@@ -1,0 +1,20 @@
+---
+description: How to update documentation
+globs:
+alwaysApply: true
+---
+
+# Documentation Updates
+
+## Roadmap Updates
+
+Whenever a request is made to update something significant, like the addition of a new feature or a major change to an existing feature then update the roadmap to refelect the change.  If the existing roadmap does not include that work, then add it and mark as future work, in progress or complete along with the date.
+
+## Additional Documentation
+
+Also, add documentation about the feature if it's not already there or update existing documentation to make it more complete.
+
+## Code Comments
+
+Use code comments in cases where something that is not obvious being done or at the header of files or classes where business logic is contained.
+

@@ -1,31 +1,208 @@
-# ManagerOS Starter (Next.js + Prisma)
+# ManagerOS
 
-A minimal, manager-only MVP scaffold: Initiatives, Tasks, People, 1:1s, Weekly Check-ins.
+A comprehensive management platform built for engineering managers to track initiatives, manage people, conduct 1:1s, and monitor team performance through structured check-ins and metrics.
 
-## Quick start
+## 🚀 What is ManagerOS?
+
+ManagerOS is a Next.js-based management platform designed specifically for engineering managers. It provides a structured approach to:
+
+- **Initiative Management**: Track strategic initiatives with RAG status, confidence levels, and progress metrics
+- **People Management**: Organize team members, roles, and reporting structures
+- **1:1 Management**: Schedule and track one-on-one meetings with team members
+- **Weekly Check-ins**: Regular progress updates with RAG status and confidence tracking
+- **Task Management**: Break down initiatives into objectives and actionable tasks
+- **Performance Tracking**: Monitor metrics and outcomes for each initiative
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 15 with App Router and Server Actions
+- **Database**: Prisma ORM with SQLite (easily upgradeable to PostgreSQL)
+- **Styling**: TailwindCSS for utility-first styling
+- **Runtime**: Bun for fast package management and execution
+- **Type Safety**: TypeScript throughout the application
+- **Validation**: Zod for runtime type validation
+
+## 📋 Prerequisites
+
+- [Bun](https://bun.sh/) installed on your system
+- Node.js 18+ (if not using Bun)
+
+## 🚀 Local Setup
+
+### 1. Clone and Install Dependencies
 
 ```bash
-pnpm i # or npm install
-cp .env.example .env
-# update DATABASE_URL to a local sqlite file or Postgres URL
-pnpm prisma:push
-pnpm prisma:seed
-pnpm dev
+git clone <repository-url>
+cd manageros
+bun install
 ```
 
-Open http://localhost:3000
+### 2. Environment Configuration
 
-## Tech
+Create a `.env` file in the root directory:
 
-- Next.js (App Router, server actions)
-- Prisma + SQLite (swap to Postgres when ready)
-- TailwindCSS (utility-first)
-- Minimal auth stub (manager-only demo mode)
+```bash
+# Database Configuration
+DATABASE_URL="file:./prisma/dev.db"
+```
 
-## Env
+For production, replace with a PostgreSQL connection string:
 
-- `DATABASE_URL` (e.g., file:./prisma/dev.db for SQLite)
+```bash
+DATABASE_URL="postgresql://username:password@localhost:5432/manageros"
+```
 
-## Notes
+### 3. Database Setup
 
-This is a demo scaffold. Replace the in-memory manager allowlist with a real auth provider (NextAuth, Clerk, WorkOS, etc.).
+```bash
+# Generate Prisma client
+bun run prisma:generate
+
+# Push schema to database
+bun run prisma:push
+
+# Seed with sample data
+bun run prisma:seed
+```
+
+### 4. Start Development Server
+
+```bash
+bun run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 📊 Features Overview
+
+### Dashboard
+
+- Recent check-ins with RAG status
+- Upcoming 1:1 meetings
+- Quick navigation to all sections
+
+### Initiatives Management
+
+- Create and track strategic initiatives
+- Set objectives and key results
+- Monitor RAG status (Red/Amber/Green) and confidence levels
+- Weekly check-ins with progress updates
+- Task breakdown and assignment
+
+### People Management
+
+- Team member profiles with roles and contact information
+- Organizational hierarchy (manager-reports relationships)
+- Team assignments and status tracking
+
+### 1:1 Management
+
+- Schedule recurring one-on-one meetings
+- Set agendas and take notes
+- Track meeting cadence and history
+
+### Task Management
+
+- Break initiatives into actionable tasks
+- Assign tasks to team members
+- Track progress with status updates
+- Priority and due date management
+
+## 🗄️ Database Schema
+
+The application uses a comprehensive Prisma schema with the following key models:
+
+- **Team**: Organizational units
+- **Person**: Team members with roles and relationships
+- **Initiative**: Strategic projects with objectives and metrics
+- **Task**: Actionable items linked to initiatives or objectives
+- **CheckIn**: Weekly progress updates
+- **OneOnOne**: Manager-report meeting records
+- **IDP**: Individual Development Plans
+- **Feedback**: Peer and manager feedback
+- **Metric**: Performance measurements
+- **Event**: Audit trail for all activities
+
+## 🔧 Available Scripts
+
+```bash
+# Development
+bun run dev          # Start development server
+bun run build        # Build for production
+bun run start        # Start production server
+
+# Database
+bun run prisma:generate  # Generate Prisma client
+bun run prisma:push      # Push schema changes to database
+bun run prisma:seed      # Seed database with sample data
+```
+
+## 🔐 Authentication
+
+Currently, the application runs in demo mode with a simple manager-only authentication stub. For production deployment, integrate with:
+
+- **NextAuth.js** for authentication
+- **Clerk** for user management
+- **WorkOS** for enterprise SSO
+- **Auth0** for identity management
+
+## 🚧 Roadmap
+
+### Phase 1: Core Features (Current)
+
+- ✅ Basic initiative management
+- ✅ People and team organization
+- ✅ 1:1 scheduling and tracking
+- ✅ Weekly check-ins
+- ✅ Task management
+- ✅ RAG status tracking
+
+### Phase 2: Enhanced Management
+
+- [ ] Advanced reporting and analytics
+- [ ] Goal setting and OKR tracking
+- [ ] Performance review cycles
+- [ ] Feedback collection and management
+- [ ] Team health metrics
+- [ ] Integration with project management tools
+
+### Phase 3: Collaboration & Integration
+
+- [ ] Real-time notifications
+- [ ] Calendar integration
+- [ ] Slack/Teams integration
+- [ ] Email notifications
+- [ ] Mobile application
+- [ ] API for third-party integrations
+
+### Phase 4: Advanced Analytics
+
+- [ ] Predictive analytics for initiative success
+- [ ] Team performance insights
+- [ ] Resource allocation optimization
+- [ ] Custom dashboard creation
+- [ ] Advanced reporting suite
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🆘 Support
+
+For support and questions:
+
+- Create an issue in the repository
+- Check the documentation
+- Review the code examples in the `/src` directory
+
+---
+
+**Note**: This is currently a demo scaffold. Replace the authentication stub with a real auth provider before deploying to production.

@@ -49,7 +49,9 @@ export default async function Home() {
           {oneOnes.map(o => (
             <div key={o.id} className="flex items-center justify-between">
               <div>
-                <div className="font-medium">{o.report.name}</div>
+                <Link href={`/people/${o.report.id}`} className="font-medium hover:text-blue-400">
+                  {o.report.name}
+                </Link>
                 <div className="text-neutral-400 text-sm">{o.cadence ?? ''}</div>
               </div>
               <div className="badge">{o.scheduledAt ? new Date(o.scheduledAt).toLocaleString() : 'TBD'}</div>

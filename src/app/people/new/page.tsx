@@ -1,8 +1,8 @@
-import { InitiativeForm } from '@/components/initiative-form'
+import { PersonForm } from '@/components/person-form'
 import { getTeams, getPeople } from '@/lib/actions'
 import Link from 'next/link'
 
-export default async function NewInitiativePage() {
+export default async function NewPersonPage() {
   const [teams, people] = await Promise.all([
     getTeams(),
     getPeople(),
@@ -11,13 +11,13 @@ export default async function NewInitiativePage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">New Initiative</h2>
-        <Link href="/initiatives" className="btn">
-          Back to Initiatives
+        <h2 className="text-lg font-semibold">New Person</h2>
+        <Link href="/people" className="btn">
+          Back to People
         </Link>
       </div>
       
-      <InitiativeForm teams={teams} people={people} />
+      <PersonForm teams={teams} people={people} />
     </div>
   )
 }

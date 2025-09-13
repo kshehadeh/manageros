@@ -1,0 +1,222 @@
+---
+description: ManagerOS Starter Scaffold (Next.js + Prisma)
+alwaysApply: false
+---
+# ManagerOS – Starter Scaffold (Next.js + Prisma)
+
+This scaffold sets up a **Next.js (App Router) + Prisma + Postgres** project with Tailwind and shadcn/ui. It’s structured so you can drop it directly into a GitHub repo and run locally or deploy to Vercel.
+
+---
+
+## 1) Project Structure
+
+```plaintext
+manageros/
+├─ prisma/
+│  ├─ schema.prisma
+├─ src/
+│  ├─ app/
+│  │  ├─ layout.tsx
+│  │  ├─ page.tsx (Dashboard)
+│  │  ├─ initiatives/
+│  │  │  ├─ page.tsx
+│  │  ├─ people/
+│  │  │  ├─ page.tsx
+│  │  ├─ oneonones/
+│  │  │  ├─ page.tsx
+│  ├─ components/
+│  │  ├─ ui/ (shadcn generated)
+│  │  ├─ nav.tsx
+│  │  ├─ header.tsx
+│  │  ├─ card.tsx
+│  ├─ lib/
+│  │  ├─ prisma.ts
+│  │  ├─ auth.ts
+│  ├─ styles/
+│     ├─ globals.css
+├─ .env
+├─ package.json
+├─ tailwind.config.js
+├─ tsconfig.json
+```
+
+---
+
+## 2) Dependencies
+
+```bash
+npm install next@14 react react-dom typescript @prisma/client prisma tailwindcss postcss autoprefixer @auth/core @auth/prisma-adapter @auth/nextjs
+npm install @radix-ui/react-icons lucide-react @tanstack/react-query
+npx shadcn-ui init
+```
+
+---
+
+## 3) Prisma Schema (MVP slice)
+
+```prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Team {
+  id    String  @id @default(cuid())
+  name  String
+  people Person[]
+}
+
+model Person {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  teamId    String?
+  team      Team?    @relation(fields: [teamId], references: [id])
+  oneOnOnes OneOnOne[]
+}
+
+model Initiative {
+  id        String   @id @default(cuid())
+  title     String
+  summary   String?
+  status    String   @default("planned")
+  tasks     Task[]
+}
+
+model Task {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  status       String   @default("todo")
+  assigneeId   String?
+  assignee     Person?  @relation(fields: [assigneeId], references: [id])
+  initiativeId String?
+  initiative   Initiative? @relation(fields: [initiativeId], references: [id])
+}
+
+model OneOnOne {
+  id        String   @id @default(cuid())
+  managerId String
+  reportId  String
+  agenda    String?
+  notes     String?
+  manager   Person   @relation("Manager", fields: [managerId], references: [id])
+  report    Person   @relation("Report", fields: [reportId], references: [id])
+}
+```
+
+---
+
+## 4) Auth Setup (NextAuth.js)
+
+- Use email magic links or Google SSO.
+- Restrict by domain or allowlist for managers.
+
+`src/lib/auth.ts`
+
+```ts
+import NextAuth from "next-auth";
+import Email from "next-auth/providers/email";
+import Google from "next-auth/providers/google";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { prisma } from "./prisma";
+
+export const authOptions = {
+  adapter: PrismaAdapter(prisma),
+  providers: [
+    Email({ sendVerificationRequest: /* custom email fn */ }),
+    Google({ clientId: process.env.GOOGLE_ID!, clientSecret: process.env.GOOGLE_SECRET! }),
+  ],
+  callbacks: {
+    async signIn({ user }) {
+      // manager-only filter
+      return user.email?.endsWith("@underarmour.com") ?? false;
+    },
+  },
+};
+
+export default NextAuth(authOptions);
+```
+
+---
+
+## 5) Example Pages
+
+### Dashboard `src/app/page.tsx`
+
+```tsx
+import Link from "next/link";
+
+export default function Dashboard() {
+  return (
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-bold">ManagerOS</h1>
+      <div className="grid grid-cols-3 gap-4">
+        <Link href="/initiatives" className="p-4 rounded-xl shadow bg-white">Initiatives</Link>
+        <Link href="/people" className="p-4 rounded-xl shadow bg-white">People</Link>
+        <Link href="/oneonones" className="p-4 rounded-xl shadow bg-white">1:1s</Link>
+      </div>
+    </div>
+  );
+}
+```
+
+### Initiatives Page `src/app/initiatives/page.tsx`
+
+```tsx
+import { prisma } from "@/lib/prisma";
+
+export default async function InitiativesPage() {
+  const initiatives = await prisma.initiative.findMany({ include: { tasks: true } });
+  return (
+    <div className="p-6">
+      <h2 className="text-xl font-semibold mb-4">Initiatives</h2>
+      <ul className="space-y-2">
+        {initiatives.map(i => (
+          <li key={i.id} className="border rounded p-3 bg-white">
+            <div className="font-bold">{i.title}</div>
+            <div className="text-sm text-gray-500">{i.status}</div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+---
+
+## 6) Running Locally
+
+```bash
+# Clone repo
+npx create-next-app manageros --ts --app
+cd manageros
+
+# Add prisma + schema
+npx prisma init
+# paste schema into prisma/schema.prisma
+
+# Migrate
+npx prisma migrate dev --name init
+
+# Run
+npm run dev
+```
+
+---
+
+## 7) Next Steps
+
+- Seed script for demo team + sample initiatives.
+- Build forms for create/edit (Initiatives, Tasks, People).
+- Add weekly digest email via Resend/Postmark.
+- Extend schema for CheckIns + IDPs.
+
+---
+
+This scaffold is ready to push to GitHub. Add a `README.md` with setup instructions, and you’ve got the MVP backbone live.

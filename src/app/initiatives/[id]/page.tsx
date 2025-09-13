@@ -1,10 +1,20 @@
 import { prisma } from '@/lib/db'
 import { Rag } from '@/components/rag'
+import Link from 'next/link'
 
 export default async function InitiativeDetail({ params }: { params: { id: string } }) {
   const init = await prisma.initiative.findUnique({
     where: { id: params.id },
-    include: { objectives: { include: { tasks: true } }, checkIns: { orderBy: { createdAt: 'desc' } } }
+    include: { 
+      objectives: { include: { tasks: true } }, 
+      checkIns: { orderBy: { createdAt: 'desc' } },
+      team: true,
+      owners: {
+        include: {
+          person: true,
+        },
+      },
+    }
   })
 
   if (!init) return <div>Not found</div>
@@ -16,6 +26,24 @@ export default async function InitiativeDetail({ params }: { params: { id: strin
           <div>
             <h2 className="text-lg font-semibold">{init.title}</h2>
             <p className="text-neutral-400">{init.summary ?? ''}</p>
+            <div className="text-xs text-neutral-500 mt-2">
+              {init.team && (
+                <span>Team: <Link href={`/teams/${init.team.id}`} className="hover:text-blue-400">{init.team.name}</Link></span>
+              )}
+              {init.owners.length > 0 && (
+                <span>
+                  {init.team && ' • '}
+                  Owners: {init.owners.map((owner, index) => (
+                    <span key={owner.person.id}>
+                      <Link href={`/people/${owner.person.id}`} className="hover:text-blue-400">
+                        {owner.person.name}
+                      </Link>
+                      {index < init.owners.length - 1 && ', '}
+                    </span>
+                  ))}
+                </span>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Rag rag={init.rag} />

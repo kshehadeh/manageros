@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db'
+import Link from 'next/link'
 
 export default async function OneOnOnesPage() {
   const items = await prisma.oneOnOne.findMany({
@@ -13,7 +14,9 @@ export default async function OneOnOnesPage() {
           <div key={i.id} className="card">
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-medium">{i.report.name}</div>
+                <Link href={`/people/${i.report.id}`} className="font-medium hover:text-blue-400">
+                  {i.report.name}
+                </Link>
                 <div className="text-sm text-neutral-400">{i.cadence ?? ''}</div>
               </div>
               <div className="text-sm text-neutral-400">{i.scheduledAt ? new Date(i.scheduledAt).toLocaleString() : 'TBD'}</div>
