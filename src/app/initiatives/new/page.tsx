@@ -1,8 +1,17 @@
 import { InitiativeForm } from '@/components/initiative-form'
 import { getTeams, getPeople } from '@/lib/actions'
 import Link from 'next/link'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect } from 'next/navigation'
 
 export default async function NewInitiativePage() {
+  const session = await getServerSession(authOptions)
+  
+  if (!session?.user) {
+    redirect('/auth/signin')
+  }
+
   const [teams, people] = await Promise.all([
     getTeams(),
     getPeople(),

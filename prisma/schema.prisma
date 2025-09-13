@@ -7,22 +7,57 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Team {
-  id          String       @id @default(cuid())
+model Organization {
+  id          String   @id @default(cuid())
   name        String
+  slug        String   @unique
   description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relationships
+  users       User[]
+  teams       Team[]
   people      Person[]
   initiatives Initiative[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+}
+
+model User {
+  id             String       @id @default(cuid())
+  email          String       @unique
+  name           String
+  passwordHash   String
+  role           String       @default("USER") // ADMIN or USER
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  
+  @@index([organizationId])
+}
+
+model Team {
+  id             String       @id @default(cuid())
+  name           String
+  description    String?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  people         Person[]
+  initiatives    Initiative[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  
+  @@index([organizationId])
 }
 
 model Person {
   id                 String            @id @default(cuid())
-  email              String            @unique
+  email              String
   name               String
   role               String?
   status             String            @default("active")
+  organizationId     String
+  organization       Organization      @relation(fields: [organizationId], references: [id])
   teamId             String?
   team               Team?             @relation(fields: [teamId], references: [id])
   managerId          String?
@@ -40,27 +75,34 @@ model Person {
   events             Event[]
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
+  
+  @@unique([email, organizationId])
+  @@index([organizationId])
 }
 
 model Initiative {
-  id         String            @id @default(cuid())
-  teamId     String?
-  team       Team?             @relation(fields: [teamId], references: [id])
-  title      String
-  summary    String?
-  outcome    String?
-  startDate  DateTime?
-  targetDate DateTime?
-  status     String            @default("planned") // planned|in_progress|paused|done|canceled
-  rag        String            @default("green") // green|amber|red
-  confidence Int               @default(80)
-  objectives Objective[]
-  owners     InitiativeOwner[]
-  checkIns   CheckIn[]
-  metrics    Metric[]
-  tasks      Task[]
-  createdAt  DateTime          @default(now())
-  updatedAt  DateTime          @updatedAt
+  id             String            @id @default(cuid())
+  teamId         String?
+  team           Team?             @relation(fields: [teamId], references: [id])
+  organizationId String
+  organization   Organization      @relation(fields: [organizationId], references: [id])
+  title          String
+  summary        String?
+  outcome        String?
+  startDate      DateTime?
+  targetDate     DateTime?
+  status         String            @default("planned") // planned|in_progress|paused|done|canceled
+  rag            String            @default("green") // green|amber|red
+  confidence     Int               @default(80)
+  objectives     Objective[]
+  owners         InitiativeOwner[]
+  checkIns       CheckIn[]
+  metrics        Metric[]
+  tasks          Task[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  
+  @@index([organizationId])
 }
 
 model InitiativeOwner {

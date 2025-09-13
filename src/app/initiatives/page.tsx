@@ -1,9 +1,19 @@
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
 import { Rag } from '@/components/rag'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect } from 'next/navigation'
 
 export default async function InitiativesPage() {
+  const session = await getServerSession(authOptions)
+  
+  if (!session?.user) {
+    redirect('/auth/signin')
+  }
+
   const inits = await prisma.initiative.findMany({
+    where: { organizationId: session.user.organizationId },
     orderBy: { updatedAt: 'desc' },
     include: {
       objectives: true,

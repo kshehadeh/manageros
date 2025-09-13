@@ -1,8 +1,22 @@
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect } from 'next/navigation'
 
 export default async function OneOnOnesPage() {
+  const session = await getServerSession(authOptions)
+  
+  if (!session?.user) {
+    redirect('/auth/signin')
+  }
+
   const items = await prisma.oneOnOne.findMany({
+    where: {
+      report: {
+        organizationId: session.user.organizationId
+      }
+    },
     orderBy: { scheduledAt: 'asc' },
     include: { report: true }
   })

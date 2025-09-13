@@ -1,35 +1,132 @@
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
+
 const prisma = new PrismaClient()
 
 async function main() {
-  // team
-  const team = await prisma.team.upsert({
-    where: { id: 'seed-team' },
-    update: {},
-    create: { id: 'seed-team', name: 'Platform', description: 'Demo team' }
-  })
-
-  // people
-  const manager = await prisma.person.create({
-    data: { email: 'manager@example.com', name: 'Demo Manager', role: 'EM', teamId: team.id }
-  })
-  const alice = await prisma.person.create({
-    data: { email: 'alice@example.com', name: 'Alice Dev', role: 'Senior FE', teamId: team.id, managerId: manager.id }
-  })
-  const bob = await prisma.person.create({
-    data: { email: 'bob@example.com', name: 'Bob Dev', role: 'BE', teamId: team.id, managerId: manager.id }
-  })
-
-  // initiative + objective + tasks
-  const init = await prisma.initiative.create({
+  // Create demo organizations
+  const org1 = await prisma.organization.create({
     data: {
-      teamId: team.id,
+      name: 'Acme Corp',
+      slug: 'acme-corp',
+      description: 'Demo organization 1'
+    }
+  })
+
+  const org2 = await prisma.organization.create({
+    data: {
+      name: 'TechStart Inc',
+      slug: 'techstart-inc',
+      description: 'Demo organization 2'
+    }
+  })
+
+  // Create users for each organization
+  const passwordHash = await bcrypt.hash('password123', 12)
+
+  const user1 = await prisma.user.create({
+    data: {
+      email: 'admin@acme.com',
+      name: 'Admin User',
+      passwordHash,
+      role: 'ADMIN',
+      organizationId: org1.id
+    }
+  })
+
+  const user2 = await prisma.user.create({
+    data: {
+      email: 'user@acme.com',
+      name: 'Regular User',
+      passwordHash,
+      role: 'USER',
+      organizationId: org1.id
+    }
+  })
+
+  const user3 = await prisma.user.create({
+    data: {
+      email: 'admin@techstart.com',
+      name: 'TechStart Admin',
+      passwordHash,
+      role: 'ADMIN',
+      organizationId: org2.id
+    }
+  })
+
+  // Create teams for each organization
+  const team1 = await prisma.team.create({
+    data: {
+      id: 'seed-team-1',
+      name: 'Platform Team',
+      description: 'Demo team for Acme Corp',
+      organizationId: org1.id
+    }
+  })
+
+  const team2 = await prisma.team.create({
+    data: {
+      id: 'seed-team-2',
+      name: 'Product Team',
+      description: 'Demo team for TechStart Inc',
+      organizationId: org2.id
+    }
+  })
+
+  // Create people for each organization
+  const manager1 = await prisma.person.create({
+    data: {
+      email: 'manager@acme.com',
+      name: 'Demo Manager',
+      role: 'EM',
+      teamId: team1.id,
+      organizationId: org1.id
+    }
+  })
+
+  const alice = await prisma.person.create({
+    data: {
+      email: 'alice@acme.com',
+      name: 'Alice Dev',
+      role: 'Senior FE',
+      teamId: team1.id,
+      managerId: manager1.id,
+      organizationId: org1.id
+    }
+  })
+
+  const bob = await prisma.person.create({
+    data: {
+      email: 'bob@acme.com',
+      name: 'Bob Dev',
+      role: 'BE',
+      teamId: team1.id,
+      managerId: manager1.id,
+      organizationId: org1.id
+    }
+  })
+
+  const manager2 = await prisma.person.create({
+    data: {
+      email: 'manager@techstart.com',
+      name: 'TechStart Manager',
+      role: 'EM',
+      teamId: team2.id,
+      organizationId: org2.id
+    }
+  })
+
+  // Create initiatives for each organization
+  const init1 = await prisma.initiative.create({
+    data: {
+      teamId: team1.id,
+      organizationId: org1.id,
       title: 'Improve Web Performance',
       summary: 'Lift LCP and TTFB across product pages',
       status: 'in_progress',
       rag: 'amber',
       confidence: 72,
-      owners: { create: [{ personId: manager.id, role: 'owner' }] },
+      owners: { create: [{ personId: manager1.id, role: 'owner' }] },
       objectives: {
         create: [
           {
@@ -46,21 +143,35 @@ async function main() {
     }
   })
 
+  const init2 = await prisma.initiative.create({
+    data: {
+      teamId: team2.id,
+      organizationId: org2.id,
+      title: 'Mobile App Launch',
+      summary: 'Launch new mobile application',
+      status: 'planned',
+      rag: 'green',
+      confidence: 85,
+      owners: { create: [{ personId: manager2.id, role: 'owner' }] }
+    }
+  })
+
+  // Create check-ins
   await prisma.checkIn.create({
     data: {
-      initiativeId: init.id,
+      initiativeId: init1.id,
       weekOf: new Date(),
       rag: 'amber',
       confidence: 72,
       summary: 'Image work in progress; CDN cache rules drafted. Risk: vendor script variance.',
-      createdById: manager.id
+      createdById: manager1.id
     }
   })
 
-  // 1:1s
+  // Create 1:1s
   await prisma.oneOnOne.create({
     data: {
-      managerId: manager.id,
+      managerId: manager1.id,
       reportId: alice.id,
       cadence: 'weekly',
       agenda: '- Wins\n- Blockers\n- Growth',
@@ -69,7 +180,9 @@ async function main() {
     }
   })
 
-  console.log('Seed completed')
+  console.log('Seed completed with multi-tenant data')
+  console.log('Organizations created:', org1.name, org2.name)
+  console.log('Users created:', user1.email, user2.email, user3.email)
 }
 
 main().finally(() => prisma.$disconnect())

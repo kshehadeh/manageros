@@ -2,18 +2,31 @@ import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { Rag } from "@/components/rag";
 import { notFound } from "next/navigation";
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect } from 'next/navigation'
 
 interface PersonDetailPageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 export default async function PersonDetailPage({
     params,
 }: PersonDetailPageProps) {
-    const person = await prisma.person.findUnique({
-        where: { id: params.id },
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user) {
+        redirect('/auth/signin')
+    }
+
+    const { id } = await params
+    const person = await prisma.person.findFirst({
+        where: { 
+            id,
+            organizationId: session.user.organizationId
+        },
         include: {
             team: true,
             manager: true,

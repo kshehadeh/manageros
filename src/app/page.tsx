@@ -1,15 +1,34 @@
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
 import { Rag } from '@/components/rag'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect } from 'next/navigation'
 
 export default async function Home() {
+  const session = await getServerSession(authOptions)
+  
+  if (!session?.user) {
+    redirect('/auth/signin')
+  }
+
   const [checkIns, oneOnes] = await Promise.all([
     prisma.checkIn.findMany({
+      where: {
+        initiative: {
+          organizationId: session.user.organizationId
+        }
+      },
       orderBy: { createdAt: 'desc' },
       take: 5,
       include: { initiative: true }
     }),
     prisma.oneOnOne.findMany({
+      where: {
+        report: {
+          organizationId: session.user.organizationId
+        }
+      },
       orderBy: { scheduledAt: 'asc' },
       take: 5,
       include: { report: true }

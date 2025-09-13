@@ -1,8 +1,18 @@
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect } from 'next/navigation'
 
 export default async function PeoplePage() {
+  const session = await getServerSession(authOptions)
+  
+  if (!session?.user) {
+    redirect('/auth/signin')
+  }
+
   const people = await prisma.person.findMany({ 
+    where: { organizationId: session.user.organizationId },
     orderBy: { name: 'asc' },
     include: {
       team: true,

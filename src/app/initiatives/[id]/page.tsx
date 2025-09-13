@@ -1,10 +1,23 @@
 import { prisma } from '@/lib/db'
 import { Rag } from '@/components/rag'
 import Link from 'next/link'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect } from 'next/navigation'
 
-export default async function InitiativeDetail({ params }: { params: { id: string } }) {
-  const init = await prisma.initiative.findUnique({
-    where: { id: params.id },
+export default async function InitiativeDetail({ params }: { params: Promise<{ id: string }> }) {
+  const session = await getServerSession(authOptions)
+  
+  if (!session?.user) {
+    redirect('/auth/signin')
+  }
+
+  const { id } = await params
+  const init = await prisma.initiative.findFirst({
+    where: { 
+      id,
+      organizationId: session.user.organizationId
+    },
     include: { 
       objectives: { include: { tasks: true } }, 
       checkIns: { orderBy: { createdAt: 'desc' } },
