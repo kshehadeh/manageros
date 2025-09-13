@@ -1,0 +1,17 @@
+# dependencies
+/node_modules
+
+# next
+/.next
+/out
+
+# env
+.env
+.env.local
+
+# prisma
+prisma/*.db
+prisma/dev.db
+prisma/dev.sqlite
+
+.DS_Store

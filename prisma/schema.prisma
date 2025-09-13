@@ -1,0 +1,203 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Team {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  people      Person[]
+  initiatives Initiative[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Person {
+  id                 String            @id @default(cuid())
+  email              String            @unique
+  name               String
+  role               String?
+  status             String            @default("active")
+  teamId             String?
+  team               Team?             @relation(fields: [teamId], references: [id])
+  managerId          String?
+  manager            Person?           @relation("MgrReports", fields: [managerId], references: [id])
+  reports            Person[]          @relation("MgrReports")
+  startedAt          DateTime?
+  tasks              Task[]
+  oneOnOnes          OneOnOne[]        @relation("OOOReport")
+  oneOnOnesAsManager OneOnOne[]        @relation("OOOManager")
+  idps               IDP[]
+  feedback           Feedback[]        @relation("About")
+  feedbackFrom       Feedback[]        @relation("From")
+  initiativeOwners   InitiativeOwner[]
+  checkIns           CheckIn[]
+  events             Event[]
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+}
+
+model Initiative {
+  id         String            @id @default(cuid())
+  teamId     String?
+  team       Team?             @relation(fields: [teamId], references: [id])
+  title      String
+  summary    String?
+  outcome    String?
+  startDate  DateTime?
+  targetDate DateTime?
+  status     String            @default("planned") // planned|in_progress|paused|done|canceled
+  rag        String            @default("green") // green|amber|red
+  confidence Int               @default(80)
+  objectives Objective[]
+  owners     InitiativeOwner[]
+  checkIns   CheckIn[]
+  metrics    Metric[]
+  tasks      Task[]
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+}
+
+model InitiativeOwner {
+  initiativeId String
+  personId     String
+  role         String @default("owner") // owner|sponsor|collaborator
+
+  initiative Initiative @relation(fields: [initiativeId], references: [id])
+  person     Person     @relation(fields: [personId], references: [id])
+
+  @@id([initiativeId, personId])
+}
+
+model Objective {
+  id           String     @id @default(cuid())
+  initiativeId String
+  initiative   Initiative @relation(fields: [initiativeId], references: [id])
+  title        String
+  keyResult    String?
+  sortIndex    Int        @default(0)
+  tasks        Task[]
+}
+
+model Task {
+  id           String      @id @default(cuid())
+  objectiveId  String?
+  objective    Objective?  @relation(fields: [objectiveId], references: [id])
+  initiativeId String?
+  initiative   Initiative? @relation(fields: [initiativeId], references: [id])
+  title        String
+  description  String?
+  assigneeId   String?
+  assignee     Person?     @relation(fields: [assigneeId], references: [id])
+  status       String      @default("todo") // todo|doing|blocked|done|dropped
+  priority     Int         @default(2)
+  estimate     Int?
+  dueDate      DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  completedAt  DateTime?
+}
+
+model CheckIn {
+  id           String     @id @default(cuid())
+  initiativeId String
+  initiative   Initiative @relation(fields: [initiativeId], references: [id])
+  weekOf       DateTime
+  rag          String     @default("green")
+  confidence   Int        @default(80)
+  summary      String
+  blockers     String?
+  nextSteps    String?
+  createdById  String
+  createdBy    Person     @relation(fields: [createdById], references: [id])
+  createdAt    DateTime   @default(now())
+}
+
+model OneOnOne {
+  id          String    @id @default(cuid())
+  managerId   String
+  reportId    String
+  scheduledAt DateTime?
+  cadence     String?
+  agenda      String?
+  notes       String?
+  // actionItems  Task[]   @relation("OneOnOneTasks")
+  manager     Person    @relation("OOOManager", fields: [managerId], references: [id])
+  report      Person    @relation("OOOReport", fields: [reportId], references: [id])
+}
+
+model IDP {
+  id        String    @id @default(cuid())
+  personId  String
+  person    Person    @relation(fields: [personId], references: [id])
+  period    String
+  summary   String?
+  goals     IDPGoal[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model IDPGoal {
+  id      String    @id @default(cuid())
+  idpId   String
+  idp     IDP       @relation(fields: [idpId], references: [id])
+  title   String
+  metric  String?
+  target  String?
+  status  String    @default("in_progress")
+  dueDate DateTime?
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  aboutId   String
+  about     Person   @relation("About", fields: [aboutId], references: [id])
+  fromId    String
+  from      Person   @relation("From", fields: [fromId], references: [id])
+  kind      String   @default("note") // praise|concern|note
+  isPrivate Boolean  @default(true)
+  body      String
+  createdAt DateTime @default(now())
+}
+
+model Metric {
+  id           String     @id @default(cuid())
+  initiativeId String
+  initiative   Initiative @relation(fields: [initiativeId], references: [id])
+  name         String
+  unit         String?
+  value        Float
+  capturedAt   DateTime   @default(now())
+}
+
+model Tag {
+  id    String   @id @default(cuid())
+  name  String   @unique
+  color String?
+  maps  TagMap[]
+}
+
+model TagMap {
+  tagId    String
+  tag      Tag    @relation(fields: [tagId], references: [id])
+  entity   String
+  entityId String
+
+  @@id([tagId, entity, entityId])
+}
+
+model Event {
+  id        String   @id @default(cuid())
+  actorId   String?
+  actor     Person?  @relation(fields: [actorId], references: [id])
+  entity    String
+  entityId  String
+  action    String
+  metadata  String?
+  createdAt DateTime @default(now())
+}
