@@ -16,8 +16,56 @@ async function getCurrentUser() {
   return session.user
 }
 
+export async function createOrganization(formData: { name: string; slug: string }) {
+  const user = await getCurrentUser()
+  
+  // Check if user already has an organization
+  if (user.organizationId) {
+    throw new Error('User already belongs to an organization')
+  }
+  
+  // Check if organization slug already exists
+  const existingOrg = await prisma.organization.findUnique({
+    where: { slug: formData.slug }
+  })
+  
+  if (existingOrg) {
+    throw new Error('Organization slug already exists')
+  }
+  
+  // Create organization and update user in a transaction
+  const result = await prisma.$transaction(async (tx) => {
+    // Create organization
+    const organization = await tx.organization.create({
+      data: {
+        name: formData.name,
+        slug: formData.slug
+      }
+    })
+    
+    // Update user to be admin of the organization
+    await tx.user.update({
+      where: { id: user.id },
+      data: {
+        organizationId: organization.id,
+        role: 'ADMIN'
+      }
+    })
+    
+    return organization
+  })
+  
+  revalidatePath('/')
+  return result
+}
+
 export async function createInitiative(formData: InitiativeFormData) {
   const user = await getCurrentUser()
+  
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to create initiatives')
+  }
   
   // Validate the form data
   const validatedData = initiativeSchema.parse(formData)
@@ -87,6 +135,9 @@ export async function createInitiative(formData: InitiativeFormData) {
 export async function getTeams() {
   try {
     const user = await getCurrentUser()
+    if (!user.organizationId) {
+      return []
+    }
     return await prisma.team.findMany({
       where: { organizationId: user.organizationId },
       orderBy: { name: 'asc' },
@@ -100,6 +151,9 @@ export async function getTeams() {
 export async function getPeople() {
   try {
     const user = await getCurrentUser()
+    if (!user.organizationId) {
+      return []
+    }
     return await prisma.person.findMany({
       where: { 
         status: 'active',
@@ -115,6 +169,11 @@ export async function getPeople() {
 
 export async function createPerson(formData: PersonFormData) {
   const user = await getCurrentUser()
+  
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to create people')
+  }
   
   // Validate the form data
   const validatedData = personSchema.parse(formData)
@@ -175,6 +234,11 @@ export async function createPerson(formData: PersonFormData) {
 
 export async function updatePerson(id: string, formData: PersonFormData) {
   const user = await getCurrentUser()
+  
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to update people')
+  }
   
   // Validate the form data
   const validatedData = personSchema.parse(formData)
@@ -247,6 +311,9 @@ export async function updatePerson(id: string, formData: PersonFormData) {
 export async function getPerson(id: string) {
   try {
     const user = await getCurrentUser()
+    if (!user.organizationId) {
+      return null
+    }
     return await prisma.person.findFirst({
       where: {
         id,
@@ -267,8 +334,51 @@ export async function getPerson(id: string) {
 export async function createTeam(formData: TeamFormData) {
   const user = await getCurrentUser()
   
+  // Debug logging
+  console.log('Creating team for user:', {
+    id: user.id,
+    email: user.email,
+    organizationId: user.organizationId,
+    role: user.role,
+    organizationName: user.organizationName
+  })
+  
+  // Additional validation
+  if (!user.organizationId) {
+    console.error('❌ User has no organizationId!', user)
+    throw new Error('User is not associated with an organization')
+  }
+  
+  // Verify organization exists
+  const organization = await prisma.organization.findUnique({
+    where: { id: user.organizationId }
+  })
+  
+  if (!organization) {
+    console.error('❌ Organization not found!', { organizationId: user.organizationId })
+    throw new Error('Organization not found')
+  }
+  
+  console.log('✅ Organization found:', organization.name)
+  
   // Validate the form data
   const validatedData = teamSchema.parse(formData)
+  
+  console.log('Validated form data:', validatedData)
+  
+  // Validate parent team if provided
+  if (validatedData.parentId) {
+    const parentTeam = await prisma.team.findFirst({
+      where: {
+        id: validatedData.parentId,
+        organizationId: user.organizationId
+      }
+    })
+    
+    if (!parentTeam) {
+      throw new Error('Parent team not found or access denied')
+    }
+  }
   
   // Create the team
   const team = await prisma.team.create({
@@ -276,10 +386,13 @@ export async function createTeam(formData: TeamFormData) {
       name: validatedData.name,
       description: validatedData.description,
       organizationId: user.organizationId,
+      parentId: validatedData.parentId && validatedData.parentId.trim() !== '' ? validatedData.parentId : null,
     },
     include: {
       people: true,
       initiatives: true,
+      parent: true,
+      children: true,
     },
   })
 
@@ -292,6 +405,11 @@ export async function createTeam(formData: TeamFormData) {
 
 export async function updateTeam(id: string, formData: TeamFormData) {
   const user = await getCurrentUser()
+  
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to update teams')
+  }
   
   // Validate the form data
   const validatedData = teamSchema.parse(formData)
@@ -307,16 +425,38 @@ export async function updateTeam(id: string, formData: TeamFormData) {
     throw new Error('Team not found or access denied')
   }
   
+  // Validate parent team if provided
+  if (validatedData.parentId) {
+    // Prevent self-reference
+    if (validatedData.parentId === id) {
+      throw new Error('Team cannot be its own parent')
+    }
+    
+    const parentTeam = await prisma.team.findFirst({
+      where: {
+        id: validatedData.parentId,
+        organizationId: user.organizationId
+      }
+    })
+    
+    if (!parentTeam) {
+      throw new Error('Parent team not found or access denied')
+    }
+  }
+  
   // Update the team
   const team = await prisma.team.update({
     where: { id },
     data: {
       name: validatedData.name,
       description: validatedData.description,
+      parentId: validatedData.parentId && validatedData.parentId.trim() !== '' ? validatedData.parentId : null,
     },
     include: {
       people: true,
       initiatives: true,
+      parent: true,
+      children: true,
     },
   })
 
@@ -330,6 +470,9 @@ export async function updateTeam(id: string, formData: TeamFormData) {
 export async function getTeam(id: string) {
   try {
     const user = await getCurrentUser()
+    if (!user.organizationId) {
+      return null
+    }
     return await prisma.team.findFirst({
       where: {
         id,
@@ -338,10 +481,36 @@ export async function getTeam(id: string) {
       include: {
         people: true,
         initiatives: true,
+        parent: true,
+        children: true,
       },
     })
   } catch (error) {
     console.error('Error fetching team:', error)
     return null
+  }
+}
+
+export async function getTeamsForSelection(excludeId?: string) {
+  try {
+    const user = await getCurrentUser()
+    if (!user.organizationId) {
+      return []
+    }
+    return await prisma.team.findMany({
+      where: {
+        organizationId: user.organizationId,
+        ...(excludeId && { id: { not: excludeId } })
+      },
+      select: {
+        id: true,
+        name: true,
+        parentId: true,
+      },
+      orderBy: { name: 'asc' }
+    })
+  } catch (error) {
+    console.error('Error fetching teams for selection:', error)
+    return []
   }
 }

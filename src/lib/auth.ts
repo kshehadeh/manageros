@@ -45,8 +45,8 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           role: user.role,
           organizationId: user.organizationId,
-          organizationName: user.organization.name,
-          organizationSlug: user.organization.slug
+          organizationName: user.organization?.name || null,
+          organizationSlug: user.organization?.slug || null
         }
       }
     })

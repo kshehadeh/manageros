@@ -7,10 +7,22 @@ const signupSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  organizationName: z.string().min(1, 'Organization name is required'),
+  organizationName: z.string().optional(),
   organizationSlug: z.string()
-    .min(1, 'Organization slug is required')
     .regex(/^[a-z0-9-]+$/, 'Organization slug can only contain lowercase letters, numbers, and hyphens')
+    .optional()
+}).refine((data) => {
+  // If organizationName is provided, organizationSlug must also be provided
+  if (data.organizationName && !data.organizationSlug) {
+    return false
+  }
+  if (data.organizationSlug && !data.organizationName) {
+    return false
+  }
+  return true
+}, {
+  message: 'Both organization name and slug must be provided together',
+  path: ['organizationSlug']
 })
 
 export async function POST(request: NextRequest) {
@@ -18,16 +30,18 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = signupSchema.parse(body)
 
-    // Check if organization slug already exists
-    const existingOrg = await prisma.organization.findUnique({
-      where: { slug: validatedData.organizationSlug }
-    })
+    // Check if organization slug already exists (only if provided)
+    if (validatedData.organizationSlug) {
+      const existingOrg = await prisma.organization.findUnique({
+        where: { slug: validatedData.organizationSlug }
+      })
 
-    if (existingOrg) {
-      return NextResponse.json(
-        { error: 'Organization slug already exists' },
-        { status: 400 }
-      )
+      if (existingOrg) {
+        return NextResponse.json(
+          { error: 'Organization slug already exists' },
+          { status: 400 }
+        )
+      }
     }
 
     // Check if user email already exists
@@ -45,24 +59,28 @@ export async function POST(request: NextRequest) {
     // Hash password
     const passwordHash = await bcrypt.hash(validatedData.password, 12)
 
-    // Create organization and user in a transaction
+    // Create organization and user in a transaction (if organization provided)
     const result = await prisma.$transaction(async (tx) => {
-      // Create organization
-      const organization = await tx.organization.create({
-        data: {
-          name: validatedData.organizationName,
-          slug: validatedData.organizationSlug
-        }
-      })
+      let organization = null
+      
+      // Create organization if provided
+      if (validatedData.organizationName && validatedData.organizationSlug) {
+        organization = await tx.organization.create({
+          data: {
+            name: validatedData.organizationName,
+            slug: validatedData.organizationSlug
+          }
+        })
+      }
 
-      // Create user as admin of the organization
+      // Create user
       const user = await tx.user.create({
         data: {
           name: validatedData.name,
           email: validatedData.email,
           passwordHash,
-          role: 'ADMIN',
-          organizationId: organization.id
+          role: organization ? 'ADMIN' : 'USER', // Admin if creating org, User otherwise
+          organizationId: organization?.id || null
         },
         include: {
           organization: true

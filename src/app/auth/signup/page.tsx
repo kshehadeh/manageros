@@ -12,7 +12,8 @@ export default function SignUpPage() {
     password: '',
     confirmPassword: '',
     organizationName: '',
-    organizationSlug: ''
+    organizationSlug: '',
+    createOrganization: false
   })
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -39,8 +40,8 @@ export default function SignUpPage() {
           name: formData.name,
           email: formData.email,
           password: formData.password,
-          organizationName: formData.organizationName,
-          organizationSlug: formData.organizationSlug
+          organizationName: formData.createOrganization ? formData.organizationName : undefined,
+          organizationSlug: formData.createOrganization ? formData.organizationSlug : undefined
         })
       })
 
@@ -131,39 +132,62 @@ export default function SignUpPage() {
                 onChange={handleInputChange}
               />
             </div>
-            <div>
-              <label htmlFor="organizationName" className="block text-sm font-medium text-gray-700">
-                Organization Name
-              </label>
-              <input
-                id="organizationName"
-                name="organizationName"
-                type="text"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                placeholder="Acme Corp"
-                value={formData.organizationName}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="organizationSlug" className="block text-sm font-medium text-gray-700">
-                Organization Slug
-              </label>
-              <input
-                id="organizationSlug"
-                name="organizationSlug"
-                type="text"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                placeholder="acme-corp"
-                value={formData.organizationSlug}
-                onChange={handleInputChange}
-              />
+            <div className="border-t border-gray-200 pt-6">
+              <div className="flex items-center">
+                <input
+                  id="createOrganization"
+                  name="createOrganization"
+                  type="checkbox"
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  checked={formData.createOrganization}
+                  onChange={(e) => setFormData(prev => ({ ...prev, createOrganization: e.target.checked }))}
+                />
+                <label htmlFor="createOrganization" className="ml-2 block text-sm text-gray-900">
+                  Create a new organization
+                </label>
+              </div>
               <p className="mt-1 text-xs text-gray-500">
-                Used in URLs. Only lowercase letters, numbers, and hyphens allowed.
+                If unchecked, you'll need to be invited to an existing organization to access the platform.
               </p>
             </div>
+
+            {formData.createOrganization && (
+              <>
+                <div>
+                  <label htmlFor="organizationName" className="block text-sm font-medium text-gray-700">
+                    Organization Name
+                  </label>
+                  <input
+                    id="organizationName"
+                    name="organizationName"
+                    type="text"
+                    required={formData.createOrganization}
+                    className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    placeholder="Acme Corp"
+                    value={formData.organizationName}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="organizationSlug" className="block text-sm font-medium text-gray-700">
+                    Organization Slug
+                  </label>
+                  <input
+                    id="organizationSlug"
+                    name="organizationSlug"
+                    type="text"
+                    required={formData.createOrganization}
+                    className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    placeholder="acme-corp"
+                    value={formData.organizationSlug}
+                    onChange={handleInputChange}
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Used in URLs. Only lowercase letters, numbers, and hyphens allowed.
+                  </p>
+                </div>
+              </>
+            )}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password

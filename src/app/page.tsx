@@ -12,6 +12,28 @@ export default async function Home() {
     redirect('/auth/signin')
   }
 
+  // If user doesn't have an organization, show organization creation prompt
+  if (!session.user.organizationId) {
+    return (
+      <div className="space-y-6">
+        <div className="card text-center py-12">
+          <h2 className="text-xl font-semibold mb-4">Welcome to ManagerOS!</h2>
+          <p className="text-neutral-400 mb-6">
+            To get started, you'll need to create an organization or be invited to an existing one.
+          </p>
+          <div className="flex justify-center gap-4">
+            <Link href="/organization/create" className="btn">
+              Create Organization
+            </Link>
+            <Link href="/teams" className="btn bg-neutral-600 hover:bg-neutral-700">
+              Browse Teams
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const [checkIns, oneOnes] = await Promise.all([
     prisma.checkIn.findMany({
       where: {

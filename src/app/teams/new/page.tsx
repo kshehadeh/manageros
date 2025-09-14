@@ -4,12 +4,21 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 
-export default async function NewTeamPage() {
+interface NewTeamPageProps {
+  searchParams: Promise<{
+    parentId?: string
+  }>
+}
+
+export default async function NewTeamPage({ searchParams }: NewTeamPageProps) {
   const session = await getServerSession(authOptions)
   
   if (!session?.user) {
     redirect('/auth/signin')
   }
+
+  const { parentId } = await searchParams
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -19,7 +28,7 @@ export default async function NewTeamPage() {
         </Link>
       </div>
       
-      <TeamForm />
+      <TeamForm parentId={parentId} />
     </div>
   )
 }

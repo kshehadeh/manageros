@@ -44,6 +44,7 @@ export type PersonFormData = z.infer<typeof personSchema>
 export const teamSchema = z.object({
   name: z.string().min(1, 'Team name is required').max(100, 'Team name must be less than 100 characters'),
   description: z.string().optional(),
+  parentId: z.string().optional().transform(val => val === '' ? undefined : val),
 })
 
 export type TeamFormData = z.infer<typeof teamSchema>

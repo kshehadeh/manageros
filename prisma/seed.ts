@@ -5,16 +5,20 @@ const prisma = new PrismaClient()
 
 async function main() {
   // Create demo organizations
-  const org1 = await prisma.organization.create({
-    data: {
+  const org1 = await prisma.organization.upsert({
+    where: { slug: 'acme-corp' },
+    update: {},
+    create: {
       name: 'Acme Corp',
       slug: 'acme-corp',
       description: 'Demo organization 1'
     }
   })
 
-  const org2 = await prisma.organization.create({
-    data: {
+  const org2 = await prisma.organization.upsert({
+    where: { slug: 'techstart-inc' },
+    update: {},
+    create: {
       name: 'TechStart Inc',
       slug: 'techstart-inc',
       description: 'Demo organization 2'
@@ -24,8 +28,10 @@ async function main() {
   // Create users for each organization
   const passwordHash = await bcrypt.hash('password123', 12)
 
-  const user1 = await prisma.user.create({
-    data: {
+  const user1 = await prisma.user.upsert({
+    where: { email: 'admin@acme.com' },
+    update: {},
+    create: {
       email: 'admin@acme.com',
       name: 'Admin User',
       passwordHash,
@@ -34,8 +40,10 @@ async function main() {
     }
   })
 
-  const user2 = await prisma.user.create({
-    data: {
+  const user2 = await prisma.user.upsert({
+    where: { email: 'user@acme.com' },
+    update: {},
+    create: {
       email: 'user@acme.com',
       name: 'Regular User',
       passwordHash,
@@ -44,8 +52,10 @@ async function main() {
     }
   })
 
-  const user3 = await prisma.user.create({
-    data: {
+  const user3 = await prisma.user.upsert({
+    where: { email: 'admin@techstart.com' },
+    update: {},
+    create: {
       email: 'admin@techstart.com',
       name: 'TechStart Admin',
       passwordHash,
@@ -55,8 +65,10 @@ async function main() {
   })
 
   // Create teams for each organization
-  const team1 = await prisma.team.create({
-    data: {
+  const team1 = await prisma.team.upsert({
+    where: { id: 'seed-team-1' },
+    update: {},
+    create: {
       id: 'seed-team-1',
       name: 'Platform Team',
       description: 'Demo team for Acme Corp',
@@ -64,8 +76,10 @@ async function main() {
     }
   })
 
-  const team2 = await prisma.team.create({
-    data: {
+  const team2 = await prisma.team.upsert({
+    where: { id: 'seed-team-2' },
+    update: {},
+    create: {
       id: 'seed-team-2',
       name: 'Product Team',
       description: 'Demo team for TechStart Inc',
@@ -74,8 +88,15 @@ async function main() {
   })
 
   // Create people for each organization
-  const manager1 = await prisma.person.create({
-    data: {
+  const manager1 = await prisma.person.upsert({
+    where: { 
+      email_organizationId: {
+        email: 'manager@acme.com',
+        organizationId: org1.id
+      }
+    },
+    update: {},
+    create: {
       email: 'manager@acme.com',
       name: 'Demo Manager',
       role: 'EM',
@@ -84,8 +105,15 @@ async function main() {
     }
   })
 
-  const alice = await prisma.person.create({
-    data: {
+  const alice = await prisma.person.upsert({
+    where: { 
+      email_organizationId: {
+        email: 'alice@acme.com',
+        organizationId: org1.id
+      }
+    },
+    update: {},
+    create: {
       email: 'alice@acme.com',
       name: 'Alice Dev',
       role: 'Senior FE',
@@ -95,8 +123,15 @@ async function main() {
     }
   })
 
-  const bob = await prisma.person.create({
-    data: {
+  const bob = await prisma.person.upsert({
+    where: { 
+      email_organizationId: {
+        email: 'bob@acme.com',
+        organizationId: org1.id
+      }
+    },
+    update: {},
+    create: {
       email: 'bob@acme.com',
       name: 'Bob Dev',
       role: 'BE',
@@ -106,8 +141,15 @@ async function main() {
     }
   })
 
-  const manager2 = await prisma.person.create({
-    data: {
+  const manager2 = await prisma.person.upsert({
+    where: { 
+      email_organizationId: {
+        email: 'manager@techstart.com',
+        organizationId: org2.id
+      }
+    },
+    update: {},
+    create: {
       email: 'manager@techstart.com',
       name: 'TechStart Manager',
       role: 'EM',

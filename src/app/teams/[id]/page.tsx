@@ -26,6 +26,14 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
       organizationId: session.user.organizationId
     },
     include: {
+      parent: true,
+      children: {
+        include: {
+          people: true,
+          initiatives: true,
+        },
+        orderBy: { name: 'asc' }
+      },
       people: {
         include: {
           manager: true,
@@ -56,6 +64,11 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
           <h2 className="text-lg font-semibold">{team.name}</h2>
           {team.description && (
             <p className="text-sm text-neutral-400 mt-1">{team.description}</p>
+          )}
+          {team.parent && (
+            <div className="text-sm text-neutral-500 mt-1">
+              Parent team: <Link href={`/teams/${team.parent.id}`} className="hover:text-blue-400">{team.parent.name}</Link>
+            </div>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -165,10 +178,49 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
         </section>
       </div>
 
+      {/* Child Teams */}
+      <section className="card">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold">Child Teams ({team.children.length})</h3>
+          <Link href={`/teams/new?parentId=${team.id}`} className="btn text-sm">
+            Add Child Team
+          </Link>
+        </div>
+        <div className="space-y-3">
+          {team.children.map(childTeam => (
+            <Link 
+              key={childTeam.id} 
+              href={`/teams/${childTeam.id}`}
+              className="block border border-neutral-800 rounded-xl p-3 hover:bg-neutral-800/60"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">{childTeam.name}</div>
+                  <div className="text-sm text-neutral-400">{childTeam.description ?? ''}</div>
+                  <div className="text-xs text-neutral-500 mt-1">
+                    {childTeam.people.length} member{childTeam.people.length !== 1 ? 's' : ''} • {childTeam.initiatives.length} initiative{childTeam.initiatives.length !== 1 ? 's' : ''}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Link href={`/teams/${childTeam.id}/edit`} className="btn text-sm">
+                    Edit
+                  </Link>
+                </div>
+              </div>
+            </Link>
+          ))}
+          {team.children.length === 0 && (
+            <div className="text-neutral-400 text-sm text-center py-4">
+              No child teams yet. <Link href={`/teams/new?parentId=${team.id}`} className="text-blue-400 hover:text-blue-300">Create the first child team</Link>.
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* Team Statistics */}
       <section className="card">
         <h3 className="font-semibold mb-4">Team Statistics</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="text-center">
             <div className="text-2xl font-bold">{team.people.length}</div>
             <div className="text-sm text-neutral-400">Members</div>
@@ -176,6 +228,10 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
           <div className="text-center">
             <div className="text-2xl font-bold">{team.initiatives.length}</div>
             <div className="text-sm text-neutral-400">Initiatives</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold">{team.children.length}</div>
+            <div className="text-sm text-neutral-400">Child Teams</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold">

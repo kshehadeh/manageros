@@ -23,15 +23,15 @@ model Organization {
 }
 
 model User {
-  id             String       @id @default(cuid())
-  email          String       @unique
+  id             String        @id @default(cuid())
+  email          String        @unique
   name           String
   passwordHash   String
-  role           String       @default("USER") // ADMIN or USER
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  role           String        @default("USER") // ADMIN or USER
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
   
   @@index([organizationId])
 }
@@ -42,12 +42,16 @@ model Team {
   description    String?
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
+  parentId       String?
+  parent         Team?        @relation("TeamHierarchy", fields: [parentId], references: [id])
+  children       Team[]       @relation("TeamHierarchy")
   people         Person[]
   initiatives    Initiative[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   
   @@index([organizationId])
+  @@index([parentId])
 }
 
 model Person {
