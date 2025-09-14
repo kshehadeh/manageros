@@ -1,10 +1,24 @@
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { Rag } from "@/components/rag";
+import { UserLinkForm } from "@/components/user-link-form";
 import { notFound } from "next/navigation";
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import { Person, Team, User } from '@prisma/client'
+
+type PersonWithRelations = Person & {
+  team: Team | null
+  manager: Person | null
+  user: User | null
+  reports: (Person & { team: Team | null })[]
+  tasks: any[]
+  initiativeOwners: any[]
+  oneOnOnes: any[]
+  oneOnOnesAsManager: any[]
+  checkIns: any[]
+}
 
 interface PersonDetailPageProps {
     params: Promise<{
@@ -22,6 +36,11 @@ export default async function PersonDetailPage({
     }
 
     const { id } = await params
+    
+    if (!session.user.organizationId) {
+        redirect('/organization/create')
+    }
+    
     const person = await prisma.person.findFirst({
         where: { 
             id,
@@ -30,6 +49,14 @@ export default async function PersonDetailPage({
         include: {
             team: true,
             manager: true,
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    role: true
+                }
+            },
             reports: {
                 include: {
                     team: true,
@@ -77,32 +104,34 @@ export default async function PersonDetailPage({
     if (!person) {
         notFound();
     }
+    
+    const personWithRelations = person as PersonWithRelations
 
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-lg font-semibold">{person.name}</h2>
+                    <h2 className="text-lg font-semibold">{personWithRelations.name}</h2>
                     <div className="text-sm text-neutral-400">
-                        {person.role ?? ""}
+                        {personWithRelations.role ?? ""}
                     </div>
                     <div className="text-xs text-neutral-500">
-                        {person.email}
+                        {personWithRelations.email}
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
                     <span
                         className={`badge ${
-                            person.status === "active"
+                            personWithRelations.status === "active"
                                 ? "rag-green"
-                                : person.status === "inactive"
+                                : personWithRelations.status === "inactive"
                                 ? "rag-red"
                                 : "rag-amber"
                         }`}
                     >
-                        {person.status.replace("_", " ")}
+                        {personWithRelations.status.replace("_", " ")}
                     </span>
-                    <Link href={`/people/${person.id}/edit`} className="btn">
+                    <Link href={`/people/${personWithRelations.id}/edit`} className="btn">
                         Edit Person
                     </Link>
                     <Link href="/people" className="btn">
@@ -119,12 +148,12 @@ export default async function PersonDetailPage({
                         <div>
                             <span className="text-sm font-medium">Team:</span>
                             <div className="text-sm text-neutral-400">
-                                {person.team ? (
+                                {personWithRelations.team ? (
                                     <Link
-                                        href={`/teams/${person.team.id}`}
+                                        href={`/teams/${personWithRelations.team.id}`}
                                         className="hover:text-blue-400"
                                     >
-                                        {person.team.name}
+                                        {personWithRelations.team.name}
                                     </Link>
                                 ) : (
                                     "No team assigned"
@@ -136,12 +165,12 @@ export default async function PersonDetailPage({
                                 Manager:
                             </span>
                             <div className="text-sm text-neutral-400">
-                                {person.manager ? (
+                                {personWithRelations.manager ? (
                                     <Link
-                                        href={`/people/${person.manager.id}`}
+                                        href={`/people/${personWithRelations.manager.id}`}
                                         className="hover:text-blue-400"
                                     >
-                                        {person.manager.name}
+                                        {personWithRelations.manager.name}
                                     </Link>
                                 ) : (
                                     "No manager assigned"
@@ -150,12 +179,29 @@ export default async function PersonDetailPage({
                         </div>
                         <div>
                             <span className="text-sm font-medium">
+                                User Account:
+                            </span>
+                            <div className="text-sm text-neutral-400">
+                                {personWithRelations.user ? (
+                                    <div>
+                                        <div className="font-medium">{personWithRelations.user.name}</div>
+                                        <div className="text-xs text-neutral-500">
+                                            {personWithRelations.user.email} - {personWithRelations.user.role}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    "No user account linked"
+                                )}
+                            </div>
+                        </div>
+                        <div>
+                            <span className="text-sm font-medium">
                                 Start Date:
                             </span>
                             <div className="text-sm text-neutral-400">
-                                {person.startedAt
+                                {personWithRelations.startedAt
                                     ? new Date(
-                                          person.startedAt,
+                                          personWithRelations.startedAt,
                                       ).toLocaleDateString()
                                     : "Not specified"}
                             </div>
@@ -165,8 +211,8 @@ export default async function PersonDetailPage({
                                 Reports:
                             </span>
                             <div className="text-sm text-neutral-400">
-                                {person.reports.length} direct report
-                                {person.reports.length !== 1 ? "s" : ""}
+                                {personWithRelations.reports.length} direct report
+                                {personWithRelations.reports.length !== 1 ? "s" : ""}
                             </div>
                         </div>
                     </div>
@@ -176,14 +222,14 @@ export default async function PersonDetailPage({
                 <section className="card">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="font-semibold">
-                            Direct Reports ({person.reports.length})
+                            Direct Reports ({personWithRelations.reports.length})
                         </h3>
                         <Link href="/people/new" className="btn text-sm">
                             Add Report
                         </Link>
                     </div>
                     <div className="space-y-3">
-                        {person.reports.map((report) => (
+                        {personWithRelations.reports.map((report) => (
                             <div
                                 key={report.id}
                                 className="border border-neutral-800 rounded-xl p-3"
@@ -231,7 +277,7 @@ export default async function PersonDetailPage({
                                 </div>
                             </div>
                         ))}
-                        {person.reports.length === 0 && (
+                        {personWithRelations.reports.length === 0 && (
                             <div className="text-neutral-400 text-sm text-center py-4">
                                 No direct reports.
                             </div>
@@ -245,14 +291,14 @@ export default async function PersonDetailPage({
                 <section className="card">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="font-semibold">
-                            Owned Initiatives ({person.initiativeOwners.length})
+                            Owned Initiatives ({personWithRelations.initiativeOwners.length})
                         </h3>
                         <Link href="/initiatives/new" className="btn text-sm">
                             New Initiative
                         </Link>
                     </div>
                     <div className="space-y-3">
-                        {person.initiativeOwners.map((ownership) => (
+                        {personWithRelations.initiativeOwners.map((ownership) => (
                             <Link
                                 key={ownership.initiative.id}
                                 href={`/initiatives/${ownership.initiative.id}`}
@@ -281,7 +327,7 @@ export default async function PersonDetailPage({
                                 </div>
                             </Link>
                         ))}
-                        {person.initiativeOwners.length === 0 && (
+                        {personWithRelations.initiativeOwners.length === 0 && (
                             <div className="text-neutral-400 text-sm text-center py-4">
                                 No owned initiatives.
                             </div>
@@ -293,14 +339,14 @@ export default async function PersonDetailPage({
                 <section className="card">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="font-semibold">
-                            Assigned Tasks ({person.tasks.length})
+                            Assigned Tasks ({personWithRelations.tasks.length})
                         </h3>
                         <Link href="/initiatives/new" className="btn text-sm">
                             New Task
                         </Link>
                     </div>
                     <div className="space-y-3">
-                        {person.tasks.slice(0, 5).map((task) => (
+                        {personWithRelations.tasks.slice(0, 5).map((task) => (
                             <div
                                 key={task.id}
                                 className="border border-neutral-800 rounded-xl p-3"
@@ -352,18 +398,18 @@ export default async function PersonDetailPage({
                                 </div>
                             </div>
                         ))}
-                        {person.tasks.length === 0 && (
+                        {personWithRelations.tasks.length === 0 && (
                             <div className="text-neutral-400 text-sm text-center py-4">
                                 No assigned tasks.
                             </div>
                         )}
-                        {person.tasks.length > 5 && (
+                        {personWithRelations.tasks.length > 5 && (
                             <div className="text-center">
                                 <Link
                                     href="/tasks"
                                     className="text-sm text-blue-400 hover:text-blue-300"
                                 >
-                                    View all {person.tasks.length} tasks
+                                    View all {personWithRelations.tasks.length} tasks
                                 </Link>
                             </div>
                         )}
@@ -376,14 +422,14 @@ export default async function PersonDetailPage({
                 <section className="card">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="font-semibold">
-                            Recent Check-ins ({person.checkIns.length})
+                            Recent Check-ins ({personWithRelations.checkIns.length})
                         </h3>
                         <Link href="/initiatives" className="btn text-sm">
                             View All
                         </Link>
                     </div>
                     <div className="space-y-3">
-                        {person.checkIns.slice(0, 3).map((checkIn) => (
+                        {personWithRelations.checkIns.slice(0, 3).map((checkIn) => (
                             <div
                                 key={checkIn.id}
                                 className="border border-neutral-800 rounded-xl p-3"
@@ -415,7 +461,7 @@ export default async function PersonDetailPage({
                                 </div>
                             </div>
                         ))}
-                        {person.checkIns.length === 0 && (
+                        {personWithRelations.checkIns.length === 0 && (
                             <div className="text-neutral-400 text-sm text-center py-4">
                                 No check-ins yet.
                             </div>
@@ -433,13 +479,13 @@ export default async function PersonDetailPage({
                     </div>
                     <div className="space-y-3">
                         {/* As Manager */}
-                        {person.oneOnOnesAsManager.length > 0 && (
+                        {personWithRelations.oneOnOnesAsManager.length > 0 && (
                             <div>
                                 <div className="text-sm font-medium mb-2">
                                     As Manager (
-                                    {person.oneOnOnesAsManager.length})
+                                    {personWithRelations.oneOnOnesAsManager.length})
                                 </div>
-                                {person.oneOnOnesAsManager
+                                {personWithRelations.oneOnOnesAsManager
                                     .slice(0, 2)
                                     .map((oneOnOne) => (
                                         <div
@@ -478,12 +524,12 @@ export default async function PersonDetailPage({
                         )}
 
                         {/* As Report */}
-                        {person.oneOnOnes.length > 0 && (
+                        {personWithRelations.oneOnOnes.length > 0 && (
                             <div>
                                 <div className="text-sm font-medium mb-2">
-                                    With Manager ({person.oneOnOnes.length})
+                                    With Manager ({personWithRelations.oneOnOnes.length})
                                 </div>
-                                {person.oneOnOnes
+                                {personWithRelations.oneOnOnes
                                     .slice(0, 2)
                                     .map((oneOnOne) => (
                                         <div
@@ -521,8 +567,8 @@ export default async function PersonDetailPage({
                             </div>
                         )}
 
-                        {person.oneOnOnes.length === 0 &&
-                            person.oneOnOnesAsManager.length === 0 && (
+                        {personWithRelations.oneOnOnes.length === 0 &&
+                            personWithRelations.oneOnOnesAsManager.length === 0 && (
                                 <div className="text-neutral-400 text-sm text-center py-4">
                                     No 1:1 meetings scheduled.
                                 </div>
@@ -537,7 +583,7 @@ export default async function PersonDetailPage({
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="text-center">
                         <div className="text-2xl font-bold">
-                            {person.reports.length}
+                            {personWithRelations.reports.length}
                         </div>
                         <div className="text-sm text-neutral-400">
                             Direct Reports
@@ -545,7 +591,7 @@ export default async function PersonDetailPage({
                     </div>
                     <div className="text-center">
                         <div className="text-2xl font-bold">
-                            {person.initiativeOwners.length}
+                            {personWithRelations.initiativeOwners.length}
                         </div>
                         <div className="text-sm text-neutral-400">
                             Owned Initiatives
@@ -553,7 +599,7 @@ export default async function PersonDetailPage({
                     </div>
                     <div className="text-center">
                         <div className="text-2xl font-bold">
-                            {person.tasks.length}
+                            {personWithRelations.tasks.length}
                         </div>
                         <div className="text-sm text-neutral-400">
                             Assigned Tasks
@@ -561,13 +607,21 @@ export default async function PersonDetailPage({
                     </div>
                     <div className="text-center">
                         <div className="text-2xl font-bold">
-                            {person.checkIns.length}
+                            {personWithRelations.checkIns.length}
                         </div>
                         <div className="text-sm text-neutral-400">
                             Check-ins
                         </div>
                     </div>
                 </div>
+            </section>
+
+            {/* User Account Linking */}
+            <section className="card">
+                <UserLinkForm 
+                    personId={personWithRelations.id} 
+                    linkedUser={personWithRelations.user}
+                />
             </section>
         </div>
     );

@@ -30,10 +30,13 @@ model User {
   role           String        @default("USER") // ADMIN or USER
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id])
+  personId       String?       @unique
+  person         Person?       @relation(fields: [personId], references: [id])
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   
   @@index([organizationId])
+  @@index([personId])
 }
 
 model Team {
@@ -77,6 +80,7 @@ model Person {
   initiativeOwners   InitiativeOwner[]
   checkIns           CheckIn[]
   events             Event[]
+  user               User?
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
   

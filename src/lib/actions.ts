@@ -59,6 +59,91 @@ export async function createOrganization(formData: { name: string; slug: string 
   return result
 }
 
+export async function linkUserToPerson(userId: string, personId: string) {
+  const currentUser = await getCurrentUser()
+  
+  // Check if user belongs to an organization
+  if (!currentUser.organizationId) {
+    throw new Error('User must belong to an organization to link users to persons')
+  }
+  
+  // Verify the person belongs to the same organization
+  const person = await prisma.person.findFirst({
+    where: {
+      id: personId,
+      organizationId: currentUser.organizationId
+    }
+  })
+  
+  if (!person) {
+    throw new Error('Person not found or access denied')
+  }
+  
+  // Check if person is already linked to a user
+  const personWithUser = await prisma.person.findFirst({
+    where: {
+      id: personId,
+      organizationId: currentUser.organizationId
+    },
+    include: { user: true }
+  })
+  
+  if (personWithUser?.user) {
+    throw new Error('Person is already linked to a user')
+  }
+  
+  // Link the user to the person
+  await prisma.user.update({
+    where: { id: userId },
+    data: { personId: personId }
+  })
+  
+  revalidatePath('/people')
+  revalidatePath('/people/[id]', 'page')
+}
+
+export async function unlinkUserFromPerson(userId: string) {
+  const currentUser = await getCurrentUser()
+  
+  // Check if user belongs to an organization
+  if (!currentUser.organizationId) {
+    throw new Error('User must belong to an organization to manage user-person links')
+  }
+  
+  // Unlink the user from the person
+  await prisma.user.update({
+    where: { id: userId },
+    data: { personId: null }
+  })
+  
+  revalidatePath('/people')
+  revalidatePath('/people/[id]', 'page')
+}
+
+export async function getAvailableUsersForLinking() {
+  const currentUser = await getCurrentUser()
+  
+  // Check if user belongs to an organization
+  if (!currentUser.organizationId) {
+    return []
+  }
+  
+  // Get users in the same organization who aren't linked to a person
+  return await prisma.user.findMany({
+    where: {
+      organizationId: currentUser.organizationId,
+      personId: null
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true
+    },
+    orderBy: { name: 'asc' }
+  })
+}
+
 export async function createInitiative(formData: InitiativeFormData) {
   const user = await getCurrentUser()
   
@@ -323,6 +408,14 @@ export async function getPerson(id: string) {
         team: true,
         manager: true,
         reports: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true
+          }
+        }
       },
     })
   } catch (error) {

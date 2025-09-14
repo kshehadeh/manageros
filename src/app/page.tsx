@@ -38,7 +38,7 @@ export default async function Home() {
     prisma.checkIn.findMany({
       where: {
         initiative: {
-          organizationId: session.user.organizationId
+          organizationId: session.user.organizationId!
         }
       },
       orderBy: { createdAt: 'desc' },
@@ -48,7 +48,7 @@ export default async function Home() {
     prisma.oneOnOne.findMany({
       where: {
         report: {
-          organizationId: session.user.organizationId
+          organizationId: session.user.organizationId!
         }
       },
       orderBy: { scheduledAt: 'asc' },
