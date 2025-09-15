@@ -10,6 +10,7 @@ declare module 'next-auth' {
       organizationId: string | null
       organizationName: string | null
       organizationSlug: string | null
+      personId: string | null
     }
   }
 
@@ -21,6 +22,7 @@ declare module 'next-auth' {
     organizationId: string | null
     organizationName: string | null
     organizationSlug: string | null
+    personId: string | null
   }
 }
 
@@ -30,5 +32,6 @@ declare module 'next-auth/jwt' {
     organizationId: string | null
     organizationName: string | null
     organizationSlug: string | null
+    personId: string | null
   }
 }

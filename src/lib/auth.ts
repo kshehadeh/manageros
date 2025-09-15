@@ -1,4 +1,4 @@
-import { NextAuthOptions } from 'next-auth'
+import { NextAuthOptions, User } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { prisma } from './db'
 import bcrypt from 'bcryptjs'
@@ -23,6 +23,11 @@ export const authOptions: NextAuthOptions = {
           },
           include: {
             organization: true,
+            person: {
+              select: {
+                id: true,
+              },
+            },
           },
         })
 
@@ -47,7 +52,8 @@ export const authOptions: NextAuthOptions = {
           organizationId: user.organizationId,
           organizationName: user.organization?.name || null,
           organizationSlug: user.organization?.slug || null,
-        }
+          personId: user.person?.id || null,
+        } as User
       },
     }),
   ],
@@ -61,6 +67,7 @@ export const authOptions: NextAuthOptions = {
         token.organizationId = user.organizationId
         token.organizationName = user.organizationName
         token.organizationSlug = user.organizationSlug
+        token.personId = user.personId
       }
       return token
     },
@@ -71,6 +78,7 @@ export const authOptions: NextAuthOptions = {
         session.user.organizationId = token.organizationId as string
         session.user.organizationName = token.organizationName as string
         session.user.organizationSlug = token.organizationSlug as string
+        session.user.personId = token.personId as string | null
       }
       return session
     },

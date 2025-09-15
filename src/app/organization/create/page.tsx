@@ -41,19 +41,19 @@ export default function CreateOrganizationPage() {
   }
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8'>
+    <div className='min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8'>
       <div className='max-w-md w-full space-y-8'>
         <div>
-          <h2 className='mt-6 text-center text-3xl font-extrabold text-gray-900'>
+          <h2 className='mt-6 text-center text-3xl font-extrabold text-neutral-100'>
             Create Organization
           </h2>
-          <p className='mt-2 text-center text-sm text-gray-600'>
+          <p className='mt-2 text-center text-sm text-neutral-400'>
             Create a new organization to get started with ManagerOS
           </p>
         </div>
         <form className='mt-8 space-y-6' onSubmit={handleSubmit}>
           {error && (
-            <div className='bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded'>
+            <div className='bg-red-900/30 border border-red-700 text-red-300 px-4 py-3 rounded'>
               {error}
             </div>
           )}
@@ -61,7 +61,7 @@ export default function CreateOrganizationPage() {
             <div>
               <label
                 htmlFor='name'
-                className='block text-sm font-medium text-gray-700'
+                className='block text-sm font-medium text-neutral-300'
               >
                 Organization Name
               </label>
@@ -70,7 +70,7 @@ export default function CreateOrganizationPage() {
                 name='name'
                 type='text'
                 required
-                className='mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+                className='input mt-1'
                 placeholder='Acme Corp'
                 value={formData.name}
                 onChange={handleInputChange}
@@ -79,7 +79,7 @@ export default function CreateOrganizationPage() {
             <div>
               <label
                 htmlFor='slug'
-                className='block text-sm font-medium text-gray-700'
+                className='block text-sm font-medium text-neutral-300'
               >
                 Organization Slug
               </label>
@@ -88,12 +88,12 @@ export default function CreateOrganizationPage() {
                 name='slug'
                 type='text'
                 required
-                className='mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+                className='input mt-1'
                 placeholder='acme-corp'
                 value={formData.slug}
                 onChange={handleInputChange}
               />
-              <p className='mt-1 text-xs text-gray-500'>
+              <p className='mt-1 text-xs text-neutral-500'>
                 Used in URLs. Only lowercase letters, numbers, and hyphens
                 allowed.
               </p>
@@ -104,7 +104,7 @@ export default function CreateOrganizationPage() {
             <button
               type='submit'
               disabled={isLoading}
-              className='group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50'
+              className='btn w-full justify-center bg-blue-600 hover:bg-blue-700 disabled:opacity-50'
             >
               {isLoading ? 'Creating organization...' : 'Create organization'}
             </button>

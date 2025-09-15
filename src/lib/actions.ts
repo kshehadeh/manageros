@@ -830,13 +830,12 @@ export async function getOneOnOnes() {
     },
   })
 
-  if (!currentPerson) {
-    throw new Error('No person record found for current user')
-  }
-
   return await prisma.oneOnOne.findMany({
     where: {
-      OR: [{ managerId: currentPerson.id }, { reportId: currentPerson.id }],
+      OR: [
+        { managerId: currentPerson?.id || '' },
+        { reportId: currentPerson?.id || '' },
+      ],
     },
     include: {
       manager: true,

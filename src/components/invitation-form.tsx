@@ -36,19 +36,19 @@ export default function InvitationForm({
   }
 
   return (
-    <div className='bg-white shadow rounded-lg p-6'>
-      <h3 className='text-lg font-medium text-gray-900 mb-4'>
+    <div className='card'>
+      <h3 className='text-lg font-medium text-neutral-100 mb-4'>
         Invite User to Organization
       </h3>
 
       {error && (
-        <div className='mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded'>
+        <div className='mb-4 bg-red-900/30 border border-red-700 text-red-300 px-4 py-3 rounded'>
           {error}
         </div>
       )}
 
       {success && (
-        <div className='mb-4 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded'>
+        <div className='mb-4 bg-green-900/30 border border-green-700 text-green-300 px-4 py-3 rounded'>
           {success}
         </div>
       )}
@@ -57,7 +57,7 @@ export default function InvitationForm({
         <div>
           <label
             htmlFor='email'
-            className='block text-sm font-medium text-gray-700'
+            className='block text-sm font-medium text-neutral-300'
           >
             Email Address
           </label>
@@ -67,10 +67,10 @@ export default function InvitationForm({
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
-            className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+            className='input mt-1'
             placeholder='user@example.com'
           />
-          <p className='mt-1 text-sm text-gray-500'>
+          <p className='mt-1 text-sm text-neutral-500'>
             The user will receive an invitation to join your organization. They
             can accept it when they create their account.
           </p>
@@ -80,7 +80,7 @@ export default function InvitationForm({
           <button
             type='submit'
             disabled={isLoading}
-            className='w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50'
+            className='btn w-full justify-center bg-blue-600 hover:bg-blue-700 disabled:opacity-50'
           >
             {isLoading ? 'Sending Invitation...' : 'Send Invitation'}
           </button>

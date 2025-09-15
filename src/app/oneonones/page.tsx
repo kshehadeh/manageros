@@ -13,6 +13,7 @@ export default async function OneOnOnesPage() {
   }
 
   const items = await getOneOnOnes()
+
   return (
     <div className='space-y-4'>
       <div className='flex items-center justify-between'>
