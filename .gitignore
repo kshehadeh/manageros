@@ -15,3 +15,5 @@ prisma/dev.db
 prisma/dev.sqlite
 
 .DS_Store
+
+tsconfig.tsbuildinfo
