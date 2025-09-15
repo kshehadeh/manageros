@@ -12,9 +12,9 @@ interface EditPersonPageProps {
   }>
 }
 
-export default async function EditPersonPage ({ params }: EditPersonPageProps) {
+export default async function EditPersonPage({ params }: EditPersonPageProps) {
   const session = await getServerSession(authOptions)
-  
+
   if (!session?.user) {
     redirect('/auth/signin')
   }
@@ -31,14 +31,14 @@ export default async function EditPersonPage ({ params }: EditPersonPageProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Edit {person.name}</h2>
-        <Link href="/people" className="btn">
+    <div className='space-y-6'>
+      <div className='flex items-center justify-between'>
+        <h2 className='text-lg font-semibold'>Edit {person.name}</h2>
+        <Link href='/people' className='btn'>
           Back to People
         </Link>
       </div>
-      
+
       <PersonForm teams={teams} people={people} person={person} />
     </div>
   )

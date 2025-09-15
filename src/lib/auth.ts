@@ -10,20 +10,20 @@ export const authOptions: NextAuthOptions = {
       name: 'credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' }
+        password: { label: 'Password', type: 'password' },
       },
-      async authorize (credentials) {
+      async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           return null
         }
 
         const user = await prisma.user.findUnique({
           where: {
-            email: credentials.email
+            email: credentials.email,
           },
           include: {
-            organization: true
-          }
+            organization: true,
+          },
         })
 
         if (!user) {
@@ -46,16 +46,16 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
           organizationId: user.organizationId,
           organizationName: user.organization?.name || null,
-          organizationSlug: user.organization?.slug || null
+          organizationSlug: user.organization?.slug || null,
         }
-      }
-    })
+      },
+    }),
   ],
   session: {
-    strategy: 'jwt'
+    strategy: 'jwt',
   },
   callbacks: {
-    async jwt ({ token, user }) {
+    async jwt({ token, user }) {
       if (user) {
         token.role = user.role
         token.organizationId = user.organizationId
@@ -64,7 +64,7 @@ export const authOptions: NextAuthOptions = {
       }
       return token
     },
-    async session ({ session, token }) {
+    async session({ session, token }) {
       if (token) {
         session.user.id = token.sub!
         session.user.role = token.role as string
@@ -73,23 +73,26 @@ export const authOptions: NextAuthOptions = {
         session.user.organizationSlug = token.organizationSlug as string
       }
       return session
-    }
+    },
   },
   pages: {
     signIn: '/auth/signin',
-    newUser: '/auth/signup'
-  }
+    newUser: '/auth/signup',
+  },
 }
 
 // Helper functions for role-based access control
-export function isAdmin (user: { role: string }) {
+export function isAdmin(user: { role: string }) {
   return user.role === 'ADMIN'
 }
 
-export function isUser (user: { role: string }) {
+export function isUser(user: { role: string }) {
   return user.role === 'USER'
 }
 
-export function canAccessOrganization (user: { organizationId: string }, organizationId: string) {
+export function canAccessOrganization(
+  user: { organizationId: string },
+  organizationId: string
+) {
   return user.organizationId === organizationId
 }

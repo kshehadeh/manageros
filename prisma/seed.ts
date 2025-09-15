@@ -11,8 +11,8 @@ async function main() {
     create: {
       name: 'Acme Corp',
       slug: 'acme-corp',
-      description: 'Demo organization 1'
-    }
+      description: 'Demo organization 1',
+    },
   })
 
   const org2 = await prisma.organization.upsert({
@@ -21,8 +21,8 @@ async function main() {
     create: {
       name: 'TechStart Inc',
       slug: 'techstart-inc',
-      description: 'Demo organization 2'
-    }
+      description: 'Demo organization 2',
+    },
   })
 
   // Create users for each organization
@@ -36,8 +36,8 @@ async function main() {
       name: 'Admin User',
       passwordHash,
       role: 'ADMIN',
-      organizationId: org1.id
-    }
+      organizationId: org1.id,
+    },
   })
 
   const user2 = await prisma.user.upsert({
@@ -48,8 +48,8 @@ async function main() {
       name: 'Regular User',
       passwordHash,
       role: 'USER',
-      organizationId: org1.id
-    }
+      organizationId: org1.id,
+    },
   })
 
   const user3 = await prisma.user.upsert({
@@ -60,8 +60,8 @@ async function main() {
       name: 'TechStart Admin',
       passwordHash,
       role: 'ADMIN',
-      organizationId: org2.id
-    }
+      organizationId: org2.id,
+    },
   })
 
   // Create teams for each organization
@@ -72,8 +72,8 @@ async function main() {
       id: 'seed-team-1',
       name: 'Platform Team',
       description: 'Demo team for Acme Corp',
-      organizationId: org1.id
-    }
+      organizationId: org1.id,
+    },
   })
 
   const team2 = await prisma.team.upsert({
@@ -83,17 +83,17 @@ async function main() {
       id: 'seed-team-2',
       name: 'Product Team',
       description: 'Demo team for TechStart Inc',
-      organizationId: org2.id
-    }
+      organizationId: org2.id,
+    },
   })
 
   // Create people for each organization
   const manager1 = await prisma.person.upsert({
-    where: { 
+    where: {
       email_organizationId: {
         email: 'manager@acme.com',
-        organizationId: org1.id
-      }
+        organizationId: org1.id,
+      },
     },
     update: {},
     create: {
@@ -101,16 +101,16 @@ async function main() {
       name: 'Demo Manager',
       role: 'EM',
       teamId: team1.id,
-      organizationId: org1.id
-    }
+      organizationId: org1.id,
+    },
   })
 
   const alice = await prisma.person.upsert({
-    where: { 
+    where: {
       email_organizationId: {
         email: 'alice@acme.com',
-        organizationId: org1.id
-      }
+        organizationId: org1.id,
+      },
     },
     update: {},
     create: {
@@ -119,16 +119,16 @@ async function main() {
       role: 'Senior FE',
       teamId: team1.id,
       managerId: manager1.id,
-      organizationId: org1.id
-    }
+      organizationId: org1.id,
+    },
   })
 
   const bob = await prisma.person.upsert({
-    where: { 
+    where: {
       email_organizationId: {
         email: 'bob@acme.com',
-        organizationId: org1.id
-      }
+        organizationId: org1.id,
+      },
     },
     update: {},
     create: {
@@ -137,16 +137,16 @@ async function main() {
       role: 'BE',
       teamId: team1.id,
       managerId: manager1.id,
-      organizationId: org1.id
-    }
+      organizationId: org1.id,
+    },
   })
 
   const manager2 = await prisma.person.upsert({
-    where: { 
+    where: {
       email_organizationId: {
         email: 'manager@techstart.com',
-        organizationId: org2.id
-      }
+        organizationId: org2.id,
+      },
     },
     update: {},
     create: {
@@ -154,8 +154,8 @@ async function main() {
       name: 'TechStart Manager',
       role: 'EM',
       teamId: team2.id,
-      organizationId: org2.id
-    }
+      organizationId: org2.id,
+    },
   })
 
   // Create initiatives for each organization
@@ -175,14 +175,24 @@ async function main() {
             title: 'Reduce LCP p75 by 20%',
             tasks: {
               create: [
-                { title: 'Lazy-load below-the-fold images', assigneeId: alice.id, status: 'doing', priority: 1 },
-                { title: 'Cache HTML at CDN for PDP', assigneeId: bob.id, status: 'todo', priority: 2 }
-              ]
-            }
-          }
-        ]
-      }
-    }
+                {
+                  title: 'Lazy-load below-the-fold images',
+                  assigneeId: alice.id,
+                  status: 'doing',
+                  priority: 1,
+                },
+                {
+                  title: 'Cache HTML at CDN for PDP',
+                  assigneeId: bob.id,
+                  status: 'todo',
+                  priority: 2,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
   })
 
   const init2 = await prisma.initiative.create({
@@ -194,8 +204,8 @@ async function main() {
       status: 'planned',
       rag: 'green',
       confidence: 85,
-      owners: { create: [{ personId: manager2.id, role: 'owner' }] }
-    }
+      owners: { create: [{ personId: manager2.id, role: 'owner' }] },
+    },
   })
 
   // Create check-ins
@@ -205,9 +215,10 @@ async function main() {
       weekOf: new Date(),
       rag: 'amber',
       confidence: 72,
-      summary: 'Image work in progress; CDN cache rules drafted. Risk: vendor script variance.',
-      createdById: manager1.id
-    }
+      summary:
+        'Image work in progress; CDN cache rules drafted. Risk: vendor script variance.',
+      createdById: manager1.id,
+    },
   })
 
   // Create 1:1s
@@ -216,8 +227,8 @@ async function main() {
       managerId: manager1.id,
       reportId: alice.id,
       notes: 'Discussed perf metrics and ownership.',
-      scheduledAt: new Date(Date.now() + 2*24*60*60*1000)
-    }
+      scheduledAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+    },
   })
 
   console.log('Seed completed with multi-tenant data')

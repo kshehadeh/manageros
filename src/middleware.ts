@@ -2,7 +2,7 @@ import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
 
 export default withAuth(
-  function middleware (req) {
+  function middleware(req) {
     const { pathname } = req.nextUrl
     const token = req.nextauth.token
 
@@ -21,13 +21,13 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token
-    }
+      authorized: ({ token }) => !!token,
+    },
   }
 )
 
 export const config = {
   matcher: [
-    '/((?!api/auth|auth/signin|auth/signup|organization/create|_next/static|_next/image|favicon.ico).*)'
-  ]
+    '/((?!api/auth|auth/signin|auth/signup|organization/create|_next/static|_next/image|favicon.ico).*)',
+  ],
 }

@@ -14,7 +14,7 @@ interface TeamFormProps {
   parentId?: string
 }
 
-export function TeamForm ({ team, parentId }: TeamFormProps) {
+export function TeamForm({ team, parentId }: TeamFormProps) {
   const [formData, setFormData] = useState<TeamFormData>({
     name: team?.name || '',
     description: team?.description || '',
@@ -23,7 +23,9 @@ export function TeamForm ({ team, parentId }: TeamFormProps) {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
-  const [availableTeams, setAvailableTeams] = useState<Array<{ id: string; name: string; parentId: string | null }>>([])
+  const [availableTeams, setAvailableTeams] = useState<
+    Array<{ id: string; name: string; parentId: string | null }>
+  >([])
 
   useEffect(() => {
     const loadTeams = async () => {
@@ -56,72 +58,89 @@ export function TeamForm ({ team, parentId }: TeamFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className='space-y-6'>
       {/* Error Display */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
+        <div className='bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded'>
           {error}
         </div>
       )}
-      
+
       {/* Basic Information */}
-      <div className="card">
-        <h3 className="font-semibold mb-4">Team Information</h3>
-        <div className="space-y-4">
+      <div className='card'>
+        <h3 className='font-semibold mb-4'>Team Information</h3>
+        <div className='space-y-4'>
           <div>
-            <label className="block text-sm font-medium mb-2">Team Name *</label>
+            <label className='block text-sm font-medium mb-2'>
+              Team Name *
+            </label>
             <input
-              type="text"
+              type='text'
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="input"
-              placeholder="Enter team name"
+              onChange={e => setFormData({ ...formData, name: e.target.value })}
+              className='input'
+              placeholder='Enter team name'
               required
             />
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium mb-2">Description</label>
+            <label className='block text-sm font-medium mb-2'>
+              Description
+            </label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="input min-h-[100px] resize-none"
+              onChange={e =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              className='input min-h-[100px] resize-none'
               placeholder="Describe the team's purpose, responsibilities, or focus area"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Parent Team</label>
+            <label className='block text-sm font-medium mb-2'>
+              Parent Team
+            </label>
             <select
               value={formData.parentId || ''}
-              onChange={(e) => setFormData({ ...formData, parentId: e.target.value === '' ? undefined : e.target.value })}
-              className="input"
+              onChange={e =>
+                setFormData({
+                  ...formData,
+                  parentId: e.target.value === '' ? undefined : e.target.value,
+                })
+              }
+              className='input'
             >
-              <option value="">No parent team (top-level team)</option>
-              {availableTeams.map((availableTeam) => (
+              <option value=''>No parent team (top-level team)</option>
+              {availableTeams.map(availableTeam => (
                 <option key={availableTeam.id} value={availableTeam.id}>
                   {availableTeam.name}
                 </option>
               ))}
             </select>
-            <p className="text-xs text-neutral-500 mt-1">
-              Select a parent team to create a hierarchy. Teams can only have one parent but multiple children.
+            <p className='text-xs text-neutral-500 mt-1'>
+              Select a parent team to create a hierarchy. Teams can only have
+              one parent but multiple children.
             </p>
           </div>
         </div>
       </div>
 
       {/* Submit Button */}
-      <div className="flex justify-end">
+      <div className='flex justify-end'>
         <button
-          type="submit"
+          type='submit'
           disabled={isSubmitting || !formData.name.trim()}
-          className="btn bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className='btn bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
         >
-          {isSubmitting 
-            ? (team ? 'Updating...' : 'Creating...') 
-            : (team ? 'Update Team' : 'Create Team')
-          }
+          {isSubmitting
+            ? team
+              ? 'Updating...'
+              : 'Creating...'
+            : team
+              ? 'Update Team'
+              : 'Create Team'}
         </button>
       </div>
     </form>

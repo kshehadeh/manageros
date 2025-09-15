@@ -11,10 +11,12 @@ interface EditOneOnOnePageProps {
   }>
 }
 
-export default async function EditOneOnOnePage ({ params }: EditOneOnOnePageProps) {
+export default async function EditOneOnOnePage({
+  params,
+}: EditOneOnOnePageProps) {
   const session = await getServerSession(authOptions)
   const { id } = await params
-  
+
   if (!session?.user) {
     redirect('/auth/signin')
   }
@@ -22,73 +24,71 @@ export default async function EditOneOnOnePage ({ params }: EditOneOnOnePageProp
   try {
     const [oneOnOne, people] = await Promise.all([
       getOneOnOneById(id),
-      getPeopleForOneOnOne()
+      getPeopleForOneOnOne(),
     ])
 
     return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
+      <div className='space-y-4'>
+        <div className='flex items-center justify-between'>
           <div>
-            <h2 className="text-lg font-semibold">Edit 1:1 Meeting</h2>
-            <p className="text-sm text-neutral-400 mt-1">
+            <h2 className='text-lg font-semibold'>Edit 1:1 Meeting</h2>
+            <p className='text-sm text-neutral-400 mt-1'>
               Update meeting details and notes
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <Link 
+          <div className='flex items-center gap-2'>
+            <Link
               href={`/oneonones/${id}`}
-              className="btn bg-neutral-700 hover:bg-neutral-600"
+              className='btn bg-neutral-700 hover:bg-neutral-600'
             >
               View Meeting
             </Link>
-            <Link 
-              href="/oneonones" 
-              className="btn bg-neutral-700 hover:bg-neutral-600"
+            <Link
+              href='/oneonones'
+              className='btn bg-neutral-700 hover:bg-neutral-600'
             >
               Back to 1:1s
             </Link>
           </div>
         </div>
 
-        <OneOnOneForm 
-          people={people}
-          existingOneOnOne={oneOnOne}
-        />
+        <OneOnOneForm people={people} existingOneOnOne={oneOnOne} />
       </div>
     )
   } catch (error) {
     console.error('Error loading one-on-one:', error)
     return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
+      <div className='space-y-4'>
+        <div className='flex items-center justify-between'>
           <div>
-            <h2 className="text-lg font-semibold">Edit 1:1 Meeting</h2>
-            <p className="text-sm text-neutral-400 mt-1">
+            <h2 className='text-lg font-semibold'>Edit 1:1 Meeting</h2>
+            <p className='text-sm text-neutral-400 mt-1'>
               Update meeting details and notes
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <Link 
+          <div className='flex items-center gap-2'>
+            <Link
               href={`/oneonones/${id}`}
-              className="btn bg-neutral-700 hover:bg-neutral-600"
+              className='btn bg-neutral-700 hover:bg-neutral-600'
             >
               View Meeting
             </Link>
-            <Link 
-              href="/oneonones" 
-              className="btn bg-neutral-700 hover:bg-neutral-600"
+            <Link
+              href='/oneonones'
+              className='btn bg-neutral-700 hover:bg-neutral-600'
             >
               Back to 1:1s
             </Link>
           </div>
         </div>
 
-        <div className="card text-center py-8">
-          <h3 className="font-semibold mb-2">Meeting Not Found</h3>
-          <p className="text-sm text-neutral-400 mb-4">
-            The 1:1 meeting you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it.
+        <div className='card text-center py-8'>
+          <h3 className='font-semibold mb-2'>Meeting Not Found</h3>
+          <p className='text-sm text-neutral-400 mb-4'>
+            The 1:1 meeting you&apos;re looking for doesn&apos;t exist or you
+            don&apos;t have access to it.
           </p>
-          <Link href="/oneonones" className="btn bg-blue-600 hover:bg-blue-700">
+          <Link href='/oneonones' className='btn bg-blue-600 hover:bg-blue-700'>
             Back to 1:1s
           </Link>
         </div>

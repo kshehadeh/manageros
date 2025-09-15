@@ -12,9 +12,9 @@ interface EditTeamPageProps {
   }>
 }
 
-export default async function EditTeamPage ({ params }: EditTeamPageProps) {
+export default async function EditTeamPage({ params }: EditTeamPageProps) {
   const session = await getServerSession(authOptions)
-  
+
   if (!session?.user) {
     redirect('/auth/signin')
   }
@@ -27,14 +27,14 @@ export default async function EditTeamPage ({ params }: EditTeamPageProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Edit {team.name}</h2>
-        <Link href="/teams" className="btn">
+    <div className='space-y-6'>
+      <div className='flex items-center justify-between'>
+        <h2 className='text-lg font-semibold'>Edit {team.name}</h2>
+        <Link href='/teams' className='btn'>
           Back to Teams
         </Link>
       </div>
-      
+
       <TeamForm team={team} />
     </div>
   )

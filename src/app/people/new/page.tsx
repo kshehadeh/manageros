@@ -11,9 +11,11 @@ interface NewPersonPageProps {
   }>
 }
 
-export default async function NewPersonPage ({ searchParams }: NewPersonPageProps) {
+export default async function NewPersonPage({
+  searchParams,
+}: NewPersonPageProps) {
   const session = await getServerSession(authOptions)
-  
+
   if (!session?.user) {
     redirect('/auth/signin')
   }
@@ -21,20 +23,17 @@ export default async function NewPersonPage ({ searchParams }: NewPersonPageProp
   const params = await searchParams
   const managerId = params.managerId
 
-  const [teams, people] = await Promise.all([
-    getTeams(),
-    getPeople(),
-  ])
+  const [teams, people] = await Promise.all([getTeams(), getPeople()])
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">New Person</h2>
-        <Link href="/people" className="btn">
+    <div className='space-y-6'>
+      <div className='flex items-center justify-between'>
+        <h2 className='text-lg font-semibold'>New Person</h2>
+        <Link href='/people' className='btn'>
           Back to People
         </Link>
       </div>
-      
+
       <PersonForm teams={teams} people={people} initialManagerId={managerId} />
     </div>
   )

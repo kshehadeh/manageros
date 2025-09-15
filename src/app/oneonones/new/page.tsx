@@ -13,9 +13,11 @@ interface NewOneOnOnePageProps {
   }>
 }
 
-export default async function NewOneOnOnePage ({ searchParams }: NewOneOnOnePageProps) {
+export default async function NewOneOnOnePage({
+  searchParams,
+}: NewOneOnOnePageProps) {
   const session = await getServerSession(authOptions)
-  
+
   if (!session?.user) {
     redirect('/auth/signin')
   }
@@ -31,9 +33,9 @@ export default async function NewOneOnOnePage ({ searchParams }: NewOneOnOnePage
   const currentPerson = await prisma.person.findFirst({
     where: {
       user: {
-        id: session.user.id
-      }
-    }
+        id: session.user.id,
+      },
+    },
   })
 
   if (!currentPerson) {
@@ -59,22 +61,24 @@ export default async function NewOneOnOnePage ({ searchParams }: NewOneOnOnePage
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className='space-y-6'>
+      <div className='flex items-center justify-between'>
         <div>
-          <h1 className="text-2xl font-bold">New 1:1 Meeting</h1>
-          <p className="text-neutral-600 mt-1">Schedule a new one-on-one meeting</p>
+          <h1 className='text-2xl font-bold'>New 1:1 Meeting</h1>
+          <p className='text-neutral-600 mt-1'>
+            Schedule a new one-on-one meeting
+          </p>
         </div>
-        <Link 
-          href="/oneonones" 
-          className="btn bg-neutral-600 hover:bg-neutral-700"
+        <Link
+          href='/oneonones'
+          className='btn bg-neutral-600 hover:bg-neutral-700'
         >
           Back to 1:1s
         </Link>
       </div>
 
-      <OneOnOneForm 
-        people={people} 
+      <OneOnOneForm
+        people={people}
         preFilledManagerId={validManagerId}
         preFilledReportId={validReportId}
       />

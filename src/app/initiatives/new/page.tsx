@@ -12,30 +12,34 @@ interface NewInitiativePageProps {
   }>
 }
 
-export default async function NewInitiativePage ({ searchParams }: NewInitiativePageProps) {
+export default async function NewInitiativePage({
+  searchParams,
+}: NewInitiativePageProps) {
   const session = await getServerSession(authOptions)
-  
+
   if (!session?.user) {
     redirect('/auth/signin')
   }
 
   const { ownerId, teamId } = await searchParams
 
-  const [teams, people] = await Promise.all([
-    getTeams(),
-    getPeople(),
-  ])
+  const [teams, people] = await Promise.all([getTeams(), getPeople()])
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">New Initiative</h2>
-        <Link href="/initiatives" className="btn">
+    <div className='space-y-6'>
+      <div className='flex items-center justify-between'>
+        <h2 className='text-lg font-semibold'>New Initiative</h2>
+        <Link href='/initiatives' className='btn'>
           Back to Initiatives
         </Link>
       </div>
-      
-      <InitiativeForm teams={teams} people={people} preselectedOwnerId={ownerId} preselectedTeamId={teamId} />
+
+      <InitiativeForm
+        teams={teams}
+        people={people}
+        preselectedOwnerId={ownerId}
+        preselectedTeamId={teamId}
+      />
     </div>
   )
 }

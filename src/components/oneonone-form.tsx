@@ -29,7 +29,12 @@ interface OneOnOneFormProps {
   existingOneOnOne?: OneOnOneData
 }
 
-export function OneOnOneForm ({ people, preFilledManagerId, preFilledReportId, existingOneOnOne }: OneOnOneFormProps) {
+export function OneOnOneForm({
+  people,
+  preFilledManagerId,
+  preFilledReportId,
+  existingOneOnOne,
+}: OneOnOneFormProps) {
   // Get current date and time in the format required by datetime-local input
   const getCurrentDateTime = () => {
     const now = new Date()
@@ -55,7 +60,9 @@ export function OneOnOneForm ({ people, preFilledManagerId, preFilledReportId, e
   const [formData, setFormData] = useState<OneOnOneFormData>({
     managerId: existingOneOnOne?.managerId || preFilledManagerId || '',
     reportId: existingOneOnOne?.reportId || preFilledReportId || '',
-    scheduledAt: existingOneOnOne?.scheduledAt ? formatExistingDate(existingOneOnOne.scheduledAt) : getCurrentDateTime(),
+    scheduledAt: existingOneOnOne?.scheduledAt
+      ? formatExistingDate(existingOneOnOne.scheduledAt)
+      : getCurrentDateTime(),
     notes: existingOneOnOne?.notes || '',
   })
 
@@ -84,13 +91,13 @@ export function OneOnOneForm ({ people, preFilledManagerId, preFilledReportId, e
 
   if (people.length === 0) {
     return (
-      <div className="card text-center py-8">
-        <h3 className="font-semibold mb-2">No Meeting Partners Available</h3>
-        <p className="text-sm text-neutral-400 mb-4">
-          You don&apos;t have any direct reports or a manager assigned. 
-          Contact your administrator to set up reporting relationships.
+      <div className='card text-center py-8'>
+        <h3 className='font-semibold mb-2'>No Meeting Partners Available</h3>
+        <p className='text-sm text-neutral-400 mb-4'>
+          You don&apos;t have any direct reports or a manager assigned. Contact
+          your administrator to set up reporting relationships.
         </p>
-        <Link href="/people" className="btn bg-blue-600 hover:bg-blue-700">
+        <Link href='/people' className='btn bg-blue-600 hover:bg-blue-700'>
           Manage People
         </Link>
       </div>
@@ -98,32 +105,36 @@ export function OneOnOneForm ({ people, preFilledManagerId, preFilledReportId, e
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className='space-y-6'>
       {/* Meeting Details */}
-      <div className="card">
-        <h3 className="font-semibold mb-4">Meeting Details</h3>
-        <p className="text-sm text-neutral-400 mb-4">
-          You can only create 1:1 meetings with people you manage or who manage you. 
-          These meetings will only be visible to the participants.
+      <div className='card'>
+        <h3 className='font-semibold mb-4'>Meeting Details</h3>
+        <p className='text-sm text-neutral-400 mb-4'>
+          You can only create 1:1 meetings with people you manage or who manage
+          you. These meetings will only be visible to the participants.
         </p>
         {(preFilledManagerId || preFilledReportId) && (
-          <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-3 mb-4">
-            <p className="text-sm text-blue-300">
+          <div className='bg-blue-900/20 border border-blue-700 rounded-lg p-3 mb-4'>
+            <p className='text-sm text-blue-300'>
               ✓ Form pre-filled based on your selection
             </p>
           </div>
         )}
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className='space-y-4'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <div>
-              <label className="block text-sm font-medium mb-2">Manager *</label>
+              <label className='block text-sm font-medium mb-2'>
+                Manager *
+              </label>
               <select
                 value={formData.managerId}
-                onChange={(e) => setFormData({ ...formData, managerId: e.target.value })}
-                className="input"
+                onChange={e =>
+                  setFormData({ ...formData, managerId: e.target.value })
+                }
+                className='input'
                 required
               >
-                <option value="">Select a manager</option>
+                <option value=''>Select a manager</option>
                 {managerOptions.map(person => (
                   <option key={person.id} value={person.id}>
                     {person.name} ({person.email})
@@ -133,14 +144,16 @@ export function OneOnOneForm ({ people, preFilledManagerId, preFilledReportId, e
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Report *</label>
+              <label className='block text-sm font-medium mb-2'>Report *</label>
               <select
                 value={formData.reportId}
-                onChange={(e) => setFormData({ ...formData, reportId: e.target.value })}
-                className="input"
+                onChange={e =>
+                  setFormData({ ...formData, reportId: e.target.value })
+                }
+                className='input'
                 required
               >
-                <option value="">Select a report</option>
+                <option value=''>Select a report</option>
                 {reportOptions.map(person => (
                   <option key={person.id} value={person.id}>
                     {person.name} ({person.email})
@@ -151,12 +164,14 @@ export function OneOnOneForm ({ people, preFilledManagerId, preFilledReportId, e
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Date *</label>
+            <label className='block text-sm font-medium mb-2'>Date *</label>
             <input
-              type="datetime-local"
+              type='datetime-local'
               value={formData.scheduledAt}
-              onChange={(e) => setFormData({ ...formData, scheduledAt: e.target.value })}
-              className="input"
+              onChange={e =>
+                setFormData({ ...formData, scheduledAt: e.target.value })
+              }
+              className='input'
               required
             />
           </div>
@@ -164,34 +179,45 @@ export function OneOnOneForm ({ people, preFilledManagerId, preFilledReportId, e
       </div>
 
       {/* Notes */}
-      <div className="card">
-        <h3 className="font-semibold mb-4">Meeting Notes</h3>
+      <div className='card'>
+        <h3 className='font-semibold mb-4'>Meeting Notes</h3>
         <div>
-          <label className="block text-sm font-medium mb-2">Notes (Markdown supported)</label>
+          <label className='block text-sm font-medium mb-2'>
+            Notes (Markdown supported)
+          </label>
           <textarea
             value={formData.notes}
-            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            className="input min-h-[150px] resize-y font-mono text-sm"
-            placeholder="Enter meeting notes... (Markdown formatting supported)"
+            onChange={e => setFormData({ ...formData, notes: e.target.value })}
+            className='input min-h-[150px] resize-y font-mono text-sm'
+            placeholder='Enter meeting notes... (Markdown formatting supported)'
             rows={6}
           />
-          <p className="text-xs text-neutral-500 mt-2">
-            You can use Markdown formatting like **bold**, *italic*, - lists, etc.
+          <p className='text-xs text-neutral-500 mt-2'>
+            You can use Markdown formatting like **bold**, *italic*, - lists,
+            etc.
           </p>
         </div>
       </div>
 
       {/* Submit Button */}
-      <div className="flex justify-end">
+      <div className='flex justify-end'>
         <button
-          type="submit"
-          disabled={isSubmitting || !formData.managerId || !formData.reportId || !formData.scheduledAt}
-          className="btn bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isSubmitting 
-            ? (existingOneOnOne ? 'Updating...' : 'Creating...') 
-            : (existingOneOnOne ? 'Update 1:1 Meeting' : 'Create 1:1 Meeting')
+          type='submit'
+          disabled={
+            isSubmitting ||
+            !formData.managerId ||
+            !formData.reportId ||
+            !formData.scheduledAt
           }
+          className='btn bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
+        >
+          {isSubmitting
+            ? existingOneOnOne
+              ? 'Updating...'
+              : 'Creating...'
+            : existingOneOnOne
+              ? 'Update 1:1 Meeting'
+              : 'Create 1:1 Meeting'}
         </button>
       </div>
     </form>

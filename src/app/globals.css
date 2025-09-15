@@ -24,28 +24,46 @@ body {
 .badge {
   @apply inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium border border-neutral-700;
 }
-.rag-green { @apply bg-emerald-900/30 border-emerald-700 text-emerald-300; }
-.rag-amber { @apply bg-amber-900/30 border-amber-700 text-amber-300; }
-.rag-red { @apply bg-red-900/30 border-red-700 text-red-300; }
+.rag-green {
+  @apply bg-emerald-900/30 border-emerald-700 text-emerald-300;
+}
+.rag-amber {
+  @apply bg-amber-900/30 border-amber-700 text-amber-300;
+}
+.rag-red {
+  @apply bg-red-900/30 border-red-700 text-red-300;
+}
 
 /* Markdown prose styling */
 .prose {
   @apply text-neutral-200;
 }
 
-.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
   @apply text-neutral-100 font-semibold;
 }
 
-.prose h1 { @apply text-lg; }
-.prose h2 { @apply text-base; }
-.prose h3 { @apply text-sm; }
+.prose h1 {
+  @apply text-lg;
+}
+.prose h2 {
+  @apply text-base;
+}
+.prose h3 {
+  @apply text-sm;
+}
 
 .prose p {
   @apply mb-2;
 }
 
-.prose ul, .prose ol {
+.prose ul,
+.prose ol {
   @apply mb-2 ml-4;
 }
 
@@ -74,17 +92,17 @@ body {
 }
 
 /* Fix calendar icon visibility in dark mode for datetime-local inputs */
-input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+input[type='datetime-local']::-webkit-calendar-picker-indicator {
   filter: invert(1);
   opacity: 0.8;
 }
 
-input[type="date"]::-webkit-calendar-picker-indicator {
+input[type='date']::-webkit-calendar-picker-indicator {
   filter: invert(1);
   opacity: 0.8;
 }
 
-input[type="time"]::-webkit-calendar-picker-indicator {
+input[type='time']::-webkit-calendar-picker-indicator {
   filter: invert(1);
   opacity: 0.8;
 }
