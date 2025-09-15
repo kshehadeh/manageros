@@ -6,9 +6,8 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { isAdmin, canAccessOrganization } from '@/lib/auth'
 
-async function getCurrentUser() {
+async function getCurrentUser () {
   const session = await getServerSession(authOptions)
   if (!session?.user) {
     throw new Error('Unauthorized')
@@ -16,7 +15,7 @@ async function getCurrentUser() {
   return session.user
 }
 
-export async function createOrganization(formData: { name: string; slug: string }) {
+export async function createOrganization (formData: { name: string; slug: string }) {
   const user = await getCurrentUser()
   
   // Check if user already has an organization
@@ -59,7 +58,7 @@ export async function createOrganization(formData: { name: string; slug: string 
   return result
 }
 
-export async function linkUserToPerson(userId: string, personId: string) {
+export async function linkUserToPerson (userId: string, personId: string) {
   const currentUser = await getCurrentUser()
   
   // Check if user belongs to an organization
@@ -102,7 +101,7 @@ export async function linkUserToPerson(userId: string, personId: string) {
   revalidatePath('/people/[id]', 'page')
 }
 
-export async function unlinkUserFromPerson(userId: string) {
+export async function unlinkUserFromPerson (userId: string) {
   const currentUser = await getCurrentUser()
   
   // Check if user belongs to an organization
@@ -120,7 +119,7 @@ export async function unlinkUserFromPerson(userId: string) {
   revalidatePath('/people/[id]', 'page')
 }
 
-export async function getAvailableUsersForLinking() {
+export async function getAvailableUsersForLinking () {
   const currentUser = await getCurrentUser()
   
   // Check if user belongs to an organization
@@ -144,7 +143,7 @@ export async function getAvailableUsersForLinking() {
   })
 }
 
-export async function createInitiative(formData: InitiativeFormData) {
+export async function createInitiative (formData: InitiativeFormData) {
   const user = await getCurrentUser()
   
   // Check if user belongs to an organization
@@ -217,7 +216,7 @@ export async function createInitiative(formData: InitiativeFormData) {
   redirect(`/initiatives/${initiative.id}`)
 }
 
-export async function getTeams() {
+export async function getTeams () {
   try {
     const user = await getCurrentUser()
     if (!user.organizationId) {
@@ -233,7 +232,7 @@ export async function getTeams() {
   }
 }
 
-export async function getPeople() {
+export async function getPeople () {
   try {
     const user = await getCurrentUser()
     if (!user.organizationId) {
@@ -252,7 +251,7 @@ export async function getPeople() {
   }
 }
 
-export async function getPeopleHierarchy() {
+export async function getPeopleHierarchy () {
   try {
     const user = await getCurrentUser()
     if (!user.organizationId) {
@@ -302,38 +301,29 @@ export async function getPeopleHierarchy() {
       orderBy: { name: 'asc' },
     })
     
-    // Build hierarchical structure
-    const hierarchy: Array<{
-      id: string
-      name: string
-      email: string
-      role: string | null
-      status: string
-      team: { id: string; name: string } | null
-      manager: { 
-        id: string
-        name: string
-        email: string
-        role: string | null
-        status: string
-        reports: Array<{ id: string; name: string; email: string; role: string | null; status: string }>
-      } | null
-      reports: Array<{ id: string; name: string; email: string; role: string | null; status: string }>
+    // Define the type for a person with all included relations
+    type PersonWithRelations = typeof people[0]
+    
+    // Define the hierarchy item type
+    type HierarchyItem = PersonWithRelations & {
       level: number
-    }> = []
+    }
+    
+    // Build hierarchical structure
+    const hierarchy: HierarchyItem[] = []
     
     // Find top-level people (those without managers)
     const topLevelPeople = people.filter(person => !person.managerId)
     
     // Recursive function to build hierarchy
-    function buildHierarchy(person: any, level: number = 0) {
+    function buildHierarchy (person: PersonWithRelations, level: number = 0) {
       hierarchy.push({
         ...person,
         level
       })
       
       // Add reports recursively
-      person.reports.forEach((report: any) => {
+      person.reports.forEach((report) => {
         const fullReport = people.find(p => p.id === report.id)
         if (fullReport) {
           buildHierarchy(fullReport, level + 1)
@@ -351,7 +341,7 @@ export async function getPeopleHierarchy() {
   }
 }
 
-export async function createPerson(formData: PersonFormData) {
+export async function createPerson (formData: PersonFormData) {
   const user = await getCurrentUser()
   
   // Check if user belongs to an organization
@@ -392,7 +382,7 @@ export async function createPerson(formData: PersonFormData) {
   }
   
   // Create the person
-  const person = await prisma.person.create({
+  await prisma.person.create({
     data: {
       name: validatedData.name,
       email: validatedData.email,
@@ -416,7 +406,7 @@ export async function createPerson(formData: PersonFormData) {
   redirect('/people')
 }
 
-export async function updatePerson(id: string, formData: PersonFormData) {
+export async function updatePerson (id: string, formData: PersonFormData) {
   const user = await getCurrentUser()
   
   // Check if user belongs to an organization
@@ -468,7 +458,7 @@ export async function updatePerson(id: string, formData: PersonFormData) {
   }
   
   // Update the person
-  const person = await prisma.person.update({
+  await prisma.person.update({
     where: { id },
     data: {
       name: validatedData.name,
@@ -492,7 +482,7 @@ export async function updatePerson(id: string, formData: PersonFormData) {
   redirect('/people')
 }
 
-export async function getPerson(id: string) {
+export async function getPerson (id: string) {
   try {
     const user = await getCurrentUser()
     if (!user.organizationId) {
@@ -523,7 +513,7 @@ export async function getPerson(id: string) {
   }
 }
 
-export async function createTeam(formData: TeamFormData) {
+export async function createTeam (formData: TeamFormData) {
   const user = await getCurrentUser()
   
   // Debug logging
@@ -573,7 +563,7 @@ export async function createTeam(formData: TeamFormData) {
   }
   
   // Create the team
-  const team = await prisma.team.create({
+  await prisma.team.create({
     data: {
       name: validatedData.name,
       description: validatedData.description,
@@ -595,7 +585,7 @@ export async function createTeam(formData: TeamFormData) {
   redirect('/teams')
 }
 
-export async function updateTeam(id: string, formData: TeamFormData) {
+export async function updateTeam (id: string, formData: TeamFormData) {
   const user = await getCurrentUser()
   
   // Check if user belongs to an organization
@@ -637,7 +627,7 @@ export async function updateTeam(id: string, formData: TeamFormData) {
   }
   
   // Update the team
-  const team = await prisma.team.update({
+  await prisma.team.update({
     where: { id },
     data: {
       name: validatedData.name,
@@ -659,7 +649,7 @@ export async function updateTeam(id: string, formData: TeamFormData) {
   redirect('/teams')
 }
 
-export async function getTeam(id: string) {
+export async function getTeam (id: string) {
   try {
     const user = await getCurrentUser()
     if (!user.organizationId) {
@@ -683,7 +673,7 @@ export async function getTeam(id: string) {
   }
 }
 
-export async function getTeamsForSelection(excludeId?: string) {
+export async function getTeamsForSelection (excludeId?: string) {
   try {
     const user = await getCurrentUser()
     if (!user.organizationId) {
@@ -707,7 +697,7 @@ export async function getTeamsForSelection(excludeId?: string) {
   }
 }
 
-export async function createOneOnOne(formData: OneOnOneFormData) {
+export async function createOneOnOne (formData: OneOnOneFormData) {
   const user = await getCurrentUser()
   
   if (!user.organizationId) {
@@ -742,7 +732,7 @@ export async function createOneOnOne(formData: OneOnOneFormData) {
   }
 
   // Create the one-on-one record
-  const oneOnOne = await prisma.oneOnOne.create({
+  await prisma.oneOnOne.create({
     data: {
       managerId: validatedData.managerId,
       reportId: validatedData.reportId,
@@ -763,7 +753,7 @@ export async function createOneOnOne(formData: OneOnOneFormData) {
   redirect('/oneonones')
 }
 
-export async function getOneOnOnes() {
+export async function getOneOnOnes () {
   const user = await getCurrentUser()
   
   if (!user.organizationId) {
@@ -798,7 +788,7 @@ export async function getOneOnOnes() {
   })
 }
 
-export async function getPeopleForOneOnOne() {
+export async function getPeopleForOneOnOne () {
   const user = await getCurrentUser()
   
   if (!user.organizationId) {
@@ -835,7 +825,7 @@ export async function getPeopleForOneOnOne() {
   return people
 }
 
-export async function getOneOnOneById(id: string) {
+export async function getOneOnOneById (id: string) {
   const user = await getCurrentUser()
   
   if (!user.organizationId) {
@@ -887,7 +877,7 @@ export async function getOneOnOneById(id: string) {
   return oneOnOne
 }
 
-export async function updateOneOnOne(id: string, formData: OneOnOneFormData) {
+export async function updateOneOnOne (id: string, formData: OneOnOneFormData) {
   const user = await getCurrentUser()
   
   if (!user.organizationId) {

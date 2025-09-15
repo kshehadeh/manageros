@@ -12,7 +12,7 @@ interface InitiativeFormProps {
   preselectedTeamId?: string
 }
 
-export function InitiativeForm({ teams, people, preselectedOwnerId, preselectedTeamId }: InitiativeFormProps) {
+export function InitiativeForm ({ teams, people, preselectedOwnerId, preselectedTeamId }: InitiativeFormProps) {
   // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split('T')[0]
   
@@ -159,7 +159,7 @@ export function InitiativeForm({ teams, people, preselectedOwnerId, preselectedT
             <label className="block text-sm font-medium mb-2">Status</label>
             <select
               value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value as InitiativeFormData['status'] })}
               className="input"
             >
               <option value="planned">Planned</option>
@@ -174,7 +174,7 @@ export function InitiativeForm({ teams, people, preselectedOwnerId, preselectedT
             <label className="block text-sm font-medium mb-2">RAG Status</label>
             <select
               value={formData.rag}
-              onChange={(e) => setFormData({ ...formData, rag: e.target.value as any })}
+              onChange={(e) => setFormData({ ...formData, rag: e.target.value as InitiativeFormData['rag'] })}
               className="input"
             >
               <option value="green">Green</option>

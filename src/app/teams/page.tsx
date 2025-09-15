@@ -12,7 +12,7 @@ type TeamWithChildren = Team & {
   initiatives: Initiative[]
 }
 
-function TeamCard({ team, level = 0 }: { team: TeamWithChildren; level?: number }) {
+function TeamCard ({ team, _level = 0 }: { team: TeamWithChildren; _level?: number }) {
   return (
     <div className="card">
       {/* Main team info */}
@@ -110,7 +110,7 @@ function TeamCard({ team, level = 0 }: { team: TeamWithChildren; level?: number 
   )
 }
 
-export default async function TeamsPage() {
+export default async function TeamsPage () {
   const session = await getServerSession(authOptions)
   
   if (!session?.user) {

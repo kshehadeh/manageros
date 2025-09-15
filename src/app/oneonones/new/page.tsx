@@ -13,7 +13,7 @@ interface NewOneOnOnePageProps {
   }>
 }
 
-export default async function NewOneOnOnePage({ searchParams }: NewOneOnOnePageProps) {
+export default async function NewOneOnOnePage ({ searchParams }: NewOneOnOnePageProps) {
   const session = await getServerSession(authOptions)
   
   if (!session?.user) {

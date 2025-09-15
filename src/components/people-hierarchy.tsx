@@ -16,7 +16,7 @@ interface PeopleHierarchyProps {
   people: Person[]
 }
 
-export function PeopleHierarchy({ people }: PeopleHierarchyProps) {
+export function PeopleHierarchy ({ people }: PeopleHierarchyProps) {
   if (people.length === 0) {
     return <div className="text-neutral-400 text-sm">No people yet.</div>
   }

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createOrganization } from '@/lib/actions'
 
-export default function CreateOrganizationPage() {
+export default function CreateOrganizationPage () {
   const [formData, setFormData] = useState({
     name: '',
     slug: ''

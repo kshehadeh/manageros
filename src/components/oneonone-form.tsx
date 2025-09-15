@@ -29,7 +29,7 @@ interface OneOnOneFormProps {
   existingOneOnOne?: OneOnOneData
 }
 
-export function OneOnOneForm({ people, preFilledManagerId, preFilledReportId, existingOneOnOne }: OneOnOneFormProps) {
+export function OneOnOneForm ({ people, preFilledManagerId, preFilledReportId, existingOneOnOne }: OneOnOneFormProps) {
   // Get current date and time in the format required by datetime-local input
   const getCurrentDateTime = () => {
     const now = new Date()
@@ -87,7 +87,7 @@ export function OneOnOneForm({ people, preFilledManagerId, preFilledReportId, ex
       <div className="card text-center py-8">
         <h3 className="font-semibold mb-2">No Meeting Partners Available</h3>
         <p className="text-sm text-neutral-400 mb-4">
-          You don't have any direct reports or a manager assigned. 
+          You don&apos;t have any direct reports or a manager assigned. 
           Contact your administrator to set up reporting relationships.
         </p>
         <Link href="/people" className="btn bg-blue-600 hover:bg-blue-700">

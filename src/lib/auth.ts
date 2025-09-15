@@ -12,7 +12,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' }
       },
-      async authorize(credentials) {
+      async authorize (credentials) {
         if (!credentials?.email || !credentials?.password) {
           return null
         }
@@ -55,7 +55,7 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt'
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt ({ token, user }) {
       if (user) {
         token.role = user.role
         token.organizationId = user.organizationId
@@ -64,7 +64,7 @@ export const authOptions: NextAuthOptions = {
       }
       return token
     },
-    async session({ session, token }) {
+    async session ({ session, token }) {
       if (token) {
         session.user.id = token.sub!
         session.user.role = token.role as string
@@ -77,19 +77,19 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/auth/signin',
-    signUp: '/auth/signup'
+    newUser: '/auth/signup'
   }
 }
 
 // Helper functions for role-based access control
-export function isAdmin(user: { role: string }) {
+export function isAdmin (user: { role: string }) {
   return user.role === 'ADMIN'
 }
 
-export function isUser(user: { role: string }) {
+export function isUser (user: { role: string }) {
   return user.role === 'USER'
 }
 
-export function canAccessOrganization(user: { organizationId: string }, organizationId: string) {
+export function canAccessOrganization (user: { organizationId: string }, organizationId: string) {
   return user.organizationId === organizationId
 }

@@ -27,12 +27,12 @@ interface PersonFormProps {
   }
 }
 
-export function PersonForm({ teams, people, initialManagerId, person }: PersonFormProps) {
+export function PersonForm ({ teams, people, initialManagerId, person }: PersonFormProps) {
   const [formData, setFormData] = useState<PersonFormData>({
     name: person?.name || '',
     email: person?.email || '',
     role: person?.role || '',
-    status: person?.status as any || 'active',
+    status: person?.status as PersonFormData['status'] || 'active',
     teamId: person?.teamId || '',
     managerId: person?.managerId || initialManagerId || '',
     startedAt: person?.startedAt ? person.startedAt.toISOString().split('T')[0] : '',
@@ -110,7 +110,7 @@ export function PersonForm({ teams, people, initialManagerId, person }: PersonFo
             <label className="block text-sm font-medium mb-2">Status</label>
             <select
               value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value as PersonFormData['status'] })}
               className="input"
             >
               <option value="active">Active</option>

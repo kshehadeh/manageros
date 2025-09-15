@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 
-export default function Navigation() {
+export default function Navigation () {
   const { data: session, status } = useSession()
 
   if (status === 'loading') {

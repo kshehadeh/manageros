@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 
-export default async function OneOnOnesPage() {
+export default async function OneOnOnesPage () {
   const session = await getServerSession(authOptions)
   
   if (!session?.user) {

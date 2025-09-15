@@ -5,7 +5,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 
-export default async function Home() {
+export default async function Home () {
   const session = await getServerSession(authOptions)
   
   if (!session?.user) {
@@ -19,7 +19,7 @@ export default async function Home() {
         <div className="card text-center py-12">
           <h2 className="text-xl font-semibold mb-4">Welcome to ManagerOS!</h2>
           <p className="text-neutral-400 mb-6">
-            To get started, you'll need to create an organization or be invited to an existing one.
+            To get started, you&apos;ll need to create an organization or be invited to an existing one.
           </p>
           <div className="flex justify-center gap-4">
             <Link href="/organization/create" className="btn">

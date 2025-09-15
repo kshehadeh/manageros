@@ -6,13 +6,14 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
 interface EditOneOnOnePageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
-export default async function EditOneOnOnePage({ params }: EditOneOnOnePageProps) {
+export default async function EditOneOnOnePage ({ params }: EditOneOnOnePageProps) {
   const session = await getServerSession(authOptions)
+  const { id } = await params
   
   if (!session?.user) {
     redirect('/auth/signin')
@@ -20,7 +21,7 @@ export default async function EditOneOnOnePage({ params }: EditOneOnOnePageProps
 
   try {
     const [oneOnOne, people] = await Promise.all([
-      getOneOnOneById(params.id),
+      getOneOnOneById(id),
       getPeopleForOneOnOne()
     ])
 
@@ -35,7 +36,7 @@ export default async function EditOneOnOnePage({ params }: EditOneOnOnePageProps
           </div>
           <div className="flex items-center gap-2">
             <Link 
-              href={`/oneonones/${params.id}`}
+              href={`/oneonones/${id}`}
               className="btn bg-neutral-700 hover:bg-neutral-600"
             >
               View Meeting
@@ -68,7 +69,7 @@ export default async function EditOneOnOnePage({ params }: EditOneOnOnePageProps
           </div>
           <div className="flex items-center gap-2">
             <Link 
-              href={`/oneonones/${params.id}`}
+              href={`/oneonones/${id}`}
               className="btn bg-neutral-700 hover:bg-neutral-600"
             >
               View Meeting
@@ -85,7 +86,7 @@ export default async function EditOneOnOnePage({ params }: EditOneOnOnePageProps
         <div className="card text-center py-8">
           <h3 className="font-semibold mb-2">Meeting Not Found</h3>
           <p className="text-sm text-neutral-400 mb-4">
-            The 1:1 meeting you're looking for doesn't exist or you don't have access to it.
+            The 1:1 meeting you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it.
           </p>
           <Link href="/oneonones" className="btn bg-blue-600 hover:bg-blue-700">
             Back to 1:1s

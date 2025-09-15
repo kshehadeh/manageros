@@ -16,7 +16,7 @@ interface UserLinkFormProps {
   onLinkChange?: () => void
 }
 
-export function UserLinkForm({ personId, linkedUser, onLinkChange }: UserLinkFormProps) {
+export function UserLinkForm ({ personId, linkedUser, onLinkChange }: UserLinkFormProps) {
   const [availableUsers, setAvailableUsers] = useState<User[]>([])
   const [selectedUserId, setSelectedUserId] = useState('')
   const [isLoading, setIsLoading] = useState(false)

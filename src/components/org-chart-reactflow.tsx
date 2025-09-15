@@ -42,7 +42,7 @@ interface OrgChartReactFlowProps {
 }
 
 // Custom Person Node Component
-function PersonNode({ data }: { data: Person }) {
+function PersonNode ({ data }: { data: Person }) {
   const router = useRouter()
 
   const handleClick = useCallback(() => {
@@ -127,9 +127,7 @@ const nodeTypes: NodeTypes = {
   person: PersonNode,
 }
 
-export function OrgChartReactFlow({ people }: OrgChartReactFlowProps) {
-  const router = useRouter()
-
+export function OrgChartReactFlow ({ people }: OrgChartReactFlowProps) {
   // Convert people data to React Flow nodes and edges
   const { nodes, edges, containerHeight } = useMemo(() => {
     const nodeMap = new Map<string, Node>()

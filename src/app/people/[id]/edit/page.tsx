@@ -12,7 +12,7 @@ interface EditPersonPageProps {
   }>
 }
 
-export default async function EditPersonPage({ params }: EditPersonPageProps) {
+export default async function EditPersonPage ({ params }: EditPersonPageProps) {
   const session = await getServerSession(authOptions)
   
   if (!session?.user) {

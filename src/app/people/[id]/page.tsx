@@ -1,23 +1,36 @@
-import { prisma } from "@/lib/db";
-import Link from "next/link";
-import { Rag } from "@/components/rag";
-import { UserLinkForm } from "@/components/user-link-form";
-import { notFound } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import { Person, Team, User } from "@prisma/client";
+import { prisma } from '@/lib/db'
+import Link from 'next/link'
+import { Rag } from '@/components/rag'
+import { UserLinkForm } from '@/components/user-link-form'
+import { notFound } from 'next/navigation'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { Person, Team, User, Task, InitiativeOwner, OneOnOne, CheckIn, Initiative, Objective } from '@prisma/client'
 
 type PersonWithRelations = Person & {
     team: Team | null;
     manager: Person | null;
     user: User | null;
     reports: (Person & { team: Team | null })[];
-    tasks: any[];
-    initiativeOwners: any[];
-    oneOnOnes: any[];
-    oneOnOnesAsManager: any[];
-    checkIns: any[];
+    tasks: (Task & {
+        initiative: Initiative | null;
+        objective: Objective | null;
+    })[];
+    initiativeOwners: (InitiativeOwner & {
+        initiative: Initiative & {
+            team: Team | null;
+        };
+    })[];
+    oneOnOnes: (OneOnOne & {
+        manager: Person;
+    })[];
+    oneOnOnesAsManager: (OneOnOne & {
+        report: Person;
+    })[];
+    checkIns: (CheckIn & {
+        initiative: Initiative;
+    })[];
 };
 
 interface PersonDetailPageProps {
@@ -26,19 +39,19 @@ interface PersonDetailPageProps {
     }>;
 }
 
-export default async function PersonDetailPage({
+export default async function PersonDetailPage ({
     params,
 }: PersonDetailPageProps) {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions)
 
     if (!session?.user) {
-        redirect("/auth/signin");
+        redirect('/auth/signin')
     }
 
-    const { id } = await params;
+    const { id } = await params
 
     if (!session.user.organizationId) {
-        redirect("/organization/create");
+        redirect('/organization/create')
     }
 
     const person = await prisma.person.findFirst({
@@ -61,14 +74,14 @@ export default async function PersonDetailPage({
                 include: {
                     team: true,
                 },
-                orderBy: { name: "asc" },
+                orderBy: { name: 'asc' },
             },
             tasks: {
                 include: {
                     initiative: true,
                     objective: true,
                 },
-                orderBy: { updatedAt: "desc" },
+                orderBy: { updatedAt: 'desc' },
             },
             initiativeOwners: {
                 include: {
@@ -78,31 +91,31 @@ export default async function PersonDetailPage({
                         },
                     },
                 },
-                orderBy: { initiative: { updatedAt: "desc" } },
+                orderBy: { initiative: { updatedAt: 'desc' } },
             },
             oneOnOnes: {
                 include: {
                     manager: true,
                 },
-                orderBy: { scheduledAt: "desc" },
+                orderBy: { scheduledAt: 'desc' },
             },
             oneOnOnesAsManager: {
                 include: {
                     report: true,
                 },
-                orderBy: { scheduledAt: "desc" },
+                orderBy: { scheduledAt: 'desc' },
             },
             checkIns: {
                 include: {
                     initiative: true,
                 },
-                orderBy: { createdAt: "desc" },
+                orderBy: { createdAt: 'desc' },
             },
         },
-    });
+    })
 
     if (!person) {
-        notFound();
+        notFound()
     }
 
     // Get the current user's person record to determine relationships
@@ -112,13 +125,13 @@ export default async function PersonDetailPage({
                 id: session.user.id,
             },
         },
-    });
+    })
 
     if (!currentPerson) {
-        throw new Error("No person record found for current user");
+        throw new Error('No person record found for current user')
     }
 
-    const personWithRelations = person as PersonWithRelations;
+    const personWithRelations = person as PersonWithRelations
 
     return (
         <div className="space-y-6">
@@ -128,7 +141,7 @@ export default async function PersonDetailPage({
                         {personWithRelations.name}
                     </h2>
                     <div className="text-sm text-neutral-400">
-                        {personWithRelations.role ?? ""}
+                        {personWithRelations.role ?? ''}
                     </div>
                     <div className="text-xs text-neutral-500">
                         {personWithRelations.email}
@@ -137,14 +150,14 @@ export default async function PersonDetailPage({
                 <div className="flex items-center gap-2">
                     <span
                         className={`badge ${
-                            personWithRelations.status === "active"
-                                ? "rag-green"
-                                : personWithRelations.status === "inactive"
-                                ? "rag-red"
-                                : "rag-amber"
+                            personWithRelations.status === 'active'
+                                ? 'rag-green'
+                                : personWithRelations.status === 'inactive'
+                                ? 'rag-red'
+                                : 'rag-amber'
                         }`}
                     >
-                        {personWithRelations.status.replace("_", " ")}
+                        {personWithRelations.status.replace('_', ' ')}
                     </span>
                     <Link
                         href={`/people/${personWithRelations.id}/edit`}
@@ -174,7 +187,7 @@ export default async function PersonDetailPage({
                                         {personWithRelations.team.name}
                                     </Link>
                                 ) : (
-                                    "No team assigned"
+                                    'No team assigned'
                                 )}
                             </div>
                         </div>
@@ -191,7 +204,7 @@ export default async function PersonDetailPage({
                                         {personWithRelations.manager.name}
                                     </Link>
                                 ) : (
-                                    "No manager assigned"
+                                    'No manager assigned'
                                 )}
                             </div>
                         </div>
@@ -206,12 +219,12 @@ export default async function PersonDetailPage({
                                             {personWithRelations.user.name}
                                         </div>
                                         <div className="text-xs text-neutral-500">
-                                            {personWithRelations.user.email} -{" "}
+                                            {personWithRelations.user.email} -{' '}
                                             {personWithRelations.user.role}
                                         </div>
                                     </div>
                                 ) : (
-                                    "No user account linked"
+                                    'No user account linked'
                                 )}
                             </div>
                         </div>
@@ -224,7 +237,7 @@ export default async function PersonDetailPage({
                                     ? new Date(
                                           personWithRelations.startedAt,
                                       ).toLocaleDateString()
-                                    : "Not specified"}
+                                    : 'Not specified'}
                             </div>
                         </div>
                         <div>
@@ -235,8 +248,8 @@ export default async function PersonDetailPage({
                                 {personWithRelations.reports.length} direct
                                 report
                                 {personWithRelations.reports.length !== 1
-                                    ? "s"
-                                    : ""}
+                                    ? 's'
+                                    : ''}
                             </div>
                         </div>
                     </div>
@@ -268,7 +281,7 @@ export default async function PersonDetailPage({
                                             {report.name}
                                         </Link>
                                         <div className="text-sm text-neutral-400">
-                                            {report.role ?? ""}
+                                            {report.role ?? ''}
                                         </div>
                                         <div className="text-xs text-neutral-500">
                                             {report.email}
@@ -282,15 +295,15 @@ export default async function PersonDetailPage({
                                     <div className="flex items-center gap-2">
                                         <span
                                             className={`badge ${
-                                                report.status === "active"
-                                                    ? "rag-green"
+                                                report.status === 'active'
+                                                    ? 'rag-green'
                                                     : report.status ===
-                                                      "inactive"
-                                                    ? "rag-red"
-                                                    : "rag-amber"
+                                                      'inactive'
+                                                    ? 'rag-red'
+                                                    : 'rag-amber'
                                             }`}
                                         >
-                                            {report.status.replace("_", " ")}
+                                            {report.status.replace('_', ' ')}
                                         </span>
                                         <Link
                                             href={`/people/${report.id}/edit`}
@@ -325,7 +338,7 @@ export default async function PersonDetailPage({
                             }${
                                 personWithRelations.team
                                     ? `&teamId=${personWithRelations.team.id}`
-                                    : ""
+                                    : ''
                             }`}
                             className="btn text-sm"
                         >
@@ -347,12 +360,12 @@ export default async function PersonDetailPage({
                                             </div>
                                             <div className="text-sm text-neutral-400">
                                                 {ownership.initiative.summary ??
-                                                    ""}
+                                                    ''}
                                             </div>
                                             <div className="text-xs text-neutral-500 mt-1">
-                                                Role: {ownership.role} • Team:{" "}
+                                                Role: {ownership.role} • Team:{' '}
                                                 {ownership.initiative.team
-                                                    ?.name || "No team"}
+                                                    ?.name || 'No team'}
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2">
@@ -401,19 +414,19 @@ export default async function PersonDetailPage({
                                             {task.title}
                                         </div>
                                         <div className="text-sm text-neutral-400">
-                                            {task.description ?? ""}
+                                            {task.description ?? ''}
                                         </div>
                                         <div className="text-xs text-neutral-500 mt-1">
                                             {task.initiative && (
                                                 <span>
-                                                    Initiative:{" "}
+                                                    Initiative:{' '}
                                                     {task.initiative.title}
                                                 </span>
                                             )}
                                             {task.objective && (
                                                 <span>
-                                                    {" "}
-                                                    • Objective:{" "}
+                                                    {' '}
+                                                    • Objective:{' '}
                                                     {task.objective.title}
                                                 </span>
                                             )}
@@ -422,16 +435,16 @@ export default async function PersonDetailPage({
                                     <div className="flex items-center gap-2">
                                         <span
                                             className={`badge ${
-                                                task.status === "done"
-                                                    ? "rag-green"
-                                                    : task.status === "doing"
-                                                    ? "rag-amber"
-                                                    : task.status === "blocked"
-                                                    ? "rag-red"
-                                                    : "badge"
+                                                task.status === 'done'
+                                                    ? 'rag-green'
+                                                    : task.status === 'doing'
+                                                    ? 'rag-amber'
+                                                    : task.status === 'blocked'
+                                                    ? 'rag-red'
+                                                    : 'badge'
                                             }`}
                                         >
-                                            {task.status.replace("_", " ")}
+                                            {task.status.replace('_', ' ')}
                                         </span>
                                         {task.priority && (
                                             <span className="badge">
@@ -453,7 +466,7 @@ export default async function PersonDetailPage({
                                     href="/tasks"
                                     className="text-sm text-blue-400 hover:text-blue-300"
                                 >
-                                    View all {personWithRelations.tasks.length}{" "}
+                                    View all {personWithRelations.tasks.length}{' '}
                                     tasks
                                 </Link>
                             </div>
@@ -494,7 +507,7 @@ export default async function PersonDetailPage({
                                                 {checkIn.summary}
                                             </div>
                                             <div className="text-xs text-neutral-500 mt-1">
-                                                Week of{" "}
+                                                Week of{' '}
                                                 {new Date(
                                                     checkIn.weekOf,
                                                 ).toLocaleDateString()}
@@ -547,7 +560,7 @@ export default async function PersonDetailPage({
                                             // If viewing report's profile, the report is the report
                                             currentPerson.id ===
                                             personWithRelations.id
-                                                ? ""
+                                                ? ''
                                                 : currentPerson.managerId ===
                                                   personWithRelations.id
                                                 ? currentPerson.id
@@ -599,7 +612,7 @@ export default async function PersonDetailPage({
                                                                 ? new Date(
                                                                       oneOnOne.scheduledAt,
                                                                   ).toLocaleDateString()
-                                                                : "TBD"}
+                                                                : 'TBD'}
                                                         </div>
                                                     </div>
                                                     <Link
@@ -644,7 +657,7 @@ export default async function PersonDetailPage({
                                                                 ? new Date(
                                                                       oneOnOne.scheduledAt,
                                                                   ).toLocaleDateString()
-                                                                : "TBD"}
+                                                                : 'TBD'}
                                                         </div>
                                                     </div>
                                                     <Link
@@ -718,5 +731,5 @@ export default async function PersonDetailPage({
                 />
             </section>
         </div>
-    );
+    )
 }

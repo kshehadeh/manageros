@@ -10,7 +10,7 @@ interface NewTeamPageProps {
   }>
 }
 
-export default async function NewTeamPage({ searchParams }: NewTeamPageProps) {
+export default async function NewTeamPage ({ searchParams }: NewTeamPageProps) {
   const session = await getServerSession(authOptions)
   
   if (!session?.user) {

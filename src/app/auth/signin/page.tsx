@@ -5,7 +5,7 @@ import { signIn, getSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-export default function SignInPage() {
+export default function SignInPage () {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -34,6 +34,7 @@ export default function SignInPage() {
         }
       }
     } catch (error) {
+      console.error('Error signing in:', error)
       setError('An error occurred. Please try again.')
     } finally {
       setIsLoading(false)

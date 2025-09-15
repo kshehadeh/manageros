@@ -14,7 +14,7 @@ interface TeamFormProps {
   parentId?: string
 }
 
-export function TeamForm({ team, parentId }: TeamFormProps) {
+export function TeamForm ({ team, parentId }: TeamFormProps) {
   const [formData, setFormData] = useState<TeamFormData>({
     name: team?.name || '',
     description: team?.description || '',

@@ -12,7 +12,7 @@ interface EditTeamPageProps {
   }>
 }
 
-export default async function EditTeamPage({ params }: EditTeamPageProps) {
+export default async function EditTeamPage ({ params }: EditTeamPageProps) {
   const session = await getServerSession(authOptions)
   
   if (!session?.user) {

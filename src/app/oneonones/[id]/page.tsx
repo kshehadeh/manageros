@@ -12,7 +12,7 @@ interface OneOnOneViewPageProps {
   }>
 }
 
-export default async function OneOnOneViewPage({ params }: OneOnOneViewPageProps) {
+export default async function OneOnOneViewPage ({ params }: OneOnOneViewPageProps) {
   const session = await getServerSession(authOptions)
   
   if (!session?.user) {

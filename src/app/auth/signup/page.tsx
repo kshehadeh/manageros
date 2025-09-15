@@ -5,7 +5,7 @@ import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-export default function SignUpPage() {
+export default function SignUpPage () {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -147,7 +147,7 @@ export default function SignUpPage() {
                 </label>
               </div>
               <p className="mt-1 text-xs text-gray-500">
-                If unchecked, you'll need to be invited to an existing organization to access the platform.
+                If unchecked, you&apos;ll need to be invited to an existing organization to access the platform.
               </p>
             </div>
 

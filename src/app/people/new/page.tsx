@@ -11,7 +11,7 @@ interface NewPersonPageProps {
   }>
 }
 
-export default async function NewPersonPage({ searchParams }: NewPersonPageProps) {
+export default async function NewPersonPage ({ searchParams }: NewPersonPageProps) {
   const session = await getServerSession(authOptions)
   
   if (!session?.user) {

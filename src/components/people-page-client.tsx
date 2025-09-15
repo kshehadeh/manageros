@@ -28,7 +28,7 @@ interface PeoplePageClientProps {
   people: Person[]
 }
 
-export function PeoplePageClient({ people }: PeoplePageClientProps) {
+export function PeoplePageClient ({ people }: PeoplePageClientProps) {
   const [viewMode, setViewMode] = useState<'list' | 'chart'>('chart')
 
   return (

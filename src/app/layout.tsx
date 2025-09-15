@@ -5,7 +5,7 @@ import type { ReactNode } from 'react'
 
 export const metadata = { title: 'ManagerOS', description: 'Manager-only MVP' }
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout ({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>

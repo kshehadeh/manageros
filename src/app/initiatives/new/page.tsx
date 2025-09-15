@@ -12,7 +12,7 @@ interface NewInitiativePageProps {
   }>
 }
 
-export default async function NewInitiativePage({ searchParams }: NewInitiativePageProps) {
+export default async function NewInitiativePage ({ searchParams }: NewInitiativePageProps) {
   const session = await getServerSession(authOptions)
   
   if (!session?.user) {
