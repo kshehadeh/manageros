@@ -20,6 +20,7 @@ model Organization {
   teams       Team[]
   people      Person[]
   initiatives Initiative[]
+  invitations OrganizationInvitation[]
 }
 
 model User {
@@ -32,6 +33,7 @@ model User {
   organization   Organization? @relation(fields: [organizationId], references: [id])
   personId       String?       @unique
   person         Person?       @relation(fields: [personId], references: [id])
+  sentInvitations OrganizationInvitation[]
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   
@@ -237,6 +239,25 @@ model TagMap {
   entityId String
 
   @@id([tagId, entity, entityId])
+}
+
+model OrganizationInvitation {
+  id             String       @id @default(cuid())
+  email          String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  invitedById    String
+  invitedBy      User         @relation(fields: [invitedById], references: [id])
+  status         String       @default("pending") // pending|accepted|expired|revoked
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  
+  @@unique([email, organizationId])
+  @@index([organizationId])
+  @@index([email])
+  @@index([status])
 }
 
 model Event {

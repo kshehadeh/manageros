@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { OrgChartReactFlow } from '@/components/org-chart-reactflow'
 import { PeopleList } from '@/components/people-list'
+import { useSession } from 'next-auth/react'
+import { isAdmin } from '@/lib/auth'
 
 interface Person {
   id: string
@@ -42,6 +44,7 @@ interface PeoplePageClientProps {
 
 export function PeoplePageClient({ people }: PeoplePageClientProps) {
   const [viewMode, setViewMode] = useState<'list' | 'chart'>('chart')
+  const { data: session } = useSession()
 
   return (
     <div className='space-y-4'>
@@ -102,9 +105,11 @@ export function PeoplePageClient({ people }: PeoplePageClientProps) {
             </button>
           </div>
 
-          <Link href='/people/new' className='btn'>
-            New
-          </Link>
+          {session?.user && isAdmin(session.user) && (
+            <Link href='/people/new' className='btn'>
+              New
+            </Link>
+          )}
         </div>
       </div>
 

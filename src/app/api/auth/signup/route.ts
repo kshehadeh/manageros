@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/db'
+import { checkPendingInvitation } from '@/lib/actions'
 import { z } from 'zod'
 
 const signupSchema = z
@@ -68,18 +69,41 @@ export async function POST(request: NextRequest) {
     // Hash password
     const passwordHash = await bcrypt.hash(validatedData.password, 12)
 
-    // Create organization and user in a transaction (if organization provided)
+    // Check for pending invitation
+    const pendingInvitation = await checkPendingInvitation(validatedData.email)
+
+    // Create organization and user in a transaction
     const result = await prisma.$transaction(async tx => {
       let organization = null
+      let userRole = 'USER'
 
-      // Create organization if provided
-      if (validatedData.organizationName && validatedData.organizationSlug) {
+      // If user has a pending invitation, accept it and join that organization
+      if (pendingInvitation) {
+        organization = await tx.organization.findUnique({
+          where: { id: pendingInvitation.organization.id },
+        })
+        userRole = 'USER' // Invited users are regular users, not admins
+
+        // Mark invitation as accepted
+        await tx.organizationInvitation.update({
+          where: { id: pendingInvitation.id },
+          data: {
+            status: 'accepted',
+            acceptedAt: new Date(),
+          },
+        })
+      } else if (
+        validatedData.organizationName &&
+        validatedData.organizationSlug
+      ) {
+        // Create organization if provided and no invitation
         organization = await tx.organization.create({
           data: {
             name: validatedData.organizationName,
             slug: validatedData.organizationSlug,
           },
         })
+        userRole = 'ADMIN' // User creating org becomes admin
       }
 
       // Create user
@@ -88,7 +112,7 @@ export async function POST(request: NextRequest) {
           name: validatedData.name,
           email: validatedData.email,
           passwordHash,
-          role: organization ? 'ADMIN' : 'USER', // Admin if creating org, User otherwise
+          role: userRole,
           organizationId: organization?.id || null,
         },
         include: {
@@ -96,11 +120,13 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      return { user, organization }
+      return { user, organization, wasInvited: !!pendingInvitation }
     })
 
     return NextResponse.json({
-      message: 'Account created successfully',
+      message: result.wasInvited
+        ? 'Account created successfully and you have been added to the organization!'
+        : 'Account created successfully',
       user: {
         id: result.user.id,
         name: result.user.name,
@@ -108,6 +134,7 @@ export async function POST(request: NextRequest) {
         role: result.user.role,
         organization: result.organization,
       },
+      wasInvited: result.wasInvited,
     })
   } catch (error) {
     if (error instanceof z.ZodError) {

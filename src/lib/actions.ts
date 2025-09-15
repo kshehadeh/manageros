@@ -14,7 +14,7 @@ import {
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { authOptions, isAdmin } from '@/lib/auth'
 
 async function getCurrentUser() {
   const session = await getServerSession(authOptions)
@@ -73,6 +73,11 @@ export async function createOrganization(formData: {
 export async function linkUserToPerson(userId: string, personId: string) {
   const currentUser = await getCurrentUser()
 
+  // Check if user is admin
+  if (!isAdmin(currentUser)) {
+    throw new Error('Only organization admins can link users to persons')
+  }
+
   // Check if user belongs to an organization
   if (!currentUser.organizationId) {
     throw new Error(
@@ -118,6 +123,11 @@ export async function linkUserToPerson(userId: string, personId: string) {
 export async function unlinkUserFromPerson(userId: string) {
   const currentUser = await getCurrentUser()
 
+  // Check if user is admin
+  if (!isAdmin(currentUser)) {
+    throw new Error('Only organization admins can unlink users from persons')
+  }
+
   // Check if user belongs to an organization
   if (!currentUser.organizationId) {
     throw new Error(
@@ -137,6 +147,13 @@ export async function unlinkUserFromPerson(userId: string) {
 
 export async function getAvailableUsersForLinking() {
   const currentUser = await getCurrentUser()
+
+  // Check if user is admin
+  if (!isAdmin(currentUser)) {
+    throw new Error(
+      'Only organization admins can view available users for linking'
+    )
+  }
 
   // Check if user belongs to an organization
   if (!currentUser.organizationId) {
@@ -366,6 +383,11 @@ export async function getPeopleHierarchy() {
 export async function createPerson(formData: PersonFormData) {
   const user = await getCurrentUser()
 
+  // Check if user is admin
+  if (!isAdmin(user)) {
+    throw new Error('Only organization admins can create people')
+  }
+
   // Check if user belongs to an organization
   if (!user.organizationId) {
     throw new Error('User must belong to an organization to create people')
@@ -432,6 +454,11 @@ export async function createPerson(formData: PersonFormData) {
 
 export async function updatePerson(id: string, formData: PersonFormData) {
   const user = await getCurrentUser()
+
+  // Check if user is admin
+  if (!isAdmin(user)) {
+    throw new Error('Only organization admins can update people')
+  }
 
   // Check if user belongs to an organization
   if (!user.organizationId) {
@@ -976,4 +1003,192 @@ export async function updateOneOnOne(id: string, formData: OneOnOneFormData) {
 
   // Redirect to the one-on-ones page
   redirect('/oneonones')
+}
+
+// Organization Invitation Management Actions
+
+export async function createOrganizationInvitation(email: string) {
+  const user = await getCurrentUser()
+
+  // Check if user is admin
+  if (user.role !== 'ADMIN') {
+    throw new Error('Only organization admins can send invitations')
+  }
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to send invitations')
+  }
+
+  // Check if email is already a user in the organization
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      email: email.toLowerCase(),
+      organizationId: user.organizationId,
+    },
+  })
+
+  if (existingUser) {
+    throw new Error('User is already a member of this organization')
+  }
+
+  // Check if there's already a pending invitation for this email
+  const existingInvitation = await prisma.organizationInvitation.findFirst({
+    where: {
+      email: email.toLowerCase(),
+      organizationId: user.organizationId,
+      status: 'pending',
+    },
+  })
+
+  if (existingInvitation) {
+    throw new Error('An invitation has already been sent to this email address')
+  }
+
+  // Create invitation (expires in 7 days)
+  const expiresAt = new Date()
+  expiresAt.setDate(expiresAt.getDate() + 7)
+
+  const invitation = await prisma.organizationInvitation.create({
+    data: {
+      email: email.toLowerCase(),
+      organizationId: user.organizationId,
+      invitedById: user.id,
+      expiresAt,
+    },
+    include: {
+      organization: true,
+      invitedBy: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
+  })
+
+  revalidatePath('/organization/invitations')
+  return invitation
+}
+
+export async function getOrganizationInvitations() {
+  const user = await getCurrentUser()
+
+  // Check if user is admin
+  if (user.role !== 'ADMIN') {
+    throw new Error('Only organization admins can view invitations')
+  }
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    return []
+  }
+
+  return await prisma.organizationInvitation.findMany({
+    where: {
+      organizationId: user.organizationId,
+    },
+    include: {
+      invitedBy: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+}
+
+export async function revokeOrganizationInvitation(invitationId: string) {
+  const user = await getCurrentUser()
+
+  // Check if user is admin
+  if (user.role !== 'ADMIN') {
+    throw new Error('Only organization admins can revoke invitations')
+  }
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to manage invitations')
+  }
+
+  // Verify invitation belongs to user's organization
+  const invitation = await prisma.organizationInvitation.findFirst({
+    where: {
+      id: invitationId,
+      organizationId: user.organizationId,
+    },
+  })
+
+  if (!invitation) {
+    throw new Error('Invitation not found or access denied')
+  }
+
+  if (invitation.status !== 'pending') {
+    throw new Error('Only pending invitations can be revoked')
+  }
+
+  // Update invitation status to revoked
+  await prisma.organizationInvitation.update({
+    where: { id: invitationId },
+    data: { status: 'revoked' },
+  })
+
+  revalidatePath('/organization/invitations')
+}
+
+export async function acceptOrganizationInvitation(email: string) {
+  // Find pending invitation for this email
+  const invitation = await prisma.organizationInvitation.findFirst({
+    where: {
+      email: email.toLowerCase(),
+      status: 'pending',
+      expiresAt: {
+        gt: new Date(), // Not expired
+      },
+    },
+    include: {
+      organization: true,
+    },
+  })
+
+  if (!invitation) {
+    return null // No valid invitation found
+  }
+
+  // Update invitation status to accepted
+  await prisma.organizationInvitation.update({
+    where: { id: invitation.id },
+    data: {
+      status: 'accepted',
+      acceptedAt: new Date(),
+    },
+  })
+
+  return invitation.organization
+}
+
+export async function checkPendingInvitation(email: string) {
+  // Check if there's a pending invitation for this email
+  const invitation = await prisma.organizationInvitation.findFirst({
+    where: {
+      email: email.toLowerCase(),
+      status: 'pending',
+      expiresAt: {
+        gt: new Date(), // Not expired
+      },
+    },
+    include: {
+      organization: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
+    },
+  })
+
+  return invitation
 }

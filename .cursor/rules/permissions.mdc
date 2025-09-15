@@ -1,0 +1,26 @@
+---
+description: Permisions in ManagerOS
+globs:
+alwaysApply: true
+---
+
+# Concepts, Permissions, and Relationships
+
+## Users
+
+A user is a record that represents the acutal person who is logging in to the system.  A user has permissions associated with them.  The permissions are ADMIN and USER.   Also,
+a user can be associated with one organization.  It's possible that a user can be unassociated with an organization, but in this case the user will not be able to do anything with th e software.
+
+During account creation, the user has the option of creating a new organization.  But if they have been invited to an existing organization, then they will automatically be associated with to which they have been invited.
+
+## Person
+
+A person is a record of a member of an organization.  There is a 1:1 relationship between a user and a person.  But when a user is first created, they have no person associated with them.  It is up to the admin of an organization to link them to a user.  Only when a user is linked to a person can that user create 1/1s along with some other permissions.
+
+## Organization
+
+An organization is a record of a group of people who are associated with each other.  An organization has a name, a slug, and a description.  An organization has many users, many people, many teams, many initiatives, many invitations, and many events.
+
+## Team
+
+A team is a record of a group of persons who are associated with each other.  A team has a name, a description, and an organization.  A team has many people, many initiatives, and many events.

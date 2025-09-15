@@ -2,7 +2,7 @@ import { PersonForm } from '@/components/person-form'
 import { getTeams, getPeople } from '@/lib/actions'
 import Link from 'next/link'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { authOptions, isAdmin } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 
 interface NewPersonPageProps {
@@ -18,6 +18,11 @@ export default async function NewPersonPage({
 
   if (!session?.user) {
     redirect('/auth/signin')
+  }
+
+  // Check if user is admin
+  if (!isAdmin(session.user)) {
+    redirect('/people')
   }
 
   const params = await searchParams

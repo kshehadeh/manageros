@@ -56,6 +56,11 @@ export default function Navigation() {
         <Link href='/oneonones' className='btn'>
           1:1s
         </Link>
+        {session.user.role === 'ADMIN' && (
+          <Link href='/organization/invitations' className='btn'>
+            Invitations
+          </Link>
+        )}
         <button
           onClick={() => signOut()}
           className='btn text-red-600 hover:text-red-700'

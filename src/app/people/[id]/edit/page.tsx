@@ -3,7 +3,7 @@ import { getTeams, getPeople, getPerson } from '@/lib/actions'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { authOptions, isAdmin } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 
 interface EditPersonPageProps {
@@ -17,6 +17,11 @@ export default async function EditPersonPage({ params }: EditPersonPageProps) {
 
   if (!session?.user) {
     redirect('/auth/signin')
+  }
+
+  // Check if user is admin
+  if (!isAdmin(session.user)) {
+    redirect('/people')
   }
 
   const { id } = await params

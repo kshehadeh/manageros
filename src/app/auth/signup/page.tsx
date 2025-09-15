@@ -16,6 +16,7 @@ export default function SignUpPage() {
     createOrganization: false,
   })
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
@@ -23,6 +24,7 @@ export default function SignUpPage() {
     e.preventDefault()
     setIsLoading(true)
     setError('')
+    setSuccess('')
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
@@ -54,6 +56,8 @@ export default function SignUpPage() {
         throw new Error(errorData.error || 'Failed to create account')
       }
 
+      const responseData = await response.json()
+
       // Auto sign in after successful registration
       const result = await signIn('credentials', {
         email: formData.email,
@@ -66,7 +70,16 @@ export default function SignUpPage() {
           'Account created but failed to sign in. Please try signing in manually.'
         )
       } else {
-        router.push('/')
+        // Show success message if user was invited
+        if (responseData.wasInvited) {
+          setSuccess(responseData.message)
+          // Redirect after a short delay to show the success message
+          setTimeout(() => {
+            router.push('/')
+          }, 2000)
+        } else {
+          router.push('/')
+        }
       }
     } catch (error) {
       setError(
@@ -108,6 +121,11 @@ export default function SignUpPage() {
           {error && (
             <div className='bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded'>
               {error}
+            </div>
+          )}
+          {success && (
+            <div className='bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded'>
+              {success}
             </div>
           )}
           <div className='space-y-4'>

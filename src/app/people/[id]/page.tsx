@@ -4,7 +4,7 @@ import { Rag } from '@/components/rag'
 import { UserLinkForm } from '@/components/user-link-form'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { authOptions, isAdmin } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import {
   Person,
@@ -137,10 +137,6 @@ export default async function PersonDetailPage({
     },
   })
 
-  if (!currentPerson) {
-    throw new Error('No person record found for current user')
-  }
-
   const personWithRelations = person as PersonWithRelations
 
   return (
@@ -167,9 +163,14 @@ export default async function PersonDetailPage({
           >
             {personWithRelations.status.replace('_', ' ')}
           </span>
-          <Link href={`/people/${personWithRelations.id}/edit`} className='btn'>
-            Edit Person
-          </Link>
+          {isAdmin(session.user) && (
+            <Link
+              href={`/people/${personWithRelations.id}/edit`}
+              className='btn'
+            >
+              Edit Person
+            </Link>
+          )}
           <Link href='/people' className='btn'>
             Back to People
           </Link>
@@ -298,12 +299,14 @@ export default async function PersonDetailPage({
                     >
                       {report.status.replace('_', ' ')}
                     </span>
-                    <Link
-                      href={`/people/${report.id}/edit`}
-                      className='btn text-sm'
-                    >
-                      Edit
-                    </Link>
+                    {isAdmin(session.user) && (
+                      <Link
+                        href={`/people/${report.id}/edit`}
+                        className='btn text-sm'
+                      >
+                        Edit
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>
@@ -500,26 +503,26 @@ export default async function PersonDetailPage({
                 {/* Show "New 1:1" button if current user can create a meeting with this person */}
                 {
                   // Current user is viewing their own profile and has reports
-                  ((currentPerson.id === personWithRelations.id &&
+                  ((currentPerson?.id === personWithRelations.id &&
                     personWithRelations.reports.length > 0) ||
                     // Current user is viewing their manager's profile
-                    currentPerson.managerId === personWithRelations.id ||
+                    currentPerson?.managerId === personWithRelations.id ||
                     // Current user is viewing one of their reports' profiles
-                    personWithRelations.managerId === currentPerson.id) && (
+                    personWithRelations.managerId === currentPerson?.id) && (
                     <Link
                       href={`/oneonones/new?managerId=${
                         // If viewing own profile, current user is the manager
-                        currentPerson.id === personWithRelations.id
+                        currentPerson?.id === personWithRelations.id
                           ? currentPerson.id
                           : personWithRelations.id
                       }&reportId=${
                         // If viewing own profile, no report pre-filled (user will select)
                         // If viewing manager's profile, current user is the report
                         // If viewing report's profile, the report is the report
-                        currentPerson.id === personWithRelations.id
+                        currentPerson?.id === personWithRelations.id
                           ? ''
-                          : currentPerson.managerId === personWithRelations.id
-                            ? currentPerson.id
+                          : currentPerson?.managerId === personWithRelations.id
+                            ? currentPerson?.id
                             : personWithRelations.id
                       }`}
                       className='btn bg-blue-600 hover:bg-blue-700 text-sm'
@@ -650,13 +653,15 @@ export default async function PersonDetailPage({
         </div>
       </section>
 
-      {/* User Account Linking */}
-      <section className='card'>
-        <UserLinkForm
-          personId={personWithRelations.id}
-          linkedUser={personWithRelations.user}
-        />
-      </section>
+      {/* User Account Linking - Only show for admins */}
+      {isAdmin(session.user) && (
+        <section className='card'>
+          <UserLinkForm
+            personId={personWithRelations.id}
+            linkedUser={personWithRelations.user}
+          />
+        </section>
+      )}
     </div>
   )
 }
