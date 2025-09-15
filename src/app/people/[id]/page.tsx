@@ -3,22 +3,22 @@ import Link from "next/link";
 import { Rag } from "@/components/rag";
 import { UserLinkForm } from "@/components/user-link-form";
 import { notFound } from "next/navigation";
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { redirect } from 'next/navigation'
-import { Person, Team, User } from '@prisma/client'
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { Person, Team, User } from "@prisma/client";
 
 type PersonWithRelations = Person & {
-  team: Team | null
-  manager: Person | null
-  user: User | null
-  reports: (Person & { team: Team | null })[]
-  tasks: any[]
-  initiativeOwners: any[]
-  oneOnOnes: any[]
-  oneOnOnesAsManager: any[]
-  checkIns: any[]
-}
+    team: Team | null;
+    manager: Person | null;
+    user: User | null;
+    reports: (Person & { team: Team | null })[];
+    tasks: any[];
+    initiativeOwners: any[];
+    oneOnOnes: any[];
+    oneOnOnesAsManager: any[];
+    checkIns: any[];
+};
 
 interface PersonDetailPageProps {
     params: Promise<{
@@ -29,22 +29,22 @@ interface PersonDetailPageProps {
 export default async function PersonDetailPage({
     params,
 }: PersonDetailPageProps) {
-    const session = await getServerSession(authOptions)
-    
+    const session = await getServerSession(authOptions);
+
     if (!session?.user) {
-        redirect('/auth/signin')
+        redirect("/auth/signin");
     }
 
-    const { id } = await params
-    
+    const { id } = await params;
+
     if (!session.user.organizationId) {
-        redirect('/organization/create')
+        redirect("/organization/create");
     }
-    
+
     const person = await prisma.person.findFirst({
-        where: { 
+        where: {
             id,
-            organizationId: session.user.organizationId
+            organizationId: session.user.organizationId,
         },
         include: {
             team: true,
@@ -54,8 +54,8 @@ export default async function PersonDetailPage({
                     id: true,
                     name: true,
                     email: true,
-                    role: true
-                }
+                    role: true,
+                },
             },
             reports: {
                 include: {
@@ -104,14 +104,29 @@ export default async function PersonDetailPage({
     if (!person) {
         notFound();
     }
-    
-    const personWithRelations = person as PersonWithRelations
+
+    // Get the current user's person record to determine relationships
+    const currentPerson = await prisma.person.findFirst({
+        where: {
+            user: {
+                id: session.user.id,
+            },
+        },
+    });
+
+    if (!currentPerson) {
+        throw new Error("No person record found for current user");
+    }
+
+    const personWithRelations = person as PersonWithRelations;
 
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-lg font-semibold">{personWithRelations.name}</h2>
+                    <h2 className="text-lg font-semibold">
+                        {personWithRelations.name}
+                    </h2>
                     <div className="text-sm text-neutral-400">
                         {personWithRelations.role ?? ""}
                     </div>
@@ -131,7 +146,10 @@ export default async function PersonDetailPage({
                     >
                         {personWithRelations.status.replace("_", " ")}
                     </span>
-                    <Link href={`/people/${personWithRelations.id}/edit`} className="btn">
+                    <Link
+                        href={`/people/${personWithRelations.id}/edit`}
+                        className="btn"
+                    >
                         Edit Person
                     </Link>
                     <Link href="/people" className="btn">
@@ -184,9 +202,12 @@ export default async function PersonDetailPage({
                             <div className="text-sm text-neutral-400">
                                 {personWithRelations.user ? (
                                     <div>
-                                        <div className="font-medium">{personWithRelations.user.name}</div>
+                                        <div className="font-medium">
+                                            {personWithRelations.user.name}
+                                        </div>
                                         <div className="text-xs text-neutral-500">
-                                            {personWithRelations.user.email} - {personWithRelations.user.role}
+                                            {personWithRelations.user.email} -{" "}
+                                            {personWithRelations.user.role}
                                         </div>
                                     </div>
                                 ) : (
@@ -211,8 +232,11 @@ export default async function PersonDetailPage({
                                 Reports:
                             </span>
                             <div className="text-sm text-neutral-400">
-                                {personWithRelations.reports.length} direct report
-                                {personWithRelations.reports.length !== 1 ? "s" : ""}
+                                {personWithRelations.reports.length} direct
+                                report
+                                {personWithRelations.reports.length !== 1
+                                    ? "s"
+                                    : ""}
                             </div>
                         </div>
                     </div>
@@ -222,9 +246,10 @@ export default async function PersonDetailPage({
                 <section className="card">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="font-semibold">
-                            Direct Reports ({personWithRelations.reports.length})
+                            Direct Reports ({personWithRelations.reports.length}
+                            )
                         </h3>
-                        <Link href="/people/new" className="btn text-sm">
+                        <Link href={`/people/new?managerId=${personWithRelations.id}`} className="btn text-sm">
                             Add Report
                         </Link>
                     </div>
@@ -291,42 +316,61 @@ export default async function PersonDetailPage({
                 <section className="card">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="font-semibold">
-                            Owned Initiatives ({personWithRelations.initiativeOwners.length})
+                            Owned Initiatives (
+                            {personWithRelations.initiativeOwners.length})
                         </h3>
-                        <Link href="/initiatives/new" className="btn text-sm">
+                        <Link
+                            href={`/initiatives/new?ownerId=${
+                                personWithRelations.id
+                            }${
+                                personWithRelations.team
+                                    ? `&teamId=${personWithRelations.team.id}`
+                                    : ""
+                            }`}
+                            className="btn text-sm"
+                        >
                             New Initiative
                         </Link>
                     </div>
                     <div className="space-y-3">
-                        {personWithRelations.initiativeOwners.map((ownership) => (
-                            <Link
-                                key={ownership.initiative.id}
-                                href={`/initiatives/${ownership.initiative.id}`}
-                                className="block border border-neutral-800 rounded-xl p-3 hover:bg-neutral-800/60"
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <div className="font-medium">
-                                            {ownership.initiative.title}
+                        {personWithRelations.initiativeOwners.map(
+                            (ownership) => (
+                                <Link
+                                    key={ownership.initiative.id}
+                                    href={`/initiatives/${ownership.initiative.id}`}
+                                    className="block border border-neutral-800 rounded-xl p-3 hover:bg-neutral-800/60"
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <div className="font-medium">
+                                                {ownership.initiative.title}
+                                            </div>
+                                            <div className="text-sm text-neutral-400">
+                                                {ownership.initiative.summary ??
+                                                    ""}
+                                            </div>
+                                            <div className="text-xs text-neutral-500 mt-1">
+                                                Role: {ownership.role} • Team:{" "}
+                                                {ownership.initiative.team
+                                                    ?.name || "No team"}
+                                            </div>
                                         </div>
-                                        <div className="text-sm text-neutral-400">
-                                            {ownership.initiative.summary ?? ""}
-                                        </div>
-                                        <div className="text-xs text-neutral-500 mt-1">
-                                            Role: {ownership.role} • Team:{" "}
-                                            {ownership.initiative.team?.name ||
-                                                "No team"}
+                                        <div className="flex items-center gap-2">
+                                            <Rag
+                                                rag={ownership.initiative.rag}
+                                            />
+                                            <span className="badge">
+                                                {
+                                                    ownership.initiative
+                                                        .confidence
+                                                }
+                                                %
+                                            </span>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <Rag rag={ownership.initiative.rag} />
-                                        <span className="badge">
-                                            {ownership.initiative.confidence}%
-                                        </span>
-                                    </div>
-                                </div>
-                            </Link>
-                        ))}
+                                </Link>
+                            ),
+                        )}
                         {personWithRelations.initiativeOwners.length === 0 && (
                             <div className="text-neutral-400 text-sm text-center py-4">
                                 No owned initiatives.
@@ -409,7 +453,8 @@ export default async function PersonDetailPage({
                                     href="/tasks"
                                     className="text-sm text-blue-400 hover:text-blue-300"
                                 >
-                                    View all {personWithRelations.tasks.length} tasks
+                                    View all {personWithRelations.tasks.length}{" "}
+                                    tasks
                                 </Link>
                             </div>
                         )}
@@ -422,45 +467,48 @@ export default async function PersonDetailPage({
                 <section className="card">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="font-semibold">
-                            Recent Check-ins ({personWithRelations.checkIns.length})
+                            Recent Check-ins (
+                            {personWithRelations.checkIns.length})
                         </h3>
                         <Link href="/initiatives" className="btn text-sm">
                             View All
                         </Link>
                     </div>
                     <div className="space-y-3">
-                        {personWithRelations.checkIns.slice(0, 3).map((checkIn) => (
-                            <div
-                                key={checkIn.id}
-                                className="border border-neutral-800 rounded-xl p-3"
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <Link
-                                            href={`/initiatives/${checkIn.initiative.id}`}
-                                            className="font-medium hover:text-blue-400"
-                                        >
-                                            {checkIn.initiative.title}
-                                        </Link>
-                                        <div className="text-sm text-neutral-400">
-                                            {checkIn.summary}
+                        {personWithRelations.checkIns
+                            .slice(0, 3)
+                            .map((checkIn) => (
+                                <div
+                                    key={checkIn.id}
+                                    className="border border-neutral-800 rounded-xl p-3"
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <Link
+                                                href={`/initiatives/${checkIn.initiative.id}`}
+                                                className="font-medium hover:text-blue-400"
+                                            >
+                                                {checkIn.initiative.title}
+                                            </Link>
+                                            <div className="text-sm text-neutral-400">
+                                                {checkIn.summary}
+                                            </div>
+                                            <div className="text-xs text-neutral-500 mt-1">
+                                                Week of{" "}
+                                                {new Date(
+                                                    checkIn.weekOf,
+                                                ).toLocaleDateString()}
+                                            </div>
                                         </div>
-                                        <div className="text-xs text-neutral-500 mt-1">
-                                            Week of{" "}
-                                            {new Date(
-                                                checkIn.weekOf,
-                                            ).toLocaleDateString()}
+                                        <div className="flex items-center gap-2">
+                                            <Rag rag={checkIn.rag} />
+                                            <span className="badge">
+                                                {checkIn.confidence}%
+                                            </span>
                                         </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Rag rag={checkIn.rag} />
-                                        <span className="badge">
-                                            {checkIn.confidence}%
-                                        </span>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
                         {personWithRelations.checkIns.length === 0 && (
                             <div className="text-neutral-400 text-sm text-center py-4">
                                 No check-ins yet.
@@ -469,112 +517,158 @@ export default async function PersonDetailPage({
                     </div>
                 </section>
 
-                {/* 1:1 Meetings */}
-                <section className="card">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-semibold">1:1 Meetings</h3>
-                        <Link href="/oneonones" className="btn text-sm">
-                            Manage 1:1s
-                        </Link>
-                    </div>
-                    <div className="space-y-3">
-                        {/* As Manager */}
-                        {personWithRelations.oneOnOnesAsManager.length > 0 && (
-                            <div>
-                                <div className="text-sm font-medium mb-2">
-                                    As Manager (
-                                    {personWithRelations.oneOnOnesAsManager.length})
-                                </div>
-                                {personWithRelations.oneOnOnesAsManager
-                                    .slice(0, 2)
-                                    .map((oneOnOne) => (
-                                        <div
-                                            key={oneOnOne.id}
-                                            className="border border-neutral-800 rounded-xl p-3 mb-2"
-                                        >
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <Link
-                                                        href={`/people/${oneOnOne.report.id}`}
-                                                        className="font-medium hover:text-blue-400"
-                                                    >
-                                                        {oneOnOne.report.name}
-                                                    </Link>
-                                                    <div className="text-sm text-neutral-400">
-                                                        {oneOnOne.cadence ?? ""}
-                                                    </div>
-                                                    <div className="text-xs text-neutral-500 mt-1">
-                                                        {oneOnOne.scheduledAt
-                                                            ? new Date(
-                                                                  oneOnOne.scheduledAt,
-                                                              ).toLocaleDateString()
-                                                            : "TBD"}
-                                                    </div>
-                                                </div>
-                                                <Link
-                                                    href="/oneonones"
-                                                    className="btn text-sm"
-                                                >
-                                                    Edit
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    ))}
+                {/* 1:1 Meetings - Only show if person has reports or a manager */}
+                {(personWithRelations.reports.length > 0 ||
+                    personWithRelations.manager) && (
+                    <section className="card">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-semibold">1:1 Meetings</h3>
+                            <div className="flex gap-2">
+                                {/* Show "New 1:1" button if current user can create a meeting with this person */}
+                                {// Current user is viewing their own profile and has reports
+                                ((currentPerson.id === personWithRelations.id &&
+                                    personWithRelations.reports.length > 0) ||
+                                    // Current user is viewing their manager's profile
+                                    currentPerson.managerId ===
+                                        personWithRelations.id ||
+                                    // Current user is viewing one of their reports' profiles
+                                    personWithRelations.managerId ===
+                                        currentPerson.id) && (
+                                    <Link
+                                        href={`/oneonones/new?managerId=${
+                                            // If viewing own profile, current user is the manager
+                                            currentPerson.id ===
+                                            personWithRelations.id
+                                                ? currentPerson.id
+                                                : personWithRelations.id
+                                        }&reportId=${
+                                            // If viewing own profile, no report pre-filled (user will select)
+                                            // If viewing manager's profile, current user is the report
+                                            // If viewing report's profile, the report is the report
+                                            currentPerson.id ===
+                                            personWithRelations.id
+                                                ? ""
+                                                : currentPerson.managerId ===
+                                                  personWithRelations.id
+                                                ? currentPerson.id
+                                                : personWithRelations.id
+                                        }`}
+                                        className="btn bg-blue-600 hover:bg-blue-700 text-sm"
+                                    >
+                                        New 1:1
+                                    </Link>
+                                )}
+                                <Link href="/oneonones" className="btn text-sm">
+                                    Manage 1:1s
+                                </Link>
                             </div>
-                        )}
-
-                        {/* As Report */}
-                        {personWithRelations.oneOnOnes.length > 0 && (
-                            <div>
-                                <div className="text-sm font-medium mb-2">
-                                    With Manager ({personWithRelations.oneOnOnes.length})
-                                </div>
-                                {personWithRelations.oneOnOnes
-                                    .slice(0, 2)
-                                    .map((oneOnOne) => (
-                                        <div
-                                            key={oneOnOne.id}
-                                            className="border border-neutral-800 rounded-xl p-3 mb-2"
-                                        >
-                                            <div className="flex items-center justify-between">
-                                                <div>
+                        </div>
+                        <div className="space-y-3">
+                            {/* As Manager */}
+                            {personWithRelations.oneOnOnesAsManager.length >
+                                0 && (
+                                <div>
+                                    <div className="text-sm font-medium mb-2">
+                                        As Manager (
+                                        {
+                                            personWithRelations
+                                                .oneOnOnesAsManager.length
+                                        }
+                                        )
+                                    </div>
+                                    {personWithRelations.oneOnOnesAsManager
+                                        .slice(0, 2)
+                                        .map((oneOnOne) => (
+                                            <div
+                                                key={oneOnOne.id}
+                                                className="border border-neutral-800 rounded-xl p-3 mb-2"
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <Link
+                                                            href={`/people/${oneOnOne.report.id}`}
+                                                            className="font-medium hover:text-blue-400"
+                                                        >
+                                                            {
+                                                                oneOnOne.report
+                                                                    .name
+                                                            }
+                                                        </Link>
+                                                        <div className="text-xs text-neutral-500 mt-1">
+                                                            {oneOnOne.scheduledAt
+                                                                ? new Date(
+                                                                      oneOnOne.scheduledAt,
+                                                                  ).toLocaleDateString()
+                                                                : "TBD"}
+                                                        </div>
+                                                    </div>
                                                     <Link
-                                                        href={`/people/${oneOnOne.manager.id}`}
-                                                        className="font-medium hover:text-blue-400"
+                                                        href="/oneonones"
+                                                        className="btn text-sm"
                                                     >
-                                                        {oneOnOne.manager.name}
+                                                        Edit
                                                     </Link>
-                                                    <div className="text-sm text-neutral-400">
-                                                        {oneOnOne.cadence ?? ""}
-                                                    </div>
-                                                    <div className="text-xs text-neutral-500 mt-1">
-                                                        {oneOnOne.scheduledAt
-                                                            ? new Date(
-                                                                  oneOnOne.scheduledAt,
-                                                              ).toLocaleDateString()
-                                                            : "TBD"}
-                                                    </div>
                                                 </div>
-                                                <Link
-                                                    href="/oneonones"
-                                                    className="btn text-sm"
-                                                >
-                                                    Edit
-                                                </Link>
                                             </div>
-                                        </div>
-                                    ))}
-                            </div>
-                        )}
-
-                        {personWithRelations.oneOnOnes.length === 0 &&
-                            personWithRelations.oneOnOnesAsManager.length === 0 && (
-                                <div className="text-neutral-400 text-sm text-center py-4">
-                                    No 1:1 meetings scheduled.
+                                        ))}
                                 </div>
                             )}
-                    </div>
-                </section>
+
+                            {/* As Report */}
+                            {personWithRelations.oneOnOnes.length > 0 && (
+                                <div>
+                                    <div className="text-sm font-medium mb-2">
+                                        With Manager (
+                                        {personWithRelations.oneOnOnes.length})
+                                    </div>
+                                    {personWithRelations.oneOnOnes
+                                        .slice(0, 2)
+                                        .map((oneOnOne) => (
+                                            <div
+                                                key={oneOnOne.id}
+                                                className="border border-neutral-800 rounded-xl p-3 mb-2"
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <Link
+                                                            href={`/people/${oneOnOne.manager.id}`}
+                                                            className="font-medium hover:text-blue-400"
+                                                        >
+                                                            {
+                                                                oneOnOne.manager
+                                                                    .name
+                                                            }
+                                                        </Link>
+                                                        <div className="text-xs text-neutral-500 mt-1">
+                                                            {oneOnOne.scheduledAt
+                                                                ? new Date(
+                                                                      oneOnOne.scheduledAt,
+                                                                  ).toLocaleDateString()
+                                                                : "TBD"}
+                                                        </div>
+                                                    </div>
+                                                    <Link
+                                                        href="/oneonones"
+                                                        className="btn text-sm"
+                                                    >
+                                                        Edit
+                                                    </Link>
+                                                </div>
+                                            </div>
+                                        ))}
+                                </div>
+                            )}
+
+                            {personWithRelations.oneOnOnes.length === 0 &&
+                                personWithRelations.oneOnOnesAsManager
+                                    .length === 0 && (
+                                    <div className="text-neutral-400 text-sm text-center py-4">
+                                        No 1:1 meetings scheduled.
+                                    </div>
+                                )}
+                        </div>
+                    </section>
+                )}
             </div>
 
             {/* Person Statistics */}
@@ -618,8 +712,8 @@ export default async function PersonDetailPage({
 
             {/* User Account Linking */}
             <section className="card">
-                <UserLinkForm 
-                    personId={personWithRelations.id} 
+                <UserLinkForm
+                    personId={personWithRelations.id}
                     linkedUser={personWithRelations.user}
                 />
             </section>

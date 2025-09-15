@@ -3,10 +3,12 @@
 import { useState } from 'react'
 import { createPerson, updatePerson } from '@/lib/actions'
 import { type PersonFormData } from '@/lib/validations'
+import { UserLinkForm } from '@/components/user-link-form'
 
 interface PersonFormProps {
   teams: Array<{ id: string; name: string }>
   people: Array<{ id: string; name: string; email: string }>
+  initialManagerId?: string
   person?: {
     id: string
     name: string
@@ -16,17 +18,23 @@ interface PersonFormProps {
     teamId?: string | null
     managerId?: string | null
     startedAt?: Date | null
+    user?: {
+      id: string
+      name: string
+      email: string
+      role: string
+    } | null
   }
 }
 
-export function PersonForm({ teams, people, person }: PersonFormProps) {
+export function PersonForm({ teams, people, initialManagerId, person }: PersonFormProps) {
   const [formData, setFormData] = useState<PersonFormData>({
     name: person?.name || '',
     email: person?.email || '',
     role: person?.role || '',
     status: person?.status as any || 'active',
     teamId: person?.teamId || '',
-    managerId: person?.managerId || '',
+    managerId: person?.managerId || initialManagerId || '',
     startedAt: person?.startedAt ? person.startedAt.toISOString().split('T')[0] : '',
   })
 
@@ -158,6 +166,16 @@ export function PersonForm({ teams, people, person }: PersonFormProps) {
           </div>
         </div>
       </div>
+
+      {/* User Account Linking - Only show in edit mode */}
+      {person && (
+        <div className="card">
+          <UserLinkForm 
+            personId={person.id} 
+            linkedUser={person.user}
+          />
+        </div>
+      )}
 
       {/* Submit Button */}
       <div className="flex justify-end">

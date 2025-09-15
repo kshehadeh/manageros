@@ -48,3 +48,12 @@ export const teamSchema = z.object({
 })
 
 export type TeamFormData = z.infer<typeof teamSchema>
+
+export const oneOnOneSchema = z.object({
+  managerId: z.string().min(1, 'Manager is required'),
+  reportId: z.string().min(1, 'Report is required'),
+  scheduledAt: z.string().min(1, 'Date is required'),
+  notes: z.string().optional(),
+})
+
+export type OneOnOneFormData = z.infer<typeof oneOnOneSchema>

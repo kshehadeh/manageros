@@ -1,7 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/db'
-import { initiativeSchema, type InitiativeFormData, personSchema, type PersonFormData, teamSchema, type TeamFormData } from '@/lib/validations'
+import { initiativeSchema, type InitiativeFormData, personSchema, type PersonFormData, teamSchema, type TeamFormData, oneOnOneSchema, type OneOnOneFormData } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
@@ -248,6 +248,105 @@ export async function getPeople() {
     })
   } catch (error) {
     console.error('Error fetching people:', error)
+    return []
+  }
+}
+
+export async function getPeopleHierarchy() {
+  try {
+    const user = await getCurrentUser()
+    if (!user.organizationId) {
+      return []
+    }
+    
+    // Get all people with their manager and reports relationships
+    const people = await prisma.person.findMany({
+      where: { 
+        organizationId: user.organizationId
+      },
+      include: {
+        manager: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            status: true,
+            reports: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                status: true
+              }
+            }
+          }
+        },
+        reports: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            status: true
+          }
+        },
+        team: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      },
+      orderBy: { name: 'asc' },
+    })
+    
+    // Build hierarchical structure
+    const hierarchy: Array<{
+      id: string
+      name: string
+      email: string
+      role: string | null
+      status: string
+      team: { id: string; name: string } | null
+      manager: { 
+        id: string
+        name: string
+        email: string
+        role: string | null
+        status: string
+        reports: Array<{ id: string; name: string; email: string; role: string | null; status: string }>
+      } | null
+      reports: Array<{ id: string; name: string; email: string; role: string | null; status: string }>
+      level: number
+    }> = []
+    
+    // Find top-level people (those without managers)
+    const topLevelPeople = people.filter(person => !person.managerId)
+    
+    // Recursive function to build hierarchy
+    function buildHierarchy(person: any, level: number = 0) {
+      hierarchy.push({
+        ...person,
+        level
+      })
+      
+      // Add reports recursively
+      person.reports.forEach((report: any) => {
+        const fullReport = people.find(p => p.id === report.id)
+        if (fullReport) {
+          buildHierarchy(fullReport, level + 1)
+        }
+      })
+    }
+    
+    // Build hierarchy starting from top-level people
+    topLevelPeople.forEach(person => buildHierarchy(person))
+    
+    return hierarchy
+  } catch (error) {
+    console.error('Error fetching people hierarchy:', error)
     return []
   }
 }
@@ -606,4 +705,260 @@ export async function getTeamsForSelection(excludeId?: string) {
     console.error('Error fetching teams for selection:', error)
     return []
   }
+}
+
+export async function createOneOnOne(formData: OneOnOneFormData) {
+  const user = await getCurrentUser()
+  
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization')
+  }
+
+  // Validate form data
+  const validatedData = oneOnOneSchema.parse(formData)
+  
+  // Verify both manager and report belong to the same organization
+  const [manager, report] = await Promise.all([
+    prisma.person.findFirst({
+      where: { 
+        id: validatedData.managerId,
+        organizationId: user.organizationId 
+      }
+    }),
+    prisma.person.findFirst({
+      where: { 
+        id: validatedData.reportId,
+        organizationId: user.organizationId 
+      }
+    })
+  ])
+
+  if (!manager) {
+    throw new Error('Manager not found or not in your organization')
+  }
+  
+  if (!report) {
+    throw new Error('Report not found or not in your organization')
+  }
+
+  // Create the one-on-one record
+  const oneOnOne = await prisma.oneOnOne.create({
+    data: {
+      managerId: validatedData.managerId,
+      reportId: validatedData.reportId,
+      scheduledAt: new Date(validatedData.scheduledAt),
+      notes: validatedData.notes,
+    },
+    include: {
+      manager: true,
+      report: true,
+    }
+  })
+
+  revalidatePath('/oneonones')
+  revalidatePath(`/people/${report.id}`)
+  revalidatePath(`/people/${manager.id}`)
+  
+  // Redirect to the one-on-ones page
+  redirect('/oneonones')
+}
+
+export async function getOneOnOnes() {
+  const user = await getCurrentUser()
+  
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization')
+  }
+
+  // Get the person record for the current user
+  const currentPerson = await prisma.person.findFirst({
+    where: {
+      user: {
+        id: user.id
+      }
+    }
+  })
+
+  if (!currentPerson) {
+    throw new Error('No person record found for current user')
+  }
+
+  return await prisma.oneOnOne.findMany({
+    where: {
+      OR: [
+        { managerId: currentPerson.id },
+        { reportId: currentPerson.id }
+      ]
+    },
+    include: {
+      manager: true,
+      report: true,
+    },
+    orderBy: { scheduledAt: 'desc' }
+  })
+}
+
+export async function getPeopleForOneOnOne() {
+  const user = await getCurrentUser()
+  
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization')
+  }
+
+  // Get all people in the organization for one-on-one meetings
+  const people = await prisma.person.findMany({
+    where: {
+      organizationId: user.organizationId,
+      status: 'active'
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      manager: {
+        select: {
+          id: true,
+          name: true,
+        }
+      },
+      reports: {
+        select: {
+          id: true,
+          name: true,
+        }
+      }
+    },
+    orderBy: { name: 'asc' }
+  })
+
+  return people
+}
+
+export async function getOneOnOneById(id: string) {
+  const user = await getCurrentUser()
+  
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization')
+  }
+
+  // Get the current user's person record
+  const currentPerson = await prisma.person.findFirst({
+    where: { user: { id: user.id } }
+  })
+
+  if (!currentPerson) {
+    throw new Error('No person record found for current user')
+  }
+
+  // Get the one-on-one record, ensuring the current user is a participant
+  const oneOnOne = await prisma.oneOnOne.findFirst({
+    where: {
+      id,
+      OR: [
+        { managerId: currentPerson.id },
+        { reportId: currentPerson.id }
+      ]
+    },
+    include: {
+      manager: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true
+        }
+      },
+      report: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true
+        }
+      }
+    }
+  })
+
+  if (!oneOnOne) {
+    throw new Error('One-on-one not found or you do not have access to it')
+  }
+
+  return oneOnOne
+}
+
+export async function updateOneOnOne(id: string, formData: OneOnOneFormData) {
+  const user = await getCurrentUser()
+  
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization')
+  }
+
+  // Validate form data
+  const validatedData = oneOnOneSchema.parse(formData)
+  
+  // Get the current user's person record
+  const currentPerson = await prisma.person.findFirst({
+    where: { user: { id: user.id } }
+  })
+
+  if (!currentPerson) {
+    throw new Error('No person record found for current user')
+  }
+
+  // Verify the one-on-one exists and user has access to it
+  const existingOneOnOne = await prisma.oneOnOne.findFirst({
+    where: {
+      id,
+      OR: [
+        { managerId: currentPerson.id },
+        { reportId: currentPerson.id }
+      ]
+    }
+  })
+
+  if (!existingOneOnOne) {
+    throw new Error('One-on-one not found or you do not have access to it')
+  }
+
+  // Verify both manager and report belong to the same organization
+  const [manager, report] = await Promise.all([
+    prisma.person.findFirst({
+      where: { 
+        id: validatedData.managerId,
+        organizationId: user.organizationId
+      }
+    }),
+    prisma.person.findFirst({
+      where: { 
+        id: validatedData.reportId,
+        organizationId: user.organizationId
+      }
+    })
+  ])
+
+  if (!manager) {
+    throw new Error('Manager not found or not in your organization')
+  }
+
+  if (!report) {
+    throw new Error('Report not found or not in your organization')
+  }
+
+  // Update the one-on-one record
+  await prisma.oneOnOne.update({
+    where: { id },
+    data: {
+      managerId: validatedData.managerId,
+      reportId: validatedData.reportId,
+      scheduledAt: new Date(validatedData.scheduledAt),
+      notes: validatedData.notes,
+    }
+  })
+
+  // Revalidate the one-on-ones page
+  revalidatePath('/oneonones')
+  
+  // Redirect to the one-on-ones page
+  redirect('/oneonones')
 }

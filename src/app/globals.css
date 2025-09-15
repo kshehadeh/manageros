@@ -27,3 +27,64 @@ body {
 .rag-green { @apply bg-emerald-900/30 border-emerald-700 text-emerald-300; }
 .rag-amber { @apply bg-amber-900/30 border-amber-700 text-amber-300; }
 .rag-red { @apply bg-red-900/30 border-red-700 text-red-300; }
+
+/* Markdown prose styling */
+.prose {
+  @apply text-neutral-200;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  @apply text-neutral-100 font-semibold;
+}
+
+.prose h1 { @apply text-lg; }
+.prose h2 { @apply text-base; }
+.prose h3 { @apply text-sm; }
+
+.prose p {
+  @apply mb-2;
+}
+
+.prose ul, .prose ol {
+  @apply mb-2 ml-4;
+}
+
+.prose li {
+  @apply mb-1;
+}
+
+.prose strong {
+  @apply font-semibold text-neutral-100;
+}
+
+.prose em {
+  @apply italic;
+}
+
+.prose code {
+  @apply bg-neutral-800 px-1 py-0.5 rounded text-xs font-mono;
+}
+
+.prose pre {
+  @apply bg-neutral-800 p-2 rounded overflow-x-auto;
+}
+
+.prose blockquote {
+  @apply border-l-2 border-neutral-700 pl-3 italic text-neutral-400;
+}
+
+/* Fix calendar icon visibility in dark mode for datetime-local inputs */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.8;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.8;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.8;
+}

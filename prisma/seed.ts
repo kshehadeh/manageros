@@ -215,8 +215,6 @@ async function main() {
     data: {
       managerId: manager1.id,
       reportId: alice.id,
-      cadence: 'weekly',
-      agenda: '- Wins\n- Blockers\n- Growth',
       notes: 'Discussed perf metrics and ownership.',
       scheduledAt: new Date(Date.now() + 2*24*60*60*1000)
     }

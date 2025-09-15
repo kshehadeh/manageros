@@ -8,25 +8,33 @@ import { Rag } from '@/components/rag'
 interface InitiativeFormProps {
   teams: Array<{ id: string; name: string }>
   people: Array<{ id: string; name: string; email: string }>
+  preselectedOwnerId?: string
+  preselectedTeamId?: string
 }
 
-export function InitiativeForm({ teams, people }: InitiativeFormProps) {
+export function InitiativeForm({ teams, people, preselectedOwnerId, preselectedTeamId }: InitiativeFormProps) {
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split('T')[0]
+  
   const [formData, setFormData] = useState<InitiativeFormData>({
     title: '',
     summary: '',
     outcome: '',
-    startDate: '',
+    startDate: today,
     targetDate: '',
     status: 'planned',
     rag: 'green',
     confidence: 80,
-    teamId: '',
+    teamId: preselectedTeamId || '',
     objectives: [],
     owners: [],
   })
 
   const [objectives, setObjectives] = useState([{ title: '', keyResult: '' }])
-  const [owners, setOwners] = useState([{ personId: '', role: 'owner' as const }])
+  const [owners, setOwners] = useState([{ 
+    personId: preselectedOwnerId || '', 
+    role: 'owner' as const 
+  }])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {

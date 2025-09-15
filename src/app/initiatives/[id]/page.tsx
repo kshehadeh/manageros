@@ -12,6 +12,10 @@ export default async function InitiativeDetail({ params }: { params: Promise<{ i
     redirect('/auth/signin')
   }
 
+  if (!session.user.organizationId) {
+    redirect('/organization/create')
+  }
+
   const { id } = await params
   const init = await prisma.initiative.findFirst({
     where: { 

@@ -1,0 +1,97 @@
+import { getOneOnOneById, getPeopleForOneOnOne } from '@/lib/actions'
+import { OneOnOneForm } from '@/components/oneonone-form'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import Link from 'next/link'
+
+interface EditOneOnOnePageProps {
+  params: {
+    id: string
+  }
+}
+
+export default async function EditOneOnOnePage({ params }: EditOneOnOnePageProps) {
+  const session = await getServerSession(authOptions)
+  
+  if (!session?.user) {
+    redirect('/auth/signin')
+  }
+
+  try {
+    const [oneOnOne, people] = await Promise.all([
+      getOneOnOneById(params.id),
+      getPeopleForOneOnOne()
+    ])
+
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">Edit 1:1 Meeting</h2>
+            <p className="text-sm text-neutral-400 mt-1">
+              Update meeting details and notes
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link 
+              href={`/oneonones/${params.id}`}
+              className="btn bg-neutral-700 hover:bg-neutral-600"
+            >
+              View Meeting
+            </Link>
+            <Link 
+              href="/oneonones" 
+              className="btn bg-neutral-700 hover:bg-neutral-600"
+            >
+              Back to 1:1s
+            </Link>
+          </div>
+        </div>
+
+        <OneOnOneForm 
+          people={people}
+          existingOneOnOne={oneOnOne}
+        />
+      </div>
+    )
+  } catch (error) {
+    console.error('Error loading one-on-one:', error)
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">Edit 1:1 Meeting</h2>
+            <p className="text-sm text-neutral-400 mt-1">
+              Update meeting details and notes
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link 
+              href={`/oneonones/${params.id}`}
+              className="btn bg-neutral-700 hover:bg-neutral-600"
+            >
+              View Meeting
+            </Link>
+            <Link 
+              href="/oneonones" 
+              className="btn bg-neutral-700 hover:bg-neutral-600"
+            >
+              Back to 1:1s
+            </Link>
+          </div>
+        </div>
+
+        <div className="card text-center py-8">
+          <h3 className="font-semibold mb-2">Meeting Not Found</h3>
+          <p className="text-sm text-neutral-400 mb-4">
+            The 1:1 meeting you're looking for doesn't exist or you don't have access to it.
+          </p>
+          <Link href="/oneonones" className="btn bg-blue-600 hover:bg-blue-700">
+            Back to 1:1s
+          </Link>
+        </div>
+      </div>
+    )
+  }
+}

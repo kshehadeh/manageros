@@ -5,12 +5,21 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 
-export default async function NewPersonPage() {
+interface NewPersonPageProps {
+  searchParams: Promise<{
+    managerId?: string
+  }>
+}
+
+export default async function NewPersonPage({ searchParams }: NewPersonPageProps) {
   const session = await getServerSession(authOptions)
   
   if (!session?.user) {
     redirect('/auth/signin')
   }
+
+  const params = await searchParams
+  const managerId = params.managerId
 
   const [teams, people] = await Promise.all([
     getTeams(),
@@ -26,7 +35,7 @@ export default async function NewPersonPage() {
         </Link>
       </div>
       
-      <PersonForm teams={teams} people={people} />
+      <PersonForm teams={teams} people={people} initialManagerId={managerId} />
     </div>
   )
 }

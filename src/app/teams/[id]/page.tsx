@@ -132,7 +132,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
         <section className="card">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold">Team Initiatives ({team.initiatives.length})</h3>
-            <Link href="/initiatives/new" className="btn text-sm">
+            <Link href={`/initiatives/new?teamId=${team.id}`} className="btn text-sm">
               New Initiative
             </Link>
           </div>

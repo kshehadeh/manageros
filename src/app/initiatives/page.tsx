@@ -12,6 +12,10 @@ export default async function InitiativesPage() {
     redirect('/auth/signin')
   }
 
+  if (!session.user.organizationId) {
+    redirect('/organization/create')
+  }
+
   const inits = await prisma.initiative.findMany({
     where: { organizationId: session.user.organizationId },
     orderBy: { updatedAt: 'desc' },

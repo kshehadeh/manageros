@@ -173,8 +173,6 @@ model OneOnOne {
   managerId   String
   reportId    String
   scheduledAt DateTime?
-  cadence     String?
-  agenda      String?
   notes       String?
   // actionItems  Task[]   @relation("OneOnOneTasks")
   manager     Person    @relation("OOOManager", fields: [managerId], references: [id])
