@@ -10,20 +10,20 @@ import { isAdmin } from '@/lib/auth'
 interface Person {
   id: string
   name: string
-  email: string
+  email: string | null
   role: string | null
   status: string
   team: { id: string; name: string } | null
   manager: {
     id: string
     name: string
-    email: string
+    email: string | null
     role: string | null
     status: string
     reports: Array<{
       id: string
       name: string
-      email: string
+      email: string | null
       role: string | null
       status: string
     }>
@@ -31,7 +31,7 @@ interface Person {
   reports: Array<{
     id: string
     name: string
-    email: string
+    email: string | null
     role: string | null
     status: string
   }>
@@ -106,9 +106,14 @@ export function PeoplePageClient({ people }: PeoplePageClientProps) {
           </div>
 
           {session?.user && isAdmin(session.user) && (
-            <Link href='/people/new' className='btn'>
-              New
-            </Link>
+            <>
+              <Link href='/people/import' className='btn-secondary'>
+                Import CSV
+              </Link>
+              <Link href='/people/new' className='btn'>
+                New
+              </Link>
+            </>
           )}
         </div>
       </div>

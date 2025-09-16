@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -61,7 +61,7 @@ model Team {
 
 model Person {
   id                 String            @id @default(cuid())
-  email              String
+  email              String?
   name               String
   role               String?
   status             String            @default("active")
@@ -86,7 +86,6 @@ model Person {
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
   
-  @@unique([email, organizationId])
   @@index([organizationId])
 }
 

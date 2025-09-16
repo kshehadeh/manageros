@@ -3,21 +3,21 @@ import Link from 'next/link'
 interface Person {
   id: string
   name: string
-  email: string
+  email: string | null
   role: string | null
   status: string
   team: { id: string; name: string } | null
   manager: {
     id: string
     name: string
-    email: string
+    email: string | null
     role: string | null
     status: string
   } | null
   reports: Array<{
     id: string
     name: string
-    email: string
+    email: string | null
     role: string | null
     status: string
   }>
@@ -104,7 +104,7 @@ export function PeopleHierarchy({ people }: PeopleHierarchyProps) {
                   </div>
 
                   <div className='text-xs text-neutral-500 mt-1'>
-                    {person.email}
+                    {person.email && <span>{person.email}</span>}
                     {person.manager && (
                       <span>
                         {' '}

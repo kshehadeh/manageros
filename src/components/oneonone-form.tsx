@@ -8,7 +8,7 @@ import Link from 'next/link'
 interface Person {
   id: string
   name: string
-  email: string
+  email: string | null
   role?: string | null
   manager?: { id: string; name: string } | null
   reports: Array<{ id: string; name: string }>
@@ -137,7 +137,8 @@ export function OneOnOneForm({
                 <option value=''>Select a manager</option>
                 {managerOptions.map(person => (
                   <option key={person.id} value={person.id}>
-                    {person.name} ({person.email})
+                    {person.name}
+                    {person.email ? ` (${person.email})` : ''}
                   </option>
                 ))}
               </select>
@@ -156,7 +157,8 @@ export function OneOnOneForm({
                 <option value=''>Select a report</option>
                 {reportOptions.map(person => (
                   <option key={person.id} value={person.id}>
-                    {person.name} ({person.email})
+                    {person.name}
+                    {person.email ? ` (${person.email})` : ''}
                   </option>
                 ))}
               </select>

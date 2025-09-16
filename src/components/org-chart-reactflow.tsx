@@ -21,20 +21,20 @@ import 'reactflow/dist/style.css'
 interface Person {
   id: string
   name: string
-  email: string
+  email: string | null
   role: string | null
   status: string
   team: { id: string; name: string } | null
   manager: {
     id: string
     name: string
-    email: string
+    email: string | null
     role: string | null
     status: string
     reports: Array<{
       id: string
       name: string
-      email: string
+      email: string | null
       role: string | null
       status: string
     }>
@@ -42,7 +42,7 @@ interface Person {
   reports: Array<{
     id: string
     name: string
-    email: string
+    email: string | null
     role: string | null
     status: string
   }>
@@ -116,9 +116,11 @@ function PersonNode({ data }: { data: Person }) {
         )}
 
         {/* Email */}
-        <p className='text-xs text-neutral-400 dark:text-neutral-600 truncate'>
-          {data.email}
-        </p>
+        {data.email && (
+          <p className='text-xs text-neutral-400 dark:text-neutral-600 truncate'>
+            {data.email}
+          </p>
+        )}
 
         {/* Status indicator */}
         <div className='flex items-center justify-end mt-2'>

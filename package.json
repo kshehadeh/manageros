@@ -15,6 +15,7 @@
     "prisma:generate": "bunx prisma generate",
     "prisma:push": "bunx prisma db push",
     "prisma:seed": "bunx tsx prisma/seed.ts",
+    "db:init": "tsx scripts/init-database.ts",
     "postinstall": "bunx prisma generate",
     "prepare": "husky"
   },

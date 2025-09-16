@@ -46,6 +46,9 @@ function TeamCard({
           </div>
         </div>
         <div className='flex items-center gap-2'>
+          <Link href={`/people/new?teamId=${team.id}`} className='btn text-sm'>
+            Add Person
+          </Link>
           <Link href={`/teams/new?parentId=${team.id}`} className='btn text-sm'>
             Add Child
           </Link>
@@ -92,6 +95,12 @@ function TeamCard({
                     </div>
                   </div>
                   <div className='flex items-center gap-2'>
+                    <Link
+                      href={`/people/new?teamId=${child.id}`}
+                      className='btn text-xs'
+                    >
+                      Add Person
+                    </Link>
                     <Link
                       href={`/teams/new?parentId=${child.id}`}
                       className='btn text-xs'
@@ -140,6 +149,12 @@ function TeamCard({
                               </div>
                             </div>
                             <div className='flex items-center gap-1'>
+                              <Link
+                                href={`/people/new?teamId=${grandchild.id}`}
+                                className='btn text-xs'
+                              >
+                                Add Person
+                              </Link>
                               <Link
                                 href={`/teams/${grandchild.id}/edit`}
                                 className='btn text-xs'

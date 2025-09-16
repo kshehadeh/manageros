@@ -98,7 +98,10 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
             <h3 className='font-semibold'>
               Team Members ({team.people.length})
             </h3>
-            <Link href='/people/new' className='btn text-sm'>
+            <Link
+              href={`/people/new?teamId=${team.id}`}
+              className='btn text-sm'
+            >
               Add Member
             </Link>
           </div>

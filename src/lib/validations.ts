@@ -49,7 +49,11 @@ export const personSchema = z.object({
     .string()
     .min(1, 'Name is required')
     .max(100, 'Name must be less than 100 characters'),
-  email: z.string().email('Valid email is required'),
+  email: z
+    .string()
+    .email('Valid email is required')
+    .optional()
+    .or(z.literal('')),
   role: z.string().optional(),
   status: z.enum(['active', 'inactive', 'on_leave']).default('active'),
   teamId: z.string().optional(),
@@ -81,3 +85,17 @@ export const oneOnOneSchema = z.object({
 })
 
 export type OneOnOneFormData = z.infer<typeof oneOnOneSchema>
+
+export const csvPersonSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  email: z
+    .string()
+    .email('Valid email is required')
+    .optional()
+    .or(z.literal('')),
+  role: z.string().optional(),
+  team: z.string().optional(),
+  manager: z.string().optional(), // Manager name instead of email
+})
+
+export type CSVPersonData = z.infer<typeof csvPersonSchema>

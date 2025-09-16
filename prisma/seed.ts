@@ -89,14 +89,10 @@ async function main() {
 
   // Create people for each organization
   const manager1 = await prisma.person.upsert({
-    where: {
-      email_organizationId: {
-        email: 'manager@acme.com',
-        organizationId: org1.id,
-      },
-    },
+    where: { id: 'seed-manager-1' },
     update: {},
     create: {
+      id: 'seed-manager-1',
       email: 'manager@acme.com',
       name: 'Demo Manager',
       role: 'EM',
@@ -106,14 +102,10 @@ async function main() {
   })
 
   const alice = await prisma.person.upsert({
-    where: {
-      email_organizationId: {
-        email: 'alice@acme.com',
-        organizationId: org1.id,
-      },
-    },
+    where: { id: 'seed-alice-1' },
     update: {},
     create: {
+      id: 'seed-alice-1',
       email: 'alice@acme.com',
       name: 'Alice Dev',
       role: 'Senior FE',
@@ -124,14 +116,10 @@ async function main() {
   })
 
   const bob = await prisma.person.upsert({
-    where: {
-      email_organizationId: {
-        email: 'bob@acme.com',
-        organizationId: org1.id,
-      },
-    },
+    where: { id: 'seed-bob-1' },
     update: {},
     create: {
+      id: 'seed-bob-1',
       email: 'bob@acme.com',
       name: 'Bob Dev',
       role: 'BE',
@@ -142,14 +130,10 @@ async function main() {
   })
 
   const manager2 = await prisma.person.upsert({
-    where: {
-      email_organizationId: {
-        email: 'manager@techstart.com',
-        organizationId: org2.id,
-      },
-    },
+    where: { id: 'seed-manager-2' },
     update: {},
     create: {
+      id: 'seed-manager-2',
       email: 'manager@techstart.com',
       name: 'TechStart Manager',
       role: 'EM',

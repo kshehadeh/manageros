@@ -7,12 +7,13 @@ import { UserLinkForm } from '@/components/user-link-form'
 
 interface PersonFormProps {
   teams: Array<{ id: string; name: string }>
-  people: Array<{ id: string; name: string; email: string }>
+  people: Array<{ id: string; name: string; email: string | null }>
   initialManagerId?: string
+  initialTeamId?: string
   person?: {
     id: string
     name: string
-    email: string
+    email: string | null
     role?: string | null
     status: string
     teamId?: string | null
@@ -31,6 +32,7 @@ export function PersonForm({
   teams,
   people,
   initialManagerId,
+  initialTeamId,
   person,
 }: PersonFormProps) {
   const [formData, setFormData] = useState<PersonFormData>({
@@ -38,7 +40,7 @@ export function PersonForm({
     email: person?.email || '',
     role: person?.role || '',
     status: (person?.status as PersonFormData['status']) || 'active',
-    teamId: person?.teamId || '',
+    teamId: person?.teamId || initialTeamId || '',
     managerId: person?.managerId || initialManagerId || '',
     startedAt: person?.startedAt
       ? person.startedAt.toISOString().split('T')[0]
@@ -85,7 +87,7 @@ export function PersonForm({
           </div>
 
           <div>
-            <label className='block text-sm font-medium mb-2'>Email *</label>
+            <label className='block text-sm font-medium mb-2'>Email</label>
             <input
               type='email'
               value={formData.email}
@@ -94,7 +96,6 @@ export function PersonForm({
               }
               className='input'
               placeholder='Enter email address'
-              required
             />
           </div>
 
@@ -181,7 +182,8 @@ export function PersonForm({
               <option value=''>Select a manager</option>
               {managerOptions.map(person => (
                 <option key={person.id} value={person.id}>
-                  {person.name} ({person.email})
+                  {person.name}
+                  {person.email ? ` (${person.email})` : ''}
                 </option>
               ))}
             </select>
@@ -200,9 +202,7 @@ export function PersonForm({
       <div className='flex justify-end'>
         <button
           type='submit'
-          disabled={
-            isSubmitting || !formData.name.trim() || !formData.email.trim()
-          }
+          disabled={isSubmitting || !formData.name.trim()}
           className='btn bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
         >
           {isSubmitting

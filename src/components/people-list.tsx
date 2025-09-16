@@ -5,20 +5,20 @@ import Link from 'next/link'
 interface Person {
   id: string
   name: string
-  email: string
+  email: string | null
   role: string | null
   status: string
   team: { id: string; name: string } | null
   manager: {
     id: string
     name: string
-    email: string
+    email: string | null
     role: string | null
     status: string
     reports: Array<{
       id: string
       name: string
-      email: string
+      email: string | null
       role: string | null
       status: string
     }>
@@ -26,7 +26,7 @@ interface Person {
   reports: Array<{
     id: string
     name: string
-    email: string
+    email: string | null
     role: string | null
     status: string
   }>
@@ -74,7 +74,7 @@ export function PeopleList({ people }: PeopleListProps) {
                 )}
               </div>
               <div className='mt-1 flex items-center gap-4 text-sm text-neutral-500 dark:text-neutral-400'>
-                <span>{person.email}</span>
+                {person.email && <span>{person.email}</span>}
                 {person.team && (
                   <span className='bg-neutral-100 dark:bg-neutral-700 px-2 py-1 rounded text-xs'>
                     {person.team.name}

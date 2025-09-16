@@ -7,7 +7,7 @@ import { Rag } from '@/components/rag'
 
 interface InitiativeFormProps {
   teams: Array<{ id: string; name: string }>
-  people: Array<{ id: string; name: string; email: string }>
+  people: Array<{ id: string; name: string; email: string | null }>
   preselectedOwnerId?: string
   preselectedTeamId?: string
 }
@@ -354,7 +354,8 @@ export function InitiativeForm({
                   <option value=''>Select person</option>
                   {people.map(person => (
                     <option key={person.id} value={person.id}>
-                      {person.name} ({person.email})
+                      {person.name}
+                      {person.email ? ` (${person.email})` : ''}
                     </option>
                   ))}
                 </select>

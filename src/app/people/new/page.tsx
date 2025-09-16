@@ -8,6 +8,7 @@ import { redirect } from 'next/navigation'
 interface NewPersonPageProps {
   searchParams: Promise<{
     managerId?: string
+    teamId?: string
   }>
 }
 
@@ -27,6 +28,7 @@ export default async function NewPersonPage({
 
   const params = await searchParams
   const managerId = params.managerId
+  const teamId = params.teamId
 
   const [teams, people] = await Promise.all([getTeams(), getPeople()])
 
@@ -39,7 +41,12 @@ export default async function NewPersonPage({
         </Link>
       </div>
 
-      <PersonForm teams={teams} people={people} initialManagerId={managerId} />
+      <PersonForm
+        teams={teams}
+        people={people}
+        initialManagerId={managerId}
+        initialTeamId={teamId}
+      />
     </div>
   )
 }
