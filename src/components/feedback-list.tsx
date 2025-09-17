@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import ReactMarkdown from 'react-markdown'
 import { deleteFeedback } from '@/lib/actions'
 import { FeedbackForm } from './feedback-form'
 import { type Person } from '@prisma/client'
@@ -154,8 +155,56 @@ export function FeedbackList({
               From: <span className='font-medium'>{item.from.name}</span>
             </div>
 
-            <div className='text-sm text-neutral-200 whitespace-pre-wrap'>
-              {item.body}
+            <div className='prose prose-invert prose-sm max-w-none text-neutral-200'>
+              <ReactMarkdown
+                components={{
+                  p: ({ children }) => <p className='mb-3'>{children}</p>,
+                  strong: ({ children }) => (
+                    <strong className='font-semibold text-white'>
+                      {children}
+                    </strong>
+                  ),
+                  em: ({ children }) => (
+                    <em className='italic text-neutral-300'>{children}</em>
+                  ),
+                  a: ({ href, children }) => (
+                    <a
+                      href={href}
+                      className='text-blue-400 hover:text-blue-300 underline'
+                      target='_blank'
+                      rel='noopener noreferrer'
+                    >
+                      {children}
+                    </a>
+                  ),
+                  ul: ({ children }) => (
+                    <ul className='list-disc list-inside mb-3'>{children}</ul>
+                  ),
+                  ol: ({ children }) => (
+                    <ol className='list-decimal list-inside mb-3'>
+                      {children}
+                    </ol>
+                  ),
+                  li: ({ children }) => <li className='mb-1'>{children}</li>,
+                  blockquote: ({ children }) => (
+                    <blockquote className='border-l-4 border-neutral-600 pl-4 italic text-neutral-300 mb-3'>
+                      {children}
+                    </blockquote>
+                  ),
+                  code: ({ children }) => (
+                    <code className='bg-neutral-700 px-1 py-0.5 rounded text-sm font-mono text-neutral-200'>
+                      {children}
+                    </code>
+                  ),
+                  pre: ({ children }) => (
+                    <pre className='bg-neutral-700 p-3 rounded overflow-x-auto mb-3'>
+                      {children}
+                    </pre>
+                  ),
+                }}
+              >
+                {item.body}
+              </ReactMarkdown>
             </div>
           </div>
         ))}

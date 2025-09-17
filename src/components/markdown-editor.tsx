@@ -1,0 +1,55 @@
+/* eslint-disable no-unused-vars */
+'use client'
+
+import MDEditor from '@uiw/react-md-editor'
+
+interface MarkdownEditorProps {
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+  maxLength?: number
+  className?: string
+}
+
+export function MarkdownEditor({
+  value,
+  onChange,
+  placeholder = 'Start typing...',
+  maxLength = 2000,
+  className = '',
+}: MarkdownEditorProps) {
+  const handleChange = (val?: string) => {
+    const newValue = val || ''
+    if (newValue.length <= maxLength) {
+      onChange(newValue)
+    }
+  }
+
+  return (
+    <div className={className}>
+      <MDEditor
+        value={value}
+        onChange={handleChange}
+        data-color-mode='dark'
+        preview='edit'
+        hideToolbar={false}
+        visibleDragbar={false}
+        height={300}
+        textareaProps={{
+          placeholder: placeholder,
+          style: {
+            fontSize: 14,
+            fontFamily:
+              'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
+          },
+        }}
+        toolbarHeight={40}
+      />
+
+      {/* Character count */}
+      <div className='px-4 py-2 border-t border-neutral-700 text-xs text-neutral-400 bg-neutral-800'>
+        {value.length}/{maxLength} characters
+      </div>
+    </div>
+  )
+}

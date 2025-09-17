@@ -18,3 +18,4 @@ prisma/dev.sqlite
 .DS_Store
 
 tsconfig.tsbuildinfo
+.vercel

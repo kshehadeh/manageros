@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createFeedback, updateFeedback } from '@/lib/actions'
 import { type FeedbackFormData } from '@/lib/validations'
 import { type Person } from '@prisma/client'
+import { MarkdownEditor } from './markdown-editor'
 
 interface FeedbackFormProps {
   person: Person
@@ -102,18 +103,12 @@ export function FeedbackForm({
         <label htmlFor='body' className='block text-sm font-medium mb-2'>
           Feedback Content
         </label>
-        <textarea
-          id='body'
+        <MarkdownEditor
           value={formData.body}
-          onChange={e => handleChange('body', e.target.value)}
-          rows={4}
-          className='w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none'
-          placeholder='Share your feedback...'
-          required
+          onChange={value => handleChange('body', value)}
+          placeholder='Share your feedback... Use Markdown for formatting!'
+          maxLength={2000}
         />
-        <div className='text-xs text-neutral-400 mt-1'>
-          {formData.body.length}/2000 characters
-        </div>
       </div>
 
       <div className='flex gap-2 pt-4'>
