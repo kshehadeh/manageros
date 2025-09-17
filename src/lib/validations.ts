@@ -99,3 +99,15 @@ export const csvPersonSchema = z.object({
 })
 
 export type CSVPersonData = z.infer<typeof csvPersonSchema>
+
+export const feedbackSchema = z.object({
+  aboutId: z.string().min(1, 'Person is required'),
+  kind: z.enum(['praise', 'concern', 'note']).default('note'),
+  isPrivate: z.boolean().default(true),
+  body: z
+    .string()
+    .min(1, 'Feedback content is required')
+    .max(2000, 'Feedback must be less than 2000 characters'),
+})
+
+export type FeedbackFormData = z.infer<typeof feedbackSchema>

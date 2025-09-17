@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createOrganization } from '@/lib/actions'
+import { useSession } from 'next-auth/react'
 
 export default function CreateOrganizationPage() {
   const [formData, setFormData] = useState({
@@ -12,6 +13,7 @@ export default function CreateOrganizationPage() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { update: updateSession } = useSession()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -20,6 +22,10 @@ export default function CreateOrganizationPage() {
 
     try {
       await createOrganization(formData)
+
+      // Update the session to reflect the new organization
+      await updateSession()
+
       router.push('/')
     } catch (error) {
       setError(

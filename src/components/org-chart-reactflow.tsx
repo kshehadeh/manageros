@@ -16,6 +16,7 @@ import ReactFlow, {
   Position,
   Handle,
 } from 'reactflow'
+import dagre from 'dagre'
 import 'reactflow/dist/style.css'
 
 interface Person {
@@ -70,19 +71,12 @@ function PersonNode({ data }: { data: Person }) {
         className='w-3 h-3 bg-neutral-400 dark:bg-neutral-500'
       />
 
-      {/* Bottom handles for outgoing connections */}
-      {data.reports.map((_, index) => (
-        <Handle
-          key={index}
-          type='source'
-          position={Position.Bottom}
-          id={`${data.id}-${index}`}
-          className='w-3 h-3 bg-neutral-400 dark:bg-neutral-500'
-          style={{
-            left: `${20 + index * 30}px`,
-          }}
-        />
-      ))}
+      {/* Bottom handle for outgoing connections */}
+      <Handle
+        type='source'
+        position={Position.Bottom}
+        className='w-3 h-3 bg-neutral-400 dark:bg-neutral-500'
+      />
 
       {/* Node content */}
       <div
@@ -144,50 +138,71 @@ const nodeTypes: NodeTypes = {
   person: PersonNode,
 }
 
+// Dagre layout configuration
+const getLayoutedElements = (
+  nodes: Node[],
+  edges: Edge[],
+  direction = 'TB'
+) => {
+  const dagreGraph = new dagre.graphlib.Graph()
+  dagreGraph.setDefaultEdgeLabel(() => ({}))
+  dagreGraph.setGraph({
+    rankdir: direction,
+    ranksep: 180, // Increased spacing between levels for better readability
+    nodesep: 80, // Increased spacing between nodes at the same level
+    edgesep: 30, // Increased spacing between edges
+    marginx: 60,
+    marginy: 60,
+    // Additional options to minimize edge crossings
+    align: 'UL', // Align nodes to upper left
+    acyclicer: 'greedy', // Use greedy algorithm for cycle removal
+  })
+
+  nodes.forEach(node => {
+    dagreGraph.setNode(node.id, {
+      width: 220,
+      height: 120,
+    })
+  })
+
+  edges.forEach(edge => {
+    dagreGraph.setEdge(edge.source, edge.target)
+  })
+
+  dagre.layout(dagreGraph)
+
+  nodes.forEach(node => {
+    const nodeWithPosition = dagreGraph.node(node.id)
+    node.targetPosition = Position.Top
+    node.sourcePosition = Position.Bottom
+    // We are shifting the dagre node position (anchor=center center) to the top left
+    // so it matches the React Flow node anchor point (top left).
+    node.position = {
+      x: nodeWithPosition.x - 110, // Half of node width
+      y: nodeWithPosition.y - 60, // Half of node height
+    }
+
+    return node
+  })
+
+  return { nodes, edges }
+}
+
 export function OrgChartReactFlow({ people }: OrgChartReactFlowProps) {
   // Convert people data to React Flow nodes and edges
   const { nodes, edges, containerHeight } = useMemo(() => {
     const nodeMap = new Map<string, Node>()
     const edgeList: Edge[] = []
 
-    // Constants for layout
-    const LEVEL_HEIGHT = 200
-    const NODE_WIDTH = 220
-    const NODE_SPACING = 30
-
-    // Group people by level
-    const levelGroups = new Map<number, Person[]>()
+    // Create nodes for all people
     people.forEach(person => {
-      if (!levelGroups.has(person.level)) {
-        levelGroups.set(person.level, [])
-      }
-      levelGroups.get(person.level)!.push(person)
-    })
-
-    const maxLevel = Math.max(...people.map(p => p.level))
-
-    // Calculate positions for each level
-    for (let level = 0; level <= maxLevel; level++) {
-      const levelPeople = levelGroups.get(level) || []
-      const levelCount = levelPeople.length
-
-      // Calculate total width needed for this level
-      const totalWidth =
-        levelCount * NODE_WIDTH + (levelCount - 1) * NODE_SPACING
-      const startX = Math.max(50, (800 - totalWidth) / 2) // Center the level with minimum margin
-
-      levelPeople.forEach((person, index) => {
-        const x = startX + index * (NODE_WIDTH + NODE_SPACING)
-        const y = 50 + level * LEVEL_HEIGHT
-
-        nodeMap.set(person.id, {
-          id: person.id,
-          type: 'person',
-          position: { x, y },
-          data: person,
-        })
+      nodeMap.set(person.id, {
+        id: person.id,
+        type: 'person',
+        position: { x: 0, y: 0 }, // Will be set by Dagre
+        data: person,
       })
-    }
+    })
 
     // Create edges
     people.forEach(person => {
@@ -204,16 +219,26 @@ export function OrgChartReactFlow({ people }: OrgChartReactFlowProps) {
               strokeWidth: 2,
             },
             className: 'text-neutral-300 dark:text-neutral-600',
+            animated: false,
+            // Add some curvature to avoid overlaps
+            pathOptions: {
+              borderRadius: 10,
+            },
           })
         }
       }
     })
 
+    // Apply Dagre layout
+    const initialNodes = Array.from(nodeMap.values())
+    const { nodes: layoutedNodes } = getLayoutedElements(initialNodes, edgeList)
+
     // Calculate container height based on the layout
-    const calculatedHeight = Math.max(400, 100 + (maxLevel + 1) * LEVEL_HEIGHT)
+    const maxY = Math.max(...layoutedNodes.map(node => node.position.y))
+    const calculatedHeight = Math.max(400, maxY + 200)
 
     return {
-      nodes: Array.from(nodeMap.values()),
+      nodes: layoutedNodes,
       edges: edgeList,
       containerHeight: calculatedHeight,
     }

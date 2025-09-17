@@ -12,6 +12,8 @@ import {
   type OneOnOneFormData,
   csvPersonSchema,
   type CSVPersonData,
+  feedbackSchema,
+  type FeedbackFormData,
 } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -1203,6 +1205,106 @@ export async function checkPendingInvitation(email: string) {
   return invitation
 }
 
+export async function getPendingInvitationsForUser() {
+  const user = await getCurrentUser()
+
+  // Only return invitations if user doesn't have an organization
+  if (user.organizationId) {
+    return []
+  }
+
+  const invitations = await prisma.organizationInvitation.findMany({
+    where: {
+      email: user.email,
+      status: 'pending',
+      expiresAt: {
+        gt: new Date(), // Not expired
+      },
+    },
+    include: {
+      organization: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          description: true,
+        },
+      },
+      invitedBy: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  // Convert Date objects to strings for client-side consumption
+  return invitations.map(invitation => ({
+    ...invitation,
+    createdAt: invitation.createdAt.toISOString(),
+    updatedAt: invitation.updatedAt.toISOString(),
+    expiresAt: invitation.expiresAt.toISOString(),
+  }))
+}
+
+export async function acceptInvitationForUser(invitationId: string) {
+  const user = await getCurrentUser()
+
+  // Check if user already has an organization
+  if (user.organizationId) {
+    throw new Error('User already belongs to an organization')
+  }
+
+  // Find the invitation
+  const invitation = await prisma.organizationInvitation.findFirst({
+    where: {
+      id: invitationId,
+      email: user.email,
+      status: 'pending',
+      expiresAt: {
+        gt: new Date(), // Not expired
+      },
+    },
+    include: {
+      organization: true,
+    },
+  })
+
+  if (!invitation) {
+    throw new Error('Invitation not found or expired')
+  }
+
+  // Update user and invitation in a transaction
+  const result = await prisma.$transaction(async tx => {
+    // Update user to join the organization
+    const updatedUser = await tx.user.update({
+      where: { id: user.id },
+      data: {
+        organizationId: invitation.organizationId,
+      },
+      include: {
+        organization: true,
+      },
+    })
+
+    // Mark invitation as accepted
+    await tx.organizationInvitation.update({
+      where: { id: invitation.id },
+      data: {
+        status: 'accepted',
+        acceptedAt: new Date(),
+      },
+    })
+
+    return updatedUser
+  })
+
+  revalidatePath('/')
+  return result
+}
+
 // CSV Import Actions
 
 function parseCSV(csvText: string): {
@@ -1532,4 +1634,421 @@ export async function importPersonsFromCSV(formData: FormData) {
     errors: allErrors,
     errorRows: errorRows,
   }
+}
+
+// Feedback Management Actions
+
+export async function createFeedback(formData: FeedbackFormData) {
+  const user = await getCurrentUser()
+
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to create feedback')
+  }
+
+  // Validate the form data
+  const validatedData = feedbackSchema.parse(formData)
+
+  // Get the current user's person record
+  const currentPerson = await prisma.person.findFirst({
+    where: {
+      user: {
+        id: user.id,
+      },
+    },
+  })
+
+  if (!currentPerson) {
+    throw new Error('No person record found for current user')
+  }
+
+  // Verify the person being given feedback belongs to the same organization
+  const aboutPerson = await prisma.person.findFirst({
+    where: {
+      id: validatedData.aboutId,
+      organizationId: user.organizationId,
+    },
+  })
+
+  if (!aboutPerson) {
+    throw new Error('Person not found or access denied')
+  }
+
+  // Create the feedback
+  const feedback = await prisma.feedback.create({
+    data: {
+      aboutId: validatedData.aboutId,
+      fromId: currentPerson.id,
+      kind: validatedData.kind,
+      isPrivate: validatedData.isPrivate,
+      body: validatedData.body,
+    },
+    include: {
+      about: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      from: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  })
+
+  revalidatePath(`/people/${validatedData.aboutId}`)
+  return feedback
+}
+
+export async function updateFeedback(id: string, formData: FeedbackFormData) {
+  const user = await getCurrentUser()
+
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to update feedback')
+  }
+
+  // Validate the form data
+  const validatedData = feedbackSchema.parse(formData)
+
+  // Get the current user's person record
+  const currentPerson = await prisma.person.findFirst({
+    where: {
+      user: {
+        id: user.id,
+      },
+    },
+  })
+
+  if (!currentPerson) {
+    throw new Error('No person record found for current user')
+  }
+
+  // Verify the feedback exists and the current user is the author
+  const existingFeedback = await prisma.feedback.findFirst({
+    where: {
+      id,
+      fromId: currentPerson.id,
+    },
+  })
+
+  if (!existingFeedback) {
+    throw new Error(
+      'Feedback not found or you do not have permission to edit it'
+    )
+  }
+
+  // Verify the person being given feedback belongs to the same organization
+  const aboutPerson = await prisma.person.findFirst({
+    where: {
+      id: validatedData.aboutId,
+      organizationId: user.organizationId,
+    },
+  })
+
+  if (!aboutPerson) {
+    throw new Error('Person not found or access denied')
+  }
+
+  // Update the feedback
+  const feedback = await prisma.feedback.update({
+    where: { id },
+    data: {
+      aboutId: validatedData.aboutId,
+      kind: validatedData.kind,
+      isPrivate: validatedData.isPrivate,
+      body: validatedData.body,
+    },
+    include: {
+      about: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      from: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  })
+
+  revalidatePath(`/people/${validatedData.aboutId}`)
+  return feedback
+}
+
+export async function deleteFeedback(id: string) {
+  const user = await getCurrentUser()
+
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to delete feedback')
+  }
+
+  // Get the current user's person record
+  const currentPerson = await prisma.person.findFirst({
+    where: {
+      user: {
+        id: user.id,
+      },
+    },
+  })
+
+  if (!currentPerson) {
+    throw new Error('No person record found for current user')
+  }
+
+  // Verify the feedback exists and the current user is the author
+  const existingFeedback = await prisma.feedback.findFirst({
+    where: {
+      id,
+      fromId: currentPerson.id,
+    },
+  })
+
+  if (!existingFeedback) {
+    throw new Error(
+      'Feedback not found or you do not have permission to delete it'
+    )
+  }
+
+  // Delete the feedback
+  await prisma.feedback.delete({
+    where: { id },
+  })
+
+  revalidatePath(`/people/${existingFeedback.aboutId}`)
+}
+
+export async function getFeedbackForPerson(personId: string) {
+  const user = await getCurrentUser()
+
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to view feedback')
+  }
+
+  // Get the current user's person record
+  const currentPerson = await prisma.person.findFirst({
+    where: {
+      user: {
+        id: user.id,
+      },
+    },
+  })
+
+  if (!currentPerson) {
+    throw new Error('No person record found for current user')
+  }
+
+  // Verify the person belongs to the same organization
+  const person = await prisma.person.findFirst({
+    where: {
+      id: personId,
+      organizationId: user.organizationId,
+    },
+  })
+
+  if (!person) {
+    throw new Error('Person not found or access denied')
+  }
+
+  // Get feedback for the person
+  // Only show feedback that is either:
+  // 1. Not private (public feedback)
+  // 2. Private feedback written by the current user
+  const feedback = await prisma.feedback.findMany({
+    where: {
+      aboutId: personId,
+      OR: [{ isPrivate: false }, { fromId: currentPerson.id }],
+    },
+    include: {
+      about: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      from: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  return feedback
+}
+
+export async function getFeedbackById(id: string) {
+  const user = await getCurrentUser()
+
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to view feedback')
+  }
+
+  // Get the current user's person record
+  const currentPerson = await prisma.person.findFirst({
+    where: {
+      user: {
+        id: user.id,
+      },
+    },
+  })
+
+  if (!currentPerson) {
+    throw new Error('No person record found for current user')
+  }
+
+  // Get the feedback, ensuring the current user has access to it
+  const feedback = await prisma.feedback.findFirst({
+    where: {
+      id,
+      OR: [{ isPrivate: false }, { fromId: currentPerson.id }],
+    },
+    include: {
+      about: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      from: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  })
+
+  if (!feedback) {
+    throw new Error('Feedback not found or you do not have access to it')
+  }
+
+  return feedback
+}
+
+export async function getAllFeedback(filters?: {
+  fromPersonId?: string
+  aboutPersonId?: string
+  kind?: string
+  isPrivate?: boolean
+  startDate?: string
+  endDate?: string
+}) {
+  const user = await getCurrentUser()
+
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to view feedback')
+  }
+
+  // Get the current user's person record
+  const currentPerson = await prisma.person.findFirst({
+    where: {
+      user: {
+        id: user.id,
+      },
+    },
+  })
+
+  if (!currentPerson) {
+    throw new Error('No person record found for current user')
+  }
+
+  // Build the where clause
+  const whereClause: Record<string, any> = {
+    OR: [
+      { isPrivate: false }, // Public feedback
+      { fromId: currentPerson.id }, // Private feedback written by current user
+    ],
+    // Ensure feedback is about people in the same organization
+    about: {
+      organizationId: user.organizationId,
+    },
+  }
+
+  // Apply filters
+  if (filters?.fromPersonId) {
+    whereClause.fromId = filters.fromPersonId
+  }
+
+  if (filters?.aboutPersonId) {
+    whereClause.aboutId = filters.aboutPersonId
+  }
+
+  if (filters?.kind) {
+    whereClause.kind = filters.kind
+  }
+
+  if (filters?.isPrivate !== undefined) {
+    whereClause.isPrivate = filters.isPrivate
+  }
+
+  if (filters?.startDate || filters?.endDate) {
+    whereClause.createdAt = {}
+    if (filters.startDate) {
+      whereClause.createdAt.gte = new Date(filters.startDate)
+    }
+    if (filters.endDate) {
+      whereClause.createdAt.lte = new Date(filters.endDate)
+    }
+  }
+
+  // Get all feedback with filters
+  const feedback = await prisma.feedback.findMany({
+    where: whereClause,
+    include: {
+      about: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
+      from: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  // Convert Date objects to strings for client-side consumption
+  return feedback.map(feedback => ({
+    ...feedback,
+    createdAt: feedback.createdAt.toISOString(),
+  }))
+}
+
+export async function getPeopleForFeedbackFilters() {
+  const user = await getCurrentUser()
+
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to view people')
+  }
+
+  // Get all people in the organization for filter dropdowns
+  const people = await prisma.person.findMany({
+    where: {
+      organizationId: user.organizationId,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+    },
+    orderBy: { name: 'asc' },
+  })
+
+  return people
 }

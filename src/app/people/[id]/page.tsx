@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db'
 import Link from 'next/link'
 import { Rag } from '@/components/rag'
 import { UserLinkForm } from '@/components/user-link-form'
+import { FeedbackList } from '@/components/feedback-list'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
@@ -16,6 +17,7 @@ import {
   CheckIn,
   Initiative,
   Objective,
+  Feedback,
 } from '@prisma/client'
 
 type PersonWithRelations = Person & {
@@ -40,6 +42,10 @@ type PersonWithRelations = Person & {
   })[]
   checkIns: (CheckIn & {
     initiative: Initiative
+  })[]
+  feedback: (Feedback & {
+    about: Person
+    from: Person
   })[]
 }
 
@@ -121,6 +127,23 @@ export default async function PersonDetailPage({
         },
         orderBy: { createdAt: 'desc' },
       },
+      feedback: {
+        include: {
+          about: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          from: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      },
     },
   })
 
@@ -138,6 +161,14 @@ export default async function PersonDetailPage({
   })
 
   const personWithRelations = person as PersonWithRelations
+
+  // Filter feedback based on privacy rules
+  // Only show feedback that is either:
+  // 1. Not private (public feedback)
+  // 2. Private feedback written by the current user
+  const visibleFeedback = personWithRelations.feedback.filter(
+    feedback => !feedback.isPrivate || feedback.fromId === currentPerson?.id
+  )
 
   return (
     <div className='space-y-6'>
@@ -651,6 +682,15 @@ export default async function PersonDetailPage({
             <div className='text-sm text-neutral-400'>Check-ins</div>
           </div>
         </div>
+      </section>
+
+      {/* Feedback Section */}
+      <section className='card'>
+        <FeedbackList
+          person={personWithRelations}
+          feedback={visibleFeedback}
+          currentUserId={currentPerson?.id}
+        />
       </section>
 
       {/* User Account Linking - Only show for admins */}

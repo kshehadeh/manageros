@@ -56,6 +56,9 @@ export default function Navigation() {
         <Link href='/oneonones' className='btn'>
           1:1s
         </Link>
+        <Link href='/feedback' className='btn'>
+          Feedback
+        </Link>
         {session.user.role === 'ADMIN' && (
           <Link href='/organization/invitations' className='btn'>
             Invitations

@@ -61,7 +61,7 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt',
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.role = user.role
         token.organizationId = user.organizationId
@@ -69,6 +69,30 @@ export const authOptions: NextAuthOptions = {
         token.organizationSlug = user.organizationSlug
         token.personId = user.personId
       }
+
+      // If this is a session update trigger, fetch fresh user data
+      if (trigger === 'update' && token.sub) {
+        const freshUser = await prisma.user.findUnique({
+          where: { id: token.sub },
+          include: {
+            organization: true,
+            person: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        })
+
+        if (freshUser) {
+          token.role = freshUser.role
+          token.organizationId = freshUser.organizationId
+          token.organizationName = freshUser.organization?.name || null
+          token.organizationSlug = freshUser.organization?.slug || null
+          token.personId = freshUser.person?.id || null
+        }
+      }
+
       return token
     },
     async session({ session, token }) {
