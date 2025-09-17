@@ -15,12 +15,12 @@ export function MarkdownEditor({
   value,
   onChange,
   placeholder = 'Start typing...',
-  maxLength = 2000,
+  maxLength,
   className = '',
 }: MarkdownEditorProps) {
   const handleChange = (val?: string) => {
     const newValue = val || ''
-    if (newValue.length <= maxLength) {
+    if (!maxLength || newValue.length <= maxLength) {
       onChange(newValue)
     }
   }
@@ -48,7 +48,9 @@ export function MarkdownEditor({
 
       {/* Character count */}
       <div className='px-4 py-2 border-t border-neutral-700 text-xs text-neutral-400 bg-neutral-800'>
-        {value.length}/{maxLength} characters
+        {maxLength
+          ? `${value.length}/${maxLength} characters`
+          : `${value.length} characters`}
       </div>
     </div>
   )

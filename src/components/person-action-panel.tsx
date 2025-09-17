@@ -10,7 +10,6 @@ import {
   CheckSquare,
   Calendar,
   MessageSquare,
-  Settings,
   BarChart3,
   ChevronDown,
 } from 'lucide-react'
@@ -131,7 +130,21 @@ export function PersonActionPanel({
                 </Link>
               )}
 
-              {/* New 1:1 - Show if current user can create a meeting with this person */}
+              {/* Add Feedback - Show for all users */}
+              {!showFeedbackForm ? (
+                <button
+                  onClick={() => {
+                    setShowFeedbackForm(true)
+                    setIsDropdownOpen(false)
+                  }}
+                  className='w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-neutral-700 transition-colors text-left'
+                >
+                  <MessageSquare className='w-4 h-4' />
+                  Add Feedback
+                </button>
+              ) : null}
+
+              {/* Add a 1:1 - Show if current user can create a meeting with this person */}
               {canCreateOneOnOne && (
                 <Link
                   href={`/oneonones/new?managerId=${
@@ -153,33 +166,7 @@ export function PersonActionPanel({
                   onClick={() => setIsDropdownOpen(false)}
                 >
                   <Calendar className='w-4 h-4' />
-                  New 1:1
-                </Link>
-              )}
-
-              {/* Add Feedback - Show for all users */}
-              {!showFeedbackForm ? (
-                <button
-                  onClick={() => {
-                    setShowFeedbackForm(true)
-                    setIsDropdownOpen(false)
-                  }}
-                  className='w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-neutral-700 transition-colors text-left'
-                >
-                  <MessageSquare className='w-4 h-4' />
-                  Add Feedback
-                </button>
-              ) : null}
-
-              {/* Manage 1:1s - Show if person has reports or a manager */}
-              {((person.reports?.length ?? 0) > 0 || person.manager) && (
-                <Link
-                  href='/oneonones'
-                  className='flex items-center gap-3 px-4 py-2 text-sm hover:bg-neutral-700 transition-colors'
-                  onClick={() => setIsDropdownOpen(false)}
-                >
-                  <Settings className='w-4 h-4' />
-                  Manage 1:1s
+                  Add a 1:1
                 </Link>
               )}
 

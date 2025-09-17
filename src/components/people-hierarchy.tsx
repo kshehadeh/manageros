@@ -44,7 +44,7 @@ export function PeopleHierarchy({ people }: PeopleHierarchyProps) {
             {/* Vertical line for hierarchy levels */}
             {person.level > 0 && (
               <div
-                className='absolute w-px bg-neutral-300 dark:bg-neutral-600'
+                className='absolute w-px bg-neutral-600'
                 style={{
                   left: `${person.level * 32 - 16}px`,
                   top: '0px',
@@ -56,7 +56,7 @@ export function PeopleHierarchy({ people }: PeopleHierarchyProps) {
             {/* Horizontal connector line */}
             {person.level > 0 && (
               <div
-                className='absolute w-4 h-px bg-neutral-300 dark:bg-neutral-600'
+                className='absolute w-4 h-px bg-neutral-600'
                 style={{
                   left: `${person.level * 32 - 16}px`,
                   top: '50%',
@@ -80,7 +80,7 @@ export function PeopleHierarchy({ people }: PeopleHierarchyProps) {
                       {person.name}
                     </Link>
                     {person.reports.length > 0 && (
-                      <span className='text-xs text-neutral-500 bg-neutral-100 dark:bg-neutral-800 px-2 py-1 rounded-full'>
+                      <span className='text-xs text-neutral-500 bg-neutral-800 px-2 py-1 rounded-full'>
                         {person.reports.length} report
                         {person.reports.length !== 1 ? 's' : ''}
                       </span>

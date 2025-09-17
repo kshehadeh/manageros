@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createFeedback, updateFeedback } from '@/lib/actions'
 import { type FeedbackFormData } from '@/lib/validations'
 import { type Person } from '@prisma/client'
@@ -14,6 +15,7 @@ interface FeedbackFormProps {
     isPrivate: boolean
     body: string
   }
+  redirectTo?: string
   onSuccess?: () => void
   onCancel?: () => void
 }
@@ -21,9 +23,11 @@ interface FeedbackFormProps {
 export function FeedbackForm({
   person,
   feedback,
+  redirectTo,
   onSuccess,
   onCancel,
 }: FeedbackFormProps) {
+  const router = useRouter()
   const [formData, setFormData] = useState<FeedbackFormData>({
     aboutId: person.id,
     kind: feedback?.kind || 'note',
@@ -44,7 +48,13 @@ export function FeedbackForm({
       } else {
         await createFeedback(formData)
       }
-      onSuccess?.()
+
+      // Handle redirect or callback
+      if (redirectTo) {
+        router.push(redirectTo)
+      } else {
+        onSuccess?.()
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -107,7 +117,6 @@ export function FeedbackForm({
           value={formData.body}
           onChange={value => handleChange('body', value)}
           placeholder='Share your feedback... Use Markdown for formatting!'
-          maxLength={2000}
         />
       </div>
 

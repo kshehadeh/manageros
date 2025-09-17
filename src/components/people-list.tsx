@@ -48,7 +48,7 @@ export function PeopleList({ people }: PeopleListProps) {
         <Link
           key={person.id}
           href={`/people/${person.id}`}
-          className='block p-4 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600 transition-colors'
+          className='block p-4 bg-neutral-900/60 border border-neutral-800 rounded-lg hover:border-neutral-700 transition-colors'
         >
           <div className='flex items-center justify-between'>
             <div className='flex-1'>
@@ -63,20 +63,20 @@ export function PeopleList({ people }: PeopleListProps) {
                           : 'bg-yellow-500'
                     }`}
                   />
-                  <h3 className='font-semibold text-neutral-900 dark:text-neutral-100'>
+                  <h3 className='font-semibold text-neutral-100'>
                     {person.name}
                   </h3>
                 </div>
                 {person.role && (
-                  <span className='text-sm text-neutral-600 dark:text-neutral-400'>
+                  <span className='text-sm text-neutral-400'>
                     {person.role}
                   </span>
                 )}
               </div>
-              <div className='mt-1 flex items-center gap-4 text-sm text-neutral-500 dark:text-neutral-400'>
+              <div className='mt-1 flex items-center gap-4 text-sm text-neutral-400'>
                 {person.email && <span>{person.email}</span>}
                 {person.team && (
-                  <span className='bg-neutral-100 dark:bg-neutral-700 px-2 py-1 rounded text-xs'>
+                  <span className='bg-neutral-800 px-2 py-1 rounded text-xs'>
                     {person.team.name}
                   </span>
                 )}
@@ -95,7 +95,7 @@ export function PeopleList({ people }: PeopleListProps) {
             </div>
             <div className='flex items-center gap-2'>
               {person.reports.length > 0 && (
-                <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'>
+                <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-900 text-blue-300'>
                   {person.reports.length} reports
                 </span>
               )}

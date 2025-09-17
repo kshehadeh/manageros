@@ -184,7 +184,7 @@ export default async function Home() {
         <section className='card'>
           <div className='flex items-center justify-between mb-3'>
             <h2 className='font-semibold'>Direct Reports</h2>
-            <Link href='/people' className='text-sm underline'>
+            <Link href='/direct-reports' className='text-sm underline'>
               View all
             </Link>
           </div>

@@ -94,21 +94,17 @@ export default async function FeedbackEditPage({
         </Link>
       </div>
 
-      <div className='max-w-2xl'>
-        <div className='card'>
-          <FeedbackForm
-            person={person}
-            feedback={{
-              id: feedback.id,
-              kind: feedback.kind as 'praise' | 'concern' | 'note',
-              isPrivate: feedback.isPrivate,
-              body: feedback.body,
-            }}
-            onSuccess={() => {
-              redirect(`/people/${id}`)
-            }}
-          />
-        </div>
+      <div className='card'>
+        <FeedbackForm
+          person={person}
+          feedback={{
+            id: feedback.id,
+            kind: feedback.kind as 'praise' | 'concern' | 'note',
+            isPrivate: feedback.isPrivate,
+            body: feedback.body,
+          }}
+          redirectTo={`/people/${id}`}
+        />
       </div>
     </div>
   )

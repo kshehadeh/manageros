@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { getAllFeedback, getPeopleForFeedbackFilters } from '@/lib/actions'
 import FeedbackViewClient from '@/components/feedback-view-client'
+import { prisma } from '@/lib/db'
 
 interface FeedbackPageProps {
   searchParams: Promise<{
@@ -50,9 +51,16 @@ export default async function FeedbackPage({
     Object.entries(filters).filter(([_, value]) => value !== undefined)
   )
 
-  const [feedback, people] = await Promise.all([
+  const [feedback, people, currentPerson] = await Promise.all([
     getAllFeedback(cleanFilters),
     getPeopleForFeedbackFilters(),
+    prisma.person.findFirst({
+      where: {
+        user: {
+          id: session.user.id,
+        },
+      },
+    }),
   ])
 
   return (
@@ -70,6 +78,7 @@ export default async function FeedbackPage({
           initialFeedback={feedback}
           people={people}
           currentFilters={cleanFilters}
+          currentUserId={currentPerson?.id}
         />
       </div>
     </div>

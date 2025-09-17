@@ -14,6 +14,8 @@ import {
   type CSVPersonData,
   feedbackSchema,
   type FeedbackFormData,
+  taskSchema,
+  type TaskFormData,
 } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -257,6 +259,135 @@ export async function createInitiative(formData: InitiativeFormData) {
 
   // Redirect to the new initiative
   redirect(`/initiatives/${initiative.id}`)
+}
+
+export async function updateInitiative(
+  id: string,
+  formData: InitiativeFormData
+) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to update initiatives')
+  }
+
+  // Validate the form data
+  const validatedData = initiativeSchema.parse(formData)
+
+  // Parse dates if provided
+  const startDate = validatedData.startDate
+    ? new Date(validatedData.startDate)
+    : null
+  const targetDate = validatedData.targetDate
+    ? new Date(validatedData.targetDate)
+    : null
+
+  // Verify initiative belongs to user's organization
+  const existingInitiative = await prisma.initiative.findFirst({
+    where: {
+      id,
+      organizationId: user.organizationId,
+    },
+  })
+  if (!existingInitiative) {
+    throw new Error('Initiative not found or access denied')
+  }
+
+  // Verify team belongs to user's organization if specified
+  if (validatedData.teamId) {
+    const team = await prisma.team.findFirst({
+      where: {
+        id: validatedData.teamId,
+        organizationId: user.organizationId,
+      },
+    })
+    if (!team) {
+      throw new Error('Team not found or access denied')
+    }
+  }
+
+  // Update the initiative with objectives and owners
+  const initiative = await prisma.initiative.update({
+    where: { id },
+    data: {
+      title: validatedData.title,
+      summary: validatedData.summary,
+      outcome: validatedData.outcome,
+      startDate,
+      targetDate,
+      status: validatedData.status,
+      rag: validatedData.rag,
+      confidence: validatedData.confidence,
+      teamId: validatedData.teamId,
+      // Update objectives by deleting existing and creating new ones
+      objectives: {
+        deleteMany: {},
+        create:
+          validatedData.objectives?.map((obj, index) => ({
+            title: obj.title,
+            keyResult: obj.keyResult,
+            sortIndex: index,
+          })) || [],
+      },
+      // Update owners by deleting existing and creating new ones
+      owners: {
+        deleteMany: {},
+        create:
+          validatedData.owners?.map(owner => ({
+            personId: owner.personId,
+            role: owner.role,
+          })) || [],
+      },
+    },
+    include: {
+      objectives: true,
+      owners: {
+        include: {
+          person: true,
+        },
+      },
+      team: true,
+    },
+  })
+
+  // Revalidate the initiatives page
+  revalidatePath('/initiatives')
+  revalidatePath(`/initiatives/${id}`)
+
+  // Redirect to the updated initiative
+  redirect(`/initiatives/${initiative.id}`)
+}
+
+export async function deleteInitiative(id: string) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to delete initiatives')
+  }
+
+  // Verify initiative belongs to user's organization
+  const existingInitiative = await prisma.initiative.findFirst({
+    where: {
+      id,
+      organizationId: user.organizationId,
+    },
+  })
+  if (!existingInitiative) {
+    throw new Error('Initiative not found or access denied')
+  }
+
+  // Delete the initiative (this will cascade delete objectives, owners, check-ins, etc.)
+  await prisma.initiative.delete({
+    where: { id },
+  })
+
+  // Revalidate the initiatives page
+  revalidatePath('/initiatives')
+
+  // Redirect to the initiatives list
+  redirect('/initiatives')
 }
 
 export async function getTeams() {
@@ -1932,6 +2063,57 @@ export async function getFeedbackById(id: string) {
   return feedback
 }
 
+export async function getDirectReports() {
+  try {
+    const user = await getCurrentUser()
+    if (!user.organizationId || !user.personId) {
+      return []
+    }
+
+    // Get the current user's person record
+    const currentPerson = await prisma.person.findUnique({
+      where: { id: user.personId },
+      include: {
+        reports: {
+          include: {
+            team: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+            _count: {
+              select: {
+                oneOnOnes: true,
+                feedback: true,
+                tasks: true,
+                reports: true,
+              },
+            },
+          },
+          orderBy: { name: 'asc' },
+        },
+      },
+    })
+
+    if (!currentPerson) {
+      return []
+    }
+
+    return currentPerson.reports
+  } catch (error) {
+    console.error('Error fetching direct reports:', error)
+    return []
+  }
+}
+
 export async function getAllFeedback(filters?: {
   fromPersonId?: string
   aboutPersonId?: string
@@ -1960,7 +2142,7 @@ export async function getAllFeedback(filters?: {
   }
 
   // Build the where clause
-  const whereClause: Record<string, any> = {
+  const whereClause: any = {
     OR: [
       { isPrivate: false }, // Public feedback
       { fromId: currentPerson.id }, // Private feedback written by current user
@@ -2051,4 +2233,275 @@ export async function getPeopleForFeedbackFilters() {
   })
 
   return people
+}
+
+// Task Actions
+export async function createTask(formData: TaskFormData) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to create tasks')
+  }
+
+  // Validate the form data
+  const validatedData = taskSchema.parse(formData)
+
+  // Parse due date if provided
+  const dueDate = validatedData.dueDate ? new Date(validatedData.dueDate) : null
+
+  // Verify assignee belongs to user's organization if specified
+  if (validatedData.assigneeId) {
+    const assignee = await prisma.person.findFirst({
+      where: {
+        id: validatedData.assigneeId,
+        organizationId: user.organizationId,
+      },
+    })
+    if (!assignee) {
+      throw new Error('Assignee not found or access denied')
+    }
+  }
+
+  // Verify initiative belongs to user's organization if specified
+  if (validatedData.initiativeId) {
+    const initiative = await prisma.initiative.findFirst({
+      where: {
+        id: validatedData.initiativeId,
+        organizationId: user.organizationId,
+      },
+    })
+    if (!initiative) {
+      throw new Error('Initiative not found or access denied')
+    }
+  }
+
+  // Verify objective belongs to user's organization if specified
+  if (validatedData.objectiveId) {
+    const objective = await prisma.objective.findFirst({
+      where: {
+        id: validatedData.objectiveId,
+        initiative: {
+          organizationId: user.organizationId,
+        },
+      },
+    })
+    if (!objective) {
+      throw new Error('Objective not found or access denied')
+    }
+  }
+
+  // Create the task
+  const task = await prisma.task.create({
+    data: {
+      title: validatedData.title,
+      description: validatedData.description,
+      assigneeId: validatedData.assigneeId,
+      status: validatedData.status,
+      priority: validatedData.priority,
+      estimate: validatedData.estimate,
+      dueDate,
+      initiativeId: validatedData.initiativeId,
+      objectiveId: validatedData.objectiveId,
+    },
+    include: {
+      assignee: true,
+      initiative: true,
+      objective: true,
+    },
+  })
+
+  // Revalidate the tasks page
+  revalidatePath('/tasks')
+
+  // Redirect to the new task
+  redirect(`/tasks/${task.id}`)
+}
+
+export async function updateTask(taskId: string, formData: TaskFormData) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to update tasks')
+  }
+
+  // Validate the form data
+  const validatedData = taskSchema.parse(formData)
+
+  // Parse due date if provided
+  const dueDate = validatedData.dueDate ? new Date(validatedData.dueDate) : null
+
+  // Verify task belongs to user's organization
+  const existingTask = await prisma.task.findFirst({
+    where: {
+      id: taskId,
+      OR: [
+        { assignee: { organizationId: user.organizationId } },
+        { initiative: { organizationId: user.organizationId } },
+        { objective: { initiative: { organizationId: user.organizationId } } },
+      ],
+    },
+  })
+
+  if (!existingTask) {
+    throw new Error('Task not found or access denied')
+  }
+
+  // Verify assignee belongs to user's organization if specified
+  if (validatedData.assigneeId) {
+    const assignee = await prisma.person.findFirst({
+      where: {
+        id: validatedData.assigneeId,
+        organizationId: user.organizationId,
+      },
+    })
+    if (!assignee) {
+      throw new Error('Assignee not found or access denied')
+    }
+  }
+
+  // Verify initiative belongs to user's organization if specified
+  if (validatedData.initiativeId) {
+    const initiative = await prisma.initiative.findFirst({
+      where: {
+        id: validatedData.initiativeId,
+        organizationId: user.organizationId,
+      },
+    })
+    if (!initiative) {
+      throw new Error('Initiative not found or access denied')
+    }
+  }
+
+  // Verify objective belongs to user's organization if specified
+  if (validatedData.objectiveId) {
+    const objective = await prisma.objective.findFirst({
+      where: {
+        id: validatedData.objectiveId,
+        initiative: {
+          organizationId: user.organizationId,
+        },
+      },
+    })
+    if (!objective) {
+      throw new Error('Objective not found or access denied')
+    }
+  }
+
+  // Update the task
+  const task = await prisma.task.update({
+    where: { id: taskId },
+    data: {
+      title: validatedData.title,
+      description: validatedData.description,
+      assigneeId: validatedData.assigneeId,
+      status: validatedData.status,
+      priority: validatedData.priority,
+      estimate: validatedData.estimate,
+      dueDate,
+      initiativeId: validatedData.initiativeId,
+      objectiveId: validatedData.objectiveId,
+      completedAt: validatedData.status === 'done' ? new Date() : null,
+    },
+    include: {
+      assignee: true,
+      initiative: true,
+      objective: true,
+    },
+  })
+
+  // Revalidate the tasks page and task detail page
+  revalidatePath('/tasks')
+  revalidatePath(`/tasks/${taskId}`)
+
+  // Redirect to the updated task
+  redirect(`/tasks/${task.id}`)
+}
+
+export async function deleteTask(taskId: string) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to delete tasks')
+  }
+
+  // Verify task belongs to user's organization
+  const task = await prisma.task.findFirst({
+    where: {
+      id: taskId,
+      OR: [
+        { assignee: { organizationId: user.organizationId } },
+        { initiative: { organizationId: user.organizationId } },
+        { objective: { initiative: { organizationId: user.organizationId } } },
+      ],
+    },
+  })
+
+  if (!task) {
+    throw new Error('Task not found or access denied')
+  }
+
+  // Delete the task
+  await prisma.task.delete({
+    where: { id: taskId },
+  })
+
+  // Revalidate the tasks page
+  revalidatePath('/tasks')
+}
+
+export async function getTasks() {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to view tasks')
+  }
+
+  const tasks = await prisma.task.findMany({
+    where: {
+      OR: [
+        { assignee: { organizationId: user.organizationId } },
+        { initiative: { organizationId: user.organizationId } },
+        { objective: { initiative: { organizationId: user.organizationId } } },
+      ],
+    },
+    include: {
+      assignee: true,
+      initiative: true,
+      objective: true,
+    },
+    orderBy: { updatedAt: 'desc' },
+  })
+
+  return tasks
+}
+
+export async function getTask(taskId: string) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to view tasks')
+  }
+
+  const task = await prisma.task.findFirst({
+    where: {
+      id: taskId,
+      OR: [
+        { assignee: { organizationId: user.organizationId } },
+        { initiative: { organizationId: user.organizationId } },
+        { objective: { initiative: { organizationId: user.organizationId } } },
+      ],
+    },
+    include: {
+      assignee: true,
+      initiative: true,
+      objective: true,
+    },
+  })
+
+  return task
 }

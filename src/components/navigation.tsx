@@ -53,6 +53,9 @@ export default function Navigation() {
         <Link href='/teams' className='btn'>
           Teams
         </Link>
+        <Link href='/tasks' className='btn'>
+          Tasks
+        </Link>
         <Link href='/oneonones' className='btn'>
           1:1s
         </Link>

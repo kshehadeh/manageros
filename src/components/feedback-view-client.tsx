@@ -4,7 +4,7 @@ import { useState, useTransition, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import ReactMarkdown from 'react-markdown'
-import { getAllFeedback } from '@/lib/actions'
+import { getAllFeedback, deleteFeedback } from '@/lib/actions'
 
 interface Person {
   id: string
@@ -36,17 +36,20 @@ interface FeedbackViewClientProps {
     startDate?: string
     endDate?: string
   }
+  currentUserId?: string
 }
 
 export default function FeedbackViewClient({
   initialFeedback,
   people,
   currentFilters,
+  currentUserId,
 }: FeedbackViewClientProps) {
   const [feedback, setFeedback] = useState(initialFeedback)
   const [filters, setFilters] = useState(currentFilters)
   const [isPending, startTransition] = useTransition()
   const [isLoading, setIsLoading] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -104,6 +107,22 @@ export default function FeedbackViewClient({
     startTransition(() => {
       router.push('/feedback')
     })
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this feedback?')) return
+
+    setDeletingId(id)
+    try {
+      await deleteFeedback(id)
+      // Remove the deleted feedback from the local state
+      setFeedback(prev => prev.filter(item => item.id !== id))
+    } catch (error) {
+      console.error('Failed to delete feedback:', error)
+      alert('Failed to delete feedback. Please try again.')
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   const formatDate = (dateString: string) => {
@@ -347,12 +366,23 @@ export default function FeedbackViewClient({
                     </div>
                   </div>
 
-                  <Link
-                    href={`/people/${item.about.id}/feedback/${item.id}/edit`}
-                    className='text-sm text-neutral-400 hover:text-neutral-300 underline'
-                  >
-                    Edit
-                  </Link>
+                  <div className='flex gap-2'>
+                    <Link
+                      href={`/people/${item.about.id}/feedback/${item.id}/edit`}
+                      className='text-sm text-neutral-400 hover:text-neutral-300 underline'
+                    >
+                      Edit
+                    </Link>
+                    {item.fromId === currentUserId && (
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        disabled={deletingId === item.id}
+                        className='text-sm text-red-400 hover:text-red-300 underline disabled:opacity-50'
+                      >
+                        {deletingId === item.id ? 'Deleting...' : 'Delete'}
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div className='prose prose-invert prose-sm max-w-none text-neutral-200'>

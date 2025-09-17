@@ -63,33 +63,33 @@ function PersonNode({ data }: { data: Person }) {
   }, [data.id, router])
 
   return (
-    <div className='bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 min-w-[200px]'>
+    <div className='bg-neutral-900/60 border-2 border-neutral-600 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 min-w-[200px]'>
       {/* Top handle for incoming connections */}
       <Handle
         type='target'
         position={Position.Top}
-        className='w-3 h-3 bg-neutral-400 dark:bg-neutral-500'
+        className='w-3 h-3 bg-neutral-500'
       />
 
       {/* Bottom handle for outgoing connections */}
       <Handle
         type='source'
         position={Position.Bottom}
-        className='w-3 h-3 bg-neutral-400 dark:bg-neutral-500'
+        className='w-3 h-3 bg-neutral-500'
       />
 
       {/* Node content */}
       <div
-        className='p-3 cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors duration-200'
+        className='p-3 cursor-pointer hover:bg-neutral-800 transition-colors duration-200'
         onClick={handleClick}
       >
         {/* Header with name and reports count */}
         <div className='flex items-center justify-between mb-2'>
-          <h3 className='font-semibold text-sm text-neutral-900 dark:text-neutral-100 truncate'>
+          <h3 className='font-semibold text-sm text-neutral-100 truncate'>
             {data.name}
           </h3>
           {data.reports.length > 0 && (
-            <span className='bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded-full font-medium'>
+            <span className='bg-blue-900 text-blue-300 text-xs px-2 py-1 rounded-full font-medium'>
               {data.reports.length}
             </span>
           )}
@@ -97,23 +97,19 @@ function PersonNode({ data }: { data: Person }) {
 
         {/* Role */}
         {data.role && (
-          <p className='text-xs text-neutral-600 dark:text-neutral-400 mb-1 truncate'>
-            {data.role}
-          </p>
+          <p className='text-xs text-neutral-400 mb-1 truncate'>{data.role}</p>
         )}
 
         {/* Team */}
         {data.team && (
-          <p className='text-xs text-neutral-500 dark:text-neutral-500 mb-1 truncate'>
+          <p className='text-xs text-neutral-500 mb-1 truncate'>
             {data.team.name}
           </p>
         )}
 
         {/* Email */}
         {data.email && (
-          <p className='text-xs text-neutral-400 dark:text-neutral-600 truncate'>
-            {data.email}
-          </p>
+          <p className='text-xs text-neutral-600 truncate'>{data.email}</p>
         )}
 
         {/* Status indicator */}
@@ -218,7 +214,7 @@ export function OrgChartReactFlow({ people }: OrgChartReactFlowProps) {
               stroke: 'currentColor',
               strokeWidth: 2,
             },
-            className: 'text-neutral-300 dark:text-neutral-600',
+            className: 'text-neutral-600',
             animated: false,
             // Add some curvature to avoid overlaps
             pathOptions: {
@@ -264,7 +260,7 @@ export function OrgChartReactFlow({ people }: OrgChartReactFlowProps) {
 
   return (
     <div
-      className='w-full border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden'
+      className='w-full border border-neutral-800 rounded-lg overflow-hidden'
       style={{ height: `${containerHeight}px` }}
     >
       <ReactFlow
@@ -279,15 +275,15 @@ export function OrgChartReactFlow({ people }: OrgChartReactFlowProps) {
           padding: 0.1,
           includeHiddenNodes: false,
         }}
-        className='bg-neutral-50 dark:bg-neutral-900'
+        className='bg-neutral-900'
         style={{ height: '100%' }}
       >
-        <Controls className='bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700' />
+        <Controls className='bg-neutral-800 border border-neutral-700' />
         <Background
           variant={BackgroundVariant.Dots}
           gap={20}
           size={1}
-          className='text-neutral-200 dark:text-neutral-800'
+          className='text-neutral-800'
         />
       </ReactFlow>
     </div>

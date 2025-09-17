@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import { DeleteInitiativeButton } from '@/components/delete-initiative-button'
 
 export default async function InitiativeDetail({
   params,
@@ -44,43 +45,72 @@ export default async function InitiativeDetail({
     <div className='space-y-6'>
       <div className='card'>
         <div className='flex items-center justify-between'>
-          <div>
-            <h2 className='text-lg font-semibold'>{init.title}</h2>
-            <p className='text-neutral-400'>{init.summary ?? ''}</p>
-            <div className='text-xs text-neutral-500 mt-2'>
+          <div className='flex-1'>
+            <div className='flex items-center gap-3 mb-2'>
+              <h2 className='text-lg font-semibold'>{init.title}</h2>
+              <div className='flex items-center gap-2'>
+                <Rag rag={init.rag} />
+                <span className='badge'>{init.confidence}%</span>
+              </div>
+            </div>
+            <p className='text-neutral-400 mb-4'>{init.summary ?? ''}</p>
+
+            {/* Team and Owner Details */}
+            <div className='space-y-3'>
               {init.team && (
-                <span>
-                  Team:{' '}
+                <div className='flex items-center gap-2'>
+                  <span className='text-sm font-medium text-neutral-300'>
+                    Team:
+                  </span>
                   <Link
                     href={`/teams/${init.team.id}`}
-                    className='hover:text-blue-400'
+                    className='text-blue-400 hover:text-blue-300 font-medium'
                   >
                     {init.team.name}
                   </Link>
-                </span>
+                </div>
               )}
+
               {init.owners.length > 0 && (
-                <span>
-                  {init.team && ' • '}
-                  Owners:{' '}
-                  {init.owners.map((owner, index) => (
-                    <span key={owner.person.id}>
-                      <Link
-                        href={`/people/${owner.person.id}`}
-                        className='hover:text-blue-400'
+                <div className='flex items-center gap-2'>
+                  <span className='text-sm font-medium text-neutral-300'>
+                    Owners:
+                  </span>
+                  <div className='flex items-center gap-2'>
+                    {init.owners.map((owner, index) => (
+                      <span
+                        key={owner.person.id}
+                        className='flex items-center gap-1'
                       >
-                        {owner.person.name}
-                      </Link>
-                      {index < init.owners.length - 1 && ', '}
-                    </span>
-                  ))}
-                </span>
+                        <Link
+                          href={`/people/${owner.person.id}`}
+                          className='text-blue-400 hover:text-blue-300 font-medium'
+                        >
+                          {owner.person.name}
+                        </Link>
+                        <span className='text-xs text-neutral-500'>
+                          ({owner.role})
+                        </span>
+                        {index < init.owners.length - 1 && (
+                          <span className='text-neutral-500'>,</span>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           </div>
+
+          {/* Action Buttons */}
           <div className='flex items-center gap-2'>
-            <Rag rag={init.rag} />
-            <span className='badge'>{init.confidence}%</span>
+            <Link
+              href={`/initiatives/${init.id}/edit`}
+              className='btn bg-blue-600 hover:bg-blue-700 text-sm'
+            >
+              Edit
+            </Link>
+            <DeleteInitiativeButton initiativeId={init.id} />
           </div>
         </div>
       </div>

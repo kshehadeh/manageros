@@ -52,13 +52,13 @@ export function PeoplePageClient({ people }: PeoplePageClientProps) {
         <h2 className='text-lg font-semibold'>People</h2>
         <div className='flex items-center gap-3'>
           {/* View Toggle */}
-          <div className='flex items-center bg-neutral-100 dark:bg-neutral-800 rounded-lg p-1'>
+          <div className='flex items-center bg-neutral-800 rounded-lg p-1'>
             <button
               onClick={() => setViewMode('chart')}
               className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                 viewMode === 'chart'
-                  ? 'bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 shadow-sm'
-                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100'
+                  ? 'bg-neutral-700 text-neutral-100 shadow-sm'
+                  : 'text-neutral-400 hover:text-neutral-100'
               }`}
             >
               <div className='flex items-center gap-2'>
@@ -82,8 +82,8 @@ export function PeoplePageClient({ people }: PeoplePageClientProps) {
               onClick={() => setViewMode('list')}
               className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                 viewMode === 'list'
-                  ? 'bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 shadow-sm'
-                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100'
+                  ? 'bg-neutral-700 text-neutral-100 shadow-sm'
+                  : 'text-neutral-400 hover:text-neutral-100'
               }`}
             >
               <div className='flex items-center gap-2'>

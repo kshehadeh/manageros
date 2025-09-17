@@ -104,10 +104,26 @@ export const feedbackSchema = z.object({
   aboutId: z.string().min(1, 'Person is required'),
   kind: z.enum(['praise', 'concern', 'note']).default('note'),
   isPrivate: z.boolean().default(true),
-  body: z
-    .string()
-    .min(1, 'Feedback content is required')
-    .max(2000, 'Feedback must be less than 2000 characters'),
+  body: z.string().min(1, 'Feedback content is required'),
 })
 
 export type FeedbackFormData = z.infer<typeof feedbackSchema>
+
+export const taskSchema = z.object({
+  title: z
+    .string()
+    .min(1, 'Task title is required')
+    .max(200, 'Title must be less than 200 characters'),
+  description: z.string().optional(),
+  assigneeId: z.string().optional(),
+  status: z
+    .enum(['todo', 'doing', 'blocked', 'done', 'dropped'])
+    .default('todo'),
+  priority: z.number().min(1).max(5).default(2),
+  estimate: z.number().min(0).optional(),
+  dueDate: z.string().optional(),
+  initiativeId: z.string().optional(),
+  objectiveId: z.string().optional(),
+})
+
+export type TaskFormData = z.infer<typeof taskSchema>
