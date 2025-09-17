@@ -2142,6 +2142,7 @@ export async function getAllFeedback(filters?: {
   }
 
   // Build the where clause
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const whereClause: any = {
     OR: [
       { isPrivate: false }, // Public feedback
