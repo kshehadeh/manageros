@@ -127,3 +127,15 @@ export const taskSchema = z.object({
 })
 
 export type TaskFormData = z.infer<typeof taskSchema>
+
+export const checkInSchema = z.object({
+  initiativeId: z.string().min(1, 'Initiative is required'),
+  weekOf: z.string().min(1, 'Week of date is required'),
+  rag: z.enum(['green', 'amber', 'red']).default('green'),
+  confidence: z.number().min(0).max(100).default(80),
+  summary: z.string().min(1, 'Summary is required'),
+  blockers: z.string().optional(),
+  nextSteps: z.string().optional(),
+})
+
+export type CheckInFormData = z.infer<typeof checkInSchema>

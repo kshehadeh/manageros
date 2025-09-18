@@ -1,11 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
 import { OrgChartReactFlow } from '@/components/org-chart-reactflow'
 import { PeopleList } from '@/components/people-list'
 import { useSession } from 'next-auth/react'
 import { isAdmin } from '@/lib/auth'
+import { useUserSettings } from '@/lib/hooks/use-user-settings'
 
 interface Person {
   id: string
@@ -43,8 +43,16 @@ interface PeoplePageClientProps {
 }
 
 export function PeoplePageClient({ people }: PeoplePageClientProps) {
-  const [viewMode, setViewMode] = useState<'list' | 'chart'>('chart')
   const { data: session } = useSession()
+  const { getSetting, updateSetting } = useUserSettings()
+
+  // Get the current view mode from user settings, defaulting to 'chart'
+  const viewMode = getSetting('peopleViewMode')
+
+  // Function to handle view mode changes
+  const handleViewModeChange = (mode: 'list' | 'chart') => {
+    updateSetting('peopleViewMode', mode)
+  }
 
   return (
     <div className='space-y-4'>
@@ -54,7 +62,7 @@ export function PeoplePageClient({ people }: PeoplePageClientProps) {
           {/* View Toggle */}
           <div className='flex items-center bg-neutral-800 rounded-lg p-1'>
             <button
-              onClick={() => setViewMode('chart')}
+              onClick={() => handleViewModeChange('chart')}
               className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                 viewMode === 'chart'
                   ? 'bg-neutral-700 text-neutral-100 shadow-sm'
@@ -79,7 +87,7 @@ export function PeoplePageClient({ people }: PeoplePageClientProps) {
               </div>
             </button>
             <button
-              onClick={() => setViewMode('list')}
+              onClick={() => handleViewModeChange('list')}
               className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                 viewMode === 'list'
                   ? 'bg-neutral-700 text-neutral-100 shadow-sm'
@@ -107,7 +115,10 @@ export function PeoplePageClient({ people }: PeoplePageClientProps) {
 
           {session?.user && isAdmin(session.user) && (
             <>
-              <Link href='/people/import' className='btn-secondary'>
+              <Link
+                href='/people/import'
+                className='btn bg-neutral-700 hover:bg-neutral-600'
+              >
                 Import CSV
               </Link>
               <Link href='/people/new' className='btn'>

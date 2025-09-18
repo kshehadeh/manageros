@@ -368,6 +368,12 @@ export default function FeedbackViewClient({
 
                   <div className='flex gap-2'>
                     <Link
+                      href={`/feedback/${item.id}`}
+                      className='text-sm text-blue-400 hover:text-blue-300 underline'
+                    >
+                      View
+                    </Link>
+                    <Link
                       href={`/people/${item.about.id}/feedback/${item.id}/edit`}
                       className='text-sm text-neutral-400 hover:text-neutral-300 underline'
                     >

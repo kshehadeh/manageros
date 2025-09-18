@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { DeleteInitiativeButton } from '@/components/delete-initiative-button'
+import { CheckInList } from '@/components/checkin-list'
 
 export default async function InitiativeDetail({
   params,
@@ -29,7 +30,12 @@ export default async function InitiativeDetail({
     },
     include: {
       objectives: { include: { tasks: true } },
-      checkIns: { orderBy: { createdAt: 'desc' } },
+      checkIns: {
+        orderBy: { createdAt: 'desc' },
+        include: {
+          createdBy: true,
+        },
+      },
       team: true,
       owners: {
         include: {
@@ -141,23 +147,24 @@ export default async function InitiativeDetail({
       </section>
 
       <section className='card'>
-        <h3 className='font-semibold mb-3'>Recent Check-ins</h3>
-        <div className='space-y-3'>
-          {init.checkIns.map(ci => (
-            <div
-              key={ci.id}
-              className='border border-neutral-800 rounded-xl p-3'
-            >
-              <div className='text-sm text-neutral-400'>
-                {new Date(ci.createdAt).toLocaleString()}
-              </div>
-              <div className='mt-1'>{ci.summary}</div>
-            </div>
-          ))}
-          {init.checkIns.length === 0 && (
-            <div className='text-neutral-400 text-sm'>No check-ins yet.</div>
-          )}
-        </div>
+        <CheckInList
+          initiativeId={init.id}
+          initiativeTitle={init.title}
+          checkIns={init.checkIns.map(ci => ({
+            id: ci.id,
+            weekOf: ci.weekOf.toISOString(),
+            rag: ci.rag,
+            confidence: ci.confidence,
+            summary: ci.summary,
+            blockers: ci.blockers,
+            nextSteps: ci.nextSteps,
+            createdAt: ci.createdAt.toISOString(),
+            createdBy: {
+              id: ci.createdBy.id,
+              name: ci.createdBy.name,
+            },
+          }))}
+        />
       </section>
     </div>
   )

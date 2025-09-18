@@ -131,23 +131,31 @@ export function FeedbackList({
                 <span className='text-xs text-neutral-500'>
                   {new Date(item.createdAt).toLocaleDateString()}
                 </span>
-                {item.from.id === currentUserId && (
-                  <div className='flex gap-1'>
-                    <Link
-                      href={`/people/${person.id}/feedback/${item.id}/edit`}
-                      className='text-xs text-blue-400 hover:text-blue-300'
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      disabled={deletingId === item.id}
-                      className='text-xs text-red-400 hover:text-red-300 disabled:opacity-50'
-                    >
-                      {deletingId === item.id ? 'Deleting...' : 'Delete'}
-                    </button>
-                  </div>
-                )}
+                <div className='flex gap-1'>
+                  <Link
+                    href={`/feedback/${item.id}`}
+                    className='text-xs text-blue-400 hover:text-blue-300'
+                  >
+                    View
+                  </Link>
+                  {item.from.id === currentUserId && (
+                    <>
+                      <Link
+                        href={`/people/${person.id}/feedback/${item.id}/edit`}
+                        className='text-xs text-blue-400 hover:text-blue-300'
+                      >
+                        Edit
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        disabled={deletingId === item.id}
+                        className='text-xs text-red-400 hover:text-red-300 disabled:opacity-50'
+                      >
+                        {deletingId === item.id ? 'Deleting...' : 'Delete'}
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
