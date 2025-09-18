@@ -1,17 +1,12 @@
 import { getDirectReports } from '@/lib/actions'
 import { DirectReportsCards } from '@/components/direct-reports-cards'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function DirectReportsPage() {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
-
-  if (!session.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 

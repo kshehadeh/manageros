@@ -1,0 +1,7 @@
+---
+description: Database interactions
+globs:
+alwaysApply: true
+---
+
+Never do a database reset.  Always use the prisma schema to make changes to the database.

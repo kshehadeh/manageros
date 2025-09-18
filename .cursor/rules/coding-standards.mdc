@@ -81,6 +81,7 @@ alwaysApply: true
   - Use Tailwind for common utilities and layout.
   - Use CSS modules for complex, component-specific styles.
   - Never use the @apply directive
+- Use buttons that have outlines
 
 ## File Structure for Styling
 

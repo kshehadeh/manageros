@@ -35,6 +35,7 @@ model User {
   personId       String?       @unique
   person         Person?       @relation(fields: [personId], references: [id])
   sentInvitations OrganizationInvitation[]
+  jiraCredentials UserJiraCredentials?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   
@@ -84,6 +85,7 @@ model Person {
   checkIns           CheckIn[]
   events             Event[]
   user               User?
+  jiraAccount        PersonJiraAccount?
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
   
@@ -270,3 +272,29 @@ model Event {
   metadata  String?
   createdAt DateTime @default(now())
 }
+
+model UserJiraCredentials {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jiraUsername String
+  encryptedApiKey String
+  jiraBaseUrl  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model PersonJiraAccount {
+  id           String   @id @default(cuid())
+  personId     String   @unique
+  person       Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  jiraAccountId String
+  jiraEmail    String
+  jiraDisplayName String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  @@index([jiraAccountId])
+  @@index([jiraEmail])
+}
+

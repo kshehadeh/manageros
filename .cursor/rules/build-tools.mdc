@@ -1,0 +1,14 @@
+---
+description: Build tools for the project
+globs:
+alwaysApply: true
+---
+
+* Always use Bun for building the project.
+* Always use Prisma for database interactions.
+* Always use Next.js for the web framework.
+* Always use React for the UI.
+* Always use Tailwind for the CSS.
+* Always use Shadcn for the UI components.
+* Always use Lucide for the icons.
+* Always use React Flow for the flowchart.

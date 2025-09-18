@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
-import { PersonImportForm } from '@/components/person-import-form'
+import { TeamImportForm } from '@/components/team-import-form'
 import { getCurrentUser } from '@/lib/auth-utils'
 
-export default async function ImportPeoplePage() {
+export default async function ImportTeamsPage() {
   const user = await getCurrentUser()
 
   if (!user) {
@@ -14,8 +14,8 @@ export default async function ImportPeoplePage() {
   }
 
   return (
-    <div className='min-h-screen bg-gray-50'>
-      <PersonImportForm />
+    <div className='min-h-screen bg-black'>
+      <TeamImportForm />
     </div>
   )
 }

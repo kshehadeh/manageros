@@ -14,9 +14,10 @@
 
 - **Person Records** - Complete person profiles with roles, status, and team assignments
 - **Hierarchical Structure** - Manager-report relationships with unlimited depth
-- **Team Management** - Hierarchical teams with parent-child relationships
+- **Team Management** - Hierarchical teams with parent-child relationships and deletion capabilities
 - **Organization Chart** - Interactive ReactFlow-based org chart visualization
 - **Person Import** - Bulk import functionality for adding multiple people
+- **Team Import** - CSV import functionality for teams with automatic parent team creation, fuzzy matching, and update capabilities for existing teams
 - **User Linking** - Connect user accounts to person records for access control
 
 ### Initiative Management
@@ -48,8 +49,14 @@
 - **Multi-directional Feedback** - Give feedback to anyone in the organization
 - **Feedback Types** - Praise, concerns, and general notes
 - **Privacy Controls** - Public/private feedback visibility
-- **Advanced Filtering** - Filter by person, type, date range, and privacy
-- **Feedback Management** - Edit and manage existing feedback
+
+### Jira Integration
+
+- **Jira Credentials Management** - Secure storage of encrypted API keys and credentials
+- **Person-Jira Account Linking** - Link ManagerOS persons to Jira accounts via email
+- **Work Activity Tracking** - Fetch and display Jira work logs and time tracking
+- **Real-time Data Sync** - Refresh work activity data from Jira API
+- **Activity Visualization** - Display work logs with issue details, time spent, and project information
 
 ### Dashboard & Navigation
 

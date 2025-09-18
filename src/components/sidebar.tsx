@@ -39,6 +39,7 @@ const navigation: NavItem[] = [
     icon: Mail,
     adminOnly: true,
   },
+  { name: 'Your Settings', href: '/settings', icon: Settings },
 ]
 
 export default function Sidebar() {
@@ -159,7 +160,7 @@ export default function Sidebar() {
             className='flex items-center gap-3 px-3 py-2 text-sm text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800/50 rounded-lg transition-colors'
           >
             <Settings className='h-5 w-5' />
-            Settings
+            Org Settings
           </Link>
           <button
             onClick={() => {

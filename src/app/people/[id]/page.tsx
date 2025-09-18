@@ -5,6 +5,8 @@ import { UserLinkForm } from '@/components/user-link-form'
 import { FeedbackList } from '@/components/feedback-list'
 import { PersonActionPanel } from '@/components/person-action-panel'
 import { PersonDetailClient } from '@/components/person-detail-client'
+import { JiraAccountLinker } from '@/components/jira-account-linker'
+import { JiraWorkActivity } from '@/components/jira-work-activity'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
@@ -50,6 +52,15 @@ type PersonWithRelations = Person & {
     about: Person
     from: Person
   })[]
+  jiraAccount: {
+    id: string
+    personId: string
+    jiraAccountId: string
+    jiraEmail: string
+    jiraDisplayName: string | null
+    createdAt: Date
+    updatedAt: Date
+  } | null
 }
 
 interface PersonDetailPageProps {
@@ -147,6 +158,7 @@ export default async function PersonDetailPage({
         },
         orderBy: { createdAt: 'desc' },
       },
+      jiraAccount: true,
     },
   })
 
@@ -745,6 +757,29 @@ export default async function PersonDetailPage({
               <UserLinkForm
                 personId={personWithRelations.id}
                 linkedUser={personWithRelations.user}
+              />
+            </section>
+          )}
+
+          {/* Jira Integration - Only show for admins */}
+          {isAdmin(session.user) && (
+            <section className='card'>
+              <JiraAccountLinker
+                personId={personWithRelations.id}
+                personName={personWithRelations.name}
+                personEmail={personWithRelations.email}
+                jiraAccount={personWithRelations.jiraAccount}
+              />
+            </section>
+          )}
+
+          {/* Jira Work Activity - Show if person has Jira account */}
+          {personWithRelations.jiraAccount && (
+            <section className='card'>
+              <JiraWorkActivity
+                personId={personWithRelations.id}
+                personName={personWithRelations.name}
+                hasJiraAccount={!!personWithRelations.jiraAccount}
               />
             </section>
           )}

@@ -139,3 +139,11 @@ export const checkInSchema = z.object({
 })
 
 export type CheckInFormData = z.infer<typeof checkInSchema>
+
+export const csvTeamSchema = z.object({
+  name: z.string().min(1, 'Team name is required'),
+  description: z.string().optional(),
+  parent: z.string().optional(), // Parent team name instead of ID
+})
+
+export type CSVTeamData = z.infer<typeof csvTeamSchema>

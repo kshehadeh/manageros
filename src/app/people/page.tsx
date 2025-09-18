@@ -1,13 +1,12 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { getPeopleHierarchy } from '@/lib/actions'
 import { PeoplePageClient } from '@/components/people-page-client'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function PeoplePage() {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user) {
+  try {
+    await getCurrentUser()
+  } catch {
     redirect('/auth/signin')
   }
 

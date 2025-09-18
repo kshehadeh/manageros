@@ -6,6 +6,9 @@ import { PeopleList } from '@/components/people-list'
 import { useSession } from 'next-auth/react'
 import { isAdmin } from '@/lib/auth'
 import { useUserSettings } from '@/lib/hooks/use-user-settings'
+import { Button } from '@/components/ui/button'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { LayoutGrid, List } from 'lucide-react'
 
 interface Person {
   id: string
@@ -50,8 +53,8 @@ export function PeoplePageClient({ people }: PeoplePageClientProps) {
   const viewMode = getSetting('peopleViewMode')
 
   // Function to handle view mode changes
-  const handleViewModeChange = (mode: 'list' | 'chart') => {
-    updateSetting('peopleViewMode', mode)
+  const handleViewModeChange = (mode: string) => {
+    updateSetting('peopleViewMode', mode as 'list' | 'chart')
   }
 
   return (
@@ -60,70 +63,33 @@ export function PeoplePageClient({ people }: PeoplePageClientProps) {
         <h2 className='text-lg font-semibold'>People</h2>
         <div className='flex items-center gap-3'>
           {/* View Toggle */}
-          <div className='flex items-center bg-neutral-800 rounded-lg p-1'>
-            <button
-              onClick={() => handleViewModeChange('chart')}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                viewMode === 'chart'
-                  ? 'bg-neutral-700 text-neutral-100 shadow-sm'
-                  : 'text-neutral-400 hover:text-neutral-100'
-              }`}
-            >
-              <div className='flex items-center gap-2'>
-                <svg
-                  className='w-4 h-4'
-                  fill='none'
-                  stroke='currentColor'
-                  viewBox='0 0 24 24'
-                >
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
-                  />
-                </svg>
+          <Tabs value={viewMode} onValueChange={handleViewModeChange}>
+            <TabsList className='border border-neutral-700 bg-neutral-800'>
+              <TabsTrigger
+                value='chart'
+                className='flex items-center gap-2 border border-transparent hover:border-neutral-600 data-[state=active]:bg-neutral-700 data-[state=active]:border-neutral-600 data-[state=active]:shadow-sm data-[state=active]:font-semibold data-[state=active]:text-white'
+              >
+                <LayoutGrid className='w-4 h-4' />
                 Chart
-              </div>
-            </button>
-            <button
-              onClick={() => handleViewModeChange('list')}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                viewMode === 'list'
-                  ? 'bg-neutral-700 text-neutral-100 shadow-sm'
-                  : 'text-neutral-400 hover:text-neutral-100'
-              }`}
-            >
-              <div className='flex items-center gap-2'>
-                <svg
-                  className='w-4 h-4'
-                  fill='none'
-                  stroke='currentColor'
-                  viewBox='0 0 24 24'
-                >
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M4 6h16M4 10h16M4 14h16M4 18h16'
-                  />
-                </svg>
+              </TabsTrigger>
+              <TabsTrigger
+                value='list'
+                className='flex items-center gap-2 border border-transparent hover:border-neutral-600 data-[state=active]:bg-neutral-700 data-[state=active]:border-neutral-600 data-[state=active]:shadow-sm data-[state=active]:font-semibold data-[state=active]:text-white'
+              >
+                <List className='w-4 h-4' />
                 List
-              </div>
-            </button>
-          </div>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
 
           {session?.user && isAdmin(session.user) && (
             <>
-              <Link
-                href='/people/import'
-                className='btn bg-neutral-700 hover:bg-neutral-600'
-              >
-                Import CSV
-              </Link>
-              <Link href='/people/new' className='btn'>
-                New
-              </Link>
+              <Button asChild variant='outline'>
+                <Link href='/people/import'>Import CSV</Link>
+              </Button>
+              <Button asChild variant='outline'>
+                <Link href='/people/new'>New</Link>
+              </Button>
             </>
           )}
         </div>
