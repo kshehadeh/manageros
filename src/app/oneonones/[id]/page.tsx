@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import { OneOnOneDetailClient } from '@/components/oneonone-detail-client'
+import { EditButton } from '@/components/icon-button'
 
 interface OneOnOneViewPageProps {
   params: Promise<{
@@ -43,12 +44,13 @@ export default async function OneOnOneViewPage({
               </p>
             </div>
             <div className='flex items-center gap-2'>
-              <Link
+              <EditButton
                 href={`/oneonones/${oneOnOne.id}/edit`}
-                className='btn bg-blue-600 hover:bg-blue-700'
+                variant='primary'
+                size='md'
               >
-                Edit Meeting
-              </Link>
+                Meeting
+              </EditButton>
               <Link
                 href='/oneonones'
                 className='btn bg-neutral-700 hover:bg-neutral-600'

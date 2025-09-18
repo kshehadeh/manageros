@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { DeleteTaskButton } from '@/components/delete-task-button'
+import { EditButton } from '@/components/icon-button'
 
 export default async function TaskDetailPage({
   params,
@@ -71,12 +72,13 @@ export default async function TaskDetailPage({
           </div>
         </div>
         <div className='flex items-center gap-2'>
-          <Link
+          <EditButton
             href={`/tasks/${task.id}/edit`}
-            className='btn bg-blue-600 hover:bg-blue-700'
+            variant='primary'
+            size='md'
           >
-            Edit Task
-          </Link>
+            Task
+          </EditButton>
           <DeleteTaskButton taskId={task.id} />
         </div>
       </div>

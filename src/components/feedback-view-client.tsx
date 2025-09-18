@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import ReactMarkdown from 'react-markdown'
 import { getAllFeedback, deleteFeedback } from '@/lib/actions'
+import { ViewButton, EditButton } from './icon-button'
 
 interface Person {
   id: string
@@ -367,18 +368,16 @@ export default function FeedbackViewClient({
                   </div>
 
                   <div className='flex gap-2'>
-                    <Link
+                    <ViewButton
                       href={`/feedback/${item.id}`}
-                      className='text-sm text-blue-400 hover:text-blue-300 underline'
-                    >
-                      View
-                    </Link>
-                    <Link
+                      variant='link'
+                      size='sm'
+                    />
+                    <EditButton
                       href={`/people/${item.about.id}/feedback/${item.id}/edit`}
-                      className='text-sm text-neutral-400 hover:text-neutral-300 underline'
-                    >
-                      Edit
-                    </Link>
+                      variant='link'
+                      size='sm'
+                    />
                     {item.fromId === currentUserId && (
                       <button
                         onClick={() => handleDelete(item.id)}

@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import { EditButton } from '@/components/icon-button'
 
 interface TeamDetailPageProps {
   params: Promise<{
@@ -86,9 +87,13 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
             )}
           </div>
           <div className='flex items-center gap-2'>
-            <Link href={`/teams/${team.id}/edit`} className='btn'>
-              Edit Team
-            </Link>
+            <EditButton
+              href={`/teams/${team.id}/edit`}
+              variant='primary'
+              size='md'
+            >
+              Team
+            </EditButton>
             <Link href='/teams' className='btn'>
               Back to Teams
             </Link>
@@ -153,12 +158,11 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
                       >
                         {person.status.replace('_', ' ')}
                       </span>
-                      <Link
+                      <EditButton
                         href={`/people/${person.id}/edit`}
-                        className='btn text-sm'
-                      >
-                        Edit
-                      </Link>
+                        variant='secondary'
+                        size='sm'
+                      />
                     </div>
                   </div>
                 </div>
@@ -266,12 +270,11 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
                     </div>
                   </div>
                   <div className='flex items-center gap-2'>
-                    <Link
+                    <EditButton
                       href={`/teams/${childTeam.id}/edit`}
-                      className='btn text-sm'
-                    >
-                      Edit
-                    </Link>
+                      variant='secondary'
+                      size='sm'
+                    />
                   </div>
                 </div>
               </Link>

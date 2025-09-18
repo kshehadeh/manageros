@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
+import { ViewButton, EditButton } from '@/components/icon-button'
 
 export default async function OneOnOnesPage() {
   const session = await getServerSession(authOptions)
@@ -57,18 +58,16 @@ export default async function OneOnOnesPage() {
                     ? new Date(i.scheduledAt).toLocaleString()
                     : 'TBD'}
                 </div>
-                <Link
+                <ViewButton
                   href={`/oneonones/${i.id}`}
-                  className='btn btn-sm bg-blue-600 hover:bg-blue-700'
-                >
-                  View
-                </Link>
-                <Link
+                  variant='primary'
+                  size='sm'
+                />
+                <EditButton
                   href={`/oneonones/${i.id}/edit`}
-                  className='btn btn-sm bg-neutral-700 hover:bg-neutral-600'
-                >
-                  Edit
-                </Link>
+                  variant='secondary'
+                  size='sm'
+                />
               </div>
             </div>
 

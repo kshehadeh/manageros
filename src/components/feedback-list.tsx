@@ -1,11 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import ReactMarkdown from 'react-markdown'
 import { deleteFeedback } from '@/lib/actions'
 import { FeedbackForm } from './feedback-form'
 import { type Person } from '@prisma/client'
+import { ViewButton, EditButton } from './icon-button'
 
 type FeedbackWithRelations = {
   id: string
@@ -132,20 +132,18 @@ export function FeedbackList({
                   {new Date(item.createdAt).toLocaleDateString()}
                 </span>
                 <div className='flex gap-1'>
-                  <Link
+                  <ViewButton
                     href={`/feedback/${item.id}`}
-                    className='text-xs text-blue-400 hover:text-blue-300'
-                  >
-                    View
-                  </Link>
+                    variant='link'
+                    size='sm'
+                  />
                   {item.from.id === currentUserId && (
                     <>
-                      <Link
+                      <EditButton
                         href={`/people/${person.id}/feedback/${item.id}/edit`}
-                        className='text-xs text-blue-400 hover:text-blue-300'
-                      >
-                        Edit
-                      </Link>
+                        variant='link'
+                        size='sm'
+                      />
                       <button
                         onClick={() => handleDelete(item.id)}
                         disabled={deletingId === item.id}

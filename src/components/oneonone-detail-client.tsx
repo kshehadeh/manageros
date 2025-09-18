@@ -17,13 +17,10 @@ export function OneOnOneDetailClient({
 }: OneOnOneDetailClientProps) {
   const meetingTitle = `${managerName} ↔ ${reportName}`
 
-  usePageBreadcrumbs(
-    [
-      { name: '1:1s', href: '/oneonones' },
-      { name: meetingTitle, href: `/oneonones/${oneOnOneId}` },
-    ],
-    [managerName, reportName, oneOnOneId]
-  )
+  usePageBreadcrumbs([
+    { name: '1:1s', href: '/oneonones' },
+    { name: meetingTitle, href: `/oneonones/${oneOnOneId}` },
+  ])
 
   return <>{children}</>
 }

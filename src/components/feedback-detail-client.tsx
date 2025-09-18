@@ -19,13 +19,10 @@ export function FeedbackDetailClient({
 }: FeedbackDetailClientProps) {
   const feedbackTitle = `${fromName} → ${aboutName} (${feedbackKind})`
 
-  usePageBreadcrumbs(
-    [
-      { name: 'Feedback', href: '/feedback' },
-      { name: feedbackTitle, href: `/feedback/${feedbackId}` },
-    ],
-    [feedbackKind, fromName, aboutName, feedbackId]
-  )
+  usePageBreadcrumbs([
+    { name: 'Feedback', href: '/feedback' },
+    { name: feedbackTitle, href: `/feedback/${feedbackId}` },
+  ])
 
   return <>{children}</>
 }

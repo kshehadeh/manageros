@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import { FeedbackDetailClient } from '@/components/feedback-detail-client'
+import { EditButton } from '@/components/icon-button'
 
 interface FeedbackDetailPageProps {
   params: Promise<{
@@ -43,12 +44,13 @@ export default async function FeedbackDetailPage({
               </p>
             </div>
             <div className='flex items-center gap-2'>
-              <Link
+              <EditButton
                 href={`/people/${feedback.about.id}/feedback/${feedback.id}/edit`}
-                className='btn bg-blue-600 hover:bg-blue-700'
+                variant='primary'
+                size='md'
               >
-                Edit Feedback
-              </Link>
+                Feedback
+              </EditButton>
               <Link
                 href={`/people/${feedback.about.id}`}
                 className='btn bg-neutral-700 hover:bg-neutral-600'

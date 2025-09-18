@@ -13,13 +13,10 @@ export function InitiativeDetailClient({
   initiativeId,
   children,
 }: InitiativeDetailClientProps) {
-  usePageBreadcrumbs(
-    [
-      { name: 'Initiatives', href: '/initiatives' },
-      { name: initiativeTitle, href: `/initiatives/${initiativeId}` },
-    ],
-    [initiativeTitle, initiativeId]
-  )
+  usePageBreadcrumbs([
+    { name: 'Initiatives', href: '/initiatives' },
+    { name: initiativeTitle, href: `/initiatives/${initiativeId}` },
+  ])
 
   return <>{children}</>
 }

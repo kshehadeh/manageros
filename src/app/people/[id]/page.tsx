@@ -9,6 +9,7 @@ import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import { EditButton } from '@/components/icon-button'
 import {
   Person,
   Team,
@@ -203,12 +204,13 @@ export default async function PersonDetailPage({
               {personWithRelations.status.replace('_', ' ')}
             </span>
             {isAdmin(session.user) && (
-              <Link
+              <EditButton
                 href={`/people/${personWithRelations.id}/edit`}
-                className='btn'
+                variant='primary'
+                size='md'
               >
-                Edit Person
-              </Link>
+                Person
+              </EditButton>
             )}
             <PersonActionPanel
               person={personWithRelations}
@@ -343,12 +345,11 @@ export default async function PersonDetailPage({
                             {report.status.replace('_', ' ')}
                           </span>
                           {isAdmin(session.user) && (
-                            <Link
+                            <EditButton
                               href={`/people/${report.id}/edit`}
-                              className='btn text-sm'
-                            >
-                              Edit
-                            </Link>
+                              variant='secondary'
+                              size='sm'
+                            />
                           )}
                         </div>
                       </div>

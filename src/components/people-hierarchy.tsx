@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { EditButton } from './icon-button'
 
 interface Person {
   id: string
@@ -132,12 +133,11 @@ export function PeopleHierarchy({ people }: PeopleHierarchyProps) {
                   >
                     {person.status.replace('_', ' ')}
                   </span>
-                  <Link
+                  <EditButton
                     href={`/people/${person.id}/edit`}
-                    className='btn text-sm'
-                  >
-                    Edit
-                  </Link>
+                    variant='secondary'
+                    size='sm'
+                  />
                 </div>
               </div>
             </div>

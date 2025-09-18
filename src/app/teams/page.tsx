@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { Team, Person, Initiative } from '@prisma/client'
+import { EditButton } from '@/components/icon-button'
 
 type TeamWithChildren = Team & {
   parent?: { id: string; name: string } | null
@@ -52,9 +53,11 @@ function TeamCard({
           <Link href={`/teams/new?parentId=${team.id}`} className='btn text-sm'>
             Add Child
           </Link>
-          <Link href={`/teams/${team.id}/edit`} className='btn text-sm'>
-            Edit
-          </Link>
+          <EditButton
+            href={`/teams/${team.id}/edit`}
+            variant='secondary'
+            size='sm'
+          />
         </div>
       </div>
 
@@ -107,12 +110,11 @@ function TeamCard({
                     >
                       Add Child
                     </Link>
-                    <Link
+                    <EditButton
                       href={`/teams/${child.id}/edit`}
-                      className='btn text-xs'
-                    >
-                      Edit
-                    </Link>
+                      variant='secondary'
+                      size='sm'
+                    />
                   </div>
                 </div>
 
@@ -155,12 +157,11 @@ function TeamCard({
                               >
                                 Add Person
                               </Link>
-                              <Link
+                              <EditButton
                                 href={`/teams/${grandchild.id}/edit`}
-                                className='btn text-xs'
-                              >
-                                Edit
-                              </Link>
+                                variant='secondary'
+                                size='sm'
+                              />
                             </div>
                           </div>
                         </div>
