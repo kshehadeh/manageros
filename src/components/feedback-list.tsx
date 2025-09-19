@@ -8,6 +8,7 @@ import { deleteFeedback } from '@/lib/actions'
 import { type Person } from '@prisma/client'
 import { Eye } from 'lucide-react'
 import { EditIconButton } from './edit-icon-button'
+import Link from 'next/link'
 
 type FeedbackWithRelations = {
   id: string
@@ -106,9 +107,12 @@ export function FeedbackList({
                 </span>
                 <div className='flex gap-1'>
                   <Button asChild variant='outline' size='icon'>
-                    <a href={`/feedback/${item.id}`} aria-label='View feedback'>
+                    <Link
+                      href={`/feedback/${item.id}`}
+                      aria-label='View feedback'
+                    >
                       <Eye className='w-4 h-4' />
-                    </a>
+                    </Link>
                   </Button>
                   {item.from.id === currentUserId && (
                     <>

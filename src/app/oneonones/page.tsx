@@ -6,7 +6,6 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import { Eye } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { EditIconButton } from '@/components/edit-icon-button'
 
 export default async function OneOnOnesPage() {

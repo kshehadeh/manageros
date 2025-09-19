@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button'
 'use client'
 
+import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { createPerson, updatePerson } from '@/lib/actions'
 import { type PersonFormData } from '@/lib/validations'
@@ -201,7 +201,11 @@ export function PersonForm({
 
       {/* Submit Button */}
       <div className='flex justify-end'>
-        <Button type='submit' disabled={isSubmitting || !formData.name.trim()} variant='outline'>
+        <Button
+          type='submit'
+          disabled={isSubmitting || !formData.name.trim()}
+          variant='outline'
+        >
           {isSubmitting
             ? person
               ? 'Updating...'

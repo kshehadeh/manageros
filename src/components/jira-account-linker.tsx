@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button'
 'use client'
 
+import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import {
   linkPersonToJiraAccount,
@@ -92,7 +92,12 @@ export function JiraAccountLinker({
           </div>
         )}
 
-        <Button type='button' onClick={handleUnlink} disabled={isLoading} variant='outline'>
+        <Button
+          type='button'
+          onClick={handleUnlink}
+          disabled={isLoading}
+          variant='outline'
+        >
           {isLoading ? 'Unlinking...' : 'Unlink Jira Account'}
         </Button>
       </div>

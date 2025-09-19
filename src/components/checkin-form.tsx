@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button'
 'use client'
 
+import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { createCheckIn, updateCheckIn } from '@/lib/actions'
 import { Rag } from '@/components/rag'

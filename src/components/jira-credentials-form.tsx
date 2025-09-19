@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { saveJiraCredentials, deleteJiraCredentials } from '@/lib/actions'
+import { Button } from './ui/button'
 
 interface JiraCredentialsFormProps {
   initialCredentials?: {
@@ -191,7 +192,12 @@ export function JiraCredentialsForm({
       </form>
 
       <div className='border-t border-neutral-800 pt-4'>
-        <Button type='button' onClick={handleDelete} disabled={isLoading} variant='outline'>
+        <Button
+          type='button'
+          onClick={handleDelete}
+          disabled={isLoading}
+          variant='outline'
+        >
           Delete Jira Credentials
         </Button>
       </div>

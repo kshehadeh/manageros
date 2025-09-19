@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button'
 'use client'
 
+import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { updateInitiative } from '@/lib/actions'
 import { type InitiativeFormData } from '@/lib/validations'
@@ -313,7 +313,12 @@ export function InitiativeEditForm({
       <div className='card'>
         <div className='flex items-center justify-between mb-4'>
           <h3 className='font-semibold'>Objectives</h3>
-          <Button type='button' onClick={addObjective} variant='outline' size='sm'>
+          <Button
+            type='button'
+            onClick={addObjective}
+            variant='outline'
+            size='sm'
+          >
             Add Objective
           </Button>
         </div>
@@ -328,7 +333,12 @@ export function InitiativeEditForm({
                   Objective {index + 1}
                 </span>
                 {objectives.length > 1 && (
-                  <Button type='button' onClick={() => removeObjective(index)} variant='outline' size='sm'>
+                  <Button
+                    type='button'
+                    onClick={() => removeObjective(index)}
+                    variant='outline'
+                    size='sm'
+                  >
                     Remove
                   </Button>
                 )}
@@ -375,7 +385,12 @@ export function InitiativeEditForm({
               <div className='flex items-center justify-between mb-2'>
                 <span className='text-sm font-medium'>Owner {index + 1}</span>
                 {owners.length > 1 && (
-                  <Button type='button' onClick={() => removeOwner(index)} variant='outline' size='sm'>
+                  <Button
+                    type='button'
+                    onClick={() => removeOwner(index)}
+                    variant='outline'
+                    size='sm'
+                  >
                     Remove
                   </Button>
                 )}
@@ -411,7 +426,11 @@ export function InitiativeEditForm({
 
       {/* Submit Button */}
       <div className='flex justify-end'>
-        <Button type='submit' disabled={isSubmitting || !formData.title.trim()} variant='outline'>
+        <Button
+          type='submit'
+          disabled={isSubmitting || !formData.title.trim()}
+          variant='outline'
+        >
           {isSubmitting ? 'Updating...' : 'Update Initiative'}
         </Button>
       </div>
