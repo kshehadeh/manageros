@@ -4,6 +4,9 @@ import { useState } from 'react'
 import { createOneOnOne, updateOneOnOne } from '@/lib/actions'
 import { type OneOnOneFormData } from '@/lib/validations'
 import Link from 'next/link'
+import { MarkdownEditor } from './markdown-editor'
+import { Button } from '@/components/ui/button'
+import { MessageSquare } from 'lucide-react'
 
 interface Person {
   id: string
@@ -27,6 +30,7 @@ interface OneOnOneFormProps {
   preFilledManagerId?: string
   preFilledReportId?: string
   existingOneOnOne?: OneOnOneData
+  onCancel?: () => void
 }
 
 export function OneOnOneForm({
@@ -34,17 +38,24 @@ export function OneOnOneForm({
   preFilledManagerId,
   preFilledReportId,
   existingOneOnOne,
+  onCancel,
 }: OneOnOneFormProps) {
   // Get current date and time in the format required by datetime-local input
   const getCurrentDateTime = () => {
     const now = new Date()
+
+    // Round to the nearest half hour
+    const minutes = now.getMinutes()
+    const roundedMinutes = minutes < 15 ? 0 : minutes < 45 ? 30 : 0
+    const roundedHours = minutes >= 45 ? now.getHours() + 1 : now.getHours()
+
     // Format as YYYY-MM-DDTHH:MM for datetime-local input
     const year = now.getFullYear()
     const month = String(now.getMonth() + 1).padStart(2, '0')
     const day = String(now.getDate()).padStart(2, '0')
-    const hours = String(now.getHours()).padStart(2, '0')
-    const minutes = String(now.getMinutes()).padStart(2, '0')
-    return `${year}-${month}-${day}T${hours}:${minutes}`
+    const hours = String(roundedHours).padStart(2, '0')
+    const minutesStr = String(roundedMinutes).padStart(2, '0')
+    return `${year}-${month}-${day}T${hours}:${minutesStr}`
   }
 
   // Format existing date for datetime-local input
@@ -85,7 +96,7 @@ export function OneOnOneForm({
   }
 
   // Since the people list is already filtered to only include people the current user can have meetings with,
-  // we can use the same list for both manager and report options
+  // we can use the same list for both host and guest options
   const managerOptions = people
   const reportOptions = people
 
@@ -110,22 +121,12 @@ export function OneOnOneForm({
       <div className='card'>
         <h3 className='font-semibold mb-4'>Meeting Details</h3>
         <p className='text-sm text-neutral-400 mb-4'>
-          You can only create 1:1 meetings with people you manage or who manage
-          you. These meetings will only be visible to the participants.
+          These meetings will only be visible to the participants.
         </p>
-        {(preFilledManagerId || preFilledReportId) && (
-          <div className='bg-blue-900/20 border border-blue-700 rounded-lg p-3 mb-4'>
-            <p className='text-sm text-blue-300'>
-              ✓ Form pre-filled based on your selection
-            </p>
-          </div>
-        )}
         <div className='space-y-4'>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <div>
-              <label className='block text-sm font-medium mb-2'>
-                Manager *
-              </label>
+              <label className='block text-sm font-medium mb-2'>Host *</label>
               <select
                 value={formData.managerId}
                 onChange={e =>
@@ -134,7 +135,7 @@ export function OneOnOneForm({
                 className='input'
                 required
               >
-                <option value=''>Select a manager</option>
+                <option value=''>Select a host</option>
                 {managerOptions.map(person => (
                   <option key={person.id} value={person.id}>
                     {person.name}
@@ -145,7 +146,7 @@ export function OneOnOneForm({
             </div>
 
             <div>
-              <label className='block text-sm font-medium mb-2'>Report *</label>
+              <label className='block text-sm font-medium mb-2'>Guest *</label>
               <select
                 value={formData.reportId}
                 onChange={e =>
@@ -154,7 +155,7 @@ export function OneOnOneForm({
                 className='input'
                 required
               >
-                <option value=''>Select a report</option>
+                <option value=''>Select a guest</option>
                 {reportOptions.map(person => (
                   <option key={person.id} value={person.id}>
                     {person.name}
@@ -182,37 +183,35 @@ export function OneOnOneForm({
 
       {/* Notes */}
       <div className='card'>
-        <h3 className='font-semibold mb-4'>Meeting Notes</h3>
         <div>
-          <label className='block text-sm font-medium mb-2'>
-            Notes (Markdown supported)
-          </label>
-          <textarea
-            value={formData.notes}
-            onChange={e => setFormData({ ...formData, notes: e.target.value })}
-            className='input min-h-[150px] resize-y font-mono text-sm'
-            placeholder='Enter meeting notes... (Markdown formatting supported)'
-            rows={6}
+          <label className='block text-sm font-medium mb-2'>Notes</label>
+          <MarkdownEditor
+            value={formData.notes || ''}
+            onChange={value => setFormData({ ...formData, notes: value })}
+            placeholder='Enter meeting notes... Use Markdown for formatting!'
           />
-          <p className='text-xs text-neutral-500 mt-2'>
-            You can use Markdown formatting like **bold**, *italic*, - lists,
-            etc.
-          </p>
         </div>
       </div>
 
       {/* Submit Button */}
-      <div className='flex justify-end'>
-        <button
+      <div className='flex justify-end gap-2'>
+        {onCancel && (
+          <Button type='button' variant='ghost' onClick={onCancel}>
+            Cancel
+          </Button>
+        )}
+        <Button
           type='submit'
+          variant='outline'
           disabled={
             isSubmitting ||
             !formData.managerId ||
             !formData.reportId ||
             !formData.scheduledAt
           }
-          className='btn bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
+          className='flex items-center gap-2'
         >
+          <MessageSquare className='w-4 h-4' />
           {isSubmitting
             ? existingOneOnOne
               ? 'Updating...'
@@ -220,7 +219,7 @@ export function OneOnOneForm({
             : existingOneOnOne
               ? 'Update 1:1 Meeting'
               : 'Create 1:1 Meeting'}
-        </button>
+        </Button>
       </div>
     </form>
   )

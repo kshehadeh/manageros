@@ -5,7 +5,6 @@ import ReactMarkdown from 'react-markdown'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { deleteFeedback } from '@/lib/actions'
-import { FeedbackForm } from './feedback-form'
 import { type Person } from '@prisma/client'
 import { ViewButton } from './icon-button'
 import { EditIconButton } from './edit-icon-button'
@@ -39,7 +38,6 @@ export function FeedbackList({
   currentUserId,
   onRefresh,
 }: FeedbackListProps) {
-  const [showForm, setShowForm] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const handleDelete = async (id: string) => {
@@ -55,15 +53,6 @@ export function FeedbackList({
     } finally {
       setDeletingId(null)
     }
-  }
-
-  const handleFormSuccess = () => {
-    setShowForm(false)
-    onRefresh?.()
-  }
-
-  const handleFormCancel = () => {
-    setShowForm(false)
   }
 
   const getKindColor = (kind: string) => {
@@ -92,26 +81,7 @@ export function FeedbackList({
     <div className='space-y-4'>
       <div className='flex items-center justify-between'>
         <h3 className='font-semibold'>Feedback ({feedback.length})</h3>
-        {!showForm && (
-          <button
-            onClick={() => setShowForm(true)}
-            className='btn bg-blue-600 hover:bg-blue-700 text-sm'
-          >
-            Add Feedback
-          </button>
-        )}
       </div>
-
-      {showForm && (
-        <div className='border border-neutral-800 rounded-xl p-4'>
-          <h4 className='font-medium mb-4'>Add New Feedback</h4>
-          <FeedbackForm
-            person={person}
-            onSuccess={handleFormSuccess}
-            onCancel={handleFormCancel}
-          />
-        </div>
-      )}
 
       <div className='space-y-3'>
         {feedback.map(item => (
@@ -221,7 +191,7 @@ export function FeedbackList({
           </div>
         ))}
 
-        {feedback.length === 0 && !showForm && (
+        {feedback.length === 0 && (
           <div className='text-neutral-400 text-sm text-center py-8'>
             No feedback yet. Be the first to share feedback about {person.name}.
           </div>

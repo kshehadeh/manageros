@@ -8,11 +8,12 @@ import {
   Plus,
   FileText,
   CheckSquare,
-  Calendar,
   MessageSquare,
+  MessageCircle,
   ChevronDown,
   Eye,
 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 interface PersonActionPanelProps {
   person: Person & {
@@ -77,9 +78,11 @@ export function PersonActionPanel({
     <>
       {/* Actions Dropdown */}
       <div className='relative' ref={dropdownRef}>
-        <button
+        <Button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className='btn text-sm flex items-center gap-2'
+          variant='outline'
+          size='default'
+          className='flex items-center gap-2'
         >
           <span>Actions</span>
           <ChevronDown
@@ -87,7 +90,7 @@ export function PersonActionPanel({
               isDropdownOpen ? 'rotate-180' : ''
             }`}
           />
-        </button>
+        </Button>
 
         {isDropdownOpen && (
           <div className='absolute top-full right-0 mt-2 bg-neutral-800 border border-neutral-700 rounded-xl shadow-lg z-10 min-w-48'>
@@ -132,16 +135,18 @@ export function PersonActionPanel({
 
               {/* Add Feedback - Show for all users */}
               {!showFeedbackForm ? (
-                <button
+                <Button
                   onClick={() => {
                     setShowFeedbackForm(true)
                     setIsDropdownOpen(false)
                   }}
-                  className='w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-neutral-700 transition-colors text-left'
+                  variant='ghost'
+                  size='sm'
+                  className='w-full justify-start gap-3 px-4 py-2 text-sm'
                 >
-                  <MessageSquare className='w-4 h-4' />
+                  <MessageCircle className='w-4 h-4' />
                   Add Feedback
-                </button>
+                </Button>
               ) : null}
 
               {/* Add a 1:1 - Show if current user can create a meeting with this person */}
@@ -165,7 +170,7 @@ export function PersonActionPanel({
                   className='flex items-center gap-3 px-4 py-2 text-sm hover:bg-neutral-700 transition-colors'
                   onClick={() => setIsDropdownOpen(false)}
                 >
-                  <Calendar className='w-4 h-4' />
+                  <MessageSquare className='w-4 h-4' />
                   Add a 1:1
                 </Link>
               )}

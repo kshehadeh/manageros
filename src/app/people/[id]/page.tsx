@@ -13,6 +13,7 @@ import { authOptions, isAdmin } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { EditIconButton } from '@/components/edit-icon-button'
 import { Eye } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import {
   Person,
   Team,
@@ -228,10 +229,12 @@ export default async function PersonDetailPage({
               currentPerson={currentPerson}
               isAdmin={isAdmin(session.user)}
             />
-            <Link href='/people' className='btn flex items-center gap-2'>
-              <Eye className='w-4 h-4' />
-              Back to People
-            </Link>
+            <Button asChild variant='outline' size='default'>
+              <Link href='/people' className='flex items-center gap-2'>
+                <Eye className='w-4 h-4' />
+                Back to People
+              </Link>
+            </Button>
           </div>
         </div>
 
@@ -545,13 +548,15 @@ export default async function PersonDetailPage({
                     ))}
                     {personWithRelations.tasks.length > 5 && (
                       <div className='text-center'>
-                        <Link
-                          href='/tasks'
-                          className='text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1 justify-center'
-                        >
-                          <Eye className='w-4 h-4' />
-                          View all {personWithRelations.tasks.length} tasks
-                        </Link>
+                        <Button asChild variant='ghost' size='sm'>
+                          <Link
+                            href='/tasks'
+                            className='flex items-center gap-1'
+                          >
+                            <Eye className='w-4 h-4' />
+                            View all {personWithRelations.tasks.length} tasks
+                          </Link>
+                        </Button>
                       </div>
                     )}
                   </div>
@@ -568,13 +573,15 @@ export default async function PersonDetailPage({
                   <h3 className='font-semibold'>
                     Recent Check-ins ({personWithRelations.checkIns.length})
                   </h3>
-                  <Link
-                    href='/initiatives'
-                    className='btn text-sm flex items-center gap-2'
-                  >
-                    <Eye className='w-4 h-4' />
-                    View All
-                  </Link>
+                  <Button asChild variant='outline' size='sm'>
+                    <Link
+                      href='/initiatives'
+                      className='flex items-center gap-2'
+                    >
+                      <Eye className='w-4 h-4' />
+                      View All
+                    </Link>
+                  </Button>
                 </div>
                 <div className='space-y-3'>
                   {personWithRelations.checkIns.slice(0, 3).map(checkIn => (
@@ -648,12 +655,9 @@ export default async function PersonDetailPage({
                                         : 'TBD'}
                                     </div>
                                   </div>
-                                  <Link
-                                    href='/oneonones'
-                                    className='btn text-sm'
-                                  >
-                                    Edit
-                                  </Link>
+                                  <Button asChild variant='outline' size='sm'>
+                                    <Link href='/oneonones'>Edit</Link>
+                                  </Button>
                                 </div>
                               </div>
                             ))}
@@ -690,12 +694,9 @@ export default async function PersonDetailPage({
                                         : 'TBD'}
                                     </div>
                                   </div>
-                                  <Link
-                                    href='/oneonones'
-                                    className='btn text-sm'
-                                  >
-                                    Edit
-                                  </Link>
+                                  <Button asChild variant='outline' size='sm'>
+                                    <Link href='/oneonones'>Edit</Link>
+                                  </Button>
                                 </div>
                               </div>
                             ))}

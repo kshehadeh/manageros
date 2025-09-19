@@ -1,8 +1,17 @@
 'use client'
 
 import { useState, useTransition, useEffect } from 'react'
-import Link from 'next/link'
-import { MoreHorizontal, Edit, Eye, Trash2, Check, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import {
+  MoreHorizontal,
+  Edit,
+  Eye,
+  Trash2,
+  Check,
+  X,
+  MessageCircle,
+  MessageSquare,
+} from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -11,12 +20,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import {
   Select,
   SelectContent,
@@ -34,6 +37,8 @@ import {
 } from '@/lib/actions'
 import { toast } from 'sonner'
 import { Person } from '@/types/person'
+import { FeedbackForm } from '@/components/feedback-form'
+import { OneOnOneForm } from '@/components/oneonone-form'
 
 interface PeopleTableProps {
   people: Person[]
@@ -47,6 +52,26 @@ interface EditingState {
   }
 }
 
+interface ContextMenuState {
+  visible: boolean
+  x: number
+  y: number
+  personId: string
+  triggerType: 'rightClick' | 'button'
+}
+
+interface FeedbackModalState {
+  visible: boolean
+  personId: string
+  personName: string
+}
+
+interface OneOnOneModalState {
+  visible: boolean
+  personId: string
+  personName: string
+}
+
 export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
   const displayPeople = filteredPeople || people
   const [editing, setEditing] = useState<EditingState>({})
@@ -55,6 +80,24 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
     Array<{ id: string; name: string }>
   >([])
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
+  const [contextMenu, setContextMenu] = useState<ContextMenuState>({
+    visible: false,
+    x: 0,
+    y: 0,
+    personId: '',
+    triggerType: 'rightClick',
+  })
+  const [feedbackModal, setFeedbackModal] = useState<FeedbackModalState>({
+    visible: false,
+    personId: '',
+    personName: '',
+  })
+  const [oneOnOneModal, setOneOnOneModal] = useState<OneOnOneModalState>({
+    visible: false,
+    personId: '',
+    personName: '',
+  })
 
   // Load teams and people for dropdowns
   useEffect(() => {
@@ -72,6 +115,18 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
     }
     loadData()
   }, [])
+
+  // Handle clicking outside context menu to close it
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setContextMenu(prev => ({ ...prev, visible: false }))
+    }
+
+    if (contextMenu.visible) {
+      document.addEventListener('click', handleClickOutside)
+      return () => document.removeEventListener('click', handleClickOutside)
+    }
+  }, [contextMenu.visible])
 
   const handleEdit = (
     personId: string,
@@ -152,6 +207,66 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
         }
       })
     }
+  }
+
+  const handleRowDoubleClick = (personId: string) => {
+    router.push(`/people/${personId}`)
+  }
+
+  const handleRowRightClick = (e: React.MouseEvent, personId: string) => {
+    e.preventDefault()
+    setContextMenu({
+      visible: true,
+      x: e.clientX,
+      y: e.clientY,
+      personId,
+      triggerType: 'rightClick',
+    })
+  }
+
+  const handleButtonClick = (e: React.MouseEvent, personId: string) => {
+    e.stopPropagation()
+    const rect = e.currentTarget.getBoundingClientRect()
+    setContextMenu({
+      visible: true,
+      x: rect.right - 160, // Position menu to the left of the button
+      y: rect.bottom + 4, // Position menu below the button
+      personId,
+      triggerType: 'button',
+    })
+  }
+
+  const handleAddFeedback = (personId: string, personName: string) => {
+    setContextMenu(prev => ({ ...prev, visible: false }))
+    setFeedbackModal({
+      visible: true,
+      personId,
+      personName,
+    })
+  }
+
+  const handleFeedbackSuccess = () => {
+    setFeedbackModal(prev => ({ ...prev, visible: false }))
+    toast.success('Feedback added successfully')
+    // Refresh the page to show updated data
+    window.location.reload()
+  }
+
+  const handleFeedbackCancel = () => {
+    setFeedbackModal(prev => ({ ...prev, visible: false }))
+  }
+
+  const handleAddOneOnOne = (personId: string, personName: string) => {
+    setContextMenu(prev => ({ ...prev, visible: false }))
+    setOneOnOneModal({
+      visible: true,
+      personId,
+      personName,
+    })
+  }
+
+  const handleOneOnOneCancel = () => {
+    setOneOnOneModal(prev => ({ ...prev, visible: false }))
   }
 
   const renderEditableCell = (
@@ -340,7 +455,9 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
           {displayPeople.map(person => (
             <TableRow
               key={person.id}
-              className='border-neutral-800 hover:bg-neutral-900/50'
+              className='border-neutral-800 hover:bg-neutral-900/50 cursor-pointer'
+              onDoubleClick={() => handleRowDoubleClick(person.id)}
+              onContextMenu={e => handleRowRightClick(e, person.id)}
             >
               <TableCell className='font-medium text-neutral-100'>
                 <div className='flex items-center gap-2'>
@@ -375,48 +492,139 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
                 </span>
               </TableCell>
               <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant='ghost' className='h-8 w-8 p-0'>
-                      <MoreHorizontal className='h-4 w-4' />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align='end'
-                    className='bg-neutral-900 border-neutral-800'
-                  >
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href={`/people/${person.id}`}
-                        className='flex items-center gap-2'
-                      >
-                        <Eye className='w-4 h-4' />
-                        View
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href={`/people/${person.id}/edit`}
-                        className='flex items-center gap-2'
-                      >
-                        <Edit className='w-4 h-4' />
-                        Edit
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleDelete(person.id)}
-                      className='text-red-400 hover:text-red-300 hover:bg-red-900/20'
-                    >
-                      <Trash2 className='w-4 h-4 mr-2' />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Button
+                  variant='ghost'
+                  className='h-8 w-8 p-0'
+                  onClick={e => handleButtonClick(e, person.id)}
+                >
+                  <MoreHorizontal className='h-4 w-4' />
+                </Button>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+
+      {/* Context Menu */}
+      {contextMenu.visible && (
+        <div
+          className='fixed z-50 bg-neutral-900 border border-neutral-700 rounded-md shadow-lg py-1 min-w-[160px]'
+          style={{
+            left: contextMenu.x,
+            top: contextMenu.y,
+          }}
+          onClick={e => e.stopPropagation()}
+        >
+          <button
+            className='w-full px-3 py-2 text-left text-sm text-neutral-100 hover:bg-neutral-800 flex items-center gap-2'
+            onClick={() => {
+              router.push(`/people/${contextMenu.personId}`)
+              setContextMenu(prev => ({ ...prev, visible: false }))
+            }}
+          >
+            <Eye className='w-4 h-4' />
+            View
+          </button>
+          <button
+            className='w-full px-3 py-2 text-left text-sm text-neutral-100 hover:bg-neutral-800 flex items-center gap-2'
+            onClick={() => {
+              router.push(`/people/${contextMenu.personId}/edit`)
+              setContextMenu(prev => ({ ...prev, visible: false }))
+            }}
+          >
+            <Edit className='w-4 h-4' />
+            Edit
+          </button>
+          <button
+            className='w-full px-3 py-2 text-left text-sm text-neutral-100 hover:bg-neutral-800 flex items-center gap-2'
+            onClick={() => {
+              const person = displayPeople.find(
+                p => p.id === contextMenu.personId
+              )
+              if (person) {
+                handleAddFeedback(person.id, person.name)
+              }
+            }}
+          >
+            <MessageCircle className='w-4 h-4' />
+            Add Feedback
+          </button>
+          <button
+            className='w-full px-3 py-2 text-left text-sm text-neutral-100 hover:bg-neutral-800 flex items-center gap-2'
+            onClick={() => {
+              const person = displayPeople.find(
+                p => p.id === contextMenu.personId
+              )
+              if (person) {
+                handleAddOneOnOne(person.id, person.name)
+              }
+            }}
+          >
+            <MessageSquare className='w-4 h-4' />
+            Add 1:1
+          </button>
+          <button
+            className='w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 flex items-center gap-2'
+            onClick={() => {
+              handleDelete(contextMenu.personId)
+              setContextMenu(prev => ({ ...prev, visible: false }))
+            }}
+          >
+            <Trash2 className='w-4 h-4' />
+            Delete
+          </button>
+        </div>
+      )}
+
+      {/* Feedback Modal */}
+      {feedbackModal.visible && (
+        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+          <div className='bg-neutral-800 border border-neutral-700 rounded-xl p-6 max-w-md w-full mx-4'>
+            <h4 className='font-medium mb-4'>
+              Add Feedback for {feedbackModal.personName}
+            </h4>
+            <FeedbackForm
+              person={{
+                id: feedbackModal.personId,
+                name: feedbackModal.personName,
+                email: null,
+                role: null,
+                organizationId: '',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                status: 'active',
+                teamId: null,
+                managerId: null,
+                startedAt: null,
+              }}
+              onSuccess={handleFeedbackSuccess}
+              onCancel={handleFeedbackCancel}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* 1:1 Modal */}
+      {oneOnOneModal.visible && (
+        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+          <div className='bg-neutral-800 border border-neutral-700 rounded-xl p-6 max-w-lg w-full mx-4'>
+            <h4 className='font-medium mb-4'>
+              Add 1:1 with {oneOnOneModal.personName}
+            </h4>
+            <OneOnOneForm
+              people={allPeople.map(p => ({
+                id: p.id,
+                name: p.name,
+                email: null,
+                role: null,
+                reports: [],
+              }))}
+              preFilledReportId={oneOnOneModal.personId}
+              onCancel={handleOneOnOneCancel}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

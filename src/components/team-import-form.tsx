@@ -101,30 +101,77 @@ export function TeamImportForm() {
   }
 
   return (
-    <div className='max-w-4xl mx-auto p-6 bg-black min-h-screen'>
-      <h1 className='text-2xl font-bold text-neutral-100 mb-6'>
-        Import Teams from CSV
-      </h1>
-
-      <div className='mb-6'>
-        <h2 className='text-lg font-semibold text-neutral-200 mb-3'>
-          CSV Format
-        </h2>
+    <div className='space-y-6'>
+      <div>
+        <h3 className='text-lg font-semibold mb-4'>CSV Format</h3>
         <p className='text-neutral-400 mb-4'>
           Your CSV file should have the following columns:
         </p>
-        <ul className='list-disc list-inside text-neutral-400 mb-4 space-y-1'>
-          <li>
-            <strong>name</strong> - Team name (required)
-          </li>
-          <li>
-            <strong>description</strong> - Team description (optional)
-          </li>
-          <li>
-            <strong>parent</strong> - Parent team name (optional)
-          </li>
-        </ul>
-        <div className='bg-blue-900/30 border border-blue-700 rounded-md p-4 mb-4'>
+        <div className='overflow-x-auto mb-4'>
+          <table className='min-w-full border border-neutral-700 rounded-lg'>
+            <thead className='bg-neutral-800'>
+              <tr>
+                <th className='px-4 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider border-b border-neutral-700'>
+                  Column Name
+                </th>
+                <th className='px-4 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider border-b border-neutral-700'>
+                  Description
+                </th>
+                <th className='px-4 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider border-b border-neutral-700'>
+                  Required
+                </th>
+                <th className='px-4 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider border-b border-neutral-700'>
+                  Example
+                </th>
+              </tr>
+            </thead>
+            <tbody className='bg-neutral-900 divide-y divide-neutral-700'>
+              <tr>
+                <td className='px-4 py-3 text-sm font-medium text-neutral-200 border-r border-neutral-700'>
+                  name
+                </td>
+                <td className='px-4 py-3 text-sm text-neutral-300 border-r border-neutral-700'>
+                  Team name
+                </td>
+                <td className='px-4 py-3 text-sm text-red-400 border-r border-neutral-700'>
+                  Yes
+                </td>
+                <td className='px-4 py-3 text-sm text-neutral-400'>
+                  Engineering
+                </td>
+              </tr>
+              <tr>
+                <td className='px-4 py-3 text-sm font-medium text-neutral-200 border-r border-neutral-700'>
+                  description
+                </td>
+                <td className='px-4 py-3 text-sm text-neutral-300 border-r border-neutral-700'>
+                  Team description
+                </td>
+                <td className='px-4 py-3 text-sm text-green-400 border-r border-neutral-700'>
+                  No
+                </td>
+                <td className='px-4 py-3 text-sm text-neutral-400'>
+                  Software development team
+                </td>
+              </tr>
+              <tr>
+                <td className='px-4 py-3 text-sm font-medium text-neutral-200 border-r border-neutral-700'>
+                  parent
+                </td>
+                <td className='px-4 py-3 text-sm text-neutral-300 border-r border-neutral-700'>
+                  Parent team name (must match existing team)
+                </td>
+                <td className='px-4 py-3 text-sm text-green-400 border-r border-neutral-700'>
+                  No
+                </td>
+                <td className='px-4 py-3 text-sm text-neutral-400'>
+                  Engineering
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div className='card mb-4'>
           <h3 className='font-semibold text-blue-300 mb-2'>Important Notes:</h3>
           <ul className='text-blue-200 text-sm space-y-1'>
             <li>• Team names must be unique within your organization</li>
@@ -147,28 +194,42 @@ export function TeamImportForm() {
             </li>
           </ul>
         </div>
-        <Button type='button' onClick={downloadTemplate} variant='outline'>
-          Download Template CSV
-        </Button>
       </div>
 
       <form onSubmit={handleSubmit} className='space-y-6'>
         <div>
-          <label
-            htmlFor='file'
-            className='block text-sm font-medium text-neutral-200 mb-2'
-          >
+          <label htmlFor='file' className='block text-sm font-medium mb-2'>
             Select CSV File
           </label>
-          <input
-            type='file'
-            id='file'
-            name='file'
-            accept='.csv'
-            onChange={handleFileChange}
-            className='block w-full text-sm text-neutral-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-neutral-800 file:text-neutral-200 hover:file:bg-neutral-700'
-            required
-          />
+          <div className='relative'>
+            <input
+              type='file'
+              id='file'
+              name='file'
+              accept='.csv'
+              onChange={handleFileChange}
+              className='absolute inset-0 w-full h-full opacity-0 cursor-pointer'
+              required
+            />
+            <div className='input flex items-center justify-between cursor-pointer hover:bg-neutral-800 transition-colors'>
+              <span className='text-neutral-400'>
+                {file ? file.name : 'Choose CSV file...'}
+              </span>
+              <svg
+                className='w-5 h-5 text-neutral-400'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12'
+                />
+              </svg>
+            </div>
+          </div>
           {file && (
             <p className='mt-2 text-sm text-neutral-400'>
               Selected file: {file.name} ({(file.size / 1024).toFixed(1)} KB)
@@ -177,11 +238,11 @@ export function TeamImportForm() {
         </div>
 
         <div className='flex space-x-4'>
-          <Button type='submit' disabled={!file || isLoading}>
+          <Button type='submit' disabled={!file || isLoading} variant='outline'>
             {isLoading ? (
               <>
                 <svg
-                  className='animate-spin -ml-1 mr-3 h-5 w-5 text-white'
+                  className='animate-spin -ml-1 mr-3 h-5 w-5'
                   xmlns='http://www.w3.org/2000/svg'
                   fill='none'
                   viewBox='0 0 24 24'
@@ -206,23 +267,20 @@ export function TeamImportForm() {
               'Import Teams'
             )}
           </Button>
+          <Button type='button' onClick={downloadTemplate} variant='outline'>
+            Download Template CSV
+          </Button>
         </div>
       </form>
 
       {result && (
-        <div className='mt-8'>
-          <div
-            className={`rounded-md p-4 mb-4 ${
-              result.success
-                ? 'bg-emerald-900/30 border border-emerald-700'
-                : 'bg-red-900/30 border border-red-700'
-            }`}
-          >
+        <div className='space-y-6'>
+          <div className={`card ${result.success ? 'rag-green' : 'rag-red'}`}>
             <div className='flex'>
               <div className='flex-shrink-0'>
                 {result.success ? (
                   <svg
-                    className='h-5 w-5 text-emerald-300'
+                    className='h-5 w-5 text-emerald-400'
                     xmlns='http://www.w3.org/2000/svg'
                     viewBox='0 0 20 20'
                     fill='currentColor'
@@ -235,7 +293,7 @@ export function TeamImportForm() {
                   </svg>
                 ) : (
                   <svg
-                    className='h-5 w-5 text-red-300'
+                    className='h-5 w-5 text-red-400'
                     xmlns='http://www.w3.org/2000/svg'
                     viewBox='0 0 20 20'
                     fill='currentColor'
@@ -249,15 +307,9 @@ export function TeamImportForm() {
                 )}
               </div>
               <div className='ml-3'>
-                <h3
-                  className={`text-sm font-medium ${
-                    result.success ? 'text-emerald-200' : 'text-red-200'
-                  }`}
-                >
-                  {result.message}
-                </h3>
+                <h3 className='text-sm font-medium'>{result.message}</h3>
                 {result.imported > 0 && (
-                  <div className='mt-2 text-sm text-emerald-300'>
+                  <div className='mt-2 text-sm'>
                     <p>Successfully processed {result.imported} teams</p>
                   </div>
                 )}
@@ -266,12 +318,10 @@ export function TeamImportForm() {
           </div>
 
           {result.errors.length > 0 && (
-            <div className='mb-4'>
-              <h3 className='text-lg font-semibold text-neutral-200 mb-2'>
-                Errors:
-              </h3>
-              <div className='bg-red-900/30 border border-red-700 rounded-md p-4'>
-                <ul className='text-sm text-red-200 space-y-1'>
+            <div>
+              <h3 className='text-lg font-semibold mb-2'>Errors:</h3>
+              <div className='card rag-red'>
+                <ul className='text-sm space-y-1'>
                   {result.errors.map((error, index) => (
                     <li key={index}>• {error}</li>
                   ))}
@@ -283,14 +333,10 @@ export function TeamImportForm() {
           {result.errorRows.length > 0 && (
             <div>
               <div className='flex justify-between items-center mb-4'>
-                <h3 className='text-lg font-semibold text-neutral-200'>
+                <h3 className='text-lg font-semibold'>
                   Row Errors ({result.errorRows.length} rows with errors)
                 </h3>
-                <Button
-                  onClick={downloadErrorReport}
-                  variant='outline'
-                  size='sm'
-                >
+                <Button onClick={downloadErrorReport} variant='outline'>
                   Download Error Report
                 </Button>
               </div>
@@ -318,19 +364,19 @@ export function TeamImportForm() {
                   <tbody className='bg-neutral-900 divide-y divide-neutral-700'>
                     {result.errorRows.map((row, index) => (
                       <tr key={index}>
-                        <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-100'>
+                        <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-200'>
                           {row.rowNumber}
                         </td>
-                        <td className='px-6 py-4 whitespace-nowrap text-sm text-neutral-100'>
+                        <td className='px-6 py-4 whitespace-nowrap text-sm text-neutral-200'>
                           {row.data.name}
                         </td>
-                        <td className='px-6 py-4 whitespace-nowrap text-sm text-neutral-100'>
+                        <td className='px-6 py-4 whitespace-nowrap text-sm text-neutral-200'>
                           {row.data.description}
                         </td>
-                        <td className='px-6 py-4 whitespace-nowrap text-sm text-neutral-100'>
+                        <td className='px-6 py-4 whitespace-nowrap text-sm text-neutral-200'>
                           {row.data.parent}
                         </td>
-                        <td className='px-6 py-4 text-sm text-red-300'>
+                        <td className='px-6 py-4 text-sm text-red-400'>
                           {row.errors.join(', ')}
                         </td>
                       </tr>
