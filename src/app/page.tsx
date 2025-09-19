@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { Rag } from '@/components/rag'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -33,15 +34,12 @@ export default async function Home() {
               : "To get started, you'll need to create an organization or be invited to an existing one."}
           </p>
           <div className='flex justify-center gap-4'>
-            <Link href='/organization/create' className='btn'>
-              Create Organization
-            </Link>
-            <Link
-              href='/teams'
-              className='btn bg-neutral-600 hover:bg-neutral-700'
-            >
-              Browse Teams
-            </Link>
+            <Button asChild variant='outline'>
+              <Link href='/organization/create'>Create Organization</Link>
+            </Button>
+            <Button asChild variant='outline'>
+              <Link href='/teams'>Browse Teams</Link>
+            </Button>
           </div>
         </div>
       </div>

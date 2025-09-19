@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { useSession, signOut } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
@@ -68,12 +69,12 @@ export default function Sidebar() {
         </div>
         <div className='flex-1 px-6 py-4'>
           <nav className='space-y-2'>
-            <Link href='/auth/signin' className='btn w-full justify-start'>
-              Sign In
-            </Link>
-            <Link href='/auth/signup' className='btn w-full justify-start'>
-              Sign Up
-            </Link>
+            <Button asChild variant='outline' className='w-full justify-start'>
+              <Link href='/auth/signin'>Sign In</Link>
+            </Button>
+            <Button asChild variant='outline' className='w-full justify-start'>
+              <Link href='/auth/signup'>Sign Up</Link>
+            </Button>
           </nav>
         </div>
       </div>

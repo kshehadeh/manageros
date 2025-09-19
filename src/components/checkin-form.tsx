@@ -1,5 +1,6 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { createCheckIn, updateCheckIn } from '@/lib/actions'
 import { Rag } from '@/components/rag'
@@ -236,25 +237,17 @@ export function CheckInForm({
       </div>
 
       <div className='flex gap-2 pt-4'>
-        <button
-          type='submit'
-          disabled={isSubmitting}
-          className='btn bg-blue-600 hover:bg-blue-700 disabled:opacity-50'
-        >
+        <Button type='submit' disabled={isSubmitting} variant='outline'>
           {isSubmitting
             ? 'Saving...'
             : isEditing
               ? 'Update Check-in'
               : 'Create Check-in'}
-        </button>
+        </Button>
         {onSuccess && (
-          <button
-            type='button'
-            onClick={onSuccess}
-            className='btn bg-neutral-700 hover:bg-neutral-600'
-          >
+          <Button type='button' onClick={onSuccess} variant='outline'>
             Cancel
-          </button>
+          </Button>
         )}
       </div>
     </form>

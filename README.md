@@ -17,7 +17,7 @@ ManagerOS is a Next.js-based management platform designed specifically for engin
 
 - **Framework**: Next.js 15 with App Router and Server Actions
 - **Database**: Prisma ORM with SQLite (easily upgradeable to PostgreSQL)
-- **Styling**: TailwindCSS for utility-first styling
+- **Styling**: TailwindCSS with shadcn UI components and Radix UI primitives
 - **Runtime**: Bun for fast package management and execution
 - **Type Safety**: TypeScript throughout the application
 - **Validation**: Zod for runtime type validation
@@ -107,6 +107,12 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - Assign tasks to team members
 - Track progress with status updates
 - Priority and due date management
+
+- Standardized UI components:
+  - Buttons use the shared shadcn `Button` at `src/components/ui/button.tsx`
+  - Default button style is `variant='outline'`
+  - Icon-only actions use `size='icon'` and Lucide icons
+  - Destructive confirms use `variant='destructive'` only for the confirm state
 
 ## 🗄️ Database Schema
 

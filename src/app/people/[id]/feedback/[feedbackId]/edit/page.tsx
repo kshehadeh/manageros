@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
 interface FeedbackEditPageProps {
   params: Promise<{
@@ -89,9 +90,9 @@ export default async function FeedbackEditPage({
             Editing feedback for {person.name}
           </div>
         </div>
-        <Link href={`/people/${id}`} className='btn'>
-          Back to {person.name}
-        </Link>
+        <Button asChild variant='outline'>
+          <Link href={`/people/${id}`}>Back to {person.name}</Link>
+        </Button>
       </div>
 
       <div className='card'>

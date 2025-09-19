@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
 import {
   linkUserToPerson,
   unlinkUserFromPerson,
@@ -102,13 +103,9 @@ export function UserLinkForm({
                 {linkedUser.name} ({linkedUser.email}) - {linkedUser.role}
               </div>
             </div>
-            <button
-              onClick={handleUnlink}
-              disabled={isLoading}
-              className='btn bg-red-600 hover:bg-red-700 text-sm'
-            >
+            <Button onClick={handleUnlink} disabled={isLoading} variant='outline' size='sm'>
               {isLoading ? 'Unlinking...' : 'Unlink'}
-            </button>
+            </Button>
           </div>
         </div>
       ) : (
@@ -138,15 +135,9 @@ export function UserLinkForm({
             )}
           </div>
 
-          <button
-            type='submit'
-            disabled={
-              isLoading || !selectedUserId || availableUsers.length === 0
-            }
-            className='btn bg-blue-600 hover:bg-blue-700 disabled:opacity-50'
-          >
+          <Button type='submit' disabled={isLoading || !selectedUserId || availableUsers.length === 0} variant='outline'>
             {isLoading ? 'Linking...' : 'Link User Account'}
-          </button>
+          </Button>
         </form>
       )}
     </div>

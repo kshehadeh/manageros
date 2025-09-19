@@ -1,5 +1,7 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
+
 import { useState, useEffect } from 'react'
 import { createTeam, updateTeam, getTeamsForSelection } from '@/lib/actions'
 import { type TeamFormData } from '@/lib/validations'
@@ -129,10 +131,10 @@ export function TeamForm({ team, parentId }: TeamFormProps) {
 
       {/* Submit Button */}
       <div className='flex justify-end'>
-        <button
+        <Button
           type='submit'
           disabled={isSubmitting || !formData.name.trim()}
-          className='btn bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
+          variant='outline'
         >
           {isSubmitting
             ? team
@@ -141,7 +143,7 @@ export function TeamForm({ team, parentId }: TeamFormProps) {
             : team
               ? 'Update Team'
               : 'Create Team'}
-        </button>
+        </Button>
       </div>
     </form>
   )

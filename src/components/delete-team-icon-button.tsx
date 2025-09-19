@@ -11,7 +11,7 @@ interface DeleteTeamIconButtonProps {
   hasPeople: boolean
   hasInitiatives: boolean
   hasChildren: boolean
-  size?: 'sm' | 'default' | 'lg'
+  size?: 'sm' | 'default' | 'lg' | 'icon'
   variant?: 'default' | 'secondary' | 'outline' | 'destructive'
   className?: string
 }
@@ -23,6 +23,7 @@ export function DeleteTeamIconButton({
   hasInitiatives,
   hasChildren,
   size = 'sm',
+  // keep outline by default; destructive used only in confirm state
   variant = 'outline',
   className = '',
 }: DeleteTeamIconButtonProps) {
@@ -53,7 +54,7 @@ export function DeleteTeamIconButton({
       <Button
         disabled
         size={size}
-        variant='secondary'
+        variant='outline'
         className={`${className} opacity-50 cursor-not-allowed`}
         title={`Cannot delete "${teamName}" because it has ${[
           hasPeople && 'members',
@@ -75,7 +76,7 @@ export function DeleteTeamIconButton({
         <Button
           onClick={handleDelete}
           disabled={isDeleting}
-          size={size}
+          size='default'
           variant='destructive'
           className={className}
         >
@@ -84,7 +85,7 @@ export function DeleteTeamIconButton({
         <Button
           onClick={() => setShowConfirm(false)}
           disabled={isDeleting}
-          size={size}
+          size='default'
           variant='outline'
         >
           Cancel

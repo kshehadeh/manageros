@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Rag } from '@/components/rag'
 import { CheckInForm } from '@/components/checkin-form'
 import { DeleteCheckInButton } from '@/components/delete-checkin-button'
+import { Button } from '@/components/ui/button'
 import { EditIconButton } from './edit-icon-button'
 
 interface CheckIn {
@@ -62,12 +63,9 @@ export function CheckInList({
     <div className='space-y-4'>
       <div className='flex items-center justify-between'>
         <h3 className='font-semibold'>Check-ins</h3>
-        <button
-          onClick={() => setShowNewForm(true)}
-          className='btn bg-blue-600 hover:bg-blue-700 text-sm'
-        >
+        <Button onClick={() => setShowNewForm(true)} variant='outline' size='sm'>
           Add Check-in
-        </button>
+        </Button>
       </div>
 
       {/* New Check-in Form */}
@@ -166,12 +164,9 @@ export function CheckInList({
             <div className='text-sm mb-4'>
               Start tracking progress with regular check-ins
             </div>
-            <button
-              onClick={() => setShowNewForm(true)}
-              className='btn bg-blue-600 hover:bg-blue-700'
-            >
+            <Button onClick={() => setShowNewForm(true)} variant='outline'>
               Add First Check-in
-            </button>
+            </Button>
           </div>
         )}
       </div>

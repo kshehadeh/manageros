@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { createTask, updateTask } from '@/lib/actions'
 import { type TaskFormData } from '@/lib/validations'
 import { Person, Initiative, Objective } from '@prisma/client'
@@ -263,20 +264,16 @@ export function TaskForm({
       </div>
 
       <div className='flex items-center gap-3'>
-        <button
-          type='submit'
-          disabled={isSubmitting}
-          className='btn bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
-        >
+        <Button type='submit' disabled={isSubmitting} variant='outline'>
           {isSubmitting
             ? 'Saving...'
             : isEditing
               ? 'Update Task'
               : 'Create Task'}
-        </button>
-        <Link href='/tasks' className='btn bg-neutral-700 hover:bg-neutral-600'>
-          Cancel
-        </Link>
+        </Button>
+        <Button asChild variant='outline'>
+          <Link href='/tasks'>Cancel</Link>
+        </Button>
       </div>
     </form>
   )

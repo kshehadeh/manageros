@@ -53,7 +53,7 @@ function HierarchicalTeamCard({
             {hasChildren ? (
               <Collapsible open={isExpanded} onOpenChange={handleToggle}>
                 <CollapsibleTrigger asChild>
-                  <button className='flex items-center justify-center w-6 h-6 hover:bg-neutral-700 rounded transition-colors'>
+                  <button className='flex items-center justify-center w-6 h-6 hover:bg-neutral-700 rounded transition-colors' aria-label={isExpanded ? 'Collapse team' : 'Expand team'}>
                     {isExpanded ? (
                       <ChevronDown className='w-4 h-4 text-neutral-400' />
                     ) : (

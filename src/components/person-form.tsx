@@ -1,5 +1,6 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { createPerson, updatePerson } from '@/lib/actions'
 import { type PersonFormData } from '@/lib/validations'
@@ -200,10 +201,10 @@ export function PersonForm({
 
       {/* Submit Button */}
       <div className='flex justify-end'>
-        <button
+        <Button
           type='submit'
           disabled={isSubmitting || !formData.name.trim()}
-          className='btn bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
+          variant='outline'
         >
           {isSubmitting
             ? person
@@ -212,7 +213,7 @@ export function PersonForm({
             : person
               ? 'Update Person'
               : 'Create Person'}
-        </button>
+        </Button>
       </div>
     </form>
   )

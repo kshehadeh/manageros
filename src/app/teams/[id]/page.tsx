@@ -7,6 +7,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { EditIconButton } from '@/components/edit-icon-button'
+import { Button } from '@/components/ui/button'
 import { Eye } from 'lucide-react'
 
 interface TeamDetailPageProps {
@@ -93,10 +94,12 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
               variant='outline'
               size='default'
             />
-            <Link href='/teams' className='btn flex items-center gap-2'>
-              <Eye className='w-4 h-4' />
-              Back to Teams
-            </Link>
+            <Button asChild variant='outline'>
+              <Link href='/teams' className='flex items-center gap-2'>
+                <Eye className='w-4 h-4' />
+                Back to Teams
+              </Link>
+            </Button>
           </div>
         </div>
 
@@ -107,12 +110,9 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
               <h3 className='font-semibold'>
                 Team Members ({team.people.length})
               </h3>
-              <Link
-                href={`/people/new?teamId=${team.id}`}
-                className='btn text-sm'
-              >
-                Add Member
-              </Link>
+              <Button asChild variant='outline' size='sm'>
+                <Link href={`/people/new?teamId=${team.id}`}>Add Member</Link>
+              </Button>
             </div>
             <div className='space-y-3'>
               {team.people.map(person => (
@@ -181,12 +181,9 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
               <h3 className='font-semibold'>
                 Team Initiatives ({team.initiatives.length})
               </h3>
-              <Link
-                href={`/initiatives/new?teamId=${team.id}`}
-                className='btn text-sm'
-              >
-                New Initiative
-              </Link>
+              <Button asChild variant='outline' size='sm'>
+                <Link href={`/initiatives/new?teamId=${team.id}`}>New Initiative</Link>
+              </Button>
             </div>
             <div className='space-y-3'>
               {team.initiatives.map(initiative => (
@@ -242,12 +239,9 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
             <h3 className='font-semibold'>
               Child Teams ({team.children.length})
             </h3>
-            <Link
-              href={`/teams/new?parentId=${team.id}`}
-              className='btn text-sm'
-            >
-              Add Child Team
-            </Link>
+            <Button asChild variant='outline' size='sm'>
+              <Link href={`/teams/new?parentId=${team.id}`}>Add Child Team</Link>
+            </Button>
           </div>
           <div className='space-y-3'>
             {team.children.map(childTeam => (

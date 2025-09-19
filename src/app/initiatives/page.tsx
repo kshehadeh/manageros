@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { Rag } from '@/components/rag'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -29,9 +30,9 @@ export default async function InitiativesPage() {
     <div className='space-y-4'>
       <div className='flex items-center justify-between'>
         <h2 className='text-lg font-semibold'>Initiatives</h2>
-        <Link href='/initiatives/new' className='btn'>
-          New
-        </Link>
+        <Button asChild variant='outline'>
+          <Link href='/initiatives/new'>New</Link>
+        </Button>
       </div>
       <div className='grid gap-3'>
         {inits.map(i => (

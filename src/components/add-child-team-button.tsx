@@ -4,14 +4,14 @@ import { Button } from '@/components/ui/button'
 
 interface AddChildTeamButtonProps {
   parentTeamId: string
-  size?: 'sm' | 'default' | 'lg'
+  size?: 'sm' | 'default' | 'lg' | 'icon'
   variant?: 'default' | 'secondary' | 'outline'
   className?: string
 }
 
 export function AddChildTeamButton({
   parentTeamId,
-  size = 'sm',
+  size = 'icon',
   variant = 'outline',
   className = '',
 }: AddChildTeamButtonProps) {

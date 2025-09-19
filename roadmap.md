@@ -199,6 +199,12 @@
 - **Error Handling** - Improved error boundaries and user feedback
 - **Accessibility** - WCAG compliance and screen reader support
 
+### UI Consistency
+
+- Standardize on shadcn UI `Button` across the app with `variant='outline'` default.
+- Use icon-only buttons (`size='icon'`) with Lucide icons for view/edit/delete actions.
+- Remove legacy custom `IconButton`; replaced by shadcn Button variants.
+
 ### Infrastructure
 
 - **Monitoring** - Application performance monitoring and alerting

@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { prisma } from '@/lib/db'
 
 interface NewOneOnOnePageProps {
@@ -69,12 +70,9 @@ export default async function NewOneOnOnePage({
             Schedule a new one-on-one meeting
           </p>
         </div>
-        <Link
-          href='/oneonones'
-          className='btn bg-neutral-600 hover:bg-neutral-700'
-        >
-          Back to 1:1s
-        </Link>
+        <Button asChild variant='outline'>
+          <Link href='/oneonones'>Back to 1:1s</Link>
+        </Button>
       </div>
 
       <OneOnOneForm

@@ -114,6 +114,11 @@ The integration adds three new tables:
 - **"Jira credentials not configured"**: Set up credentials in Settings first
 
 ## Future Enhancements
+## UI Consistency
+
+- All actions use the shared shadcn `Button` with `variant='outline'`.
+- Icon-only actions use shadcn `Button` with `size='icon'` and Lucide icons.
+- Destructive confirmations use `variant='destructive'` only in the confirm state.
 
 Planned improvements include:
 

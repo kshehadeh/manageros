@@ -1,6 +1,7 @@
 import { PersonForm } from '@/components/person-form'
 import { getTeams, getPeople } from '@/lib/actions'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -36,9 +37,9 @@ export default async function NewPersonPage({
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
         <h2 className='text-lg font-semibold'>New Person</h2>
-        <Link href='/people' className='btn'>
-          Back to People
-        </Link>
+        <Button asChild variant='outline'>
+          <Link href='/people'>Back to People</Link>
+        </Button>
       </div>
 
       <PersonForm

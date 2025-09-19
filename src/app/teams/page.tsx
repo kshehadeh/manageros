@@ -30,13 +30,13 @@ export default async function TeamsPage() {
           </p>
         </div>
         <div className='flex gap-2'>
-          <Button asChild variant='secondary'>
+          <Button asChild variant='outline'>
             <Link href='/teams/import'>
               <Upload className='w-4 h-4' />
               Import Teams
             </Link>
           </Button>
-          <Button asChild>
+          <Button asChild variant='outline'>
             <Link href='/teams/new'>
               <Plus className='w-4 h-4' />
               New Team

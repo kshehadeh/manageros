@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
 import { acceptInvitationForUser } from '@/lib/actions'
 import { useSession } from 'next-auth/react'
 
@@ -134,11 +135,7 @@ export default function PendingInvitations({
                 </div>
               </div>
 
-              <button
-                onClick={() => handleAcceptInvitation(invitation.id)}
-                disabled={acceptingInvitation === invitation.id}
-                className='btn btn-sm bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
-              >
+              <Button onClick={() => handleAcceptInvitation(invitation.id)} disabled={acceptingInvitation === invitation.id} variant='outline' size='sm'>
                 {acceptingInvitation === invitation.id ? (
                   <>
                     <svg
@@ -166,7 +163,7 @@ export default function PendingInvitations({
                 ) : (
                   'Accept Invitation'
                 )}
-              </button>
+              </Button>
             </div>
           </div>
         ))}
