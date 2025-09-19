@@ -204,6 +204,7 @@
 - Standardize on shadcn UI `Button` across the app with `variant='outline'` default.
 - Use icon-only buttons (`size='icon'`) with Lucide icons for view/edit/delete actions.
 - Remove legacy custom `IconButton`; replaced by shadcn Button variants.
+- **Authentication Screens Dark Theme** (January 19, 2025) - Updated sign-in and sign-up screens with consistent dark theme and shadcn components
 
 ### Infrastructure
 

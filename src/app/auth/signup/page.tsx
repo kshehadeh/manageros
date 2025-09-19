@@ -4,6 +4,19 @@ import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { AlertCircle, CheckCircle2 } from 'lucide-react'
 
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -101,94 +114,84 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8'>
-      <div className='max-w-md w-full space-y-8'>
-        <div>
-          <h2 className='mt-6 text-center text-3xl font-extrabold text-gray-900'>
-            Create your account
-          </h2>
-          <p className='mt-2 text-center text-sm text-gray-600'>
-            Or{' '}
-            <Link
-              href='/auth/signin'
-              className='font-medium text-indigo-600 hover:text-indigo-500'
-            >
-              sign in to your existing account
-            </Link>
-          </p>
-        </div>
-        <form className='mt-8 space-y-6' onSubmit={handleSubmit}>
-          {error && (
-            <div className='bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded'>
-              {error}
-            </div>
-          )}
-          {success && (
-            <div className='bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded'>
-              {success}
-            </div>
-          )}
-          <div className='space-y-4'>
-            <div>
-              <label
-                htmlFor='name'
-                className='block text-sm font-medium text-gray-700'
-              >
+    <div className='p-4'>
+      <Card className='w-full max-w-md'>
+        <CardHeader className='space-y-1'>
+          <CardTitle className='text-2xl font-bold text-center'>
+            Create an account
+          </CardTitle>
+          <CardDescription className='text-center'>
+            Enter your information to get started
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className='space-y-4'>
+            {error && (
+              <div className='flex items-center gap-2 rounded-lg bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 text-sm'>
+                <AlertCircle className='h-4 w-4 flex-shrink-0' />
+                <span>{error}</span>
+              </div>
+            )}
+            {success && (
+              <div className='flex items-center gap-2 rounded-lg bg-green-900/20 border border-green-800 text-green-400 px-4 py-3 text-sm'>
+                <CheckCircle2 className='h-4 w-4 flex-shrink-0' />
+                <span>{success}</span>
+              </div>
+            )}
+
+            <div className='space-y-2'>
+              <Label htmlFor='name' className='text-neutral-200'>
                 Full Name
-              </label>
-              <input
+              </Label>
+              <Input
                 id='name'
                 name='name'
                 type='text'
                 required
-                className='mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
                 placeholder='John Doe'
                 value={formData.name}
                 onChange={handleInputChange}
+                className='bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-600'
               />
             </div>
-            <div>
-              <label
-                htmlFor='email'
-                className='block text-sm font-medium text-gray-700'
-              >
+
+            <div className='space-y-2'>
+              <Label htmlFor='email' className='text-neutral-200'>
                 Email Address
-              </label>
-              <input
+              </Label>
+              <Input
                 id='email'
                 name='email'
                 type='email'
                 autoComplete='email'
                 required
-                className='mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
                 placeholder='john@example.com'
                 value={formData.email}
                 onChange={handleInputChange}
+                className='bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-600'
               />
             </div>
-            <div className='border-t border-gray-200 pt-6'>
-              <div className='flex items-center'>
-                <input
+
+            <div className='border-t border-neutral-800 pt-4'>
+              <div className='flex items-center space-x-2'>
+                <Checkbox
                   id='createOrganization'
-                  name='createOrganization'
-                  type='checkbox'
-                  className='h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded'
                   checked={formData.createOrganization}
-                  onChange={e =>
+                  onCheckedChange={checked =>
                     setFormData(prev => ({
                       ...prev,
-                      createOrganization: e.target.checked,
+                      createOrganization: checked as boolean,
                     }))
                   }
                 />
-                <label
+                <Label
                   htmlFor='createOrganization'
-                  className='ml-2 block text-sm text-gray-900'
+                  className='text-sm font-normal text-neutral-200 cursor-pointer'
                 >
                   Create a new organization
-                </label>
+                </Label>
               </div>
-              <p className='mt-1 text-xs text-gray-500'>
+              <p className='mt-1 text-xs text-neutral-500'>
                 If unchecked, you&apos;ll need to be invited to an existing
                 organization to access the platform.
               </p>
@@ -196,99 +199,105 @@ export default function SignUpPage() {
 
             {formData.createOrganization && (
               <>
-                <div>
-                  <label
+                <div className='space-y-2'>
+                  <Label
                     htmlFor='organizationName'
-                    className='block text-sm font-medium text-gray-700'
+                    className='text-neutral-200'
                   >
                     Organization Name
-                  </label>
-                  <input
+                  </Label>
+                  <Input
                     id='organizationName'
                     name='organizationName'
                     type='text'
                     required={formData.createOrganization}
-                    className='mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
                     placeholder='Acme Corp'
                     value={formData.organizationName}
                     onChange={handleInputChange}
+                    className='bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-600'
                   />
                 </div>
-                <div>
-                  <label
+
+                <div className='space-y-2'>
+                  <Label
                     htmlFor='organizationSlug'
-                    className='block text-sm font-medium text-gray-700'
+                    className='text-neutral-200'
                   >
                     Organization Slug
-                  </label>
-                  <input
+                  </Label>
+                  <Input
                     id='organizationSlug'
                     name='organizationSlug'
                     type='text'
                     required={formData.createOrganization}
-                    className='mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
                     placeholder='acme-corp'
                     value={formData.organizationSlug}
                     onChange={handleInputChange}
+                    className='bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-600'
                   />
-                  <p className='mt-1 text-xs text-gray-500'>
+                  <p className='text-xs text-neutral-500'>
                     Used in URLs. Only lowercase letters, numbers, and hyphens
                     allowed.
                   </p>
                 </div>
               </>
             )}
-            <div>
-              <label
-                htmlFor='password'
-                className='block text-sm font-medium text-gray-700'
-              >
+
+            <div className='space-y-2'>
+              <Label htmlFor='password' className='text-neutral-200'>
                 Password
-              </label>
-              <input
+              </Label>
+              <Input
                 id='password'
                 name='password'
                 type='password'
                 autoComplete='new-password'
                 required
-                className='mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
-                placeholder='Password'
+                placeholder='Create a strong password'
                 value={formData.password}
                 onChange={handleInputChange}
+                className='bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-600'
               />
             </div>
-            <div>
-              <label
-                htmlFor='confirmPassword'
-                className='block text-sm font-medium text-gray-700'
-              >
+
+            <div className='space-y-2'>
+              <Label htmlFor='confirmPassword' className='text-neutral-200'>
                 Confirm Password
-              </label>
-              <input
+              </Label>
+              <Input
                 id='confirmPassword'
                 name='confirmPassword'
                 type='password'
                 autoComplete='new-password'
                 required
-                className='mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
-                placeholder='Confirm Password'
+                placeholder='Confirm your password'
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
+                className='bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-600'
               />
             </div>
-          </div>
 
-          <div>
-            <button
+            <Button
               type='submit'
               disabled={isLoading}
-              className='group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50'
+              className='w-full bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700'
             >
               {isLoading ? 'Creating account...' : 'Create account'}
-            </button>
+            </Button>
+          </form>
+        </CardContent>
+        <CardFooter className='flex flex-col space-y-2'>
+          <div className='text-sm text-neutral-400 text-center'>
+            Already have an account?{' '}
+            <Link
+              href='/auth/signin'
+              className='text-white hover:text-neutral-200 underline underline-offset-4'
+            >
+              Sign in
+            </Link>
           </div>
-        </form>
-      </div>
+        </CardFooter>
+      </Card>
     </div>
   )
 }
