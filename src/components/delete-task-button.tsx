@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { deleteTask } from '@/lib/actions'
 
 interface DeleteTaskButtonProps {
@@ -27,29 +29,34 @@ export function DeleteTaskButton({ taskId }: DeleteTaskButtonProps) {
   if (showConfirm) {
     return (
       <div className='flex items-center gap-2'>
-        <button
+        <Button
           onClick={handleDelete}
           disabled={isDeleting}
-          className='btn bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed'
+          variant='destructive'
+          size='sm'
         >
           {isDeleting ? 'Deleting...' : 'Confirm Delete'}
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => setShowConfirm(false)}
-          className='btn bg-neutral-700 hover:bg-neutral-600'
+          variant='outline'
+          size='sm'
         >
           Cancel
-        </button>
+        </Button>
       </div>
     )
   }
 
   return (
-    <button
+    <Button
       onClick={() => setShowConfirm(true)}
-      className='btn bg-red-600 hover:bg-red-700'
+      variant='outline'
+      size='sm'
+      className='text-red-400 hover:text-red-300 border-red-400 hover:border-red-300'
     >
+      <Trash2 className='w-4 h-4 mr-2' />
       Delete Task
-    </button>
+    </Button>
   )
 }

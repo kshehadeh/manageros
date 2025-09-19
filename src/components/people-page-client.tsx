@@ -1,45 +1,14 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
-import { OrgChartReactFlow } from '@/components/org-chart-reactflow'
-import { PeopleList } from '@/components/people-list'
+import { PeopleTable } from '@/components/people-table'
+import { PeopleFilterBar } from '@/components/people-filter-bar'
 import { useSession } from 'next-auth/react'
 import { isAdmin } from '@/lib/auth'
-import { useUserSettings } from '@/lib/hooks/use-user-settings'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { LayoutGrid, List } from 'lucide-react'
-
-interface Person {
-  id: string
-  name: string
-  email: string | null
-  role: string | null
-  status: string
-  team: { id: string; name: string } | null
-  manager: {
-    id: string
-    name: string
-    email: string | null
-    role: string | null
-    status: string
-    reports: Array<{
-      id: string
-      name: string
-      email: string | null
-      role: string | null
-      status: string
-    }>
-  } | null
-  reports: Array<{
-    id: string
-    name: string
-    email: string | null
-    role: string | null
-    status: string
-  }>
-  level: number
-}
+import { LayoutGrid, Upload, UserPlus } from 'lucide-react'
+import { Person } from '@/types/person'
 
 interface PeoplePageClientProps {
   people: Person[]
@@ -47,60 +16,45 @@ interface PeoplePageClientProps {
 
 export function PeoplePageClient({ people }: PeoplePageClientProps) {
   const { data: session } = useSession()
-  const { getSetting, updateSetting } = useUserSettings()
-
-  // Get the current view mode from user settings, defaulting to 'chart'
-  const viewMode = getSetting('peopleViewMode')
-
-  // Function to handle view mode changes
-  const handleViewModeChange = (mode: string) => {
-    updateSetting('peopleViewMode', mode as 'list' | 'chart')
-  }
+  const [filteredPeople, setFilteredPeople] = useState<Person[]>(people)
 
   return (
     <div className='space-y-4'>
       <div className='flex items-center justify-between'>
         <h2 className='text-lg font-semibold'>People</h2>
         <div className='flex items-center gap-3'>
-          {/* View Toggle */}
-          <Tabs value={viewMode} onValueChange={handleViewModeChange}>
-            <TabsList className='border border-neutral-700 bg-neutral-800'>
-              <TabsTrigger
-                value='chart'
-                className='flex items-center gap-2 border border-transparent hover:border-neutral-600 data-[state=active]:bg-neutral-700 data-[state=active]:border-neutral-600 data-[state=active]:shadow-sm data-[state=active]:font-semibold data-[state=active]:text-white'
-              >
-                <LayoutGrid className='w-4 h-4' />
-                Chart
-              </TabsTrigger>
-              <TabsTrigger
-                value='list'
-                className='flex items-center gap-2 border border-transparent hover:border-neutral-600 data-[state=active]:bg-neutral-700 data-[state=active]:border-neutral-600 data-[state=active]:shadow-sm data-[state=active]:font-semibold data-[state=active]:text-white'
-              >
-                <List className='w-4 h-4' />
-                List
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <Button asChild variant='outline'>
+            <Link href='/people/chart' className='flex items-center gap-2'>
+              <LayoutGrid className='w-4 h-4' />
+              Chart View
+            </Link>
+          </Button>
 
           {session?.user && isAdmin(session.user) && (
             <>
               <Button asChild variant='outline'>
-                <Link href='/people/import'>Import CSV</Link>
+                <Link href='/people/import' className='flex items-center gap-2'>
+                  <Upload className='w-4 h-4' />
+                  Import CSV
+                </Link>
               </Button>
               <Button asChild variant='outline'>
-                <Link href='/people/new'>New</Link>
+                <Link href='/people/new' className='flex items-center gap-2'>
+                  <UserPlus className='w-4 h-4' />
+                  New
+                </Link>
               </Button>
             </>
           )}
         </div>
       </div>
 
-      {/* Conditional Rendering */}
-      {viewMode === 'chart' ? (
-        <OrgChartReactFlow people={people} />
-      ) : (
-        <PeopleList people={people} />
-      )}
+      <PeopleFilterBar
+        people={people}
+        onFilteredPeopleChange={setFilteredPeople}
+      />
+
+      <PeopleTable people={people} filteredPeople={filteredPeople} />
     </div>
   )
 }

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Rag } from '@/components/rag'
 import { CheckInForm } from '@/components/checkin-form'
 import { DeleteCheckInButton } from '@/components/delete-checkin-button'
-import { EditButton } from './icon-button'
+import { EditIconButton } from './edit-icon-button'
 
 interface CheckIn {
   id: string
@@ -147,9 +147,9 @@ export function CheckInList({
 
             {/* Actions */}
             <div className='flex items-center gap-2 pt-2 border-t border-neutral-800'>
-              <EditButton
-                onClick={() => setEditingCheckIn(checkIn)}
-                variant='primary'
+              <EditIconButton
+                href={`/initiatives/${initiativeId}/checkins/${checkIn.id}/edit`}
+                variant='outline'
                 size='sm'
               />
               <DeleteCheckInButton

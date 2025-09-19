@@ -5,7 +5,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { DeleteTaskButton } from '@/components/delete-task-button'
-import { EditButton } from '@/components/icon-button'
+import { EditIconButton } from '@/components/edit-icon-button'
+import { Eye } from 'lucide-react'
 
 export default async function TaskDetailPage({
   params,
@@ -72,13 +73,11 @@ export default async function TaskDetailPage({
           </div>
         </div>
         <div className='flex items-center gap-2'>
-          <EditButton
+          <EditIconButton
             href={`/tasks/${task.id}/edit`}
-            variant='primary'
-            size='md'
-          >
-            Task
-          </EditButton>
+            variant='outline'
+            size='default'
+          />
           <DeleteTaskButton taskId={task.id} />
         </div>
       </div>
@@ -219,16 +218,18 @@ export default async function TaskDetailPage({
         {task.initiative && (
           <Link
             href={`/initiatives/${task.initiative.id}`}
-            className='btn bg-neutral-700 hover:bg-neutral-600'
+            className='btn bg-neutral-700 hover:bg-neutral-600 flex items-center gap-2'
           >
+            <Eye className='w-4 h-4' />
             View Initiative
           </Link>
         )}
         {task.assignee && (
           <Link
             href={`/people/${task.assignee.id}`}
-            className='btn bg-neutral-700 hover:bg-neutral-600'
+            className='btn bg-neutral-700 hover:bg-neutral-600 flex items-center gap-2'
           >
+            <Eye className='w-4 h-4' />
             View Assignee
           </Link>
         )}

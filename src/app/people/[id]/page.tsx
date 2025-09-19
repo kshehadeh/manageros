@@ -11,7 +11,8 @@ import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { EditButton } from '@/components/icon-button'
+import { EditIconButton } from '@/components/edit-icon-button'
+import { Eye } from 'lucide-react'
 import {
   Person,
   Team,
@@ -216,20 +217,19 @@ export default async function PersonDetailPage({
               {personWithRelations.status.replace('_', ' ')}
             </span>
             {isAdmin(session.user) && (
-              <EditButton
+              <EditIconButton
                 href={`/people/${personWithRelations.id}/edit`}
-                variant='primary'
-                size='md'
-              >
-                Person
-              </EditButton>
+                variant='outline'
+                size='default'
+              />
             )}
             <PersonActionPanel
               person={personWithRelations}
               currentPerson={currentPerson}
               isAdmin={isAdmin(session.user)}
             />
-            <Link href='/people' className='btn'>
+            <Link href='/people' className='btn flex items-center gap-2'>
+              <Eye className='w-4 h-4' />
               Back to People
             </Link>
           </div>
@@ -357,9 +357,9 @@ export default async function PersonDetailPage({
                             {report.status.replace('_', ' ')}
                           </span>
                           {isAdmin(session.user) && (
-                            <EditButton
+                            <EditIconButton
                               href={`/people/${report.id}/edit`}
-                              variant='secondary'
+                              variant='outline'
                               size='sm'
                             />
                           )}
@@ -547,8 +547,9 @@ export default async function PersonDetailPage({
                       <div className='text-center'>
                         <Link
                           href='/tasks'
-                          className='text-sm text-blue-400 hover:text-blue-300'
+                          className='text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1 justify-center'
                         >
+                          <Eye className='w-4 h-4' />
                           View all {personWithRelations.tasks.length} tasks
                         </Link>
                       </div>
@@ -567,7 +568,11 @@ export default async function PersonDetailPage({
                   <h3 className='font-semibold'>
                     Recent Check-ins ({personWithRelations.checkIns.length})
                   </h3>
-                  <Link href='/initiatives' className='btn text-sm'>
+                  <Link
+                    href='/initiatives'
+                    className='btn text-sm flex items-center gap-2'
+                  >
+                    <Eye className='w-4 h-4' />
                     View All
                   </Link>
                 </div>

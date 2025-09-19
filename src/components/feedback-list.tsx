@@ -2,10 +2,13 @@
 
 import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
+import { Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { deleteFeedback } from '@/lib/actions'
 import { FeedbackForm } from './feedback-form'
 import { type Person } from '@prisma/client'
-import { ViewButton, EditButton } from './icon-button'
+import { ViewButton } from './icon-button'
+import { EditIconButton } from './edit-icon-button'
 
 type FeedbackWithRelations = {
   id: string
@@ -139,18 +142,21 @@ export function FeedbackList({
                   />
                   {item.from.id === currentUserId && (
                     <>
-                      <EditButton
+                      <EditIconButton
                         href={`/people/${person.id}/feedback/${item.id}/edit`}
-                        variant='link'
+                        variant='outline'
                         size='sm'
                       />
-                      <button
+                      <Button
                         onClick={() => handleDelete(item.id)}
                         disabled={deletingId === item.id}
-                        className='text-xs text-red-400 hover:text-red-300 disabled:opacity-50'
+                        variant='outline'
+                        size='sm'
+                        className='text-red-400 hover:text-red-300 border-red-400 hover:border-red-300'
                       >
+                        <Trash2 className='w-4 h-4 mr-2' />
                         {deletingId === item.id ? 'Deleting...' : 'Delete'}
-                      </button>
+                      </Button>
                     </>
                   )}
                 </div>

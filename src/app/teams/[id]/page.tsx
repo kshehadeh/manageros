@@ -6,7 +6,8 @@ import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { EditButton } from '@/components/icon-button'
+import { EditIconButton } from '@/components/edit-icon-button'
+import { Eye } from 'lucide-react'
 
 interface TeamDetailPageProps {
   params: Promise<{
@@ -87,14 +88,13 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
             )}
           </div>
           <div className='flex items-center gap-2'>
-            <EditButton
+            <EditIconButton
               href={`/teams/${team.id}/edit`}
-              variant='primary'
-              size='md'
-            >
-              Team
-            </EditButton>
-            <Link href='/teams' className='btn'>
+              variant='outline'
+              size='default'
+            />
+            <Link href='/teams' className='btn flex items-center gap-2'>
+              <Eye className='w-4 h-4' />
               Back to Teams
             </Link>
           </div>
@@ -158,9 +158,9 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
                       >
                         {person.status.replace('_', ' ')}
                       </span>
-                      <EditButton
+                      <EditIconButton
                         href={`/people/${person.id}/edit`}
-                        variant='secondary'
+                        variant='outline'
                         size='sm'
                       />
                     </div>
@@ -270,9 +270,9 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
                     </div>
                   </div>
                   <div className='flex items-center gap-2'>
-                    <EditButton
+                    <EditIconButton
                       href={`/teams/${childTeam.id}/edit`}
-                      variant='secondary'
+                      variant='outline'
                       size='sm'
                     />
                   </div>

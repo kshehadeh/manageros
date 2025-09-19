@@ -10,8 +10,8 @@ import {
   CheckSquare,
   Calendar,
   MessageSquare,
-  BarChart3,
   ChevronDown,
+  Eye,
 } from 'lucide-react'
 
 interface PersonActionPanelProps {
@@ -176,7 +176,7 @@ export function PersonActionPanel({
                 className='flex items-center gap-3 px-4 py-2 text-sm hover:bg-neutral-700 transition-colors'
                 onClick={() => setIsDropdownOpen(false)}
               >
-                <BarChart3 className='w-4 h-4' />
+                <Eye className='w-4 h-4' />
                 View All Initiatives
               </Link>
             </div>

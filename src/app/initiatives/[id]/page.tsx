@@ -6,7 +6,7 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { DeleteInitiativeButton } from '@/components/delete-initiative-button'
 import { CheckInList } from '@/components/checkin-list'
-import { EditButton } from '@/components/icon-button'
+import { EditIconButton } from '@/components/edit-icon-button'
 
 export default async function InitiativeDetail({
   params,
@@ -111,9 +111,9 @@ export default async function InitiativeDetail({
 
           {/* Action Buttons */}
           <div className='flex items-center gap-2'>
-            <EditButton
+            <EditIconButton
               href={`/initiatives/${init.id}/edit`}
-              variant='primary'
+              variant='outline'
               size='sm'
             />
             <DeleteInitiativeButton initiativeId={init.id} />

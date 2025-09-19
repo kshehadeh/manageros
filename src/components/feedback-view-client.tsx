@@ -4,8 +4,11 @@ import { useState, useTransition, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import ReactMarkdown from 'react-markdown'
+import { Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { getAllFeedback, deleteFeedback } from '@/lib/actions'
-import { ViewButton, EditButton } from './icon-button'
+import { ViewButton } from './icon-button'
+import { EditIconButton } from './edit-icon-button'
 
 interface Person {
   id: string
@@ -373,19 +376,22 @@ export default function FeedbackViewClient({
                       variant='link'
                       size='sm'
                     />
-                    <EditButton
+                    <EditIconButton
                       href={`/people/${item.about.id}/feedback/${item.id}/edit`}
-                      variant='link'
+                      variant='outline'
                       size='sm'
                     />
                     {item.fromId === currentUserId && (
-                      <button
+                      <Button
                         onClick={() => handleDelete(item.id)}
                         disabled={deletingId === item.id}
-                        className='text-sm text-red-400 hover:text-red-300 underline disabled:opacity-50'
+                        variant='outline'
+                        size='sm'
+                        className='text-red-400 hover:text-red-300 border-red-400 hover:border-red-300'
                       >
+                        <Trash2 className='w-4 h-4 mr-2' />
                         {deletingId === item.id ? 'Deleting...' : 'Delete'}
-                      </button>
+                      </Button>
                     )}
                   </div>
                 </div>

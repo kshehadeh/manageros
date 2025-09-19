@@ -4,6 +4,7 @@ import { BreadcrumbProvider } from '@/components/breadcrumb-provider'
 import { DefaultBreadcrumbHandler } from '@/components/default-breadcrumb-handler'
 import Sidebar from '@/components/sidebar'
 import TopBar from '@/components/top-bar'
+import { Toaster } from 'sonner'
 import type { ReactNode } from 'react'
 
 export const metadata = { title: 'ManagerOS', description: 'Manager-only MVP' }
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </div>
           </BreadcrumbProvider>
         </AuthSessionProvider>
+        <Toaster theme='dark' />
       </body>
     </html>
   )

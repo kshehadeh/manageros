@@ -18,37 +18,7 @@ import ReactFlow, {
 } from 'reactflow'
 import dagre from 'dagre'
 import 'reactflow/dist/style.css'
-
-interface Person {
-  id: string
-  name: string
-  email: string | null
-  role: string | null
-  status: string
-  team: { id: string; name: string } | null
-  manager: {
-    id: string
-    name: string
-    email: string | null
-    role: string | null
-    status: string
-    reports: Array<{
-      id: string
-      name: string
-      email: string | null
-      role: string | null
-      status: string
-    }>
-  } | null
-  reports: Array<{
-    id: string
-    name: string
-    email: string | null
-    role: string | null
-    status: string
-  }>
-  level: number
-}
+import { Person } from '@/types/person'
 
 interface OrgChartReactFlowProps {
   people: Person[]

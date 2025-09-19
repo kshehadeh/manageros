@@ -34,7 +34,7 @@ function HierarchicalTeamCard({
   expandedTeams,
   onToggleExpanded,
 }: HierarchicalTeamCardProps) {
-  const hasChildren = team.children && team.children.length > 0
+  const hasChildren = Boolean(team.children && team.children.length > 0)
   const isExpanded = expandedTeams.has(team.id)
   const indentLevel = level * 16 // Reduced from 24px to 16px per level
 

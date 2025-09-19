@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { deleteCheckIn } from '@/lib/actions'
 
 interface DeleteCheckInButtonProps {
@@ -32,29 +34,34 @@ export function DeleteCheckInButton({
     return (
       <div className='flex items-center gap-2'>
         <span className='text-sm text-neutral-400'>Are you sure?</span>
-        <button
+        <Button
           onClick={handleDelete}
           disabled={isDeleting}
-          className='btn bg-red-600 hover:bg-red-700 text-sm disabled:opacity-50'
+          variant='destructive'
+          size='sm'
         >
           {isDeleting ? 'Deleting...' : 'Yes, Delete'}
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => setShowConfirm(false)}
-          className='btn bg-neutral-700 hover:bg-neutral-600 text-sm'
+          variant='outline'
+          size='sm'
         >
           Cancel
-        </button>
+        </Button>
       </div>
     )
   }
 
   return (
-    <button
+    <Button
       onClick={() => setShowConfirm(true)}
-      className='btn bg-red-600 hover:bg-red-700 text-sm'
+      variant='outline'
+      size='sm'
+      className='text-red-400 hover:text-red-300 border-red-400 hover:border-red-300'
     >
+      <Trash2 className='w-4 h-4 mr-2' />
       Delete
-    </button>
+    </Button>
   )
 }

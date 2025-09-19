@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { deleteTeam } from '@/lib/actions'
 
 interface DeleteTeamButtonProps {
@@ -42,9 +44,11 @@ export function DeleteTeamButton({
 
   if (!canDelete) {
     return (
-      <button
+      <Button
         disabled
-        className='btn bg-neutral-600 text-neutral-400 cursor-not-allowed text-sm'
+        variant='secondary'
+        size='sm'
+        className='opacity-50 cursor-not-allowed'
         title={`Cannot delete "${teamName}" because it has ${[
           hasPeople && 'members',
           hasInitiatives && 'initiatives',
@@ -53,65 +57,45 @@ export function DeleteTeamButton({
           .filter(Boolean)
           .join(', ')}`}
       >
-        <svg
-          className='w-4 h-4'
-          fill='none'
-          stroke='currentColor'
-          viewBox='0 0 24 24'
-          xmlns='http://www.w3.org/2000/svg'
-        >
-          <path
-            strokeLinecap='round'
-            strokeLinejoin='round'
-            strokeWidth={2}
-            d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
-          />
-        </svg>
-      </button>
+        <Trash2 className='w-4 h-4' />
+        <span className='sr-only'>Delete Team (Disabled)</span>
+      </Button>
     )
   }
 
   if (showConfirm) {
     return (
       <div className='flex items-center gap-2'>
-        <button
+        <Button
           onClick={handleDelete}
           disabled={isDeleting}
-          className='btn bg-red-600 hover:bg-red-700 text-sm disabled:opacity-50'
+          variant='destructive'
+          size='sm'
         >
           {isDeleting ? 'Deleting...' : 'Confirm Delete'}
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => setShowConfirm(false)}
           disabled={isDeleting}
-          className='btn bg-neutral-600 hover:bg-neutral-700 text-sm'
+          variant='outline'
+          size='sm'
         >
           Cancel
-        </button>
+        </Button>
       </div>
     )
   }
 
   return (
-    <button
+    <Button
       onClick={() => setShowConfirm(true)}
-      className='btn bg-red-600 hover:bg-red-700 text-sm'
+      variant='outline'
+      size='sm'
+      className='text-red-400 hover:text-red-300 border-red-400 hover:border-red-300'
       title={`Delete "${teamName}"`}
     >
-      <svg
-        className='w-4 h-4'
-        fill='none'
-        stroke='currentColor'
-        viewBox='0 0 24 24'
-        xmlns='http://www.w3.org/2000/svg'
-      >
-        <path
-          strokeLinecap='round'
-          strokeLinejoin='round'
-          strokeWidth={2}
-          d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
-        />
-      </svg>
-    </button>
+      <Trash2 className='w-4 h-4 mr-2' />
+      Delete
+    </Button>
   )
 }

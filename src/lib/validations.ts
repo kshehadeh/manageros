@@ -63,6 +63,26 @@ export const personSchema = z.object({
 
 export type PersonFormData = z.infer<typeof personSchema>
 
+export const personUpdateSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Name is required')
+    .max(100, 'Name must be less than 100 characters')
+    .optional(),
+  email: z
+    .string()
+    .email('Valid email is required')
+    .optional()
+    .or(z.literal('')),
+  role: z.string().optional(),
+  status: z.enum(['active', 'inactive', 'on_leave']).optional(),
+  teamId: z.string().optional(),
+  managerId: z.string().optional(),
+  startedAt: z.string().optional(),
+})
+
+export type PersonUpdateData = z.infer<typeof personUpdateSchema>
+
 export const teamSchema = z.object({
   name: z
     .string()

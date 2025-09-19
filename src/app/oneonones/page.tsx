@@ -4,7 +4,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
-import { ViewButton, EditButton } from '@/components/icon-button'
+import { ViewButton } from '@/components/icon-button'
+import { EditIconButton } from '@/components/edit-icon-button'
 
 export default async function OneOnOnesPage() {
   const session = await getServerSession(authOptions)
@@ -63,9 +64,9 @@ export default async function OneOnOnesPage() {
                   variant='primary'
                   size='sm'
                 />
-                <EditButton
+                <EditIconButton
                   href={`/oneonones/${i.id}/edit`}
-                  variant='secondary'
+                  variant='outline'
                   size='sm'
                 />
               </div>
