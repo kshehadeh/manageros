@@ -5,6 +5,11 @@ import { teamSchema, type TeamFormData } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
+import type {
+  TeamWithHierarchy,
+  TeamForSelection,
+  TeamWithRelations,
+} from '@/types/team'
 
 export async function getTeams() {
   try {
@@ -29,7 +34,7 @@ export async function getTeams() {
 export async function getTeamHierarchy(
   organizationId: string,
   parentId: string | null = null
-): Promise<any[]> {
+): Promise<TeamWithHierarchy[]> {
   const teams = await prisma.team.findMany({
     where: {
       organizationId,
@@ -62,7 +67,7 @@ export async function getTeamHierarchy(
  * Returns only top-level teams with their full nested structure
  * Uses caching for better performance
  */
-export async function getCompleteTeamHierarchy() {
+export async function getCompleteTeamHierarchy(): Promise<TeamWithHierarchy[]> {
   try {
     const user = await getCurrentUser()
     if (!user.organizationId) {
@@ -80,7 +85,9 @@ export async function getCompleteTeamHierarchy() {
  * Alternative approach: Fetch all teams at once and build hierarchy in memory
  * This can be more efficient for large hierarchies with many teams
  */
-export async function getTeamHierarchyOptimized() {
+export async function getTeamHierarchyOptimized(): Promise<
+  TeamWithHierarchy[]
+> {
   try {
     const user = await getCurrentUser()
     if (!user.organizationId) {
@@ -99,10 +106,8 @@ export async function getTeamHierarchyOptimized() {
     })
 
     // Build hierarchy in memory
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const teamMap = new Map<string, any>()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rootTeams: any[] = []
+    const teamMap = new Map<string, TeamWithHierarchy>()
+    const rootTeams: TeamWithHierarchy[] = []
 
     // First pass: create team objects and map them
     allTeams.forEach(team => {
@@ -330,7 +335,7 @@ export async function deleteTeam(id: string) {
   revalidatePath('/teams')
 }
 
-export async function getTeam(id: string) {
+export async function getTeam(id: string): Promise<TeamWithRelations | null> {
   try {
     const user = await getCurrentUser()
     if (!user.organizationId) {
@@ -354,7 +359,9 @@ export async function getTeam(id: string) {
   }
 }
 
-export async function getTeamsForSelection(excludeId?: string) {
+export async function getTeamsForSelection(
+  excludeId?: string
+): Promise<TeamForSelection[]> {
   try {
     const user = await getCurrentUser()
     if (!user.organizationId) {

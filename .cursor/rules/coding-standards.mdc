@@ -15,6 +15,7 @@ alwaysApply: true
 - Prefer iteration and modularization over code duplication.
 - Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
 - Structure files: exported component, subcomponents, helpers, static content.
+- Avoid using `any` type.  Use existing types rather than creating new ones.
 
 ## Next.js Rules
 

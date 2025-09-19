@@ -34,24 +34,6 @@ export function JiraWorkActivity({
   const [error, setError] = useState<string | null>(null)
   const [daysBack, setDaysBack] = useState(30)
 
-  const loadAssignedTickets = async () => {
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const result = await fetchJiraAssignedTickets(personId, daysBack)
-      if (result.success) {
-        setAssignedTickets(result.tickets)
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Failed to load assigned tickets'
-      )
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   const handleFetchFromJira = async () => {
     setIsFetching(true)
     setError(null)
@@ -73,6 +55,23 @@ export function JiraWorkActivity({
   }
 
   useEffect(() => {
+    const loadAssignedTickets = async () => {
+      setIsLoading(true)
+      setError(null)
+
+      try {
+        const result = await fetchJiraAssignedTickets(personId, daysBack)
+        if (result.success) {
+          setAssignedTickets(result.tickets)
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'Failed to load assigned tickets'
+        )
+      } finally {
+        setIsLoading(false)
+      }
+    }
     if (hasJiraAccount) {
       loadAssignedTickets()
     }

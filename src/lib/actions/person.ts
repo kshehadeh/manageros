@@ -10,6 +10,7 @@ import {
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
+import { Prisma } from '@prisma/client'
 
 export async function getPeople() {
   try {
@@ -337,17 +338,23 @@ export async function updatePersonPartial(
     : undefined
 
   // Build update data object with only provided fields
-  const updateFields: any = {}
+  const updateFields: Partial<Prisma.PersonUpdateInput> = {}
   if (validatedData.name !== undefined) updateFields.name = validatedData.name
   if (validatedData.email !== undefined)
     updateFields.email = validatedData.email || null
   if (validatedData.role !== undefined) updateFields.role = validatedData.role
   if (validatedData.status !== undefined)
     updateFields.status = validatedData.status
-  if (validatedData.teamId !== undefined)
-    updateFields.teamId = validatedData.teamId || null
-  if (validatedData.managerId !== undefined)
-    updateFields.managerId = validatedData.managerId || null
+  if (validatedData.teamId !== undefined) {
+    updateFields.team = validatedData.teamId
+      ? { connect: { id: validatedData.teamId } }
+      : { disconnect: true }
+  }
+  if (validatedData.managerId !== undefined) {
+    updateFields.manager = validatedData.managerId
+      ? { connect: { id: validatedData.managerId } }
+      : { disconnect: true }
+  }
   if (startedAt !== undefined) updateFields.startedAt = startedAt
 
   // Update the person
