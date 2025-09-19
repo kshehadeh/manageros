@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { createFeedback, updateFeedback } from '@/lib/actions'
 import { type FeedbackFormData } from '@/lib/validations'
@@ -121,25 +122,17 @@ export function FeedbackForm({
       </div>
 
       <div className='flex gap-2 pt-4'>
-        <button
-          type='submit'
-          disabled={isSubmitting || !formData.body.trim()}
-          className='btn bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
-        >
+        <Button type='submit' disabled={isSubmitting || !formData.body.trim()} variant='outline'>
           {isSubmitting
             ? 'Saving...'
             : feedback
               ? 'Update Feedback'
               : 'Add Feedback'}
-        </button>
+        </Button>
         {onCancel && (
-          <button
-            type='button'
-            onClick={onCancel}
-            className='btn bg-neutral-700 hover:bg-neutral-600'
-          >
+          <Button type='button' onClick={onCancel} variant='outline'>
             Cancel
-          </button>
+          </Button>
         )}
       </div>
     </form>

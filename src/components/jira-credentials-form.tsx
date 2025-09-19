@@ -180,29 +180,20 @@ export function JiraCredentialsForm({
 
         <div className='flex justify-end space-x-3'>
           {onCancel && (
-            <button
-              type='button'
-              onClick={onCancel}
-              className='rounded-md border border-neutral-700 bg-neutral-800 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-neutral-700'
-            >
+            <Button type='button' onClick={onCancel} variant='outline'>
               Cancel
-            </button>
+            </Button>
           )}
-          <button type='submit' disabled={isLoading} className='btn'>
+          <Button type='submit' disabled={isLoading} variant='outline'>
             {isLoading ? 'Saving...' : 'Save Credentials'}
-          </button>
+          </Button>
         </div>
       </form>
 
       <div className='border-t border-neutral-800 pt-4'>
-        <button
-          type='button'
-          onClick={handleDelete}
-          disabled={isLoading}
-          className='text-sm text-red-400 hover:text-red-300 disabled:opacity-50'
-        >
+        <Button type='button' onClick={handleDelete} disabled={isLoading} variant='outline'>
           Delete Jira Credentials
-        </button>
+        </Button>
       </div>
     </div>
   )

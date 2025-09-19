@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 'use client'
 
 import { useState } from 'react'
@@ -91,14 +92,9 @@ export function JiraAccountLinker({
           </div>
         )}
 
-        <button
-          type='button'
-          onClick={handleUnlink}
-          disabled={isLoading}
-          className='text-sm text-red-400 hover:text-red-300 disabled:opacity-50'
-        >
+        <Button type='button' onClick={handleUnlink} disabled={isLoading} variant='outline'>
           {isLoading ? 'Unlinking...' : 'Unlink Jira Account'}
-        </button>
+        </Button>
       </div>
     )
   }
@@ -141,9 +137,9 @@ export function JiraAccountLinker({
           </div>
         )}
 
-        <button type='submit' disabled={isLoading} className='btn'>
+        <Button type='submit' disabled={isLoading} variant='outline'>
           {isLoading ? 'Linking...' : 'Link Account'}
-        </button>
+        </Button>
       </form>
     </div>
   )

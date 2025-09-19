@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
 import { fetchJiraAssignedTickets } from '@/lib/actions'
 
 interface JiraAssignedTicketsProps {
@@ -158,14 +159,9 @@ export function JiraWorkActivity({
             <option value={30}>Last 30 days</option>
             <option value={90}>Last 90 days</option>
           </select>
-          <button
-            type='button'
-            onClick={handleFetchFromJira}
-            disabled={isFetching}
-            className='btn'
-          >
+          <Button type='button' onClick={handleFetchFromJira} disabled={isFetching} variant='outline'>
             {isFetching ? 'Fetching...' : 'Refresh'}
-          </button>
+          </Button>
         </div>
       </div>
 

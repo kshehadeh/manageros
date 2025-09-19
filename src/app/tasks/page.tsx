@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { Task, Person, Initiative, Objective } from '@prisma/client'
 
 type TaskWithRelations = Task & {
@@ -66,9 +67,9 @@ export default async function TasksPage() {
             Manage and track all tasks across your organization
           </p>
         </div>
-        <Link href='/tasks/new' className='btn bg-blue-600 hover:bg-blue-700'>
-          Create Task
-        </Link>
+        <Button asChild variant='outline'>
+          <Link href='/tasks/new'>Create Task</Link>
+        </Button>
       </div>
 
       {/* Task Statistics */}

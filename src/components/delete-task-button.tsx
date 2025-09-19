@@ -33,14 +33,14 @@ export function DeleteTaskButton({ taskId }: DeleteTaskButtonProps) {
           onClick={handleDelete}
           disabled={isDeleting}
           variant='destructive'
-          size='sm'
+          size='default'
         >
           {isDeleting ? 'Deleting...' : 'Confirm Delete'}
         </Button>
         <Button
           onClick={() => setShowConfirm(false)}
           variant='outline'
-          size='sm'
+          size='default'
         >
           Cancel
         </Button>
@@ -52,11 +52,10 @@ export function DeleteTaskButton({ taskId }: DeleteTaskButtonProps) {
     <Button
       onClick={() => setShowConfirm(true)}
       variant='outline'
-      size='sm'
-      className='text-red-400 hover:text-red-300 border-red-400 hover:border-red-300'
+      size='icon'
     >
-      <Trash2 className='w-4 h-4 mr-2' />
-      Delete Task
+      <Trash2 className='w-4 h-4' />
+      <span className='sr-only'>Delete Task</span>
     </Button>
   )
 }

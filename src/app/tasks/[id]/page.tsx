@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { notFound } from 'next/navigation'
 import { DeleteTaskButton } from '@/components/delete-task-button'
 import { EditIconButton } from '@/components/edit-icon-button'
@@ -212,26 +213,24 @@ export default async function TaskDetailPage({
 
       {/* Navigation */}
       <div className='flex items-center gap-3'>
-        <Link href='/tasks' className='btn bg-neutral-700 hover:bg-neutral-600'>
-          Back to Tasks
-        </Link>
+        <Button asChild variant='outline'>
+          <Link href='/tasks'>Back to Tasks</Link>
+        </Button>
         {task.initiative && (
-          <Link
-            href={`/initiatives/${task.initiative.id}`}
-            className='btn bg-neutral-700 hover:bg-neutral-600 flex items-center gap-2'
-          >
-            <Eye className='w-4 h-4' />
-            View Initiative
-          </Link>
+          <Button asChild variant='outline'>
+            <Link href={`/initiatives/${task.initiative.id}`} className='flex items-center gap-2'>
+              <Eye className='w-4 h-4' />
+              View Initiative
+            </Link>
+          </Button>
         )}
         {task.assignee && (
-          <Link
-            href={`/people/${task.assignee.id}`}
-            className='btn bg-neutral-700 hover:bg-neutral-600 flex items-center gap-2'
-          >
-            <Eye className='w-4 h-4' />
-            View Assignee
-          </Link>
+          <Button asChild variant='outline'>
+            <Link href={`/people/${task.assignee.id}`} className='flex items-center gap-2'>
+              <Eye className='w-4 h-4' />
+              View Assignee
+            </Link>
+          </Button>
         )}
       </div>
     </div>

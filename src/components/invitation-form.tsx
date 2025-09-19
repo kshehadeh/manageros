@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
 import { createOrganizationInvitation } from '@/lib/actions'
 
 interface InvitationFormProps {
@@ -77,13 +78,9 @@ export default function InvitationForm({
         </div>
 
         <div>
-          <button
-            type='submit'
-            disabled={isLoading}
-            className='btn w-full justify-center bg-blue-600 hover:bg-blue-700 disabled:opacity-50'
-          >
+          <Button type='submit' disabled={isLoading} variant='outline' className='w-full justify-center'>
             {isLoading ? 'Sending Invitation...' : 'Send Invitation'}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

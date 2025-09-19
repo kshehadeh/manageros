@@ -1,10 +1,12 @@
 import { getOneOnOnes } from '@/lib/actions'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
-import { ViewButton } from '@/components/icon-button'
+import { Eye } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { EditIconButton } from '@/components/edit-icon-button'
 
 export default async function OneOnOnesPage() {
@@ -25,12 +27,9 @@ export default async function OneOnOnesPage() {
             Your private 1:1 meetings (only visible to participants)
           </p>
         </div>
-        <Link
-          href='/oneonones/new'
-          className='btn bg-blue-600 hover:bg-blue-700'
-        >
-          New 1:1
-        </Link>
+        <Button asChild variant='outline'>
+          <Link href='/oneonones/new'>New 1:1</Link>
+        </Button>
       </div>
       <div className='grid gap-3'>
         {items.map(i => (
@@ -59,11 +58,11 @@ export default async function OneOnOnesPage() {
                     ? new Date(i.scheduledAt).toLocaleString()
                     : 'TBD'}
                 </div>
-                <ViewButton
-                  href={`/oneonones/${i.id}`}
-                  variant='primary'
-                  size='sm'
-                />
+                <Button asChild variant='outline' size='icon'>
+                  <Link href={`/oneonones/${i.id}`} aria-label='View 1:1'>
+                    <Eye className='w-4 h-4' />
+                  </Link>
+                </Button>
                 <EditIconButton
                   href={`/oneonones/${i.id}/edit`}
                   variant='outline'
@@ -85,12 +84,9 @@ export default async function OneOnOnesPage() {
         {items.length === 0 && (
           <div className='text-center py-8'>
             <div className='text-neutral-400 text-sm mb-4'>No 1:1s yet.</div>
-            <Link
-              href='/oneonones/new'
-              className='btn bg-blue-600 hover:bg-blue-700'
-            >
-              Create your first 1:1
-            </Link>
+            <Button asChild variant='outline'>
+              <Link href='/oneonones/new'>Create your first 1:1</Link>
+            </Button>
           </div>
         )}
       </div>

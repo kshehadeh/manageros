@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 'use client'
 
 import { useState } from 'react'
@@ -200,11 +201,7 @@ export function PersonForm({
 
       {/* Submit Button */}
       <div className='flex justify-end'>
-        <button
-          type='submit'
-          disabled={isSubmitting || !formData.name.trim()}
-          className='btn bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
-        >
+        <Button type='submit' disabled={isSubmitting || !formData.name.trim()} variant='outline'>
           {isSubmitting
             ? person
               ? 'Updating...'
@@ -212,7 +209,7 @@ export function PersonForm({
             : person
               ? 'Update Person'
               : 'Create Person'}
-        </button>
+        </Button>
       </div>
     </form>
   )

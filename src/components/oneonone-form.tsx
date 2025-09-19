@@ -108,9 +108,9 @@ export function OneOnOneForm({
           You don&apos;t have any direct reports or a manager assigned. Contact
           your administrator to set up reporting relationships.
         </p>
-        <Link href='/people' className='btn bg-blue-600 hover:bg-blue-700'>
-          Manage People
-        </Link>
+        <Button asChild variant='outline'>
+          <Link href='/people'>Manage People</Link>
+        </Button>
       </div>
     )
   }

@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -129,11 +130,7 @@ export function TeamForm({ team, parentId }: TeamFormProps) {
 
       {/* Submit Button */}
       <div className='flex justify-end'>
-        <button
-          type='submit'
-          disabled={isSubmitting || !formData.name.trim()}
-          className='btn bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
-        >
+        <Button type='submit' disabled={isSubmitting || !formData.name.trim()} variant='outline'>
           {isSubmitting
             ? team
               ? 'Updating...'
@@ -141,7 +138,7 @@ export function TeamForm({ team, parentId }: TeamFormProps) {
             : team
               ? 'Update Team'
               : 'Create Team'}
-        </button>
+        </Button>
       </div>
     </form>
   )

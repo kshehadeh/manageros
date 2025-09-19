@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 'use client'
 
 import { useState } from 'react'
@@ -312,9 +313,9 @@ export function InitiativeEditForm({
       <div className='card'>
         <div className='flex items-center justify-between mb-4'>
           <h3 className='font-semibold'>Objectives</h3>
-          <button type='button' onClick={addObjective} className='btn text-sm'>
+          <Button type='button' onClick={addObjective} variant='outline' size='sm'>
             Add Objective
-          </button>
+          </Button>
         </div>
         <div className='space-y-3'>
           {objectives.map((objective, index) => (
@@ -327,13 +328,9 @@ export function InitiativeEditForm({
                   Objective {index + 1}
                 </span>
                 {objectives.length > 1 && (
-                  <button
-                    type='button'
-                    onClick={() => removeObjective(index)}
-                    className='text-red-400 hover:text-red-300 text-sm'
-                  >
+                  <Button type='button' onClick={() => removeObjective(index)} variant='outline' size='sm'>
                     Remove
-                  </button>
+                  </Button>
                 )}
               </div>
               <div className='space-y-2'>
@@ -365,9 +362,9 @@ export function InitiativeEditForm({
       <div className='card'>
         <div className='flex items-center justify-between mb-4'>
           <h3 className='font-semibold'>Owners</h3>
-          <button type='button' onClick={addOwner} className='btn text-sm'>
+          <Button type='button' onClick={addOwner} variant='outline' size='sm'>
             Add Owner
-          </button>
+          </Button>
         </div>
         <div className='space-y-3'>
           {owners.map((owner, index) => (
@@ -378,13 +375,9 @@ export function InitiativeEditForm({
               <div className='flex items-center justify-between mb-2'>
                 <span className='text-sm font-medium'>Owner {index + 1}</span>
                 {owners.length > 1 && (
-                  <button
-                    type='button'
-                    onClick={() => removeOwner(index)}
-                    className='text-red-400 hover:text-red-300 text-sm'
-                  >
+                  <Button type='button' onClick={() => removeOwner(index)} variant='outline' size='sm'>
                     Remove
-                  </button>
+                  </Button>
                 )}
               </div>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
@@ -418,13 +411,9 @@ export function InitiativeEditForm({
 
       {/* Submit Button */}
       <div className='flex justify-end'>
-        <button
-          type='submit'
-          disabled={isSubmitting || !formData.title.trim()}
-          className='btn bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
-        >
+        <Button type='submit' disabled={isSubmitting || !formData.title.trim()} variant='outline'>
           {isSubmitting ? 'Updating...' : 'Update Initiative'}
-        </button>
+        </Button>
       </div>
     </form>
   )

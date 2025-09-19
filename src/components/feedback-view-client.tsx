@@ -7,7 +7,7 @@ import ReactMarkdown from 'react-markdown'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getAllFeedback, deleteFeedback } from '@/lib/actions'
-import { ViewButton } from './icon-button'
+import { Eye } from 'lucide-react'
 import { EditIconButton } from './edit-icon-button'
 
 interface Person {
@@ -322,7 +322,7 @@ export default function FeedbackViewClient({
             Feedback ({feedback.length})
           </h2>
           {(isPending || isLoading) && (
-            <div className='text-sm text-neutral-400'>
+                  <div className='text-sm text-neutral-400'>
               {isLoading ? 'Loading...' : 'Updating...'}
             </div>
           )}
@@ -371,11 +371,11 @@ export default function FeedbackViewClient({
                   </div>
 
                   <div className='flex gap-2'>
-                    <ViewButton
-                      href={`/feedback/${item.id}`}
-                      variant='link'
-                      size='sm'
-                    />
+                    <Button asChild variant='outline' size='icon'>
+                      <Link href={`/feedback/${item.id}`} aria-label='View feedback'>
+                        <Eye className='w-4 h-4' />
+                      </Link>
+                    </Button>
                     <EditIconButton
                       href={`/people/${item.about.id}/feedback/${item.id}/edit`}
                       variant='outline'

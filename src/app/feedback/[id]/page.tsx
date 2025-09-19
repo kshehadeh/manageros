@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { notFound } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import { FeedbackDetailClient } from '@/components/feedback-detail-client'
@@ -50,13 +51,12 @@ export default async function FeedbackDetailPage({
                 variant='outline'
                 size='default'
               />
-              <Link
-                href={`/people/${feedback.about.id}`}
-                className='btn bg-neutral-700 hover:bg-neutral-600 flex items-center gap-2'
-              >
-                <Eye className='w-4 h-4' />
-                Back to {feedback.about.name}
-              </Link>
+              <Button asChild variant='outline'>
+                <Link href={`/people/${feedback.about.id}`} className='flex items-center gap-2'>
+                  <Eye className='w-4 h-4' />
+                  Back to {feedback.about.name}
+                </Link>
+              </Button>
             </div>
           </div>
 

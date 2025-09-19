@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
 interface EditOneOnOnePageProps {
   params: Promise<{
@@ -37,18 +38,12 @@ export default async function EditOneOnOnePage({
             </p>
           </div>
           <div className='flex items-center gap-2'>
-            <Link
-              href={`/oneonones/${id}`}
-              className='btn bg-neutral-700 hover:bg-neutral-600'
-            >
-              View Meeting
-            </Link>
-            <Link
-              href='/oneonones'
-              className='btn bg-neutral-700 hover:bg-neutral-600'
-            >
-              Back to 1:1s
-            </Link>
+            <Button asChild variant='outline'>
+              <Link href={`/oneonones/${id}`}>View Meeting</Link>
+            </Button>
+            <Button asChild variant='outline'>
+              <Link href='/oneonones'>Back to 1:1s</Link>
+            </Button>
           </div>
         </div>
 
@@ -67,18 +62,12 @@ export default async function EditOneOnOnePage({
             </p>
           </div>
           <div className='flex items-center gap-2'>
-            <Link
-              href={`/oneonones/${id}`}
-              className='btn bg-neutral-700 hover:bg-neutral-600'
-            >
-              View Meeting
-            </Link>
-            <Link
-              href='/oneonones'
-              className='btn bg-neutral-700 hover:bg-neutral-600'
-            >
-              Back to 1:1s
-            </Link>
+            <Button asChild variant='outline'>
+              <Link href={`/oneonones/${id}`}>View Meeting</Link>
+            </Button>
+            <Button asChild variant='outline'>
+              <Link href='/oneonones'>Back to 1:1s</Link>
+            </Button>
           </div>
         </div>
 
@@ -88,9 +77,9 @@ export default async function EditOneOnOnePage({
             The 1:1 meeting you&apos;re looking for doesn&apos;t exist or you
             don&apos;t have access to it.
           </p>
-          <Link href='/oneonones' className='btn bg-blue-600 hover:bg-blue-700'>
-            Back to 1:1s
-          </Link>
+          <Button asChild variant='outline'>
+            <Link href='/oneonones'>Back to 1:1s</Link>
+          </Button>
         </div>
       </div>
     )
