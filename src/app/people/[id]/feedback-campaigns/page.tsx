@@ -110,6 +110,19 @@ export default async function FeedbackCampaignsPage({
     orderBy: { createdAt: 'desc' },
   })
 
+  // Type the campaigns with proper status typing
+  const typedCampaigns = campaigns.map(campaign => ({
+    ...campaign,
+    status: campaign.status as 'draft' | 'active' | 'completed' | 'cancelled',
+    template: campaign.template
+      ? {
+          id: campaign.template.id,
+          name: campaign.template.name,
+          description: campaign.template.description || undefined,
+        }
+      : undefined,
+  }))
+
   return (
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
@@ -143,7 +156,7 @@ export default async function FeedbackCampaignsPage({
 
       <div className='grid gap-6 lg:grid-cols-3'>
         <div className='lg:col-span-2'>
-          <FeedbackCampaignList campaigns={campaigns} />
+          <FeedbackCampaignList campaigns={typedCampaigns} />
         </div>
 
         <div className='space-y-6'>

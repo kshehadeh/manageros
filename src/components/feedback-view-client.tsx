@@ -322,7 +322,7 @@ export default function FeedbackViewClient({
             Feedback ({feedback.length})
           </h2>
           {(isPending || isLoading) && (
-                  <div className='text-sm text-muted-foreground'>
+            <div className='text-sm text-neutral-400'>
               {isLoading ? 'Loading...' : 'Updating...'}
             </div>
           )}
@@ -337,10 +337,7 @@ export default function FeedbackViewClient({
         ) : (
           <div className='space-y-4'>
             {feedback.map(item => (
-              <div
-                key={item.id}
-                className='p-4 border rounded-lg bg-card'
-              >
+              <div key={item.id} className='p-4 border rounded-lg bg-card'>
                 <div className='flex items-start justify-between mb-3'>
                   <div className='flex-1'>
                     <div className='flex items-center gap-2 mb-2'>
@@ -409,7 +406,9 @@ export default function FeedbackViewClient({
                         </strong>
                       ),
                       em: ({ children }) => (
-                        <em className='italic text-muted-foreground'>{children}</em>
+                        <em className='italic text-muted-foreground'>
+                          {children}
+                        </em>
                       ),
                       a: ({ href, children }) => (
                         <a
