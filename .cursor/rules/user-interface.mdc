@@ -1,0 +1,22 @@
+---
+description: User Interface
+globs:
+alwaysApply: true
+---
+
+# User Interface Rules
+
+## Theming Rules
+
+* Use the theme tokens for all colors.
+* Read the docs/theming.md file for more information.
+
+## Shadcn Rules
+
+* Use the shadcn components for all UI.
+* Read the components.json file for more information.
+
+## Tailwind Rules
+
+* Use the tailwind utility classes for all UI.
+* Read the tailwind.config.ts file for more information.

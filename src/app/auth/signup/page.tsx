@@ -127,22 +127,20 @@ export default function SignUpPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className='space-y-4'>
             {error && (
-              <div className='flex items-center gap-2 rounded-lg bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 text-sm'>
+              <div className='flex items-center gap-2 rounded-lg bg-destructive/20 border border-destructive text-destructive px-4 py-3 text-sm'>
                 <AlertCircle className='h-4 w-4 flex-shrink-0' />
                 <span>{error}</span>
               </div>
             )}
             {success && (
-              <div className='flex items-center gap-2 rounded-lg bg-green-900/20 border border-green-800 text-green-400 px-4 py-3 text-sm'>
+              <div className='flex items-center gap-2 rounded-lg bg-secondary/30 border text-foreground px-4 py-3 text-sm'>
                 <CheckCircle2 className='h-4 w-4 flex-shrink-0' />
                 <span>{success}</span>
               </div>
             )}
 
             <div className='space-y-2'>
-              <Label htmlFor='name' className='text-neutral-200'>
-                Full Name
-              </Label>
+              <Label htmlFor='name'>Full Name</Label>
               <Input
                 id='name'
                 name='name'
@@ -151,14 +149,12 @@ export default function SignUpPage() {
                 placeholder='John Doe'
                 value={formData.name}
                 onChange={handleInputChange}
-                className='bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-600'
+                className=''
               />
             </div>
 
             <div className='space-y-2'>
-              <Label htmlFor='email' className='text-neutral-200'>
-                Email Address
-              </Label>
+              <Label htmlFor='email'>Email Address</Label>
               <Input
                 id='email'
                 name='email'
@@ -168,11 +164,11 @@ export default function SignUpPage() {
                 placeholder='john@example.com'
                 value={formData.email}
                 onChange={handleInputChange}
-                className='bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-600'
+                className=''
               />
             </div>
 
-            <div className='border-t border-neutral-800 pt-4'>
+            <div className='border-t pt-4'>
               <div className='flex items-center space-x-2'>
                 <Checkbox
                   id='createOrganization'
@@ -186,12 +182,12 @@ export default function SignUpPage() {
                 />
                 <Label
                   htmlFor='createOrganization'
-                  className='text-sm font-normal text-neutral-200 cursor-pointer'
+                  className='text-sm font-normal cursor-pointer'
                 >
                   Create a new organization
                 </Label>
               </div>
-              <p className='mt-1 text-xs text-neutral-500'>
+              <p className='mt-1 text-xs text-muted-foreground'>
                 If unchecked, you&apos;ll need to be invited to an existing
                 organization to access the platform.
               </p>
@@ -200,10 +196,7 @@ export default function SignUpPage() {
             {formData.createOrganization && (
               <>
                 <div className='space-y-2'>
-                  <Label
-                    htmlFor='organizationName'
-                    className='text-neutral-200'
-                  >
+                  <Label htmlFor='organizationName' className=''>
                     Organization Name
                   </Label>
                   <Input
@@ -214,15 +207,12 @@ export default function SignUpPage() {
                     placeholder='Acme Corp'
                     value={formData.organizationName}
                     onChange={handleInputChange}
-                    className='bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-600'
+                    className=''
                   />
                 </div>
 
                 <div className='space-y-2'>
-                  <Label
-                    htmlFor='organizationSlug'
-                    className='text-neutral-200'
-                  >
+                  <Label htmlFor='organizationSlug' className=''>
                     Organization Slug
                   </Label>
                   <Input
@@ -233,9 +223,9 @@ export default function SignUpPage() {
                     placeholder='acme-corp'
                     value={formData.organizationSlug}
                     onChange={handleInputChange}
-                    className='bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-600'
+                    className=''
                   />
-                  <p className='text-xs text-neutral-500'>
+                  <p className='text-xs text-muted-foreground'>
                     Used in URLs. Only lowercase letters, numbers, and hyphens
                     allowed.
                   </p>
@@ -244,9 +234,7 @@ export default function SignUpPage() {
             )}
 
             <div className='space-y-2'>
-              <Label htmlFor='password' className='text-neutral-200'>
-                Password
-              </Label>
+              <Label htmlFor='password'>Password</Label>
               <Input
                 id='password'
                 name='password'
@@ -256,14 +244,12 @@ export default function SignUpPage() {
                 placeholder='Create a strong password'
                 value={formData.password}
                 onChange={handleInputChange}
-                className='bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-600'
+                className=''
               />
             </div>
 
             <div className='space-y-2'>
-              <Label htmlFor='confirmPassword' className='text-neutral-200'>
-                Confirm Password
-              </Label>
+              <Label htmlFor='confirmPassword'>Confirm Password</Label>
               <Input
                 id='confirmPassword'
                 name='confirmPassword'
@@ -273,26 +259,19 @@ export default function SignUpPage() {
                 placeholder='Confirm your password'
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
-                className='bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-600'
+                className=''
               />
             </div>
 
-            <Button
-              type='submit'
-              disabled={isLoading}
-              className='w-full bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700'
-            >
+            <Button type='submit' disabled={isLoading} className='w-full'>
               {isLoading ? 'Creating account...' : 'Create account'}
             </Button>
           </form>
         </CardContent>
         <CardFooter className='flex flex-col space-y-2'>
-          <div className='text-sm text-neutral-400 text-center'>
+          <div className='text-sm text-muted-foreground text-center'>
             Already have an account?{' '}
-            <Link
-              href='/auth/signin'
-              className='text-white hover:text-neutral-200 underline underline-offset-4'
-            >
+            <Link href='/auth/signin' className='underline underline-offset-4'>
               Sign in
             </Link>
           </div>

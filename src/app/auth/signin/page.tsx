@@ -67,15 +67,13 @@ export default function SignInPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className='space-y-4'>
             {error && (
-              <div className='flex items-center gap-2 rounded-lg bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 text-sm'>
+              <div className='flex items-center gap-2 rounded-lg bg-destructive/20 border border-destructive text-destructive px-4 py-3 text-sm'>
                 <AlertCircle className='h-4 w-4 flex-shrink-0' />
                 <span>{error}</span>
               </div>
             )}
             <div className='space-y-2'>
-              <Label htmlFor='email' className='text-neutral-200'>
-                Email address
-              </Label>
+              <Label htmlFor='email'>Email address</Label>
               <Input
                 id='email'
                 name='email'
@@ -85,13 +83,11 @@ export default function SignInPage() {
                 placeholder='john@example.com'
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className='bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-600'
+                className=''
               />
             </div>
             <div className='space-y-2'>
-              <Label htmlFor='password' className='text-neutral-200'>
-                Password
-              </Label>
+              <Label htmlFor='password'>Password</Label>
               <Input
                 id='password'
                 name='password'
@@ -101,25 +97,18 @@ export default function SignInPage() {
                 placeholder='Enter your password'
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className='bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-600'
+                className=''
               />
             </div>
-            <Button
-              type='submit'
-              disabled={isLoading}
-              className='w-full bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700'
-            >
+            <Button type='submit' disabled={isLoading} className='w-full'>
               {isLoading ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
         </CardContent>
         <CardFooter className='flex flex-col space-y-2'>
-          <div className='text-sm text-neutral-400 text-center'>
+          <div className='text-sm text-muted-foreground text-center'>
             Don&apos;t have an account?{' '}
-            <Link
-              href='/auth/signup'
-              className='text-white hover:text-neutral-200 underline underline-offset-4'
-            >
+            <Link href='/auth/signup' className='underline underline-offset-4'>
               Create account
             </Link>
           </div>
