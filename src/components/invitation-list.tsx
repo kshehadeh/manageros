@@ -47,15 +47,15 @@ export default function InvitationList({
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
-        return 'bg-amber-900/30 border-amber-700 text-amber-300'
+        return 'rag-amber'
       case 'accepted':
-        return 'bg-green-900/30 border-green-700 text-green-300'
+        return 'rag-green'
       case 'expired':
-        return 'bg-neutral-900/30 border-neutral-700 text-neutral-300'
+        return 'badge'
       case 'revoked':
-        return 'bg-red-900/30 border-red-700 text-red-300'
+        return 'rag-red'
       default:
-        return 'bg-neutral-900/30 border-neutral-700 text-neutral-300'
+        return 'badge'
     }
   }
 
@@ -83,22 +83,22 @@ export default function InvitationList({
   if (invitations.length === 0) {
     return (
       <div className='card'>
-        <h3 className='text-lg font-medium text-neutral-100 mb-4'>
+        <h3 className='text-lg font-medium text-foreground mb-4'>
           Organization Invitations
         </h3>
-        <p className='text-neutral-400'>No invitations have been sent yet.</p>
+        <p className='text-muted-foreground'>No invitations have been sent yet.</p>
       </div>
     )
   }
 
   return (
     <div className='card'>
-      <h3 className='text-lg font-medium text-neutral-100 mb-4'>
+      <h3 className='text-lg font-medium text-foreground mb-4'>
         Organization Invitations
       </h3>
 
       {error && (
-        <div className='mb-4 bg-red-900/30 border border-red-700 text-red-300 px-4 py-3 rounded'>
+        <div className='mb-4 bg-destructive/20 border border-destructive text-destructive px-4 py-3 rounded'>
           {error}
         </div>
       )}
@@ -108,11 +108,11 @@ export default function InvitationList({
         {invitations.map(invitation => (
           <div
             key={invitation.id}
-            className='border border-neutral-700 rounded-lg p-4'
+            className='border rounded-lg p-4'
           >
             <div className='flex items-center justify-between mb-2'>
               <div
-                className='font-medium text-neutral-100 truncate max-w-xs'
+                className='font-medium text-foreground truncate max-w-xs'
                 title={invitation.email}
               >
                 {invitation.email}
@@ -124,7 +124,7 @@ export default function InvitationList({
                   ' (Expired)'}
               </span>
             </div>
-            <div className='text-sm text-neutral-400 space-y-1'>
+            <div className='text-sm text-muted-foreground space-y-1'>
               <div>Invited by: {invitation.invitedBy.name}</div>
               <div>Sent: {formatDate(invitation.createdAt, true)}</div>
               <div>Expires: {formatDate(invitation.expiresAt, true)}</div>
@@ -135,7 +135,7 @@ export default function InvitationList({
                   <button
                     onClick={() => handleRevoke(invitation.id)}
                     disabled={revokingId === invitation.id}
-                    className='text-red-400 hover:text-red-300 disabled:opacity-50 text-sm'
+                  className='text-destructive hover:bg-destructive hover:text-destructive-foreground disabled:opacity-50 text-sm rounded px-2 py-1 border border-destructive'
                   >
                     {revokingId === invitation.id ? 'Revoking...' : 'Revoke'}
                   </button>
@@ -147,33 +147,33 @@ export default function InvitationList({
 
       {/* Desktop Table View */}
       <div className='hidden sm:block overflow-x-auto -mx-4 sm:mx-0'>
-        <table className='min-w-full divide-y divide-neutral-700'>
-          <thead className='bg-neutral-800'>
+        <table className='min-w-full divide-y'>
+          <thead className='bg-accent/30'>
             <tr>
-              <th className='px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider'>
+              <th className='px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                 Email
               </th>
-              <th className='px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider'>
+              <th className='px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                 Status
               </th>
-              <th className='hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider'>
+              <th className='hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                 Invited By
               </th>
-              <th className='hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider'>
+              <th className='hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                 Sent
               </th>
-              <th className='hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider'>
+              <th className='hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                 Expires
               </th>
-              <th className='px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider'>
+              <th className='px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className='divide-y divide-neutral-700'>
+          <tbody className='divide-y'>
             {invitations.map(invitation => (
               <tr key={invitation.id}>
-                <td className='px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-100'>
+                <td className='px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground'>
                   <div className='max-w-xs truncate' title={invitation.email}>
                     {invitation.email}
                   </div>
@@ -188,10 +188,10 @@ export default function InvitationList({
                       ' (Expired)'}
                   </span>
                 </td>
-                <td className='hidden sm:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-neutral-400'>
+                <td className='hidden sm:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-muted-foreground'>
                   {invitation.invitedBy.name}
                 </td>
-                <td className='hidden md:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-neutral-400'>
+                <td className='hidden md:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-muted-foreground'>
                   <span className='hidden lg:inline'>
                     {formatDate(invitation.createdAt)}
                   </span>
@@ -199,7 +199,7 @@ export default function InvitationList({
                     {formatDate(invitation.createdAt, true)}
                   </span>
                 </td>
-                <td className='hidden lg:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-neutral-400'>
+                <td className='hidden lg:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-muted-foreground'>
                   {formatDate(invitation.expiresAt)}
                 </td>
                 <td className='px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium'>
@@ -208,7 +208,7 @@ export default function InvitationList({
                       <button
                         onClick={() => handleRevoke(invitation.id)}
                         disabled={revokingId === invitation.id}
-                        className='text-red-400 hover:text-red-300 disabled:opacity-50'
+                        className='text-destructive hover:bg-destructive hover:text-destructive-foreground disabled:opacity-50 rounded px-2 py-1 border border-destructive'
                       >
                         {revokingId === invitation.id
                           ? 'Revoking...'

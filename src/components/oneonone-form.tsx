@@ -104,7 +104,7 @@ export function OneOnOneForm({
     return (
       <div className='card text-center py-8'>
         <h3 className='font-semibold mb-2'>No Meeting Partners Available</h3>
-        <p className='text-sm text-neutral-400 mb-4'>
+        <p className='text-sm text-muted-foreground mb-4'>
           You don&apos;t have any direct reports or a manager assigned. Contact
           your administrator to set up reporting relationships.
         </p>
@@ -120,7 +120,7 @@ export function OneOnOneForm({
       {/* Meeting Details */}
       <div className='card'>
         <h3 className='font-semibold mb-4'>Meeting Details</h3>
-        <p className='text-sm text-neutral-400 mb-4'>
+        <p className='text-sm text-muted-foreground mb-4'>
           These meetings will only be visible to the participants.
         </p>
         <div className='space-y-4'>

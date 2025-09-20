@@ -31,7 +31,7 @@ interface PeopleHierarchyProps {
 
 export function PeopleHierarchy({ people }: PeopleHierarchyProps) {
   if (people.length === 0) {
-    return <div className='text-neutral-400 text-sm'>No people yet.</div>
+    return <div className='text-muted-foreground text-sm'>No people yet.</div>
   }
 
   return (
@@ -45,7 +45,7 @@ export function PeopleHierarchy({ people }: PeopleHierarchyProps) {
             {/* Vertical line for hierarchy levels */}
             {person.level > 0 && (
               <div
-                className='absolute w-px bg-neutral-600'
+                className='absolute w-px bg-muted-foreground'
                 style={{
                   left: `${person.level * 32 - 16}px`,
                   top: '0px',
@@ -57,7 +57,7 @@ export function PeopleHierarchy({ people }: PeopleHierarchyProps) {
             {/* Horizontal connector line */}
             {person.level > 0 && (
               <div
-                className='absolute w-4 h-px bg-neutral-600'
+                className='absolute w-4 h-px bg-muted-foreground'
                 style={{
                   left: `${person.level * 32 - 16}px`,
                   top: '50%',
@@ -76,19 +76,19 @@ export function PeopleHierarchy({ people }: PeopleHierarchyProps) {
                   <div className='flex items-center gap-2'>
                     <Link
                       href={`/people/${person.id}`}
-                      className='font-medium hover:text-blue-400'
+                      className='font-medium hover:text-primary'
                     >
                       {person.name}
                     </Link>
                     {person.reports.length > 0 && (
-                      <span className='text-xs text-neutral-500 bg-neutral-800 px-2 py-1 rounded-full'>
+                      <span className='text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-full'>
                         {person.reports.length} report
                         {person.reports.length !== 1 ? 's' : ''}
                       </span>
                     )}
                   </div>
 
-                  <div className='text-sm text-neutral-400 mt-1'>
+                  <div className='text-sm text-muted-foreground mt-1'>
                     {person.role && <span>{person.role}</span>}
                     {person.role && person.team && <span> • </span>}
                     {person.team && (
@@ -96,7 +96,7 @@ export function PeopleHierarchy({ people }: PeopleHierarchyProps) {
                         Team:{' '}
                         <Link
                           href={`/teams/${person.team.id}`}
-                          className='hover:text-blue-400'
+                          className='hover:text-primary'
                         >
                           {person.team.name}
                         </Link>
@@ -104,7 +104,7 @@ export function PeopleHierarchy({ people }: PeopleHierarchyProps) {
                     )}
                   </div>
 
-                  <div className='text-xs text-neutral-500 mt-1'>
+                  <div className='text-xs text-muted-foreground mt-1'>
                     {person.email && <span>{person.email}</span>}
                     {person.manager && (
                       <span>
@@ -112,7 +112,7 @@ export function PeopleHierarchy({ people }: PeopleHierarchyProps) {
                         • Reports to:{' '}
                         <Link
                           href={`/people/${person.manager.id}`}
-                          className='hover:text-blue-400'
+                          className='hover:text-primary'
                         >
                           {person.manager.name}
                         </Link>

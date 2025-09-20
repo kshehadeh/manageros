@@ -165,7 +165,7 @@ export default function FeedbackViewClient({
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className='text-sm text-neutral-400 hover:text-neutral-300 underline'
+              className='text-sm text-muted-foreground hover:text-foreground underline'
             >
               Clear all filters
             </button>
@@ -322,14 +322,14 @@ export default function FeedbackViewClient({
             Feedback ({feedback.length})
           </h2>
           {(isPending || isLoading) && (
-            <div className='text-sm text-neutral-400'>
+                  <div className='text-sm text-muted-foreground'>
               {isLoading ? 'Loading...' : 'Updating...'}
             </div>
           )}
         </div>
 
         {feedback.length === 0 ? (
-          <div className='text-center py-8 text-neutral-400'>
+          <div className='text-center py-8 text-muted-foreground'>
             {hasActiveFilters
               ? 'No feedback matches your filters.'
               : 'No feedback found.'}
@@ -339,7 +339,7 @@ export default function FeedbackViewClient({
             {feedback.map(item => (
               <div
                 key={item.id}
-                className='p-4 border border-neutral-700 rounded-lg bg-neutral-800/50'
+                className='p-4 border rounded-lg bg-card'
               >
                 <div className='flex items-start justify-between mb-3'>
                   <div className='flex-1'>
@@ -354,18 +354,18 @@ export default function FeedbackViewClient({
                       )}
                     </div>
 
-                    <div className='text-sm text-neutral-400 mb-2'>
-                      <span className='text-neutral-300'>{item.from.name}</span>{' '}
+                    <div className='text-sm text-muted-foreground mb-2'>
+                      <span className='text-foreground'>{item.from.name}</span>{' '}
                       wrote about{' '}
                       <Link
                         href={`/people/${item.about.id}`}
-                        className='text-blue-400 hover:text-blue-300'
+                        className='text-primary hover:opacity-90'
                       >
                         {item.about.name}
                       </Link>
                     </div>
 
-                    <div className='text-xs text-neutral-500'>
+                    <div className='text-xs text-muted-foreground'>
                       {formatDate(item.createdAt)}
                     </div>
                   </div>
@@ -390,7 +390,7 @@ export default function FeedbackViewClient({
                         disabled={deletingId === item.id}
                         variant='outline'
                         size='sm'
-                        className='text-red-400 hover:text-red-300 border-red-400 hover:border-red-300'
+                        className='text-destructive border-destructive hover:text-destructive-foreground hover:bg-destructive'
                       >
                         <Trash2 className='w-4 h-4 mr-2' />
                         {deletingId === item.id ? 'Deleting...' : 'Delete'}
@@ -399,22 +399,22 @@ export default function FeedbackViewClient({
                   </div>
                 </div>
 
-                <div className='prose prose-invert prose-sm max-w-none text-neutral-200'>
+                <div className='prose prose-invert prose-sm max-w-none text-foreground'>
                   <ReactMarkdown
                     components={{
                       p: ({ children }) => <p className='mb-3'>{children}</p>,
                       strong: ({ children }) => (
-                        <strong className='font-semibold text-white'>
+                        <strong className='font-semibold text-foreground'>
                           {children}
                         </strong>
                       ),
                       em: ({ children }) => (
-                        <em className='italic text-neutral-300'>{children}</em>
+                        <em className='italic text-muted-foreground'>{children}</em>
                       ),
                       a: ({ href, children }) => (
                         <a
                           href={href}
-                          className='text-blue-400 hover:text-blue-300 underline'
+                          className='text-primary underline'
                           target='_blank'
                           rel='noopener noreferrer'
                         >
@@ -435,17 +435,17 @@ export default function FeedbackViewClient({
                         <li className='mb-1'>{children}</li>
                       ),
                       blockquote: ({ children }) => (
-                        <blockquote className='border-l-4 border-neutral-600 pl-4 italic text-neutral-300 mb-3'>
+                        <blockquote className='border-l-4 border pl-4 italic text-muted-foreground mb-3'>
                           {children}
                         </blockquote>
                       ),
                       code: ({ children }) => (
-                        <code className='bg-neutral-700 px-1 py-0.5 rounded text-sm font-mono text-neutral-200'>
+                        <code className='bg-accent px-1 py-0.5 rounded text-sm font-mono text-foreground'>
                           {children}
                         </code>
                       ),
                       pre: ({ children }) => (
-                        <pre className='bg-neutral-700 p-3 rounded overflow-x-auto mb-3'>
+                        <pre className='bg-accent p-3 rounded overflow-x-auto mb-3'>
                           {children}
                         </pre>
                       ),

@@ -14,7 +14,7 @@ export function PeopleChartClient({ people }: PeopleChartClientProps) {
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-3'>
           <div className='flex items-center gap-2'>
-            <Workflow className='w-5 h-5 text-neutral-400' />
+            <Workflow className='w-5 h-5 text-muted-foreground' />
             <h2 className='text-lg font-semibold'>Organization Chart</h2>
           </div>
         </div>

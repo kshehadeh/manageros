@@ -89,7 +89,7 @@ export function TaskForm({
             name='title'
             required
             defaultValue={initialData?.title || ''}
-            className='w-full px-3 py-2 border border-neutral-700 rounded-lg bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
+            className='w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
             placeholder='Enter task title'
           />
         </div>
@@ -106,7 +106,7 @@ export function TaskForm({
             name='description'
             rows={3}
             defaultValue={initialData?.description || ''}
-            className='w-full px-3 py-2 border border-neutral-700 rounded-lg bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
+            className='w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
             placeholder='Enter task description'
           />
         </div>
@@ -125,7 +125,7 @@ export function TaskForm({
               defaultValue={
                 preselectedAssigneeId || initialData?.assigneeId || ''
               }
-              className='w-full px-3 py-2 border border-neutral-700 rounded-lg bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
+              className='w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
             >
               <option value=''>Select assignee</option>
               {people.map(person => (
@@ -144,7 +144,7 @@ export function TaskForm({
               id='status'
               name='status'
               defaultValue={initialData?.status || 'todo'}
-              className='w-full px-3 py-2 border border-neutral-700 rounded-lg bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
+              className='w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
             >
               <option value='todo'>To Do</option>
               <option value='doing'>Doing</option>
@@ -167,7 +167,7 @@ export function TaskForm({
               id='priority'
               name='priority'
               defaultValue={initialData?.priority || 2}
-              className='w-full px-3 py-2 border border-neutral-700 rounded-lg bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
+              className='w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
             >
               <option value={1}>1 - Highest</option>
               <option value={2}>2 - High</option>
@@ -191,7 +191,7 @@ export function TaskForm({
               min='0'
               step='0.5'
               defaultValue={initialData?.estimate || ''}
-              className='w-full px-3 py-2 border border-neutral-700 rounded-lg bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
+              className='w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
               placeholder='Hours'
             />
           </div>
@@ -205,7 +205,7 @@ export function TaskForm({
               id='dueDate'
               name='dueDate'
               defaultValue={initialData?.dueDate || ''}
-              className='w-full px-3 py-2 border border-neutral-700 rounded-lg bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
+              className='w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
             />
           </div>
         </div>
@@ -225,7 +225,7 @@ export function TaskForm({
               onChange={e => {
                 setSelectedInitiativeId(e.target.value)
               }}
-              className='w-full px-3 py-2 border border-neutral-700 rounded-lg bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
+              className='w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
             >
               <option value=''>Select initiative (optional)</option>
               {initiatives.map(initiative => (
@@ -250,7 +250,7 @@ export function TaskForm({
                 preselectedObjectiveId || initialData?.objectiveId || ''
               }
               disabled={!selectedInitiativeId}
-              className='w-full px-3 py-2 border border-neutral-700 rounded-lg bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed'
+              className='w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed'
             >
               <option value=''>Select objective (optional)</option>
               {availableObjectives.map(objective => (

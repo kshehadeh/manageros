@@ -47,7 +47,7 @@ export function MarkdownEditor({
       />
 
       {/* Character count */}
-      <div className='px-4 py-2 border-t border-neutral-700 text-xs text-neutral-400 bg-neutral-800'>
+      <div className='px-4 py-2 border-t text-xs text-muted-foreground bg-accent'>
         {maxLength
           ? `${value.length}/${maxLength} characters`
           : `${value.length} characters`}

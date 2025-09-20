@@ -33,7 +33,7 @@ export function DeleteCheckInButton({
   if (showConfirm) {
     return (
       <div className='flex items-center gap-2'>
-        <span className='text-sm text-neutral-400'>Are you sure?</span>
+        <span className='text-sm text-muted-foreground'>Are you sure?</span>
         <Button
           onClick={handleDelete}
           disabled={isDeleting}
@@ -58,7 +58,7 @@ export function DeleteCheckInButton({
       onClick={() => setShowConfirm(true)}
       variant='outline'
       size='sm'
-      className='text-red-400 hover:text-red-300 border-red-400 hover:border-red-300'
+      className='text-destructive border-destructive hover:text-destructive-foreground hover:bg-destructive'
     >
       <Trash2 className='w-4 h-4 mr-2' />
       Delete

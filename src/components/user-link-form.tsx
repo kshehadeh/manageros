@@ -81,25 +81,25 @@ export function UserLinkForm({
     <div className='space-y-4'>
       <div>
         <h4 className='font-medium mb-2'>User Account Link</h4>
-        <p className='text-sm text-neutral-400 mb-4'>
+        <p className='text-sm text-muted-foreground mb-4'>
           Link this person to a user account to enable login access.
         </p>
       </div>
 
       {error && (
-        <div className='bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded'>
+        <div className='bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded'>
           {error}
         </div>
       )}
 
       {linkedUser ? (
-        <div className='bg-green-50 border border-green-200 rounded-lg p-4'>
+        <div className='bg-secondary/30 border rounded-lg p-4'>
           <div className='flex items-center justify-between'>
             <div>
-              <div className='font-medium text-green-800'>
+              <div className='font-medium text-foreground'>
                 Linked to User Account
               </div>
-              <div className='text-sm text-green-600'>
+              <div className='text-sm text-foreground'>
                 {linkedUser.name} ({linkedUser.email}) - {linkedUser.role}
               </div>
             </div>

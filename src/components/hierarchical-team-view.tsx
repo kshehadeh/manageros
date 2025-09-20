@@ -53,11 +53,11 @@ function HierarchicalTeamCard({
             {hasChildren ? (
               <Collapsible open={isExpanded} onOpenChange={handleToggle}>
                 <CollapsibleTrigger asChild>
-                  <button className='flex items-center justify-center w-6 h-6 hover:bg-neutral-700 rounded transition-colors' aria-label={isExpanded ? 'Collapse team' : 'Expand team'}>
+                  <button className='flex items-center justify-center w-6 h-6 hover:bg-accent rounded transition-colors' aria-label={isExpanded ? 'Collapse team' : 'Expand team'}>
                     {isExpanded ? (
-                      <ChevronDown className='w-4 h-4 text-neutral-400' />
+                      <ChevronDown className='w-4 h-4 text-muted-foreground' />
                     ) : (
-                      <ChevronRight className='w-4 h-4 text-neutral-400' />
+                      <ChevronRight className='w-4 h-4 text-muted-foreground' />
                     )}
                   </button>
                 </CollapsibleTrigger>
@@ -69,16 +69,16 @@ function HierarchicalTeamCard({
             <div className='flex-1'>
               <Link
                 href={`/teams/${team.id}`}
-                className='font-medium hover:text-blue-400 transition-colors'
+                className='font-medium hover:text-primary transition-colors'
               >
                 {team.name}
               </Link>
               {team.description && (
-                <div className='text-sm text-neutral-400 mt-1'>
+                <div className='text-sm text-muted-foreground mt-1'>
                   {team.description}
                 </div>
               )}
-              <div className='flex items-center gap-4 text-xs text-neutral-500 mt-2'>
+              <div className='flex items-center gap-4 text-xs text-muted-foreground mt-2'>
                 <div className='flex items-center gap-1'>
                   <Users className='w-3 h-3' />
                   {team.people.length} member
@@ -90,7 +90,7 @@ function HierarchicalTeamCard({
                   {team.initiatives.length !== 1 ? 's' : ''}
                 </div>
                 {hasChildren && (
-                  <span className='text-blue-400'>
+                  <span className='text-primary'>
                     {team.children!.length} child team
                     {team.children!.length !== 1 ? 's' : ''}
                   </span>
@@ -115,7 +115,7 @@ function HierarchicalTeamCard({
 
         {hasChildren && (
           <Collapsible open={isExpanded} onOpenChange={handleToggle}>
-            <CollapsibleContent className='mt-4 pt-4 border-t border-neutral-700'>
+            <CollapsibleContent className='mt-4 pt-4 border-t'>
               <div className='space-y-2'>
                 {team.children!.map(child => (
                   <HierarchicalTeamCard

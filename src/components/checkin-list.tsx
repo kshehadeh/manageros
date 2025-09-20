@@ -84,7 +84,7 @@ export function CheckInList({
         {checkIns.map(checkIn => (
           <div
             key={checkIn.id}
-            className='border border-neutral-800 rounded-xl p-4 space-y-3'
+            className='border rounded-xl p-4 space-y-3'
           >
             {/* Header */}
             <div className='flex items-center justify-between'>
@@ -93,11 +93,11 @@ export function CheckInList({
                   <div className='font-medium'>
                     Week of {formatWeekOf(checkIn.weekOf)}
                   </div>
-                  <div className='text-sm text-neutral-400'>
+                  <div className='text-sm text-muted-foreground'>
                     Created by{' '}
                     <Link
                       href={`/people/${checkIn.createdBy.id}`}
-                      className='text-blue-400 hover:text-blue-300'
+                      className='text-primary hover:opacity-90'
                     >
                       {checkIn.createdBy.name}
                     </Link>{' '}
@@ -114,7 +114,7 @@ export function CheckInList({
             {/* Content */}
             <div className='space-y-2'>
               <div>
-                <div className='text-sm font-medium text-neutral-300 mb-1'>
+                <div className='text-sm font-medium text-muted-foreground mb-1'>
                   Summary
                 </div>
                 <div className='text-sm'>{checkIn.summary}</div>
@@ -122,7 +122,7 @@ export function CheckInList({
 
               {checkIn.blockers && (
                 <div>
-                  <div className='text-sm font-medium text-neutral-300 mb-1'>
+                  <div className='text-sm font-medium text-muted-foreground mb-1'>
                     Blockers
                   </div>
                   <div className='text-sm text-amber-300'>
@@ -133,10 +133,10 @@ export function CheckInList({
 
               {checkIn.nextSteps && (
                 <div>
-                  <div className='text-sm font-medium text-neutral-300 mb-1'>
+                  <div className='text-sm font-medium text-muted-foreground mb-1'>
                     Next Steps
                   </div>
-                  <div className='text-sm text-green-300'>
+                  <div className='text-sm text-emerald-300'>
                     {checkIn.nextSteps}
                   </div>
                 </div>
@@ -144,7 +144,7 @@ export function CheckInList({
             </div>
 
             {/* Actions */}
-            <div className='flex items-center gap-2 pt-2 border-t border-neutral-800'>
+            <div className='flex items-center gap-2 pt-2 border-t'>
               <EditIconButton
                 href={`/initiatives/${initiativeId}/checkins/${checkIn.id}/edit`}
                 variant='outline'
@@ -159,7 +159,7 @@ export function CheckInList({
         ))}
 
         {checkIns.length === 0 && !showNewForm && (
-          <div className='text-center py-8 text-neutral-400'>
+          <div className='text-center py-8 text-muted-foreground'>
             <div className='text-lg font-medium mb-2'>No check-ins yet</div>
             <div className='text-sm mb-4'>
               Start tracking progress with regular check-ins
@@ -174,7 +174,7 @@ export function CheckInList({
       {/* Edit Check-in Form */}
       {editingCheckIn && (
         <div className='fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50'>
-          <div className='bg-neutral-900 border border-neutral-800 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto'>
+          <div className='bg-popover text-popover-foreground border rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto'>
             <CheckInForm
               initiativeId={initiativeId}
               initiativeTitle={initiativeTitle}
