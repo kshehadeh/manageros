@@ -192,56 +192,56 @@ export default async function PersonDetailPage({
       personName={personWithRelations.name}
       personId={personWithRelations.id}
     >
-      <div className='space-y-6'>
-        <div className='flex items-center justify-between'>
-          <div>
-            <h2 className='text-lg font-semibold'>
-              {personWithRelations.name}
-            </h2>
-            <div className='text-sm text-neutral-400'>
-              {personWithRelations.role ?? ''}
+      <div className='page-container'>
+        <div className='page-header'>
+          <div className='flex items-center justify-between'>
+            <div>
+              <h1 className='page-title'>{personWithRelations.name}</h1>
+              <div className='page-section-subtitle'>
+                {personWithRelations.role ?? ''}
+              </div>
+              <div className='text-xs text-muted-foreground'>
+                {personWithRelations.email}
+              </div>
             </div>
-            <div className='text-xs text-neutral-500'>
-              {personWithRelations.email}
-            </div>
-          </div>
-          <div className='flex items-center gap-2'>
-            <span
-              className={`badge ${
-                personWithRelations.status === 'active'
-                  ? 'rag-green'
-                  : personWithRelations.status === 'inactive'
-                    ? 'rag-red'
-                    : 'rag-amber'
-              }`}
-            >
-              {personWithRelations.status.replace('_', ' ')}
-            </span>
-            {isAdmin(session.user) && (
-              <EditIconButton
-                href={`/people/${personWithRelations.id}/edit`}
-                variant='outline'
-                size='default'
+            <div className='flex items-center gap-2'>
+              <span
+                className={`badge ${
+                  personWithRelations.status === 'active'
+                    ? 'rag-green'
+                    : personWithRelations.status === 'inactive'
+                      ? 'rag-red'
+                      : 'rag-amber'
+                }`}
+              >
+                {personWithRelations.status.replace('_', ' ')}
+              </span>
+              {isAdmin(session.user) && (
+                <EditIconButton
+                  href={`/people/${personWithRelations.id}/edit`}
+                  variant='outline'
+                  size='default'
+                />
+              )}
+              <PersonActionPanel
+                person={personWithRelations}
+                currentPerson={currentPerson}
+                isAdmin={isAdmin(session.user)}
               />
-            )}
-            <PersonActionPanel
-              person={personWithRelations}
-              currentPerson={currentPerson}
-              isAdmin={isAdmin(session.user)}
-            />
-            <Button asChild variant='outline' size='default'>
-              <Link href='/people' className='flex items-center gap-2'>
-                <Eye className='w-4 h-4' />
-                Back to People
-              </Link>
-            </Button>
+              <Button asChild variant='outline' size='default'>
+                <Link href='/people' className='flex items-center gap-2'>
+                  <Eye className='w-4 h-4' />
+                  Back to People
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
 
         <div className='space-y-6'>
           {/* Basic Information and Direct Reports */}
           {personWithRelations.reports.length > 0 ? (
-            <div className='grid gap-6 md:grid-cols-2'>
+            <div className='card-grid'>
               {/* Basic Information */}
               <section className='card'>
                 <h3 className='font-semibold mb-4'>Basic Information</h3>
@@ -453,7 +453,7 @@ export default async function PersonDetailPage({
 
           {/* Owned Initiatives - Only show if person has initiatives */}
           {personWithRelations.initiativeOwners.length > 0 && (
-            <div className='grid gap-6 md:grid-cols-2'>
+            <div className='card-grid'>
               <section className='card'>
                 <div className='flex items-center justify-between mb-4'>
                   <h3 className='font-semibold'>
@@ -567,7 +567,7 @@ export default async function PersonDetailPage({
 
           {/* Recent Check-ins - Only show if person has check-ins */}
           {personWithRelations.checkIns.length > 0 && (
-            <div className='grid gap-6 md:grid-cols-2'>
+            <div className='card-grid'>
               <section className='card'>
                 <div className='flex items-center justify-between mb-4'>
                   <h3 className='font-semibold'>

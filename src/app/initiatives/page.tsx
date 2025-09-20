@@ -27,43 +27,49 @@ export default async function InitiativesPage() {
   })
 
   return (
-    <div className='space-y-4'>
-      <div className='flex items-center justify-between'>
-        <h2 className='text-lg font-semibold'>Initiatives</h2>
-        <Button asChild variant='outline'>
-          <Link href='/initiatives/new'>New</Link>
-        </Button>
-      </div>
-      <div className='grid gap-3'>
-        {inits.map(i => (
-          <Link
-            key={i.id}
-            href={`/initiatives/${i.id}`}
-            className='card hover:bg-accent/50 transition-colors'
-          >
-            <div className='flex items-center justify-between'>
-              <div>
-                <div className='font-semibold'>{i.title}</div>
-                <div className='text-sm text-muted-foreground'>
-                  {i.summary ?? ''}
-                </div>
-                <div className='text-xs text-muted-foreground mt-2'>
-                  {i.objectives.length} objectives · {i._count.checkIns}{' '}
-                  check-ins
-                </div>
-              </div>
-              <div className='flex items-center gap-2'>
-                <Rag rag={i.rag} />
-                <span className='badge'>{i.confidence}%</span>
-              </div>
-            </div>
-          </Link>
-        ))}
-        {inits.length === 0 && (
-          <div className='text-muted-foreground text-sm'>
-            No initiatives yet.
+    <div className='page-container'>
+      <div className='page-header'>
+        <div className='flex items-center justify-between'>
+          <div>
+            <h1 className='page-title'>Initiatives</h1>
           </div>
-        )}
+          <Button asChild variant='outline'>
+            <Link href='/initiatives/new'>New Initiative</Link>
+          </Button>
+        </div>
+      </div>
+      <div className='page-section'>
+        <div className='grid gap-3'>
+          {inits.map(i => (
+            <Link
+              key={i.id}
+              href={`/initiatives/${i.id}`}
+              className='card hover:bg-accent/50 transition-colors'
+            >
+              <div className='flex items-center justify-between'>
+                <div>
+                  <div className='font-semibold'>{i.title}</div>
+                  <div className='text-sm text-muted-foreground'>
+                    {i.summary ?? ''}
+                  </div>
+                  <div className='text-xs text-muted-foreground mt-2'>
+                    {i.objectives.length} objectives · {i._count.checkIns}{' '}
+                    check-ins
+                  </div>
+                </div>
+                <div className='flex items-center gap-2'>
+                  <Rag rag={i.rag} />
+                  <span className='badge'>{i.confidence}%</span>
+                </div>
+              </div>
+            </Link>
+          ))}
+          {inits.length === 0 && (
+            <div className='text-muted-foreground text-sm'>
+              No initiatives yet.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

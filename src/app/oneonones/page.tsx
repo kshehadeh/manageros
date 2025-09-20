@@ -18,76 +18,82 @@ export default async function OneOnOnesPage() {
   const items = await getOneOnOnes()
 
   return (
-    <div className='space-y-4'>
-      <div className='flex items-center justify-between'>
-        <div>
-          <h2 className='text-lg font-semibold'>1:1s</h2>
-          <p className='text-sm text-neutral-400 mt-1'>
-            Your private 1:1 meetings (only visible to participants)
-          </p>
+    <div className='page-container'>
+      <div className='page-header'>
+        <div className='flex items-center justify-between'>
+          <div>
+            <h1 className='page-title'>1:1s</h1>
+            <p className='page-section-subtitle'>
+              Your private 1:1 meetings (only visible to participants)
+            </p>
+          </div>
+          <Button asChild variant='outline'>
+            <Link href='/oneonones/new'>New 1:1</Link>
+          </Button>
         </div>
-        <Button asChild variant='outline'>
-          <Link href='/oneonones/new'>New 1:1</Link>
-        </Button>
       </div>
-      <div className='grid gap-3'>
-        {items.map(i => (
-          <div key={i.id} className='card'>
-            <div className='flex items-center justify-between mb-3'>
-              <div>
-                <div className='flex items-center gap-2'>
-                  <Link
-                    href={`/people/${i.manager.id}`}
-                    className='font-medium hover:text-blue-400'
-                  >
-                    {i.manager.name}
-                  </Link>
-                  <span className='text-neutral-400'>→</span>
-                  <Link
-                    href={`/people/${i.report.id}`}
-                    className='font-medium hover:text-blue-400'
-                  >
-                    {i.report.name}
-                  </Link>
+      <div className='page-section'>
+        <div className='grid gap-3'>
+          {items.map(i => (
+            <div key={i.id} className='card'>
+              <div className='flex items-center justify-between mb-3'>
+                <div>
+                  <div className='flex items-center gap-2'>
+                    <Link
+                      href={`/people/${i.manager.id}`}
+                      className='font-medium link-hover'
+                    >
+                      {i.manager.name}
+                    </Link>
+                    <span className='text-muted-foreground'>→</span>
+                    <Link
+                      href={`/people/${i.report.id}`}
+                      className='font-medium link-hover'
+                    >
+                      {i.report.name}
+                    </Link>
+                  </div>
+                </div>
+                <div className='flex items-center gap-3'>
+                  <div className='text-sm text-muted-foreground'>
+                    {i.scheduledAt
+                      ? new Date(i.scheduledAt).toLocaleString()
+                      : 'TBD'}
+                  </div>
+                  <Button asChild variant='outline' size='icon'>
+                    <Link href={`/oneonones/${i.id}`} aria-label='View 1:1'>
+                      <Eye className='w-4 h-4' />
+                    </Link>
+                  </Button>
+                  <EditIconButton
+                    href={`/oneonones/${i.id}/edit`}
+                    variant='outline'
+                    size='sm'
+                  />
                 </div>
               </div>
-              <div className='flex items-center gap-3'>
-                <div className='text-sm text-neutral-400'>
-                  {i.scheduledAt
-                    ? new Date(i.scheduledAt).toLocaleString()
-                    : 'TBD'}
-                </div>
-                <Button asChild variant='outline' size='icon'>
-                  <Link href={`/oneonones/${i.id}`} aria-label='View 1:1'>
-                    <Eye className='w-4 h-4' />
-                  </Link>
-                </Button>
-                <EditIconButton
-                  href={`/oneonones/${i.id}/edit`}
-                  variant='outline'
-                  size='sm'
-                />
-              </div>
-            </div>
 
-            {i.notes && (
-              <div>
-                <h4 className='text-sm font-medium mb-1'>Notes:</h4>
-                <div className='text-sm prose prose-sm max-w-none'>
-                  <ReactMarkdown>{i.notes}</ReactMarkdown>
+              {i.notes && (
+                <div>
+                  <h4 className='text-sm font-medium mb-1'>Notes:</h4>
+                  <div className='text-sm prose prose-sm max-w-none'>
+                    <ReactMarkdown>{i.notes}</ReactMarkdown>
+                  </div>
                 </div>
+              )}
+            </div>
+          ))}
+          {items.length === 0 && (
+            <div className='text-center py-8'>
+              <div className='text-muted-foreground text-sm mb-4'>
+                No 1:1s yet.
               </div>
-            )}
-          </div>
-        ))}
-        {items.length === 0 && (
-          <div className='text-center py-8'>
-            <div className='text-neutral-400 text-sm mb-4'>No 1:1s yet.</div>
-            <Button asChild variant='outline'>
-              <Link href='/oneonones/new'>Create your first 1:1</Link>
-            </Button>
-          </div>
-        )}
+              <Button asChild variant='outline'>
+                <Link href='/oneonones/new'>Create your first 1:1</Link>
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

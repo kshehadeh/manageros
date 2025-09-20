@@ -183,7 +183,7 @@ export default async function Home() {
     ])
 
   return (
-    <div className='space-y-6'>
+    <div className='page-container'>
       {/* Top row with Teams, Direct Reports, and Recent 1:1s */}
       <div className='grid gap-6 md:grid-cols-3'>
         <ExpandableSection title='Related Teams' viewAllHref='/teams'>

@@ -191,6 +191,49 @@ input[type='time']::-webkit-calendar-picker-indicator {
   opacity: 0.8;
 }
 
+/* Page Layout Standardization */
+.page-container {
+  @apply space-y-6;
+}
+
+.page-header {
+  @apply mb-6;
+}
+
+.page-title {
+  @apply text-2xl font-bold text-foreground mb-2;
+}
+
+.page-subtitle {
+  @apply text-muted-foreground;
+}
+
+.page-section {
+  @apply space-y-4;
+}
+
+.page-section-title {
+  @apply text-lg font-semibold text-foreground;
+}
+
+.page-section-subtitle {
+  @apply text-sm text-muted-foreground;
+}
+
+/* Standardized link hover colors */
+.link-hover {
+  @apply hover:text-primary transition-colors;
+}
+
+/* Standardized card content spacing */
+.card-content {
+  @apply space-y-3;
+}
+
+.card-grid {
+  @apply grid gap-6 md:grid-cols-2;
+}
+
 /* Sidebar scrollbar styling */
 .sidebar-scroll::-webkit-scrollbar {
   width: 4px;

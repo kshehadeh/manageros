@@ -64,23 +64,21 @@ export default async function FeedbackPage({
   ])
 
   return (
-    <div className='min-h-screen py-8'>
-      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-        <div className='mb-8'>
-          <h1 className='text-3xl font-bold text-neutral-100'>Feedback</h1>
-          <p className='mt-2 text-neutral-400'>
-            View and filter feedback across your organization. You can see all
-            public feedback and any private feedback you&apos;ve written.
-          </p>
-        </div>
-
-        <FeedbackViewClient
-          initialFeedback={feedback}
-          people={people}
-          currentFilters={cleanFilters}
-          currentUserId={currentPerson?.id}
-        />
+    <div className='page-container'>
+      <div className='page-header'>
+        <h1 className='page-title'>Feedback</h1>
+        <p className='page-subtitle'>
+          View and filter feedback across your organization. You can see all
+          public feedback and any private feedback you&apos;ve written.
+        </p>
       </div>
+
+      <FeedbackViewClient
+        initialFeedback={feedback}
+        people={people}
+        currentFilters={cleanFilters}
+        currentUserId={currentPerson?.id}
+      />
     </div>
   )
 }

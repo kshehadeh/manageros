@@ -67,43 +67,43 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
 
   return (
     <TeamDetailClient teamName={team.name} teamId={team.id}>
-      <div className='space-y-6'>
-        <div className='flex items-center justify-between'>
-          <div>
-            <h2 className='text-lg font-semibold'>{team.name}</h2>
-            {team.description && (
-              <p className='text-sm text-neutral-400 mt-1'>
-                {team.description}
-              </p>
-            )}
-            {team.parent && (
-              <div className='text-sm text-neutral-500 mt-1'>
-                Parent team:{' '}
-                <Link
-                  href={`/teams/${team.parent.id}`}
-                  className='hover:text-blue-400'
-                >
-                  {team.parent.name}
+      <div className='page-container'>
+        <div className='page-header'>
+          <div className='flex items-center justify-between'>
+            <div>
+              <h1 className='page-title'>{team.name}</h1>
+              {team.description && (
+                <p className='page-section-subtitle'>{team.description}</p>
+              )}
+              {team.parent && (
+                <div className='text-sm text-muted-foreground mt-1'>
+                  Parent team:{' '}
+                  <Link
+                    href={`/teams/${team.parent.id}`}
+                    className='link-hover'
+                  >
+                    {team.parent.name}
+                  </Link>
+                </div>
+              )}
+            </div>
+            <div className='flex items-center gap-2'>
+              <EditIconButton
+                href={`/teams/${team.id}/edit`}
+                variant='outline'
+                size='default'
+              />
+              <Button asChild variant='outline'>
+                <Link href='/teams' className='flex items-center gap-2'>
+                  <Eye className='w-4 h-4' />
+                  Back to Teams
                 </Link>
-              </div>
-            )}
-          </div>
-          <div className='flex items-center gap-2'>
-            <EditIconButton
-              href={`/teams/${team.id}/edit`}
-              variant='outline'
-              size='default'
-            />
-            <Button asChild variant='outline'>
-              <Link href='/teams' className='flex items-center gap-2'>
-                <Eye className='w-4 h-4' />
-                Back to Teams
-              </Link>
-            </Button>
+              </Button>
+            </div>
           </div>
         </div>
 
-        <div className='grid gap-6 md:grid-cols-2'>
+        <div className='card-grid'>
           {/* Team Members */}
           <section className='card'>
             <div className='flex items-center justify-between mb-4'>

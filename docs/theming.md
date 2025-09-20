@@ -83,7 +83,50 @@ import { ModeToggle } from '@/components/mode-toggle'
 2. Apply that class at the root using `next-themes` by setting `setTheme('ocean')`.
 3. All components using tokens will adopt the new look without code changes.
 
+### Page Layout Standardization
+
+The application now includes standardized page layout classes to ensure consistency across all pages:
+
+#### Page Structure Classes
+
+- `.page-container`: Main page wrapper with consistent spacing (`space-y-6`)
+- `.page-header`: Header section with bottom margin (`mb-6`)
+- `.page-title`: Standardized h1 styling (`text-2xl font-bold text-foreground mb-2`)
+- `.page-subtitle`: Subtitle text styling (`text-muted-foreground`)
+- `.page-section`: Content sections with consistent spacing (`space-y-4`)
+- `.page-section-title`: Section headings (`text-lg font-semibold text-foreground`)
+- `.page-section-subtitle`: Section descriptions (`text-sm text-muted-foreground`)
+
+#### Layout Classes
+
+- `.card-grid`: Two-column responsive grid (`grid gap-6 md:grid-cols-2`)
+- `.card-content`: Consistent card content spacing (`space-y-3`)
+- `.link-hover`: Standardized link hover effects (`hover:text-primary transition-colors`)
+
+#### Usage Examples
+
+```tsx
+// Standard page structure
+<div className='page-container'>
+  <div className='page-header'>
+    <h1 className='page-title'>Page Title</h1>
+    <p className='page-subtitle'>Page description</p>
+  </div>
+
+  <div className='page-section'>
+    <h2 className='page-section-title'>Section Title</h2>
+    <div className='card-grid'>
+      <div className='card'>Content</div>
+      <div className='card'>Content</div>
+    </div>
+  </div>
+</div>
+```
+
 ### Notes
 
 - Default theme is dark to match current look. Light theme is fully defined and can be enabled.
 - Keep using shadcn UI primitives; they are token-aware by default.
+- All pages now use standardized layout classes for consistency.
+- Page titles should always use `h1` with the `.page-title` class.
+- Main layout provides consistent padding and max-width constraints.

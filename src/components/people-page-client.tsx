@@ -19,42 +19,51 @@ export function PeoplePageClient({ people }: PeoplePageClientProps) {
   const [filteredPeople, setFilteredPeople] = useState<Person[]>(people)
 
   return (
-    <div className='space-y-4'>
-      <div className='flex items-center justify-between'>
-        <h2 className='text-lg font-semibold'>People</h2>
-        <div className='flex items-center gap-3'>
-          <Button asChild variant='outline'>
-            <Link href='/people/chart' className='flex items-center gap-2'>
-              <Workflow className='w-4 h-4' />
-              Chart
-            </Link>
-          </Button>
+    <div className='page-container'>
+      <div className='page-header'>
+        <div className='flex items-center justify-between'>
+          <div>
+            <h1 className='page-title'>People</h1>
+          </div>
+          <div className='flex items-center gap-3'>
+            <Button asChild variant='outline'>
+              <Link href='/people/chart' className='flex items-center gap-2'>
+                <Workflow className='w-4 h-4' />
+                Chart
+              </Link>
+            </Button>
 
-          {session?.user && isAdmin(session.user) && (
-            <>
-              <Button asChild variant='outline'>
-                <Link href='/people/import' className='flex items-center gap-2'>
-                  <Upload className='w-4 h-4' />
-                  Import CSV
-                </Link>
-              </Button>
-              <Button asChild variant='outline'>
-                <Link href='/people/new' className='flex items-center gap-2'>
-                  <UserPlus className='w-4 h-4' />
-                  New
-                </Link>
-              </Button>
-            </>
-          )}
+            {session?.user && isAdmin(session.user) && (
+              <>
+                <Button asChild variant='outline'>
+                  <Link
+                    href='/people/import'
+                    className='flex items-center gap-2'
+                  >
+                    <Upload className='w-4 h-4' />
+                    Import CSV
+                  </Link>
+                </Button>
+                <Button asChild variant='outline'>
+                  <Link href='/people/new' className='flex items-center gap-2'>
+                    <UserPlus className='w-4 h-4' />
+                    New Person
+                  </Link>
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
-      <PeopleFilterBar
-        people={people}
-        onFilteredPeopleChange={setFilteredPeople}
-      />
+      <div className='page-section'>
+        <PeopleFilterBar
+          people={people}
+          onFilteredPeopleChange={setFilteredPeople}
+        />
 
-      <PeopleTable people={people} filteredPeople={filteredPeople} />
+        <PeopleTable people={people} filteredPeople={filteredPeople} />
+      </div>
     </div>
   )
 }
