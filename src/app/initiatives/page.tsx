@@ -39,15 +39,15 @@ export default async function InitiativesPage() {
           <Link
             key={i.id}
             href={`/initiatives/${i.id}`}
-            className='card hover:bg-neutral-800/60'
+            className='card hover:bg-accent/50 transition-colors'
           >
             <div className='flex items-center justify-between'>
               <div>
                 <div className='font-semibold'>{i.title}</div>
-                <div className='text-sm text-neutral-400'>
+                <div className='text-sm text-muted-foreground'>
                   {i.summary ?? ''}
                 </div>
-                <div className='text-xs text-neutral-500 mt-2'>
+                <div className='text-xs text-muted-foreground mt-2'>
                   {i.objectives.length} objectives · {i._count.checkIns}{' '}
                   check-ins
                 </div>
@@ -60,7 +60,9 @@ export default async function InitiativesPage() {
           </Link>
         ))}
         {inits.length === 0 && (
-          <div className='text-neutral-400 text-sm'>No initiatives yet.</div>
+          <div className='text-muted-foreground text-sm'>
+            No initiatives yet.
+          </div>
         )}
       </div>
     </div>

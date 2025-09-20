@@ -52,7 +52,10 @@ export default async function FeedbackDetailPage({
                 size='default'
               />
               <Button asChild variant='outline'>
-                <Link href={`/people/${feedback.about.id}`} className='flex items-center gap-2'>
+                <Link
+                  href={`/people/${feedback.about.id}`}
+                  className='flex items-center gap-2'
+                >
                   <Eye className='w-4 h-4' />
                   Back to {feedback.about.name}
                 </Link>
@@ -110,7 +113,7 @@ export default async function FeedbackDetailPage({
                   <span className='text-sm font-medium'>Privacy:</span>
                   <div className='text-sm text-neutral-400'>
                     {feedback.isPrivate ? (
-                      <span className='badge bg-neutral-700 text-neutral-300'>
+                      <span className='badge bg-badge-neutral text-badge-neutral-text'>
                         Private
                       </span>
                     ) : (

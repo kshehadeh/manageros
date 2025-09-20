@@ -182,7 +182,9 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
                 Team Initiatives ({team.initiatives.length})
               </h3>
               <Button asChild variant='outline' size='sm'>
-                <Link href={`/initiatives/new?teamId=${team.id}`}>New Initiative</Link>
+                <Link href={`/initiatives/new?teamId=${team.id}`}>
+                  New Initiative
+                </Link>
               </Button>
             </div>
             <div className='space-y-3'>
@@ -190,15 +192,15 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
                 <Link
                   key={initiative.id}
                   href={`/initiatives/${initiative.id}`}
-                  className='block border border-neutral-800 rounded-xl p-3 hover:bg-neutral-800/60'
+                  className='block border rounded-xl p-3 hover:bg-accent/50 transition-colors'
                 >
                   <div className='flex items-center justify-between'>
                     <div>
                       <div className='font-medium'>{initiative.title}</div>
-                      <div className='text-sm text-neutral-400'>
+                      <div className='text-sm text-muted-foreground'>
                         {initiative.summary ?? ''}
                       </div>
-                      <div className='text-xs text-neutral-500 mt-1'>
+                      <div className='text-xs text-muted-foreground mt-1'>
                         {initiative.owners.length > 0 && (
                           <span>
                             Owners:{' '}
@@ -206,7 +208,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
                               <span key={owner.person.id}>
                                 <Link
                                   href={`/people/${owner.person.id}`}
-                                  className='hover:text-blue-400'
+                                  className='hover:text-primary'
                                 >
                                   {owner.person.name}
                                 </Link>
@@ -240,7 +242,9 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
               Child Teams ({team.children.length})
             </h3>
             <Button asChild variant='outline' size='sm'>
-              <Link href={`/teams/new?parentId=${team.id}`}>Add Child Team</Link>
+              <Link href={`/teams/new?parentId=${team.id}`}>
+                Add Child Team
+              </Link>
             </Button>
           </div>
           <div className='space-y-3'>

@@ -331,14 +331,14 @@ export default async function Home() {
               <div>
                 <Link
                   href={`/initiatives/${initiative.id}`}
-                  className='font-medium hover:text-blue-400'
+                  className='font-medium hover:text-primary'
                 >
                   {initiative.title}
                 </Link>
-                <div className='text-neutral-400 text-sm'>
+                <div className='text-muted-foreground text-sm'>
                   {initiative.summary ?? ''}
                 </div>
-                <div className='text-xs text-neutral-500 mt-1'>
+                <div className='text-xs text-muted-foreground mt-1'>
                   {initiative.objectives.length} objectives •{' '}
                   {initiative._count.checkIns} check-ins
                   {initiative.team && (
@@ -347,7 +347,7 @@ export default async function Home() {
                       • Team:{' '}
                       <Link
                         href={`/teams/${initiative.team.id}`}
-                        className='hover:text-blue-400'
+                        className='hover:text-primary'
                       >
                         {initiative.team.name}
                       </Link>
@@ -362,7 +362,9 @@ export default async function Home() {
             </div>
           ))}
           {openInitiatives.length === 0 && (
-            <div className='text-neutral-400 text-sm'>No open initiatives.</div>
+            <div className='text-muted-foreground text-sm'>
+              No open initiatives.
+            </div>
           )}
         </div>
       </section>

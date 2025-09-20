@@ -25,6 +25,23 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
     --radius: 0.75rem; /* matches current rounded-xl vibe */
+
+    /* Badge-specific tokens */
+    --badge-success: 142 76% 36%;
+    --badge-success-foreground: 210 40% 98%;
+    --badge-success-text: 142 76% 40%;
+    --badge-warning: 38 92% 50%;
+    --badge-warning-foreground: 222.2 47.4% 11.2%;
+    --badge-warning-text: 38 92% 45%;
+    --badge-error: 0 84% 60%;
+    --badge-error-foreground: 210 40% 98%;
+    --badge-error-text: 0 84% 55%;
+    --badge-info: 221.2 83.2% 53.3%;
+    --badge-info-foreground: 210 40% 98%;
+    --badge-info-text: 221.2 83.2% 45%;
+    --badge-neutral: 210 40% 96.1%;
+    --badge-neutral-foreground: 222.2 47.4% 11.2%;
+    --badge-neutral-text: 222.2 47.4% 25%;
   }
 
   .dark {
@@ -49,6 +66,23 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
     --radius: 0.75rem;
+
+    /* Badge-specific tokens */
+    --badge-success: 142 76% 36%;
+    --badge-success-foreground: 210 40% 98%;
+    --badge-success-text: 142 76% 60%;
+    --badge-warning: 38 92% 50%;
+    --badge-warning-foreground: 222.2 47.4% 11.2%;
+    --badge-warning-text: 38 92% 70%;
+    --badge-error: 0 84% 60%;
+    --badge-error-foreground: 210 40% 98%;
+    --badge-error-text: 0 84% 80%;
+    --badge-info: 217.2 91.2% 59.8%;
+    --badge-info-foreground: 222.2 47.4% 11.2%;
+    --badge-info-text: 217.2 91.2% 70%;
+    --badge-neutral: 217.2 32.6% 17.5%;
+    --badge-neutral-foreground: 210 40% 98%;
+    --badge-neutral-text: 210 40% 80%;
   }
 
   * {
@@ -72,14 +106,16 @@
 .badge {
   @apply inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium border;
 }
+
+/* Legacy RAG classes - now using tokenized colors */
 .rag-green {
-  @apply bg-emerald-900/30 border-emerald-700 text-emerald-300;
+  @apply bg-badge-success/30 border-badge-success text-badge-success-text;
 }
 .rag-amber {
-  @apply bg-amber-900/30 border-amber-700 text-amber-300;
+  @apply bg-badge-warning/30 border-badge-warning text-badge-warning-text;
 }
 .rag-red {
-  @apply bg-red-900/30 border-red-700 text-red-300;
+  @apply bg-badge-error/30 border-badge-error text-badge-error-text;
 }
 
 /* Markdown prose styling */

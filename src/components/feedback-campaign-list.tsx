@@ -54,18 +54,20 @@ export function FeedbackCampaignList({
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null)
   const [deletingCampaign, setDeletingCampaign] = useState<string | null>(null)
 
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (
+    status: string
+  ): 'neutral' | 'success' | 'info' | 'error' => {
     switch (status) {
       case 'draft':
-        return 'bg-gray-100 text-gray-800'
+        return 'neutral'
       case 'active':
-        return 'bg-green-100 text-green-800'
+        return 'success'
       case 'completed':
-        return 'bg-blue-100 text-blue-800'
+        return 'info'
       case 'cancelled':
-        return 'bg-red-100 text-red-800'
+        return 'error'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'neutral'
     }
   }
 
@@ -155,17 +157,12 @@ export function FeedbackCampaignList({
           <CardHeader>
             <div className='flex items-center justify-between'>
               <div className='flex items-center gap-3'>
-                <Badge className={getStatusColor(campaign.status)}>
+                <Badge variant={getStatusVariant(campaign.status)}>
                   {getStatusIcon(campaign.status)}
                   <span className='ml-1 capitalize'>{campaign.status}</span>
                 </Badge>
                 {isCampaignActive(campaign) && (
-                  <Badge
-                    variant='outline'
-                    className='text-green-600 border-green-600'
-                  >
-                    Currently Active
-                  </Badge>
+                  <Badge variant='success'>Currently Active</Badge>
                 )}
               </div>
               <div className='flex items-center gap-2'>

@@ -106,38 +106,38 @@ export function JiraWorkActivity({
       statusLower.includes('closed') ||
       statusLower.includes('resolved')
     ) {
-      return 'bg-green-900/30 text-green-400 border border-green-800'
+      return 'bg-badge-success/30 text-badge-success-text border-badge-success'
     }
     if (statusLower.includes('progress') || statusLower.includes('review')) {
-      return 'bg-blue-900/30 text-blue-400 border border-blue-800'
+      return 'bg-badge-info/30 text-badge-info-text border-badge-info'
     }
     if (statusLower.includes('blocked') || statusLower.includes('waiting')) {
-      return 'bg-yellow-900/30 text-yellow-400 border border-yellow-800'
+      return 'bg-badge-warning/30 text-badge-warning-text border-badge-warning'
     }
-    return 'bg-neutral-800 text-neutral-400 border border-neutral-700'
+    return 'bg-badge-neutral/30 text-badge-neutral-text border-badge-neutral'
   }
 
   const getPriorityColor = (priority?: string | null): string => {
     if (!priority)
-      return 'bg-neutral-800 text-neutral-400 border border-neutral-700'
+      return 'bg-badge-neutral/30 text-badge-neutral-text border-badge-neutral'
 
     const priorityLower = priority.toLowerCase()
     if (priorityLower.includes('high') || priorityLower.includes('critical')) {
-      return 'bg-red-900/30 text-red-400 border border-red-800'
+      return 'bg-badge-error/30 text-badge-error-text border-badge-error'
     }
     if (priorityLower.includes('medium')) {
-      return 'bg-yellow-900/30 text-yellow-400 border border-yellow-800'
+      return 'bg-badge-warning/30 text-badge-warning-text border-badge-warning'
     }
     if (priorityLower.includes('low')) {
-      return 'bg-green-900/30 text-green-400 border border-green-800'
+      return 'bg-badge-success/30 text-badge-success-text border-badge-success'
     }
-    return 'bg-neutral-800 text-neutral-400 border border-neutral-700'
+    return 'bg-badge-neutral/30 text-badge-neutral-text border-badge-neutral'
   }
 
   if (!hasJiraAccount) {
     return (
-      <div className='rounded-md bg-neutral-800 border border-neutral-700 p-4'>
-        <p className='text-sm text-neutral-400'>
+      <div className='rounded-md bg-card border p-4'>
+        <p className='text-sm text-muted-foreground'>
           This person is not linked to a Jira account. Link their account to
           view work activity.
         </p>
@@ -148,7 +148,9 @@ export function JiraWorkActivity({
   return (
     <div className='space-y-4'>
       <div className='flex items-center justify-between'>
-        <h4 className='text-sm font-medium text-white'>Assigned Tickets</h4>
+        <h4 className='text-sm font-medium text-foreground'>
+          Assigned Tickets
+        </h4>
         <div className='flex items-center space-x-2'>
           <select
             value={daysBack}
@@ -159,56 +161,58 @@ export function JiraWorkActivity({
             <option value={30}>Last 30 days</option>
             <option value={90}>Last 90 days</option>
           </select>
-          <Button type='button' onClick={handleFetchFromJira} disabled={isFetching} variant='outline'>
+          <Button
+            type='button'
+            onClick={handleFetchFromJira}
+            disabled={isFetching}
+            variant='outline'
+          >
             {isFetching ? 'Fetching...' : 'Refresh'}
           </Button>
         </div>
       </div>
 
       {error && (
-        <div className='rounded-md bg-red-900/20 border border-red-800 p-3'>
-          <div className='text-sm text-red-400'>{error}</div>
+        <div className='rounded-md bg-badge-error/20 border-badge-error p-3'>
+          <div className='text-sm text-badge-error-text'>{error}</div>
         </div>
       )}
 
       {isLoading ? (
         <div className='flex justify-center py-4'>
-          <div className='text-sm text-neutral-500'>
+          <div className='text-sm text-muted-foreground'>
             Loading assigned tickets...
           </div>
         </div>
       ) : assignedTickets.length === 0 ? (
-        <div className='rounded-md bg-neutral-800 border border-neutral-700 p-4'>
-          <p className='text-sm text-neutral-400'>
+        <div className='rounded-md bg-card border p-4'>
+          <p className='text-sm text-muted-foreground'>
             No assigned tickets found for the selected time period.
           </p>
         </div>
       ) : (
         <div className='space-y-3'>
           {assignedTickets.map(item => (
-            <div
-              key={item.id}
-              className='rounded-md border border-neutral-700 bg-neutral-800 p-4'
-            >
+            <div key={item.id} className='rounded-md border bg-card p-4'>
               <div className='flex items-start justify-between'>
                 <div className='flex-1'>
                   <div className='flex items-center space-x-2'>
-                    <span className='font-medium text-blue-400'>
+                    <span className='font-medium text-primary'>
                       {item.jiraIssueKey}
                     </span>
-                    <span className='text-sm text-neutral-400'>
+                    <span className='text-sm text-muted-foreground'>
                       {item.projectKey}
                     </span>
                   </div>
-                  <h5 className='mt-1 text-sm font-medium text-white'>
+                  <h5 className='mt-1 text-sm font-medium text-card-foreground'>
                     {item.issueTitle}
                   </h5>
                 </div>
                 <div className='ml-4 text-right'>
-                  <div className='text-sm font-medium text-white'>
+                  <div className='text-sm font-medium text-card-foreground'>
                     {formatRelativeDate(item.lastUpdated)}
                   </div>
-                  <div className='text-xs text-neutral-500'>Updated</div>
+                  <div className='text-xs text-muted-foreground'>Updated</div>
                 </div>
               </div>
 
@@ -223,7 +227,7 @@ export function JiraWorkActivity({
                 >
                   {item.priority || 'No Priority'}
                 </span>
-                <span className='text-xs text-neutral-500'>
+                <span className='text-xs text-muted-foreground'>
                   {item.issueType}
                 </span>
               </div>

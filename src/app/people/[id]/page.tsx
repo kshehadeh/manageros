@@ -466,17 +466,17 @@ export default async function PersonDetailPage({
                     <Link
                       key={ownership.initiative.id}
                       href={`/initiatives/${ownership.initiative.id}`}
-                      className='block border border-neutral-800 rounded-xl p-3 hover:bg-neutral-800/60'
+                      className='block border rounded-xl p-3 hover:bg-accent/50 transition-colors'
                     >
                       <div className='flex items-center justify-between'>
                         <div>
                           <div className='font-medium'>
                             {ownership.initiative.title}
                           </div>
-                          <div className='text-sm text-neutral-400'>
+                          <div className='text-sm text-muted-foreground'>
                             {ownership.initiative.summary ?? ''}
                           </div>
-                          <div className='text-xs text-neutral-500 mt-1'>
+                          <div className='text-xs text-muted-foreground mt-1'>
                             Role: {ownership.role} • Team:{' '}
                             {ownership.initiative.team?.name || 'No team'}
                           </div>

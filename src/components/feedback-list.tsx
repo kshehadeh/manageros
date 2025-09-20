@@ -96,7 +96,7 @@ export function FeedbackList({
                   {getKindLabel(item.kind)}
                 </span>
                 {item.isPrivate && (
-                  <span className='badge bg-neutral-700 text-neutral-300'>
+                  <span className='badge bg-badge-neutral text-badge-neutral-text'>
                     Private
                   </span>
                 )}

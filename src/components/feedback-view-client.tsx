@@ -142,13 +142,13 @@ export default function FeedbackViewClient({
   const getKindColor = (kind: string) => {
     switch (kind) {
       case 'praise':
-        return 'bg-green-900/30 text-green-300 border-green-700'
+        return 'rag-green'
       case 'concern':
-        return 'bg-red-900/30 text-red-300 border-red-700'
+        return 'rag-red'
       case 'note':
-        return 'bg-blue-900/30 text-blue-300 border-blue-700'
+        return 'rag-amber'
       default:
-        return 'bg-neutral-900/30 text-neutral-300 border-neutral-700'
+        return 'badge'
     }
   }
 
@@ -345,7 +345,7 @@ export default function FeedbackViewClient({
                         {item.kind}
                       </span>
                       {item.isPrivate && (
-                        <span className='badge bg-neutral-700 text-neutral-300'>
+                        <span className='badge bg-badge-neutral text-badge-neutral-text'>
                           Private
                         </span>
                       )}
