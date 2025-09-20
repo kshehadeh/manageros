@@ -103,7 +103,7 @@ export const authOptions: NextAuthOptions = {
 
         if (!user) {
           // User no longer exists, invalidate token
-          return null
+          throw new Error('User no longer exists')
         }
       }
 
@@ -119,11 +119,6 @@ export const authOptions: NextAuthOptions = {
         session.user.personId = token.personId as string | null
       }
       return session
-    },
-    async signOut() {
-      // This callback is called when the user signs out
-      // We can add any cleanup logic here if needed
-      return true
     },
   },
   pages: {
