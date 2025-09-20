@@ -299,7 +299,7 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
                 [person.id]: { field, value: e.target.value },
               })
             }
-            className='h-8 bg-neutral-900 border-neutral-700 text-neutral-100 placeholder:text-neutral-400 focus:border-neutral-600'
+            className='h-8 bg-background border-input text-foreground placeholder:text-muted-foreground'
             autoFocus
           />
           <Button
@@ -333,13 +333,13 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
               })
             }
           >
-            <SelectTrigger className='h-8 w-[180px] bg-neutral-900 border-neutral-700 text-neutral-100'>
+            <SelectTrigger className='h-8 w-[180px] bg-background border-input text-foreground'>
               <SelectValue placeholder='Select team' />
             </SelectTrigger>
-            <SelectContent className='bg-neutral-900 border-neutral-700'>
+            <SelectContent className='bg-popover text-popover-foreground border'>
               <SelectItem
                 value='none'
-                className='text-neutral-100 hover:bg-neutral-800'
+                className='hover:bg-accent hover:text-accent-foreground'
               >
                 No team
               </SelectItem>
@@ -347,7 +347,7 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
                 <SelectItem
                   key={team.id}
                   value={team.id}
-                  className='text-neutral-100 hover:bg-neutral-800'
+                  className='hover:bg-accent hover:text-accent-foreground'
                 >
                   {team.name}
                 </SelectItem>
@@ -385,13 +385,13 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
               })
             }
           >
-            <SelectTrigger className='h-8 w-[180px] bg-neutral-900 border-neutral-700 text-neutral-100'>
+            <SelectTrigger className='h-8 w-[180px] bg-background border-input text-foreground'>
               <SelectValue placeholder='Select manager' />
             </SelectTrigger>
-            <SelectContent className='bg-neutral-900 border-neutral-700'>
+            <SelectContent className='bg-popover text-popover-foreground border'>
               <SelectItem
                 value='none'
-                className='text-neutral-100 hover:bg-neutral-800'
+                className='hover:bg-accent hover:text-accent-foreground'
               >
                 No manager
               </SelectItem>
@@ -401,7 +401,7 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
                   <SelectItem
                     key={p.id}
                     value={p.id}
-                    className='text-neutral-100 hover:bg-neutral-800'
+                    className='hover:bg-accent hover:text-accent-foreground'
                   >
                     {p.name}
                   </SelectItem>
@@ -432,62 +432,62 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
 
   if (displayPeople.length === 0) {
     return (
-      <div className='text-neutral-400 text-sm text-center py-8'>
+      <div className='text-muted-foreground text-sm text-center py-8'>
         {filteredPeople ? 'No people match your filters.' : 'No people yet.'}
       </div>
     )
   }
 
   return (
-    <div className='rounded-md border border-neutral-800'>
+    <div className='rounded-md border'>
       <Table>
         <TableHeader>
-          <TableRow className='border-neutral-800 hover:bg-neutral-900/50'>
-            <TableHead className='text-neutral-300'>Name</TableHead>
-            <TableHead className='text-neutral-300'>Role</TableHead>
-            <TableHead className='text-neutral-300'>Team</TableHead>
-            <TableHead className='text-neutral-300'>Manager</TableHead>
-            <TableHead className='text-neutral-300'>Direct Reports</TableHead>
-            <TableHead className='text-neutral-300 w-[50px]'>Actions</TableHead>
+          <TableRow className='hover:bg-accent/50'>
+            <TableHead className='text-muted-foreground'>Name</TableHead>
+            <TableHead className='text-muted-foreground'>Role</TableHead>
+            <TableHead className='text-muted-foreground'>Team</TableHead>
+            <TableHead className='text-muted-foreground'>Manager</TableHead>
+            <TableHead className='text-muted-foreground'>Direct Reports</TableHead>
+            <TableHead className='text-muted-foreground w-[50px]'>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {displayPeople.map(person => (
             <TableRow
               key={person.id}
-              className='border-neutral-800 hover:bg-neutral-900/50 cursor-pointer'
+              className='hover:bg-accent/50 cursor-pointer'
               onDoubleClick={() => handleRowDoubleClick(person.id)}
               onContextMenu={e => handleRowRightClick(e, person.id)}
             >
-              <TableCell className='font-medium text-neutral-100'>
+              <TableCell className='font-medium text-foreground'>
                 <div className='flex items-center gap-2'>
                   <div
                     className={`w-2 h-2 rounded-full ${
                       person.status === 'active'
-                        ? 'bg-green-500'
+                        ? 'bg-emerald-500'
                         : person.status === 'inactive'
                           ? 'bg-red-500'
-                          : 'bg-yellow-500'
+                          : 'bg-amber-500'
                     }`}
                   />
                   {person.name}
                 </div>
               </TableCell>
-              <TableCell className='text-neutral-300'>
+              <TableCell className='text-muted-foreground'>
                 {renderEditableCell(person, 'role', person.role || '')}
               </TableCell>
-              <TableCell className='text-neutral-300'>
+              <TableCell className='text-muted-foreground'>
                 {renderEditableCell(person, 'team', person.team?.name || '')}
               </TableCell>
-              <TableCell className='text-neutral-300'>
+              <TableCell className='text-muted-foreground'>
                 {renderEditableCell(
                   person,
                   'manager',
                   person.manager?.name || ''
                 )}
               </TableCell>
-              <TableCell className='text-neutral-300'>
-                <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-900 text-blue-300'>
+              <TableCell className='text-muted-foreground'>
+                <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
                   {person.reports.length}
                 </span>
               </TableCell>
@@ -508,7 +508,7 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
       {/* Context Menu */}
       {contextMenu.visible && (
         <div
-          className='fixed z-50 bg-neutral-900 border border-neutral-700 rounded-md shadow-lg py-1 min-w-[160px]'
+          className='fixed z-50 bg-popover text-popover-foreground border rounded-md shadow-lg py-1 min-w-[160px]'
           style={{
             left: contextMenu.x,
             top: contextMenu.y,
@@ -516,7 +516,7 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
           onClick={e => e.stopPropagation()}
         >
           <button
-            className='w-full px-3 py-2 text-left text-sm text-neutral-100 hover:bg-neutral-800 flex items-center gap-2'
+            className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
             onClick={() => {
               router.push(`/people/${contextMenu.personId}`)
               setContextMenu(prev => ({ ...prev, visible: false }))
@@ -526,7 +526,7 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
             View
           </button>
           <button
-            className='w-full px-3 py-2 text-left text-sm text-neutral-100 hover:bg-neutral-800 flex items-center gap-2'
+            className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
             onClick={() => {
               router.push(`/people/${contextMenu.personId}/edit`)
               setContextMenu(prev => ({ ...prev, visible: false }))
@@ -536,7 +536,7 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
             Edit
           </button>
           <button
-            className='w-full px-3 py-2 text-left text-sm text-neutral-100 hover:bg-neutral-800 flex items-center gap-2'
+            className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
             onClick={() => {
               const person = displayPeople.find(
                 p => p.id === contextMenu.personId
@@ -550,7 +550,7 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
             Add Feedback
           </button>
           <button
-            className='w-full px-3 py-2 text-left text-sm text-neutral-100 hover:bg-neutral-800 flex items-center gap-2'
+            className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
             onClick={() => {
               const person = displayPeople.find(
                 p => p.id === contextMenu.personId
@@ -579,7 +579,7 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
       {/* Feedback Modal */}
       {feedbackModal.visible && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-          <div className='bg-neutral-800 border border-neutral-700 rounded-xl p-6 max-w-md w-full mx-4'>
+          <div className='bg-popover text-popover-foreground border rounded-xl p-6 max-w-md w-full mx-4'>
             <h4 className='font-medium mb-4'>
               Add Feedback for {feedbackModal.personName}
             </h4>
@@ -607,7 +607,7 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
       {/* 1:1 Modal */}
       {oneOnOneModal.visible && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-          <div className='bg-neutral-800 border border-neutral-700 rounded-xl p-6 max-w-lg w-full mx-4'>
+          <div className='bg-popover text-popover-foreground border rounded-xl p-6 max-w-lg w-full mx-4'>
             <h4 className='font-medium mb-4'>
               Add 1:1 with {oneOnOneModal.personName}
             </h4>

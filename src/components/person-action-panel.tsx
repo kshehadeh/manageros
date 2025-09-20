@@ -102,13 +102,13 @@ export function PersonActionPanel({
         </Button>
 
         {isDropdownOpen && (
-          <div className='absolute top-full right-0 mt-2 bg-neutral-800 border border-neutral-700 rounded-xl shadow-lg z-10 min-w-48'>
+          <div className='absolute top-full right-0 mt-2 bg-popover text-popover-foreground border rounded-xl shadow-lg z-10 min-w-48'>
             <div className='py-2'>
               {/* Add Report - Only show if current user is admin */}
               {isAdmin && (
                 <Link
                   href={`/people/new?managerId=${person.id}`}
-                  className='flex items-center gap-3 px-4 py-2 text-sm hover:bg-neutral-700 transition-colors'
+                  className='flex items-center gap-3 px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
                   onClick={() => setIsDropdownOpen(false)}
                 >
                   <Plus className='w-4 h-4' />
@@ -122,7 +122,7 @@ export function PersonActionPanel({
                   href={`/initiatives/new?ownerId=${person.id}${
                     person.team ? `&teamId=${person.team.id}` : ''
                   }`}
-                  className='flex items-center gap-3 px-4 py-2 text-sm hover:bg-neutral-700 transition-colors'
+                  className='flex items-center gap-3 px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
                   onClick={() => setIsDropdownOpen(false)}
                 >
                   <FileText className='w-4 h-4' />
@@ -134,7 +134,7 @@ export function PersonActionPanel({
               {isAdmin && (
                 <Link
                   href='/initiatives/new'
-                  className='flex items-center gap-3 px-4 py-2 text-sm hover:bg-neutral-700 transition-colors'
+                  className='flex items-center gap-3 px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
                   onClick={() => setIsDropdownOpen(false)}
                 >
                   <CheckSquare className='w-4 h-4' />
@@ -199,7 +199,7 @@ export function PersonActionPanel({
               {/* View All Initiatives - Show for all users */}
               <Link
                 href='/initiatives'
-                className='flex items-center gap-3 px-4 py-2 text-sm hover:bg-neutral-700 transition-colors'
+                className='flex items-center gap-3 px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
                 onClick={() => setIsDropdownOpen(false)}
               >
                 <Eye className='w-4 h-4' />
