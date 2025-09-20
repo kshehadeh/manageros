@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { useSession, signOut } from 'next-auth/react'
+import { signOutWithCleanup } from '@/lib/auth-utils'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import {
@@ -128,7 +129,9 @@ export default function Sidebar() {
           <div className='text-xs text-muted-foreground'>
             {session.user.organizationName}
           </div>
-          <div className='text-xs text-muted-foreground'>{session.user.role}</div>
+          <div className='text-xs text-muted-foreground'>
+            {session.user.role}
+          </div>
         </div>
 
         {/* Navigation */}
@@ -164,9 +167,10 @@ export default function Sidebar() {
             Org Settings
           </Link>
           <button
-            onClick={() => {
+            onClick={async () => {
               setIsMobileMenuOpen(false)
-              signOut()
+              await signOutWithCleanup()
+              signOut({ callbackUrl: '/auth/signin' })
             }}
             className='flex items-center gap-3 px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors w-full'
           >

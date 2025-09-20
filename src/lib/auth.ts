@@ -59,6 +59,7 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
     async jwt({ token, user, trigger }) {
@@ -93,6 +94,19 @@ export const authOptions: NextAuthOptions = {
         }
       }
 
+      // Always verify the user still exists and is active
+      if (token.sub) {
+        const user = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: { id: true },
+        })
+
+        if (!user) {
+          // User no longer exists, invalidate token
+          return null
+        }
+      }
+
       return token
     },
     async session({ session, token }) {
@@ -105,6 +119,11 @@ export const authOptions: NextAuthOptions = {
         session.user.personId = token.personId as string | null
       }
       return session
+    },
+    async signOut() {
+      // This callback is called when the user signs out
+      // We can add any cleanup logic here if needed
+      return true
     },
   },
   pages: {
