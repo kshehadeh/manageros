@@ -63,7 +63,7 @@ export function TeamForm({ team, parentId }: TeamFormProps) {
     <form onSubmit={handleSubmit} className='space-y-6'>
       {/* Error Display */}
       {error && (
-        <div className='bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded'>
+        <div className='bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded'>
           {error}
         </div>
       )}
@@ -121,7 +121,7 @@ export function TeamForm({ team, parentId }: TeamFormProps) {
                 </option>
               ))}
             </select>
-            <p className='text-xs text-neutral-500 mt-1'>
+            <p className='text-xs text-muted-foreground mt-1'>
               Select a parent team to create a hierarchy. Teams can only have
               one parent but multiple children.
             </p>

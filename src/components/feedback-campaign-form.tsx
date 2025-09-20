@@ -75,7 +75,7 @@ export function FeedbackCampaignForm({
     const loadTemplates = async () => {
       try {
         const fetchedTemplates = await getFeedbackTemplates()
-        setTemplates(fetchedTemplates)
+        setTemplates(fetchedTemplates as FeedbackTemplate[])
 
         // Set default template if no template is selected
         if (!formData.templateId && fetchedTemplates.length > 0) {

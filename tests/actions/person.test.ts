@@ -89,8 +89,8 @@ describe('getPeople', () => {
       id: 'user-2',
       email: 'u2@example.com',
       role: 'USER',
-      organizationId: null,
-      organizationName: null,
+      organizationId: '',
+      organizationName: '',
     })
 
     // Act

@@ -99,27 +99,27 @@ export function PeopleFilterBar({
     textFilter.trim() || teamFilter !== 'all' || managerFilter !== 'all'
 
   return (
-    <div className='flex flex-wrap items-center gap-3 p-4 bg-neutral-900/50 border border-neutral-800 rounded-lg'>
+    <div className='flex flex-wrap items-center gap-3 p-4 bg-card border rounded-lg'>
       {/* Text Search */}
       <div className='relative flex-1 min-w-[200px]'>
-        <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400' />
+        <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground' />
         <Input
           placeholder='Search people, roles, emails...'
           value={textFilter}
           onChange={e => setTextFilter(e.target.value)}
-          className='pl-10 bg-neutral-900 border-neutral-700 text-neutral-100 placeholder:text-neutral-400 focus:border-neutral-600'
+          className='pl-10 bg-background border-input text-foreground placeholder:text-muted-foreground'
         />
       </div>
 
       {/* Team Filter */}
       <Select value={teamFilter} onValueChange={setTeamFilter}>
-        <SelectTrigger className='w-[180px] bg-neutral-900 border-neutral-700 text-neutral-100'>
+        <SelectTrigger className='w-[180px] bg-background border-input text-foreground'>
           <SelectValue placeholder='Filter by team' />
         </SelectTrigger>
-        <SelectContent className='bg-neutral-900 border-neutral-700'>
+        <SelectContent className='bg-popover text-popover-foreground border'>
           <SelectItem
             value='all'
-            className='text-neutral-100 hover:bg-neutral-800'
+            className='hover:bg-accent hover:text-accent-foreground'
           >
             All Teams
           </SelectItem>
@@ -127,7 +127,7 @@ export function PeopleFilterBar({
             <SelectItem
               key={team.id}
               value={team.id}
-              className='text-neutral-100 hover:bg-neutral-800'
+              className='hover:bg-accent hover:text-accent-foreground'
             >
               {team.name}
             </SelectItem>
@@ -137,13 +137,13 @@ export function PeopleFilterBar({
 
       {/* Manager Filter */}
       <Select value={managerFilter} onValueChange={setManagerFilter}>
-        <SelectTrigger className='w-[180px] bg-neutral-900 border-neutral-700 text-neutral-100'>
+        <SelectTrigger className='w-[180px] bg-background border-input text-foreground'>
           <SelectValue placeholder='Filter by manager' />
         </SelectTrigger>
-        <SelectContent className='bg-neutral-900 border-neutral-700'>
+        <SelectContent className='bg-popover text-popover-foreground border'>
           <SelectItem
             value='all'
-            className='text-neutral-100 hover:bg-neutral-800'
+            className='hover:bg-accent hover:text-accent-foreground'
           >
             All Managers
           </SelectItem>
@@ -151,7 +151,7 @@ export function PeopleFilterBar({
             <SelectItem
               key={manager.id}
               value={manager.id}
-              className='text-neutral-100 hover:bg-neutral-800'
+              className='hover:bg-accent hover:text-accent-foreground'
             >
               {manager.name}
             </SelectItem>
@@ -165,7 +165,7 @@ export function PeopleFilterBar({
           variant='outline'
           size='sm'
           onClick={clearFilters}
-          className='flex items-center gap-2 border-neutral-700 text-neutral-300 hover:bg-neutral-800'
+          className='flex items-center gap-2'
         >
           <X className='w-4 h-4' />
           Clear

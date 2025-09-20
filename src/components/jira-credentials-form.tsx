@@ -66,19 +66,19 @@ export function JiraCredentialsForm({
   return (
     <div className='space-y-6'>
       <div>
-        <h3 className='text-lg font-medium text-white'>Jira Integration</h3>
-        <p className='text-sm text-neutral-400'>
+        <h3 className='text-lg font-medium text-foreground'>Jira Integration</h3>
+        <p className='text-sm text-muted-foreground'>
           Configure your Jira credentials to enable work activity tracking for
           your team members.
         </p>
       </div>
 
       {initialCredentials && (
-        <div className='rounded-md bg-green-900/20 border border-green-800 p-4'>
+        <div className='rounded-md bg-secondary/30 border p-4'>
           <div className='flex'>
             <div className='flex-shrink-0'>
               <svg
-                className='h-5 w-5 text-green-400'
+                className='h-5 w-5 text-emerald-400'
                 viewBox='0 0 20 20'
                 fill='currentColor'
               >
@@ -90,10 +90,10 @@ export function JiraCredentialsForm({
               </svg>
             </div>
             <div className='ml-3'>
-              <h4 className='text-sm font-medium text-green-400'>
+              <h4 className='text-sm font-medium text-foreground'>
                 Jira credentials configured
               </h4>
-              <div className='mt-1 text-sm text-green-300'>
+              <div className='mt-1 text-sm text-foreground'>
                 <p>Connected to: {initialCredentials.jiraBaseUrl}</p>
                 <p>Username: {initialCredentials.jiraUsername}</p>
               </div>
@@ -106,7 +106,7 @@ export function JiraCredentialsForm({
         <div>
           <label
             htmlFor='jiraBaseUrl'
-            className='block text-sm font-medium text-white'
+            className='block text-sm font-medium text-foreground'
           >
             Jira Base URL
           </label>
@@ -121,7 +121,7 @@ export function JiraCredentialsForm({
             className='input'
             required
           />
-          <p className='mt-1 text-xs text-neutral-500'>
+          <p className='mt-1 text-xs text-muted-foreground'>
             The base URL of your Jira instance (e.g.,
             https://yourcompany.atlassian.net)
           </p>
@@ -130,7 +130,7 @@ export function JiraCredentialsForm({
         <div>
           <label
             htmlFor='jiraUsername'
-            className='block text-sm font-medium text-white'
+            className='block text-sm font-medium text-foreground'
           >
             Username or Email
           </label>
@@ -145,7 +145,7 @@ export function JiraCredentialsForm({
             className='input'
             required
           />
-          <p className='mt-1 text-xs text-neutral-500'>
+          <p className='mt-1 text-xs text-muted-foreground'>
             Your Jira username or email address
           </p>
         </div>
@@ -153,7 +153,7 @@ export function JiraCredentialsForm({
         <div>
           <label
             htmlFor='jiraApiKey'
-            className='block text-sm font-medium text-white'
+            className='block text-sm font-medium text-foreground'
           >
             API Token
           </label>
@@ -168,14 +168,14 @@ export function JiraCredentialsForm({
             className='input'
             required
           />
-          <p className='mt-1 text-xs text-neutral-500'>
+          <p className='mt-1 text-xs text-muted-foreground'>
             Generate an API token from your Jira account settings
           </p>
         </div>
 
         {error && (
-          <div className='rounded-md bg-red-900/20 border border-red-800 p-4'>
-            <div className='text-sm text-red-400'>{error}</div>
+          <div className='rounded-md bg-destructive/20 border border-destructive p-4'>
+            <div className='text-sm text-destructive'>{error}</div>
           </div>
         )}
 
@@ -191,7 +191,7 @@ export function JiraCredentialsForm({
         </div>
       </form>
 
-      <div className='border-t border-neutral-800 pt-4'>
+      <div className='border-t pt-4'>
         <Button
           type='button'
           onClick={handleDelete}

@@ -87,13 +87,13 @@ export function CheckInForm({
         <h3 className='text-lg font-semibold mb-2'>
           {isEditing ? 'Edit Check-in' : 'New Check-in'}
         </h3>
-        <p className='text-sm text-neutral-400'>
+        <p className='text-sm text-muted-foreground'>
           Initiative: {initiativeTitle}
         </p>
       </div>
 
       {error && (
-        <div className='bg-red-900/20 border border-red-500/50 rounded-lg p-3 text-red-300 text-sm'>
+        <div className='bg-destructive/20 border border-destructive rounded-lg p-3 text-destructive text-sm'>
           {error}
         </div>
       )}
@@ -164,19 +164,7 @@ export function CheckInForm({
                 }
                 className='sr-only'
               />
-              <div
-                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                  formData.rag === color
-                    ? 'bg-opacity-100'
-                    : 'bg-opacity-20 hover:bg-opacity-40'
-                } ${
-                  color === 'green'
-                    ? 'bg-green-600 text-green-100'
-                    : color === 'amber'
-                      ? 'bg-amber-600 text-amber-100'
-                      : 'bg-red-600 text-red-100'
-                }`}
-              >
+              <div className='px-3 py-1 rounded-lg text-sm font-medium transition-colors bg-secondary text-secondary-foreground'>
                 <Rag rag={color} />
               </div>
             </label>

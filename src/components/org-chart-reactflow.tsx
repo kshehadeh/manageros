@@ -34,33 +34,33 @@ function PersonNode({ data }: { data: Person }) {
   }, [data.id, router])
 
   return (
-    <div className='bg-neutral-900/60 border-2 border-neutral-600 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 min-w-[200px]'>
+    <div className='bg-card border-2 border-border rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 min-w-[200px]'>
       {/* Top handle for incoming connections */}
       <Handle
         type='target'
         position={Position.Top}
-        className='w-3 h-3 bg-neutral-500'
+        className='w-3 h-3 bg-muted-foreground'
       />
 
       {/* Bottom handle for outgoing connections */}
       <Handle
         type='source'
         position={Position.Bottom}
-        className='w-3 h-3 bg-neutral-500'
+        className='w-3 h-3 bg-muted-foreground'
       />
 
       {/* Node content */}
       <div
-        className='p-3 cursor-pointer hover:bg-neutral-800 transition-colors duration-200'
+        className='p-3 cursor-pointer hover:bg-accent transition-colors duration-200'
         onClick={handleClick}
       >
         {/* Header with name and reports count */}
         <div className='flex items-center justify-between mb-2'>
-          <h3 className='font-semibold text-sm text-neutral-100 truncate'>
+          <h3 className='font-semibold text-sm text-foreground truncate'>
             {data.name}
           </h3>
           {data.reports.length > 0 && (
-            <span className='bg-blue-900 text-blue-300 text-xs px-2 py-1 rounded-full font-medium'>
+            <span className='bg-primary/20 text-primary text-xs px-2 py-1 rounded-full font-medium'>
               {data.reports.length}
             </span>
           )}
@@ -68,32 +68,24 @@ function PersonNode({ data }: { data: Person }) {
 
         {/* Role */}
         {data.role && (
-          <p className='text-xs text-neutral-400 mb-1 truncate'>{data.role}</p>
+          <p className='text-xs text-muted-foreground mb-1 truncate'>{data.role}</p>
         )}
 
         {/* Team */}
         {data.team && (
-          <p className='text-xs text-neutral-500 mb-1 truncate'>
+          <p className='text-xs text-muted-foreground mb-1 truncate'>
             {data.team.name}
           </p>
         )}
 
         {/* Email */}
         {data.email && (
-          <p className='text-xs text-neutral-600 truncate'>{data.email}</p>
+          <p className='text-xs text-muted-foreground truncate'>{data.email}</p>
         )}
 
         {/* Status indicator */}
         <div className='flex items-center justify-end mt-2'>
-          <div
-            className={`w-2 h-2 rounded-full ${
-              data.status === 'active'
-                ? 'bg-green-500'
-                : data.status === 'inactive'
-                  ? 'bg-red-500'
-                  : 'bg-yellow-500'
-            }`}
-          />
+          <div className={`w-2 h-2 rounded-full ${data.status === 'active' ? 'bg-emerald-500' : data.status === 'inactive' ? 'bg-red-500' : 'bg-amber-500'}`} />
         </div>
       </div>
     </div>

@@ -38,18 +38,18 @@ export default function InvitationForm({
 
   return (
     <div className='card'>
-      <h3 className='text-lg font-medium text-neutral-100 mb-4'>
+      <h3 className='text-lg font-medium text-foreground mb-4'>
         Invite User to Organization
       </h3>
 
       {error && (
-        <div className='mb-4 bg-red-900/30 border border-red-700 text-red-300 px-4 py-3 rounded'>
+        <div className='mb-4 bg-destructive/20 border border-destructive text-destructive px-4 py-3 rounded'>
           {error}
         </div>
       )}
 
       {success && (
-        <div className='mb-4 bg-green-900/30 border border-green-700 text-green-300 px-4 py-3 rounded'>
+        <div className='mb-4 bg-secondary/30 border text-foreground px-4 py-3 rounded'>
           {success}
         </div>
       )}
@@ -58,7 +58,7 @@ export default function InvitationForm({
         <div>
           <label
             htmlFor='email'
-            className='block text-sm font-medium text-neutral-300'
+            className='block text-sm font-medium text-muted-foreground'
           >
             Email Address
           </label>
@@ -71,7 +71,7 @@ export default function InvitationForm({
             className='input mt-1'
             placeholder='user@example.com'
           />
-          <p className='mt-1 text-sm text-neutral-500'>
+          <p className='mt-1 text-sm text-muted-foreground'>
             The user will receive an invitation to join your organization. They
             can accept it when they create their account.
           </p>

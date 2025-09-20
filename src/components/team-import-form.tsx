@@ -104,67 +104,67 @@ export function TeamImportForm() {
     <div className='space-y-6'>
       <div>
         <h3 className='text-lg font-semibold mb-4'>CSV Format</h3>
-        <p className='text-neutral-400 mb-4'>
+        <p className='text-muted-foreground mb-4'>
           Your CSV file should have the following columns:
         </p>
         <div className='overflow-x-auto mb-4'>
-          <table className='min-w-full border border-neutral-700 rounded-lg'>
-            <thead className='bg-neutral-800'>
+          <table className='min-w-full border rounded-lg'>
+            <thead className='bg-accent/30'>
               <tr>
-                <th className='px-4 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider border-b border-neutral-700'>
+                <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
                   Column Name
                 </th>
-                <th className='px-4 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider border-b border-neutral-700'>
+                <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
                   Description
                 </th>
-                <th className='px-4 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider border-b border-neutral-700'>
+                <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
                   Required
                 </th>
-                <th className='px-4 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider border-b border-neutral-700'>
+                <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
                   Example
                 </th>
               </tr>
             </thead>
-            <tbody className='bg-neutral-900 divide-y divide-neutral-700'>
+            <tbody className='divide-y'>
               <tr>
-                <td className='px-4 py-3 text-sm font-medium text-neutral-200 border-r border-neutral-700'>
+                <td className='px-4 py-3 text-sm font-medium text-foreground border-r'>
                   name
                 </td>
-                <td className='px-4 py-3 text-sm text-neutral-300 border-r border-neutral-700'>
+                <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
                   Team name
                 </td>
-                <td className='px-4 py-3 text-sm text-red-400 border-r border-neutral-700'>
+                <td className='px-4 py-3 text-sm text-destructive border-r'>
                   Yes
                 </td>
-                <td className='px-4 py-3 text-sm text-neutral-400'>
+                <td className='px-4 py-3 text-sm text-muted-foreground'>
                   Engineering
                 </td>
               </tr>
               <tr>
-                <td className='px-4 py-3 text-sm font-medium text-neutral-200 border-r border-neutral-700'>
+                <td className='px-4 py-3 text-sm font-medium text-foreground border-r'>
                   description
                 </td>
-                <td className='px-4 py-3 text-sm text-neutral-300 border-r border-neutral-700'>
+                <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
                   Team description
                 </td>
-                <td className='px-4 py-3 text-sm text-green-400 border-r border-neutral-700'>
+                <td className='px-4 py-3 text-sm text-emerald-400 border-r'>
                   No
                 </td>
-                <td className='px-4 py-3 text-sm text-neutral-400'>
+                <td className='px-4 py-3 text-sm text-muted-foreground'>
                   Software development team
                 </td>
               </tr>
               <tr>
-                <td className='px-4 py-3 text-sm font-medium text-neutral-200 border-r border-neutral-700'>
+                <td className='px-4 py-3 text-sm font-medium text-foreground border-r'>
                   parent
                 </td>
-                <td className='px-4 py-3 text-sm text-neutral-300 border-r border-neutral-700'>
+                <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
                   Parent team name (must match existing team)
                 </td>
-                <td className='px-4 py-3 text-sm text-green-400 border-r border-neutral-700'>
+                <td className='px-4 py-3 text-sm text-emerald-400 border-r'>
                   No
                 </td>
-                <td className='px-4 py-3 text-sm text-neutral-400'>
+                <td className='px-4 py-3 text-sm text-muted-foreground'>
                   Engineering
                 </td>
               </tr>
@@ -172,8 +172,8 @@ export function TeamImportForm() {
           </table>
         </div>
         <div className='card mb-4'>
-          <h3 className='font-semibold text-blue-300 mb-2'>Important Notes:</h3>
-          <ul className='text-blue-200 text-sm space-y-1'>
+          <h3 className='font-semibold text-foreground mb-2'>Important Notes:</h3>
+          <ul className='text-muted-foreground text-sm space-y-1'>
             <li>• Team names must be unique within your organization</li>
             <li>
               • If a team name is similar to an existing team, the import will
@@ -211,12 +211,12 @@ export function TeamImportForm() {
               className='absolute inset-0 w-full h-full opacity-0 cursor-pointer'
               required
             />
-            <div className='input flex items-center justify-between cursor-pointer hover:bg-neutral-800 transition-colors'>
-              <span className='text-neutral-400'>
+            <div className='input flex items-center justify-between cursor-pointer hover:bg-accent transition-colors'>
+              <span className='text-muted-foreground'>
                 {file ? file.name : 'Choose CSV file...'}
               </span>
               <svg
-                className='w-5 h-5 text-neutral-400'
+                className='w-5 h-5 text-muted-foreground'
                 fill='none'
                 stroke='currentColor'
                 viewBox='0 0 24 24'
@@ -231,7 +231,7 @@ export function TeamImportForm() {
             </div>
           </div>
           {file && (
-            <p className='mt-2 text-sm text-neutral-400'>
+            <p className='mt-2 text-sm text-muted-foreground'>
               Selected file: {file.name} ({(file.size / 1024).toFixed(1)} KB)
             </p>
           )}
@@ -293,7 +293,7 @@ export function TeamImportForm() {
                   </svg>
                 ) : (
                   <svg
-                    className='h-5 w-5 text-red-400'
+                    className='h-5 w-5 text-destructive'
                     xmlns='http://www.w3.org/2000/svg'
                     viewBox='0 0 20 20'
                     fill='currentColor'
@@ -341,42 +341,42 @@ export function TeamImportForm() {
                 </Button>
               </div>
               <div className='overflow-x-auto'>
-                <table className='min-w-full divide-y divide-neutral-700'>
-                  <thead className='bg-neutral-800'>
+                <table className='min-w-full divide-y'>
+                  <thead className='bg-accent/30'>
                     <tr>
-                      <th className='px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider'>
+                      <th className='px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                         Row
                       </th>
-                      <th className='px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider'>
+                      <th className='px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                         Name
                       </th>
-                      <th className='px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider'>
+                      <th className='px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                         Description
                       </th>
-                      <th className='px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider'>
+                      <th className='px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                         Parent
                       </th>
-                      <th className='px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider'>
+                      <th className='px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                         Errors
                       </th>
                     </tr>
                   </thead>
-                  <tbody className='bg-neutral-900 divide-y divide-neutral-700'>
+                  <tbody className='divide-y'>
                     {result.errorRows.map((row, index) => (
                       <tr key={index}>
-                        <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-200'>
+                        <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground'>
                           {row.rowNumber}
                         </td>
-                        <td className='px-6 py-4 whitespace-nowrap text-sm text-neutral-200'>
+                        <td className='px-6 py-4 whitespace-nowrap text-sm text-foreground'>
                           {row.data.name}
                         </td>
-                        <td className='px-6 py-4 whitespace-nowrap text-sm text-neutral-200'>
+                        <td className='px-6 py-4 whitespace-nowrap text-sm text-foreground'>
                           {row.data.description}
                         </td>
-                        <td className='px-6 py-4 whitespace-nowrap text-sm text-neutral-200'>
+                        <td className='px-6 py-4 whitespace-nowrap text-sm text-foreground'>
                           {row.data.parent}
                         </td>
-                        <td className='px-6 py-4 text-sm text-red-400'>
+                        <td className='px-6 py-4 text-sm text-destructive'>
                           {row.errors.join(', ')}
                         </td>
                       </tr>

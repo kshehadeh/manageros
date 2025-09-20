@@ -84,13 +84,13 @@ export default function PendingInvitations({
     <div className='card'>
       <div className='mb-4'>
         <h2 className='text-lg font-semibold mb-2'>Pending Invitations</h2>
-        <p className='text-neutral-400 text-sm'>
+        <p className='text-muted-foreground text-sm'>
           You have been invited to join the following organizations:
         </p>
       </div>
 
       {error && (
-        <div className='mb-4 p-3 bg-red-900/20 border border-red-500/30 rounded text-red-300 text-sm'>
+        <div className='mb-4 p-3 bg-destructive/20 border border-destructive rounded text-destructive text-sm'>
           {error}
         </div>
       )}
@@ -99,12 +99,12 @@ export default function PendingInvitations({
         {invitations.map(invitation => (
           <div
             key={invitation.id}
-            className='p-4 border border-neutral-700 rounded-lg bg-neutral-800/50'
+            className='p-4 border rounded-lg bg-card'
           >
             <div className='flex items-start justify-between'>
               <div className='flex-1'>
                 <div className='flex items-center gap-2 mb-2'>
-                  <h3 className='font-medium text-neutral-100'>
+                  <h3 className='font-medium text-foreground'>
                     {invitation.organization.name}
                   </h3>
                   {isExpiringSoon(invitation.expiresAt) && (
@@ -115,15 +115,15 @@ export default function PendingInvitations({
                 </div>
 
                 {invitation.organization.description && (
-                  <p className='text-neutral-400 text-sm mb-2'>
+                  <p className='text-muted-foreground text-sm mb-2'>
                     {invitation.organization.description}
                   </p>
                 )}
 
-                <div className='text-xs text-neutral-500 space-y-1'>
+                <div className='text-xs text-muted-foreground space-y-1'>
                   <div>
                     Invited by{' '}
-                    <span className='text-neutral-300'>
+                    <span className='text-foreground'>
                       {invitation.invitedBy.name}
                     </span>{' '}
                     ({invitation.invitedBy.email})

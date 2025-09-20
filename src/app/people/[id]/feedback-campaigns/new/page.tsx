@@ -31,11 +31,6 @@ export default async function NewFeedbackCampaignPage({
       id,
       organizationId: session.user.organizationId,
     },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-    },
   })
 
   if (!person) {
