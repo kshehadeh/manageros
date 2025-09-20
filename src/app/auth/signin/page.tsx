@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { signIn, getSession } from 'next-auth/react'
+import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -39,11 +39,10 @@ export default function SignInPage() {
       if (result?.error) {
         setError('Invalid email or password')
       } else {
-        // Get session to check organization
-        const session = await getSession()
-        if (session) {
-          router.push('/')
-        }
+        // Refresh server-side data to ensure session is synchronized
+        // This prevents hydration mismatch between client and server
+        router.refresh()
+        router.push('/')
       }
     } catch (error) {
       console.error('Error signing in:', error)

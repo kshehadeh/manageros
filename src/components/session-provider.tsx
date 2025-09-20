@@ -7,5 +7,14 @@ export default function AuthSessionProvider({
 }: {
   children: React.ReactNode
 }) {
-  return <SessionProvider>{children}</SessionProvider>
+  return (
+    <SessionProvider
+      // Force session to be refetched on every request to ensure consistency
+      refetchInterval={0}
+      refetchOnWindowFocus={true}
+      refetchWhenOffline={false}
+    >
+      {children}
+    </SessionProvider>
+  )
 }
