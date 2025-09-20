@@ -50,12 +50,12 @@ export default function Sidebar() {
 
   if (status === 'loading') {
     return (
-      <div className='hidden lg:flex h-screen w-64 flex-col bg-neutral-900 border-r border-neutral-800'>
+      <div className='hidden lg:flex h-screen w-64 flex-col bg-card border-r'>
         <div className='flex h-16 items-center px-6'>
-          <h1 className='text-xl font-semibold text-neutral-100'>ManagerOS</h1>
+          <h1 className='text-xl font-semibold text-foreground'>ManagerOS</h1>
         </div>
         <div className='flex-1 px-6 py-4'>
-          <div className='text-sm text-neutral-400'>Loading...</div>
+          <div className='text-sm text-muted-foreground'>Loading...</div>
         </div>
       </div>
     )
@@ -63,9 +63,9 @@ export default function Sidebar() {
 
   if (!session) {
     return (
-      <div className='hidden lg:flex h-screen w-64 flex-col bg-neutral-900 border-r border-neutral-800'>
+      <div className='hidden lg:flex h-screen w-64 flex-col bg-card border-r'>
         <div className='flex h-16 items-center px-6'>
-          <h1 className='text-xl font-semibold text-neutral-100'>ManagerOS</h1>
+          <h1 className='text-xl font-semibold text-foreground'>ManagerOS</h1>
         </div>
         <div className='flex-1 px-6 py-4'>
           <nav className='space-y-2'>
@@ -90,7 +90,7 @@ export default function Sidebar() {
       {/* Mobile menu button */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className='lg:hidden fixed top-4 left-4 z-50 p-2 bg-neutral-800 border border-neutral-700 rounded-lg text-neutral-100 hover:bg-neutral-700 transition-colors'
+        className='lg:hidden fixed top-4 left-4 z-50 p-2 bg-secondary border rounded-lg text-secondary-foreground hover:bg-secondary/80 transition-colors'
       >
         {isMobileMenuOpen ? (
           <X className='h-5 w-5' />
@@ -109,26 +109,26 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <div
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-neutral-900 border-r border-neutral-800 transform transition-transform duration-300 ease-in-out sidebar-scroll overflow-y-auto ${
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-card border-r transform transition-transform duration-300 ease-in-out sidebar-scroll overflow-y-auto ${
           isMobileMenuOpen
             ? 'translate-x-0'
             : '-translate-x-full lg:translate-x-0'
         }`}
       >
         {/* Header */}
-        <div className='flex h-16 items-center px-6 border-b border-neutral-800'>
-          <h1 className='text-xl font-semibold text-neutral-100'>ManagerOS</h1>
+        <div className='flex h-16 items-center px-6 border-b'>
+          <h1 className='text-xl font-semibold text-foreground'>ManagerOS</h1>
         </div>
 
         {/* User Info */}
-        <div className='px-6 py-4 border-b border-neutral-800'>
-          <div className='text-sm text-neutral-100 font-medium'>
+        <div className='px-6 py-4 border-b'>
+          <div className='text-sm text-foreground font-medium'>
             {session.user.name}
           </div>
-          <div className='text-xs text-neutral-400'>
+          <div className='text-xs text-muted-foreground'>
             {session.user.organizationName}
           </div>
-          <div className='text-xs text-neutral-500'>{session.user.role}</div>
+          <div className='text-xs text-muted-foreground'>{session.user.role}</div>
         </div>
 
         {/* Navigation */}
@@ -142,8 +142,8 @@ export default function Sidebar() {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
                   isActive
-                    ? 'bg-neutral-800 text-neutral-100 border border-neutral-700'
-                    : 'text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800/50'
+                    ? 'bg-secondary text-secondary-foreground border'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent hover:text-accent-foreground'
                 }`}
               >
                 <item.icon className='h-5 w-5' />
@@ -154,11 +154,11 @@ export default function Sidebar() {
         </nav>
 
         {/* Settings and Sign Out */}
-        <div className='px-3 py-4 border-t border-neutral-800 space-y-1'>
+        <div className='px-3 py-4 border-t space-y-1'>
           <Link
             href='/organization/settings'
             onClick={() => setIsMobileMenuOpen(false)}
-            className='flex items-center gap-3 px-3 py-2 text-sm text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800/50 rounded-lg transition-colors'
+            className='flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent hover:text-accent-foreground rounded-lg transition-colors'
           >
             <Settings className='h-5 w-5' />
             Org Settings
