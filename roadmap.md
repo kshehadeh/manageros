@@ -206,6 +206,7 @@
 - Use icon-only buttons (`size='icon'`) with Lucide icons for view/edit/delete actions.
 - Remove legacy custom `IconButton`; replaced by shadcn Button variants.
 - **Authentication Screens Dark Theme** (January 19, 2025) - Updated sign-in and sign-up screens with consistent dark theme and shadcn components
+- **Token-based Theming** (September 20, 2025) - Added Tailwind token theming with `next-themes` (light/dark), theme toggle, and docs `docs/theming.md`. Enables adding future themes without component edits.
 
 ### Infrastructure
 
@@ -216,5 +217,5 @@
 
 ---
 
-_Last Updated: January 2025_
-_Next Review: February 2025_
+_Last Updated: September 2025_
+_Next Review: October 2025_
