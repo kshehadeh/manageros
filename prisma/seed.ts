@@ -215,6 +215,47 @@ async function main() {
     },
   })
 
+  // Create default feedback template
+  const existingTemplate = await prisma.feedbackTemplate.findFirst({
+    where: { isDefault: true },
+  })
+
+  if (!existingTemplate) {
+    const template = await prisma.feedbackTemplate.create({
+      data: {
+        name: 'Performance Review Template',
+        description:
+          'Standard performance review questions for employee feedback',
+        isDefault: true,
+        questions: {
+          create: [
+            {
+              question: 'What did the employee do well?',
+              type: 'text',
+              required: true,
+              sortOrder: 0,
+            },
+            {
+              question: 'What are some areas of improvement?',
+              type: 'text',
+              required: true,
+              sortOrder: 1,
+            },
+            {
+              question: 'Rate performance from 1-5',
+              type: 'rating',
+              required: true,
+              sortOrder: 2,
+            },
+          ],
+        },
+      },
+    })
+    console.log('Created default feedback template:', template.name)
+  } else {
+    console.log('Default feedback template already exists')
+  }
+
   console.log('Seed completed with multi-tenant data')
   console.log('Organizations created:', org1.name, org2.name)
   console.log('Users created:', user1.email, user2.email, user3.email)

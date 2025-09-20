@@ -1,0 +1,8 @@
+# Ignore all backup files
+*.sql
+*.sql.gz
+*.dump
+*.backup
+
+# Keep directory structure
+!.gitignore

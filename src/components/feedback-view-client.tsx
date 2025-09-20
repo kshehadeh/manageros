@@ -322,7 +322,7 @@ export default function FeedbackViewClient({
             Feedback ({feedback.length})
           </h2>
           {(isPending || isLoading) && (
-                  <div className='text-sm text-neutral-400'>
+            <div className='text-sm text-neutral-400'>
               {isLoading ? 'Loading...' : 'Updating...'}
             </div>
           )}
@@ -371,8 +371,11 @@ export default function FeedbackViewClient({
                   </div>
 
                   <div className='flex gap-2'>
-                    <Button asChild variant='outline' size='icon'>
-                      <Link href={`/feedback/${item.id}`} aria-label='View feedback'>
+                    <Button asChild variant='outline' size='sm'>
+                      <Link
+                        href={`/feedback/${item.id}`}
+                        aria-label='View feedback 2'
+                      >
                         <Eye className='w-4 h-4' />
                       </Link>
                     </Button>

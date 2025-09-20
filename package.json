@@ -7,7 +7,10 @@
     "dev": "bun run next dev",
     "build": "bun run next build",
     "start": "bun run next start",
-    "test": "bun test",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "format": "prettier --write .",
@@ -15,8 +18,9 @@
     "lint-staged": "lint-staged",
     "prisma:generate": "bunx prisma generate",
     "prisma:push": "bunx prisma db push",
-    "prisma:seed": "bunx tsx prisma/seed.ts",
-    "db:init": "tsx scripts/init-database.ts",
+    "prisma:seed": "bun prisma/seed.ts",
+    "db:init": "bun scripts/init-database.ts",
+    "db:backup": "bun scripts/backup-database.ts --verbose",
     "postinstall": "bunx prisma generate",
     "prepare": "husky"
   },
@@ -50,6 +54,7 @@
     "clsx": "^2.1.1",
     "crypto-js": "^4.2.0",
     "dagre": "^0.8.5",
+    "date-fns": "^4.1.0",
     "lucide-react": "^0.544.0",
     "next": "^15.5.3",
     "next-auth": "^4.24.11",
@@ -70,6 +75,7 @@
     "@types/node": "^24.3.3",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
+    "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.20",
     "eslint": "9.35.0",
     "eslint-config-next": "15.5.3",
@@ -82,6 +88,7 @@
     "prisma": "^5.19.1",
     "tailwindcss": "^3.4.10",
     "tsx": "^4.19.1",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.2",
+    "vitest": "^3.2.4"
   }
 }

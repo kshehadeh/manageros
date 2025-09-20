@@ -106,10 +106,10 @@ export function FeedbackList({
                   {new Date(item.createdAt).toLocaleDateString()}
                 </span>
                 <div className='flex gap-1'>
-                  <Button asChild variant='outline' size='icon'>
+                  <Button asChild variant='outline' size='sm'>
                     <Link
                       href={`/feedback/${item.id}`}
-                      aria-label='View feedback'
+                      aria-label='View feedback 2'
                     >
                       <Eye className='w-4 h-4' />
                     </Link>

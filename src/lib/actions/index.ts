@@ -65,6 +65,28 @@ export {
   getAllFeedback,
 } from './feedback'
 
+// Feedback Campaign Actions
+export {
+  createFeedbackCampaign,
+  updateFeedbackCampaign,
+  deleteFeedbackCampaign,
+  getFeedbackCampaignsForPerson,
+  getFeedbackCampaignById,
+  submitFeedbackResponse,
+  updateCampaignStatus,
+} from './feedback-campaign'
+
+// Feedback Template Actions
+export {
+  createFeedbackTemplate,
+  getFeedbackTemplates,
+  getFeedbackTemplateById,
+  getDefaultFeedbackTemplate,
+  updateFeedbackTemplate,
+  deleteFeedbackTemplate,
+  setDefaultTemplate,
+} from './feedback-template'
+
 // Task Actions
 export { createTask, updateTask, deleteTask, getTasks, getTask } from './task'
 

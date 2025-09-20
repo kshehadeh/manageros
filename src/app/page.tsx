@@ -7,6 +7,7 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { getPendingInvitationsForUser } from '@/lib/actions'
 import PendingInvitations from '@/components/pending-invitations'
+import { ExpandableSection } from '@/components/expandable-section'
 
 export default async function Home() {
   const session = await getServerSession(authOptions)
@@ -46,12 +47,66 @@ export default async function Home() {
     )
   }
 
+  // First, get all people that the current user manages (directly or indirectly)
+  const getAllManagedPeople = async (userId: string): Promise<string[]> => {
+    const managedPersonIds: string[] = []
+
+    // Get the current user's person record
+    const currentUserPerson = await prisma.person.findFirst({
+      where: { user: { id: userId } },
+      select: { id: true },
+    })
+
+    if (!currentUserPerson) return managedPersonIds
+
+    // Recursive function to find all reports (direct and indirect)
+    const findReports = async (managerId: string) => {
+      const directReports = await prisma.person.findMany({
+        where: { managerId },
+        select: { id: true },
+      })
+
+      for (const report of directReports) {
+        managedPersonIds.push(report.id)
+        // Recursively find reports of this report
+        await findReports(report.id)
+      }
+    }
+
+    await findReports(currentUserPerson.id)
+    return managedPersonIds
+  }
+
+  const managedPersonIds = await getAllManagedPeople(session.user.id)
+
   const [teams, directReports, openInitiatives, recentOneOnes] =
     await Promise.all([
-      // Get all teams (including child teams)
+      // Get teams where the current user is associated (member or manages team members)
       prisma.team.findMany({
         where: {
           organizationId: session.user.organizationId!,
+          OR: [
+            // User is a member of the team
+            {
+              people: {
+                some: {
+                  user: {
+                    id: session.user.id,
+                  },
+                },
+              },
+            },
+            // User manages someone who is a member of the team (directly or indirectly)
+            {
+              people: {
+                some: {
+                  id: {
+                    in: managedPersonIds,
+                  },
+                },
+              },
+            },
+          ],
         },
         orderBy: { name: 'asc' },
         include: {
@@ -112,7 +167,6 @@ export default async function Home() {
           ],
         },
         orderBy: { scheduledAt: 'desc' },
-        take: 5,
         include: {
           manager: {
             include: {
@@ -132,168 +186,132 @@ export default async function Home() {
     <div className='space-y-6'>
       {/* Top row with Teams, Direct Reports, and Recent 1:1s */}
       <div className='grid gap-6 md:grid-cols-3'>
-        <section className='card'>
-          <div className='flex items-center justify-between mb-3'>
-            <h2 className='font-semibold'>Teams</h2>
-            <Link href='/teams' className='text-sm underline'>
-              View all
-            </Link>
-          </div>
-          <div className='space-y-3'>
-            {teams.map(team => (
-              <div key={team.id} className='flex items-center justify-between'>
-                <div>
-                  <Link
-                    href={`/teams/${team.id}`}
-                    className='font-medium hover:text-blue-400'
-                  >
-                    {team.name}
-                  </Link>
-                  <div className='text-neutral-400 text-sm'>
-                    {team.description ?? ''}
-                  </div>
-                  <div className='text-xs text-neutral-500 mt-1'>
-                    {team.people.length} member
-                    {team.people.length !== 1 ? 's' : ''} •{' '}
-                    {team.initiatives.length} initiative
-                    {team.initiatives.length !== 1 ? 's' : ''}
-                    {team.parent && (
-                      <span>
-                        {' '}
-                        • Parent:{' '}
-                        <Link
-                          href={`/teams/${team.parent.id}`}
-                          className='hover:text-blue-400'
-                        >
-                          {team.parent.name}
-                        </Link>
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-            {teams.length === 0 && (
-              <div className='text-neutral-400 text-sm'>No teams yet.</div>
-            )}
-          </div>
-        </section>
-
-        <section className='card'>
-          <div className='flex items-center justify-between mb-3'>
-            <h2 className='font-semibold'>Direct Reports</h2>
-            <Link href='/direct-reports' className='text-sm underline'>
-              View all
-            </Link>
-          </div>
-          <div className='space-y-3'>
-            {directReports.map(person => (
-              <div
-                key={person.id}
-                className='flex items-center justify-between'
-              >
-                <div>
-                  <Link
-                    href={`/people/${person.id}`}
-                    className='font-medium hover:text-blue-400'
-                  >
-                    {person.name}
-                  </Link>
-                  <div className='text-neutral-400 text-sm'>
-                    {person.role ?? ''}
-                  </div>
-                  <div className='text-xs text-neutral-500 mt-1'>
-                    {person.team?.name && (
-                      <span>
-                        Team:{' '}
-                        <Link
-                          href={`/teams/${person.team.id}`}
-                          className='hover:text-blue-400'
-                        >
-                          {person.team.name}
-                        </Link>
-                      </span>
-                    )}
-                    {person.reports.length > 0 && (
-                      <span>
-                        {' '}
-                        • {person.reports.length} report
-                        {person.reports.length !== 1 ? 's' : ''}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <span
-                  className={`badge ${
-                    person.status === 'active'
-                      ? 'rag-green'
-                      : person.status === 'inactive'
-                        ? 'rag-red'
-                        : 'rag-amber'
-                  }`}
+        <ExpandableSection title='Related Teams' viewAllHref='/teams'>
+          {teams.map(team => (
+            <div key={team.id} className='flex items-center justify-between'>
+              <div>
+                <Link
+                  href={`/teams/${team.id}`}
+                  className='font-medium hover:text-blue-400'
                 >
-                  {person.status.replace('_', ' ')}
-                </span>
+                  {team.name}
+                </Link>
+                <div className='text-neutral-400 text-sm'>
+                  {team.description ?? ''}
+                </div>
+                <div className='text-xs text-neutral-500 mt-1'>
+                  {team.people.length} member
+                  {team.people.length !== 1 ? 's' : ''} •{' '}
+                  {team.initiatives.length} initiative
+                  {team.initiatives.length !== 1 ? 's' : ''}
+                  {team.parent && (
+                    <span>
+                      {' '}
+                      • Parent:{' '}
+                      <Link
+                        href={`/teams/${team.parent.id}`}
+                        className='hover:text-blue-400'
+                      >
+                        {team.parent.name}
+                      </Link>
+                    </span>
+                  )}
+                </div>
               </div>
-            ))}
-            {directReports.length === 0 && (
-              <div className='text-neutral-400 text-sm'>No direct reports.</div>
-            )}
-          </div>
-        </section>
+            </div>
+          ))}
+        </ExpandableSection>
 
-        <section className='card'>
-          <div className='flex items-center justify-between mb-3'>
-            <h2 className='font-semibold'>Recent 1:1s</h2>
-            <Link href='/oneonones' className='text-sm underline'>
-              View all
-            </Link>
-          </div>
-          <div className='space-y-3'>
-            {recentOneOnes.map(oneOnOne => (
-              <Link
-                key={oneOnOne.id}
-                href={`/oneonones/${oneOnOne.id}`}
-                className='block card hover:bg-neutral-800/60'
+        <ExpandableSection title='Direct Reports' viewAllHref='/direct-reports'>
+          {directReports.map(person => (
+            <div key={person.id} className='flex items-center justify-between'>
+              <div>
+                <Link
+                  href={`/people/${person.id}`}
+                  className='font-medium hover:text-blue-400'
+                >
+                  {person.name}
+                </Link>
+                <div className='text-neutral-400 text-sm'>
+                  {person.role ?? ''}
+                </div>
+                <div className='text-xs text-neutral-500 mt-1'>
+                  {person.team?.name && (
+                    <span>
+                      Team:{' '}
+                      <Link
+                        href={`/teams/${person.team.id}`}
+                        className='hover:text-blue-400'
+                      >
+                        {person.team.name}
+                      </Link>
+                    </span>
+                  )}
+                  {person.reports.length > 0 && (
+                    <span>
+                      {' '}
+                      • {person.reports.length} report
+                      {person.reports.length !== 1 ? 's' : ''}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <span
+                className={`badge ${
+                  person.status === 'active'
+                    ? 'rag-green'
+                    : person.status === 'inactive'
+                      ? 'rag-red'
+                      : 'rag-amber'
+                }`}
               >
-                <div className='flex items-center justify-between'>
-                  <div>
-                    <div className='font-medium'>
-                      {oneOnOne.manager?.user?.id === session.user.id ? (
-                        <span>
-                          With{' '}
-                          <span className='hover:text-blue-400'>
-                            {oneOnOne.report.name}
-                          </span>
+                {person.status.replace('_', ' ')}
+              </span>
+            </div>
+          ))}
+        </ExpandableSection>
+
+        <ExpandableSection title='Recent 1:1s' viewAllHref='/oneonones'>
+          {recentOneOnes.map(oneOnOne => (
+            <Link
+              key={oneOnOne.id}
+              href={`/oneonones/${oneOnOne.id}`}
+              className='block card hover:bg-neutral-800/60'
+            >
+              <div className='flex items-center justify-between'>
+                <div>
+                  <div className='font-medium'>
+                    {oneOnOne.manager?.user?.id === session.user.id ? (
+                      <span>
+                        With{' '}
+                        <span className='hover:text-blue-400'>
+                          {oneOnOne.report.name}
                         </span>
-                      ) : (
-                        <span>
-                          With{' '}
-                          <span className='hover:text-blue-400'>
-                            {oneOnOne.manager.name}
-                          </span>
+                      </span>
+                    ) : (
+                      <span>
+                        With{' '}
+                        <span className='hover:text-blue-400'>
+                          {oneOnOne.manager.name}
                         </span>
-                      )}
-                    </div>
-                    <div className='text-xs text-neutral-500 mt-1'>
-                      {oneOnOne.scheduledAt
-                        ? new Date(oneOnOne.scheduledAt).toLocaleDateString()
-                        : 'TBD'}
-                    </div>
+                      </span>
+                    )}
                   </div>
-                  <div className='text-xs text-neutral-500'>
-                    {oneOnOne.manager?.user?.id === session.user.id
-                      ? 'Manager'
-                      : 'Report'}
+                  <div className='text-xs text-neutral-500 mt-1'>
+                    {oneOnOne.scheduledAt
+                      ? new Date(oneOnOne.scheduledAt).toLocaleDateString()
+                      : 'TBD'}
                   </div>
                 </div>
-              </Link>
-            ))}
-            {recentOneOnes.length === 0 && (
-              <div className='text-neutral-400 text-sm'>No recent 1:1s.</div>
-            )}
-          </div>
-        </section>
+                <div className='text-xs text-neutral-500'>
+                  {oneOnOne.manager?.user?.id === session.user.id
+                    ? 'Manager'
+                    : 'Report'}
+                </div>
+              </div>
+            </Link>
+          ))}
+        </ExpandableSection>
       </div>
 
       {/* Bottom row with Open Initiatives spanning full width */}

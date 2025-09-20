@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { HierarchicalTeamView } from '@/components/hierarchical-team-view'
 import { getTeamHierarchyOptimized } from '@/lib/actions'
 import { Button } from '@/components/ui/button'
-import { Upload, Plus } from 'lucide-react'
+import { Upload, Plus, Workflow } from 'lucide-react'
 
 export default async function TeamsPage() {
   const session = await getServerSession(authOptions)
@@ -30,6 +30,12 @@ export default async function TeamsPage() {
           </p>
         </div>
         <div className='flex gap-2'>
+          <Button asChild variant='outline'>
+            <Link href='/teams/chart'>
+              <Workflow className='w-4 h-4' />
+              Chart
+            </Link>
+          </Button>
           <Button asChild variant='outline'>
             <Link href='/teams/import'>
               <Upload className='w-4 h-4' />

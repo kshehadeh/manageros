@@ -19,22 +19,24 @@ import ReactFlow, {
 } from 'reactflow'
 import dagre from 'dagre'
 import 'reactflow/dist/style.css'
-import { Person } from '@/types/person'
+import { TeamWithHierarchy } from '@/types/team'
+import { Users, Target, Building2 } from 'lucide-react'
+import Link from 'next/link'
 
-interface OrgChartReactFlowProps {
-  people: Person[]
+interface TeamsFlowChartProps {
+  teams: TeamWithHierarchy[]
 }
 
-// Custom Person Node Component
-function PersonNode({ data }: { data: Person }) {
+// Custom Team Node Component
+function TeamNode({ data }: { data: TeamWithHierarchy }) {
   const router = useRouter()
 
   const handleClick = useCallback(() => {
-    router.push(`/people/${data.id}`)
+    router.push(`/teams/${data.id}`)
   }, [data.id, router])
 
   return (
-    <div className='bg-neutral-900/60 border-2 border-neutral-600 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 min-w-[200px]'>
+    <div className='bg-neutral-900/60 border-2 border-neutral-600 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 min-w-[250px]'>
       {/* Top handle for incoming connections */}
       <Handle
         type='target'
@@ -51,49 +53,46 @@ function PersonNode({ data }: { data: Person }) {
 
       {/* Node content */}
       <div
-        className='p-3 cursor-pointer hover:bg-neutral-800 transition-colors duration-200'
+        className='p-4 cursor-pointer hover:bg-neutral-800 transition-colors duration-200'
         onClick={handleClick}
       >
-        {/* Header with name and reports count */}
-        <div className='flex items-center justify-between mb-2'>
-          <h3 className='font-semibold text-sm text-neutral-100 truncate'>
-            {data.name}
-          </h3>
-          {data.reports.length > 0 && (
+        {/* Header with team name and children count */}
+        <div className='flex items-center justify-between mb-3'>
+          <div className='flex items-center gap-2'>
+            <Building2 className='w-4 h-4 text-blue-400' />
+            <h3 className='font-semibold text-sm text-neutral-100 truncate'>
+              {data.name}
+            </h3>
+          </div>
+          {data.children.length > 0 && (
             <span className='bg-blue-900 text-blue-300 text-xs px-2 py-1 rounded-full font-medium'>
-              {data.reports.length}
+              {data.children.length}
             </span>
           )}
         </div>
 
-        {/* Role */}
-        {data.role && (
-          <p className='text-xs text-neutral-400 mb-1 truncate'>{data.role}</p>
-        )}
-
-        {/* Team */}
-        {data.team && (
-          <p className='text-xs text-neutral-500 mb-1 truncate'>
-            {data.team.name}
+        {/* Description */}
+        {data.description && (
+          <p className='text-xs text-neutral-400 mb-3 line-clamp-2'>
+            {data.description}
           </p>
         )}
 
-        {/* Email */}
-        {data.email && (
-          <p className='text-xs text-neutral-600 truncate'>{data.email}</p>
-        )}
-
-        {/* Status indicator */}
-        <div className='flex items-center justify-end mt-2'>
-          <div
-            className={`w-2 h-2 rounded-full ${
-              data.status === 'active'
-                ? 'bg-green-500'
-                : data.status === 'inactive'
-                  ? 'bg-red-500'
-                  : 'bg-yellow-500'
-            }`}
-          />
+        {/* Stats */}
+        <div className='space-y-2'>
+          <div className='flex items-center gap-2 text-xs text-neutral-500'>
+            <Users className='w-3 h-3' />
+            <span>
+              {data.people.length} member{data.people.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+          <div className='flex items-center gap-2 text-xs text-neutral-500'>
+            <Target className='w-3 h-3' />
+            <span>
+              {data.initiatives.length} initiative
+              {data.initiatives.length !== 1 ? 's' : ''}
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -102,7 +101,7 @@ function PersonNode({ data }: { data: Person }) {
 
 // Define custom node types
 const nodeTypes: NodeTypes = {
-  person: PersonNode,
+  team: TeamNode,
 }
 
 // Dagre layout configuration
@@ -115,11 +114,11 @@ const getLayoutedElements = (
   dagreGraph.setDefaultEdgeLabel(() => ({}))
   dagreGraph.setGraph({
     rankdir: direction,
-    ranksep: 180, // Increased spacing between levels for better readability
-    nodesep: 80, // Increased spacing between nodes at the same level
-    edgesep: 30, // Increased spacing between edges
-    marginx: 60,
-    marginy: 60,
+    ranksep: 200, // Increased spacing between levels for better readability
+    nodesep: 100, // Increased spacing between nodes at the same level
+    edgesep: 40, // Increased spacing between edges
+    marginx: 80,
+    marginy: 80,
     // Additional options to minimize edge crossings
     align: 'UL', // Align nodes to upper left
     acyclicer: 'greedy', // Use greedy algorithm for cycle removal
@@ -127,8 +126,8 @@ const getLayoutedElements = (
 
   nodes.forEach(node => {
     dagreGraph.setNode(node.id, {
-      width: 220,
-      height: 120,
+      width: 270,
+      height: 160,
     })
   })
 
@@ -145,8 +144,8 @@ const getLayoutedElements = (
     // We are shifting the dagre node position (anchor=center center) to the top left
     // so it matches the React Flow node anchor point (top left).
     node.position = {
-      x: nodeWithPosition.x - 110, // Half of node width
-      y: nodeWithPosition.y - 60, // Half of node height
+      x: nodeWithPosition.x - 135, // Half of node width
+      y: nodeWithPosition.y - 80, // Half of node height
     }
 
     return node
@@ -155,47 +154,65 @@ const getLayoutedElements = (
   return { nodes, edges }
 }
 
-export function OrgChartReactFlow({ people }: OrgChartReactFlowProps) {
-  // Convert people data to React Flow nodes and edges
+export function TeamsFlowChart({ teams }: TeamsFlowChartProps) {
+  // Convert teams data to React Flow nodes and edges
   const { nodes, edges, containerWidth, containerHeight, topLevelPosition } =
     useMemo(() => {
       const nodeMap = new Map<string, Node>()
       const edgeList: Edge[] = []
 
-      // Create nodes for all people
-      people.forEach(person => {
-        nodeMap.set(person.id, {
-          id: person.id,
-          type: 'person',
-          position: { x: 0, y: 0 }, // Will be set by Dagre
-          data: person,
-        })
-      })
+      // Recursive function to create nodes for all teams
+      const createNodes = (teamList: TeamWithHierarchy[]) => {
+        teamList.forEach(team => {
+          nodeMap.set(team.id, {
+            id: team.id,
+            type: 'team',
+            position: { x: 0, y: 0 }, // Will be set by Dagre
+            data: team,
+          })
 
-      // Create edges
-      people.forEach(person => {
-        if (person.manager) {
-          const managerNode = nodeMap.get(person.manager.id)
-          if (managerNode) {
-            edgeList.push({
-              id: `${person.manager.id}-${person.id}`,
-              source: person.manager.id,
-              target: person.id,
-              type: 'smoothstep',
-              style: {
-                stroke: 'currentColor',
-                strokeWidth: 2,
-              },
-              className: 'text-neutral-600',
-              animated: false,
-              // Add some curvature to avoid overlaps
-              pathOptions: {
-                borderRadius: 10,
-              },
-            })
+          // Recursively create nodes for children
+          if (team.children.length > 0) {
+            createNodes(team.children)
           }
-        }
-      })
+        })
+      }
+
+      // Recursive function to create edges
+      const createEdges = (teamList: TeamWithHierarchy[]) => {
+        teamList.forEach(team => {
+          if (team.parentId) {
+            const parentNode = nodeMap.get(team.parentId)
+            if (parentNode) {
+              edgeList.push({
+                id: `${team.parentId}-${team.id}`,
+                source: team.parentId,
+                target: team.id,
+                type: 'smoothstep',
+                style: {
+                  stroke: 'currentColor',
+                  strokeWidth: 2,
+                },
+                className: 'text-neutral-600',
+                animated: false,
+                // Add some curvature to avoid overlaps
+                pathOptions: {
+                  borderRadius: 10,
+                },
+              })
+            }
+          }
+
+          // Recursively create edges for children
+          if (team.children.length > 0) {
+            createEdges(team.children)
+          }
+        })
+      }
+
+      // Create all nodes and edges
+      createNodes(teams)
+      createEdges(teams)
 
       // Apply Dagre layout
       const initialNodes = Array.from(nodeMap.values())
@@ -204,10 +221,10 @@ export function OrgChartReactFlow({ people }: OrgChartReactFlowProps) {
         edgeList
       )
 
-      // Find the top-level node (root of hierarchy)
-      const topLevelNode = layoutedNodes.find(node => {
-        const person = node.data as Person
-        return !person.manager // No manager means this is the top-level node
+      // Find the top-level team (root of hierarchy)
+      const topLevelTeam = layoutedNodes.find(node => {
+        const team = node.data as TeamWithHierarchy
+        return !team.parentId // No parent means this is the top-level team
       })
 
       // Calculate container dimensions based on the layout
@@ -217,18 +234,18 @@ export function OrgChartReactFlow({ people }: OrgChartReactFlowProps) {
       const minY = Math.min(...layoutedNodes.map(node => node.position.y))
 
       // Calculate the actual chart dimensions
-      const chartWidth = maxX - minX + 220 // Add node width
-      const chartHeight = maxY - minY + 120 // Add node height
+      const chartWidth = maxX - minX + 270 // Add node width
+      const chartHeight = maxY - minY + 160 // Add node height
 
       // Set container dimensions to fit the chart with some padding
       const calculatedWidth = Math.max(800, chartWidth + 100)
-      const calculatedHeight = Math.max(400, chartHeight + 100)
+      const calculatedHeight = Math.max(500, chartHeight + 100)
 
-      // Calculate viewport to center on top-level node
-      const topLevelPosition = topLevelNode
+      // Calculate viewport to center on top-level team
+      const topLevelPosition = topLevelTeam
         ? {
-            x: topLevelNode.position.x + 110, // Center horizontally on node
-            y: topLevelNode.position.y + 60, // Center vertically on node
+            x: topLevelTeam.position.x + 135, // Center horizontally on node
+            y: topLevelTeam.position.y + 80, // Center vertically on node
           }
         : { x: 0, y: 0 }
 
@@ -239,7 +256,7 @@ export function OrgChartReactFlow({ people }: OrgChartReactFlowProps) {
         containerHeight: calculatedHeight,
         topLevelPosition,
       }
-    }, [people])
+    }, [teams])
 
   const [reactFlowNodes, setNodes, onNodesChange] = useNodesState(nodes)
   const [reactFlowEdges, setEdges, onEdgesChange] = useEdgesState(edges)
@@ -249,14 +266,22 @@ export function OrgChartReactFlow({ people }: OrgChartReactFlowProps) {
     [setEdges]
   )
 
-  // Update nodes when people data changes
+  // Update nodes when teams data changes
   React.useEffect(() => {
     setNodes(nodes)
     setEdges(edges)
   }, [nodes, edges, setNodes, setEdges])
 
-  if (people.length === 0) {
-    return <div className='text-neutral-400 text-sm'>No people yet.</div>
+  if (teams.length === 0) {
+    return (
+      <div className='text-neutral-400 text-sm text-center py-12'>
+        No teams yet.{' '}
+        <Link href='/teams/new' className='text-blue-400 hover:text-blue-300'>
+          Create your first team
+        </Link>
+        .
+      </div>
+    )
   }
 
   return (
@@ -302,7 +327,7 @@ export function OrgChartReactFlow({ people }: OrgChartReactFlowProps) {
           className='bg-neutral-800 border border-neutral-700'
           nodeColor={node => {
             switch (node.type) {
-              case 'person':
+              case 'team':
                 return '#3b82f6' // blue-500
               default:
                 return '#6b7280' // neutral-500

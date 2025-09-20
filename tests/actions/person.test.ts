@@ -1,13 +1,4 @@
-import { describe, it, expect, beforeEach, mock } from 'bun:test'
-
-// Stub Next.js server-only modules that are imported by action files
-mock.module('next/cache', () => ({ revalidatePath: () => {} }))
-mock.module('next/navigation', () => ({ redirect: () => {} }))
-mock.module('@/lib/validations', () => ({
-  personSchema: { parse: (v: unknown) => v },
-  personUpdateSchema: { parse: (v: unknown) => v },
-  teamSchema: { parse: (v: unknown) => v },
-}))
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 // Mutable stubs that we can spy on and reconfigure
 let findManyCalls = 0
@@ -25,31 +16,34 @@ const prismaMock = {
 }
 
 // Mock prisma and auth utils modules used by actions
-mock.module('@/lib/db', () => ({ prisma: prismaMock }))
+vi.mock('@/lib/db', () => ({ prisma: prismaMock }))
 
 const authUtils = {
-  getCurrentUser: async () => ({
+  getCurrentUser: vi.fn(async () => ({
     id: 'user-1',
     email: 'u1@example.com',
     role: 'ADMIN',
     organizationId: 'org-1',
     organizationName: 'Org One',
-  }),
+  })),
 }
 
-mock.module('@/lib/auth-utils', () => authUtils)
+vi.mock('@/lib/auth-utils', () => authUtils)
 
 describe('getPeople', () => {
   beforeEach(() => {
+    // Reset call counters and return values
     findManyCalls = 0
     lastFindManyArgs = []
     findManyReturnValue = []
+
+    // Reset auth utils mock
+    vi.mocked(authUtils.getCurrentUser).mockClear()
   })
 
   it('returns people for the current organization', async () => {
     // Arrange
-    const originalGetCurrentUser = authUtils.getCurrentUser
-    authUtils.getCurrentUser = async () => ({
+    vi.mocked(authUtils.getCurrentUser).mockResolvedValue({
       id: 'user-1',
       email: 'u1@example.com',
       role: 'ADMIN',
@@ -57,8 +51,22 @@ describe('getPeople', () => {
       organizationName: 'Org One',
     })
     const data = [
-      { id: 'p1', name: 'Alice', email: 'a@example.com', role: 'member', status: 'active', organizationId: 'org-1' },
-      { id: 'p2', name: 'Bob', email: 'b@example.com', role: 'manager', status: 'active', organizationId: 'org-1' },
+      {
+        id: 'p1',
+        name: 'Alice',
+        email: 'a@example.com',
+        role: 'member',
+        status: 'active',
+        organizationId: 'org-1',
+      },
+      {
+        id: 'p2',
+        name: 'Bob',
+        email: 'b@example.com',
+        role: 'manager',
+        status: 'active',
+        organizationId: 'org-1',
+      },
     ]
     findManyReturnValue = data
 
@@ -73,13 +81,11 @@ describe('getPeople', () => {
       where: { status: 'active', organizationId: 'org-1' },
       orderBy: { name: 'asc' },
     })
-    authUtils.getCurrentUser = originalGetCurrentUser
   })
 
   it('returns an empty array when user has no organization', async () => {
     // Arrange
-    const originalGetCurrentUser = authUtils.getCurrentUser
-    authUtils.getCurrentUser = async () => ({
+    vi.mocked(authUtils.getCurrentUser).mockResolvedValue({
       id: 'user-2',
       email: 'u2@example.com',
       role: 'USER',
@@ -93,13 +99,13 @@ describe('getPeople', () => {
 
     // Assert
     expect(result).toEqual([])
-    authUtils.getCurrentUser = originalGetCurrentUser
   })
 
   it('returns an empty array when getCurrentUser throws', async () => {
     // Arrange
-    const originalGetCurrentUser = authUtils.getCurrentUser
-    authUtils.getCurrentUser = async () => { throw new Error('Unauthorized') }
+    vi.mocked(authUtils.getCurrentUser).mockRejectedValue(
+      new Error('Unauthorized')
+    )
 
     // Act
     const { getPeople } = await import('@/lib/actions/person')
@@ -107,7 +113,5 @@ describe('getPeople', () => {
 
     // Assert
     expect(result).toEqual([])
-    authUtils.getCurrentUser = originalGetCurrentUser
   })
 })
-

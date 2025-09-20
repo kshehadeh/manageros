@@ -48,6 +48,7 @@
 
 - **Multi-directional Feedback** - Give feedback to anyone in the organization
 - **Feedback Types** - Praise, concerns, and general notes
+- **Feedback Campaigns** - External stakeholder feedback collection with email invitations and structured responses (January 2025)
 - **Privacy Controls** - Public/private feedback visibility
 
 ### Jira Integration

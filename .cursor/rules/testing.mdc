@@ -1,0 +1,15 @@
+---
+description: Testing
+globs:
+alwaysApply: true
+---
+
+# Testing
+
+## Unit Tests
+
+* Use vitest tests for all unit testing
+
+## Integration Tests
+
+* Use playwright for all integration testing

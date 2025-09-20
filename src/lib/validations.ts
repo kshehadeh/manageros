@@ -167,3 +167,53 @@ export const csvTeamSchema = z.object({
 })
 
 export type CSVTeamData = z.infer<typeof csvTeamSchema>
+
+export const feedbackCampaignSchema = z
+  .object({
+    targetPersonId: z.string().min(1, 'Target person is required'),
+    templateId: z.string().optional(),
+    startDate: z.string().min(1, 'Start date is required'),
+    endDate: z.string().min(1, 'End date is required'),
+    inviteEmails: z
+      .array(z.string().email('Invalid email address'))
+      .min(1, 'At least one email is required'),
+  })
+  .refine(
+    data => {
+      const startDate = new Date(data.startDate)
+      const endDate = new Date(data.endDate)
+      return endDate > startDate
+    },
+    {
+      message: 'End date must be after start date',
+      path: ['endDate'],
+    }
+  )
+
+export type FeedbackCampaignFormData = z.infer<typeof feedbackCampaignSchema>
+
+export const feedbackResponseSchema = z.object({
+  campaignId: z.string().min(1, 'Campaign ID is required'),
+  responderEmail: z.string().email('Invalid email address'),
+  responses: z.record(z.any()), // Flexible JSON structure for feedback responses
+})
+
+export type FeedbackResponseFormData = z.infer<typeof feedbackResponseSchema>
+
+export const feedbackTemplateSchema = z.object({
+  name: z.string().min(1, 'Template name is required'),
+  description: z.string().optional(),
+  questions: z
+    .array(
+      z.object({
+        question: z.string().min(1, 'Question text is required'),
+        type: z.enum(['text', 'rating', 'multiple_choice']).default('text'),
+        required: z.boolean().default(true),
+        options: z.array(z.string()).optional(),
+        sortOrder: z.number().default(0),
+      })
+    )
+    .min(1, 'At least one question is required'),
+})
+
+export type FeedbackTemplateFormData = z.infer<typeof feedbackTemplateSchema>

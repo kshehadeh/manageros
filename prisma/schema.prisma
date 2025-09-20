@@ -36,6 +36,7 @@ model User {
   person         Person?       @relation(fields: [personId], references: [id])
   sentInvitations OrganizationInvitation[]
   jiraCredentials UserJiraCredentials?
+  feedbackCampaigns FeedbackCampaign[]
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   
@@ -86,6 +87,7 @@ model Person {
   events             Event[]
   user               User?
   jiraAccount        PersonJiraAccount?
+  feedbackCampaigns  FeedbackCampaign[] @relation("CampaignTarget")
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
   
@@ -296,5 +298,71 @@ model PersonJiraAccount {
   
   @@index([jiraAccountId])
   @@index([jiraEmail])
+}
+
+model FeedbackCampaign {
+  id             String            @id @default(cuid())
+  userId         String
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetPersonId String
+  targetPerson   Person            @relation("CampaignTarget", fields: [targetPersonId], references: [id], onDelete: Cascade)
+  templateId     String?
+  template       FeedbackTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  startDate      DateTime
+  endDate        DateTime
+  inviteEmails   String[]          // Array of email addresses to invite
+  status         String            @default("draft") // draft|active|completed|cancelled
+  responses      FeedbackResponse[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  
+  @@index([userId])
+  @@index([targetPersonId])
+  @@index([templateId])
+  @@index([status])
+  @@index([startDate])
+  @@index([endDate])
+}
+
+model FeedbackResponse {
+  id           String           @id @default(cuid())
+  campaignId   String
+  campaign     FeedbackCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  responderEmail String
+  responses    Json             // Store the structured feedback responses as JSON
+  submittedAt  DateTime         @default(now())
+  
+  @@index([campaignId])
+  @@index([responderEmail])
+  @@unique([campaignId, responderEmail]) // Prevent duplicate responses from same email
+}
+
+model FeedbackTemplate {
+  id          String            @id @default(cuid())
+  name        String
+  description String?
+  isDefault   Boolean           @default(false)
+  questions   FeedbackQuestion[]
+  campaigns   FeedbackCampaign[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  
+  @@index([isDefault])
+}
+
+model FeedbackQuestion {
+  id         String           @id @default(cuid())
+  templateId String
+  template   FeedbackTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  question   String
+  type       String           @default("text") // text|rating|multiple_choice
+  required   Boolean          @default(true)
+  options    Json?            // For multiple choice questions
+  sortOrder  Int              @default(0)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  
+  @@index([templateId])
+  @@index([sortOrder])
 }
 

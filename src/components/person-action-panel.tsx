@@ -12,6 +12,7 @@ import {
   MessageCircle,
   ChevronDown,
   Eye,
+  Users,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -73,6 +74,14 @@ export function PersonActionPanel({
     currentPerson?.managerId === person.id ||
     // Current user is viewing one of their reports' profiles
     person.managerId === currentPerson?.id
+
+  // Determine if current user can create feedback campaigns for this person
+  // Only managers (direct or indirect) can create feedback campaigns
+  const canCreateFeedbackCampaign =
+    // Current user is viewing one of their reports' profiles (direct manager)
+    person.managerId === currentPerson?.id ||
+    // Current user is viewing their own profile and has reports (can create for reports)
+    (currentPerson?.id === person.id && (person.reports?.length ?? 0) > 0)
 
   return (
     <>
@@ -172,6 +181,18 @@ export function PersonActionPanel({
                 >
                   <MessageSquare className='w-4 h-4' />
                   Add a 1:1
+                </Link>
+              )}
+
+              {/* Feedback Campaigns - Show if current user can create campaigns for this person */}
+              {canCreateFeedbackCampaign && (
+                <Link
+                  href={`/people/${person.id}/feedback-campaigns`}
+                  className='flex items-center gap-3 px-4 py-2 text-sm hover:bg-neutral-700 transition-colors'
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  <Users className='w-4 h-4' />
+                  Feedback Campaigns
                 </Link>
               )}
 

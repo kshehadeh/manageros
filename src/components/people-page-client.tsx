@@ -7,7 +7,7 @@ import { PeopleFilterBar } from '@/components/people-filter-bar'
 import { useSession } from 'next-auth/react'
 import { isAdmin } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
-import { LayoutGrid, Upload, UserPlus } from 'lucide-react'
+import { Upload, UserPlus, Workflow } from 'lucide-react'
 import { Person } from '@/types/person'
 
 interface PeoplePageClientProps {
@@ -25,8 +25,8 @@ export function PeoplePageClient({ people }: PeoplePageClientProps) {
         <div className='flex items-center gap-3'>
           <Button asChild variant='outline'>
             <Link href='/people/chart' className='flex items-center gap-2'>
-              <LayoutGrid className='w-4 h-4' />
-              Chart View
+              <Workflow className='w-4 h-4' />
+              Chart
             </Link>
           </Button>
 
