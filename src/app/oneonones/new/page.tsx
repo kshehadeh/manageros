@@ -3,8 +3,6 @@ import { OneOnOneForm } from '@/components/oneonone-form'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { prisma } from '@/lib/db'
 
 interface NewOneOnOnePageProps {
@@ -70,9 +68,6 @@ export default async function NewOneOnOnePage({
             Schedule a new one-on-one meeting
           </p>
         </div>
-        <Button asChild variant='outline'>
-          <Link href='/oneonones'>Back to 1:1s</Link>
-        </Button>
       </div>
 
       <OneOnOneForm

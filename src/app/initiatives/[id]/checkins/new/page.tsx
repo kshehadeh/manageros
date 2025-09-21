@@ -3,8 +3,6 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { CheckInForm } from '@/components/checkin-form'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 
 export default async function NewCheckInPage({
   params,
@@ -36,9 +34,6 @@ export default async function NewCheckInPage({
   return (
     <div className='space-y-6'>
       <div className='flex items-center gap-4'>
-        <Button asChild variant='outline'>
-          <Link href={`/initiatives/${initiative.id}`}>← Back to Initiative</Link>
-        </Button>
         <div>
           <h1 className='text-2xl font-bold'>New Check-in</h1>
           <p className='text-neutral-400'>

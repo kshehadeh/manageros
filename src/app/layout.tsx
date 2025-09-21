@@ -2,6 +2,7 @@ import './globals.css'
 import AuthSessionProvider from '@/components/session-provider'
 import { BreadcrumbProvider } from '@/components/breadcrumb-provider'
 import { DefaultBreadcrumbHandler } from '@/components/default-breadcrumb-handler'
+import { MobileMenuProvider } from '@/components/mobile-menu-provider'
 import Sidebar from '@/components/sidebar'
 import TopBar from '@/components/top-bar'
 import { ThemeProvider } from '@/components/theme-provider'
@@ -22,16 +23,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         >
           <AuthSessionProvider>
             <BreadcrumbProvider>
-              <DefaultBreadcrumbHandler />
-              <div className='flex min-h-screen'>
-                <Sidebar />
-                <div className='flex-1 flex flex-col overflow-hidden lg:ml-0'>
-                  <TopBar />
-                  <main className='flex-1 overflow-auto p-6 pt-20 lg:pt-6'>
-                    <div className='max-w-7xl mx-auto'>{children}</div>
-                  </main>
+              <MobileMenuProvider>
+                <DefaultBreadcrumbHandler />
+                <div className='flex min-h-screen'>
+                  <Sidebar />
+                  <div className='flex-1 flex flex-col overflow-hidden lg:ml-0'>
+                    <TopBar />
+                    <main className='flex-1 overflow-auto p-6'>
+                      <div className='max-w-7xl mx-auto'>{children}</div>
+                    </main>
+                  </div>
                 </div>
-              </div>
+              </MobileMenuProvider>
             </BreadcrumbProvider>
           </AuthSessionProvider>
           <Toaster theme='system' />

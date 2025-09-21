@@ -8,7 +8,6 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { EditIconButton } from '@/components/edit-icon-button'
 import { Button } from '@/components/ui/button'
-import { Eye } from 'lucide-react'
 
 interface TeamDetailPageProps {
   params: Promise<{
@@ -93,12 +92,6 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
                 variant='outline'
                 size='default'
               />
-              <Button asChild variant='outline'>
-                <Link href='/teams' className='flex items-center gap-2'>
-                  <Eye className='w-4 h-4' />
-                  Back to Teams
-                </Link>
-              </Button>
             </div>
           </div>
         </div>

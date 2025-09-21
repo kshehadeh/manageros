@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useSession, signOut } from 'next-auth/react'
 import { signOutWithCleanup } from '@/lib/auth-utils'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useMobileMenu } from '@/components/mobile-menu-provider'
 import {
   Home,
   Lightbulb,
@@ -16,8 +16,6 @@ import {
   MessageCircle,
   Mail,
   Settings,
-  Menu,
-  X,
 } from 'lucide-react'
 
 interface NavItem {
@@ -47,7 +45,7 @@ const navigation: NavItem[] = [
 export default function Sidebar() {
   const { data: session, status } = useSession()
   const pathname = usePathname()
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { isMobileMenuOpen, setIsMobileMenuOpen } = useMobileMenu()
 
   if (status === 'loading') {
     return (
@@ -88,18 +86,6 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile menu button */}
-      <button
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className='lg:hidden fixed top-4 left-4 z-50 p-2 bg-secondary border rounded-lg text-secondary-foreground hover:bg-secondary/80 transition-colors'
-      >
-        {isMobileMenuOpen ? (
-          <X className='h-5 w-5' />
-        ) : (
-          <Menu className='h-5 w-5' />
-        )}
-      </button>
-
       {/* Mobile overlay */}
       {isMobileMenuOpen && (
         <div

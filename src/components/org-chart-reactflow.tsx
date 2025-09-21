@@ -68,7 +68,9 @@ function PersonNode({ data }: { data: Person }) {
 
         {/* Role */}
         {data.role && (
-          <p className='text-xs text-muted-foreground mb-1 truncate'>{data.role}</p>
+          <p className='text-xs text-muted-foreground mb-1 truncate'>
+            {data.role}
+          </p>
         )}
 
         {/* Team */}
@@ -85,7 +87,9 @@ function PersonNode({ data }: { data: Person }) {
 
         {/* Status indicator */}
         <div className='flex items-center justify-end mt-2'>
-          <div className={`w-2 h-2 rounded-full ${data.status === 'active' ? 'bg-emerald-500' : data.status === 'inactive' ? 'bg-red-500' : 'bg-amber-500'}`} />
+          <div
+            className={`w-2 h-2 rounded-full ${data.status === 'active' ? 'bg-emerald-500' : data.status === 'inactive' ? 'bg-red-500' : 'bg-amber-500'}`}
+          />
         </div>
       </div>
     </div>
@@ -175,10 +179,9 @@ export function OrgChartReactFlow({ people }: OrgChartReactFlowProps) {
               target: person.id,
               type: 'smoothstep',
               style: {
-                stroke: 'currentColor',
+                stroke: 'hsl(var(--muted-foreground))',
                 strokeWidth: 2,
               },
-              className: 'text-neutral-600',
               animated: false,
               // Add some curvature to avoid overlaps
               pathOptions: {
@@ -248,12 +251,12 @@ export function OrgChartReactFlow({ people }: OrgChartReactFlowProps) {
   }, [nodes, edges, setNodes, setEdges])
 
   if (people.length === 0) {
-    return <div className='text-neutral-400 text-sm'>No people yet.</div>
+    return <div className='text-muted-foreground text-sm'>No people yet.</div>
   }
 
   return (
     <div
-      className='border border-neutral-800 rounded-lg overflow-hidden'
+      className='border rounded-lg overflow-hidden'
       style={{
         width: `${containerWidth}px`,
         height: `${containerHeight}px`,
@@ -280,28 +283,28 @@ export function OrgChartReactFlow({ people }: OrgChartReactFlowProps) {
           y: -topLevelPosition.y + containerHeight / 2,
           zoom: 0.1,
         }}
-        className='bg-neutral-900'
+        className='bg-background'
         style={{ height: '100%' }}
       >
-        <Controls className='bg-neutral-800 border border-neutral-700' />
+        <Controls className='bg-card border' />
         <Background
           variant={BackgroundVariant.Dots}
           gap={20}
           size={1}
-          className='text-neutral-800'
+          className='text-muted'
         />
         <MiniMap
-          className='bg-neutral-800 border border-neutral-700'
+          className='bg-card border'
           nodeColor={node => {
             switch (node.type) {
               case 'person':
-                return '#3b82f6' // blue-500
+                return 'hsl(var(--primary))'
               default:
-                return '#6b7280' // neutral-500
+                return 'hsl(var(--muted-foreground))'
             }
           }}
           nodeStrokeWidth={2}
-          nodeStrokeColor='#374151' // neutral-700
+          nodeStrokeColor='hsl(var(--border))'
           maskColor='rgba(0, 0, 0, 0.1)'
           pannable
           zoomable

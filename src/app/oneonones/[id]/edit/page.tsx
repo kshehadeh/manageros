@@ -41,9 +41,6 @@ export default async function EditOneOnOnePage({
             <Button asChild variant='outline'>
               <Link href={`/oneonones/${id}`}>View Meeting</Link>
             </Button>
-            <Button asChild variant='outline'>
-              <Link href='/oneonones'>Back to 1:1s</Link>
-            </Button>
           </div>
         </div>
 
@@ -65,9 +62,6 @@ export default async function EditOneOnOnePage({
             <Button asChild variant='outline'>
               <Link href={`/oneonones/${id}`}>View Meeting</Link>
             </Button>
-            <Button asChild variant='outline'>
-              <Link href='/oneonones'>Back to 1:1s</Link>
-            </Button>
           </div>
         </div>
 
@@ -77,9 +71,6 @@ export default async function EditOneOnOnePage({
             The 1:1 meeting you&apos;re looking for doesn&apos;t exist or you
             don&apos;t have access to it.
           </p>
-          <Button asChild variant='outline'>
-            <Link href='/oneonones'>Back to 1:1s</Link>
-          </Button>
         </div>
       </div>
     )

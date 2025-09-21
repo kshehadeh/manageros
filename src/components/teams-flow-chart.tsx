@@ -36,36 +36,36 @@ function TeamNode({ data }: { data: TeamWithHierarchy }) {
   }, [data.id, router])
 
   return (
-    <div className='bg-neutral-900/60 border-2 border-neutral-600 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 min-w-[250px]'>
+    <div className='bg-card/60 border-2 border-border rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 min-w-[250px]'>
       {/* Top handle for incoming connections */}
       <Handle
         type='target'
         position={Position.Top}
-        className='w-3 h-3 bg-neutral-500'
+        className='w-3 h-3 bg-muted-foreground'
       />
 
       {/* Bottom handle for outgoing connections */}
       <Handle
         type='source'
         position={Position.Bottom}
-        className='w-3 h-3 bg-neutral-500'
+        className='w-3 h-3 bg-muted-foreground'
       />
 
       {/* Node content */}
       <div
-        className='p-4 cursor-pointer hover:bg-neutral-800 transition-colors duration-200'
+        className='p-4 cursor-pointer hover:bg-accent transition-colors duration-200'
         onClick={handleClick}
       >
         {/* Header with team name and children count */}
         <div className='flex items-center justify-between mb-3'>
           <div className='flex items-center gap-2'>
-            <Building2 className='w-4 h-4 text-blue-400' />
-            <h3 className='font-semibold text-sm text-neutral-100 truncate'>
+            <Building2 className='w-4 h-4 text-primary' />
+            <h3 className='font-semibold text-sm text-foreground truncate'>
               {data.name}
             </h3>
           </div>
           {data.children.length > 0 && (
-            <span className='bg-blue-900 text-blue-300 text-xs px-2 py-1 rounded-full font-medium'>
+            <span className='bg-primary/20 text-primary text-xs px-2 py-1 rounded-full font-medium'>
               {data.children.length}
             </span>
           )}
@@ -73,20 +73,20 @@ function TeamNode({ data }: { data: TeamWithHierarchy }) {
 
         {/* Description */}
         {data.description && (
-          <p className='text-xs text-neutral-400 mb-3 line-clamp-2'>
+          <p className='text-xs text-muted-foreground mb-3 line-clamp-2'>
             {data.description}
           </p>
         )}
 
         {/* Stats */}
         <div className='space-y-2'>
-          <div className='flex items-center gap-2 text-xs text-neutral-500'>
+          <div className='flex items-center gap-2 text-xs text-muted-foreground'>
             <Users className='w-3 h-3' />
             <span>
               {data.people.length} member{data.people.length !== 1 ? 's' : ''}
             </span>
           </div>
-          <div className='flex items-center gap-2 text-xs text-neutral-500'>
+          <div className='flex items-center gap-2 text-xs text-muted-foreground'>
             <Target className='w-3 h-3' />
             <span>
               {data.initiatives.length} initiative
@@ -190,10 +190,9 @@ export function TeamsFlowChart({ teams }: TeamsFlowChartProps) {
                 target: team.id,
                 type: 'smoothstep',
                 style: {
-                  stroke: 'currentColor',
+                  stroke: 'hsl(var(--muted-foreground))',
                   strokeWidth: 2,
                 },
-                className: 'text-neutral-600',
                 animated: false,
                 // Add some curvature to avoid overlaps
                 pathOptions: {
@@ -274,9 +273,9 @@ export function TeamsFlowChart({ teams }: TeamsFlowChartProps) {
 
   if (teams.length === 0) {
     return (
-      <div className='text-neutral-400 text-sm text-center py-12'>
+      <div className='text-muted-foreground text-sm text-center py-12'>
         No teams yet.{' '}
-        <Link href='/teams/new' className='text-blue-400 hover:text-blue-300'>
+        <Link href='/teams/new' className='text-primary hover:text-primary/80'>
           Create your first team
         </Link>
         .
@@ -286,7 +285,7 @@ export function TeamsFlowChart({ teams }: TeamsFlowChartProps) {
 
   return (
     <div
-      className='border border-neutral-800 rounded-lg overflow-hidden'
+      className='border rounded-lg overflow-hidden'
       style={{
         width: `${containerWidth}px`,
         height: `${containerHeight}px`,
@@ -313,28 +312,28 @@ export function TeamsFlowChart({ teams }: TeamsFlowChartProps) {
           y: -topLevelPosition.y + containerHeight / 2,
           zoom: 0.1,
         }}
-        className='bg-neutral-900'
+        className='bg-background'
         style={{ height: '100%' }}
       >
-        <Controls className='bg-neutral-800 border border-neutral-700' />
+        <Controls className='bg-card border' />
         <Background
           variant={BackgroundVariant.Dots}
           gap={20}
           size={1}
-          className='text-neutral-800'
+          className='text-muted'
         />
         <MiniMap
-          className='bg-neutral-800 border border-neutral-700'
+          className='bg-card border'
           nodeColor={node => {
             switch (node.type) {
               case 'team':
-                return '#3b82f6' // blue-500
+                return 'hsl(var(--primary))'
               default:
-                return '#6b7280' // neutral-500
+                return 'hsl(var(--muted-foreground))'
             }
           }}
           nodeStrokeWidth={2}
-          nodeStrokeColor='#374151' // neutral-700
+          nodeStrokeColor='hsl(var(--border))'
           maskColor='rgba(0, 0, 0, 0.1)'
           pannable
           zoomable

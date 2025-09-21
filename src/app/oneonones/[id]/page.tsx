@@ -3,12 +3,10 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { notFound } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import { OneOnOneDetailClient } from '@/components/oneonone-detail-client'
 import { EditIconButton } from '@/components/edit-icon-button'
-import { Eye } from 'lucide-react'
 
 interface OneOnOneViewPageProps {
   params: Promise<{
@@ -51,12 +49,6 @@ export default async function OneOnOneViewPage({
                 variant='outline'
                 size='default'
               />
-              <Button asChild variant='outline'>
-                <Link href='/oneonones' className='flex items-center gap-2'>
-                  <Eye className='w-4 h-4' />
-                  Back to 1:1s
-                </Link>
-              </Button>
             </div>
           </div>
 

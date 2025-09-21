@@ -228,12 +228,6 @@ export default async function PersonDetailPage({
                 currentPerson={currentPerson}
                 isAdmin={isAdmin(session.user)}
               />
-              <Button asChild variant='outline' size='default'>
-                <Link href='/people' className='flex items-center gap-2'>
-                  <Eye className='w-4 h-4' />
-                  Back to People
-                </Link>
-              </Button>
             </div>
           </div>
         </div>

@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { InitiativeEditForm } from '@/components/initiative-edit-form'
-import { Button } from '@/components/ui/button'
 
 export default async function EditInitiative({
   params,
@@ -62,9 +61,6 @@ export default async function EditInitiative({
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
         <h1 className='text-xl font-semibold'>Edit Initiative</h1>
-        <Button asChild variant='outline'>
-          <a href={`/initiatives/${id}`}>Back to Initiative</a>
-        </Button>
       </div>
 
       <InitiativeEditForm

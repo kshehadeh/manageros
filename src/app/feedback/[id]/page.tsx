@@ -3,12 +3,10 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { notFound } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import { FeedbackDetailClient } from '@/components/feedback-detail-client'
 import { EditIconButton } from '@/components/edit-icon-button'
-import { Eye } from 'lucide-react'
 
 interface FeedbackDetailPageProps {
   params: Promise<{
@@ -51,15 +49,6 @@ export default async function FeedbackDetailPage({
                 variant='outline'
                 size='default'
               />
-              <Button asChild variant='outline'>
-                <Link
-                  href={`/people/${feedback.about.id}`}
-                  className='flex items-center gap-2'
-                >
-                  <Eye className='w-4 h-4' />
-                  Back to {feedback.about.name}
-                </Link>
-              </Button>
             </div>
           </div>
 

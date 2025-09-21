@@ -213,12 +213,12 @@ export default async function TaskDetailPage({
 
       {/* Navigation */}
       <div className='flex items-center gap-3'>
-        <Button asChild variant='outline'>
-          <Link href='/tasks'>Back to Tasks</Link>
-        </Button>
         {task.initiative && (
           <Button asChild variant='outline'>
-            <Link href={`/initiatives/${task.initiative.id}`} className='flex items-center gap-2'>
+            <Link
+              href={`/initiatives/${task.initiative.id}`}
+              className='flex items-center gap-2'
+            >
               <Eye className='w-4 h-4' />
               View Initiative
             </Link>
@@ -226,7 +226,10 @@ export default async function TaskDetailPage({
         )}
         {task.assignee && (
           <Button asChild variant='outline'>
-            <Link href={`/people/${task.assignee.id}`} className='flex items-center gap-2'>
+            <Link
+              href={`/people/${task.assignee.id}`}
+              className='flex items-center gap-2'
+            >
               <Eye className='w-4 h-4' />
               View Assignee
             </Link>

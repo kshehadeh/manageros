@@ -1,7 +1,5 @@
 import { PersonForm } from '@/components/person-form'
 import { getTeams, getPeople, getPerson } from '@/lib/actions'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
@@ -40,9 +38,6 @@ export default async function EditPersonPage({ params }: EditPersonPageProps) {
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
         <h2 className='text-lg font-semibold'>Edit {person.name}</h2>
-        <Button asChild variant='outline'>
-          <Link href='/people'>Back to People</Link>
-        </Button>
       </div>
 
       <PersonForm teams={teams} people={people} person={person} />

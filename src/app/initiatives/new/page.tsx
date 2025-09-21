@@ -1,7 +1,5 @@
 import { InitiativeForm } from '@/components/initiative-form'
 import { getTeams, getPeople } from '@/lib/actions'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -30,9 +28,6 @@ export default async function NewInitiativePage({
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
         <h2 className='text-lg font-semibold'>New Initiative</h2>
-        <Button asChild variant='outline'>
-          <Link href='/initiatives'>Back to Initiatives</Link>
-        </Button>
       </div>
 
       <InitiativeForm
