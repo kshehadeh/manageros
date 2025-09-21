@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,7 +30,6 @@ export default function SignUpPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -75,7 +73,8 @@ export default function SignUpPage() {
       const result = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
-        redirect: false,
+        redirect: true,
+        callbackUrl: '/',
       })
 
       if (result?.error) {
@@ -88,11 +87,10 @@ export default function SignUpPage() {
           setSuccess(responseData.message)
           // Redirect after a short delay to show the success message
           setTimeout(() => {
-            router.push('/')
+            window.location.href = '/'
           }, 2000)
-        } else {
-          router.push('/')
         }
+        // If not invited, NextAuth will handle the redirect automatically
       }
     } catch (error) {
       setError(
