@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import { PersonDetailClient } from '@/components/person-detail-client'
 
 interface EditPersonPageProps {
   params: Promise<{
@@ -35,12 +36,14 @@ export default async function EditPersonPage({ params }: EditPersonPageProps) {
   }
 
   return (
-    <div className='space-y-6'>
-      <div className='flex items-center justify-between'>
-        <h2 className='text-lg font-semibold'>Edit {person.name}</h2>
-      </div>
+    <PersonDetailClient personName={person.name} personId={person.id}>
+      <div className='space-y-6'>
+        <div className='flex items-center justify-between'>
+          <h2 className='text-lg font-semibold'>Edit {person.name}</h2>
+        </div>
 
-      <PersonForm teams={teams} people={people} person={person} />
-    </div>
+        <PersonForm teams={teams} people={people} person={person} />
+      </div>
+    </PersonDetailClient>
   )
 }

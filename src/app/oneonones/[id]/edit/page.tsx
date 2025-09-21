@@ -1,5 +1,6 @@
 import { getOneOnOneById, getPeopleForOneOnOne } from '@/lib/actions'
 import { OneOnOneForm } from '@/components/oneonone-form'
+import { OneOnOneDetailClient } from '@/components/oneonone-detail-client'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -29,23 +30,29 @@ export default async function EditOneOnOnePage({
     ])
 
     return (
-      <div className='space-y-4'>
-        <div className='flex items-center justify-between'>
-          <div>
-            <h2 className='text-lg font-semibold'>Edit 1:1 Meeting</h2>
-            <p className='text-sm text-neutral-400 mt-1'>
-              Update meeting details and notes
-            </p>
+      <OneOnOneDetailClient
+        managerName={oneOnOne.manager.name}
+        reportName={oneOnOne.report.name}
+        oneOnOneId={oneOnOne.id}
+      >
+        <div className='space-y-4'>
+          <div className='flex items-center justify-between'>
+            <div>
+              <h2 className='text-lg font-semibold'>Edit 1:1 Meeting</h2>
+              <p className='text-sm text-neutral-400 mt-1'>
+                Update meeting details and notes
+              </p>
+            </div>
+            <div className='flex items-center gap-2'>
+              <Button asChild variant='outline'>
+                <Link href={`/oneonones/${id}`}>View Meeting</Link>
+              </Button>
+            </div>
           </div>
-          <div className='flex items-center gap-2'>
-            <Button asChild variant='outline'>
-              <Link href={`/oneonones/${id}`}>View Meeting</Link>
-            </Button>
-          </div>
-        </div>
 
-        <OneOnOneForm people={people} existingOneOnOne={oneOnOne} />
-      </div>
+          <OneOnOneForm people={people} existingOneOnOne={oneOnOne} />
+        </div>
+      </OneOnOneDetailClient>
     )
   } catch (error) {
     console.error('Error loading one-on-one:', error)

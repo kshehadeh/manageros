@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { InitiativeEditForm } from '@/components/initiative-edit-form'
+import { InitiativeDetailClient } from '@/components/initiative-detail-client'
 
 export default async function EditInitiative({
   params,
@@ -58,16 +59,21 @@ export default async function EditInitiative({
   ])
 
   return (
-    <div className='space-y-6'>
-      <div className='flex items-center justify-between'>
-        <h1 className='text-xl font-semibold'>Edit Initiative</h1>
-      </div>
+    <InitiativeDetailClient
+      initiativeTitle={initiative.title}
+      initiativeId={initiative.id}
+    >
+      <div className='space-y-6'>
+        <div className='flex items-center justify-between'>
+          <h1 className='text-xl font-semibold'>Edit Initiative</h1>
+        </div>
 
-      <InitiativeEditForm
-        initiative={initiative}
-        teams={teams}
-        people={people}
-      />
-    </div>
+        <InitiativeEditForm
+          initiative={initiative}
+          teams={teams}
+          people={people}
+        />
+      </div>
+    </InitiativeDetailClient>
   )
 }

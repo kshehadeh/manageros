@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import { TaskForm } from '@/components/task-form'
+import { TaskDetailBreadcrumbClient } from '@/components/task-detail-breadcrumb-client'
 
 export default async function EditTaskPage({
   params,
@@ -68,22 +69,26 @@ export default async function EditTaskPage({
   }
 
   return (
-    <div className='space-y-6'>
-      <div>
-        <h1 className='text-2xl font-bold'>Edit Task</h1>
-        <p className='text-neutral-400'>Update task details and assignments</p>
-      </div>
+    <TaskDetailBreadcrumbClient taskTitle={task.title} taskId={task.id}>
+      <div className='space-y-6'>
+        <div>
+          <h1 className='text-2xl font-bold'>Edit Task</h1>
+          <p className='text-neutral-400'>
+            Update task details and assignments
+          </p>
+        </div>
 
-      <div className='card'>
-        <TaskForm
-          people={people}
-          initiatives={initiatives}
-          objectives={objectives}
-          initialData={initialData}
-          isEditing={true}
-          taskId={task.id}
-        />
+        <div className='card'>
+          <TaskForm
+            people={people}
+            initiatives={initiatives}
+            objectives={objectives}
+            initialData={initialData}
+            isEditing={true}
+            taskId={task.id}
+          />
+        </div>
       </div>
-    </div>
+    </TaskDetailBreadcrumbClient>
   )
 }

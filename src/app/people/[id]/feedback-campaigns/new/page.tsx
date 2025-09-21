@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { FeedbackCampaignForm } from '@/components/feedback-campaign-form'
+import { NewFeedbackCampaignBreadcrumbClient } from '@/components/new-feedback-campaign-breadcrumb-client'
 
 interface NewFeedbackCampaignPageProps {
   params: Promise<{
@@ -58,12 +59,17 @@ export default async function NewFeedbackCampaignPage({
   }
 
   return (
-    <div className='space-y-6'>
-      <FeedbackCampaignForm
-        person={person}
-        redirectTo={`/people/${person.id}/feedback-campaigns`}
-      />
-    </div>
+    <NewFeedbackCampaignBreadcrumbClient
+      personName={person.name}
+      personId={person.id}
+    >
+      <div className='space-y-6'>
+        <FeedbackCampaignForm
+          person={person}
+          redirectTo={`/people/${person.id}/feedback-campaigns`}
+        />
+      </div>
+    </NewFeedbackCampaignBreadcrumbClient>
   )
 }
 
