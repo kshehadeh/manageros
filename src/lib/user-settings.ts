@@ -7,8 +7,10 @@ export interface UserSettings {
   // People page settings
   peopleViewMode: 'list' | 'chart'
 
+  // Theme settings
+  theme: 'light' | 'dark'
+
   // Future expandable settings can be added here:
-  // theme: 'light' | 'dark'
   // sidebarCollapsed: boolean
   // defaultPageSize: number
   // tasksViewMode: 'list' | 'kanban' | 'calendar'
@@ -18,8 +20,8 @@ export interface UserSettings {
 
 export const DEFAULT_USER_SETTINGS: UserSettings = {
   peopleViewMode: 'chart',
+  theme: 'dark',
   // When adding new settings, add their defaults here:
-  // theme: 'dark'
   // sidebarCollapsed: false
   // defaultPageSize: 25
 }

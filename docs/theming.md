@@ -44,6 +44,12 @@ The application now includes comprehensive badge theming with semantic color tok
 - `--badge-info`: Blue for informational states (notes, questions)
 - `--badge-neutral`: Gray for neutral states (draft, private)
 
+Each badge variant includes three color tokens:
+
+- `--badge-{variant}`: Background color for solid badges
+- `--badge-{variant}-foreground`: Text color for solid badges (high contrast)
+- `--badge-{variant}-text`: Text color for legacy RAG badges with light backgrounds (optimized for light mode visibility)
+
 #### Usage Examples
 
 ```tsx

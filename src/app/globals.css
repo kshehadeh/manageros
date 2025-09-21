@@ -29,19 +29,19 @@
     /* Badge-specific tokens */
     --badge-success: 142 76% 36%;
     --badge-success-foreground: 210 40% 98%;
-    --badge-success-text: 142 76% 40%;
+    --badge-success-text: 142 76% 25%;
     --badge-warning: 38 92% 50%;
     --badge-warning-foreground: 222.2 47.4% 11.2%;
-    --badge-warning-text: 38 92% 45%;
+    --badge-warning-text: 38 92% 30%;
     --badge-error: 0 84% 60%;
     --badge-error-foreground: 210 40% 98%;
-    --badge-error-text: 0 84% 55%;
+    --badge-error-text: 0 84% 40%;
     --badge-info: 221.2 83.2% 53.3%;
     --badge-info-foreground: 210 40% 98%;
-    --badge-info-text: 221.2 83.2% 45%;
+    --badge-info-text: 221.2 83.2% 30%;
     --badge-neutral: 210 40% 96.1%;
     --badge-neutral-foreground: 222.2 47.4% 11.2%;
-    --badge-neutral-text: 222.2 47.4% 25%;
+    --badge-neutral-text: 222.2 47.4% 15%;
   }
 
   .dark {

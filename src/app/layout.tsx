@@ -15,13 +15,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang='en' suppressHydrationWarning className='dark'>
       <body className='min-h-screen bg-background text-foreground antialiased'>
-        <ThemeProvider
-          attribute='class'
-          defaultTheme='dark'
-          enableSystem={false}
-          disableTransitionOnChange
-        >
-          <AuthSessionProvider>
+        <AuthSessionProvider>
+          <ThemeProvider
+            attribute='class'
+            defaultTheme='dark'
+            enableSystem={false}
+            disableTransitionOnChange
+          >
             <BreadcrumbProvider>
               <MobileMenuProvider>
                 <DefaultBreadcrumbHandler />
@@ -36,9 +36,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 </div>
               </MobileMenuProvider>
             </BreadcrumbProvider>
-          </AuthSessionProvider>
-          <Toaster theme='system' />
-        </ThemeProvider>
+            <Toaster theme='system' />
+          </ThemeProvider>
+        </AuthSessionProvider>
       </body>
     </html>
   )
