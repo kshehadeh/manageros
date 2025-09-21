@@ -6,6 +6,7 @@ import { useSession, signOut } from 'next-auth/react'
 import { signOutWithCleanup } from '@/lib/auth-utils'
 import { usePathname } from 'next/navigation'
 import { useMobileMenu } from '@/components/mobile-menu-provider'
+import { IndigoIcon } from '@/components/indigo-icon'
 import {
   Home,
   Lightbulb,
@@ -51,7 +52,10 @@ export default function Sidebar() {
     return (
       <div className='hidden lg:flex h-screen w-64 flex-col bg-card border-r'>
         <div className='flex h-16 items-center px-6'>
-          <h1 className='text-xl font-semibold text-foreground'>ManagerOS</h1>
+          <div className='flex items-center gap-3'>
+            <IndigoIcon width={32} height={26} color='currentColor' />
+            <h1 className='text-xl font-semibold text-foreground'>ManagerOS</h1>
+          </div>
         </div>
         <div className='flex-1 px-6 py-4'>
           <div className='text-sm text-muted-foreground'>Loading...</div>
@@ -64,7 +68,10 @@ export default function Sidebar() {
     return (
       <div className='hidden lg:flex h-screen w-64 flex-col bg-card border-r'>
         <div className='flex h-16 items-center px-6'>
-          <h1 className='text-xl font-semibold text-foreground'>ManagerOS</h1>
+          <div className='flex items-center gap-3'>
+            <IndigoIcon width={32} height={26} color='currentColor' />
+            <h1 className='text-xl font-semibold text-foreground'>ManagerOS</h1>
+          </div>
         </div>
         <div className='flex-1 px-6 py-4'>
           <nav className='space-y-2'>
@@ -104,7 +111,7 @@ export default function Sidebar() {
       >
         {/* Header */}
         <div className='flex h-16 items-center px-6 border-b'>
-          <h1 className='text-xl font-semibold text-foreground'>ManagerOS</h1>
+          <IndigoIcon width={40} height={33} color='currentColor' />
         </div>
 
         {/* User Info */}

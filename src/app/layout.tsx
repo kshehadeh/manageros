@@ -6,7 +6,7 @@ export const metadata = { title: 'ManagerOS', description: 'Manager-only MVP' }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang='en' suppressHydrationWarning className='dark'>
+    <html lang='en' suppressHydrationWarning>
       <body className='min-h-screen bg-background text-foreground antialiased'>
         <ServerConditionalLayout>{children}</ServerConditionalLayout>
       </body>
