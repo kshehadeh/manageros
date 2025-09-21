@@ -311,6 +311,7 @@ model FeedbackCampaign {
   startDate      DateTime
   endDate        DateTime
   inviteEmails   String[]          // Array of email addresses to invite
+  inviteLink     String?           // Unique link for invitees to access the feedback form
   status         String            @default("draft") // draft|active|completed|cancelled
   responses      FeedbackResponse[]
   createdAt      DateTime          @default(now())
@@ -322,6 +323,7 @@ model FeedbackCampaign {
   @@index([status])
   @@index([startDate])
   @@index([endDate])
+  @@index([inviteLink])
 }
 
 model FeedbackResponse {

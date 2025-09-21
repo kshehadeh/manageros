@@ -162,27 +162,27 @@ export function FeedbackCampaignForm({
 
   return (
     <div className='w-full max-w-2xl mx-auto'>
-      <div className='mb-6'>
-        <h2 className='text-2xl font-bold text-white mb-2'>
+      <div className='page-header'>
+        <h2 className='page-title'>
           {campaign ? 'Edit Feedback Campaign' : 'Create Feedback Campaign'}
         </h2>
-        <p className='text-gray-400'>
+        <p className='page-subtitle'>
           Create a feedback campaign for {person.name}. External stakeholders
           will be invited to provide feedback.
         </p>
       </div>
       <form onSubmit={handleSubmit} className='space-y-6'>
         {error && (
-          <div className='p-3 text-sm text-red-400 bg-red-900/20 border border-red-800 rounded-md'>
+          <div className='p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md'>
             {error}
           </div>
         )}
 
-        <div className='space-y-4'>
+        <div className='page-section'>
           <div className='space-y-2'>
-            <Label className='text-white'>Feedback Template</Label>
+            <Label>Feedback Template</Label>
             {isLoadingTemplates ? (
-              <div className='text-gray-400'>Loading templates...</div>
+              <div className='text-muted-foreground'>Loading templates...</div>
             ) : (
               <Select
                 value={formData.templateId}
@@ -190,16 +190,12 @@ export function FeedbackCampaignForm({
                   setFormData(prev => ({ ...prev, templateId: value }))
                 }
               >
-                <SelectTrigger className='bg-neutral-800 border-neutral-700 text-white'>
+                <SelectTrigger>
                   <SelectValue placeholder='Select a template' />
                 </SelectTrigger>
-                <SelectContent className='bg-neutral-800 border-neutral-700'>
+                <SelectContent>
                   {templates.map(template => (
-                    <SelectItem
-                      key={template.id}
-                      value={template.id}
-                      className='text-white hover:bg-neutral-700'
-                    >
+                    <SelectItem key={template.id} value={template.id}>
                       {template.name}
                       {template.isDefault && ' (Default)'}
                     </SelectItem>
@@ -208,7 +204,7 @@ export function FeedbackCampaignForm({
               </Select>
             )}
             {formData.templateId && (
-              <div className='text-sm text-gray-400'>
+              <div className='text-sm text-muted-foreground'>
                 {templates.find(t => t.id === formData.templateId)?.description}
               </div>
             )}
@@ -216,9 +212,7 @@ export function FeedbackCampaignForm({
 
           <div className='grid grid-cols-2 gap-4'>
             <div className='space-y-2'>
-              <Label htmlFor='startDate' className='text-white'>
-                Start Date
-              </Label>
+              <Label htmlFor='startDate'>Start Date</Label>
               <Input
                 id='startDate'
                 type='date'
@@ -229,14 +223,11 @@ export function FeedbackCampaignForm({
                     startDate: e.target.value,
                   }))
                 }
-                className='bg-neutral-800 border-neutral-700 text-white'
                 required
               />
             </div>
             <div className='space-y-2'>
-              <Label htmlFor='endDate' className='text-white'>
-                End Date
-              </Label>
+              <Label htmlFor='endDate'>End Date</Label>
               <Input
                 id='endDate'
                 type='date'
@@ -244,14 +235,13 @@ export function FeedbackCampaignForm({
                 onChange={e =>
                   setFormData(prev => ({ ...prev, endDate: e.target.value }))
                 }
-                className='bg-neutral-800 border-neutral-700 text-white'
                 required
               />
             </div>
           </div>
 
           <div className='space-y-2'>
-            <Label className='text-white'>Invite Emails</Label>
+            <Label>Invite Emails</Label>
             <div className='space-y-2'>
               {formData.inviteEmails.map((email, index) => (
                 <div key={index} className='flex gap-2'>
@@ -260,7 +250,6 @@ export function FeedbackCampaignForm({
                     value={email}
                     onChange={e => updateEmail(index, e.target.value)}
                     placeholder='Enter email address'
-                    className='bg-neutral-800 border-neutral-700 text-white'
                     required={index === 0}
                   />
                   {formData.inviteEmails.length > 1 && (
@@ -269,7 +258,7 @@ export function FeedbackCampaignForm({
                       variant='outline'
                       size='icon'
                       onClick={() => removeEmailField(index)}
-                      className='shrink-0 border-neutral-700 hover:bg-neutral-700'
+                      className='shrink-0'
                     >
                       <X className='h-4 w-4' />
                     </Button>
@@ -280,7 +269,7 @@ export function FeedbackCampaignForm({
                 type='button'
                 variant='outline'
                 onClick={addEmailField}
-                className='w-full border-neutral-700 hover:bg-neutral-700'
+                className='w-full'
               >
                 <Plus className='h-4 w-4 mr-2' />
                 Add Another Email
@@ -298,12 +287,7 @@ export function FeedbackCampaignForm({
                 : 'Create Campaign'}
           </Button>
           {onCancel && (
-            <Button
-              type='button'
-              variant='outline'
-              onClick={onCancel}
-              className='border-neutral-700 hover:bg-neutral-700'
-            >
+            <Button type='button' variant='outline' onClick={onCancel}>
               Cancel
             </Button>
           )}

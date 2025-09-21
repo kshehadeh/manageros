@@ -1,0 +1,69 @@
+import { headers } from 'next/headers'
+import { ReactNode } from 'react'
+import AuthSessionProvider from '@/components/session-provider'
+import { BreadcrumbProvider } from '@/components/breadcrumb-provider'
+import { DefaultBreadcrumbHandler } from '@/components/default-breadcrumb-handler'
+import { MobileMenuProvider } from '@/components/mobile-menu-provider'
+import Sidebar from '@/components/sidebar'
+import TopBar from '@/components/top-bar'
+import { ThemeProvider } from '@/components/theme-provider'
+import { Toaster } from 'sonner'
+
+interface ServerConditionalLayoutProps {
+  children: ReactNode
+}
+
+export default async function ServerConditionalLayout({
+  children,
+}: ServerConditionalLayoutProps) {
+  const headersList = await headers()
+
+  // Check the custom header set by middleware
+  const isPublicHeader = headersList.get('x-is-public')
+  const isPublic = isPublicHeader === 'true'
+
+  if (isPublic) {
+    // Render minimal layout for public routes
+    return (
+      <AuthSessionProvider>
+        <ThemeProvider
+          attribute='class'
+          defaultTheme='dark'
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster theme='system' />
+        </ThemeProvider>
+      </AuthSessionProvider>
+    )
+  }
+
+  // Render full layout for authenticated routes
+  return (
+    <AuthSessionProvider>
+      <ThemeProvider
+        attribute='class'
+        defaultTheme='dark'
+        enableSystem={false}
+        disableTransitionOnChange
+      >
+        <BreadcrumbProvider>
+          <MobileMenuProvider>
+            <DefaultBreadcrumbHandler />
+            <div className='flex min-h-screen'>
+              <Sidebar />
+              <div className='flex-1 flex flex-col overflow-hidden lg:ml-0'>
+                <TopBar />
+                <main className='flex-1 overflow-auto p-6'>
+                  <div className='max-w-7xl mx-auto'>{children}</div>
+                </main>
+              </div>
+            </div>
+          </MobileMenuProvider>
+        </BreadcrumbProvider>
+        <Toaster theme='system' />
+      </ThemeProvider>
+    </AuthSessionProvider>
+  )
+}

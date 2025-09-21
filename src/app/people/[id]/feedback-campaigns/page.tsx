@@ -114,6 +114,7 @@ export default async function FeedbackCampaignsPage({
   const typedCampaigns = campaigns.map(campaign => ({
     ...campaign,
     status: campaign.status as 'draft' | 'active' | 'completed' | 'cancelled',
+    inviteLink: campaign.inviteLink || undefined,
     template: campaign.template
       ? {
           id: campaign.template.id,

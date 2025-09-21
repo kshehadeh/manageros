@@ -13,8 +13,12 @@ import {
   Play,
   Pause,
   CheckCircle,
+  Link as LinkIcon,
+  Copy,
+  Eye,
 } from 'lucide-react'
 import { format } from 'date-fns'
+import Link from 'next/link'
 
 interface FeedbackCampaign {
   id: string
@@ -22,6 +26,7 @@ interface FeedbackCampaign {
   startDate: Date
   endDate: Date
   inviteEmails: string[]
+  inviteLink?: string
   status: 'draft' | 'active' | 'completed' | 'cancelled'
   createdAt: Date
   updatedAt: Date
@@ -53,6 +58,7 @@ export function FeedbackCampaignList({
 }: FeedbackCampaignListProps) {
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null)
   const [deletingCampaign, setDeletingCampaign] = useState<string | null>(null)
+  const [copiedLink, setCopiedLink] = useState<string | null>(null)
 
   const getStatusVariant = (
     status: string
@@ -125,6 +131,18 @@ export function FeedbackCampaignList({
     }
   }
 
+  const copyInviteLink = async (inviteLink: string) => {
+    try {
+      const baseUrl = window.location.origin
+      const fullUrl = `${baseUrl}/feedback-form/${inviteLink}`
+      await navigator.clipboard.writeText(fullUrl)
+      setCopiedLink(inviteLink)
+      setTimeout(() => setCopiedLink(null), 2000)
+    } catch (error) {
+      console.error('Failed to copy link:', error)
+    }
+  }
+
   const isCampaignActive = (campaign: FeedbackCampaign) => {
     const now = new Date()
     return (
@@ -138,11 +156,11 @@ export function FeedbackCampaignList({
     return (
       <Card>
         <CardContent className='p-6 text-center'>
-          <Calendar className='h-12 w-12 mx-auto text-gray-400 mb-4' />
-          <h3 className='text-lg font-medium text-gray-900 mb-2'>
+          <Calendar className='h-12 w-12 mx-auto text-muted-foreground mb-4' />
+          <h3 className='text-lg font-medium text-foreground mb-2'>
             No Feedback Campaigns
           </h3>
-          <p className='text-gray-500'>
+          <p className='text-muted-foreground'>
             No feedback campaigns have been created for this person yet.
           </p>
         </CardContent>
@@ -205,6 +223,17 @@ export function FeedbackCampaignList({
                     </Button>
                   </>
                 )}
+                {(campaign.status === 'active' ||
+                  campaign.status === 'completed') && (
+                  <Button size='sm' variant='outline' asChild>
+                    <Link
+                      href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}/responses`}
+                    >
+                      <Eye className='h-4 w-4 mr-1' />
+                      View Responses
+                    </Link>
+                  </Button>
+                )}
                 <Button
                   size='sm'
                   variant='outline'
@@ -224,7 +253,7 @@ export function FeedbackCampaignList({
           <CardContent>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
               <div>
-                <h4 className='font-medium text-sm text-gray-500 mb-1'>
+                <h4 className='font-medium text-sm text-muted-foreground mb-1'>
                   Campaign Period
                 </h4>
                 <p className='text-sm'>
@@ -233,7 +262,7 @@ export function FeedbackCampaignList({
                 </p>
               </div>
               <div>
-                <h4 className='font-medium text-sm text-gray-500 mb-1'>
+                <h4 className='font-medium text-sm text-muted-foreground mb-1'>
                   Invited
                 </h4>
                 <div className='flex items-center gap-1 text-sm'>
@@ -242,7 +271,7 @@ export function FeedbackCampaignList({
                 </div>
               </div>
               <div>
-                <h4 className='font-medium text-sm text-gray-500 mb-1'>
+                <h4 className='font-medium text-sm text-muted-foreground mb-1'>
                   Responses
                 </h4>
                 <div className='flex items-center gap-1 text-sm'>
@@ -253,7 +282,7 @@ export function FeedbackCampaignList({
             </div>
 
             <div className='mt-4'>
-              <h4 className='font-medium text-sm text-gray-500 mb-2'>
+              <h4 className='font-medium text-sm text-muted-foreground mb-2'>
                 Invited Emails
               </h4>
               <div className='flex flex-wrap gap-2'>
@@ -264,10 +293,7 @@ export function FeedbackCampaignList({
                   return (
                     <Badge
                       key={index}
-                      variant={hasResponded ? 'default' : 'outline'}
-                      className={
-                        hasResponded ? 'bg-green-100 text-green-800' : ''
-                      }
+                      variant={hasResponded ? 'success' : 'outline'}
                     >
                       {email}
                       {hasResponded && <CheckCircle className='h-3 w-3 ml-1' />}
@@ -277,9 +303,44 @@ export function FeedbackCampaignList({
               </div>
             </div>
 
+            {campaign.inviteLink && (
+              <div className='mt-4'>
+                <h4 className='font-medium text-sm text-muted-foreground mb-2'>
+                  Invite Link
+                </h4>
+                <div className='flex items-center gap-2 p-3 bg-muted rounded-md'>
+                  <LinkIcon className='h-4 w-4 text-muted-foreground' />
+                  <span className='text-sm text-foreground flex-1 truncate'>
+                    {`/feedback-form/${campaign.inviteLink}`}
+                  </span>
+                  <Button
+                    size='sm'
+                    variant='outline'
+                    onClick={() => copyInviteLink(campaign.inviteLink!)}
+                    className='shrink-0'
+                  >
+                    {copiedLink === campaign.inviteLink ? (
+                      <>
+                        <CheckCircle className='h-3 w-3 mr-1' />
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className='h-3 w-3 mr-1' />
+                        Copy
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <p className='text-xs text-muted-foreground mt-1'>
+                  Share this link with invitees to allow them to submit feedback
+                </p>
+              </div>
+            )}
+
             <div className='mt-4 pt-4 border-t'>
               <div className='flex items-center justify-between'>
-                <p className='text-xs text-gray-500'>
+                <p className='text-xs text-muted-foreground'>
                   Created by {campaign.user.name} on{' '}
                   {format(campaign.createdAt, 'MMM d, yyyy')}
                 </p>

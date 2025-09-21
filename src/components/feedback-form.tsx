@@ -73,7 +73,7 @@ export function FeedbackForm({
   return (
     <form onSubmit={handleSubmit} className='space-y-4'>
       {error && (
-        <div className='bg-red-900/20 border border-red-500/50 rounded-lg p-3 text-red-200 text-sm'>
+        <div className='bg-destructive/10 border border-destructive/20 rounded-lg p-3 text-destructive text-sm'>
           {error}
         </div>
       )}
@@ -86,7 +86,7 @@ export function FeedbackForm({
           id='kind'
           value={formData.kind}
           onChange={e => handleChange('kind', e.target.value)}
-          className='w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
+          className='input'
         >
           <option value='note'>General Note</option>
           <option value='praise'>Praise</option>
@@ -100,11 +100,11 @@ export function FeedbackForm({
             type='checkbox'
             checked={formData.isPrivate}
             onChange={e => handleChange('isPrivate', e.target.checked)}
-            className='rounded border-neutral-700 bg-neutral-800 text-blue-500 focus:ring-blue-500'
+            className='rounded border-input bg-background text-primary focus:ring-ring'
           />
           <span className='text-sm font-medium'>Private feedback</span>
         </label>
-        <p className='text-xs text-neutral-400 mt-1'>
+        <p className='text-xs text-muted-foreground mt-1'>
           Private feedback is only visible to you. Public feedback is visible to
           everyone.
         </p>
@@ -122,7 +122,11 @@ export function FeedbackForm({
       </div>
 
       <div className='flex gap-2 pt-4'>
-        <Button type='submit' disabled={isSubmitting || !formData.body.trim()} variant='outline'>
+        <Button
+          type='submit'
+          disabled={isSubmitting || !formData.body.trim()}
+          variant='outline'
+        >
           {isSubmitting
             ? 'Saving...'
             : feedback

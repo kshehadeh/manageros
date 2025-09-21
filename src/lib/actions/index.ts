@@ -73,7 +73,10 @@ export {
   getFeedbackCampaignsForPerson,
   getFeedbackCampaignById,
   submitFeedbackResponse,
+  submitFeedbackResponseByInviteLink,
+  getFeedbackCampaignByInviteLink,
   updateCampaignStatus,
+  getFeedbackCampaignResponses,
 } from './feedback-campaign'
 
 // Feedback Template Actions

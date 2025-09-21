@@ -9,6 +9,7 @@ import {
 } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth-utils'
+import { generateInviteLinkToken } from '@/lib/utils/invite-link'
 
 export async function createFeedbackCampaign(
   formData: FeedbackCampaignFormData
@@ -61,6 +62,9 @@ export async function createFeedbackCampaign(
     )
   }
 
+  // Generate a unique invite link token
+  const inviteLinkToken = generateInviteLinkToken()
+
   // Create the feedback campaign
   const campaign = await prisma.feedbackCampaign.create({
     data: {
@@ -70,6 +74,7 @@ export async function createFeedbackCampaign(
       startDate: new Date(validatedData.startDate),
       endDate: new Date(validatedData.endDate),
       inviteEmails: validatedData.inviteEmails,
+      inviteLink: inviteLinkToken,
       status: 'draft',
     },
     include: {
@@ -454,6 +459,46 @@ export async function submitFeedbackResponse(
   return response
 }
 
+export async function submitFeedbackResponseByInviteLink(
+  inviteLink: string,
+  responderEmail: string,
+  responses: Record<string, string | number>
+) {
+  // Get the campaign by invite link
+  const campaign = await getFeedbackCampaignByInviteLink(inviteLink)
+
+  // Check if the responder email is in the invite list
+  if (!campaign.inviteEmails.includes(responderEmail)) {
+    throw new Error('Your email is not authorized to respond to this campaign')
+  }
+
+  // Check if this email has already responded
+  const existingResponse = await prisma.feedbackResponse.findUnique({
+    where: {
+      // eslint-disable-next-line camelcase
+      campaignId_responderEmail: {
+        campaignId: campaign.id,
+        responderEmail,
+      },
+    },
+  })
+
+  if (existingResponse) {
+    throw new Error('You have already submitted feedback for this campaign')
+  }
+
+  // Create the response
+  const response = await prisma.feedbackResponse.create({
+    data: {
+      campaignId: campaign.id,
+      responderEmail,
+      responses,
+    },
+  })
+
+  return response
+}
+
 export async function updateCampaignStatus(
   id: string,
   status: 'draft' | 'active' | 'completed' | 'cancelled'
@@ -539,4 +584,83 @@ async function isDirectOrIndirectManager(
   }
 
   return false
+}
+
+export async function getFeedbackCampaignByInviteLink(inviteLink: string) {
+  const campaign = await prisma.feedbackCampaign.findFirst({
+    where: {
+      inviteLink,
+      status: 'active', // Only allow access to active campaigns
+    },
+    include: {
+      targetPerson: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      template: {
+        include: {
+          questions: {
+            orderBy: { sortOrder: 'asc' },
+          },
+        },
+      },
+    },
+  })
+
+  if (!campaign) {
+    throw new Error('Invalid or expired invite link')
+  }
+
+  // Check if the campaign is currently active (within date range)
+  const now = new Date()
+  if (now < campaign.startDate || now > campaign.endDate) {
+    throw new Error('This feedback campaign is not currently active')
+  }
+
+  return campaign
+}
+
+export async function getFeedbackCampaignResponses(campaignId: string) {
+  const user = await getCurrentUser()
+  if (!user) {
+    throw new Error('Unauthorized')
+  }
+
+  // Get the campaign with responses
+  const campaign = await prisma.feedbackCampaign.findFirst({
+    where: {
+      id: campaignId,
+      userId: user.id, // Only allow the campaign creator to view responses
+    },
+    include: {
+      targetPerson: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      template: {
+        include: {
+          questions: {
+            orderBy: { sortOrder: 'asc' },
+          },
+        },
+      },
+      responses: {
+        orderBy: { submittedAt: 'desc' },
+      },
+    },
+  })
+
+  if (!campaign) {
+    throw new Error(
+      'Campaign not found or you do not have permission to view responses'
+    )
+  }
+
+  return campaign
 }

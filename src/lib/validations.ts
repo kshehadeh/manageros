@@ -200,6 +200,16 @@ export const feedbackResponseSchema = z.object({
 
 export type FeedbackResponseFormData = z.infer<typeof feedbackResponseSchema>
 
+export const feedbackResponseByInviteLinkSchema = z.object({
+  inviteLink: z.string().min(1, 'Invite link is required'),
+  responderEmail: z.string().email('Invalid email address'),
+  responses: z.record(z.any()), // Flexible JSON structure for feedback responses
+})
+
+export type FeedbackResponseByInviteLinkFormData = z.infer<
+  typeof feedbackResponseByInviteLinkSchema
+>
+
 export const feedbackTemplateSchema = z.object({
   name: z.string().min(1, 'Template name is required'),
   description: z.string().optional(),
