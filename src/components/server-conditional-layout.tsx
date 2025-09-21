@@ -29,7 +29,8 @@ export default async function ServerConditionalLayout({
         <ThemeProvider
           attribute='class'
           defaultTheme='dark'
-          enableSystem={false}
+          enableSystem={true}
+          storageKey='manageros-theme'
           disableTransitionOnChange
         >
           {children}
@@ -45,7 +46,8 @@ export default async function ServerConditionalLayout({
       <ThemeProvider
         attribute='class'
         defaultTheme='dark'
-        enableSystem={false}
+        enableSystem={true}
+        storageKey='manageros-theme'
         disableTransitionOnChange
       >
         <BreadcrumbProvider>

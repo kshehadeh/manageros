@@ -136,3 +136,14 @@ The application now includes standardized page layout classes to ensure consiste
 - All pages now use standardized layout classes for consistency.
 - Page titles should always use `h1` with the `.page-title` class.
 - Main layout provides consistent padding and max-width constraints.
+- The theme provider uses a custom storage key (`manageros-theme`) to avoid conflicts with other applications or browser extensions.
+
+### Troubleshooting
+
+**Theme switching not working in some sessions:**
+
+If theme switching fails to persist between sessions, it may be due to localStorage key conflicts. The application uses `manageros-theme` as the storage key. If you encounter issues:
+
+1. Check browser DevTools → Application → Local Storage to see if there are conflicting keys
+2. The application will automatically migrate from the old default key (`theme`) to the new key (`manageros-theme`) if needed
+3. Clearing localStorage for the specific key may resolve conflicts
