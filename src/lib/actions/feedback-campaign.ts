@@ -664,3 +664,55 @@ export async function getFeedbackCampaignResponses(campaignId: string) {
 
   return campaign
 }
+
+export async function getActiveFeedbackCampaignsForUser() {
+  const user = await getCurrentUser()
+
+  if (!user) {
+    throw new Error('Unauthorized')
+  }
+
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization')
+  }
+
+  // Get active campaigns created by the current user
+  const campaigns = await prisma.feedbackCampaign.findMany({
+    where: {
+      userId: user.id,
+      status: 'active',
+      startDate: {
+        lte: new Date(),
+      },
+      endDate: {
+        gte: new Date(),
+      },
+    },
+    include: {
+      targetPerson: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      template: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+        },
+      },
+      responses: {
+        select: {
+          id: true,
+          responderEmail: true,
+          submittedAt: true,
+        },
+      },
+    },
+    orderBy: { endDate: 'asc' },
+  })
+
+  return campaigns
+}
