@@ -2,7 +2,21 @@ import './globals.css'
 import ServerConditionalLayout from '@/components/server-conditional-layout'
 import type { ReactNode } from 'react'
 
-export const metadata = { title: 'ManagerOS', description: 'Manager-only MVP' }
+export const metadata = {
+  title: 'ManagerOS',
+  description: 'Manager-only MVP',
+  icons: {
+    icon: [
+      { url: '/favicon-white.ico', media: '(prefers-color-scheme: dark)' },
+      { url: '/favicon-black.ico', media: '(prefers-color-scheme: light)' },
+    ],
+    shortcut: [
+      { url: '/favicon-white.ico', media: '(prefers-color-scheme: dark)' },
+      { url: '/favicon-black.ico', media: '(prefers-color-scheme: light)' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
+}
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
