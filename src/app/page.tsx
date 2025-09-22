@@ -12,6 +12,7 @@ import {
 import PendingInvitations from '@/components/pending-invitations'
 import { ExpandableSection } from '@/components/expandable-section'
 import { ActiveFeedbackCampaigns } from '@/components/active-feedback-campaigns'
+import { DirectReportCard } from '@/components/direct-report-card'
 
 export default async function Home() {
   const session = await getServerSession(authOptions)
@@ -243,53 +244,11 @@ export default async function Home() {
             viewAllHref='/direct-reports'
           >
             {directReports.map(person => (
-              <div
+              <DirectReportCard
                 key={person.id}
-                className='flex items-center justify-between'
-              >
-                <div>
-                  <Link
-                    href={`/people/${person.id}`}
-                    className='font-medium hover:text-blue-400'
-                  >
-                    {person.name}
-                  </Link>
-                  <div className='text-neutral-400 text-sm'>
-                    {person.role ?? ''}
-                  </div>
-                  <div className='text-xs text-neutral-500 mt-1'>
-                    {person.team?.name && (
-                      <span>
-                        Team:{' '}
-                        <Link
-                          href={`/teams/${person.team.id}`}
-                          className='hover:text-blue-400'
-                        >
-                          {person.team.name}
-                        </Link>
-                      </span>
-                    )}
-                    {person.reports.length > 0 && (
-                      <span>
-                        {' '}
-                        • {person.reports.length} report
-                        {person.reports.length !== 1 ? 's' : ''}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <span
-                  className={`badge ${
-                    person.status === 'active'
-                      ? 'rag-green'
-                      : person.status === 'inactive'
-                        ? 'rag-red'
-                        : 'rag-amber'
-                  }`}
-                >
-                  {person.status.replace('_', ' ')}
-                </span>
-              </div>
+                report={person}
+                variant='compact'
+              />
             ))}
           </ExpandableSection>
         )}

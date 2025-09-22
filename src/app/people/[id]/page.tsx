@@ -7,6 +7,7 @@ import { PersonActionsDropdown } from '@/components/person-actions-dropdown'
 import { PersonDetailClient } from '@/components/person-detail-client'
 import { JiraAccountLinker } from '@/components/jira-account-linker'
 import { JiraWorkActivity } from '@/components/jira-work-activity'
+import { DirectReportCard } from '@/components/direct-report-card'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
@@ -309,51 +310,14 @@ export default async function PersonDetailPage({
                 </div>
                 <div className='space-y-3'>
                   {personWithRelations.reports.map(report => (
-                    <div
+                    <DirectReportCard
                       key={report.id}
-                      className='border border-neutral-800 rounded-xl p-3'
-                    >
-                      <div className='flex items-center justify-between'>
-                        <div>
-                          <Link
-                            href={`/people/${report.id}`}
-                            className='font-medium hover:text-blue-400'
-                          >
-                            {report.name}
-                          </Link>
-                          <div className='text-sm text-neutral-400'>
-                            {report.role ?? ''}
-                          </div>
-                          <div className='text-xs text-neutral-500'>
-                            {report.email}
-                          </div>
-                          {report.team && (
-                            <div className='text-xs text-neutral-500 mt-1'>
-                              Team: {report.team.name}
-                            </div>
-                          )}
-                        </div>
-                        <div className='flex items-center gap-2'>
-                          <span
-                            className={`badge ${
-                              report.status === 'active'
-                                ? 'rag-green'
-                                : report.status === 'inactive'
-                                  ? 'rag-red'
-                                  : 'rag-amber'
-                            }`}
-                          >
-                            {report.status.replace('_', ' ')}
-                          </span>
-                          <PersonActionsDropdown
-                            person={report}
-                            currentPerson={currentPerson}
-                            isAdmin={isAdmin(session.user)}
-                            size='sm'
-                          />
-                        </div>
-                      </div>
-                    </div>
+                      report={report}
+                      variant='simple'
+                      showActions={true}
+                      currentPerson={currentPerson}
+                      isAdmin={isAdmin(session.user)}
+                    />
                   ))}
                 </div>
               </section>

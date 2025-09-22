@@ -20,3 +20,8 @@ alwaysApply: true
 
 * Use the tailwind utility classes for all UI.
 * Read the tailwind.config.ts file for more information.
+
+## Forms
+
+When creating forms, use the shadcn form components.
+Only use cards when there is more than one section.  Each section can be in a card, but do not use a card if there's only a single section.
