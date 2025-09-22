@@ -20,6 +20,7 @@ import ReactFlow, {
 import dagre from 'dagre'
 import 'reactflow/dist/style.css'
 import { Person } from '@/types/person'
+import { PersonStatusBadge } from './person-status-badge'
 
 interface OrgChartReactFlowProps {
   people: Person[]
@@ -87,9 +88,7 @@ function PersonNode({ data }: { data: Person }) {
 
         {/* Status indicator */}
         <div className='flex items-center justify-end mt-2'>
-          <div
-            className={`w-2 h-2 rounded-full ${data.status === 'active' ? 'bg-emerald-500' : data.status === 'inactive' ? 'bg-red-500' : 'bg-amber-500'}`}
-          />
+          <PersonStatusBadge status={data.status} size='sm' />
         </div>
       </div>
     </div>

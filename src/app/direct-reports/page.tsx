@@ -2,15 +2,33 @@ import { getDirectReports } from '@/lib/actions'
 import { DirectReportCard } from '@/components/direct-report-card'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
+import { getServerSession } from 'next-auth'
+import { authOptions, isAdmin } from '@/lib/auth'
+import { prisma } from '@/lib/db'
 
 export default async function DirectReportsPage() {
+  const session = await getServerSession(authOptions)
+
+  if (!session?.user) {
+    redirect('/auth/signin')
+  }
+
   const user = await getCurrentUser()
 
   if (!user.organizationId) {
     redirect('/organization/create')
   }
 
-  const directReports = await getDirectReports()
+  const [directReports, currentPerson] = await Promise.all([
+    getDirectReports(),
+    prisma.person.findFirst({
+      where: {
+        user: {
+          id: session.user.id,
+        },
+      },
+    }),
+  ])
 
   return (
     <div className='space-y-6'>
@@ -59,6 +77,9 @@ export default async function DirectReportsPage() {
               key={report.id}
               report={report}
               variant='detailed'
+              showActions={true}
+              currentPerson={currentPerson}
+              isAdmin={isAdmin(session.user)}
             />
           ))}
         </div>

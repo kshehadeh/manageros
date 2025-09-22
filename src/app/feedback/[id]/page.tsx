@@ -103,10 +103,10 @@ export default async function FeedbackDetailPage({
                   <div className='text-sm text-neutral-400'>
                     {feedback.isPrivate ? (
                       <span className='badge bg-badge-neutral text-badge-neutral-text'>
-                        Private
+                        PRIVATE
                       </span>
                     ) : (
-                      <span className='badge rag-green'>Public</span>
+                      <span className='badge rag-green'>PUBLIC</span>
                     )}
                   </div>
                 </div>

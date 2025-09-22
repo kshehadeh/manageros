@@ -12,6 +12,7 @@ import {
   MessageCircle,
   MessageSquare,
 } from 'lucide-react'
+import { PersonStatusBadge } from './person-status-badge'
 import {
   Table,
   TableBody,
@@ -447,8 +448,12 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
             <TableHead className='text-muted-foreground'>Role</TableHead>
             <TableHead className='text-muted-foreground'>Team</TableHead>
             <TableHead className='text-muted-foreground'>Manager</TableHead>
-            <TableHead className='text-muted-foreground'>Direct Reports</TableHead>
-            <TableHead className='text-muted-foreground w-[50px]'>Actions</TableHead>
+            <TableHead className='text-muted-foreground'>
+              Direct Reports
+            </TableHead>
+            <TableHead className='text-muted-foreground w-[50px]'>
+              Actions
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -461,15 +466,7 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
             >
               <TableCell className='font-medium text-foreground'>
                 <div className='flex items-center gap-2'>
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      person.status === 'active'
-                        ? 'bg-emerald-500'
-                        : person.status === 'inactive'
-                          ? 'bg-red-500'
-                          : 'bg-amber-500'
-                    }`}
-                  />
+                  <PersonStatusBadge status={person.status} size='sm' />
                   {person.name}
                 </div>
               </TableCell>

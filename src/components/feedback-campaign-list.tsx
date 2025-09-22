@@ -207,10 +207,10 @@ export function FeedbackCampaignList({
                 )}
                 <Badge variant={getStatusVariant(campaign.status)}>
                   {getStatusIcon(campaign.status)}
-                  <span className='ml-1 capitalize'>{campaign.status}</span>
+                  <span className='ml-1'>{campaign.status.toUpperCase()}</span>
                 </Badge>
                 {isCampaignActive(campaign) && (
-                  <Badge variant='success'>Currently Active</Badge>
+                  <Badge variant='success'>CURRENTLY ACTIVE</Badge>
                 )}
               </div>
               <div className='relative'>

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { PersonStatusBadge } from './person-status-badge'
 
 interface Person {
   id: string
@@ -54,7 +55,7 @@ export function PeopleList({ people }: PeopleListProps) {
             <div className='flex-1'>
               <div className='flex items-center gap-3'>
                 <div className='flex items-center gap-2'>
-                  <div className={`w-3 h-3 rounded-full ${person.status === 'active' ? 'bg-emerald-500' : person.status === 'inactive' ? 'bg-red-500' : 'bg-amber-500'}`} />
+                  <PersonStatusBadge status={person.status} size='sm' />
                   <h3 className='font-semibold text-foreground'>
                     {person.name}
                   </h3>

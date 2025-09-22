@@ -8,6 +8,7 @@ import { PersonDetailClient } from '@/components/person-detail-client'
 import { JiraAccountLinker } from '@/components/jira-account-linker'
 import { JiraWorkActivity } from '@/components/jira-work-activity'
 import { DirectReportCard } from '@/components/direct-report-card'
+import { PersonStatusBadge } from '@/components/person-status-badge'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
@@ -198,17 +199,7 @@ export default async function PersonDetailPage({
             <div>
               <div className='flex items-center gap-3 mb-2'>
                 <h1 className='page-title'>{personWithRelations.name}</h1>
-                <span
-                  className={`badge ${
-                    personWithRelations.status === 'active'
-                      ? 'rag-green'
-                      : personWithRelations.status === 'inactive'
-                        ? 'rag-red'
-                        : 'rag-amber'
-                  }`}
-                >
-                  {personWithRelations.status.replace('_', ' ')}
-                </span>
+                <PersonStatusBadge status={personWithRelations.status} />
               </div>
               <div className='page-section-subtitle'>
                 {personWithRelations.role ?? ''}
@@ -486,7 +477,7 @@ export default async function PersonDetailPage({
                                       : 'badge'
                               }`}
                             >
-                              {task.status.replace('_', ' ')}
+                              {task.status.replace('_', ' ').toUpperCase()}
                             </span>
                             {task.priority && (
                               <span className='badge'>P{task.priority}</span>
@@ -697,7 +688,7 @@ export default async function PersonDetailPage({
 
           {/* Feedback Section - Only show if there's feedback or user can add feedback */}
           {(visibleFeedback.length > 0 || currentPerson?.id) && (
-            <section className='card'>
+            <section id='feedback' className='card'>
               <FeedbackList
                 person={personWithRelations}
                 feedback={visibleFeedback}

@@ -86,7 +86,9 @@ export default function InvitationList({
         <h3 className='text-lg font-medium text-foreground mb-4'>
           Organization Invitations
         </h3>
-        <p className='text-muted-foreground'>No invitations have been sent yet.</p>
+        <p className='text-muted-foreground'>
+          No invitations have been sent yet.
+        </p>
       </div>
     )
   }
@@ -106,10 +108,7 @@ export default function InvitationList({
       {/* Mobile Card View */}
       <div className='block sm:hidden space-y-3'>
         {invitations.map(invitation => (
-          <div
-            key={invitation.id}
-            className='border rounded-lg p-4'
-          >
+          <div key={invitation.id} className='border rounded-lg p-4'>
             <div className='flex items-center justify-between mb-2'>
               <div
                 className='font-medium text-foreground truncate max-w-xs'
@@ -118,10 +117,10 @@ export default function InvitationList({
                 {invitation.email}
               </div>
               <span className={`badge ${getStatusColor(invitation.status)}`}>
-                {invitation.status}
+                {invitation.status.toUpperCase()}
                 {invitation.status === 'pending' &&
                   isExpired(invitation.expiresAt) &&
-                  ' (Expired)'}
+                  ' (EXPIRED)'}
               </span>
             </div>
             <div className='text-sm text-muted-foreground space-y-1'>
@@ -135,7 +134,7 @@ export default function InvitationList({
                   <button
                     onClick={() => handleRevoke(invitation.id)}
                     disabled={revokingId === invitation.id}
-                  className='text-destructive hover:bg-destructive hover:text-destructive-foreground disabled:opacity-50 text-sm rounded px-2 py-1 border border-destructive'
+                    className='text-destructive hover:bg-destructive hover:text-destructive-foreground disabled:opacity-50 text-sm rounded px-2 py-1 border border-destructive'
                   >
                     {revokingId === invitation.id ? 'Revoking...' : 'Revoke'}
                   </button>
@@ -182,10 +181,10 @@ export default function InvitationList({
                   <span
                     className={`badge ${getStatusColor(invitation.status)}`}
                   >
-                    {invitation.status}
+                    {invitation.status.toUpperCase()}
                     {invitation.status === 'pending' &&
                       isExpired(invitation.expiresAt) &&
-                      ' (Expired)'}
+                      ' (EXPIRED)'}
                   </span>
                 </td>
                 <td className='hidden sm:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-muted-foreground'>

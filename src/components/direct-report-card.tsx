@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { PersonActionsDropdown } from '@/components/person-actions-dropdown'
+import { PersonStatusBadge } from '@/components/person-status-badge'
 import { Person, Team } from '@prisma/client'
 
 // Define the type for a person with all the relations needed for direct reports
@@ -44,56 +45,57 @@ export function DirectReportCard({
   isAdmin = false,
   className = '',
 }: DirectReportCardProps) {
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'rag-green'
-      case 'inactive':
-        return 'rag-red'
-      default:
-        return 'rag-amber'
-    }
-  }
-
   if (variant === 'detailed') {
     return (
       <div
-        className={`bg-neutral-900 border border-neutral-800 rounded-xl p-6 hover:border-neutral-700 transition-colors ${className}`}
+        className={`bg-card border rounded-xl p-6 hover:border-border/80 transition-colors ${className}`}
       >
         {/* Header */}
         <div className='flex items-start justify-between mb-4'>
           <div className='flex-1'>
-            <Link
-              href={`/people/${report.id}`}
-              className='text-lg font-semibold text-white hover:text-blue-400 transition-colors'
-            >
-              {report.name}
-            </Link>
+            <div className='flex items-center gap-2 mb-1'>
+              <Link
+                href={`/people/${report.id}`}
+                className='text-lg font-semibold text-card-foreground hover:text-primary transition-colors'
+              >
+                {report.name}
+              </Link>
+              <PersonStatusBadge status={report.status} size='sm' />
+            </div>
             {report.role && (
-              <p className='text-sm text-neutral-400 mt-1'>{report.role}</p>
+              <p className='text-sm text-muted-foreground mt-1'>
+                {report.role}
+              </p>
             )}
             {report.email && (
-              <p className='text-xs text-neutral-500 mt-1'>{report.email}</p>
+              <p className='text-xs text-muted-foreground/70 mt-1'>
+                {report.email}
+              </p>
             )}
           </div>
-          <div className='flex items-center gap-2'>
-            <span
-              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                report.status === 'active'
-                  ? 'bg-green-900/20 text-green-400'
-                  : 'bg-neutral-800 text-neutral-400'
-              }`}
-            >
-              {report.status}
-            </span>
-          </div>
+          {showActions && currentPerson && (
+            <PersonActionsDropdown
+              person={{
+                ...report,
+                team:
+                  report.team && 'createdAt' in report.team
+                    ? report.team
+                    : null,
+                reports: report.reports || [],
+                manager: report.manager || null,
+              }}
+              currentPerson={currentPerson}
+              isAdmin={isAdmin}
+              size='sm'
+            />
+          )}
         </div>
 
         {/* Team */}
         {report.team && (
           <div className='mb-4'>
-            <span className='text-xs text-neutral-500'>Team:</span>
-            <span className='text-sm text-neutral-300 ml-1'>
+            <span className='text-xs text-muted-foreground'>Team:</span>
+            <span className='text-sm text-card-foreground ml-1'>
               {report.team.name}
             </span>
           </div>
@@ -101,55 +103,38 @@ export function DirectReportCard({
 
         {/* Statistics */}
         {report._count && (
-          <div className='grid grid-cols-2 gap-4 pt-4 border-t border-neutral-800'>
+          <div className='grid grid-cols-2 gap-4 pt-4 border-t border-border'>
             <div className='text-center'>
-              <div className='text-xl font-bold text-blue-400'>
+              <div className='text-xl font-bold text-primary'>
                 {report._count.oneOnOnes}
               </div>
-              <div className='text-xs text-neutral-500'>1:1s</div>
+              <div className='text-xs text-muted-foreground'>1:1s</div>
             </div>
             <div className='text-center'>
-              <div className='text-xl font-bold text-green-400'>
-                {report._count.feedback}
-              </div>
-              <div className='text-xs text-neutral-500'>Feedback</div>
+              <Link
+                href={`/people/${report.id}#feedback`}
+                className='block hover:bg-accent/10 rounded-lg p-2 transition-colors'
+              >
+                <div className='text-xl font-bold text-badge-success'>
+                  {report._count.feedback}
+                </div>
+                <div className='text-xs text-muted-foreground'>Feedback</div>
+              </Link>
             </div>
             <div className='text-center'>
-              <div className='text-xl font-bold text-purple-400'>
+              <div className='text-xl font-bold text-badge-info'>
                 {report._count.tasks}
               </div>
-              <div className='text-xs text-neutral-500'>Tasks</div>
+              <div className='text-xs text-muted-foreground'>Tasks</div>
             </div>
             <div className='text-center'>
-              <div className='text-xl font-bold text-orange-400'>
+              <div className='text-xl font-bold text-badge-warning'>
                 {report._count.reports}
               </div>
-              <div className='text-xs text-neutral-500'>Reports</div>
+              <div className='text-xs text-muted-foreground'>Reports</div>
             </div>
           </div>
         )}
-
-        {/* Actions */}
-        <div className='flex gap-2 mt-4 pt-4 border-t border-neutral-800'>
-          <Link
-            href={`/people/${report.id}`}
-            className='flex-1 text-center px-3 py-2 text-sm bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-lg transition-colors'
-          >
-            View Profile
-          </Link>
-          <Link
-            href={`/oneonones/new?reportId=${report.id}`}
-            className='flex-1 text-center px-3 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors'
-          >
-            Add 1:1 Meeting
-          </Link>
-          <Link
-            href={`/people/${report.id}`}
-            className='flex-1 text-center px-3 py-2 text-sm bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors'
-          >
-            Add Feedback
-          </Link>
-        </div>
       </div>
     )
   }
@@ -186,9 +171,9 @@ export function DirectReportCard({
             )}
           </div>
         </div>
-        <span className={`badge ${getStatusBadgeClass(report.status)}`}>
-          {report.status.replace('_', ' ')}
-        </span>
+        <div className='flex items-center gap-2'>
+          <PersonStatusBadge status={report.status} size='sm' />
+        </div>
       </div>
     )
   }
@@ -205,9 +190,7 @@ export function DirectReportCard({
             >
               {report.name}
             </Link>
-            <span className={`badge ${getStatusBadgeClass(report.status)}`}>
-              {report.status.replace('_', ' ')}
-            </span>
+            <PersonStatusBadge status={report.status} size='sm' />
           </div>
           <div className='text-sm text-neutral-400'>{report.role ?? ''}</div>
           <div className='text-xs text-neutral-500'>{report.email}</div>

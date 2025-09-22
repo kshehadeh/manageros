@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { EditIconButton } from './edit-icon-button'
+import { PersonStatusBadge } from './person-status-badge'
 
 interface Person {
   id: string
@@ -122,17 +123,7 @@ export function PeopleHierarchy({ people }: PeopleHierarchyProps) {
                 </div>
 
                 <div className='flex items-center gap-2'>
-                  <span
-                    className={`badge ${
-                      person.status === 'active'
-                        ? 'rag-green'
-                        : person.status === 'inactive'
-                          ? 'rag-red'
-                          : 'rag-amber'
-                    }`}
-                  >
-                    {person.status.replace('_', ' ')}
-                  </span>
+                  <PersonStatusBadge status={person.status} />
                   <EditIconButton
                     href={`/people/${person.id}/edit`}
                     variant='outline'

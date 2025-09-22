@@ -8,6 +8,7 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { EditIconButton } from '@/components/edit-icon-button'
 import { Button } from '@/components/ui/button'
+import { PersonStatusBadge } from '@/components/person-status-badge'
 
 interface TeamDetailPageProps {
   params: Promise<{
@@ -140,17 +141,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
                       )}
                     </div>
                     <div className='flex items-center gap-2'>
-                      <span
-                        className={`badge ${
-                          person.status === 'active'
-                            ? 'rag-green'
-                            : person.status === 'inactive'
-                              ? 'rag-red'
-                              : 'rag-amber'
-                        }`}
-                      >
-                        {person.status.replace('_', ' ')}
-                      </span>
+                      <PersonStatusBadge status={person.status} />
                       <EditIconButton
                         href={`/people/${person.id}/edit`}
                         variant='outline'

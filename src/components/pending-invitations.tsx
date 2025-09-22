@@ -97,10 +97,7 @@ export default function PendingInvitations({
 
       <div className='space-y-4'>
         {invitations.map(invitation => (
-          <div
-            key={invitation.id}
-            className='p-4 border rounded-lg bg-card'
-          >
+          <div key={invitation.id} className='p-4 border rounded-lg bg-card'>
             <div className='flex items-start justify-between'>
               <div className='flex-1'>
                 <div className='flex items-center gap-2 mb-2'>
@@ -109,7 +106,7 @@ export default function PendingInvitations({
                   </h3>
                   {isExpiringSoon(invitation.expiresAt) && (
                     <span className='badge rag-amber text-xs'>
-                      Expires Soon
+                      EXPIRES SOON
                     </span>
                   )}
                 </div>
@@ -135,7 +132,12 @@ export default function PendingInvitations({
                 </div>
               </div>
 
-              <Button onClick={() => handleAcceptInvitation(invitation.id)} disabled={acceptingInvitation === invitation.id} variant='outline' size='sm'>
+              <Button
+                onClick={() => handleAcceptInvitation(invitation.id)}
+                disabled={acceptingInvitation === invitation.id}
+                variant='outline'
+                size='sm'
+              >
                 {acceptingInvitation === invitation.id ? (
                   <>
                     <svg

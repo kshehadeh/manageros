@@ -146,7 +146,7 @@ function TaskCard({
           <h4 className='font-medium text-sm leading-tight'>{task.title}</h4>
           <div className='flex items-center gap-1 ml-2'>
             <span className={`badge ${statusColor} text-xs`}>
-              {task.status.replace('_', ' ')}
+              {task.status.replace('_', ' ').toUpperCase()}
             </span>
             <span className={`badge ${priorityColor} text-xs`}>
               P{task.priority}

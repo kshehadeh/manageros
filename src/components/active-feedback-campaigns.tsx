@@ -53,7 +53,7 @@ export function ActiveFeedbackCampaigns({
             <div className='flex items-center gap-3 mb-2'>
               <Badge variant='success' className='flex items-center gap-1'>
                 <Play className='h-3 w-3' />
-                Active
+                ACTIVE
               </Badge>
               <Link
                 href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}/responses`}
