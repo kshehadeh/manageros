@@ -5,6 +5,7 @@ import { taskSchema, type TaskFormData } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
+import { type TaskStatus } from '@/lib/task-status'
 
 export async function createTask(formData: TaskFormData) {
   const user = await getCurrentUser()
@@ -329,10 +330,7 @@ export async function createQuickTask(title: string) {
   return task
 }
 
-export async function updateTaskStatus(
-  taskId: string,
-  status: 'todo' | 'doing' | 'blocked' | 'done' | 'dropped'
-) {
+export async function updateTaskStatus(taskId: string, status: TaskStatus) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization

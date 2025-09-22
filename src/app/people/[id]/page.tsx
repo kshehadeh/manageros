@@ -16,6 +16,7 @@ import { authOptions, isAdmin } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { TaskStatus, taskStatusUtils } from '@/lib/task-status'
 import {
   Person,
   Team,
@@ -515,17 +516,11 @@ export default async function PersonDetailPage({
                           </div>
                           <div className='flex items-center gap-2'>
                             <span
-                              className={`badge ${
-                                task.status === 'done'
-                                  ? 'rag-green'
-                                  : task.status === 'doing'
-                                    ? 'rag-amber'
-                                    : task.status === 'blocked'
-                                      ? 'rag-red'
-                                      : 'badge'
-                              }`}
+                              className={`badge ${taskStatusUtils.getVariant(task.status as TaskStatus)}`}
                             >
-                              {task.status.replace('_', ' ').toUpperCase()}
+                              {taskStatusUtils
+                                .getLabel(task.status as TaskStatus)
+                                .toUpperCase()}
                             </span>
                             {task.priority && (
                               <span className='badge'>P{task.priority}</span>

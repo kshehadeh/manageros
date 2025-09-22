@@ -9,26 +9,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  type TaskStatus,
+  taskStatusUtils,
+  ALL_TASK_STATUSES,
+} from '@/lib/task-status'
 
 interface TaskStatusSelectorProps {
   taskId: string
-  currentStatus: 'todo' | 'doing' | 'blocked' | 'done' | 'dropped'
-}
-
-const statusLabels = {
-  todo: 'To Do',
-  doing: 'Doing',
-  blocked: 'Blocked',
-  done: 'Done',
-  dropped: 'Dropped',
-}
-
-const statusColors = {
-  todo: 'badge',
-  doing: 'rag-amber',
-  blocked: 'rag-red',
-  done: 'rag-green',
-  dropped: 'badge',
+  currentStatus: TaskStatus
 }
 
 export function TaskStatusSelector({
@@ -37,9 +26,7 @@ export function TaskStatusSelector({
 }: TaskStatusSelectorProps) {
   const [isUpdating, setIsUpdating] = useState(false)
 
-  async function handleStatusChange(
-    newStatus: 'todo' | 'doing' | 'blocked' | 'done' | 'dropped'
-  ) {
+  async function handleStatusChange(newStatus: TaskStatus) {
     if (newStatus === currentStatus) return
 
     setIsUpdating(true)
@@ -57,26 +44,26 @@ export function TaskStatusSelector({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className={`badge ${statusColors[currentStatus]} flex items-center gap-1 hover:opacity-80 transition-opacity ${
+          className={`badge ${taskStatusUtils.getVariant(currentStatus)} flex items-center gap-1 hover:opacity-80 transition-opacity ${
             isUpdating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
           }`}
           disabled={isUpdating}
         >
-          {statusLabels[currentStatus]}
+          {taskStatusUtils.getLabel(currentStatus)}
           <ChevronDown className='w-3 h-3' />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='start'>
-        {Object.entries(statusLabels).map(([status, label]) => (
+        {ALL_TASK_STATUSES.map(status => (
           <DropdownMenuItem
             key={status}
-            onClick={() => handleStatusChange(status as any)}
+            onClick={() => handleStatusChange(status)}
             className={status === currentStatus ? 'bg-neutral-800' : ''}
           >
             <span
-              className={`badge ${statusColors[status as keyof typeof statusColors]} mr-2`}
+              className={`badge ${taskStatusUtils.getVariant(status)} mr-2`}
             >
-              {label}
+              {taskStatusUtils.getLabel(status)}
             </span>
           </DropdownMenuItem>
         ))}

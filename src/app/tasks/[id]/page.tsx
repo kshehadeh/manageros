@@ -10,6 +10,7 @@ import { EditIconButton } from '@/components/edit-icon-button'
 import { TaskDetailBreadcrumbClient } from '@/components/task-detail-breadcrumb-client'
 import { TaskStatusSelector } from '@/components/task-status-selector'
 import { Eye } from 'lucide-react'
+import { type TaskStatus } from '@/lib/task-status'
 
 export default async function TaskDetailPage({
   params,
@@ -50,7 +51,7 @@ export default async function TaskDetailPage({
             <div className='flex items-center gap-3 mt-2'>
               <TaskStatusSelector
                 taskId={task.id}
-                currentStatus={task.status}
+                currentStatus={task.status as TaskStatus}
               />
               <span
                 className={`badge ${priorityColors[task.priority as keyof typeof priorityColors]}`}

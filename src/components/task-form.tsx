@@ -8,6 +8,11 @@ import { Textarea } from '@/components/ui/textarea'
 import { createTask, updateTask } from '@/lib/actions'
 import { type TaskFormData } from '@/lib/validations'
 import { Person, Initiative, Objective } from '@prisma/client'
+import {
+  type TaskStatus,
+  taskStatusUtils,
+  DEFAULT_TASK_STATUS,
+} from '@/lib/task-status'
 
 interface TaskFormProps {
   people: Person[]
@@ -50,12 +55,8 @@ export function TaskForm({
         title: formData.get('title') as string,
         description: formData.get('description') as string,
         assigneeId: formData.get('assigneeId') as string,
-        status: ((formData.get('status') as string) || 'todo') as
-          | 'todo'
-          | 'doing'
-          | 'blocked'
-          | 'done'
-          | 'dropped',
+        status: ((formData.get('status') as string) ||
+          DEFAULT_TASK_STATUS) as TaskStatus,
         priority: parseInt(formData.get('priority') as string) || 2,
         estimate: formData.get('estimate')
           ? parseInt(formData.get('estimate') as string)
@@ -143,14 +144,14 @@ export function TaskForm({
             <select
               id='status'
               name='status'
-              defaultValue={initialData?.status || 'todo'}
+              defaultValue={initialData?.status || DEFAULT_TASK_STATUS}
               className='input'
             >
-              <option value='todo'>To Do</option>
-              <option value='doing'>Doing</option>
-              <option value='blocked'>Blocked</option>
-              <option value='done'>Done</option>
-              <option value='dropped'>Dropped</option>
+              {taskStatusUtils.getSelectOptions().map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
             </select>
           </div>
         </div>

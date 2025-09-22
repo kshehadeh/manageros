@@ -7,6 +7,13 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { QuickTaskForm } from '@/components/quick-task-form'
 import { Task, Person, Initiative, Objective } from '@prisma/client'
+import {
+  type TaskStatus,
+  taskStatusUtils,
+  ALL_TASK_STATUSES,
+  TASK_STATUS,
+  ACTIVE_STATUSES,
+} from '@/lib/task-status'
 
 type TaskWithRelations = Task & {
   assignee: Person | null
@@ -28,29 +35,26 @@ export default async function TasksPage() {
   const tasks = await getTasks()
 
   // Group tasks by status
-  const tasksByStatus = {
-    todo: tasks.filter(task => task.status === 'todo'),
-    doing: tasks.filter(task => task.status === 'doing'),
-    blocked: tasks.filter(task => task.status === 'blocked'),
-    done: tasks.filter(task => task.status === 'done'),
-    dropped: tasks.filter(task => task.status === 'dropped'),
-  }
+  const tasksByStatus = ALL_TASK_STATUSES.reduce(
+    (acc, status) => {
+      acc[status] = tasks.filter(task => task.status === status)
+      return acc
+    },
+    {} as Record<TaskStatus, TaskWithRelations[]>
+  )
 
-  const statusLabels = {
-    todo: 'To Do',
-    doing: 'Doing',
-    blocked: 'Blocked',
-    done: 'Done',
-    dropped: 'Dropped',
-  }
+  // Get active tasks (not completed)
+  const activeTasks = ACTIVE_STATUSES.flatMap(
+    (status: TaskStatus) => tasksByStatus[status]
+  )
 
-  const statusVariants = {
-    todo: 'neutral' as const,
-    doing: 'warning' as const,
-    blocked: 'error' as const,
-    done: 'success' as const,
-    dropped: 'neutral' as const,
-  }
+  // Get recently completed tasks (done in last 30 days)
+  const thirtyDaysAgo = new Date()
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+  const recentlyCompletedTasks = tasksByStatus[TASK_STATUS.DONE].filter(
+    task => task.completedAt && new Date(task.completedAt) >= thirtyDaysAgo
+  )
 
   const priorityVariants = {
     1: 'error' as const,
@@ -77,64 +81,74 @@ export default async function TasksPage() {
       </div>
 
       <div className='page-section'>
-        <div className='card'>
-          <QuickTaskForm />
-        </div>
+        <QuickTaskForm />
       </div>
 
       <div className='page-section'>
-        {/* Task Statistics */}
-        <div className='grid grid-cols-2 md:grid-cols-5 gap-4'>
-          {Object.entries(tasksByStatus).map(([status, statusTasks]) => (
-            <div key={status} className='card text-center'>
-              <div className='text-2xl font-bold text-foreground'>
-                {statusTasks.length}
-              </div>
-              <div className='text-sm text-muted-foreground'>
-                {statusLabels[status as keyof typeof statusLabels]}
-              </div>
+        <div className='grid gap-6 lg:grid-cols-2'>
+          {/* Active Tasks */}
+          <div className='card'>
+            <div className='flex items-center justify-between mb-4'>
+              <h2 className='text-lg font-semibold'>Active Tasks</h2>
+              <span className='text-sm text-muted-foreground'>
+                {activeTasks.length} tasks
+              </span>
             </div>
-          ))}
-        </div>
+            <div className='space-y-3'>
+              {activeTasks.length === 0 ? (
+                <div className='text-muted-foreground text-sm text-center py-8'>
+                  No active tasks
+                </div>
+              ) : (
+                activeTasks.map((task: TaskWithRelations) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task as TaskWithRelations}
+                    statusVariant={taskStatusUtils.getUIVariant(
+                      task.status as TaskStatus
+                    )}
+                    priorityVariant={
+                      priorityVariants[
+                        task.priority as keyof typeof priorityVariants
+                      ]
+                    }
+                  />
+                ))
+              )}
+            </div>
+          </div>
 
-        {/* Tasks by Status */}
-        <div className='grid gap-6 lg:grid-cols-2 xl:grid-cols-3'>
-          {Object.entries(tasksByStatus).map(([status, statusTasks]) => (
-            <div key={status} className='card'>
-              <div className='flex items-center justify-between mb-4'>
-                <h3 className='font-semibold'>
-                  {statusLabels[status as keyof typeof statusLabels]} (
-                  {statusTasks.length})
-                </h3>
-              </div>
-              <div className='space-y-3'>
-                {statusTasks.length === 0 ? (
-                  <div className='text-muted-foreground text-sm text-center py-4'>
-                    No{' '}
-                    {statusLabels[
-                      status as keyof typeof statusLabels
-                    ].toLowerCase()}{' '}
-                    tasks
-                  </div>
-                ) : (
-                  statusTasks.map(task => (
-                    <TaskCard
-                      key={task.id}
-                      task={task as TaskWithRelations}
-                      statusVariant={
-                        statusVariants[status as keyof typeof statusVariants]
-                      }
-                      priorityVariant={
-                        priorityVariants[
-                          task.priority as keyof typeof priorityVariants
-                        ]
-                      }
-                    />
-                  ))
-                )}
-              </div>
+          {/* Recently Completed Tasks */}
+          <div className='card'>
+            <div className='flex items-center justify-between mb-4'>
+              <h2 className='text-lg font-semibold'>Recently Completed</h2>
+              <span className='text-sm text-muted-foreground'>
+                {recentlyCompletedTasks.length} tasks (last 30 days)
+              </span>
             </div>
-          ))}
+            <div className='space-y-3'>
+              {recentlyCompletedTasks.length === 0 ? (
+                <div className='text-muted-foreground text-sm text-center py-8'>
+                  No tasks completed in the last 30 days
+                </div>
+              ) : (
+                recentlyCompletedTasks.map((task: TaskWithRelations) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task as TaskWithRelations}
+                    statusVariant={taskStatusUtils.getUIVariant(
+                      task.status as TaskStatus
+                    )}
+                    priorityVariant={
+                      priorityVariants[
+                        task.priority as keyof typeof priorityVariants
+                      ]
+                    }
+                  />
+                ))
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -162,7 +176,9 @@ function TaskCard({
           </h4>
           <div className='flex items-center gap-1 ml-2'>
             <Badge variant={statusVariant} className='text-xs'>
-              {task.status.replace('_', ' ').toUpperCase()}
+              {taskStatusUtils
+                .getLabel(task.status as TaskStatus)
+                .toUpperCase()}
             </Badge>
             <Badge variant={priorityVariant} className='text-xs'>
               P{task.priority}

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { ALL_TASK_STATUSES } from '@/lib/task-status'
 
 export const initiativeSchema = z.object({
   title: z
@@ -136,9 +137,7 @@ export const taskSchema = z.object({
     .max(200, 'Title must be less than 200 characters'),
   description: z.string().optional(),
   assigneeId: z.string().optional(),
-  status: z
-    .enum(['todo', 'doing', 'blocked', 'done', 'dropped'])
-    .default('todo'),
+  status: z.enum(ALL_TASK_STATUSES as [string, ...string[]]).default('todo'),
   priority: z.number().min(1).max(5).default(2),
   estimate: z.number().min(0).optional(),
   dueDate: z.string().optional(),

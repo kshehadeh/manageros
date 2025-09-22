@@ -1,0 +1,129 @@
+/**
+ * Centralized task status types and utilities
+ * This file provides a single source of truth for all task status-related functionality
+ */
+
+// Task status enum - matches the database schema
+export const TASK_STATUS = {
+  TODO: 'todo',
+  DOING: 'doing',
+  BLOCKED: 'blocked',
+  DONE: 'done',
+  DROPPED: 'dropped',
+} as const
+
+// Type for task status values
+export type TaskStatus = (typeof TASK_STATUS)[keyof typeof TASK_STATUS]
+
+// Human-readable labels for each status
+export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
+  [TASK_STATUS.TODO]: 'To Do',
+  [TASK_STATUS.DOING]: 'Doing',
+  [TASK_STATUS.BLOCKED]: 'Blocked',
+  [TASK_STATUS.DONE]: 'Done',
+  [TASK_STATUS.DROPPED]: 'Dropped',
+}
+
+// CSS class variants for each status (for badges, buttons, etc.)
+export const TASK_STATUS_VARIANTS: Record<TaskStatus, string> = {
+  [TASK_STATUS.TODO]: 'badge',
+  [TASK_STATUS.DOING]: 'rag-amber',
+  [TASK_STATUS.BLOCKED]: 'rag-red',
+  [TASK_STATUS.DONE]: 'rag-green',
+  [TASK_STATUS.DROPPED]: 'badge',
+}
+
+// Alternative variants for different UI contexts
+export const TASK_STATUS_UI_VARIANTS: Record<
+  TaskStatus,
+  'neutral' | 'warning' | 'error' | 'success'
+> = {
+  [TASK_STATUS.TODO]: 'neutral',
+  [TASK_STATUS.DOING]: 'warning',
+  [TASK_STATUS.BLOCKED]: 'error',
+  [TASK_STATUS.DONE]: 'success',
+  [TASK_STATUS.DROPPED]: 'neutral',
+}
+
+// Array of all task statuses for iteration
+export const ALL_TASK_STATUSES: TaskStatus[] = Object.values(TASK_STATUS)
+
+// Array of task statuses that indicate work in progress
+export const IN_PROGRESS_STATUSES: TaskStatus[] = [
+  TASK_STATUS.DOING,
+  TASK_STATUS.BLOCKED,
+]
+
+// Array of task statuses that indicate completion
+export const COMPLETED_STATUSES: TaskStatus[] = [
+  TASK_STATUS.DONE,
+  TASK_STATUS.DROPPED,
+]
+
+// Array of task statuses that indicate active work (not completed)
+export const ACTIVE_STATUSES: TaskStatus[] = [
+  TASK_STATUS.TODO,
+  TASK_STATUS.DOING,
+  TASK_STATUS.BLOCKED,
+]
+
+// Utility functions
+export const taskStatusUtils = {
+  /**
+   * Get the human-readable label for a task status
+   */
+  getLabel: (status: TaskStatus): string => TASK_STATUS_LABELS[status],
+
+  /**
+   * Get the CSS variant class for a task status
+   */
+  getVariant: (status: TaskStatus): string => TASK_STATUS_VARIANTS[status],
+
+  /**
+   * Get the UI variant for a task status
+   */
+  getUIVariant: (
+    status: TaskStatus
+  ): 'neutral' | 'warning' | 'error' | 'success' =>
+    TASK_STATUS_UI_VARIANTS[status],
+
+  /**
+   * Check if a status indicates work in progress
+   */
+  isInProgress: (status: TaskStatus): boolean =>
+    IN_PROGRESS_STATUSES.includes(status),
+
+  /**
+   * Check if a status indicates completion
+   */
+  isCompleted: (status: TaskStatus): boolean =>
+    COMPLETED_STATUSES.includes(status),
+
+  /**
+   * Check if a status indicates active work (not completed)
+   */
+  isActive: (status: TaskStatus): boolean => ACTIVE_STATUSES.includes(status),
+
+  /**
+   * Get all statuses as options for select elements
+   */
+  getSelectOptions: () =>
+    ALL_TASK_STATUSES.map(status => ({
+      value: status,
+      label: TASK_STATUS_LABELS[status],
+    })),
+
+  /**
+   * Validate if a string is a valid task status
+   */
+  isValid: (status: string): status is TaskStatus =>
+    ALL_TASK_STATUSES.includes(status as TaskStatus),
+}
+
+// Type guard function
+export function isTaskStatus(status: string): status is TaskStatus {
+  return taskStatusUtils.isValid(status)
+}
+
+// Default task status
+export const DEFAULT_TASK_STATUS: TaskStatus = TASK_STATUS.TODO

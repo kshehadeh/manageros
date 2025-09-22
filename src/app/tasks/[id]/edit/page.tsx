@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import { TaskForm } from '@/components/task-form'
 import { TaskDetailBreadcrumbClient } from '@/components/task-detail-breadcrumb-client'
+import { type TaskStatus } from '@/lib/task-status'
 
 export default async function EditTaskPage({
   params,
@@ -58,7 +59,7 @@ export default async function EditTaskPage({
     title: task.title,
     description: task.description || '',
     assigneeId: task.assigneeId || '',
-    status: task.status as 'todo' | 'doing' | 'blocked' | 'done' | 'dropped',
+    status: task.status as TaskStatus,
     priority: task.priority,
     estimate: task.estimate || undefined,
     dueDate: task.dueDate
