@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Rag } from '@/components/rag'
+import { InitiativeCard } from '@/components/initiative-card'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -22,6 +22,7 @@ export default async function InitiativesPage() {
     orderBy: { updatedAt: 'desc' },
     include: {
       objectives: true,
+      team: true,
       _count: { select: { checkIns: true } },
     },
   })
@@ -39,30 +40,15 @@ export default async function InitiativesPage() {
         </div>
       </div>
       <div className='page-section'>
-        <div className='grid gap-3'>
-          {inits.map(i => (
-            <Link
-              key={i.id}
-              href={`/initiatives/${i.id}`}
-              className='card hover:bg-accent/50 transition-colors'
-            >
-              <div className='flex items-center justify-between'>
-                <div>
-                  <div className='font-semibold'>{i.title}</div>
-                  <div className='text-sm text-muted-foreground'>
-                    {i.summary ?? ''}
-                  </div>
-                  <div className='text-xs text-muted-foreground mt-2'>
-                    {i.objectives.length} objectives · {i._count.checkIns}{' '}
-                    check-ins
-                  </div>
-                </div>
-                <div className='flex items-center gap-2'>
-                  <Rag rag={i.rag} />
-                  <span className='badge'>{i.confidence}%</span>
-                </div>
-              </div>
-            </Link>
+        <div className='flex flex-col gap-3'>
+          {inits.map(initiative => (
+            <InitiativeCard
+              key={initiative.id}
+              initiative={initiative}
+              variant='default'
+              showTeam={true}
+              showOwners={false}
+            />
           ))}
           {inits.length === 0 && (
             <div className='text-muted-foreground text-sm'>

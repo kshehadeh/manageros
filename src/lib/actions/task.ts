@@ -66,14 +66,14 @@ export async function createTask(formData: TaskFormData) {
   const task = await prisma.task.create({
     data: {
       title: validatedData.title,
-      description: validatedData.description,
+      description: validatedData.description || null,
       assigneeId: validatedData.assigneeId,
       status: validatedData.status,
       priority: validatedData.priority,
-      estimate: validatedData.estimate,
+      estimate: validatedData.estimate || null,
       dueDate,
-      initiativeId: validatedData.initiativeId,
-      objectiveId: validatedData.objectiveId,
+      initiativeId: validatedData.initiativeId || null,
+      objectiveId: validatedData.objectiveId || null,
     },
     include: {
       assignee: true,
@@ -165,14 +165,14 @@ export async function updateTask(taskId: string, formData: TaskFormData) {
     where: { id: taskId },
     data: {
       title: validatedData.title,
-      description: validatedData.description,
+      description: validatedData.description || null,
       assigneeId: validatedData.assigneeId,
       status: validatedData.status,
       priority: validatedData.priority,
-      estimate: validatedData.estimate,
+      estimate: validatedData.estimate || null,
       dueDate,
-      initiativeId: validatedData.initiativeId,
-      objectiveId: validatedData.objectiveId,
+      initiativeId: validatedData.initiativeId || null,
+      objectiveId: validatedData.objectiveId || null,
       completedAt: validatedData.status === 'done' ? new Date() : null,
     },
     include: {
@@ -233,11 +233,7 @@ export async function getTasks() {
 
   const tasks = await prisma.task.findMany({
     where: {
-      OR: [
-        { assignee: { organizationId: user.organizationId } },
-        { initiative: { organizationId: user.organizationId } },
-        { objective: { initiative: { organizationId: user.organizationId } } },
-      ],
+      assignee: { organizationId: user.organizationId },
     },
     include: {
       assignee: true,
@@ -261,11 +257,7 @@ export async function getTask(taskId: string) {
   const task = await prisma.task.findFirst({
     where: {
       id: taskId,
-      OR: [
-        { assignee: { organizationId: user.organizationId } },
-        { initiative: { organizationId: user.organizationId } },
-        { objective: { initiative: { organizationId: user.organizationId } } },
-      ],
+      assignee: { organizationId: user.organizationId },
     },
     include: {
       assignee: true,

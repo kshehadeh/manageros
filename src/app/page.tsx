@@ -1,7 +1,6 @@
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Rag } from '@/components/rag'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -13,6 +12,7 @@ import PendingInvitations from '@/components/pending-invitations'
 import { ExpandableSection } from '@/components/expandable-section'
 import { ActiveFeedbackCampaigns } from '@/components/active-feedback-campaigns'
 import { PersonListItemCard } from '@/components/person-list-item-card'
+import { InitiativeCard } from '@/components/initiative-card'
 
 export default async function Home() {
   const session = await getServerSession(authOptions)
@@ -305,42 +305,13 @@ export default async function Home() {
             viewAllHref='/initiatives'
           >
             {openInitiatives.map(initiative => (
-              <div
+              <InitiativeCard
                 key={initiative.id}
-                className='flex items-center justify-between'
-              >
-                <div>
-                  <Link
-                    href={`/initiatives/${initiative.id}`}
-                    className='font-medium hover:text-primary'
-                  >
-                    {initiative.title}
-                  </Link>
-                  <div className='text-muted-foreground text-sm'>
-                    {initiative.summary ?? ''}
-                  </div>
-                  <div className='text-xs text-muted-foreground mt-1'>
-                    {initiative.objectives.length} objectives •{' '}
-                    {initiative._count.checkIns} check-ins
-                    {initiative.team && (
-                      <span>
-                        {' '}
-                        • Team:{' '}
-                        <Link
-                          href={`/teams/${initiative.team.id}`}
-                          className='hover:text-primary'
-                        >
-                          {initiative.team.name}
-                        </Link>
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className='flex items-center gap-2'>
-                  <Rag rag={initiative.rag} />
-                  <span className='badge'>{initiative.confidence}%</span>
-                </div>
-              </div>
+                initiative={initiative}
+                variant='compact'
+                showTeam={true}
+                showOwners={false}
+              />
             ))}
           </ExpandableSection>
         )}

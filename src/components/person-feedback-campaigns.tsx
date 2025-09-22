@@ -94,9 +94,12 @@ export function PersonFeedbackCampaigns({
           <div className='flex items-center justify-between mb-2'>
             <div className='flex items-center gap-2'>
               {campaign.name && (
-                <div className='font-medium text-foreground'>
+                <Link
+                  href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`}
+                  className='font-medium text-foreground hover:text-blue-600 transition-colors'
+                >
                   {campaign.name}
-                </div>
+                </Link>
               )}
               <FeedbackCampaignStatusBadge
                 status={campaign.status}
@@ -119,6 +122,14 @@ export function PersonFeedbackCampaigns({
                   onClick={e => e.stopPropagation()}
                 >
                   <div className='py-1'>
+                    <Link
+                      href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`}
+                      className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                      onClick={closeDropdown}
+                    >
+                      <Eye className='w-4 h-4' />
+                      View Details
+                    </Link>
                     {campaign.status === 'draft' && (
                       <Link
                         href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}/edit`}

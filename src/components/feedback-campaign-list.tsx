@@ -170,9 +170,12 @@ export function FeedbackCampaignList({
             <div className='flex items-center justify-between'>
               <div className='flex items-center gap-3'>
                 {campaign.name && (
-                  <h3 className='text-lg font-semibold text-foreground'>
+                  <Link
+                    href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`}
+                    className='text-lg font-semibold text-foreground hover:text-blue-600 transition-colors'
+                  >
                     {campaign.name}
-                  </h3>
+                  </Link>
                 )}
                 <FeedbackCampaignStatusBadge
                   status={campaign.status}
@@ -195,6 +198,14 @@ export function FeedbackCampaignList({
                     onClick={e => e.stopPropagation()}
                   >
                     <div className='py-1'>
+                      <Link
+                        href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`}
+                        className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                        onClick={closeDropdown}
+                      >
+                        <Eye className='w-4 h-4' />
+                        View Details
+                      </Link>
                       {campaign.status === 'draft' && (
                         <>
                           <Link

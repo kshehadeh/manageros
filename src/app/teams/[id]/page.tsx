@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
-import { Rag } from '@/components/rag'
 import { TeamDetailClient } from '@/components/team-detail-client'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
@@ -10,6 +9,7 @@ import { EditIconButton } from '@/components/edit-icon-button'
 import { Button } from '@/components/ui/button'
 import { PersonListItemCard } from '@/components/person-list-item-card'
 import { TeamCard } from '@/components/team-card'
+import { InitiativeCard } from '@/components/initiative-card'
 
 interface TeamDetailPageProps {
   params: Promise<{
@@ -51,11 +51,13 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
       },
       initiatives: {
         include: {
+          objectives: true,
           owners: {
             include: {
               person: true,
             },
           },
+          _count: { select: { checkIns: true } },
         },
         orderBy: { updatedAt: 'desc' },
       },
@@ -140,42 +142,14 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
             </div>
             <div className='space-y-3'>
               {team.initiatives.map(initiative => (
-                <Link
+                <InitiativeCard
                   key={initiative.id}
-                  href={`/initiatives/${initiative.id}`}
-                  className='block border rounded-xl p-3 hover:bg-accent/50 transition-colors'
-                >
-                  <div className='flex items-center justify-between'>
-                    <div>
-                      <div className='font-medium'>{initiative.title}</div>
-                      <div className='text-sm text-muted-foreground'>
-                        {initiative.summary ?? ''}
-                      </div>
-                      <div className='text-xs text-muted-foreground mt-1'>
-                        {initiative.owners.length > 0 && (
-                          <span>
-                            Owners:{' '}
-                            {initiative.owners.map((owner, index) => (
-                              <span key={owner.person.id}>
-                                <Link
-                                  href={`/people/${owner.person.id}`}
-                                  className='hover:text-primary'
-                                >
-                                  {owner.person.name}
-                                </Link>
-                                {index < initiative.owners.length - 1 && ', '}
-                              </span>
-                            ))}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className='flex items-center gap-2'>
-                      <Rag rag={initiative.rag} />
-                      <span className='badge'>{initiative.confidence}%</span>
-                    </div>
-                  </div>
-                </Link>
+                  initiative={initiative}
+                  variant='default'
+                  showTeam={false}
+                  showOwners={true}
+                  className='border rounded-xl p-3'
+                />
               ))}
               {team.initiatives.length === 0 && (
                 <div className='text-neutral-400 text-sm text-center py-4'>
