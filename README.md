@@ -141,6 +141,8 @@ bun run start        # Start production server
 bun run prisma:generate  # Generate Prisma client
 bun run prisma:push      # Push schema changes to database
 bun run prisma:seed      # Seed database with sample data
+bun run db:backup        # Create database backup
+bun run db:restore       # Restore database from backup
 ```
 
 ## 🔐 Authentication

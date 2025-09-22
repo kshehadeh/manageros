@@ -48,7 +48,7 @@ export function TaskForm({
   const [formData, setFormData] = useState<TaskFormData>({
     title: initialData?.title || '',
     description: initialData?.description || undefined,
-    assigneeId: preselectedAssigneeId || initialData?.assigneeId || '',
+    assigneeId: preselectedAssigneeId || initialData?.assigneeId || undefined,
     status: initialData?.status || DEFAULT_TASK_STATUS,
     priority: initialData?.priority || 2,
     estimate: initialData?.estimate || undefined,
@@ -110,11 +110,8 @@ export function TaskForm({
     field: keyof TaskFormData,
     value: string | number | undefined
   ) {
-    // Convert empty strings to undefined for optional fields (except title and assigneeId which are required)
-    const processedValue =
-      value === '' && field !== 'title' && field !== 'assigneeId'
-        ? undefined
-        : value
+    // Convert empty strings to undefined for optional fields (except title which is required)
+    const processedValue = value === '' && field !== 'title' ? undefined : value
     setFormData(prev => ({ ...prev, [field]: processedValue }))
     // Clear field error when user starts typing
     if (errors[field]) {
@@ -178,17 +175,16 @@ export function TaskForm({
               htmlFor='assigneeId'
               className='block text-sm font-medium mb-2'
             >
-              Assignee *
+              Assignee
             </label>
             <select
               id='assigneeId'
               name='assigneeId'
-              required
               value={formData.assigneeId || ''}
               onChange={e => handleInputChange('assigneeId', e.target.value)}
               className={`input ${errors.assigneeId ? 'border-red-500' : ''}`}
             >
-              <option value=''>Select assignee</option>
+              <option value=''>Select assignee (optional)</option>
               {people.map(person => (
                 <option key={person.id} value={person.id}>
                   {person.name}

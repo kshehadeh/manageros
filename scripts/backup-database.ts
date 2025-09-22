@@ -8,6 +8,7 @@ import { format } from 'date-fns'
 
 /**
  * Database backup script for ManagerOS
+ * Creates data-only backups of the public schema (table contents without schema)
  * Handles Supabase connections properly
  */
 
@@ -68,7 +69,7 @@ function createBackup(options: BackupOptions = {}) {
 
   try {
     if (verbose) {
-      console.log(`Starting database backup...`)
+      console.log(`Starting data-only backup of public schema...`)
       console.log(`Database: ${dbConfig.database}`)
       console.log(`Host: ${dbConfig.host}:${dbConfig.port}`)
       console.log(`Username: ${dbConfig.username}`)
@@ -94,13 +95,12 @@ function createBackup(options: BackupOptions = {}) {
       console.log(`PGPASSWORD=${env.PGPASSWORD ? '***' : 'NOT SET'}`)
     }
 
-    // Build pg_dump command (simplified, relies on environment variables)
+    // Build pg_dump command (data-only, public schema only)
     const pgDumpCommand = [
       'pg_dump',
       '--verbose',
-      '--clean',
-      '--if-exists',
-      '--create',
+      '--data-only',
+      '--schema=public',
       '--format=plain',
     ].join(' ')
 

@@ -99,6 +99,7 @@ export {
   getTasks,
   getTask,
   createQuickTask,
+  createQuickTaskForInitiative,
   updateTaskStatus,
 } from './task'
 

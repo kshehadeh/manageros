@@ -21,6 +21,7 @@
     "prisma:seed": "bun prisma/seed.ts",
     "db:init": "bun scripts/init-database.ts",
     "db:backup": "bun scripts/backup-database.ts --verbose",
+    "db:restore": "bun scripts/restore-database.ts",
     "postinstall": "bunx prisma generate",
     "prepare": "husky"
   },

@@ -162,12 +162,14 @@ async function main() {
                 {
                   title: 'Lazy-load below-the-fold images',
                   assigneeId: alice.id,
+                  createdById: user1.id,
                   status: 'doing',
                   priority: 1,
                 },
                 {
                   title: 'Cache HTML at CDN for PDP',
                   assigneeId: bob.id,
+                  createdById: user1.id,
                   status: 'todo',
                   priority: 2,
                 },

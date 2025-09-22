@@ -67,7 +67,8 @@ export async function createTask(formData: TaskFormData) {
     data: {
       title: validatedData.title,
       description: validatedData.description || null,
-      assigneeId: validatedData.assigneeId,
+      assigneeId: validatedData.assigneeId || null,
+      createdById: user.id,
       status: validatedData.status,
       priority: validatedData.priority,
       estimate: validatedData.estimate || null,
@@ -79,6 +80,7 @@ export async function createTask(formData: TaskFormData) {
       assignee: true,
       initiative: true,
       objective: true,
+      createdBy: true,
     },
   })
 
@@ -166,7 +168,7 @@ export async function updateTask(taskId: string, formData: TaskFormData) {
     data: {
       title: validatedData.title,
       description: validatedData.description || null,
-      assigneeId: validatedData.assigneeId,
+      assigneeId: validatedData.assigneeId || null,
       status: validatedData.status,
       priority: validatedData.priority,
       estimate: validatedData.estimate || null,
@@ -179,6 +181,7 @@ export async function updateTask(taskId: string, formData: TaskFormData) {
       assignee: true,
       initiative: true,
       objective: true,
+      createdBy: true,
     },
   })
 
@@ -233,12 +236,13 @@ export async function getTasks() {
 
   const tasks = await prisma.task.findMany({
     where: {
-      assignee: { organizationId: user.organizationId },
+      createdBy: { organizationId: user.organizationId },
     },
     include: {
       assignee: true,
       initiative: true,
       objective: true,
+      createdBy: true,
     },
     orderBy: { updatedAt: 'desc' },
   })
@@ -257,12 +261,13 @@ export async function getTask(taskId: string) {
   const task = await prisma.task.findFirst({
     where: {
       id: taskId,
-      assignee: { organizationId: user.organizationId },
+      createdBy: { organizationId: user.organizationId },
     },
     include: {
       assignee: true,
       initiative: true,
       objective: true,
+      createdBy: true,
     },
   })
 
@@ -308,16 +313,106 @@ export async function createQuickTask(title: string) {
       status: 'todo',
       priority: 2,
       assigneeId,
+      createdById: user.id,
     },
     include: {
       assignee: true,
       initiative: true,
       objective: true,
+      createdBy: true,
     },
   })
 
   // Revalidate the tasks page
   revalidatePath('/tasks')
+
+  return task
+}
+
+export async function createQuickTaskForInitiative(
+  title: string,
+  initiativeId: string,
+  objectiveId?: string
+) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to create tasks')
+  }
+
+  // Validate the title
+  if (!title || title.trim().length === 0) {
+    throw new Error('Task title is required')
+  }
+
+  if (title.length > 200) {
+    throw new Error('Title must be less than 200 characters')
+  }
+
+  // Verify initiative belongs to user's organization
+  const initiative = await prisma.initiative.findFirst({
+    where: {
+      id: initiativeId,
+      organizationId: user.organizationId,
+    },
+  })
+  if (!initiative) {
+    throw new Error('Initiative not found or access denied')
+  }
+
+  // Verify objective belongs to the initiative if specified
+  if (objectiveId) {
+    const objective = await prisma.objective.findFirst({
+      where: {
+        id: objectiveId,
+        initiativeId: initiativeId,
+      },
+    })
+    if (!objective) {
+      throw new Error(
+        'Objective not found or does not belong to this initiative'
+      )
+    }
+  }
+
+  // Verify the person belongs to the user's organization if user is linked to a person
+  let assigneeId = null
+  if (user.personId) {
+    const person = await prisma.person.findFirst({
+      where: {
+        id: user.personId,
+        organizationId: user.organizationId,
+      },
+    })
+
+    if (person) {
+      assigneeId = user.personId
+    }
+  }
+
+  // Create the task with defaults
+  const task = await prisma.task.create({
+    data: {
+      title: title.trim(),
+      status: 'todo',
+      priority: 2,
+      assigneeId,
+      createdById: user.id,
+      initiativeId,
+      objectiveId: objectiveId || null,
+    },
+    include: {
+      assignee: true,
+      initiative: true,
+      objective: true,
+      createdBy: true,
+    },
+  })
+
+  // Revalidate the tasks page and initiative page
+  revalidatePath('/tasks')
+  revalidatePath(`/initiatives/${initiativeId}`)
 
   return task
 }
@@ -357,6 +452,7 @@ export async function updateTaskStatus(taskId: string, status: TaskStatus) {
       assignee: true,
       initiative: true,
       objective: true,
+      createdBy: true,
     },
   })
 

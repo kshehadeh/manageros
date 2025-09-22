@@ -162,6 +162,17 @@ export default async function TaskDetailPage({
                 </div>
               </div>
 
+              {task.createdBy && (
+                <div>
+                  <span className='text-sm font-medium text-neutral-300'>
+                    Created By:
+                  </span>
+                  <div className='mt-1 text-sm text-neutral-400'>
+                    {task.createdBy.name}
+                  </div>
+                </div>
+              )}
+
               <div>
                 <span className='text-sm font-medium text-neutral-300'>
                   Last Updated:

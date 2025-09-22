@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { CheckInForm } from '@/components/checkin-form'
+import { InitiativeDetailClient } from '@/components/initiative-detail-client'
 
 export default async function NewCheckInPage({
   params,
@@ -32,22 +33,27 @@ export default async function NewCheckInPage({
   }
 
   return (
-    <div className='space-y-6'>
-      <div className='flex items-center gap-4'>
-        <div>
-          <h1 className='text-2xl font-bold'>New Check-in</h1>
-          <p className='text-neutral-400'>
-            Add a progress update for {initiative.title}
-          </p>
+    <InitiativeDetailClient
+      initiativeTitle={initiative.title}
+      initiativeId={initiative.id}
+    >
+      <div className='space-y-6'>
+        <div className='flex items-center gap-4'>
+          <div>
+            <h1 className='text-2xl font-bold'>New Check-in</h1>
+            <p className='text-neutral-400'>
+              Add a progress update for {initiative.title}
+            </p>
+          </div>
+        </div>
+
+        <div className='card'>
+          <CheckInForm
+            initiativeId={initiative.id}
+            initiativeTitle={initiative.title}
+          />
         </div>
       </div>
-
-      <div className='card'>
-        <CheckInForm
-          initiativeId={initiative.id}
-          initiativeTitle={initiative.title}
-        />
-      </div>
-    </div>
+    </InitiativeDetailClient>
   )
 }

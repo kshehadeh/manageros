@@ -37,6 +37,7 @@ model User {
   sentInvitations OrganizationInvitation[]
   jiraCredentials UserJiraCredentials?
   feedbackCampaigns FeedbackCampaign[]
+  createdTasks   Task[]
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   
@@ -150,6 +151,8 @@ model Task {
   description  String?
   assigneeId   String?
   assignee     Person?     @relation(fields: [assigneeId], references: [id])
+  createdById  String
+  createdBy    User        @relation(fields: [createdById], references: [id])
   status       String      @default("todo") // todo|doing|blocked|done|dropped
   priority     Int         @default(2)
   estimate     Int?
