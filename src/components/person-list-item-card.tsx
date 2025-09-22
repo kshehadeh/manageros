@@ -143,20 +143,25 @@ export function PersonListItemCard({
     return (
       <div className={`flex items-center justify-between ${className}`}>
         <div>
-          <Link
-            href={`/people/${person.id}`}
-            className='font-medium hover:text-blue-400'
-          >
-            {person.name}
-          </Link>
-          <div className='text-neutral-400 text-sm'>{person.role ?? ''}</div>
-          <div className='text-xs text-neutral-500 mt-1'>
+          <div className='flex items-center gap-2'>
+            <Link
+              href={`/people/${person.id}`}
+              className='font-medium hover:text-primary transition-colors'
+            >
+              {person.name}
+            </Link>
+            <PersonStatusBadge status={person.status} size='sm' />
+          </div>
+          <div className='text-muted-foreground text-sm'>
+            {person.role ?? ''}
+          </div>
+          <div className='text-xs text-muted-foreground mt-1'>
             {person.team?.name && (
               <span>
                 Team:{' '}
                 <Link
                   href={`/teams/${person.team.id}`}
-                  className='hover:text-blue-400'
+                  className='hover:text-primary transition-colors'
                 >
                   {person.team.name}
                 </Link>
@@ -171,31 +176,30 @@ export function PersonListItemCard({
             )}
           </div>
         </div>
-        <div className='flex items-center gap-2'>
-          <PersonStatusBadge status={person.status} size='sm' />
-        </div>
       </div>
     )
   }
 
   // Default 'simple' variant
   return (
-    <div className={`border border-neutral-800 rounded-xl p-3 ${className}`}>
+    <div className={`border rounded-xl p-3 ${className}`}>
       <div className='flex items-start justify-between'>
         <div className='flex-1'>
           <div className='flex items-center gap-2 mb-1'>
             <Link
               href={`/people/${person.id}`}
-              className='font-medium hover:text-blue-400'
+              className='font-medium hover:text-primary transition-colors'
             >
               {person.name}
             </Link>
             <PersonStatusBadge status={person.status} size='sm' />
           </div>
-          <div className='text-sm text-neutral-400'>{person.role ?? ''}</div>
-          <div className='text-xs text-neutral-500'>{person.email}</div>
+          <div className='text-sm text-muted-foreground'>
+            {person.role ?? ''}
+          </div>
+          <div className='text-xs text-muted-foreground'>{person.email}</div>
           {person.team && (
-            <div className='text-xs text-neutral-500 mt-1'>
+            <div className='text-xs text-muted-foreground mt-1'>
               Team: {person.team.name}
             </div>
           )}

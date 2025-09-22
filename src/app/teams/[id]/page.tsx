@@ -8,7 +8,8 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { EditIconButton } from '@/components/edit-icon-button'
 import { Button } from '@/components/ui/button'
-import { PersonStatusBadge } from '@/components/person-status-badge'
+import { PersonListItemCard } from '@/components/person-list-item-card'
+import { TeamCard } from '@/components/team-card'
 
 interface TeamDetailPageProps {
   params: Promise<{
@@ -110,46 +111,12 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
             </div>
             <div className='space-y-3'>
               {team.people.map(person => (
-                <div
+                <PersonListItemCard
                   key={person.id}
-                  className='border border-neutral-800 rounded-xl p-3'
-                >
-                  <div className='flex items-center justify-between'>
-                    <div>
-                      <Link
-                        href={`/people/${person.id}`}
-                        className='font-medium hover:text-blue-400'
-                      >
-                        {person.name}
-                      </Link>
-                      <div className='text-sm text-neutral-400'>
-                        {person.role ?? ''}
-                      </div>
-                      <div className='text-xs text-neutral-500'>
-                        {person.email}
-                      </div>
-                      {person.manager && (
-                        <div className='text-xs text-neutral-500 mt-1'>
-                          Reports to:{' '}
-                          <Link
-                            href={`/people/${person.manager.id}`}
-                            className='hover:text-blue-400'
-                          >
-                            {person.manager.name}
-                          </Link>
-                        </div>
-                      )}
-                    </div>
-                    <div className='flex items-center gap-2'>
-                      <PersonStatusBadge status={person.status} />
-                      <EditIconButton
-                        href={`/people/${person.id}/edit`}
-                        variant='outline'
-                        size='sm'
-                      />
-                    </div>
-                  </div>
-                </div>
+                  person={person}
+                  variant='simple'
+                  showActions={false}
+                />
               ))}
               {team.people.length === 0 && (
                 <div className='text-neutral-400 text-sm text-center py-4'>
@@ -233,33 +200,12 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
           </div>
           <div className='space-y-3'>
             {team.children.map(childTeam => (
-              <Link
+              <TeamCard
                 key={childTeam.id}
-                href={`/teams/${childTeam.id}`}
-                className='block border border-neutral-800 rounded-xl p-3 hover:bg-neutral-800/60'
-              >
-                <div className='flex items-center justify-between'>
-                  <div>
-                    <div className='font-medium'>{childTeam.name}</div>
-                    <div className='text-sm text-neutral-400'>
-                      {childTeam.description ?? ''}
-                    </div>
-                    <div className='text-xs text-neutral-500 mt-1'>
-                      {childTeam.people.length} member
-                      {childTeam.people.length !== 1 ? 's' : ''} •{' '}
-                      {childTeam.initiatives.length} initiative
-                      {childTeam.initiatives.length !== 1 ? 's' : ''}
-                    </div>
-                  </div>
-                  <div className='flex items-center gap-2'>
-                    <EditIconButton
-                      href={`/teams/${childTeam.id}/edit`}
-                      variant='outline'
-                      size='sm'
-                    />
-                  </div>
-                </div>
-              </Link>
+                team={childTeam}
+                variant='simple'
+                showActions={true}
+              />
             ))}
             {team.children.length === 0 && (
               <div className='text-neutral-400 text-sm text-center py-4'>

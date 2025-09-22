@@ -59,69 +59,73 @@ export default async function TasksPage() {
   }
 
   return (
-    <div className='space-y-6'>
-      <div className='flex items-center justify-between'>
-        <div>
-          <h1 className='text-2xl font-bold'>Tasks</h1>
-          <p className='text-neutral-400'>
-            Manage and track all tasks across your organization
-          </p>
+    <div className='page-container'>
+      <div className='page-header'>
+        <div className='flex items-center justify-between'>
+          <div>
+            <h1 className='page-title'>Tasks</h1>
+            <p className='page-subtitle'>
+              Manage and track all tasks across your organization
+            </p>
+          </div>
+          <Button asChild variant='outline'>
+            <Link href='/tasks/new'>Create Task</Link>
+          </Button>
         </div>
-        <Button asChild variant='outline'>
-          <Link href='/tasks/new'>Create Task</Link>
-        </Button>
       </div>
 
-      {/* Task Statistics */}
-      <div className='grid grid-cols-2 md:grid-cols-5 gap-4'>
-        {Object.entries(tasksByStatus).map(([status, statusTasks]) => (
-          <div key={status} className='card text-center'>
-            <div className='text-2xl font-bold'>{statusTasks.length}</div>
-            <div className='text-sm text-neutral-400'>
-              {statusLabels[status as keyof typeof statusLabels]}
+      <div className='page-section'>
+        {/* Task Statistics */}
+        <div className='grid grid-cols-2 md:grid-cols-5 gap-4'>
+          {Object.entries(tasksByStatus).map(([status, statusTasks]) => (
+            <div key={status} className='card text-center'>
+              <div className='text-2xl font-bold'>{statusTasks.length}</div>
+              <div className='text-sm text-neutral-400'>
+                {statusLabels[status as keyof typeof statusLabels]}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      {/* Tasks by Status */}
-      <div className='grid gap-6 lg:grid-cols-2 xl:grid-cols-3'>
-        {Object.entries(tasksByStatus).map(([status, statusTasks]) => (
-          <div key={status} className='card'>
-            <div className='flex items-center justify-between mb-4'>
-              <h3 className='font-semibold'>
-                {statusLabels[status as keyof typeof statusLabels]} (
-                {statusTasks.length})
-              </h3>
+        {/* Tasks by Status */}
+        <div className='grid gap-6 lg:grid-cols-2 xl:grid-cols-3'>
+          {Object.entries(tasksByStatus).map(([status, statusTasks]) => (
+            <div key={status} className='card'>
+              <div className='flex items-center justify-between mb-4'>
+                <h3 className='font-semibold'>
+                  {statusLabels[status as keyof typeof statusLabels]} (
+                  {statusTasks.length})
+                </h3>
+              </div>
+              <div className='space-y-3'>
+                {statusTasks.length === 0 ? (
+                  <div className='text-neutral-400 text-sm text-center py-4'>
+                    No{' '}
+                    {statusLabels[
+                      status as keyof typeof statusLabels
+                    ].toLowerCase()}{' '}
+                    tasks
+                  </div>
+                ) : (
+                  statusTasks.map(task => (
+                    <TaskCard
+                      key={task.id}
+                      task={task as TaskWithRelations}
+                      statusColor={
+                        statusColors[status as keyof typeof statusColors]
+                      }
+                      priorityColor={
+                        priorityColors[
+                          task.priority as keyof typeof priorityColors
+                        ]
+                      }
+                    />
+                  ))
+                )}
+              </div>
             </div>
-            <div className='space-y-3'>
-              {statusTasks.length === 0 ? (
-                <div className='text-neutral-400 text-sm text-center py-4'>
-                  No{' '}
-                  {statusLabels[
-                    status as keyof typeof statusLabels
-                  ].toLowerCase()}{' '}
-                  tasks
-                </div>
-              ) : (
-                statusTasks.map(task => (
-                  <TaskCard
-                    key={task.id}
-                    task={task as TaskWithRelations}
-                    statusColor={
-                      statusColors[status as keyof typeof statusColors]
-                    }
-                    priorityColor={
-                      priorityColors[
-                        task.priority as keyof typeof priorityColors
-                      ]
-                    }
-                  />
-                ))
-              )}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   )

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { FeedbackCampaignStatusBadge } from '@/components/feedback-campaign-status-badge'
 import { updateCampaignStatus, deleteFeedbackCampaign } from '@/lib/actions'
 import {
   Calendar,
@@ -63,38 +64,6 @@ export function FeedbackCampaignList({
   const [deletingCampaign, setDeletingCampaign] = useState<string | null>(null)
   const [copiedLink, setCopiedLink] = useState<string | null>(null)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
-
-  const getStatusVariant = (
-    status: string
-  ): 'neutral' | 'success' | 'info' | 'error' => {
-    switch (status) {
-      case 'draft':
-        return 'neutral'
-      case 'active':
-        return 'success'
-      case 'completed':
-        return 'info'
-      case 'cancelled':
-        return 'error'
-      default:
-        return 'neutral'
-    }
-  }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'draft':
-        return <Calendar className='h-4 w-4' />
-      case 'active':
-        return <Play className='h-4 w-4' />
-      case 'completed':
-        return <CheckCircle className='h-4 w-4' />
-      case 'cancelled':
-        return <Pause className='h-4 w-4' />
-      default:
-        return <Calendar className='h-4 w-4' />
-    }
-  }
 
   const handleStatusUpdate = async (
     campaignId: string,
@@ -205,13 +174,10 @@ export function FeedbackCampaignList({
                     {campaign.name}
                   </h3>
                 )}
-                <Badge variant={getStatusVariant(campaign.status)}>
-                  {getStatusIcon(campaign.status)}
-                  <span className='ml-1'>{campaign.status.toUpperCase()}</span>
-                </Badge>
-                {isCampaignActive(campaign) && (
-                  <Badge variant='success'>CURRENTLY ACTIVE</Badge>
-                )}
+                <FeedbackCampaignStatusBadge
+                  status={campaign.status}
+                  isCurrentlyActive={isCampaignActive(campaign)}
+                />
               </div>
               <div className='relative'>
                 <Button

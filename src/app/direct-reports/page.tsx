@@ -1,5 +1,5 @@
 import { getDirectReports } from '@/lib/actions'
-import { DirectReportCard } from '@/components/direct-report-card'
+import { PersonListItemCard } from '@/components/person-list-item-card'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { getServerSession } from 'next-auth'
@@ -73,9 +73,9 @@ export default async function DirectReportsPage() {
       ) : (
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
           {directReports.map(report => (
-            <DirectReportCard
+            <PersonListItemCard
               key={report.id}
-              report={report}
+              person={report}
               variant='detailed'
               showActions={true}
               currentPerson={currentPerson}

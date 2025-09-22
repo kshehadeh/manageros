@@ -136,7 +136,7 @@
 
 /* Markdown prose styling */
 .prose {
-  @apply text-neutral-200;
+  @apply text-foreground;
 }
 
 .prose h1,
@@ -145,7 +145,7 @@
 .prose h4,
 .prose h5,
 .prose h6 {
-  @apply text-neutral-100 font-semibold;
+  @apply text-foreground font-semibold;
 }
 
 .prose h1 {
@@ -172,7 +172,7 @@
 }
 
 .prose strong {
-  @apply font-semibold text-neutral-100;
+  @apply font-semibold text-foreground;
 }
 
 .prose em {
@@ -180,15 +180,15 @@
 }
 
 .prose code {
-  @apply bg-neutral-800 px-1 py-0.5 rounded text-xs font-mono;
+  @apply bg-muted px-1 py-0.5 rounded text-xs font-mono text-foreground;
 }
 
 .prose pre {
-  @apply bg-neutral-800 p-2 rounded overflow-x-auto;
+  @apply bg-muted p-2 rounded overflow-x-auto text-foreground;
 }
 
 .prose blockquote {
-  @apply border-l-2 border-neutral-700 pl-3 italic text-neutral-400;
+  @apply border-l-2 border-border pl-3 italic text-muted-foreground;
 }
 
 /* Fix calendar icon visibility to honor theme tokens */
@@ -217,7 +217,7 @@ input[type='time']::-webkit-calendar-picker-indicator {
 }
 
 .page-subtitle {
-  @apply text-muted-foreground;
+  @apply text-muted-foreground hidden md:block;
 }
 
 .page-section {
@@ -229,7 +229,7 @@ input[type='time']::-webkit-calendar-picker-indicator {
 }
 
 .page-section-subtitle {
-  @apply text-sm text-muted-foreground;
+  @apply text-sm text-muted-foreground hidden md:block;
 }
 
 /* Standardized link hover colors */

@@ -7,8 +7,9 @@ import { PersonActionsDropdown } from '@/components/person-actions-dropdown'
 import { PersonDetailClient } from '@/components/person-detail-client'
 import { JiraAccountLinker } from '@/components/jira-account-linker'
 import { JiraWorkActivity } from '@/components/jira-work-activity'
-import { DirectReportCard } from '@/components/direct-report-card'
+import { PersonListItemCard } from '@/components/person-list-item-card'
 import { PersonStatusBadge } from '@/components/person-status-badge'
+import { PersonFeedbackCampaigns } from '@/components/person-feedback-campaigns'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
@@ -26,6 +27,7 @@ import {
   Initiative,
   Objective,
   Feedback,
+  FeedbackCampaign,
 } from '@prisma/client'
 
 type PersonWithRelations = Person & {
@@ -64,6 +66,22 @@ type PersonWithRelations = Person & {
     createdAt: Date
     updatedAt: Date
   } | null
+  feedbackCampaigns: (FeedbackCampaign & {
+    user: {
+      id: string
+      name: string
+      email: string
+    }
+    template: {
+      id: string
+      name: string
+    } | null
+    responses: {
+      id: string
+      responderEmail: string
+      submittedAt: Date | null
+    }[]
+  })[]
 }
 
 interface PersonDetailPageProps {
@@ -162,6 +180,36 @@ export default async function PersonDetailPage({
         orderBy: { createdAt: 'desc' },
       },
       jiraAccount: true,
+      feedbackCampaigns: {
+        where: {
+          status: {
+            in: ['active', 'draft'],
+          },
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          template: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          responses: {
+            select: {
+              id: true,
+              responderEmail: true,
+              submittedAt: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      },
     },
   })
 
@@ -301,9 +349,9 @@ export default async function PersonDetailPage({
                 </div>
                 <div className='space-y-3'>
                   {personWithRelations.reports.map(report => (
-                    <DirectReportCard
+                    <PersonListItemCard
                       key={report.id}
-                      report={report}
+                      person={report}
                       variant='simple'
                       showActions={true}
                       currentPerson={currentPerson}
@@ -693,6 +741,30 @@ export default async function PersonDetailPage({
                 person={personWithRelations}
                 feedback={visibleFeedback}
                 currentUserId={currentPerson?.id}
+              />
+            </section>
+          )}
+
+          {/* Feedback Campaigns Section - Only show if there are active or draft campaigns */}
+          {personWithRelations.feedbackCampaigns.length > 0 && (
+            <section className='card'>
+              <div className='flex items-center justify-between mb-4'>
+                <h3 className='font-semibold'>
+                  Feedback Campaigns (
+                  {personWithRelations.feedbackCampaigns.length})
+                </h3>
+                <Button asChild variant='outline' size='sm'>
+                  <Link
+                    href={`/people/${personWithRelations.id}/feedback-campaigns`}
+                    className='flex items-center gap-2'
+                  >
+                    <Eye className='w-4 h-4' />
+                    View All
+                  </Link>
+                </Button>
+              </div>
+              <PersonFeedbackCampaigns
+                campaigns={personWithRelations.feedbackCampaigns}
               />
             </section>
           )}

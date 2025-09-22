@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { Badge } from '@/components/ui/badge'
-import { Calendar, Users, Mail, Play, ArrowRight } from 'lucide-react'
+import { FeedbackCampaignStatusBadge } from '@/components/feedback-campaign-status-badge'
+import { Calendar, Users, Mail, ArrowRight } from 'lucide-react'
 import { format } from 'date-fns'
 import { ExpandableSection } from '@/components/expandable-section'
 
@@ -51,10 +51,7 @@ export function ActiveFeedbackCampaigns({
         <div key={campaign.id} className='flex items-center justify-between'>
           <div className='flex-1'>
             <div className='flex items-center gap-3 mb-2'>
-              <Badge variant='success' className='flex items-center gap-1'>
-                <Play className='h-3 w-3' />
-                ACTIVE
-              </Badge>
+              <FeedbackCampaignStatusBadge status='active' />
               <Link
                 href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}/responses`}
                 className='font-medium hover:text-blue-600'

@@ -12,7 +12,7 @@ import {
 import PendingInvitations from '@/components/pending-invitations'
 import { ExpandableSection } from '@/components/expandable-section'
 import { ActiveFeedbackCampaigns } from '@/components/active-feedback-campaigns'
-import { DirectReportCard } from '@/components/direct-report-card'
+import { PersonListItemCard } from '@/components/person-list-item-card'
 
 export default async function Home() {
   const session = await getServerSession(authOptions)
@@ -244,9 +244,9 @@ export default async function Home() {
             viewAllHref='/direct-reports'
           >
             {directReports.map(person => (
-              <DirectReportCard
+              <PersonListItemCard
                 key={person.id}
-                report={person}
+                person={person}
                 variant='compact'
               />
             ))}

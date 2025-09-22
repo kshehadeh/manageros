@@ -4,9 +4,7 @@ import { FeedbackResponseDetail } from '@/components/feedback-response-detail'
 import { FeedbackCampaignResponsesBreadcrumbClient } from '@/components/feedback-campaign-responses-breadcrumb-client'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft, Users, Calendar, Mail } from 'lucide-react'
-import Link from 'next/link'
+import { Users, Calendar, Mail } from 'lucide-react'
 import { format } from 'date-fns'
 
 interface FeedbackCampaignResponsesPageProps {
@@ -19,7 +17,7 @@ interface FeedbackCampaignResponsesPageProps {
 export default async function FeedbackCampaignResponsesPage({
   params,
 }: FeedbackCampaignResponsesPageProps) {
-  const { id, campaignId } = await params
+  const { id: _id, campaignId } = await params
 
   try {
     const campaign = await getFeedbackCampaignResponses(campaignId)
@@ -36,15 +34,6 @@ export default async function FeedbackCampaignResponsesPage({
       >
         <div className='page-container'>
           <div className='page-header'>
-            <div className='flex items-center gap-4 mb-4'>
-              <Button variant='outline' size='sm' asChild>
-                <Link href={`/people/${id}/feedback-campaigns`}>
-                  <ArrowLeft className='h-4 w-4 mr-2' />
-                  Back to Campaigns
-                </Link>
-              </Button>
-            </div>
-
             <h1 className='page-title'>Feedback Responses</h1>
             <p className='page-subtitle'>
               Responses for feedback campaign about{' '}
