@@ -39,6 +39,7 @@ interface FeedbackCampaignFormProps {
   person: Person
   campaign?: {
     id: string
+    name?: string
     targetPersonId: string
     templateId?: string
     startDate: string
@@ -59,6 +60,7 @@ export function FeedbackCampaignForm({
 }: FeedbackCampaignFormProps) {
   const router = useRouter()
   const [formData, setFormData] = useState<FeedbackCampaignFormData>({
+    name: campaign?.name || '',
     targetPersonId: person.id,
     templateId: campaign?.templateId || '',
     startDate: campaign?.startDate || '',
@@ -161,138 +163,146 @@ export function FeedbackCampaignForm({
   }
 
   return (
-    <div className='w-full max-w-2xl mx-auto'>
-      <div className='page-header'>
-        <h2 className='page-title'>
-          {campaign ? 'Edit Feedback Campaign' : 'Create Feedback Campaign'}
-        </h2>
-        <p className='page-subtitle'>
-          Create a feedback campaign for {person.name}. External stakeholders
-          will be invited to provide feedback.
-        </p>
-      </div>
-      <form onSubmit={handleSubmit} className='space-y-6'>
-        {error && (
-          <div className='p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md'>
-            {error}
-          </div>
-        )}
+    <form onSubmit={handleSubmit} className='space-y-6'>
+      {error && (
+        <div className='p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md'>
+          {error}
+        </div>
+      )}
 
-        <div className='page-section'>
-          <div className='space-y-2'>
-            <Label>Feedback Template</Label>
-            {isLoadingTemplates ? (
-              <div className='text-muted-foreground'>Loading templates...</div>
-            ) : (
-              <Select
-                value={formData.templateId}
-                onValueChange={value =>
-                  setFormData(prev => ({ ...prev, templateId: value }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder='Select a template' />
-                </SelectTrigger>
-                <SelectContent>
-                  {templates.map(template => (
-                    <SelectItem key={template.id} value={template.id}>
-                      {template.name}
-                      {template.isDefault && ' (Default)'}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-            {formData.templateId && (
-              <div className='text-sm text-muted-foreground'>
-                {templates.find(t => t.id === formData.templateId)?.description}
-              </div>
-            )}
-          </div>
-
-          <div className='grid grid-cols-2 gap-4'>
-            <div className='space-y-2'>
-              <Label htmlFor='startDate'>Start Date</Label>
-              <Input
-                id='startDate'
-                type='date'
-                value={formData.startDate}
-                onChange={e =>
-                  setFormData(prev => ({
-                    ...prev,
-                    startDate: e.target.value,
-                  }))
-                }
-                required
-              />
-            </div>
-            <div className='space-y-2'>
-              <Label htmlFor='endDate'>End Date</Label>
-              <Input
-                id='endDate'
-                type='date'
-                value={formData.endDate}
-                onChange={e =>
-                  setFormData(prev => ({ ...prev, endDate: e.target.value }))
-                }
-                required
-              />
-            </div>
-          </div>
-
-          <div className='space-y-2'>
-            <Label>Invite Emails</Label>
-            <div className='space-y-2'>
-              {formData.inviteEmails.map((email, index) => (
-                <div key={index} className='flex gap-2'>
-                  <Input
-                    type='email'
-                    value={email}
-                    onChange={e => updateEmail(index, e.target.value)}
-                    placeholder='Enter email address'
-                    required={index === 0}
-                  />
-                  {formData.inviteEmails.length > 1 && (
-                    <Button
-                      type='button'
-                      variant='outline'
-                      size='icon'
-                      onClick={() => removeEmailField(index)}
-                      className='shrink-0'
-                    >
-                      <X className='h-4 w-4' />
-                    </Button>
-                  )}
-                </div>
-              ))}
-              <Button
-                type='button'
-                variant='outline'
-                onClick={addEmailField}
-                className='w-full'
-              >
-                <Plus className='h-4 w-4 mr-2' />
-                Add Another Email
-              </Button>
-            </div>
-          </div>
+      <div className='page-section'>
+        <div className='space-y-2'>
+          <Label htmlFor='name'>Campaign Name (Optional)</Label>
+          <Input
+            id='name'
+            type='text'
+            placeholder='e.g., Performance Review 2026'
+            value={formData.name}
+            onChange={e =>
+              setFormData(prev => ({
+                ...prev,
+                name: e.target.value,
+              }))
+            }
+          />
+          <p className='text-sm text-muted-foreground'>
+            Give your campaign a descriptive name to help identify it later
+          </p>
         </div>
 
-        <div className='flex gap-3 pt-4'>
-          <Button type='submit' disabled={isSubmitting}>
-            {isSubmitting
-              ? 'Saving...'
-              : campaign
-                ? 'Update Campaign'
-                : 'Create Campaign'}
-          </Button>
-          {onCancel && (
-            <Button type='button' variant='outline' onClick={onCancel}>
-              Cancel
-            </Button>
+        <div className='space-y-2'>
+          <Label>Feedback Template</Label>
+          {isLoadingTemplates ? (
+            <div className='text-muted-foreground'>Loading templates...</div>
+          ) : (
+            <Select
+              value={formData.templateId}
+              onValueChange={value =>
+                setFormData(prev => ({ ...prev, templateId: value }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder='Select a template' />
+              </SelectTrigger>
+              <SelectContent>
+                {templates.map(template => (
+                  <SelectItem key={template.id} value={template.id}>
+                    {template.name}
+                    {template.isDefault && ' (Default)'}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          {formData.templateId && (
+            <div className='text-sm text-muted-foreground'>
+              {templates.find(t => t.id === formData.templateId)?.description}
+            </div>
           )}
         </div>
-      </form>
-    </div>
+
+        <div className='grid grid-cols-2 gap-4'>
+          <div className='space-y-2'>
+            <Label htmlFor='startDate'>Start Date</Label>
+            <Input
+              id='startDate'
+              type='date'
+              value={formData.startDate}
+              onChange={e =>
+                setFormData(prev => ({
+                  ...prev,
+                  startDate: e.target.value,
+                }))
+              }
+              required
+            />
+          </div>
+          <div className='space-y-2'>
+            <Label htmlFor='endDate'>End Date</Label>
+            <Input
+              id='endDate'
+              type='date'
+              value={formData.endDate}
+              onChange={e =>
+                setFormData(prev => ({ ...prev, endDate: e.target.value }))
+              }
+              required
+            />
+          </div>
+        </div>
+
+        <div className='space-y-2'>
+          <Label>Invite Emails</Label>
+          <div className='space-y-2'>
+            {formData.inviteEmails.map((email, index) => (
+              <div key={index} className='flex gap-2'>
+                <Input
+                  type='email'
+                  value={email}
+                  onChange={e => updateEmail(index, e.target.value)}
+                  placeholder='Enter email address'
+                  required={index === 0}
+                />
+                {formData.inviteEmails.length > 1 && (
+                  <Button
+                    type='button'
+                    variant='outline'
+                    size='icon'
+                    onClick={() => removeEmailField(index)}
+                    className='shrink-0'
+                  >
+                    <X className='h-4 w-4' />
+                  </Button>
+                )}
+              </div>
+            ))}
+            <Button
+              type='button'
+              variant='outline'
+              onClick={addEmailField}
+              className='w-full'
+            >
+              <Plus className='h-4 w-4 mr-2' />
+              Add Another Email
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className='flex gap-3 pt-4'>
+        <Button type='submit' disabled={isSubmitting}>
+          {isSubmitting
+            ? 'Saving...'
+            : campaign
+              ? 'Update Campaign'
+              : 'Create Campaign'}
+        </Button>
+        {onCancel && (
+          <Button type='button' variant='outline' onClick={onCancel}>
+            Cancel
+          </Button>
+        )}
+      </div>
+    </form>
   )
 }

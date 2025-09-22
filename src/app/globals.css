@@ -42,6 +42,14 @@
     --badge-neutral: 210 40% 96.1%;
     --badge-neutral-foreground: 222.2 47.4% 11.2%;
     --badge-neutral-text: 222.2 47.4% 15%;
+
+    /* Calendar icon filter values for light theme */
+    --calendar-icon-invert: 27%;
+    --calendar-icon-sepia: 51%;
+    --calendar-icon-saturate: 2878%;
+    --calendar-icon-hue: 346deg;
+    --calendar-icon-brightness: 104%;
+    --calendar-icon-contrast: 97%;
   }
 
   .dark {
@@ -83,6 +91,14 @@
     --badge-neutral: 217.2 32.6% 17.5%;
     --badge-neutral-foreground: 210 40% 98%;
     --badge-neutral-text: 210 40% 80%;
+
+    /* Calendar icon filter values for dark theme */
+    --calendar-icon-invert: 100%;
+    --calendar-icon-sepia: 0%;
+    --calendar-icon-saturate: 0%;
+    --calendar-icon-hue: 93deg;
+    --calendar-icon-brightness: 103%;
+    --calendar-icon-contrast: 103%;
   }
 
   * {
@@ -175,19 +191,15 @@
   @apply border-l-2 border-neutral-700 pl-3 italic text-neutral-400;
 }
 
-/* Fix calendar icon visibility in dark mode for datetime-local inputs */
-input[type='datetime-local']::-webkit-calendar-picker-indicator {
-  filter: invert(1);
-  opacity: 0.8;
-}
-
-input[type='date']::-webkit-calendar-picker-indicator {
-  filter: invert(1);
-  opacity: 0.8;
-}
-
+/* Fix calendar icon visibility to honor theme tokens */
+input[type='datetime-local']::-webkit-calendar-picker-indicator,
+input[type='date']::-webkit-calendar-picker-indicator,
 input[type='time']::-webkit-calendar-picker-indicator {
-  filter: invert(1);
+  filter: brightness(0) saturate(100%) invert(var(--calendar-icon-invert))
+    sepia(var(--calendar-icon-sepia)) saturate(var(--calendar-icon-saturate))
+    hue-rotate(var(--calendar-icon-hue))
+    brightness(var(--calendar-icon-brightness))
+    contrast(var(--calendar-icon-contrast));
   opacity: 0.8;
 }
 

@@ -6,6 +6,7 @@ import { ExpandableSection } from '@/components/expandable-section'
 
 interface FeedbackCampaign {
   id: string
+  name?: string | null
   targetPersonId: string
   startDate: Date
   endDate: Date
@@ -58,8 +59,13 @@ export function ActiveFeedbackCampaigns({
                 href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}/responses`}
                 className='font-medium hover:text-blue-600'
               >
-                {campaign.targetPerson.name}
+                {campaign.name || campaign.targetPerson.name}
               </Link>
+              {campaign.name && (
+                <span className='text-sm text-muted-foreground'>
+                  • {campaign.targetPerson.name}
+                </span>
+              )}
               {campaign.template && (
                 <span className='text-sm text-muted-foreground'>
                   • {campaign.template.name}

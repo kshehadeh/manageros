@@ -10,13 +10,14 @@ import {
   CheckSquare,
   MessageSquare,
   MessageCircle,
-  ChevronDown,
   Eye,
   Users,
+  MoreHorizontal,
+  Edit,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-interface PersonActionPanelProps {
+interface PersonActionsDropdownProps {
   person: Person & {
     team?: Team | null
     reports?: Person[]
@@ -25,16 +26,18 @@ interface PersonActionPanelProps {
   currentPerson?: Person | null
   isAdmin: boolean
   onFeedbackAdded?: () => void
+  size?: 'sm' | 'default'
 }
 
-export function PersonActionPanel({
+export function PersonActionsDropdown({
   person,
   currentPerson,
   isAdmin,
   onFeedbackAdded,
-}: PersonActionPanelProps) {
+  size = 'default',
+}: PersonActionsDropdownProps) {
   const [showFeedbackForm, setShowFeedbackForm] = useState(false)
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [openDropdown, setOpenDropdown] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const handleFeedbackSuccess = () => {
@@ -46,6 +49,15 @@ export function PersonActionPanel({
     setShowFeedbackForm(false)
   }
 
+  const handleDropdownClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setOpenDropdown(!openDropdown)
+  }
+
+  const closeDropdown = () => {
+    setOpenDropdown(false)
+  }
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -53,18 +65,18 @@ export function PersonActionPanel({
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node)
       ) {
-        setIsDropdownOpen(false)
+        setOpenDropdown(false)
       }
     }
 
-    if (isDropdownOpen) {
+    if (openDropdown) {
       document.addEventListener('mousedown', handleClickOutside)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [isDropdownOpen])
+  }, [openDropdown])
 
   // Determine if current user can create a 1:1 with this person
   const canCreateOneOnOne =
@@ -88,28 +100,38 @@ export function PersonActionPanel({
       {/* Actions Dropdown */}
       <div className='relative' ref={dropdownRef}>
         <Button
-          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          variant='outline'
-          size='default'
-          className='flex items-center gap-2'
+          variant='ghost'
+          size={size}
+          className={`${size === 'sm' ? 'h-8 w-8 p-0' : 'h-8 w-8 p-0'}`}
+          onClick={handleDropdownClick}
         >
-          <span>Actions</span>
-          <ChevronDown
-            className={`w-4 h-4 transition-transform ${
-              isDropdownOpen ? 'rotate-180' : ''
-            }`}
-          />
+          <MoreHorizontal className='h-4 w-4' />
         </Button>
 
-        {isDropdownOpen && (
-          <div className='absolute top-full right-0 mt-2 bg-popover text-popover-foreground border rounded-xl shadow-lg z-10 min-w-48'>
-            <div className='py-2'>
+        {openDropdown && (
+          <div
+            className='absolute top-full right-0 mt-2 bg-popover text-popover-foreground border rounded-md shadow-lg z-10 min-w-48'
+            onClick={e => e.stopPropagation()}
+          >
+            <div className='py-1'>
+              {/* Edit - Only show if current user is admin */}
+              {isAdmin && (
+                <Link
+                  href={`/people/${person.id}/edit`}
+                  className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                  onClick={closeDropdown}
+                >
+                  <Edit className='w-4 h-4' />
+                  Edit
+                </Link>
+              )}
+
               {/* Add Report - Only show if current user is admin */}
               {isAdmin && (
                 <Link
                   href={`/people/new?managerId=${person.id}`}
-                  className='flex items-center gap-3 px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-                  onClick={() => setIsDropdownOpen(false)}
+                  className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                  onClick={closeDropdown}
                 >
                   <Plus className='w-4 h-4' />
                   Add Report
@@ -122,8 +144,8 @@ export function PersonActionPanel({
                   href={`/initiatives/new?ownerId=${person.id}${
                     person.team ? `&teamId=${person.team.id}` : ''
                   }`}
-                  className='flex items-center gap-3 px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-                  onClick={() => setIsDropdownOpen(false)}
+                  className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                  onClick={closeDropdown}
                 >
                   <FileText className='w-4 h-4' />
                   New Initiative
@@ -134,8 +156,8 @@ export function PersonActionPanel({
               {isAdmin && (
                 <Link
                   href='/initiatives/new'
-                  className='flex items-center gap-3 px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-                  onClick={() => setIsDropdownOpen(false)}
+                  className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                  onClick={closeDropdown}
                 >
                   <CheckSquare className='w-4 h-4' />
                   New Task
@@ -143,20 +165,18 @@ export function PersonActionPanel({
               )}
 
               {/* Add Feedback - Show for all users */}
-              {!showFeedbackForm ? (
-                <Button
+              {!showFeedbackForm && (
+                <button
+                  className='w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
                   onClick={() => {
                     setShowFeedbackForm(true)
-                    setIsDropdownOpen(false)
+                    closeDropdown()
                   }}
-                  variant='ghost'
-                  size='sm'
-                  className='w-full justify-start gap-3 px-4 py-2 text-sm'
                 >
                   <MessageCircle className='w-4 h-4' />
                   Add Feedback
-                </Button>
-              ) : null}
+                </button>
+              )}
 
               {/* Add a 1:1 - Show if current user can create a meeting with this person */}
               {canCreateOneOnOne && (
@@ -176,8 +196,8 @@ export function PersonActionPanel({
                         ? currentPerson?.id
                         : person.id
                   }`}
-                  className='flex items-center gap-3 px-4 py-2 text-sm hover:bg-neutral-700 transition-colors'
-                  onClick={() => setIsDropdownOpen(false)}
+                  className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                  onClick={closeDropdown}
                 >
                   <MessageSquare className='w-4 h-4' />
                   Add a 1:1
@@ -188,8 +208,8 @@ export function PersonActionPanel({
               {canCreateFeedbackCampaign && (
                 <Link
                   href={`/people/${person.id}/feedback-campaigns`}
-                  className='flex items-center gap-3 px-4 py-2 text-sm hover:bg-neutral-700 transition-colors'
-                  onClick={() => setIsDropdownOpen(false)}
+                  className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                  onClick={closeDropdown}
                 >
                   <Users className='w-4 h-4' />
                   Feedback Campaigns
@@ -199,8 +219,8 @@ export function PersonActionPanel({
               {/* View All Initiatives - Show for all users */}
               <Link
                 href='/initiatives'
-                className='flex items-center gap-3 px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-                onClick={() => setIsDropdownOpen(false)}
+                className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                onClick={closeDropdown}
               >
                 <Eye className='w-4 h-4' />
                 View All Initiatives

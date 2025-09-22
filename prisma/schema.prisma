@@ -302,6 +302,7 @@ model PersonJiraAccount {
 
 model FeedbackCampaign {
   id             String            @id @default(cuid())
+  name           String?            // Custom name for the campaign (e.g., "Performance Review 2026")
   userId         String
   user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   targetPersonId String

@@ -21,6 +21,7 @@ interface FeedbackQuestion {
 
 interface FeedbackCampaign {
   id: string
+  name?: string | null
   inviteLink: string | null
   targetPerson: {
     id: string

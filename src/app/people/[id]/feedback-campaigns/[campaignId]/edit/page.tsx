@@ -3,24 +3,25 @@ import { notFound, redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { FeedbackCampaignForm } from '@/components/feedback-campaign-form'
-import { NewFeedbackCampaignBreadcrumbClient } from '@/components/new-feedback-campaign-breadcrumb-client'
+import { EditFeedbackCampaignBreadcrumbClient } from '@/components/edit-feedback-campaign-breadcrumb-client'
 
-interface NewFeedbackCampaignPageProps {
+interface EditFeedbackCampaignPageProps {
   params: Promise<{
     id: string
+    campaignId: string
   }>
 }
 
-export default async function NewFeedbackCampaignPage({
+export default async function EditFeedbackCampaignPage({
   params,
-}: NewFeedbackCampaignPageProps) {
+}: EditFeedbackCampaignPageProps) {
   const session = await getServerSession(authOptions)
 
   if (!session?.user) {
     redirect('/auth/signin')
   }
 
-  const { id } = await params
+  const { id, campaignId } = await params
 
   if (!session.user.organizationId) {
     redirect('/organization/create')
@@ -58,26 +59,65 @@ export default async function NewFeedbackCampaignPage({
     redirect('/people')
   }
 
+  // Get the feedback campaign
+  const campaign = await prisma.feedbackCampaign.findFirst({
+    where: {
+      id: campaignId,
+      targetPersonId: id,
+      userId: session.user.id, // Only allow editing campaigns created by the current user
+    },
+    include: {
+      template: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+        },
+      },
+    },
+  })
+
+  if (!campaign) {
+    notFound()
+  }
+
+  // Only allow editing draft campaigns
+  if (campaign.status !== 'draft') {
+    redirect(`/people/${id}/feedback-campaigns`)
+  }
+
+  // Format the campaign data for the form
+  const campaignData = {
+    id: campaign.id,
+    name: campaign.name || '',
+    targetPersonId: campaign.targetPersonId,
+    templateId: campaign.templateId || '',
+    startDate: campaign.startDate.toISOString().split('T')[0],
+    endDate: campaign.endDate.toISOString().split('T')[0],
+    inviteEmails: campaign.inviteEmails,
+  }
+
   return (
-    <NewFeedbackCampaignBreadcrumbClient
+    <EditFeedbackCampaignBreadcrumbClient
       personName={person.name}
       personId={person.id}
+      campaignId={campaign.id}
     >
       <div className='space-y-6'>
         <div>
-          <h1 className='text-2xl font-bold'>Create Feedback Campaign</h1>
+          <h1 className='text-2xl font-bold'>Edit Feedback Campaign</h1>
           <p className='text-neutral-400'>
-            Create a feedback campaign for {person.name}. External stakeholders
-            will be invited to provide feedback.
+            Update campaign details for {person.name}
           </p>
         </div>
 
         <FeedbackCampaignForm
           person={person}
+          campaign={campaignData}
           redirectTo={`/people/${person.id}/feedback-campaigns`}
         />
       </div>
-    </NewFeedbackCampaignBreadcrumbClient>
+    </EditFeedbackCampaignBreadcrumbClient>
   )
 }
 

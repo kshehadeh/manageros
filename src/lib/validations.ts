@@ -170,6 +170,7 @@ export type CSVTeamData = z.infer<typeof csvTeamSchema>
 
 export const feedbackCampaignSchema = z
   .object({
+    name: z.string().optional(),
     targetPersonId: z.string().min(1, 'Target person is required'),
     templateId: z.string().optional(),
     startDate: z.string().min(1, 'Start date is required'),

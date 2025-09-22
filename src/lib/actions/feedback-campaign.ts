@@ -68,6 +68,7 @@ export async function createFeedbackCampaign(
   // Create the feedback campaign
   const campaign = await prisma.feedbackCampaign.create({
     data: {
+      name: validatedData.name,
       userId: user.id,
       targetPersonId: validatedData.targetPersonId,
       templateId: validatedData.templateId,
@@ -177,6 +178,7 @@ export async function updateFeedbackCampaign(
   const campaign = await prisma.feedbackCampaign.update({
     where: { id },
     data: {
+      name: validatedData.name,
       targetPersonId: validatedData.targetPersonId,
       templateId: validatedData.templateId,
       startDate: new Date(validatedData.startDate),

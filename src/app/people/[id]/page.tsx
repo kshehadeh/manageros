@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { Rag } from '@/components/rag'
 import { UserLinkForm } from '@/components/user-link-form'
 import { FeedbackList } from '@/components/feedback-list'
-import { PersonActionPanel } from '@/components/person-action-panel'
+import { PersonActionsDropdown } from '@/components/person-actions-dropdown'
 import { PersonDetailClient } from '@/components/person-detail-client'
 import { JiraAccountLinker } from '@/components/jira-account-linker'
 import { JiraWorkActivity } from '@/components/jira-work-activity'
@@ -11,7 +11,6 @@ import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { EditIconButton } from '@/components/edit-icon-button'
 import { Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -194,9 +193,22 @@ export default async function PersonDetailPage({
     >
       <div className='page-container'>
         <div className='page-header'>
-          <div className='flex items-center justify-between'>
+          <div className='flex items-start justify-between'>
             <div>
-              <h1 className='page-title'>{personWithRelations.name}</h1>
+              <div className='flex items-center gap-3 mb-2'>
+                <h1 className='page-title'>{personWithRelations.name}</h1>
+                <span
+                  className={`badge ${
+                    personWithRelations.status === 'active'
+                      ? 'rag-green'
+                      : personWithRelations.status === 'inactive'
+                        ? 'rag-red'
+                        : 'rag-amber'
+                  }`}
+                >
+                  {personWithRelations.status.replace('_', ' ')}
+                </span>
+              </div>
               <div className='page-section-subtitle'>
                 {personWithRelations.role ?? ''}
               </div>
@@ -204,31 +216,11 @@ export default async function PersonDetailPage({
                 {personWithRelations.email}
               </div>
             </div>
-            <div className='flex items-center gap-2'>
-              <span
-                className={`badge ${
-                  personWithRelations.status === 'active'
-                    ? 'rag-green'
-                    : personWithRelations.status === 'inactive'
-                      ? 'rag-red'
-                      : 'rag-amber'
-                }`}
-              >
-                {personWithRelations.status.replace('_', ' ')}
-              </span>
-              {isAdmin(session.user) && (
-                <EditIconButton
-                  href={`/people/${personWithRelations.id}/edit`}
-                  variant='outline'
-                  size='default'
-                />
-              )}
-              <PersonActionPanel
-                person={personWithRelations}
-                currentPerson={currentPerson}
-                isAdmin={isAdmin(session.user)}
-              />
-            </div>
+            <PersonActionsDropdown
+              person={personWithRelations}
+              currentPerson={currentPerson}
+              isAdmin={isAdmin(session.user)}
+            />
           </div>
         </div>
 
@@ -353,13 +345,12 @@ export default async function PersonDetailPage({
                           >
                             {report.status.replace('_', ' ')}
                           </span>
-                          {isAdmin(session.user) && (
-                            <EditIconButton
-                              href={`/people/${report.id}/edit`}
-                              variant='outline'
-                              size='sm'
-                            />
-                          )}
+                          <PersonActionsDropdown
+                            person={report}
+                            currentPerson={currentPerson}
+                            isAdmin={isAdmin(session.user)}
+                            size='sm'
+                          />
                         </div>
                       </div>
                     </div>

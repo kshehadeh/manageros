@@ -174,6 +174,7 @@ describe('createFeedbackCampaign', () => {
     createReturnValue = mockCampaign
 
     const formData = {
+      name: 'Performance Review 2024',
       targetPersonId: 'person-2',
       startDate: '2024-01-01',
       endDate: '2024-01-31',
@@ -191,6 +192,97 @@ describe('createFeedbackCampaign', () => {
     expect(createCalls).toBe(1)
     expect(createArgs[0]).toEqual({
       data: {
+        name: 'Performance Review 2024',
+        userId: 'user-1',
+        targetPersonId: 'person-2',
+        startDate: new Date('2024-01-01'),
+        endDate: new Date('2024-01-31'),
+        inviteEmails: ['test@example.com'],
+        status: 'draft',
+      },
+      include: {
+        targetPerson: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    })
+  })
+
+  it('should create a feedback campaign without name', async () => {
+    // Arrange
+    vi.mocked(authUtils.getCurrentUser).mockResolvedValue({
+      id: 'user-1',
+      email: 'u1@example.com',
+      name: 'Manager Name',
+      role: 'ADMIN',
+      organizationId: 'org-1',
+      organizationName: 'Org One',
+      organizationSlug: 'org-one',
+      personId: 'person-1',
+    })
+
+    const mockCurrentPerson = {
+      id: 'person-1',
+      name: 'Manager Name',
+    }
+    const mockTargetPerson = {
+      id: 'person-2',
+      name: 'Target Person',
+      organizationId: 'org-1',
+    }
+    const mockCampaign = {
+      id: 'campaign-1',
+      userId: 'user-1',
+      targetPersonId: 'person-2',
+      startDate: new Date('2024-01-01'),
+      endDate: new Date('2024-01-31'),
+      inviteEmails: ['test@example.com'],
+      status: 'draft',
+      targetPerson: {
+        id: 'person-2',
+        name: 'Target Person',
+        email: 'target@example.com',
+      },
+      user: {
+        id: 'user-1',
+        name: 'Manager Name',
+        email: 'manager@example.com',
+      },
+    }
+
+    findFirstReturnValues = [mockCurrentPerson, mockTargetPerson]
+    createReturnValue = mockCampaign
+
+    const formData = {
+      targetPersonId: 'person-2',
+      startDate: '2024-01-01',
+      endDate: '2024-01-31',
+      inviteEmails: ['test@example.com'],
+    }
+
+    // Act
+    const { createFeedbackCampaign } = await import(
+      '@/lib/actions/feedback-campaign'
+    )
+    const result = await createFeedbackCampaign(formData)
+
+    // Assert
+    expect(result).toEqual(mockCampaign)
+    expect(createCalls).toBe(1)
+    expect(createArgs[0]).toEqual({
+      data: {
+        name: undefined,
         userId: 'user-1',
         targetPersonId: 'person-2',
         startDate: new Date('2024-01-01'),
@@ -311,5 +403,182 @@ describe('createFeedbackCampaign', () => {
     await expect(createFeedbackCampaign(formData)).rejects.toThrow(
       'Target person not found or access denied'
     )
+  })
+})
+
+describe('updateFeedbackCampaign', () => {
+  beforeEach(() => {
+    // Reset all counters and arrays
+    findFirstCalls = 0
+    findFirstArgs = []
+    findFirstReturnValues = []
+    _findManyCalls = 0
+    _findManyArgs = []
+    _findManyReturnValue = []
+    findUniqueCalls = 0
+    findUniqueArgs = []
+    findUniqueReturnValues = []
+    createCalls = 0
+    createArgs = []
+    createReturnValue = null
+    _updateCalls = 0
+    _updateArgs = []
+    _updateReturnValue = null
+    _deleteCalls = 0
+    _deleteArgs = []
+
+    // Reset auth utils mock
+    vi.mocked(authUtils.getCurrentUser).mockClear()
+  })
+
+  it('should update a feedback campaign successfully', async () => {
+    // Arrange
+    vi.mocked(authUtils.getCurrentUser).mockResolvedValue({
+      id: 'user-1',
+      email: 'u1@example.com',
+      name: 'Manager Name',
+      role: 'ADMIN',
+      organizationId: 'org-1',
+      organizationName: 'Org One',
+      organizationSlug: 'org-one',
+      personId: 'person-1',
+    })
+
+    const mockCurrentPerson = {
+      id: 'person-1',
+      name: 'Manager Name',
+    }
+    const mockExistingCampaign = {
+      id: 'campaign-1',
+      userId: 'user-1',
+      targetPersonId: 'person-2',
+      targetPerson: {
+        id: 'person-2',
+        name: 'Target Person',
+        organizationId: 'org-1',
+      },
+    }
+    const mockTargetPerson = {
+      id: 'person-2',
+      name: 'Target Person',
+      organizationId: 'org-1',
+    }
+    const mockUpdatedCampaign = {
+      id: 'campaign-1',
+      userId: 'user-1',
+      targetPersonId: 'person-2',
+      templateId: 'template-1',
+      startDate: new Date('2024-02-01'),
+      endDate: new Date('2024-02-28'),
+      inviteEmails: ['updated@example.com'],
+      status: 'draft',
+      targetPerson: {
+        id: 'person-2',
+        name: 'Target Person',
+        email: 'target@example.com',
+      },
+      user: {
+        id: 'user-1',
+        name: 'Manager Name',
+        email: 'manager@example.com',
+      },
+    }
+
+    findFirstReturnValues = [
+      mockCurrentPerson,
+      mockExistingCampaign,
+      mockTargetPerson,
+    ]
+    _updateReturnValue = mockUpdatedCampaign
+
+    const formData = {
+      name: 'Updated Performance Review 2024',
+      targetPersonId: 'person-2',
+      templateId: 'template-1',
+      startDate: '2024-02-01',
+      endDate: '2024-02-28',
+      inviteEmails: ['updated@example.com'],
+    }
+
+    // Act
+    const { updateFeedbackCampaign } = await import(
+      '@/lib/actions/feedback-campaign'
+    )
+    const result = await updateFeedbackCampaign('campaign-1', formData)
+
+    // Assert
+    expect(result).toEqual(mockUpdatedCampaign)
+    expect(_updateCalls).toBe(1)
+    expect(_updateArgs[0]).toEqual({
+      where: { id: 'campaign-1' },
+      data: {
+        name: 'Updated Performance Review 2024',
+        targetPersonId: 'person-2',
+        templateId: 'template-1',
+        startDate: new Date('2024-02-01'),
+        endDate: new Date('2024-02-28'),
+        inviteEmails: ['updated@example.com'],
+      },
+      include: {
+        targetPerson: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        template: {
+          include: {
+            questions: {
+              orderBy: { sortOrder: 'asc' },
+            },
+          },
+        },
+      },
+    })
+  })
+
+  it('should throw error if campaign not found or access denied', async () => {
+    // Arrange
+    vi.mocked(authUtils.getCurrentUser).mockResolvedValue({
+      id: 'user-1',
+      email: 'u1@example.com',
+      name: 'Test User',
+      role: 'ADMIN',
+      organizationId: 'org-1',
+      organizationName: 'Org One',
+      organizationSlug: 'org-one',
+      personId: 'person-1',
+    })
+
+    const mockCurrentPerson = {
+      id: 'person-1',
+      name: 'Manager Name',
+    }
+
+    findFirstReturnValues = [mockCurrentPerson, null] // Campaign not found
+
+    const formData = {
+      targetPersonId: 'person-2',
+      templateId: 'template-1',
+      startDate: '2024-02-01',
+      endDate: '2024-02-28',
+      inviteEmails: ['updated@example.com'],
+    }
+
+    // Act & Assert
+    const { updateFeedbackCampaign } = await import(
+      '@/lib/actions/feedback-campaign'
+    )
+    await expect(
+      updateFeedbackCampaign('campaign-1', formData)
+    ).rejects.toThrow('Campaign not found or access denied')
   })
 })
