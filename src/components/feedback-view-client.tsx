@@ -2,13 +2,8 @@
 
 import { useState, useTransition, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import Link from 'next/link'
-import ReactMarkdown from 'react-markdown'
-import { Trash2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { getAllFeedback, deleteFeedback } from '@/lib/actions'
-import { Eye } from 'lucide-react'
-import { EditIconButton } from './edit-icon-button'
+import { FeedbackListItem } from './feedback-list-item'
 
 interface Person {
   id: string
@@ -129,29 +124,6 @@ export default function FeedbackViewClient({
     }
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-
-  const getKindColor = (kind: string) => {
-    switch (kind) {
-      case 'praise':
-        return 'rag-green'
-      case 'concern':
-        return 'rag-red'
-      case 'note':
-        return 'rag-amber'
-      default:
-        return 'badge'
-    }
-  }
-
   const hasActiveFilters = Object.values(filters).some(
     value => value !== undefined && value !== ''
   )
@@ -177,7 +149,7 @@ export default function FeedbackViewClient({
           <div>
             <label
               htmlFor='fromPersonId'
-              className='block text-sm font-medium text-neutral-300 mb-1'
+              className='block text-sm font-medium text-foreground mb-1'
             >
               Written by
             </label>
@@ -202,7 +174,7 @@ export default function FeedbackViewClient({
           <div>
             <label
               htmlFor='aboutPersonId'
-              className='block text-sm font-medium text-neutral-300 mb-1'
+              className='block text-sm font-medium text-foreground mb-1'
             >
               About
             </label>
@@ -227,7 +199,7 @@ export default function FeedbackViewClient({
           <div>
             <label
               htmlFor='kind'
-              className='block text-sm font-medium text-neutral-300 mb-1'
+              className='block text-sm font-medium text-foreground mb-1'
             >
               Type
             </label>
@@ -250,7 +222,7 @@ export default function FeedbackViewClient({
           <div>
             <label
               htmlFor='isPrivate'
-              className='block text-sm font-medium text-neutral-300 mb-1'
+              className='block text-sm font-medium text-foreground mb-1'
             >
               Visibility
             </label>
@@ -279,7 +251,7 @@ export default function FeedbackViewClient({
           <div>
             <label
               htmlFor='startDate'
-              className='block text-sm font-medium text-neutral-300 mb-1'
+              className='block text-sm font-medium text-foreground mb-1'
             >
               From date
             </label>
@@ -298,7 +270,7 @@ export default function FeedbackViewClient({
           <div>
             <label
               htmlFor='endDate'
-              className='block text-sm font-medium text-neutral-300 mb-1'
+              className='block text-sm font-medium text-foreground mb-1'
             >
               To date
             </label>
@@ -316,9 +288,9 @@ export default function FeedbackViewClient({
       </div>
 
       {/* Results */}
-      <div className='card'>
-        <div className='flex items-center justify-between mb-4'>
-          <h2 className='text-lg font-semibold'>
+      <div className='space-y-4'>
+        <div className='flex items-center justify-between'>
+          <h2 className='text-lg font-semibold text-foreground'>
             Feedback ({feedback.length})
           </h2>
           {(isPending || isLoading) && (
@@ -337,123 +309,15 @@ export default function FeedbackViewClient({
         ) : (
           <div className='space-y-4'>
             {feedback.map(item => (
-              <div key={item.id} className='p-4 border rounded-lg bg-card'>
-                <div className='flex items-start justify-between mb-3'>
-                  <div className='flex-1'>
-                    <div className='flex items-center gap-2 mb-2'>
-                      <span className={`badge ${getKindColor(item.kind)}`}>
-                        {item.kind}
-                      </span>
-                      {item.isPrivate && (
-                        <span className='badge bg-badge-neutral text-badge-neutral-text'>
-                          Private
-                        </span>
-                      )}
-                    </div>
-
-                    <div className='text-sm text-muted-foreground mb-2'>
-                      <span className='text-foreground'>{item.from.name}</span>{' '}
-                      wrote about{' '}
-                      <Link
-                        href={`/people/${item.about.id}`}
-                        className='text-primary hover:opacity-90'
-                      >
-                        {item.about.name}
-                      </Link>
-                    </div>
-
-                    <div className='text-xs text-muted-foreground'>
-                      {formatDate(item.createdAt)}
-                    </div>
-                  </div>
-
-                  <div className='flex gap-2'>
-                    <Button asChild variant='outline' size='icon'>
-                      <Link
-                        href={`/feedback/${item.id}`}
-                        aria-label='View feedback'
-                      >
-                        <Eye className='w-4 h-4' />
-                      </Link>
-                    </Button>
-                    <EditIconButton
-                      href={`/people/${item.about.id}/feedback/${item.id}/edit`}
-                      variant='outline'
-                      size='sm'
-                    />
-                    {item.fromId === currentUserId && (
-                      <Button
-                        onClick={() => handleDelete(item.id)}
-                        disabled={deletingId === item.id}
-                        variant='outline'
-                        size='sm'
-                        className='text-destructive border-destructive hover:text-destructive-foreground hover:bg-destructive'
-                      >
-                        <Trash2 className='w-4 h-4 mr-2' />
-                        {deletingId === item.id ? 'Deleting...' : 'Delete'}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-
-                <div className='prose prose-invert prose-sm max-w-none text-foreground'>
-                  <ReactMarkdown
-                    components={{
-                      p: ({ children }) => <p className='mb-3'>{children}</p>,
-                      strong: ({ children }) => (
-                        <strong className='font-semibold text-foreground'>
-                          {children}
-                        </strong>
-                      ),
-                      em: ({ children }) => (
-                        <em className='italic text-muted-foreground'>
-                          {children}
-                        </em>
-                      ),
-                      a: ({ href, children }) => (
-                        <a
-                          href={href}
-                          className='text-primary underline'
-                          target='_blank'
-                          rel='noopener noreferrer'
-                        >
-                          {children}
-                        </a>
-                      ),
-                      ul: ({ children }) => (
-                        <ul className='list-disc list-inside mb-3'>
-                          {children}
-                        </ul>
-                      ),
-                      ol: ({ children }) => (
-                        <ol className='list-decimal list-inside mb-3'>
-                          {children}
-                        </ol>
-                      ),
-                      li: ({ children }) => (
-                        <li className='mb-1'>{children}</li>
-                      ),
-                      blockquote: ({ children }) => (
-                        <blockquote className='border-l-4 border pl-4 italic text-muted-foreground mb-3'>
-                          {children}
-                        </blockquote>
-                      ),
-                      code: ({ children }) => (
-                        <code className='bg-accent px-1 py-0.5 rounded text-sm font-mono text-foreground'>
-                          {children}
-                        </code>
-                      ),
-                      pre: ({ children }) => (
-                        <pre className='bg-accent p-3 rounded overflow-x-auto mb-3'>
-                          {children}
-                        </pre>
-                      ),
-                    }}
-                  >
-                    {item.body}
-                  </ReactMarkdown>
-                </div>
-              </div>
+              <FeedbackListItem
+                key={item.id}
+                feedback={item}
+                currentUserId={currentUserId}
+                onDelete={handleDelete}
+                isDeleting={deletingId === item.id}
+                showAboutPerson={true}
+                variant='default'
+              />
             ))}
           </div>
         )}
