@@ -70,23 +70,25 @@ export default async function EditTaskPage({
 
   return (
     <TaskDetailBreadcrumbClient taskTitle={task.title} taskId={task.id}>
-      <div className='space-y-6'>
-        <div>
-          <h1 className='text-2xl font-bold'>Edit Task</h1>
-          <p className='text-neutral-400'>
-            Update task details and assignments
-          </p>
+      <div className='page-container'>
+        <div className='page-header'>
+          <div>
+            <h1 className='page-title'>Edit Task</h1>
+            <p className='page-subtitle'>Update task details and assignments</p>
+          </div>
         </div>
 
-        <div className='card'>
-          <TaskForm
-            people={people}
-            initiatives={initiatives}
-            objectives={objectives}
-            initialData={initialData}
-            isEditing={true}
-            taskId={task.id}
-          />
+        <div className='page-section'>
+          <div className='card'>
+            <TaskForm
+              people={people}
+              initiatives={initiatives}
+              objectives={objectives}
+              initialData={initialData}
+              isEditing={true}
+              taskId={task.id}
+            />
+          </div>
         </div>
       </div>
     </TaskDetailBreadcrumbClient>

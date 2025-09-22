@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { QuickTaskForm } from '@/components/quick-task-form'
 import { Task, Person, Initiative, Objective } from '@prisma/client'
 
 type TaskWithRelations = Task & {
@@ -42,20 +44,20 @@ export default async function TasksPage() {
     dropped: 'Dropped',
   }
 
-  const statusColors = {
-    todo: 'badge',
-    doing: 'rag-amber',
-    blocked: 'rag-red',
-    done: 'rag-green',
-    dropped: 'badge',
+  const statusVariants = {
+    todo: 'neutral' as const,
+    doing: 'warning' as const,
+    blocked: 'error' as const,
+    done: 'success' as const,
+    dropped: 'neutral' as const,
   }
 
-  const priorityColors = {
-    1: 'rag-red',
-    2: 'rag-amber',
-    3: 'badge',
-    4: 'rag-green',
-    5: 'rag-green',
+  const priorityVariants = {
+    1: 'error' as const,
+    2: 'warning' as const,
+    3: 'neutral' as const,
+    4: 'success' as const,
+    5: 'success' as const,
   }
 
   return (
@@ -75,12 +77,20 @@ export default async function TasksPage() {
       </div>
 
       <div className='page-section'>
+        <div className='card'>
+          <QuickTaskForm />
+        </div>
+      </div>
+
+      <div className='page-section'>
         {/* Task Statistics */}
         <div className='grid grid-cols-2 md:grid-cols-5 gap-4'>
           {Object.entries(tasksByStatus).map(([status, statusTasks]) => (
             <div key={status} className='card text-center'>
-              <div className='text-2xl font-bold'>{statusTasks.length}</div>
-              <div className='text-sm text-neutral-400'>
+              <div className='text-2xl font-bold text-foreground'>
+                {statusTasks.length}
+              </div>
+              <div className='text-sm text-muted-foreground'>
                 {statusLabels[status as keyof typeof statusLabels]}
               </div>
             </div>
@@ -99,7 +109,7 @@ export default async function TasksPage() {
               </div>
               <div className='space-y-3'>
                 {statusTasks.length === 0 ? (
-                  <div className='text-neutral-400 text-sm text-center py-4'>
+                  <div className='text-muted-foreground text-sm text-center py-4'>
                     No{' '}
                     {statusLabels[
                       status as keyof typeof statusLabels
@@ -111,12 +121,12 @@ export default async function TasksPage() {
                     <TaskCard
                       key={task.id}
                       task={task as TaskWithRelations}
-                      statusColor={
-                        statusColors[status as keyof typeof statusColors]
+                      statusVariant={
+                        statusVariants[status as keyof typeof statusVariants]
                       }
-                      priorityColor={
-                        priorityColors[
-                          task.priority as keyof typeof priorityColors
+                      priorityVariant={
+                        priorityVariants[
+                          task.priority as keyof typeof priorityVariants
                         ]
                       }
                     />
@@ -133,51 +143,53 @@ export default async function TasksPage() {
 
 function TaskCard({
   task,
-  statusColor,
-  priorityColor,
+  statusVariant,
+  priorityVariant,
 }: {
   task: TaskWithRelations
-  statusColor: string
-  priorityColor: string
+  statusVariant: 'neutral' | 'warning' | 'error' | 'success'
+  priorityVariant: 'neutral' | 'warning' | 'error' | 'success'
 }) {
   return (
     <Link
       href={`/tasks/${task.id}`}
-      className='block border border-neutral-800 rounded-xl p-3 hover:bg-neutral-800/60 transition-colors'
+      className='block border border-border rounded-xl p-3 hover:bg-accent/50 transition-colors'
     >
       <div className='space-y-2'>
         <div className='flex items-start justify-between'>
-          <h4 className='font-medium text-sm leading-tight'>{task.title}</h4>
+          <h4 className='font-medium text-sm leading-tight text-foreground'>
+            {task.title}
+          </h4>
           <div className='flex items-center gap-1 ml-2'>
-            <span className={`badge ${statusColor} text-xs`}>
+            <Badge variant={statusVariant} className='text-xs'>
               {task.status.replace('_', ' ').toUpperCase()}
-            </span>
-            <span className={`badge ${priorityColor} text-xs`}>
+            </Badge>
+            <Badge variant={priorityVariant} className='text-xs'>
               P{task.priority}
-            </span>
+            </Badge>
           </div>
         </div>
 
         {task.description && (
-          <p className='text-xs text-neutral-400 line-clamp-2'>
+          <p className='text-xs text-muted-foreground line-clamp-2'>
             {task.description}
           </p>
         )}
 
         <div className='space-y-1'>
           {task.assignee && (
-            <div className='text-xs text-neutral-500'>
+            <div className='text-xs text-muted-foreground'>
               <span className='font-medium'>Assignee:</span>{' '}
               {task.assignee.name}
             </div>
           )}
 
           {task.initiative && (
-            <div className='text-xs text-neutral-500'>
+            <div className='text-xs text-muted-foreground'>
               <span className='font-medium'>Initiative:</span>{' '}
               <Link
                 href={`/initiatives/${task.initiative.id}`}
-                className='text-blue-400 hover:text-blue-300'
+                className='text-primary hover:text-primary/80 transition-colors'
                 onClick={e => e.stopPropagation()}
               >
                 {task.initiative.title}
@@ -186,27 +198,27 @@ function TaskCard({
           )}
 
           {task.objective && (
-            <div className='text-xs text-neutral-500'>
+            <div className='text-xs text-muted-foreground'>
               <span className='font-medium'>Objective:</span>{' '}
               {task.objective.title}
             </div>
           )}
 
           {task.dueDate && (
-            <div className='text-xs text-neutral-500'>
+            <div className='text-xs text-muted-foreground'>
               <span className='font-medium'>Due:</span>{' '}
               {new Date(task.dueDate).toLocaleDateString()}
             </div>
           )}
 
           {task.estimate && (
-            <div className='text-xs text-neutral-500'>
+            <div className='text-xs text-muted-foreground'>
               <span className='font-medium'>Estimate:</span> {task.estimate}h
             </div>
           )}
         </div>
 
-        <div className='text-xs text-neutral-600'>
+        <div className='text-xs text-muted-foreground'>
           Updated {new Date(task.updatedAt).toLocaleDateString()}
         </div>
       </div>

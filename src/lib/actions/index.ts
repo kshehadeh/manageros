@@ -92,7 +92,15 @@ export {
 } from './feedback-template'
 
 // Task Actions
-export { createTask, updateTask, deleteTask, getTasks, getTask } from './task'
+export {
+  createTask,
+  updateTask,
+  deleteTask,
+  getTasks,
+  getTask,
+  createQuickTask,
+  updateTaskStatus,
+} from './task'
 
 // Check-in Actions
 export {

@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { createTask, updateTask } from '@/lib/actions'
 import { type TaskFormData } from '@/lib/validations'
 import { Person, Initiative, Objective } from '@prisma/client'
@@ -83,13 +85,12 @@ export function TaskForm({
           <label htmlFor='title' className='block text-sm font-medium mb-2'>
             Task Title *
           </label>
-          <input
+          <Input
             type='text'
             id='title'
             name='title'
             required
             defaultValue={initialData?.title || ''}
-            className='w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
             placeholder='Enter task title'
           />
         </div>
@@ -101,12 +102,11 @@ export function TaskForm({
           >
             Description
           </label>
-          <textarea
+          <Textarea
             id='description'
             name='description'
             rows={3}
             defaultValue={initialData?.description || ''}
-            className='w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
             placeholder='Enter task description'
           />
         </div>
@@ -125,7 +125,7 @@ export function TaskForm({
               defaultValue={
                 preselectedAssigneeId || initialData?.assigneeId || ''
               }
-              className='w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+              className='input'
             >
               <option value=''>Select assignee</option>
               {people.map(person => (
@@ -144,7 +144,7 @@ export function TaskForm({
               id='status'
               name='status'
               defaultValue={initialData?.status || 'todo'}
-              className='w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+              className='input'
             >
               <option value='todo'>To Do</option>
               <option value='doing'>Doing</option>
@@ -167,7 +167,7 @@ export function TaskForm({
               id='priority'
               name='priority'
               defaultValue={initialData?.priority || 2}
-              className='w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+              className='input'
             >
               <option value={1}>1 - Highest</option>
               <option value={2}>2 - High</option>
@@ -184,14 +184,13 @@ export function TaskForm({
             >
               Estimate (hours)
             </label>
-            <input
+            <Input
               type='number'
               id='estimate'
               name='estimate'
               min='0'
               step='0.5'
               defaultValue={initialData?.estimate || ''}
-              className='w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
               placeholder='Hours'
             />
           </div>
@@ -200,12 +199,11 @@ export function TaskForm({
             <label htmlFor='dueDate' className='block text-sm font-medium mb-2'>
               Due Date
             </label>
-            <input
+            <Input
               type='date'
               id='dueDate'
               name='dueDate'
               defaultValue={initialData?.dueDate || ''}
-              className='w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
             />
           </div>
         </div>
@@ -225,7 +223,7 @@ export function TaskForm({
               onChange={e => {
                 setSelectedInitiativeId(e.target.value)
               }}
-              className='w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+              className='input'
             >
               <option value=''>Select initiative (optional)</option>
               {initiatives.map(initiative => (
@@ -250,7 +248,7 @@ export function TaskForm({
                 preselectedObjectiveId || initialData?.objectiveId || ''
               }
               disabled={!selectedInitiativeId}
-              className='w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed'
+              className='input'
             >
               <option value=''>Select objective (optional)</option>
               {availableObjectives.map(objective => (

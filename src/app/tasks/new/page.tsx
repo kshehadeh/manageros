@@ -40,20 +40,24 @@ export default async function NewTaskPage() {
   ])
 
   return (
-    <div className='space-y-6'>
-      <div>
-        <h1 className='text-2xl font-bold'>Create New Task</h1>
-        <p className='text-neutral-400'>
-          Create a new task for your organization
-        </p>
+    <div className='page-container'>
+      <div className='page-header'>
+        <div>
+          <h1 className='page-title'>Create New Task</h1>
+          <p className='page-subtitle'>
+            Create a new task for your organization
+          </p>
+        </div>
       </div>
 
-      <div className='card'>
-        <TaskForm
-          people={people}
-          initiatives={initiatives}
-          objectives={objectives}
-        />
+      <div className='page-section'>
+        <div className='card'>
+          <TaskForm
+            people={people}
+            initiatives={initiatives}
+            objectives={objectives}
+          />
+        </div>
       </div>
     </div>
   )

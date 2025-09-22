@@ -8,6 +8,7 @@ import { notFound } from 'next/navigation'
 import { DeleteTaskButton } from '@/components/delete-task-button'
 import { EditIconButton } from '@/components/edit-icon-button'
 import { TaskDetailBreadcrumbClient } from '@/components/task-detail-breadcrumb-client'
+import { TaskStatusSelector } from '@/components/task-status-selector'
 import { Eye } from 'lucide-react'
 
 export default async function TaskDetailPage({
@@ -32,22 +33,6 @@ export default async function TaskDetailPage({
     notFound()
   }
 
-  const statusLabels = {
-    todo: 'To Do',
-    doing: 'Doing',
-    blocked: 'Blocked',
-    done: 'Done',
-    dropped: 'Dropped',
-  }
-
-  const statusColors = {
-    todo: 'badge',
-    doing: 'rag-amber',
-    blocked: 'rag-red',
-    done: 'rag-green',
-    dropped: 'badge',
-  }
-
   const priorityColors = {
     1: 'rag-red',
     2: 'rag-amber',
@@ -63,11 +48,10 @@ export default async function TaskDetailPage({
           <div>
             <h1 className='text-2xl font-bold'>{task.title}</h1>
             <div className='flex items-center gap-3 mt-2'>
-              <span
-                className={`badge ${statusColors[task.status as keyof typeof statusColors]}`}
-              >
-                {statusLabels[task.status as keyof typeof statusLabels]}
-              </span>
+              <TaskStatusSelector
+                taskId={task.id}
+                currentStatus={task.status}
+              />
               <span
                 className={`badge ${priorityColors[task.priority as keyof typeof priorityColors]}`}
               >
@@ -85,10 +69,10 @@ export default async function TaskDetailPage({
           </div>
         </div>
 
-        <div className='grid gap-6 md:grid-cols-2'>
-          {/* Task Details */}
-          <div className='card'>
-            <h3 className='font-semibold mb-4'>Task Details</h3>
+        {/* Task Details */}
+        <div className='card'>
+          <h3 className='font-semibold mb-4'>Task Details</h3>
+          <div className='grid gap-4 md:grid-cols-2'>
             <div className='space-y-4'>
               {task.description && (
                 <div>
@@ -166,11 +150,7 @@ export default async function TaskDetailPage({
                 </div>
               )}
             </div>
-          </div>
 
-          {/* Task Metadata */}
-          <div className='card'>
-            <h3 className='font-semibold mb-4'>Metadata</h3>
             <div className='space-y-4'>
               <div>
                 <span className='text-sm font-medium text-neutral-300'>

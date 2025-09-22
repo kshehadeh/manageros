@@ -275,3 +275,104 @@ export async function getTask(taskId: string) {
 
   return task
 }
+
+export async function createQuickTask(title: string) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to create tasks')
+  }
+
+  // Validate the title
+  if (!title || title.trim().length === 0) {
+    throw new Error('Task title is required')
+  }
+
+  if (title.length > 200) {
+    throw new Error('Title must be less than 200 characters')
+  }
+
+  // Verify the person belongs to the user's organization if user is linked to a person
+  let assigneeId = null
+  if (user.personId) {
+    const person = await prisma.person.findFirst({
+      where: {
+        id: user.personId,
+        organizationId: user.organizationId,
+      },
+    })
+
+    if (person) {
+      assigneeId = user.personId
+    }
+  }
+
+  // Create the task with defaults
+  const task = await prisma.task.create({
+    data: {
+      title: title.trim(),
+      status: 'todo',
+      priority: 2,
+      assigneeId,
+    },
+    include: {
+      assignee: true,
+      initiative: true,
+      objective: true,
+    },
+  })
+
+  // Revalidate the tasks page
+  revalidatePath('/tasks')
+
+  return task
+}
+
+export async function updateTaskStatus(
+  taskId: string,
+  status: 'todo' | 'doing' | 'blocked' | 'done' | 'dropped'
+) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to update tasks')
+  }
+
+  // Verify task belongs to user's organization
+  const existingTask = await prisma.task.findFirst({
+    where: {
+      id: taskId,
+      OR: [
+        { assignee: { organizationId: user.organizationId } },
+        { initiative: { organizationId: user.organizationId } },
+        { objective: { initiative: { organizationId: user.organizationId } } },
+      ],
+    },
+  })
+
+  if (!existingTask) {
+    throw new Error('Task not found or access denied')
+  }
+
+  // Update only the status and completedAt
+  const task = await prisma.task.update({
+    where: { id: taskId },
+    data: {
+      status,
+      completedAt: status === 'done' ? new Date() : null,
+    },
+    include: {
+      assignee: true,
+      initiative: true,
+      objective: true,
+    },
+  })
+
+  // Revalidate the tasks page and task detail page
+  revalidatePath('/tasks')
+  revalidatePath(`/tasks/${taskId}`)
+
+  return task
+}
