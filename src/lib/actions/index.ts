@@ -45,6 +45,7 @@ export {
   createInitiative,
   updateInitiative,
   deleteInitiative,
+  getInitiatives,
 } from './initiative'
 
 // One-on-One Actions

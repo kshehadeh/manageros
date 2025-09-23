@@ -213,3 +213,34 @@ export async function deleteInitiative(id: string) {
   // Redirect to the initiatives list
   redirect('/initiatives')
 }
+
+export async function getInitiatives() {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to view initiatives')
+  }
+
+  const initiatives = await prisma.initiative.findMany({
+    where: { organizationId: user.organizationId },
+    include: {
+      objectives: true,
+      team: true,
+      owners: {
+        include: {
+          person: true,
+        },
+      },
+      _count: {
+        select: {
+          checkIns: true,
+          tasks: true,
+        },
+      },
+    },
+    orderBy: { updatedAt: 'desc' },
+  })
+
+  return initiatives
+}

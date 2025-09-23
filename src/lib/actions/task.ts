@@ -206,6 +206,7 @@ export async function deleteTask(taskId: string) {
     where: {
       id: taskId,
       OR: [
+        { createdBy: { organizationId: user.organizationId } },
         { assignee: { organizationId: user.organizationId } },
         { initiative: { organizationId: user.organizationId } },
         { objective: { initiative: { organizationId: user.organizationId } } },
