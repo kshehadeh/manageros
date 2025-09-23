@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { MoreHorizontal, Edit, Trash2 } from 'lucide-react'
-import { DeleteInitiativeButton } from '@/components/delete-initiative-button'
+import { deleteInitiative } from '@/lib/actions'
 
 interface InitiativeActionsDropdownProps {
   initiativeId: string
@@ -16,6 +16,8 @@ export function InitiativeActionsDropdown({
   size = 'default',
 }: InitiativeActionsDropdownProps) {
   const [openDropdown, setOpenDropdown] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const handleDropdownClick = (e: React.MouseEvent) => {
@@ -25,6 +27,18 @@ export function InitiativeActionsDropdown({
 
   const closeDropdown = () => {
     setOpenDropdown(false)
+    setShowConfirm(false)
+  }
+
+  const handleDelete = async () => {
+    setIsDeleting(true)
+    try {
+      await deleteInitiative(initiativeId)
+    } catch (error) {
+      console.error('Error deleting initiative:', error)
+      setIsDeleting(false)
+      setShowConfirm(false)
+    }
   }
 
   // Close dropdown when clicking outside
@@ -35,6 +49,7 @@ export function InitiativeActionsDropdown({
         !dropdownRef.current.contains(event.target as Node)
       ) {
         setOpenDropdown(false)
+        setShowConfirm(false)
       }
     }
 
@@ -75,13 +90,41 @@ export function InitiativeActionsDropdown({
             </Link>
 
             {/* Delete Initiative */}
-            <div
-              className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer'
-              onClick={closeDropdown}
-            >
-              <Trash2 className='w-4 h-4' />
-              <DeleteInitiativeButton initiativeId={initiativeId} />
-            </div>
+            {showConfirm ? (
+              <div className='px-3 py-2 space-y-2'>
+                <div className='text-sm font-medium text-destructive mb-2'>
+                  Are you sure you want to delete this initiative?
+                </div>
+                <div className='flex gap-2'>
+                  <Button
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    variant='destructive'
+                    size='sm'
+                    className='flex-1'
+                  >
+                    {isDeleting ? 'Deleting...' : 'Delete'}
+                  </Button>
+                  <Button
+                    onClick={() => setShowConfirm(false)}
+                    disabled={isDeleting}
+                    variant='outline'
+                    size='sm'
+                    className='flex-1'
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div
+                className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer'
+                onClick={() => setShowConfirm(true)}
+              >
+                <Trash2 className='w-4 h-4' />
+                Delete Initiative
+              </div>
+            )}
           </div>
         </div>
       )}

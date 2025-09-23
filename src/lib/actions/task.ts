@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { type TaskStatus } from '@/lib/task-status'
+import { taskPriorityUtils, DEFAULT_TASK_PRIORITY } from '@/lib/task-priority'
 
 export async function createTask(formData: TaskFormData) {
   const user = await getCurrentUser()
@@ -312,7 +313,7 @@ export async function createQuickTask(title: string) {
     data: {
       title: title.trim(),
       status: 'todo',
-      priority: 2,
+      priority: DEFAULT_TASK_PRIORITY,
       assigneeId,
       createdById: user.id,
     },
@@ -397,7 +398,7 @@ export async function createQuickTaskForInitiative(
     data: {
       title: title.trim(),
       status: 'todo',
-      priority: 2,
+      priority: DEFAULT_TASK_PRIORITY,
       assigneeId,
       createdById: user.id,
       initiativeId,
@@ -448,6 +449,171 @@ export async function updateTaskStatus(taskId: string, status: TaskStatus) {
     data: {
       status,
       completedAt: status === 'done' ? new Date() : null,
+    },
+    include: {
+      assignee: true,
+      initiative: true,
+      objective: true,
+      createdBy: true,
+    },
+  })
+
+  // Revalidate the tasks page and task detail page
+  revalidatePath('/tasks')
+  revalidatePath(`/tasks/${taskId}`)
+
+  return task
+}
+
+export async function updateTaskTitle(taskId: string, title: string) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to update tasks')
+  }
+
+  // Validate the title
+  if (!title || title.trim().length === 0) {
+    throw new Error('Task title is required')
+  }
+
+  if (title.length > 200) {
+    throw new Error('Title must be less than 200 characters')
+  }
+
+  // Verify task belongs to user's organization
+  const existingTask = await prisma.task.findFirst({
+    where: {
+      id: taskId,
+      OR: [
+        { assignee: { organizationId: user.organizationId } },
+        { initiative: { organizationId: user.organizationId } },
+        { objective: { initiative: { organizationId: user.organizationId } } },
+      ],
+    },
+  })
+
+  if (!existingTask) {
+    throw new Error('Task not found or access denied')
+  }
+
+  // Update only the title
+  const task = await prisma.task.update({
+    where: { id: taskId },
+    data: {
+      title: title.trim(),
+    },
+    include: {
+      assignee: true,
+      initiative: true,
+      objective: true,
+      createdBy: true,
+    },
+  })
+
+  // Revalidate the tasks page and task detail page
+  revalidatePath('/tasks')
+  revalidatePath(`/tasks/${taskId}`)
+
+  return task
+}
+
+export async function updateTaskAssignee(
+  taskId: string,
+  assigneeId: string | null
+) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to update tasks')
+  }
+
+  // Verify task belongs to user's organization
+  const existingTask = await prisma.task.findFirst({
+    where: {
+      id: taskId,
+      OR: [
+        { assignee: { organizationId: user.organizationId } },
+        { initiative: { organizationId: user.organizationId } },
+        { objective: { initiative: { organizationId: user.organizationId } } },
+      ],
+    },
+  })
+
+  if (!existingTask) {
+    throw new Error('Task not found or access denied')
+  }
+
+  // Verify assignee belongs to user's organization if specified
+  if (assigneeId) {
+    const assignee = await prisma.person.findFirst({
+      where: {
+        id: assigneeId,
+        organizationId: user.organizationId,
+      },
+    })
+    if (!assignee) {
+      throw new Error('Assignee not found or access denied')
+    }
+  }
+
+  // Update only the assignee
+  const task = await prisma.task.update({
+    where: { id: taskId },
+    data: {
+      assigneeId,
+    },
+    include: {
+      assignee: true,
+      initiative: true,
+      objective: true,
+      createdBy: true,
+    },
+  })
+
+  // Revalidate the tasks page and task detail page
+  revalidatePath('/tasks')
+  revalidatePath(`/tasks/${taskId}`)
+
+  return task
+}
+
+export async function updateTaskPriority(taskId: string, priority: number) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to update tasks')
+  }
+
+  // Validate the priority
+  if (!taskPriorityUtils.isValid(priority)) {
+    throw new Error('Priority must be between 1 and 5')
+  }
+
+  // Verify task belongs to user's organization
+  const existingTask = await prisma.task.findFirst({
+    where: {
+      id: taskId,
+      OR: [
+        { assignee: { organizationId: user.organizationId } },
+        { initiative: { organizationId: user.organizationId } },
+        { objective: { initiative: { organizationId: user.organizationId } } },
+      ],
+    },
+  })
+
+  if (!existingTask) {
+    throw new Error('Task not found or access denied')
+  }
+
+  // Update only the priority
+  const task = await prisma.task.update({
+    where: { id: taskId },
+    data: {
+      priority,
     },
     include: {
       assignee: true,

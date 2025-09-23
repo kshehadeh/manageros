@@ -5,6 +5,7 @@ import { InitiativesTable } from '@/components/initiatives-table'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import { prisma } from '@/lib/db'
 
 export default async function InitiativesPage() {
   const session = await getServerSession(authOptions)
@@ -17,7 +18,21 @@ export default async function InitiativesPage() {
     redirect('/organization/create')
   }
 
-  const initiatives = await getInitiatives()
+  const [initiatives, people, teams] = await Promise.all([
+    getInitiatives(),
+    prisma.person.findMany({
+      where: {
+        organizationId: session.user.organizationId,
+      },
+      orderBy: { name: 'asc' },
+    }),
+    prisma.team.findMany({
+      where: {
+        organizationId: session.user.organizationId,
+      },
+      orderBy: { name: 'asc' },
+    }),
+  ])
 
   return (
     <div className='page-container'>
@@ -32,7 +47,11 @@ export default async function InitiativesPage() {
         </div>
       </div>
       <div className='page-section'>
-        <InitiativesTable initiatives={initiatives} />
+        <InitiativesTable
+          initiatives={initiatives}
+          people={people}
+          teams={teams}
+        />
       </div>
     </div>
   )

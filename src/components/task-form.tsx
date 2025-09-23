@@ -13,6 +13,7 @@ import {
   taskStatusUtils,
   DEFAULT_TASK_STATUS,
 } from '@/lib/task-status'
+import { taskPriorityUtils, DEFAULT_TASK_PRIORITY } from '@/lib/task-priority'
 import { AlertCircle } from 'lucide-react'
 
 interface TaskFormProps {
@@ -50,7 +51,7 @@ export function TaskForm({
     description: initialData?.description || undefined,
     assigneeId: preselectedAssigneeId || initialData?.assigneeId || undefined,
     status: initialData?.status || DEFAULT_TASK_STATUS,
-    priority: initialData?.priority || 2,
+    priority: (initialData?.priority as number) || DEFAULT_TASK_PRIORITY,
     estimate: initialData?.estimate || undefined,
     dueDate: initialData?.dueDate || undefined,
     initiativeId:
@@ -234,15 +235,18 @@ export function TaskForm({
               name='priority'
               value={formData.priority}
               onChange={e =>
-                handleInputChange('priority', parseInt(e.target.value))
+                handleInputChange(
+                  'priority',
+                  parseInt(e.target.value) as number
+                )
               }
               className={`input ${errors.priority ? 'border-red-500' : ''}`}
             >
-              <option value={1}>1 - Highest</option>
-              <option value={2}>2 - High</option>
-              <option value={3}>3 - Medium</option>
-              <option value={4}>4 - Low</option>
-              <option value={5}>5 - Lowest</option>
+              {taskPriorityUtils.getSelectOptions().map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
             {errors.priority && (
               <p className='text-sm text-red-500 mt-1'>{errors.priority}</p>

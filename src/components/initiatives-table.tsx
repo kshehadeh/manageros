@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useTransition, useEffect } from 'react'
+import { useState, useTransition, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { MoreHorizontal, Edit, Eye, Trash2 } from 'lucide-react'
+import { MoreHorizontal, Edit, Eye, Trash2, Search, Filter } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -12,8 +12,27 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { deleteInitiative } from '@/lib/actions'
 import { toast } from 'sonner'
+import { Person, Team } from '@prisma/client'
+
+interface FilterState {
+  keyword: string
+  ownerId: string
+  teamId: string
+  rag: string
+  dateRange: string
+  startDate: string
+  endDate: string
+}
 
 interface InitiativeWithRelations {
   id: string
@@ -55,6 +74,8 @@ interface InitiativeWithRelations {
 
 interface InitiativesTableProps {
   initiatives: InitiativeWithRelations[]
+  people: Person[]
+  teams: Team[]
 }
 
 interface ContextMenuState {
@@ -65,7 +86,11 @@ interface ContextMenuState {
   triggerType: 'rightClick' | 'button'
 }
 
-export function InitiativesTable({ initiatives }: InitiativesTableProps) {
+export function InitiativesTable({
+  initiatives,
+  people,
+  teams,
+}: InitiativesTableProps) {
   const [_isPending, startTransition] = useTransition()
   const router = useRouter()
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({
@@ -75,6 +100,106 @@ export function InitiativesTable({ initiatives }: InitiativesTableProps) {
     initiativeId: '',
     triggerType: 'rightClick',
   })
+  const [filters, setFilters] = useState<FilterState>({
+    keyword: '',
+    ownerId: 'all',
+    teamId: 'all',
+    rag: 'all',
+    dateRange: 'all',
+    startDate: '',
+    endDate: '',
+  })
+  const [showFilters, setShowFilters] = useState(false)
+
+  // Filter initiatives based on current filter state
+  const filteredInitiatives = useMemo(() => {
+    return initiatives.filter(initiative => {
+      // Keyword filter (searches title and summary)
+      if (filters.keyword) {
+        const keyword = filters.keyword.toLowerCase()
+        const titleMatch = initiative.title.toLowerCase().includes(keyword)
+        const summaryMatch =
+          initiative.summary?.toLowerCase().includes(keyword) || false
+        if (!titleMatch && !summaryMatch) return false
+      }
+
+      // Owner filter
+      if (filters.ownerId && filters.ownerId !== 'all') {
+        const hasOwner = initiative.owners.some(
+          owner => owner.personId === filters.ownerId
+        )
+        if (!hasOwner) return false
+      }
+
+      // Team filter
+      if (filters.teamId && filters.teamId !== 'all') {
+        if (filters.teamId === 'no-team') {
+          if (initiative.teamId) return false
+        } else {
+          if (initiative.teamId !== filters.teamId) return false
+        }
+      }
+
+      // RAG filter
+      if (
+        filters.rag &&
+        filters.rag !== 'all' &&
+        initiative.rag !== filters.rag
+      ) {
+        return false
+      }
+
+      // Date range filter
+      if (filters.dateRange && filters.dateRange !== 'all') {
+        const initiativeDate =
+          initiative.startDate || initiative.targetDate || initiative.createdAt
+        const now = new Date()
+
+        switch (filters.dateRange) {
+          case 'today':
+            const today = new Date(
+              now.getFullYear(),
+              now.getMonth(),
+              now.getDate()
+            )
+            const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000)
+            if (initiativeDate < today || initiativeDate >= tomorrow)
+              return false
+            break
+          case 'this-week':
+            const startOfWeek = new Date(now)
+            startOfWeek.setDate(now.getDate() - now.getDay())
+            startOfWeek.setHours(0, 0, 0, 0)
+            if (initiativeDate < startOfWeek) return false
+            break
+          case 'this-month':
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+            if (initiativeDate < startOfMonth) return false
+            break
+          case 'last-30-days':
+            const thirtyDaysAgo = new Date(
+              now.getTime() - 30 * 24 * 60 * 60 * 1000
+            )
+            if (initiativeDate < thirtyDaysAgo) return false
+            break
+          case 'custom':
+            if (filters.startDate) {
+              const startDate = new Date(filters.startDate)
+              startDate.setHours(0, 0, 0, 0)
+              if (initiativeDate < startDate) return false
+            }
+            if (filters.endDate) {
+              const endDate = new Date(filters.endDate)
+              endDate.setHours(23, 59, 59, 999)
+              if (initiativeDate > endDate) return false
+            }
+            break
+        }
+      }
+
+      return true
+    })
+  }, [initiatives, filters])
 
   // Handle clicking outside context menu to close it
   useEffect(() => {
@@ -166,89 +291,293 @@ export function InitiativesTable({ initiatives }: InitiativesTableProps) {
   }
 
   return (
-    <div className='rounded-md border'>
-      <Table>
-        <TableHeader>
-          <TableRow className='hover:bg-accent/50'>
-            <TableHead className='text-muted-foreground'>Title</TableHead>
-            <TableHead className='text-muted-foreground'>Description</TableHead>
-            <TableHead className='text-muted-foreground'>Team</TableHead>
-            <TableHead className='text-muted-foreground'>RAG</TableHead>
-            <TableHead className='text-muted-foreground'>% Complete</TableHead>
-            <TableHead className='text-muted-foreground'>
-              # Objectives
-            </TableHead>
-            <TableHead className='text-muted-foreground'># Tasks</TableHead>
-            <TableHead className='text-muted-foreground'># Check-ins</TableHead>
-            <TableHead className='text-muted-foreground'>Owner</TableHead>
-            <TableHead className='text-muted-foreground w-[50px]'>
-              Actions
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {initiatives.map(initiative => (
-            <TableRow
-              key={initiative.id}
-              className='hover:bg-accent/50 cursor-pointer'
-              onDoubleClick={() => handleRowDoubleClick(initiative.id)}
-              onContextMenu={e => handleRowRightClick(e, initiative.id)}
+    <div className='space-y-4'>
+      {/* Filter Controls */}
+      <div>
+        <div className='flex items-center justify-between'>
+          <div className='flex items-center gap-2'>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex items-center gap-2 transition-all duration-200 ${
+                showFilters
+                  ? 'rounded-b-none border-b-0 bg-background'
+                  : 'rounded-lg'
+              }`}
             >
-              <TableCell className='font-medium text-foreground'>
-                {initiative.title}
-              </TableCell>
-              <TableCell className='text-muted-foreground max-w-[200px] truncate'>
-                {initiative.summary || '—'}
-              </TableCell>
-              <TableCell className='text-muted-foreground'>
-                {initiative.team?.name || '—'}
-              </TableCell>
-              <TableCell className='text-muted-foreground'>
-                <div className='flex items-center gap-2'>
-                  <div
-                    className={`w-3 h-3 rounded-full ${getRagColor(initiative.rag)}`}
-                  />
-                  <span className='capitalize'>{initiative.rag}</span>
+              <Filter className='h-4 w-4' />
+              Filters
+              {Object.values(filters).some(
+                filter => filter !== '' && filter !== 'all'
+              ) && <div className='h-2 w-2 bg-primary rounded-full' />}
+            </Button>
+          </div>
+          <div className='text-sm text-muted-foreground'>
+            Showing {filteredInitiatives.length} of {initiatives.length}{' '}
+            initiatives
+          </div>
+        </div>
+
+        {showFilters && (
+          <div className='border border-t-0 rounded-b-lg rounded-t-none p-4 bg-muted/30'>
+            <div>
+              <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-5'>
+                {/* Keyword Search */}
+                <div className='space-y-2'>
+                  <label className='text-sm font-medium'>Search</label>
+                  <div className='relative'>
+                    <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
+                    <Input
+                      placeholder='Search initiatives...'
+                      value={filters.keyword}
+                      onChange={e =>
+                        setFilters(prev => ({
+                          ...prev,
+                          keyword: e.target.value,
+                        }))
+                      }
+                      className='pl-8'
+                    />
+                  </div>
                 </div>
-              </TableCell>
-              <TableCell className='text-muted-foreground'>
-                <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
-                  {getCompletionPercentage(initiative)}%
-                </span>
-              </TableCell>
-              <TableCell className='text-muted-foreground'>
-                <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
-                  {initiative.objectives.length}
-                </span>
-              </TableCell>
-              <TableCell className='text-muted-foreground'>
-                <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
-                  {initiative._count.tasks}
-                </span>
-              </TableCell>
-              <TableCell className='text-muted-foreground'>
-                <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
-                  {initiative._count.checkIns}
-                </span>
-              </TableCell>
-              <TableCell className='text-muted-foreground'>
-                {initiative.owners.length > 0
-                  ? initiative.owners.map(owner => owner.person.name).join(', ')
-                  : '—'}
-              </TableCell>
-              <TableCell>
+
+                {/* Owner Filter */}
+                <div className='space-y-2'>
+                  <label className='text-sm font-medium'>Owner</label>
+                  <Select
+                    value={filters.ownerId}
+                    onValueChange={value =>
+                      setFilters(prev => ({ ...prev, ownerId: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder='All owners' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='all'>All owners</SelectItem>
+                      {people.map(person => (
+                        <SelectItem key={person.id} value={person.id}>
+                          {person.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Team Filter */}
+                <div className='space-y-2'>
+                  <label className='text-sm font-medium'>Team</label>
+                  <Select
+                    value={filters.teamId}
+                    onValueChange={value =>
+                      setFilters(prev => ({ ...prev, teamId: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder='All teams' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='all'>All teams</SelectItem>
+                      <SelectItem value='no-team'>No team</SelectItem>
+                      {teams.map(team => (
+                        <SelectItem key={team.id} value={team.id}>
+                          {team.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* RAG Filter */}
+                <div className='space-y-2'>
+                  <label className='text-sm font-medium'>RAG Status</label>
+                  <Select
+                    value={filters.rag}
+                    onValueChange={value =>
+                      setFilters(prev => ({ ...prev, rag: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder='All RAG statuses' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='all'>All RAG statuses</SelectItem>
+                      <SelectItem value='red'>Red</SelectItem>
+                      <SelectItem value='amber'>Amber</SelectItem>
+                      <SelectItem value='green'>Green</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Date Range Filter */}
+                <div className='space-y-2'>
+                  <label className='text-sm font-medium'>Date Range</label>
+                  <Select
+                    value={filters.dateRange}
+                    onValueChange={value =>
+                      setFilters(prev => ({ ...prev, dateRange: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder='All dates' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='all'>All dates</SelectItem>
+                      <SelectItem value='today'>Today</SelectItem>
+                      <SelectItem value='this-week'>This week</SelectItem>
+                      <SelectItem value='this-month'>This month</SelectItem>
+                      <SelectItem value='last-30-days'>Last 30 days</SelectItem>
+                      <SelectItem value='custom'>Custom range</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Custom Date Range Inputs */}
+              {filters.dateRange === 'custom' && (
+                <div className='grid gap-4 md:grid-cols-2 mt-4'>
+                  <div className='space-y-2'>
+                    <label className='text-sm font-medium'>Start Date</label>
+                    <Input
+                      type='date'
+                      value={filters.startDate}
+                      onChange={e =>
+                        setFilters(prev => ({
+                          ...prev,
+                          startDate: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <label className='text-sm font-medium'>End Date</label>
+                    <Input
+                      type='date'
+                      value={filters.endDate}
+                      onChange={e =>
+                        setFilters(prev => ({
+                          ...prev,
+                          endDate: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Clear Filters Button */}
+              <div className='flex justify-end mt-4'>
                 <Button
-                  variant='ghost'
-                  className='h-8 w-8 p-0'
-                  onClick={e => handleButtonClick(e, initiative.id)}
+                  variant='outline'
+                  size='sm'
+                  onClick={() =>
+                    setFilters({
+                      keyword: '',
+                      ownerId: 'all',
+                      teamId: 'all',
+                      rag: 'all',
+                      dateRange: 'all',
+                      startDate: '',
+                      endDate: '',
+                    })
+                  }
                 >
-                  <MoreHorizontal className='h-4 w-4' />
+                  Clear Filters
                 </Button>
-              </TableCell>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Initiative Table */}
+      <div className='rounded-md border'>
+        <Table>
+          <TableHeader>
+            <TableRow className='hover:bg-accent/50'>
+              <TableHead className='text-muted-foreground'>Title</TableHead>
+              <TableHead className='text-muted-foreground'>Team</TableHead>
+              <TableHead className='text-muted-foreground'>RAG</TableHead>
+              <TableHead className='text-muted-foreground'>
+                % Complete
+              </TableHead>
+              <TableHead className='text-muted-foreground'>
+                # Objectives
+              </TableHead>
+              <TableHead className='text-muted-foreground'># Tasks</TableHead>
+              <TableHead className='text-muted-foreground'>
+                # Check-ins
+              </TableHead>
+              <TableHead className='text-muted-foreground'>Owner</TableHead>
+              <TableHead className='text-muted-foreground w-[50px]'>
+                Actions
+              </TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {filteredInitiatives.map(initiative => (
+              <TableRow
+                key={initiative.id}
+                className='hover:bg-accent/50 cursor-pointer'
+                onDoubleClick={() => handleRowDoubleClick(initiative.id)}
+                onContextMenu={e => handleRowRightClick(e, initiative.id)}
+              >
+                <TableCell className='font-medium text-foreground'>
+                  {initiative.title}
+                </TableCell>
+                <TableCell className='text-muted-foreground'>
+                  {initiative.team?.name || '—'}
+                </TableCell>
+                <TableCell className='text-muted-foreground'>
+                  <div className='flex items-center gap-2'>
+                    <div
+                      className={`w-3 h-3 rounded-full ${getRagColor(initiative.rag)}`}
+                    />
+                    <span className='capitalize'>{initiative.rag}</span>
+                  </div>
+                </TableCell>
+                <TableCell className='text-muted-foreground'>
+                  <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
+                    {getCompletionPercentage(initiative)}%
+                  </span>
+                </TableCell>
+                <TableCell className='text-muted-foreground'>
+                  <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
+                    {initiative.objectives.length}
+                  </span>
+                </TableCell>
+                <TableCell className='text-muted-foreground'>
+                  <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
+                    {initiative._count.tasks}
+                  </span>
+                </TableCell>
+                <TableCell className='text-muted-foreground'>
+                  <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
+                    {initiative._count.checkIns}
+                  </span>
+                </TableCell>
+                <TableCell className='text-muted-foreground'>
+                  {initiative.owners.length > 0
+                    ? initiative.owners
+                        .map(owner => owner.person.name)
+                        .join(', ')
+                    : '—'}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant='ghost'
+                    className='h-8 w-8 p-0'
+                    onClick={e => handleButtonClick(e, initiative.id)}
+                  >
+                    <MoreHorizontal className='h-4 w-4' />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       {/* Context Menu */}
       {contextMenu.visible && (

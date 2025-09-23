@@ -8,8 +8,7 @@ import { CheckInList } from '@/components/checkin-list'
 import { InitiativeDetailClient } from '@/components/initiative-detail-client'
 import { InitiativeQuickTaskForm } from '@/components/initiative-quick-task-form'
 import { InitiativeActionsDropdown } from '@/components/initiative-actions-dropdown'
-import { TaskCard } from '@/components/task-card'
-import { taskStatusUtils, type TaskStatus } from '@/lib/task-status'
+import { TaskTable } from '@/components/task-table'
 
 export default async function InitiativeDetail({
   params,
@@ -27,36 +26,44 @@ export default async function InitiativeDetail({
   }
 
   const { id } = await params
-  const init = await prisma.initiative.findFirst({
-    where: {
-      id,
-      organizationId: session.user.organizationId,
-    },
-    include: {
-      objectives: true,
-      tasks: {
-        include: {
-          assignee: true,
-          createdBy: true,
-          objective: true,
-          initiative: true,
-        },
-        orderBy: { createdAt: 'desc' },
+  const [init, people] = await Promise.all([
+    prisma.initiative.findFirst({
+      where: {
+        id,
+        organizationId: session.user.organizationId,
       },
-      checkIns: {
-        orderBy: { createdAt: 'desc' },
-        include: {
-          createdBy: true,
+      include: {
+        objectives: true,
+        tasks: {
+          include: {
+            assignee: true,
+            createdBy: true,
+            objective: true,
+            initiative: true,
+          },
+          orderBy: { createdAt: 'desc' },
+        },
+        checkIns: {
+          orderBy: { createdAt: 'desc' },
+          include: {
+            createdBy: true,
+          },
+        },
+        team: true,
+        owners: {
+          include: {
+            person: true,
+          },
         },
       },
-      team: true,
-      owners: {
-        include: {
-          person: true,
-        },
+    }),
+    prisma.person.findMany({
+      where: {
+        organizationId: session.user.organizationId,
       },
-    },
-  })
+      orderBy: { name: 'asc' },
+    }),
+  ])
 
   // Get all tasks associated with this initiative (both direct and through objectives)
   const allTasks = await prisma.task.findMany({
@@ -73,14 +80,6 @@ export default async function InitiativeDetail({
   })
 
   if (!init) return <div>Not found</div>
-
-  const priorityVariants = {
-    1: 'error' as const,
-    2: 'warning' as const,
-    3: 'neutral' as const,
-    4: 'success' as const,
-    5: 'success' as const,
-  }
 
   return (
     <InitiativeDetailClient initiativeTitle={init.title} initiativeId={init.id}>
@@ -196,28 +195,12 @@ export default async function InitiativeDetail({
               />
             </div>
 
-            <div className='space-y-3'>
-              {allTasks.length === 0 ? (
-                <div className='text-muted-foreground text-sm'>
-                  No tasks yet.
-                </div>
-              ) : (
-                allTasks.map(task => (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    statusVariant={taskStatusUtils.getUIVariant(
-                      task.status as TaskStatus
-                    )}
-                    priorityVariant={
-                      priorityVariants[
-                        task.priority as keyof typeof priorityVariants
-                      ]
-                    }
-                  />
-                ))
-              )}
-            </div>
+            <TaskTable
+              tasks={allTasks}
+              people={people}
+              showInitiative={false}
+              showCreator={true}
+            />
           </div>
         </div>
 

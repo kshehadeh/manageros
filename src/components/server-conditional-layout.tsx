@@ -58,7 +58,7 @@ export default async function ServerConditionalLayout({
               <div className='flex-1 flex flex-col overflow-hidden lg:ml-0'>
                 <TopBar />
                 <main className='flex-1 overflow-auto p-6'>
-                  <div className='max-w-7xl mx-auto'>{children}</div>
+                  <div className='w-full'>{children}</div>
                 </main>
               </div>
             </div>

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { taskStatusUtils, type TaskStatus } from '@/lib/task-status'
+import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
 import { Task, Person, Initiative, Objective, User } from '@prisma/client'
 
 type TaskWithRelations = Task & {
@@ -38,7 +39,7 @@ export function TaskCard({
                 .toUpperCase()}
             </Badge>
             <Badge variant={priorityVariant} className='text-xs'>
-              P{task.priority}
+              {taskPriorityUtils.getShortLabel(task.priority as TaskPriority)}
             </Badge>
           </div>
         </div>

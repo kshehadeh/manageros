@@ -1,5 +1,10 @@
 import { z } from 'zod'
 import { ALL_TASK_STATUSES } from '@/lib/task-status'
+import {
+  ALL_TASK_PRIORITIES,
+  DEFAULT_TASK_PRIORITY,
+  TaskPriority,
+} from '@/lib/task-priority'
 
 export const initiativeSchema = z.object({
   title: z
@@ -138,7 +143,12 @@ export const taskSchema = z.object({
   description: z.string().optional(),
   assigneeId: z.string().optional(),
   status: z.enum(ALL_TASK_STATUSES as [string, ...string[]]).default('todo'),
-  priority: z.number().min(1).max(5).default(2),
+  priority: z.coerce
+    .number()
+    .refine(val => ALL_TASK_PRIORITIES.includes(val as TaskPriority), {
+      message: 'Priority must be between 1 and 5',
+    })
+    .default(DEFAULT_TASK_PRIORITY),
   estimate: z.number().min(0).optional(),
   dueDate: z.string().optional(),
   initiativeId: z.string().optional(),

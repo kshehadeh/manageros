@@ -11,6 +11,7 @@ import { TaskDetailBreadcrumbClient } from '@/components/task-detail-breadcrumb-
 import { TaskStatusSelector } from '@/components/task-status-selector'
 import { Eye } from 'lucide-react'
 import { type TaskStatus } from '@/lib/task-status'
+import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
 
 export default async function TaskDetailPage({
   params,
@@ -35,11 +36,11 @@ export default async function TaskDetailPage({
   }
 
   const priorityColors = {
-    1: 'rag-red',
-    2: 'rag-amber',
-    3: 'badge',
-    4: 'rag-green',
-    5: 'rag-green',
+    1: taskPriorityUtils.getRAGVariant(1),
+    2: taskPriorityUtils.getRAGVariant(2),
+    3: taskPriorityUtils.getRAGVariant(3),
+    4: taskPriorityUtils.getRAGVariant(4),
+    5: taskPriorityUtils.getRAGVariant(5),
   }
 
   return (
@@ -56,7 +57,7 @@ export default async function TaskDetailPage({
               <span
                 className={`badge ${priorityColors[task.priority as keyof typeof priorityColors]}`}
               >
-                Priority {task.priority}
+                {taskPriorityUtils.getLabel(task.priority as TaskPriority)}
               </span>
             </div>
           </div>
