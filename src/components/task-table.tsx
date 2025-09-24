@@ -12,6 +12,9 @@ import {
   X,
   Search,
   Filter,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react'
 import {
   Table,
@@ -77,6 +80,7 @@ interface TaskTableProps {
   initiatives?: Initiative[]
   showInitiative?: boolean
   showCreator?: boolean
+  hideFilters?: boolean
   onTaskUpdate?: () => void
 }
 
@@ -95,12 +99,18 @@ interface EditingState {
   }
 }
 
+interface SortState {
+  column: string | null
+  direction: 'asc' | 'desc'
+}
+
 export function TaskTable({
   tasks,
   people,
   initiatives = [],
   showInitiative = true,
   showCreator = true,
+  hideFilters = false,
   onTaskUpdate,
 }: TaskTableProps) {
   const [_isPending, startTransition] = useTransition()
@@ -125,10 +135,45 @@ export function TaskTable({
     endDate: '',
   })
   const [showFilters, setShowFilters] = useState(false)
+  const [sorting, setSorting] = useState<SortState>({
+    column: null,
+    direction: 'asc',
+  })
 
-  // Filter tasks based on current filter state
+  // Handle column sorting
+  const handleSort = (column: string) => {
+    setSorting(prev => {
+      if (prev.column === column) {
+        // If clicking the same column, toggle direction
+        return {
+          column,
+          direction: prev.direction === 'asc' ? 'desc' : 'asc',
+        }
+      } else {
+        // If clicking a different column, set to ascending
+        return {
+          column,
+          direction: 'asc',
+        }
+      }
+    })
+  }
+
+  // Get sort icon for column header
+  const getSortIcon = (column: string) => {
+    if (sorting.column !== column) {
+      return <ArrowUpDown className='h-4 w-4 text-muted-foreground' />
+    }
+    return sorting.direction === 'asc' ? (
+      <ArrowUp className='h-4 w-4 text-primary' />
+    ) : (
+      <ArrowDown className='h-4 w-4 text-primary' />
+    )
+  }
+
+  // Filter and sort tasks based on current filter and sort state
   const filteredTasks = useMemo(() => {
-    return tasks.filter(task => {
+    const filtered = tasks.filter(task => {
       // Keyword filter (searches title and description)
       if (filters.keyword) {
         const keyword = filters.keyword.toLowerCase()
@@ -222,7 +267,66 @@ export function TaskTable({
 
       return true
     })
-  }, [tasks, filters])
+
+    // Sort the filtered tasks
+    if (sorting.column) {
+      return [...filtered].sort((a, b) => {
+        let aValue: string | number
+        let bValue: string | number
+
+        switch (sorting.column) {
+          case 'title':
+            aValue = a.title.toLowerCase()
+            bValue = b.title.toLowerCase()
+            break
+          case 'assignee':
+            aValue = a.assignee?.name?.toLowerCase() || ''
+            bValue = b.assignee?.name?.toLowerCase() || ''
+            break
+          case 'status':
+            aValue = a.status
+            bValue = b.status
+            break
+          case 'priority':
+            aValue = a.priority
+            bValue = b.priority
+            break
+          case 'dueDate':
+            aValue = a.dueDate
+              ? new Date(a.dueDate).getTime()
+              : Number.MAX_SAFE_INTEGER
+            bValue = b.dueDate
+              ? new Date(b.dueDate).getTime()
+              : Number.MAX_SAFE_INTEGER
+            break
+          case 'createdAt':
+            aValue = new Date(a.createdAt).getTime()
+            bValue = new Date(b.createdAt).getTime()
+            break
+          case 'initiative':
+            aValue = a.initiative?.title?.toLowerCase() || ''
+            bValue = b.initiative?.title?.toLowerCase() || ''
+            break
+          case 'createdBy':
+            aValue = a.createdBy?.name?.toLowerCase() || ''
+            bValue = b.createdBy?.name?.toLowerCase() || ''
+            break
+          default:
+            return 0
+        }
+
+        if (aValue < bValue) {
+          return sorting.direction === 'asc' ? -1 : 1
+        }
+        if (aValue > bValue) {
+          return sorting.direction === 'asc' ? 1 : -1
+        }
+        return 0
+      })
+    }
+
+    return filtered
+  }, [tasks, filters, sorting])
 
   // Handle clicking outside context menu to close it
   useEffect(() => {
@@ -394,235 +498,245 @@ export function TaskTable({
   return (
     <div className='space-y-4'>
       {/* Filter Controls */}
-      <div>
-        <div className='flex items-center justify-between'>
-          <div className='flex items-center gap-2'>
-            <Button
-              variant='outline'
-              size='sm'
-              onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-2 transition-all duration-200 ${
-                showFilters
-                  ? 'rounded-b-none border-b-0 bg-background'
-                  : 'rounded-lg'
-              }`}
-            >
-              <Filter className='h-4 w-4' />
-              Filters
-              {Object.values(filters).some(
-                filter => filter !== '' && filter !== 'all'
-              ) && <div className='h-2 w-2 bg-primary rounded-full' />}
-            </Button>
-          </div>
-          <div className='text-sm text-muted-foreground'>
-            Showing {filteredTasks.length} of {tasks.length} tasks
-          </div>
-        </div>
-
-        {showFilters && (
-          <div className='border border-t-0 rounded-b-lg rounded-t-none p-4 bg-muted/30'>
-            <div>
-              <div
-                className={`grid gap-4 md:grid-cols-2 ${showInitiative ? 'lg:grid-cols-6' : 'lg:grid-cols-5'}`}
+      {!hideFilters && (
+        <div>
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-2'>
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 transition-all duration-200 ${
+                  showFilters
+                    ? 'rounded-b-none border-b-0 bg-background'
+                    : 'rounded-lg'
+                }`}
               >
-                {/* Keyword Search */}
-                <div className='space-y-2'>
-                  <label className='text-sm font-medium'>Search</label>
-                  <div className='relative'>
-                    <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
-                    <Input
-                      placeholder='Search tasks...'
-                      value={filters.keyword}
-                      onChange={e =>
-                        setFilters(prev => ({
-                          ...prev,
-                          keyword: e.target.value,
-                        }))
-                      }
-                      className='pl-8'
-                    />
-                  </div>
-                </div>
+                <Filter className='h-4 w-4' />
+                Filters
+                {Object.values(filters).some(
+                  filter => filter !== '' && filter !== 'all'
+                ) && <div className='h-2 w-2 bg-primary rounded-full' />}
+              </Button>
+            </div>
+            <div className='text-sm text-muted-foreground'>
+              Showing {filteredTasks.length} of {tasks.length} tasks
+            </div>
+          </div>
 
-                {/* Assignee Filter */}
-                <div className='space-y-2'>
-                  <label className='text-sm font-medium'>Assignee</label>
-                  <Select
-                    value={filters.assigneeId}
-                    onValueChange={value =>
-                      setFilters(prev => ({ ...prev, assigneeId: value }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder='All assignees' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='all'>All assignees</SelectItem>
-                      <SelectItem value='unassigned'>Unassigned</SelectItem>
-                      {people.map(person => (
-                        <SelectItem key={person.id} value={person.id}>
-                          {person.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Initiative Filter - Only show when not already filtered by initiative */}
-                {showInitiative && (
+          {showFilters && (
+            <div className='border border-t-0 rounded-b-lg rounded-t-none p-4 bg-muted/30'>
+              <div>
+                <div
+                  className={`grid gap-4 md:grid-cols-2 ${showInitiative ? 'lg:grid-cols-6' : 'lg:grid-cols-5'}`}
+                >
+                  {/* Keyword Search */}
                   <div className='space-y-2'>
-                    <label className='text-sm font-medium'>Initiative</label>
+                    <label className='text-sm font-medium'>Search</label>
+                    <div className='relative'>
+                      <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
+                      <Input
+                        placeholder='Search tasks...'
+                        value={filters.keyword}
+                        onChange={e =>
+                          setFilters(prev => ({
+                            ...prev,
+                            keyword: e.target.value,
+                          }))
+                        }
+                        className='pl-8'
+                      />
+                    </div>
+                  </div>
+
+                  {/* Assignee Filter */}
+                  <div className='space-y-2'>
+                    <label className='text-sm font-medium'>Assignee</label>
                     <Select
-                      value={filters.initiativeId}
+                      value={filters.assigneeId}
                       onValueChange={value =>
-                        setFilters(prev => ({ ...prev, initiativeId: value }))
+                        setFilters(prev => ({ ...prev, assigneeId: value }))
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder='All initiatives' />
+                        <SelectValue placeholder='All assignees' />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value='all'>All initiatives</SelectItem>
-                        <SelectItem value='no-initiative'>
-                          No initiative
-                        </SelectItem>
-                        {initiatives.map(initiative => (
-                          <SelectItem key={initiative.id} value={initiative.id}>
-                            {initiative.title}
+                        <SelectItem value='all'>All assignees</SelectItem>
+                        <SelectItem value='unassigned'>Unassigned</SelectItem>
+                        {people.map(person => (
+                          <SelectItem key={person.id} value={person.id}>
+                            {person.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
+
+                  {/* Initiative Filter - Only show when not already filtered by initiative */}
+                  {showInitiative && (
+                    <div className='space-y-2'>
+                      <label className='text-sm font-medium'>Initiative</label>
+                      <Select
+                        value={filters.initiativeId}
+                        onValueChange={value =>
+                          setFilters(prev => ({ ...prev, initiativeId: value }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder='All initiatives' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value='all'>All initiatives</SelectItem>
+                          <SelectItem value='no-initiative'>
+                            No initiative
+                          </SelectItem>
+                          {initiatives.map(initiative => (
+                            <SelectItem
+                              key={initiative.id}
+                              value={initiative.id}
+                            >
+                              {initiative.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {/* Status Filter */}
+                  <div className='space-y-2'>
+                    <label className='text-sm font-medium'>Status</label>
+                    <Select
+                      value={filters.status}
+                      onValueChange={value =>
+                        setFilters(prev => ({ ...prev, status: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder='All statuses' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='all'>All statuses</SelectItem>
+                        {ALL_TASK_STATUSES.map(status => (
+                          <SelectItem key={status} value={status}>
+                            {taskStatusUtils.getLabel(status)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Priority Filter */}
+                  <div className='space-y-2'>
+                    <label className='text-sm font-medium'>Priority</label>
+                    <Select
+                      value={filters.priority}
+                      onValueChange={value =>
+                        setFilters(prev => ({ ...prev, priority: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder='All priorities' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='all'>All priorities</SelectItem>
+                        {ALL_TASK_PRIORITIES.map(priority => (
+                          <SelectItem
+                            key={priority}
+                            value={priority.toString()}
+                          >
+                            {taskPriorityUtils.getLabel(priority)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Date Range Filter */}
+                  <div className='space-y-2'>
+                    <label className='text-sm font-medium'>Date Range</label>
+                    <Select
+                      value={filters.dateRange}
+                      onValueChange={value =>
+                        setFilters(prev => ({ ...prev, dateRange: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder='All dates' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='all'>All dates</SelectItem>
+                        <SelectItem value='today'>Today</SelectItem>
+                        <SelectItem value='this-week'>This week</SelectItem>
+                        <SelectItem value='this-month'>This month</SelectItem>
+                        <SelectItem value='last-30-days'>
+                          Last 30 days
+                        </SelectItem>
+                        <SelectItem value='custom'>Custom range</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Custom Date Range Inputs */}
+                {filters.dateRange === 'custom' && (
+                  <div className='grid gap-4 md:grid-cols-2 mt-4'>
+                    <div className='space-y-2'>
+                      <label className='text-sm font-medium'>Start Date</label>
+                      <Input
+                        type='date'
+                        value={filters.startDate}
+                        onChange={e =>
+                          setFilters(prev => ({
+                            ...prev,
+                            startDate: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+                    <div className='space-y-2'>
+                      <label className='text-sm font-medium'>End Date</label>
+                      <Input
+                        type='date'
+                        value={filters.endDate}
+                        onChange={e =>
+                          setFilters(prev => ({
+                            ...prev,
+                            endDate: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+                  </div>
                 )}
 
-                {/* Status Filter */}
-                <div className='space-y-2'>
-                  <label className='text-sm font-medium'>Status</label>
-                  <Select
-                    value={filters.status}
-                    onValueChange={value =>
-                      setFilters(prev => ({ ...prev, status: value }))
+                {/* Clear Filters Button */}
+                <div className='flex justify-end mt-4'>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={() =>
+                      setFilters({
+                        keyword: '',
+                        assigneeId: 'all',
+                        initiativeId: 'all',
+                        status: 'all',
+                        priority: 'all',
+                        dateRange: 'all',
+                        startDate: '',
+                        endDate: '',
+                      })
                     }
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder='All statuses' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='all'>All statuses</SelectItem>
-                      {ALL_TASK_STATUSES.map(status => (
-                        <SelectItem key={status} value={status}>
-                          {taskStatusUtils.getLabel(status)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    Clear Filters
+                  </Button>
                 </div>
-
-                {/* Priority Filter */}
-                <div className='space-y-2'>
-                  <label className='text-sm font-medium'>Priority</label>
-                  <Select
-                    value={filters.priority}
-                    onValueChange={value =>
-                      setFilters(prev => ({ ...prev, priority: value }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder='All priorities' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='all'>All priorities</SelectItem>
-                      {ALL_TASK_PRIORITIES.map(priority => (
-                        <SelectItem key={priority} value={priority.toString()}>
-                          {taskPriorityUtils.getLabel(priority)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Date Range Filter */}
-                <div className='space-y-2'>
-                  <label className='text-sm font-medium'>Date Range</label>
-                  <Select
-                    value={filters.dateRange}
-                    onValueChange={value =>
-                      setFilters(prev => ({ ...prev, dateRange: value }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder='All dates' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='all'>All dates</SelectItem>
-                      <SelectItem value='today'>Today</SelectItem>
-                      <SelectItem value='this-week'>This week</SelectItem>
-                      <SelectItem value='this-month'>This month</SelectItem>
-                      <SelectItem value='last-30-days'>Last 30 days</SelectItem>
-                      <SelectItem value='custom'>Custom range</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Custom Date Range Inputs */}
-              {filters.dateRange === 'custom' && (
-                <div className='grid gap-4 md:grid-cols-2 mt-4'>
-                  <div className='space-y-2'>
-                    <label className='text-sm font-medium'>Start Date</label>
-                    <Input
-                      type='date'
-                      value={filters.startDate}
-                      onChange={e =>
-                        setFilters(prev => ({
-                          ...prev,
-                          startDate: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className='space-y-2'>
-                    <label className='text-sm font-medium'>End Date</label>
-                    <Input
-                      type='date'
-                      value={filters.endDate}
-                      onChange={e =>
-                        setFilters(prev => ({
-                          ...prev,
-                          endDate: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Clear Filters Button */}
-              <div className='flex justify-end mt-4'>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  onClick={() =>
-                    setFilters({
-                      keyword: '',
-                      assigneeId: 'all',
-                      initiativeId: 'all',
-                      status: 'all',
-                      priority: 'all',
-                      dateRange: 'all',
-                      startDate: '',
-                      endDate: '',
-                    })
-                  }
-                >
-                  Clear Filters
-                </Button>
               </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* Task Table */}
       <div className='rounded-md border'>
@@ -632,20 +746,64 @@ export function TaskTable({
               <TableHead className='w-[50px] text-muted-foreground'>
                 <Check className='h-4 w-4' />
               </TableHead>
-              <TableHead className='text-muted-foreground'>Summary</TableHead>
-              <TableHead className='text-muted-foreground'>Assignee</TableHead>
+              <TableHead
+                className='text-muted-foreground cursor-pointer hover:text-foreground select-none'
+                onClick={() => handleSort('title')}
+              >
+                <div className='flex items-center gap-2'>
+                  Summary
+                  {getSortIcon('title')}
+                </div>
+              </TableHead>
+              <TableHead
+                className='text-muted-foreground cursor-pointer hover:text-foreground select-none'
+                onClick={() => handleSort('assignee')}
+              >
+                <div className='flex items-center gap-2'>
+                  Assignee
+                  {getSortIcon('assignee')}
+                </div>
+              </TableHead>
               {showCreator && (
-                <TableHead className='text-muted-foreground'>
-                  Created By
+                <TableHead
+                  className='text-muted-foreground cursor-pointer hover:text-foreground select-none'
+                  onClick={() => handleSort('createdBy')}
+                >
+                  <div className='flex items-center gap-2'>
+                    Created By
+                    {getSortIcon('createdBy')}
+                  </div>
                 </TableHead>
               )}
               {showInitiative && (
-                <TableHead className='text-muted-foreground'>
-                  Initiative
+                <TableHead
+                  className='text-muted-foreground cursor-pointer hover:text-foreground select-none'
+                  onClick={() => handleSort('initiative')}
+                >
+                  <div className='flex items-center gap-2'>
+                    Initiative
+                    {getSortIcon('initiative')}
+                  </div>
                 </TableHead>
               )}
-              <TableHead className='text-muted-foreground'>Status</TableHead>
-              <TableHead className='text-muted-foreground'>Priority</TableHead>
+              <TableHead
+                className='text-muted-foreground cursor-pointer hover:text-foreground select-none'
+                onClick={() => handleSort('status')}
+              >
+                <div className='flex items-center gap-2'>
+                  Status
+                  {getSortIcon('status')}
+                </div>
+              </TableHead>
+              <TableHead
+                className='text-muted-foreground cursor-pointer hover:text-foreground select-none'
+                onClick={() => handleSort('priority')}
+              >
+                <div className='flex items-center gap-2'>
+                  Priority
+                  {getSortIcon('priority')}
+                </div>
+              </TableHead>
               <TableHead className='text-muted-foreground w-[50px]'>
                 Actions
               </TableHead>

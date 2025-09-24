@@ -8,11 +8,13 @@ import {
   getPendingInvitationsForUser,
   getActiveFeedbackCampaignsForUser,
 } from '@/lib/actions'
+import { getTasksAssignedToCurrentUser } from '@/lib/actions/task'
 import PendingInvitations from '@/components/pending-invitations'
 import { ExpandableSection } from '@/components/expandable-section'
 import { ActiveFeedbackCampaigns } from '@/components/active-feedback-campaigns'
 import { PersonListItemCard } from '@/components/person-list-item-card'
 import { InitiativeCard } from '@/components/initiative-card'
+import { TaskTable } from '@/components/task-table'
 
 export default async function Home() {
   const session = await getServerSession(authOptions)
@@ -90,6 +92,8 @@ export default async function Home() {
     openInitiatives,
     recentOneOnes,
     activeCampaigns,
+    assignedTasks,
+    people,
   ] = await Promise.all([
     // Get teams where the current user is associated (member or manages team members)
     prisma.team.findMany({
@@ -192,154 +196,189 @@ export default async function Home() {
     }),
     // Get active feedback campaigns for the current user
     getActiveFeedbackCampaignsForUser(),
+    // Get tasks assigned to the current user
+    getTasksAssignedToCurrentUser(),
+    // Get all people in the organization for the task table
+    prisma.person.findMany({
+      where: {
+        organizationId: session.user.organizationId!,
+      },
+      orderBy: { name: 'asc' },
+    }),
   ])
 
   return (
-    <div className='page-container space-y-6'>
-      {/* Dashboard sections with equal width */}
-      <div className='grid gap-6 md:grid-cols-2'>
-        {/* Teams Section - only show if there are teams */}
-        {teams.length > 0 && (
-          <ExpandableSection title='Related Teams' viewAllHref='/teams'>
-            {teams.map(team => (
-              <div key={team.id} className='flex items-center justify-between'>
-                <div>
-                  <Link
-                    href={`/teams/${team.id}`}
-                    className='font-medium hover:text-blue-400'
-                  >
-                    {team.name}
-                  </Link>
-                  <div className='text-neutral-400 text-sm'>
-                    {team.description ?? ''}
-                  </div>
-                  <div className='text-xs text-neutral-500 mt-1'>
-                    {team.people.length} member
-                    {team.people.length !== 1 ? 's' : ''} •{' '}
-                    {team.initiatives.length} initiative
-                    {team.initiatives.length !== 1 ? 's' : ''}
-                    {team.parent && (
-                      <span>
-                        {' '}
-                        • Parent:{' '}
-                        <Link
-                          href={`/teams/${team.parent.id}`}
-                          className='hover:text-blue-400'
-                        >
-                          {team.parent.name}
-                        </Link>
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </ExpandableSection>
-        )}
-
-        {/* Direct Reports Section - only show if there are direct reports */}
-        {directReports.length > 0 && (
-          <ExpandableSection
-            title='Direct Reports'
-            viewAllHref='/direct-reports'
-          >
-            {directReports.map(person => (
-              <PersonListItemCard
-                key={person.id}
-                person={person}
-                variant='compact'
+    <div className='page-container'>
+      <div className='flex gap-6'>
+        {/* Main Content Area */}
+        <div className='flex-1 space-y-6'>
+          {/* My Tasks Section - only show if there are assigned tasks */}
+          {assignedTasks.length > 0 && (
+            <ExpandableSection title='My Tasks' viewAllHref='/tasks'>
+              <TaskTable
+                tasks={assignedTasks}
+                people={people}
+                showInitiative={true}
+                showCreator={false}
+                hideFilters={true}
               />
-            ))}
-          </ExpandableSection>
-        )}
+            </ExpandableSection>
+          )}
 
-        {/* Recent 1:1s Section - only show if there are recent 1:1s */}
-        {recentOneOnes.length > 0 && (
-          <ExpandableSection title='Recent 1:1s' viewAllHref='/oneonones'>
-            {recentOneOnes.map(oneOnOne => (
-              <Link
-                key={oneOnOne.id}
-                href={`/oneonones/${oneOnOne.id}`}
-                className='block card hover:bg-neutral-800/60'
+          {/* Active Feedback Campaigns Section - only show if there are active campaigns */}
+          {activeCampaigns.length > 0 && (
+            <ActiveFeedbackCampaigns
+              campaigns={activeCampaigns.map(campaign => ({
+                ...campaign,
+                status: campaign.status as
+                  | 'draft'
+                  | 'active'
+                  | 'completed'
+                  | 'cancelled',
+                template: campaign.template
+                  ? {
+                      id: campaign.template.id,
+                      name: campaign.template.name,
+                      description: campaign.template.description || undefined,
+                    }
+                  : null,
+                targetPerson: {
+                  ...campaign.targetPerson,
+                  email: campaign.targetPerson.email || '',
+                },
+              }))}
+            />
+          )}
+
+          {/* Middle Section: Other Content */}
+          <div className='grid gap-6 md:grid-cols-2'>
+            {/* Recent 1:1s Section - only show if there are recent 1:1s */}
+            {recentOneOnes.length > 0 && (
+              <ExpandableSection title='Recent 1:1s' viewAllHref='/oneonones'>
+                {recentOneOnes.map(oneOnOne => (
+                  <Link
+                    key={oneOnOne.id}
+                    href={`/oneonones/${oneOnOne.id}`}
+                    className='block card hover:bg-neutral-800/60'
+                  >
+                    <div className='flex items-center justify-between'>
+                      <div>
+                        <div className='font-medium'>
+                          {oneOnOne.manager?.user?.id === session.user.id ? (
+                            <span>
+                              With{' '}
+                              <span className='hover:text-blue-400'>
+                                {oneOnOne.report.name}
+                              </span>
+                            </span>
+                          ) : (
+                            <span>
+                              With{' '}
+                              <span className='hover:text-blue-400'>
+                                {oneOnOne.manager.name}
+                              </span>
+                            </span>
+                          )}
+                        </div>
+                        <div className='text-xs text-neutral-500 mt-1'>
+                          {oneOnOne.scheduledAt
+                            ? new Date(
+                                oneOnOne.scheduledAt
+                              ).toLocaleDateString()
+                            : 'TBD'}
+                        </div>
+                      </div>
+                      <div className='text-xs text-neutral-500'>
+                        {oneOnOne.manager?.user?.id === session.user.id
+                          ? 'Manager'
+                          : 'Report'}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </ExpandableSection>
+            )}
+
+            {/* Open Initiatives Section - only show if there are open initiatives */}
+            {openInitiatives.length > 0 && (
+              <ExpandableSection
+                title='Open Initiatives'
+                viewAllHref='/initiatives'
               >
-                <div className='flex items-center justify-between'>
+                {openInitiatives.map(initiative => (
+                  <InitiativeCard
+                    key={initiative.id}
+                    initiative={initiative}
+                    variant='compact'
+                    showTeam={true}
+                    showOwners={false}
+                  />
+                ))}
+              </ExpandableSection>
+            )}
+          </div>
+        </div>
+
+        {/* Right Sidebar */}
+        <div className='w-80 space-y-6'>
+          {/* Teams Section - only show if there are teams */}
+          {teams.length > 0 && (
+            <ExpandableSection title='Related Teams' viewAllHref='/teams'>
+              {teams.map(team => (
+                <div
+                  key={team.id}
+                  className='flex items-center justify-between'
+                >
                   <div>
-                    <div className='font-medium'>
-                      {oneOnOne.manager?.user?.id === session.user.id ? (
+                    <Link
+                      href={`/teams/${team.id}`}
+                      className='font-medium hover:text-blue-400'
+                    >
+                      {team.name}
+                    </Link>
+                    <div className='text-neutral-400 text-sm'>
+                      {team.description ?? ''}
+                    </div>
+                    <div className='text-xs text-neutral-500 mt-1'>
+                      {team.people.length} member
+                      {team.people.length !== 1 ? 's' : ''} •{' '}
+                      {team.initiatives.length} initiative
+                      {team.initiatives.length !== 1 ? 's' : ''}
+                      {team.parent && (
                         <span>
-                          With{' '}
-                          <span className='hover:text-blue-400'>
-                            {oneOnOne.report.name}
-                          </span>
-                        </span>
-                      ) : (
-                        <span>
-                          With{' '}
-                          <span className='hover:text-blue-400'>
-                            {oneOnOne.manager.name}
-                          </span>
+                          {' '}
+                          • Parent:{' '}
+                          <Link
+                            href={`/teams/${team.parent.id}`}
+                            className='hover:text-blue-400'
+                          >
+                            {team.parent.name}
+                          </Link>
                         </span>
                       )}
                     </div>
-                    <div className='text-xs text-neutral-500 mt-1'>
-                      {oneOnOne.scheduledAt
-                        ? new Date(oneOnOne.scheduledAt).toLocaleDateString()
-                        : 'TBD'}
-                    </div>
-                  </div>
-                  <div className='text-xs text-neutral-500'>
-                    {oneOnOne.manager?.user?.id === session.user.id
-                      ? 'Manager'
-                      : 'Report'}
                   </div>
                 </div>
-              </Link>
-            ))}
-          </ExpandableSection>
-        )}
+              ))}
+            </ExpandableSection>
+          )}
 
-        {/* Open Initiatives Section - only show if there are open initiatives */}
-        {openInitiatives.length > 0 && (
-          <ExpandableSection
-            title='Open Initiatives'
-            viewAllHref='/initiatives'
-          >
-            {openInitiatives.map(initiative => (
-              <InitiativeCard
-                key={initiative.id}
-                initiative={initiative}
-                variant='compact'
-                showTeam={true}
-                showOwners={false}
-              />
-            ))}
-          </ExpandableSection>
-        )}
-
-        {/* Active Feedback Campaigns Section - only show if there are active campaigns */}
-        {activeCampaigns.length > 0 && (
-          <ActiveFeedbackCampaigns
-            campaigns={activeCampaigns.map(campaign => ({
-              ...campaign,
-              status: campaign.status as
-                | 'draft'
-                | 'active'
-                | 'completed'
-                | 'cancelled',
-              template: campaign.template
-                ? {
-                    id: campaign.template.id,
-                    name: campaign.template.name,
-                    description: campaign.template.description || undefined,
-                  }
-                : null,
-              targetPerson: {
-                ...campaign.targetPerson,
-                email: campaign.targetPerson.email || '',
-              },
-            }))}
-          />
-        )}
+          {/* Direct Reports Section - only show if there are direct reports */}
+          {directReports.length > 0 && (
+            <ExpandableSection
+              title='Direct Reports'
+              viewAllHref='/direct-reports'
+            >
+              {directReports.map(person => (
+                <PersonListItemCard
+                  key={person.id}
+                  person={person}
+                  variant='compact'
+                />
+              ))}
+            </ExpandableSection>
+          )}
+        </div>
       </div>
     </div>
   )

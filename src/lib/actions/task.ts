@@ -629,3 +629,39 @@ export async function updateTaskPriority(taskId: string, priority: number) {
 
   return task
 }
+
+export async function getTasksAssignedToCurrentUser() {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to view tasks')
+  }
+
+  // Check if user is linked to a person
+  if (!user.personId) {
+    return []
+  }
+
+  const tasks = await prisma.task.findMany({
+    where: {
+      assigneeId: user.personId,
+      status: {
+        notIn: ['done', 'dropped'], // Only show active tasks
+      },
+    },
+    include: {
+      assignee: true,
+      initiative: true,
+      objective: true,
+      createdBy: true,
+    },
+    orderBy: [
+      { priority: 'asc' }, // Lower number = higher priority
+      { dueDate: 'asc' }, // Earlier dates first
+      { createdAt: 'desc' }, // Newer tasks first as tiebreaker
+    ],
+  })
+
+  return tasks
+}

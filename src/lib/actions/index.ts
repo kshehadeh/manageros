@@ -102,6 +102,7 @@ export {
   createQuickTask,
   createQuickTaskForInitiative,
   updateTaskStatus,
+  getTasksAssignedToCurrentUser,
 } from './task'
 
 // Check-in Actions
