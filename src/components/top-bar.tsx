@@ -2,6 +2,7 @@
 
 import Breadcrumb from './breadcrumb'
 import { ModeToggle } from '@/components/mode-toggle'
+import { BugReportButton } from '@/components/bug-report-button'
 import { Menu, X } from 'lucide-react'
 import { useMobileMenu } from '@/components/mobile-menu-provider'
 
@@ -25,7 +26,10 @@ export default function TopBar() {
           </button>
           <Breadcrumb />
         </div>
-        <ModeToggle />
+        <div className='flex items-center gap-2'>
+          <BugReportButton />
+          <ModeToggle />
+        </div>
       </div>
     </header>
   )

@@ -148,3 +148,6 @@ export {
   updateMeetingInstanceParticipantStatus,
   removeMeetingInstanceParticipant,
 } from './meeting-instance'
+
+// GitHub Integration Actions
+export { submitGitHubIssue } from './github'
