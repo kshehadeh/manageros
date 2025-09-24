@@ -17,6 +17,7 @@ import {
   MessageCircle,
   Mail,
   Settings,
+  Calendar,
 } from 'lucide-react'
 
 interface NavItem {
@@ -32,6 +33,7 @@ const navigation: NavItem[] = [
   { name: 'People', href: '/people', icon: Users },
   { name: 'Teams', href: '/teams', icon: Users2 },
   { name: 'Tasks', href: '/tasks', icon: ClipboardList },
+  { name: 'Meetings', href: '/meetings', icon: Calendar },
   { name: '1:1s', href: '/oneonones', icon: MessageSquare },
   { name: 'Feedback', href: '/feedback', icon: MessageCircle },
   {

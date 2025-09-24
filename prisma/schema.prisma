@@ -22,6 +22,8 @@ model Organization {
   people      Person[]
   initiatives Initiative[]
   invitations OrganizationInvitation[]
+  meetings    Meeting[]
+  meetingInstances MeetingInstance[]
 }
 
 model User {
@@ -38,6 +40,7 @@ model User {
   jiraCredentials UserJiraCredentials?
   feedbackCampaigns FeedbackCampaign[]
   createdTasks   Task[]
+  createdMeetings Meeting[]
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   
@@ -56,6 +59,7 @@ model Team {
   children       Team[]       @relation("TeamHierarchy")
   people         Person[]
   initiatives    Initiative[]
+  meetings       Meeting[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   
@@ -89,6 +93,9 @@ model Person {
   user               User?
   jiraAccount        PersonJiraAccount?
   feedbackCampaigns  FeedbackCampaign[] @relation("CampaignTarget")
+  ownedMeetings      Meeting[]         @relation("MeetingOwner")
+  meetingParticipants MeetingParticipant[] @relation("MeetingParticipant")
+  meetingInstanceParticipants MeetingInstanceParticipant[] @relation("MeetingInstanceParticipant")
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
   
@@ -114,6 +121,7 @@ model Initiative {
   checkIns       CheckIn[]
   metrics        Metric[]
   tasks          Task[]
+  meetings       Meeting[]
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
   
@@ -370,5 +378,88 @@ model FeedbackQuestion {
   
   @@index([templateId])
   @@index([sortOrder])
+}
+
+model Meeting {
+  id             String               @id @default(cuid())
+  title          String
+  description    String?
+  scheduledAt    DateTime
+  duration       Int?         // Duration in minutes
+  location       String?      // Physical or virtual location
+  notes          String?      // Open area for notes
+  isRecurring    Boolean      @default(false)
+  recurrenceType String?      // daily|weekly|monthly|bi_monthly|semi_annually
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  teamId         String?      // Optional team association
+  team           Team?        @relation(fields: [teamId], references: [id])
+  initiativeId   String?      // Optional initiative association
+  initiative     Initiative?  @relation(fields: [initiativeId], references: [id])
+  ownerId        String?      // Meeting owner (assigned to a person)
+  owner          Person?      @relation("MeetingOwner", fields: [ownerId], references: [id])
+  createdById    String       // User who created the meeting
+  createdBy      User         @relation(fields: [createdById], references: [id])
+  participants   MeetingParticipant[]
+  instances      MeetingInstance[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  
+  @@index([organizationId])
+  @@index([teamId])
+  @@index([initiativeId])
+  @@index([ownerId])
+  @@index([createdById])
+  @@index([scheduledAt])
+  @@index([isRecurring])
+}
+
+model MeetingParticipant {
+  id        String   @id @default(cuid())
+  meetingId String
+  meeting   Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  personId  String
+  person    Person   @relation("MeetingParticipant", fields: [personId], references: [id])
+  status    String   @default("invited") // invited|accepted|declined|tentative
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([meetingId, personId])
+  @@index([meetingId])
+  @@index([personId])
+  @@index([status])
+}
+
+model MeetingInstance {
+  id             String       @id @default(cuid())
+  meetingId      String
+  meeting        Meeting      @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  scheduledAt    DateTime     // Specific date/time for this instance
+  notes          String?      // Notes for this specific instance
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  participants   MeetingInstanceParticipant[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  
+  @@index([meetingId])
+  @@index([organizationId])
+  @@index([scheduledAt])
+}
+
+model MeetingInstanceParticipant {
+  id                String           @id @default(cuid())
+  meetingInstanceId String
+  meetingInstance   MeetingInstance  @relation(fields: [meetingInstanceId], references: [id], onDelete: Cascade)
+  personId          String
+  person            Person           @relation("MeetingInstanceParticipant", fields: [personId], references: [id])
+  status            String           @default("invited") // invited|accepted|declined|tentative|attended|absent
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  
+  @@unique([meetingInstanceId, personId])
+  @@index([meetingInstanceId])
+  @@index([personId])
+  @@index([status])
 }
 

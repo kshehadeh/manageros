@@ -124,3 +124,27 @@ export {
 
 // CSV Import Actions
 export { importPersonsFromCSV, importTeamsFromCSV } from './csv-import'
+
+// Meeting Actions
+export {
+  createMeeting,
+  updateMeeting,
+  deleteMeeting,
+  getMeetings,
+  getMeeting,
+  addMeetingParticipant,
+  updateMeetingParticipantStatus,
+  removeMeetingParticipant,
+} from './meeting'
+
+// Meeting Instance Actions
+export {
+  createMeetingInstance,
+  updateMeetingInstance,
+  deleteMeetingInstance,
+  getMeetingInstance,
+  getMeetingInstances,
+  addMeetingInstanceParticipant,
+  updateMeetingInstanceParticipantStatus,
+  removeMeetingInstanceParticipant,
+} from './meeting-instance'

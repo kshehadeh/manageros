@@ -237,3 +237,180 @@ export const feedbackTemplateSchema = z.object({
 })
 
 export type FeedbackTemplateFormData = z.infer<typeof feedbackTemplateSchema>
+
+export const meetingSchema = z
+  .object({
+    title: z
+      .string()
+      .min(1, 'Meeting title is required')
+      .max(200, 'Title must be less than 200 characters'),
+    description: z.string().optional(),
+    scheduledAt: z.string().min(1, 'Scheduled date and time is required'),
+    duration: z.number().min(1).max(480).optional(), // Duration in minutes, max 8 hours
+    location: z.string().optional(),
+    notes: z.string().optional(),
+    isRecurring: z.boolean().default(false),
+    recurrenceType: z
+      .enum(['daily', 'weekly', 'monthly', 'bi_monthly', 'semi_annually'])
+      .optional(),
+    teamId: z.string().optional(),
+    initiativeId: z.string().optional(),
+    ownerId: z.string().optional(),
+    participants: z
+      .array(
+        z.object({
+          personId: z.string().min(1, 'Person ID is required'),
+          status: z
+            .enum(['invited', 'accepted', 'declined', 'tentative'])
+            .default('invited'),
+        })
+      )
+      .optional()
+      .default([]),
+  })
+  .refine(
+    data => {
+      // If isRecurring is true, recurrenceType must be provided
+      if (data.isRecurring && !data.recurrenceType) {
+        return false
+      }
+      // If isRecurring is false, recurrenceType should not be provided
+      if (!data.isRecurring && data.recurrenceType) {
+        return false
+      }
+      return true
+    },
+    {
+      message: 'Recurrence type is required when meeting is recurring',
+      path: ['recurrenceType'],
+    }
+  )
+
+export type MeetingFormData = z.infer<typeof meetingSchema>
+
+export const meetingUpdateSchema = z
+  .object({
+    title: z
+      .string()
+      .min(1, 'Meeting title is required')
+      .max(200, 'Title must be less than 200 characters')
+      .optional(),
+    description: z.string().optional(),
+    scheduledAt: z
+      .string()
+      .min(1, 'Scheduled date and time is required')
+      .optional(),
+    duration: z.number().min(1).max(480).optional(), // Duration in minutes, max 8 hours
+    location: z.string().optional(),
+    notes: z.string().optional(),
+    isRecurring: z.boolean().optional(),
+    recurrenceType: z
+      .enum(['daily', 'weekly', 'monthly', 'bi_monthly', 'semi_annually'])
+      .optional(),
+    teamId: z.string().optional(),
+    initiativeId: z.string().optional(),
+    ownerId: z.string().optional(),
+  })
+  .refine(
+    data => {
+      // If isRecurring is true, recurrenceType must be provided
+      if (data.isRecurring && !data.recurrenceType) {
+        return false
+      }
+      // If isRecurring is false, recurrenceType should not be provided
+      if (data.isRecurring === false && data.recurrenceType) {
+        return false
+      }
+      return true
+    },
+    {
+      message: 'Recurrence type is required when meeting is recurring',
+      path: ['recurrenceType'],
+    }
+  )
+
+export type MeetingUpdateData = z.infer<typeof meetingUpdateSchema>
+
+export const meetingParticipantSchema = z.object({
+  personId: z.string().min(1, 'Person ID is required'),
+  status: z
+    .enum(['invited', 'accepted', 'declined', 'tentative'])
+    .default('invited'),
+})
+
+export type MeetingParticipantFormData = z.infer<
+  typeof meetingParticipantSchema
+>
+
+export const meetingInstanceSchema = z.object({
+  meetingId: z.string().min(1, 'Meeting ID is required'),
+  scheduledAt: z.string().min(1, 'Scheduled date and time is required'),
+  notes: z.string().optional(),
+  participants: z
+    .array(
+      z.object({
+        personId: z.string().min(1, 'Person ID is required'),
+        status: z
+          .enum([
+            'invited',
+            'accepted',
+            'declined',
+            'tentative',
+            'attended',
+            'absent',
+          ])
+          .default('invited'),
+      })
+    )
+    .optional()
+    .default([]),
+})
+
+export type MeetingInstanceFormData = z.infer<typeof meetingInstanceSchema>
+
+export const meetingInstanceUpdateSchema = z.object({
+  scheduledAt: z
+    .string()
+    .min(1, 'Scheduled date and time is required')
+    .optional(),
+  notes: z.string().optional(),
+  participants: z
+    .array(
+      z.object({
+        personId: z.string().min(1, 'Person ID is required'),
+        status: z
+          .enum([
+            'invited',
+            'accepted',
+            'declined',
+            'tentative',
+            'attended',
+            'absent',
+          ])
+          .default('invited'),
+      })
+    )
+    .optional(),
+})
+
+export type MeetingInstanceUpdateData = z.infer<
+  typeof meetingInstanceUpdateSchema
+>
+
+export const meetingInstanceParticipantSchema = z.object({
+  personId: z.string().min(1, 'Person ID is required'),
+  status: z
+    .enum([
+      'invited',
+      'accepted',
+      'declined',
+      'tentative',
+      'attended',
+      'absent',
+    ])
+    .default('invited'),
+})
+
+export type MeetingInstanceParticipantFormData = z.infer<
+  typeof meetingInstanceParticipantSchema
+>
