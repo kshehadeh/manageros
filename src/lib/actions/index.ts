@@ -150,4 +150,4 @@ export {
 } from './meeting-instance'
 
 // GitHub Integration Actions
-export { submitGitHubIssue } from './github'
+export { submitGitHubIssue, uploadImageToR2 } from './github'

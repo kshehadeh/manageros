@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dialog'
 import { submitGitHubIssue } from '@/lib/actions'
 import { toast } from 'sonner'
-import { Bug, Loader2 } from 'lucide-react'
+import { Bug, Loader2, X, Image as ImageIcon } from 'lucide-react'
 
 interface BugSubmissionModalProps {
   open: boolean
@@ -29,7 +29,76 @@ export function BugSubmissionModal({
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [includeEmail, setIncludeEmail] = useState(false)
+  const [images, setImages] = useState<File[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isDragOver, setIsDragOver] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const validateImage = (file: File): string | null => {
+    const allowedTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+    ]
+    if (!allowedTypes.includes(file.type)) {
+      return 'Only JPEG, PNG, GIF, and WebP images are allowed'
+    }
+
+    const maxSize = 10 * 1024 * 1024 // 10MB
+    if (file.size > maxSize) {
+      return 'Image size must be less than 10MB'
+    }
+
+    return null
+  }
+
+  const handleImageSelect = (files: FileList | null) => {
+    if (!files) return
+
+    const newImages: File[] = []
+    const errors: string[] = []
+
+    Array.from(files).forEach(file => {
+      const error = validateImage(file)
+      if (error) {
+        errors.push(`${file.name}: ${error}`)
+      } else {
+        newImages.push(file)
+      }
+    })
+
+    if (errors.length > 0) {
+      toast.error(errors.join('\n'))
+    }
+
+    if (newImages.length > 0) {
+      setImages(prev => [...prev, ...newImages])
+    }
+  }
+
+  const removeImage = (index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(false)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(false)
+
+    const files = e.dataTransfer.files
+    handleImageSelect(files)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,6 +115,7 @@ export function BugSubmissionModal({
         title: title.trim(),
         description: description.trim(),
         includeEmail,
+        images: images.length > 0 ? images : undefined,
       })
 
       if (result.success) {
@@ -72,6 +142,7 @@ export function BugSubmissionModal({
         setTitle('')
         setDescription('')
         setIncludeEmail(false)
+        setImages([])
         onOpenChange(false)
       }
     } catch (error) {
@@ -88,6 +159,7 @@ export function BugSubmissionModal({
     setTitle('')
     setDescription('')
     setIncludeEmail(false)
+    setImages([])
     onOpenChange(false)
   }
 
@@ -135,11 +207,88 @@ export function BugSubmissionModal({
             />
           </div>
 
+          <div className='space-y-2'>
+            <label className='text-sm font-medium'>Images (Optional)</label>
+
+            {/* Drag & Drop Area */}
+            <div
+              className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
+                isDragOver
+                  ? 'border-primary bg-primary/5'
+                  : 'border-muted-foreground/25 hover:border-muted-foreground/50'
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <ImageIcon className='mx-auto h-8 w-8 text-muted-foreground mb-2' />
+              <p className='text-sm text-muted-foreground mb-2'>
+                Drag & drop images here, or{' '}
+                <button
+                  type='button'
+                  onClick={() => fileInputRef.current?.click()}
+                  className='text-primary hover:underline'
+                  disabled={isSubmitting}
+                >
+                  browse files
+                </button>
+              </p>
+              <p className='text-xs text-muted-foreground'>
+                Supports JPEG, PNG, GIF, WebP (max 10MB each)
+              </p>
+
+              <input
+                ref={fileInputRef}
+                type='file'
+                multiple
+                accept='image/*'
+                onChange={e => handleImageSelect(e.target.files)}
+                className='hidden'
+                disabled={isSubmitting}
+              />
+            </div>
+
+            {/* Image Preview */}
+            {images.length > 0 && (
+              <div className='space-y-2'>
+                <p className='text-sm font-medium'>Selected Images:</p>
+                <div className='grid grid-cols-2 gap-2'>
+                  {images.map((image, index) => (
+                    <div
+                      key={index}
+                      className='relative group border rounded-lg p-2 bg-muted/50'
+                    >
+                      <div className='flex items-center gap-2'>
+                        <ImageIcon className='h-4 w-4 text-muted-foreground' />
+                        <span className='text-xs truncate flex-1'>
+                          {image.name}
+                        </span>
+                        <button
+                          type='button'
+                          onClick={() => removeImage(index)}
+                          className='opacity-0 group-hover:opacity-100 transition-opacity'
+                          disabled={isSubmitting}
+                        >
+                          <X className='h-3 w-3 text-destructive' />
+                        </button>
+                      </div>
+                      <p className='text-xs text-muted-foreground mt-1'>
+                        {(image.size / 1024 / 1024).toFixed(1)} MB
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className='flex items-center space-x-2'>
             <Checkbox
               id='include-email'
               checked={includeEmail}
-              onCheckedChange={setIncludeEmail}
+              onCheckedChange={value =>
+                setIncludeEmail(value === 'indeterminate' ? false : value)
+              }
               disabled={isSubmitting}
             />
             <label

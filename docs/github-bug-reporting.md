@@ -19,7 +19,7 @@ To enable the GitHub integration, you need to create a GitHub Personal Access To
 5. Click "Generate token"
 6. Copy the token (you won't be able to see it again)
 
-### 2. Environment Variable
+### 2. Environment Variables
 
 Add the GitHub token to your environment variables:
 
@@ -28,7 +28,22 @@ Add the GitHub token to your environment variables:
 GITHUB_TOKEN=your_github_token_here
 ```
 
-### 3. Repository Access
+### 3. Cloudflare R2 Setup
+
+For image uploads, you'll also need to set up Cloudflare R2:
+
+```bash
+# In your .env.local file
+CLOUDFLARE_R2_ACCOUNT_ID=your_account_id_here
+CLOUDFLARE_R2_ACCESS_KEY_ID=your_api_token_here
+CLOUDFLARE_R2_SECRET_ACCESS_KEY=your_api_token_here
+CLOUDFLARE_R2_BUCKET_NAME=your_bucket_name_here
+CLOUDFLARE_R2_PUBLIC_URL=https://your-bucket.your-domain.com
+```
+
+See [Cloudflare R2 Setup Guide](./cloudflare-r2-setup.md) for detailed instructions.
+
+### 4. Repository Access
 
 Make sure the GitHub token has access to the `kshehadeh/manageros` repository. The token needs to be able to create issues in this repository.
 
@@ -40,6 +55,7 @@ Make sure the GitHub token has access to the `kshehadeh/manageros` repository. T
 2. Fill in the bug report form:
    - **Title**: Brief description of the issue
    - **Description**: Detailed description including steps to reproduce, expected behavior, and actual behavior
+   - **Images**: Optional images to help illustrate the issue (drag & drop or browse files)
    - **Include Email**: Checkbox to optionally include your email address in the issue description (unchecked by default)
 3. Click "Submit Bug Report"
 4. A success toast will appear with a link to the created GitHub issue
@@ -51,14 +67,16 @@ The bug reports will appear in the GitHub repository with:
 - The `user-submitted` label
 - The user's email in the issue body (if they chose to include it) or "Anonymous user"
 - The detailed description provided by the user
+- Images attached to the issue (if provided) with inline display
 
 ## Technical Details
 
 ### Components
 
 - `BugReportButton`: The button component in the top bar
-- `BugSubmissionModal`: The modal form for submitting bug reports with email inclusion option
-- `submitGitHubIssue`: Server action that handles the GitHub API call with optional email inclusion
+- `BugSubmissionModal`: The modal form for submitting bug reports with image upload and email inclusion options
+- `submitGitHubIssue`: Server action that handles the GitHub API call with optional image uploads and email inclusion
+- `uploadImageToR2`: Server action that uploads images to Cloudflare R2 and returns URLs for inclusion in issues
 
 ### API Integration
 
@@ -68,6 +86,19 @@ The feature uses the GitHub Issues API:
 - **Method**: POST
 - **Authentication**: GitHub Personal Access Token
 - **Labels**: Automatically adds `user-submitted` label
+
+### Image Upload
+
+Images are uploaded using Cloudflare R2's S3-compatible API:
+
+- **SDK**: AWS SDK (`@aws-sdk/client-s3`) for reliable S3-compatible operations
+- **Supported Formats**: JPEG, PNG, GIF, WebP
+- **Maximum Size**: 10MB per image
+- **Upload Process**: Images are uploaded to Cloudflare R2 first, then URLs are included in the issue description
+- **Storage**: Images are stored on Cloudflare R2 with global CDN
+- **Display**: Images appear inline in GitHub issues using Markdown syntax
+- **Cost**: Free tier includes 10GB storage and 1M requests per month
+- **API**: Uses S3-compatible API for better reliability and error handling
 
 ### Error Handling
 
