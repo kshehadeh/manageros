@@ -1,13 +1,13 @@
 'use client'
 
 import { type CommandItemDescriptor, type CommandSource } from '../types'
-import { ListTodo, Rocket, User } from 'lucide-react'
+import { ListTodo, Rocket, User, MessageSquare } from 'lucide-react'
 
 interface SearchResultBase {
   id: string
   title: string
   subtitle?: string
-  type: 'task' | 'initiative' | 'person'
+  type: 'task' | 'initiative' | 'person' | 'feedback'
 }
 
 async function searchAll(query: string): Promise<SearchResultBase[]> {
@@ -50,6 +50,16 @@ export const searchCommandSource: CommandSource = {
           },
         }
       }
+      if (r.type === 'feedback') {
+        return {
+          ...base,
+          icon: <MessageSquare className='h-4 w-4' />,
+          perform: ({ closePalette }) => {
+            window.location.href = `/feedback/${r.id}`
+            closePalette()
+          },
+        }
+      }
       return {
         ...base,
         icon: <User className='h-4 w-4' />,
@@ -62,4 +72,3 @@ export const searchCommandSource: CommandSource = {
     return items
   },
 }
-

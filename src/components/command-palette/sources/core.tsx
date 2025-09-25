@@ -1,5 +1,5 @@
 'use client'
-import { Plus, ListTodo, Users, Rocket } from 'lucide-react'
+import { Plus, ListTodo, Users, Rocket, MessageSquare } from 'lucide-react'
 import { type CommandItemDescriptor, type CommandSource } from '../types'
 
 function createStaticItems(query: string): CommandItemDescriptor[] {
@@ -54,6 +54,18 @@ function createStaticItems(query: string): CommandItemDescriptor[] {
         closePalette()
       },
     },
+    {
+      id: 'nav.feedback',
+      title: 'View Feedback',
+      subtitle: 'Go to feedback page',
+      icon: <MessageSquare className='h-4 w-4' />,
+      keywords: ['feedback', 'reviews', 'comments'],
+      group: 'Navigation',
+      perform: ({ closePalette }) => {
+        window.location.href = '/feedback'
+        closePalette()
+      },
+    },
   ]
 
   return items.filter(item => {
@@ -72,4 +84,3 @@ export const coreCommandSource: CommandSource = {
   label: 'Core',
   getItems: async (query: string) => createStaticItems(query),
 }
-
