@@ -1,0 +1,101 @@
+## Command Palette
+
+The Command Palette provides fast access to actions and data via keyboard search. Open it with Ctrl/⌘ + K or the Command button in the top bar.
+
+### Files
+
+- `src/components/ui/command.tsx` – shadcn/cmdk UI primitives
+- `src/components/command-palette/provider.tsx` – global open state and keyboard shortcut
+- `src/components/command-palette/command-palette.tsx` – palette dialog and results rendering
+- `src/components/command-palette/sources/` – extensible sources that supply commands
+  - `core.tsx` – quick actions (e.g., Create Task) and navigation
+  - `search.ts` – server-backed search across tasks, initiatives, people
+- `src/app/api/search/route.ts` – unified search endpoint
+- `src/components/command-palette/create-task-modal.tsx` – modal used by Create Task action
+
+### Usage
+
+The palette is wired globally in `server-conditional-layout.tsx` and can be opened via:
+
+- Keyboard: Ctrl/⌘ + K
+- UI: Top bar Command button
+
+### Adding Commands
+
+Commands are provided by sources implementing `CommandSource`:
+
+```ts
+export interface CommandItemDescriptor {
+  id: string
+  title: string
+  subtitle?: string
+  icon?: ReactNode
+  keywords?: string[]
+  group?: string
+  perform: (ctx: { closePalette: () => void }) => void | Promise<void>
+}
+
+export interface CommandSource {
+  id: string
+  label: string
+  getItems: (query: string) => Promise<CommandItemDescriptor[]>
+}
+```
+
+To add new commands:
+
+1. Create a new source file in `src/components/command-palette/sources/your-source.tsx`.
+2. Export a `CommandSource` whose `getItems` returns matching `CommandItemDescriptor[]` based on the query.
+3. Register the source in `src/components/command-palette/command-palette.tsx` by adding it to the `sources` array.
+
+Example static command:
+
+```ts
+export const exampleSource: CommandSource = {
+  id: 'example',
+  label: 'Example',
+  getItems: async q =>
+    q.includes('help')
+      ? [
+          {
+            id: 'help.openDocs',
+            title: 'Open Documentation',
+            group: 'Help',
+            perform: ({ closePalette }) => {
+              window.location.href = '/docs'
+              closePalette()
+            },
+          },
+        ]
+      : [],
+}
+```
+
+### Adding Server Search Results
+
+Update `src/app/api/search/route.ts` to include new entity types. Return a merged array of `{ id, title, subtitle?, type }` where `type` is used by the client to construct navigation.
+
+On the client, extend `search.ts` to map the new `type` to a `CommandItemDescriptor` and its navigation or action.
+
+### Opening Modals or Executing Actions
+
+Use DOM events for decoupled actions. Example used by Create Task:
+
+```ts
+// In a source perform()
+window.dispatchEvent(new CustomEvent('command:openCreateTaskModal'))
+
+// In a component
+useEffect(() => {
+  const onOpen = () => setOpen(true)
+  window.addEventListener('command:openCreateTaskModal', onOpen as EventListener)
+  return () => window.removeEventListener('command:openCreateTaskModal', onOpen as EventListener)
+}, [])
+```
+
+### UX Notes
+
+- Group results via `group` to keep quick actions on top.
+- `keywords` improve matching beyond `title`/`subtitle`.
+- The list queries all sources in parallel whenever the input changes.
+

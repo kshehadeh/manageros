@@ -8,6 +8,9 @@ import Sidebar from '@/components/sidebar'
 import TopBar from '@/components/top-bar'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from 'sonner'
+import { CommandPaletteProvider } from '@/components/command-palette/provider'
+import { CommandPalette } from '@/components/command-palette/command-palette'
+import { CreateTaskModal } from '@/components/command-palette/create-task-modal'
 
 interface ServerConditionalLayoutProps {
   children: ReactNode
@@ -50,20 +53,24 @@ export default async function ServerConditionalLayout({
         storageKey='manageros-theme'
         disableTransitionOnChange
       >
-        <BreadcrumbProvider>
-          <MobileMenuProvider>
-            <DefaultBreadcrumbHandler />
-            <div className='flex min-h-screen'>
-              <Sidebar />
-              <div className='flex-1 flex flex-col overflow-hidden lg:ml-0'>
-                <TopBar />
-                <main className='flex-1 overflow-auto p-6'>
-                  <div className='w-full'>{children}</div>
-                </main>
+        <CommandPaletteProvider>
+          <BreadcrumbProvider>
+            <MobileMenuProvider>
+              <DefaultBreadcrumbHandler />
+              <div className='flex min-h-screen'>
+                <Sidebar />
+                <div className='flex-1 flex flex-col overflow-hidden lg:ml-0'>
+                  <TopBar />
+                  <main className='flex-1 overflow-auto p-6'>
+                    <div className='w-full'>{children}</div>
+                  </main>
+                </div>
               </div>
-            </div>
-          </MobileMenuProvider>
-        </BreadcrumbProvider>
+              <CommandPalette />
+              <CreateTaskModal />
+            </MobileMenuProvider>
+          </BreadcrumbProvider>
+        </CommandPaletteProvider>
         <Toaster theme='system' />
       </ThemeProvider>
     </AuthSessionProvider>

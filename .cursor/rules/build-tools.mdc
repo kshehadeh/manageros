@@ -1,8 +1,11 @@
 ---
-description: Build tools for the project
-globs:
-alwaysApply: true
+description: Utilities used for building, updating, and maintaining the project
+alwaysApply: false
 ---
+
+# Tools
+
+## Rules
 
 * Always use Bun for building the project.
 * Always use Prisma for database interactions.

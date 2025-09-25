@@ -13,6 +13,7 @@ Entities like meetings, initiatives, people, etc. should follow these rules:
 * When displaying a list of entities, use the shadcn table component instead of a list of cards.  Limit the columns to those that are necessary and relevant to the entity.
 * When creating a new table list, add support for filtering using the same UI as the persons table.  Where the filter button can be expanded to show the filters.  Support filtering based on the columns in the table unless it doesn't make sense for that property.
 * We do not need to include a "Back to..." button since we have the breadcrumbs to navigate back to the previous page.
+* Use consistent iconography for all entities.  Use the Lucide icons for all icons. Determine the right icon based on the icon used in the sidebar
 
 ## Theming Rules
 
