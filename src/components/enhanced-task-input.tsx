@@ -94,50 +94,6 @@ export function EnhancedTaskInput({
           className='pr-8'
         />
 
-        {/* Hidden span for text measurement */}
-        <span
-          className='absolute invisible whitespace-pre'
-          style={{
-            fontSize: '14px',
-            fontFamily: 'inherit',
-            padding: '8px',
-            border: '1px solid transparent',
-          }}
-        >
-          {value}
-        </span>
-
-        {/* Highlight overlay for detected dates */}
-        {detectedDates.length > 0 && (
-          <div className='absolute inset-0 pointer-events-none'>
-            <div className='relative h-full'>
-              {detectedDates.map((detectedDate, index) => {
-                const beforeText = value.slice(0, detectedDate.startIndex)
-                const highlightedText = detectedDate.originalText
-
-                // Use a simpler approach - estimate based on character count
-                // This is approximate but should work reasonably well
-                const charWidth = 8.5 // Approximate character width in pixels
-                const beforeWidth = beforeText.length * charWidth
-                const highlightWidth = highlightedText.length * charWidth
-
-                return (
-                  <div
-                    key={index}
-                    className='absolute top-0 h-full bg-primary/20 rounded-sm border border-primary/30'
-                    style={{
-                      left: `${beforeWidth + 8}px`, // 8px for input padding
-                      width: `${highlightWidth}px`,
-                      height: 'calc(100% - 2px)', // Account for border
-                      top: '1px',
-                    }}
-                  />
-                )
-              })}
-            </div>
-          </div>
-        )}
-
         {isDetecting && (
           <div className='absolute right-2 top-1/2 transform -translate-y-1/2'>
             <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-foreground'></div>
