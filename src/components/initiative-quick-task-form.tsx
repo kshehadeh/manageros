@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { EnhancedTaskInput } from '@/components/enhanced-task-input'
 import {
   Select,
   SelectContent,
@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select'
 import { createQuickTaskForInitiative } from '@/lib/actions'
 import { Objective } from '@prisma/client'
+import { Plus } from 'lucide-react'
 
 interface InitiativeQuickTaskFormProps {
   initiativeId: string
@@ -23,6 +24,7 @@ export function InitiativeQuickTaskForm({
   objectives,
 }: InitiativeQuickTaskFormProps) {
   const [title, setTitle] = useState('')
+  const [detectedDate, setDetectedDate] = useState<string | null>(null)
   const [selectedObjectiveId, setSelectedObjectiveId] = useState<string>('none')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -37,9 +39,11 @@ export function InitiativeQuickTaskForm({
       await createQuickTaskForInitiative(
         title.trim(),
         initiativeId,
-        selectedObjectiveId === 'none' ? undefined : selectedObjectiveId
+        selectedObjectiveId === 'none' ? undefined : selectedObjectiveId,
+        detectedDate || undefined
       )
       setTitle('') // Clear the form after successful submission
+      setDetectedDate(null) // Clear detected date
       setSelectedObjectiveId('none') // Clear objective selection
     } catch (error) {
       console.error('Error creating quick task:', error)
@@ -52,41 +56,45 @@ export function InitiativeQuickTaskForm({
   return (
     <form onSubmit={handleSubmit} className='space-y-3'>
       <div className='flex gap-2'>
-        <Input
-          type='text'
-          placeholder='Add a new task...'
+        <EnhancedTaskInput
           value={title}
-          onChange={e => setTitle(e.target.value)}
+          onChange={setTitle}
+          onDateDetected={setDetectedDate}
+          placeholder='Add a new task...'
           className='flex-1'
           disabled={isSubmitting}
+          showDatePreview={false}
+          showInlineDate={true}
         />
-        {objectives.length > 0 && (
-          <Select
-            value={selectedObjectiveId}
-            onValueChange={setSelectedObjectiveId}
-            disabled={isSubmitting}
-          >
-            <SelectTrigger className='w-48'>
-              <SelectValue placeholder='Objective (optional)' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='none'>No objective</SelectItem>
-              {objectives.map(objective => (
-                <SelectItem key={objective.id} value={objective.id}>
-                  {objective.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
         <Button
           type='submit'
           disabled={isSubmitting || !title.trim()}
           variant='outline'
+          size='icon'
+          className='shrink-0'
         >
-          {isSubmitting ? 'Adding...' : 'Add'}
+          <Plus className='h-4 w-4' />
         </Button>
       </div>
+      {objectives.length > 0 && (
+        <Select
+          value={selectedObjectiveId}
+          onValueChange={setSelectedObjectiveId}
+          disabled={isSubmitting}
+        >
+          <SelectTrigger className='w-full'>
+            <SelectValue placeholder='Objective (optional)' />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value='none'>No objective</SelectItem>
+            {objectives.map(objective => (
+              <SelectItem key={objective.id} value={objective.id}>
+                {objective.title}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
     </form>
   )
 }
