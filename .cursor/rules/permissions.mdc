@@ -1,9 +1,7 @@
 ---
-description: Permisions in ManagerOS
-globs:
-alwaysApply: true
+description: When updating code related to database entities - either by adding new ways of viewing, editing, deleting read this file
+alwaysApply: false
 ---
-
 # Concepts, Permissions, and Relationships
 
 ## Users

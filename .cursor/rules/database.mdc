@@ -4,4 +4,8 @@ globs:
 alwaysApply: true
 ---
 
+# Database Interactions
+
+## FORBIDDEN ACTIONS
+
 Never do a database reset.  Always use the prisma schema to make changes to the database.

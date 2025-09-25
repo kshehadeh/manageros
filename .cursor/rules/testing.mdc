@@ -1,9 +1,7 @@
 ---
-description: Testing
-globs:
-alwaysApply: true
+description: When implementing new features or functions, read this context file
+alwaysApply: false
 ---
-
 # Testing
 
 ## Unit Tests
