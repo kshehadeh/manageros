@@ -34,8 +34,8 @@ export const searchCommandSource: CommandSource = {
         return {
           ...base,
           icon: <ListTodo className='h-4 w-4' />,
-          perform: ({ closePalette }) => {
-            window.location.href = `/tasks/${r.id}`
+          perform: ({ closePalette, router }) => {
+            router.push(`/tasks/${r.id}`)
             closePalette()
           },
         }
@@ -44,8 +44,8 @@ export const searchCommandSource: CommandSource = {
         return {
           ...base,
           icon: <Rocket className='h-4 w-4' />,
-          perform: ({ closePalette }) => {
-            window.location.href = `/initiatives/${r.id}`
+          perform: ({ closePalette, router }) => {
+            router.push(`/initiatives/${r.id}`)
             closePalette()
           },
         }
@@ -54,8 +54,8 @@ export const searchCommandSource: CommandSource = {
         return {
           ...base,
           icon: <MessageSquare className='h-4 w-4' />,
-          perform: ({ closePalette }) => {
-            window.location.href = `/feedback/${r.id}`
+          perform: ({ closePalette, router }) => {
+            router.push(`/feedback/${r.id}`)
             closePalette()
           },
         }
@@ -63,8 +63,8 @@ export const searchCommandSource: CommandSource = {
       return {
         ...base,
         icon: <User className='h-4 w-4' />,
-        perform: ({ closePalette }) => {
-          window.location.href = `/people/${r.id}`
+        perform: ({ closePalette, router }) => {
+          router.push(`/people/${r.id}`)
           closePalette()
         },
       }

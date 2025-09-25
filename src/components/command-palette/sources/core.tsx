@@ -25,8 +25,8 @@ function createStaticItems(query: string): CommandItemDescriptor[] {
       icon: <ListTodo className='h-4 w-4' />,
       keywords: ['task', 'tasks', 'todo'],
       group: 'Navigation',
-      perform: ({ closePalette }) => {
-        window.location.href = '/tasks'
+      perform: ({ closePalette, router }) => {
+        router.push('/tasks')
         closePalette()
       },
     },
@@ -37,8 +37,8 @@ function createStaticItems(query: string): CommandItemDescriptor[] {
       icon: <Users className='h-4 w-4' />,
       keywords: ['people', 'person', 'team', 'members'],
       group: 'Navigation',
-      perform: ({ closePalette }) => {
-        window.location.href = '/people'
+      perform: ({ closePalette, router }) => {
+        router.push('/people')
         closePalette()
       },
     },
@@ -49,8 +49,8 @@ function createStaticItems(query: string): CommandItemDescriptor[] {
       icon: <Rocket className='h-4 w-4' />,
       keywords: ['initiative', 'okr', 'objectives'],
       group: 'Navigation',
-      perform: ({ closePalette }) => {
-        window.location.href = '/initiatives'
+      perform: ({ closePalette, router }) => {
+        router.push('/initiatives')
         closePalette()
       },
     },
@@ -61,8 +61,8 @@ function createStaticItems(query: string): CommandItemDescriptor[] {
       icon: <MessageSquare className='h-4 w-4' />,
       keywords: ['feedback', 'reviews', 'comments'],
       group: 'Navigation',
-      perform: ({ closePalette }) => {
-        window.location.href = '/feedback'
+      perform: ({ closePalette, router }) => {
+        router.push('/feedback')
         closePalette()
       },
     },

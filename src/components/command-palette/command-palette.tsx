@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Command,
   CommandEmpty,
@@ -19,6 +20,7 @@ const sources: CommandSource[] = [coreCommandSource, searchCommandSource]
 
 export function CommandPalette() {
   const { isOpen, setOpen } = useCommandPalette()
+  const router = useRouter()
   const [query, setQuery] = useState('')
   const [items, setItems] = useState<CommandItemDescriptor[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -76,7 +78,7 @@ export function CommandPalette() {
                     value={[item.title, item.subtitle, ...(item.keywords || [])]
                       .filter(Boolean)
                       .join(' ')}
-                    onSelect={() => item.perform({ closePalette })}
+                    onSelect={() => item.perform({ closePalette, router })}
                   >
                     {item.icon}
                     <span className='ml-2'>{item.title}</span>

@@ -1,8 +1,6 @@
 ---
-description: Utilities used for building, updating, and maintaining the project
-alwaysApply: false
+alwaysApply: true
 ---
-
 # Tools
 
 ## Rules

@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react'
+import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 
 export type CommandId = string
 
 export interface CommandActionContext {
   closePalette: () => void
+  router: AppRouterInstance
 }
 
 export interface CommandItemDescriptor {

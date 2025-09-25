@@ -12,9 +12,11 @@ import { getTasksAssignedToCurrentUser } from '@/lib/actions/task'
 import PendingInvitations from '@/components/pending-invitations'
 import { ExpandableSection } from '@/components/expandable-section'
 import { ActiveFeedbackCampaigns } from '@/components/active-feedback-campaigns'
-import { PersonListItemCard } from '@/components/person-list-item-card'
-import { InitiativeCard } from '@/components/initiative-card'
-import { TaskTable } from '@/components/task-table'
+import { DirectReports } from '@/components/dashboard-direct-reports'
+import { OpenInitiatives } from '@/components/dashboard-open-initiatives'
+import { AssignedTasks } from '@/components/dashboard-assigned-tasks'
+import { Suspense } from 'react'
+import { Loading } from '@/components/ui/loading'
 
 export default async function Home() {
   const session = await getServerSession(authOptions)
@@ -215,13 +217,18 @@ export default async function Home() {
           {/* My Tasks Section - only show if there are assigned tasks */}
           {assignedTasks.length > 0 && (
             <ExpandableSection title='My Tasks' viewAllHref='/tasks'>
-              <TaskTable
-                tasks={assignedTasks}
-                people={people}
-                showInitiative={true}
-                showDueDate={true}
-                hideFilters={true}
-              />
+              <Suspense
+                fallback={
+                  <div className='flex items-center justify-center py-8'>
+                    <Loading size='md' />
+                    <span className='ml-2 text-sm text-muted-foreground'>
+                      Loading tasks...
+                    </span>
+                  </div>
+                }
+              >
+                <AssignedTasks assignedTasks={assignedTasks} people={people} />
+              </Suspense>
             </ExpandableSection>
           )}
 
@@ -305,15 +312,18 @@ export default async function Home() {
                 title='Open Initiatives'
                 viewAllHref='/initiatives'
               >
-                {openInitiatives.map(initiative => (
-                  <InitiativeCard
-                    key={initiative.id}
-                    initiative={initiative}
-                    variant='compact'
-                    showTeam={true}
-                    showOwners={false}
-                  />
-                ))}
+                <Suspense
+                  fallback={
+                    <div className='flex items-center justify-center py-8'>
+                      <Loading size='md' />
+                      <span className='ml-2 text-sm text-muted-foreground'>
+                        Loading initiatives...
+                      </span>
+                    </div>
+                  }
+                >
+                  <OpenInitiatives openInitiatives={openInitiatives} />
+                </Suspense>
               </ExpandableSection>
             )}
           </div>
@@ -369,13 +379,18 @@ export default async function Home() {
               title='Direct Reports'
               viewAllHref='/direct-reports'
             >
-              {directReports.map(person => (
-                <PersonListItemCard
-                  key={person.id}
-                  person={person}
-                  variant='compact'
-                />
-              ))}
+              <Suspense
+                fallback={
+                  <div className='flex items-center justify-center py-8'>
+                    <Loading size='md' />
+                    <span className='ml-2 text-sm text-muted-foreground'>
+                      Loading reports...
+                    </span>
+                  </div>
+                }
+              >
+                <DirectReports directReports={directReports} />
+              </Suspense>
             </ExpandableSection>
           )}
         </div>

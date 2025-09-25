@@ -44,11 +44,21 @@ export async function GET(request: Request) {
       where: {
         body: { contains: q, mode: 'insensitive' },
         about: { organizationId: user.organizationId },
+        // Only return feedback if:
+        // 1. It's not private, OR
+        // 2. The current user is either the person giving feedback (from) or receiving feedback (about)
+        OR: [
+          { isPrivate: false },
+          ...(user.personId
+            ? [{ fromId: user.personId }, { aboutId: user.personId }]
+            : []),
+        ],
       },
       select: {
         id: true,
         body: true,
         kind: true,
+        isPrivate: true,
         about: { select: { id: true, name: true } },
         from: { select: { id: true, name: true } },
       },
@@ -83,6 +93,7 @@ export async function GET(request: Request) {
         id: string
         body: string
         kind: string
+        isPrivate: boolean
         about: { id: string; name: string }
         from: { id: string; name: string }
       }) => ({
