@@ -79,7 +79,7 @@ interface TaskTableProps {
   people: Person[]
   initiatives?: Initiative[]
   showInitiative?: boolean
-  showCreator?: boolean
+  showDueDate?: boolean
   hideFilters?: boolean
   onTaskUpdate?: () => void
 }
@@ -109,7 +109,7 @@ export function TaskTable({
   people,
   initiatives = [],
   showInitiative = true,
-  showCreator = true,
+  showDueDate = true,
   hideFilters = false,
   onTaskUpdate,
 }: TaskTableProps) {
@@ -307,9 +307,13 @@ export function TaskTable({
             aValue = a.initiative?.title?.toLowerCase() || ''
             bValue = b.initiative?.title?.toLowerCase() || ''
             break
-          case 'createdBy':
-            aValue = a.createdBy?.name?.toLowerCase() || ''
-            bValue = b.createdBy?.name?.toLowerCase() || ''
+          case 'dueDate':
+            aValue = a.dueDate
+              ? new Date(a.dueDate).getTime()
+              : Number.MAX_SAFE_INTEGER
+            bValue = b.dueDate
+              ? new Date(b.dueDate).getTime()
+              : Number.MAX_SAFE_INTEGER
             break
           default:
             return 0
@@ -764,14 +768,14 @@ export function TaskTable({
                   {getSortIcon('assignee')}
                 </div>
               </TableHead>
-              {showCreator && (
+              {showDueDate && (
                 <TableHead
                   className='text-muted-foreground cursor-pointer hover:text-foreground select-none'
-                  onClick={() => handleSort('createdBy')}
+                  onClick={() => handleSort('dueDate')}
                 >
                   <div className='flex items-center gap-2'>
-                    Created By
-                    {getSortIcon('createdBy')}
+                    Due By
+                    {getSortIcon('dueDate')}
                   </div>
                 </TableHead>
               )}
@@ -884,11 +888,6 @@ export function TaskTable({
                             {task.description}
                           </div>
                         )}
-                        {task.dueDate && (
-                          <div className='text-xs text-muted-foreground'>
-                            Due: {new Date(task.dueDate).toLocaleDateString()}
-                          </div>
-                        )}
                       </div>
                     )}
                   </TableCell>
@@ -956,15 +955,12 @@ export function TaskTable({
                       </div>
                     )}
                   </TableCell>
-                  {showCreator && (
+                  {showDueDate && (
                     <TableCell className='text-muted-foreground'>
-                      {task.createdBy ? (
-                        <Link
-                          href={`/people/${task.createdBy.id}`}
-                          className='text-primary hover:text-primary/80 transition-colors'
-                        >
-                          {task.createdBy.name}
-                        </Link>
+                      {task.dueDate ? (
+                        <div className='text-sm'>
+                          {new Date(task.dueDate).toLocaleDateString()}
+                        </div>
                       ) : (
                         '—'
                       )}

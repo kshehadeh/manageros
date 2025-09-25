@@ -199,7 +199,7 @@ export default async function InitiativeDetail({
               tasks={allTasks}
               people={people}
               showInitiative={false}
-              showCreator={true}
+              showDueDate={true}
             />
           </div>
         </div>

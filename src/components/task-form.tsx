@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { EnhancedTaskInput } from '@/components/enhanced-task-input'
 import { Textarea } from '@/components/ui/textarea'
 import { createTask, updateTask } from '@/lib/actions'
 import { type TaskFormData, taskSchema } from '@/lib/validations'
@@ -120,6 +121,13 @@ export function TaskForm({
     }
   }
 
+  function handleDateDetected(date: string | null) {
+    // Update the due date field if a date is detected
+    if (date) {
+      handleInputChange('dueDate', date)
+    }
+  }
+
   return (
     <form onSubmit={handleSubmit} className='space-y-6'>
       {errors.general && (
@@ -134,15 +142,14 @@ export function TaskForm({
           <label htmlFor='title' className='block text-sm font-medium mb-2'>
             Task Title *
           </label>
-          <Input
-            type='text'
-            id='title'
-            name='title'
-            required
+          <EnhancedTaskInput
             value={formData.title}
-            onChange={e => handleInputChange('title', e.target.value)}
+            onChange={value => handleInputChange('title', value)}
+            onDateDetected={handleDateDetected}
             placeholder='Enter task title'
             className={errors.title ? 'border-red-500' : ''}
+            showDatePreview={false}
+            showInlineDate={true}
           />
           {errors.title && (
             <p className='text-sm text-red-500 mt-1'>{errors.title}</p>
