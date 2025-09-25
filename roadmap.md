@@ -66,6 +66,7 @@
 - **Breadcrumb Navigation** - Context-aware navigation system
 - **Sidebar Navigation** - Persistent navigation with role-based access
 - **Direct Reports View** - Dedicated manager view of team members
+ - **Command Palette** (September 25, 2025) - Global Cmd/Ctrl+K palette with quick actions and search across tasks, initiatives, and people. Extensible sources for commands and server-backed results. Includes Create Task modal trigger.
 
 ### Data Management
 
