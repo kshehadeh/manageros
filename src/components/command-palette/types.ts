@@ -13,12 +13,11 @@ export interface CommandItemDescriptor {
   icon?: ReactNode
   keywords?: string[]
   group?: string
-  perform: (ctx: CommandActionContext) => void | Promise<void>
+  perform: (_ctx: CommandActionContext) => void | Promise<void>
 }
 
 export interface CommandSource {
   id: string
   label: string
-  getItems: (query: string) => Promise<CommandItemDescriptor[]>
+  getItems: (_query: string) => Promise<CommandItemDescriptor[]>
 }
-

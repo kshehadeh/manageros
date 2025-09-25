@@ -8,7 +8,6 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
 } from '@/components/ui/command'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { useCommandPalette } from './provider'
@@ -60,21 +59,31 @@ export function CommandPalette() {
     <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogContent className='p-0 overflow-hidden sm:max-w-[640px]'>
         <Command>
-          <CommandInput placeholder='Type a command or search...' value={query} onValueChange={setQuery} />
+          <CommandInput
+            placeholder='Type a command or search...'
+            value={query}
+            onValueChange={setQuery}
+          />
           <CommandList>
-            <CommandEmpty>{isLoading ? 'Searching…' : 'No results found.'}</CommandEmpty>
+            <CommandEmpty>
+              {isLoading ? 'Searching…' : 'No results found.'}
+            </CommandEmpty>
             {Object.entries(grouped).map(([groupName, groupItems]) => (
               <CommandGroup key={groupName} heading={groupName}>
                 {groupItems.map(item => (
                   <CommandItem
                     key={item.id}
-                    value={[item.title, item.subtitle, ...(item.keywords || [])].filter(Boolean).join(' ')}
+                    value={[item.title, item.subtitle, ...(item.keywords || [])]
+                      .filter(Boolean)
+                      .join(' ')}
                     onSelect={() => item.perform({ closePalette })}
                   >
                     {item.icon}
                     <span className='ml-2'>{item.title}</span>
                     {item.subtitle && (
-                      <span className='ml-2 text-xs text-muted-foreground truncate'>{item.subtitle}</span>
+                      <span className='ml-2 text-xs text-muted-foreground truncate'>
+                        {item.subtitle}
+                      </span>
                     )}
                   </CommandItem>
                 ))}
@@ -86,4 +95,3 @@ export function CommandPalette() {
     </Dialog>
   )
 }
-
