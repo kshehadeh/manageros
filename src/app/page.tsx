@@ -219,7 +219,7 @@ export default async function Home() {
                 tasks={assignedTasks}
                 people={people}
                 showInitiative={true}
-                showCreator={false}
+                showDueDate={true}
                 hideFilters={true}
               />
             </ExpandableSection>
