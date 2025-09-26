@@ -2,8 +2,8 @@ import Link from 'next/link'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { HierarchicalTeamView } from '@/components/hierarchical-team-view'
-import { getTeamHierarchyOptimized } from '@/lib/actions'
+import { TeamsPageClient } from '@/components/teams-page-client'
+import { getAllTeamsWithRelations } from '@/lib/actions'
 import { Button } from '@/components/ui/button'
 import { Upload, Plus, Workflow } from 'lucide-react'
 
@@ -18,7 +18,7 @@ export default async function TeamsPage() {
     redirect('/organization/create')
   }
 
-  const teams = await getTeamHierarchyOptimized()
+  const teams = await getAllTeamsWithRelations()
 
   return (
     <div className='page-container'>
@@ -27,7 +27,7 @@ export default async function TeamsPage() {
           <div>
             <h1 className='page-title'>Teams</h1>
             <p className='page-subtitle'>
-              Hierarchical team structure with expand/collapse controls
+              Manage your organization&apos;s team structure
             </p>
           </div>
           <div className='flex gap-2'>
@@ -52,7 +52,7 @@ export default async function TeamsPage() {
           </div>
         </div>
       </div>
-      <HierarchicalTeamView teams={teams} />
+      <TeamsPageClient teams={teams} />
     </div>
   )
 }

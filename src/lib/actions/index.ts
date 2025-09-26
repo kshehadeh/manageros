@@ -30,6 +30,7 @@ export {
 // Team Actions
 export {
   getTeams,
+  getAllTeamsWithRelations,
   getTeamHierarchy,
   getCompleteTeamHierarchy,
   getTeamHierarchyOptimized,

@@ -28,6 +28,32 @@ export async function getTeams() {
 }
 
 /**
+ * Gets all teams with their relations for data table display
+ * Returns a flat list of all teams (not hierarchical)
+ */
+export async function getAllTeamsWithRelations(): Promise<TeamWithRelations[]> {
+  try {
+    const user = await getCurrentUser()
+    if (!user.organizationId) {
+      return []
+    }
+    return await prisma.team.findMany({
+      where: { organizationId: user.organizationId },
+      include: {
+        people: true,
+        initiatives: true,
+        parent: true,
+        children: true,
+      },
+      orderBy: { name: 'asc' },
+    })
+  } catch (error) {
+    console.error('Error fetching all teams with relations:', error)
+    return []
+  }
+}
+
+/**
  * Recursively fetches team hierarchy with all related data
  * This is more efficient than deeply nested includes and handles unlimited depth
  */
