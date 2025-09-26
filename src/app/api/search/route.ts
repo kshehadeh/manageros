@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ results: [] })
   }
 
-  const [tasks, initiatives, people, feedback] = await Promise.all([
+  const [tasks, initiatives, people, feedback, oneOnOnes] = await Promise.all([
     prisma.task.findMany({
       where: {
         title: { contains: q, mode: 'insensitive' },
@@ -64,6 +64,37 @@ export async function GET(request: Request) {
       },
       take: 6,
     }),
+    prisma.oneOnOne.findMany({
+      where: {
+        OR: [
+          { notes: { contains: q, mode: 'insensitive' } },
+          { manager: { name: { contains: q, mode: 'insensitive' } } },
+          { report: { name: { contains: q, mode: 'insensitive' } } },
+        ],
+        AND: [
+          {
+            OR: [
+              // User is the manager
+              ...(user.personId
+                ? [{ managerId: user.personId }]
+                : []),
+              // User is the report
+              ...(user.personId
+                ? [{ reportId: user.personId }]
+                : []),
+            ],
+          },
+        ],
+      },
+      select: {
+        id: true,
+        notes: true,
+        scheduledAt: true,
+        manager: { select: { id: true, name: true } },
+        report: { select: { id: true, name: true } },
+      },
+      take: 6,
+    }),
   ])
 
   const results = [
@@ -101,6 +132,20 @@ export async function GET(request: Request) {
         title: f.body.length > 60 ? f.body.substring(0, 60) + '...' : f.body,
         subtitle: `${f.kind} about ${f.about.name} from ${f.from.name}`,
         type: 'feedback' as const,
+      })
+    ),
+    ...oneOnOnes.map(
+      (o: {
+        id: string
+        notes: string | null
+        scheduledAt: Date | null
+        manager: { id: string; name: string }
+        report: { id: string; name: string }
+      }) => ({
+        id: o.id,
+        title: `1:1 - ${o.manager.name} & ${o.report.name}`,
+        subtitle: o.scheduledAt ? `Scheduled for ${new Date(o.scheduledAt).toLocaleDateString()}` : 'Not scheduled',
+        type: 'oneOnOne' as const,
       })
     ),
   ]

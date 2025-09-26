@@ -60,6 +60,16 @@ export const searchCommandSource: CommandSource = {
           },
         }
       }
+      if (r.type === 'oneOnOne') {
+        return {
+          ...base,
+          icon: <MessageSquare className='h-4 w-4' />,
+          perform: ({ closePalette, router }) => {
+            router.push(`/oneonones/${r.id}`)
+            closePalette()
+          },
+        }
+      }
       return {
         ...base,
         icon: <User className='h-4 w-4' />,

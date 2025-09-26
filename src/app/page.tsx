@@ -96,6 +96,7 @@ export default async function Home() {
     activeCampaigns,
     assignedTasks,
     people,
+    recentFeedback,
   ] = await Promise.all([
     // Get teams where the current user is associated (member or manages team members)
     prisma.team.findMany({
@@ -207,6 +208,50 @@ export default async function Home() {
       },
       orderBy: { name: 'asc' },
     }),
+    // Get recent feedback created by or about the current user (that is not private)
+    prisma.feedback.findMany({
+      where: {
+        OR: [
+          // Feedback created by the user
+          {
+            from: {
+              user: {
+                id: session.user.id,
+              },
+            },
+          },
+          // Non-private feedback about the user
+          {
+            about: {
+              user: {
+                id: session.user.id,
+              },
+            },
+            isPrivate: false,
+          },
+        ],
+        // Ensure the feedback is in the user's organization
+        about: {
+          organizationId: session.user.organizationId!,
+        },
+      },
+      include: {
+        about: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        from: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 5, // Limit to 5 most recent
+    }),
   ])
 
   return (
@@ -257,11 +302,64 @@ export default async function Home() {
             />
           )}
 
+          {/* Recent Feedback Section - only show if there is recent feedback */}
+          {recentFeedback.length > 0 && (
+            <ExpandableSection title='Recent Feedback' viewAllHref='/people'>
+              <div className='space-y-3'>
+                {recentFeedback.map((feedback: any) => (
+                  <Link
+                    key={feedback.id}
+                    href={`/people/${feedback.about.id}#feedback`}
+                    className='block card hover:bg-neutral-800/60'
+                  >
+                    <div className='flex items-start justify-between'>
+                      <div className='flex-1'>
+                        <div className='text-sm font-medium'>
+                          {feedback.kind === 'praise' && '✨ '}
+                          {feedback.kind === 'constructive' && '💡 '}
+                          {feedback.kind === 'general' && '💬 '}
+                          {feedback.body.length > 100
+                            ? feedback.body.substring(0, 100) + '...'
+                            : feedback.body}
+                        </div>
+                        <div className='flex items-center gap-2 mt-1'>
+                          <span className='text-xs text-neutral-500'>
+                            About{' '}
+                            <span className='text-blue-400'>
+                              {feedback.about.name}
+                            </span>
+                          </span>
+                          {feedback.from.id !== feedback.about.id && (
+                            <span className='text-xs text-neutral-500'>
+                              • From{' '}
+                              <span className='text-blue-400'>
+                                {feedback.from.name}
+                              </span>
+                            </span>
+                          )}
+                          <span className='text-xs text-neutral-500'>
+                            •{' '}
+                            {new Date(feedback.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                      {feedback.isPrivate && (
+                        <span className='text-xs text-neutral-500 italic'>
+                          Private
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </ExpandableSection>
+          )}
+
           {/* Middle Section: Other Content */}
           <div className='grid gap-6 md:grid-cols-2'>
             {/* Recent 1:1s Section - only show if there are recent 1:1s */}
             {recentOneOnes.length > 0 && (
-              <ExpandableSection title='Recent 1:1s' viewAllHref='/oneonones'>
+              <ExpandableSection title='Recent 1:1s'>
                 {recentOneOnes.map(oneOnOne => (
                   <Link
                     key={oneOnOne.id}

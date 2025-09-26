@@ -505,7 +505,7 @@ export default async function PersonDetailPage({
                                   </div>
                                 </div>
                                 <Button asChild variant='outline' size='sm'>
-                                  <Link href='/oneonones'>Edit</Link>
+                                  <Link href={`/oneonones/${oneOnOne.id}`}>View</Link>
                                 </Button>
                               </div>
                             </div>
@@ -543,7 +543,7 @@ export default async function PersonDetailPage({
                                   </div>
                                 </div>
                                 <Button asChild variant='outline' size='sm'>
-                                  <Link href='/oneonones'>Edit</Link>
+                                  <Link href={`/oneonones/${oneOnOne.id}`}>View</Link>
                                 </Button>
                               </div>
                             </div>
