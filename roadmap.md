@@ -217,6 +217,7 @@
 - **Backup Strategy** - Automated backups and disaster recovery
 - **Scalability** - Horizontal scaling and load balancing
 - **Security Hardening** - Security audit and penetration testing
+  - 2025-09-26: Enforced server-only usage for GitHub and Jira credentials (modules `src/lib/github-api.ts`, `src/lib/jira-api.ts`, and `src/lib/encryption.ts`). Verified UI only calls server actions.
 
 ---
 

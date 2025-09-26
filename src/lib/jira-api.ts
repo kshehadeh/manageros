@@ -2,6 +2,7 @@
  * Jira API service layer for fetching work activity and user data
  */
 
+import 'server-only'
 import { decrypt } from './encryption'
 
 export interface JiraCredentials {

@@ -9,6 +9,7 @@ ManagerOS includes a comprehensive Jira integration that allows you to track wor
 - **Secure Storage**: API keys are encrypted using AES encryption before being stored in the database
 - **Connection Testing**: Credentials are validated against the Jira API before being saved
 - **User-specific**: Each user manages their own Jira credentials independently
+- **Server-only Enforcement**: Jira credentials are never exposed to the client. All Jira requests and decryption happen on the server. The module `src/lib/jira-api.ts` is marked with server-only enforcement.
 
 ### 2. Person-Jira Account Linking
 
@@ -114,6 +115,7 @@ The integration adds three new tables:
 - **"Jira credentials not configured"**: Set up credentials in Settings first
 
 ## Future Enhancements
+
 ## UI Consistency
 
 - All actions use the shared shadcn `Button` with `variant='outline'`.

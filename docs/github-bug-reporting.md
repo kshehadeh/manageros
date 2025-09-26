@@ -130,6 +130,7 @@ The tests cover:
 - The token only needs `repo` scope for creating issues
 - User emails are included in issue bodies for contact purposes
 - No sensitive application data is sent to GitHub
+- Server-only enforcement: All GitHub API calls and token usage occur on the server via the `submitGitHubIssue` server action and the server-only `src/lib/github-api.ts` module. No GitHub credentials or tokens are ever used on the client.
 
 ## Troubleshooting
 

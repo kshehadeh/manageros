@@ -3,6 +3,7 @@
  * Uses AES encryption with a secret key from environment variables
  */
 
+import 'server-only'
 import CryptoJS from 'crypto-js'
 
 const ENCRYPTION_KEY =
