@@ -1,0 +1,49 @@
+---
+id: one-on-ones
+title: One-on-One Meetings
+category: Meetings & Communication
+---
+
+# One-on-One Meetings
+
+One-on-one meetings are regular, structured conversations between managers and their direct reports. They're essential for:
+
+## Purpose & Benefits
+
+### For Managers
+
+- **Stay connected** with team members
+- **Identify issues** early before they become problems
+- **Provide guidance** and support
+- **Understand team dynamics** and individual needs
+
+### For Team Members
+
+- **Get regular feedback** and direction
+- **Discuss career development** and growth
+- **Raise concerns** in a safe environment
+- **Align on priorities** and expectations
+
+## Meeting Structure
+
+### Regular Cadence
+
+- **Weekly or bi-weekly** for most roles
+- **Monthly** for senior or independent contributors
+- **Ad-hoc** for urgent issues or special circumstances
+
+### Agenda Topics
+
+- **Work progress** and current priorities
+- **Challenges and obstacles** being faced
+- **Career development** and growth opportunities
+- **Team dynamics** and collaboration
+- **Feedback exchange** in both directions
+
+## Best Practices
+
+- **Schedule consistently** and protect the time
+- **Prepare an agenda** but remain flexible
+- **Listen actively** and ask open-ended questions
+- **Follow up** on commitments and action items
+- **Document key points** and decisions

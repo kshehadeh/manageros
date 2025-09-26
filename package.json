@@ -18,7 +18,12 @@
     "db:init": "bun scripts/init-database.ts",
     "db:backup": "bun scripts/backup-database.ts --verbose",
     "db:restore": "bun scripts/restore-database.ts",
-    "postinstall": "bunx prisma generate",
+    "help:generate": "bun scripts/generate-help-content.ts",
+    "help:list": "bun scripts/help-content-manager.ts list",
+    "help:validate": "bun scripts/help-content-manager.ts validate",
+    "help:index": "bun scripts/help-content-manager.ts index",
+    "help:clear": "bun scripts/help-content-manager.ts clear",
+    "postinstall": "bunx prisma generate && bun run help:generate",
     "prepare": "husky"
   },
   "prisma": {

@@ -16,6 +16,7 @@ import {
 } from '@/lib/task-status'
 import { taskPriorityUtils, DEFAULT_TASK_PRIORITY } from '@/lib/task-priority'
 import { AlertCircle } from 'lucide-react'
+import { HelpIcon } from '@/components/help-icon'
 
 interface TaskFormProps {
   people: Person[]
@@ -205,8 +206,12 @@ export function TaskForm({
           </div>
 
           <div>
-            <label htmlFor='status' className='block text-sm font-medium mb-2'>
+            <label
+              htmlFor='status'
+              className='flex items-center gap-2 text-sm font-medium mb-2'
+            >
               Status
+              <HelpIcon helpId='task-status' size='sm' />
             </label>
             <select
               id='status'
@@ -233,9 +238,10 @@ export function TaskForm({
           <div>
             <label
               htmlFor='priority'
-              className='block text-sm font-medium mb-2'
+              className='flex items-center gap-2 text-sm font-medium mb-2'
             >
               Priority
+              <HelpIcon helpId='task-priorities' size='sm' />
             </label>
             <select
               id='priority'

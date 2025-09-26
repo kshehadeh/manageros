@@ -1,0 +1,44 @@
+---
+id: feedback-campaigns
+title: Feedback Campaigns
+category: Feedback & Development
+---
+
+# Feedback Campaigns
+
+Feedback campaigns help you collect structured feedback from your team and stakeholders in a systematic way.
+
+## Campaign Types
+
+### 360-Degree Feedback
+
+- **Multi-source feedback** from peers, managers, and direct reports
+- **Comprehensive view** of performance and behavior
+- **Anonymous responses** to encourage honest feedback
+
+### Performance Reviews
+
+- **Structured evaluation** of goals and objectives
+- **Development planning** and career discussions
+- **Documentation** for HR and performance records
+
+### Pulse Surveys
+
+- **Quick check-ins** on team satisfaction and engagement
+- **Regular monitoring** of team health and culture
+- **Trend analysis** over time
+
+## Campaign Process
+
+1. **Setup** - Define questions, participants, and timeline
+2. **Distribution** - Send invitations and reminders
+3. **Collection** - Gather responses and feedback
+4. **Analysis** - Review results and identify patterns
+5. **Action** - Create development plans and follow-up
+
+## Best Practices
+
+- **Keep campaigns focused** on specific objectives
+- **Ensure anonymity** when appropriate
+- **Follow up** on feedback with concrete actions
+- **Share results** transparently with participants
