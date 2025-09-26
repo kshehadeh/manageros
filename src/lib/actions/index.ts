@@ -163,3 +163,6 @@ export {
   uploadImageToR2,
   fetchGithubPullRequests,
 } from './github'
+
+// Synopsis Actions
+export { generatePersonSynopsis, listPersonSynopses } from './synopsis'

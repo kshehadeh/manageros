@@ -12,6 +12,7 @@ import { JiraWorkActivitySection } from '@/components/jira-work-activity-section
 import { PersonListItemCard } from '@/components/person-list-item-card'
 import { PersonStatusBadge } from '@/components/person-status-badge'
 import { PersonFeedbackCampaigns } from '@/components/person-feedback-campaigns'
+import { PersonSynopsis } from '@/components/person-synopsis'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
@@ -332,6 +333,8 @@ export default async function PersonDetailPage({
         <div className='flex gap-6'>
           {/* Main Content */}
           <div className='flex-1 space-y-6'>
+            {/* Synopsis */}
+            <PersonSynopsis personId={personWithRelations.id} />
             {/* Owned Initiatives - Only show if person has initiatives */}
             {personWithRelations.initiativeOwners.length > 0 && (
               <section>

@@ -223,3 +223,11 @@
 
 _Last Updated: September 2025_
 _Next Review: October 2025_
+
+### Updates on 2025-09-26
+
+- Added AI-driven Synopsis feature (in progress):
+  - Prisma `PersonSynopsis` model and relation on `Person`
+  - Server action `generatePersonSynopsis`, `listPersonSynopses`
+  - UI section `PersonSynopsis` on person detail page
+  - Uses tasks by default; optionally includes feedback; integrates Jira and GitHub when linked

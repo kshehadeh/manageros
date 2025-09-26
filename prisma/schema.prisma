@@ -100,6 +100,7 @@ model Person {
   meetingInstanceParticipants MeetingInstanceParticipant[] @relation("MeetingInstanceParticipant")
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
+  synopses           PersonSynopsis[]
   
   @@index([organizationId])
 }
@@ -486,5 +487,22 @@ model MeetingInstanceParticipant {
   @@index([meetingInstanceId])
   @@index([personId])
   @@index([status])
+}
+
+model PersonSynopsis {
+  id              String   @id @default(cuid())
+  personId        String
+  person          Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  fromDate        DateTime
+  toDate          DateTime
+  includeFeedback Boolean  @default(false)
+  content         String
+  sources         String[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([personId])
+  @@index([fromDate])
+  @@index([toDate])
 }
 
