@@ -7,7 +7,7 @@ interface SearchResultBase {
   id: string
   title: string
   subtitle?: string
-  type: 'task' | 'initiative' | 'person' | 'feedback'
+  type: 'task' | 'initiative' | 'person' | 'feedback' | 'oneOnOne'
 }
 
 async function searchAll(query: string): Promise<SearchResultBase[]> {

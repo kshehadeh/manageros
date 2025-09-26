@@ -4,7 +4,13 @@ import { redirect } from 'next/navigation'
 import { getOrganizationInvitations } from '@/lib/actions'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Mail, Users, Building, Shield } from 'lucide-react'
 
 export default async function OrganizationSettingsPage() {
@@ -33,7 +39,7 @@ export default async function OrganizationSettingsPage() {
       <div className='page-header'>
         <h1 className='page-title'>Organization Settings</h1>
         <p className='page-subtitle'>
-          Manage your organization's settings and configuration
+          Manage your organization&apos;s settings and configuration
         </p>
       </div>
 
@@ -55,12 +61,13 @@ export default async function OrganizationSettingsPage() {
                 <>
                   <div className='space-y-2'>
                     <p className='text-sm text-muted-foreground'>
-                      {openInvitations.length} open invitation{openInvitations.length !== 1 ? 's' : ''}
+                      {openInvitations.length} open invitation
+                      {openInvitations.length !== 1 ? 's' : ''}
                     </p>
                     <div className='space-y-1'>
                       {openInvitations.slice(0, 3).map(inv => (
                         <div key={inv.id} className='text-sm'>
-                          {inv.email} - <span className='text-muted-foreground'>{inv.role}</span>
+                          {inv.email}
                         </div>
                       ))}
                       {openInvitations.length > 3 && (
@@ -72,7 +79,9 @@ export default async function OrganizationSettingsPage() {
                   </div>
                 </>
               ) : (
-                <p className='text-sm text-muted-foreground'>No open invitations</p>
+                <p className='text-sm text-muted-foreground'>
+                  No open invitations
+                </p>
               )}
               <Button asChild variant='outline' className='w-full'>
                 <Link href='/organization/invitations'>
@@ -98,11 +107,15 @@ export default async function OrganizationSettingsPage() {
             <div className='space-y-2'>
               <div>
                 <p className='text-sm font-medium'>Name</p>
-                <p className='text-sm text-muted-foreground'>{session.user.organizationName}</p>
+                <p className='text-sm text-muted-foreground'>
+                  {session.user.organizationName}
+                </p>
               </div>
               <div>
                 <p className='text-sm font-medium'>Your Role</p>
-                <p className='text-sm text-muted-foreground'>{session.user.role}</p>
+                <p className='text-sm text-muted-foreground'>
+                  {session.user.role}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -133,9 +146,7 @@ export default async function OrganizationSettingsPage() {
               <Shield className='h-5 w-5' />
               Access Control
             </CardTitle>
-            <CardDescription>
-              Manage roles and permissions
-            </CardDescription>
+            <CardDescription>Manage roles and permissions</CardDescription>
           </CardHeader>
           <CardContent>
             <p className='text-sm text-muted-foreground'>

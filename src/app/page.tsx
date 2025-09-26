@@ -359,7 +359,7 @@ export default async function Home() {
           <div className='grid gap-6 md:grid-cols-2'>
             {/* Recent 1:1s Section - only show if there are recent 1:1s */}
             {recentOneOnes.length > 0 && (
-              <ExpandableSection title='Recent 1:1s'>
+              <ExpandableSection title='Recent 1:1s' viewAllHref='/oneonones'>
                 {recentOneOnes.map(oneOnOne => (
                   <Link
                     key={oneOnOne.id}
