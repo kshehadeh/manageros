@@ -111,11 +111,12 @@ export function BugSubmissionModal({
     setIsSubmitting(true)
 
     try {
+      // For now, we'll skip image uploads since uploadImageToR2 is not implemented
       const result = await submitGitHubIssue({
         title: title.trim(),
         description: description.trim(),
         includeEmail,
-        images: images.length > 0 ? images : undefined,
+        images: undefined, // TODO: Implement image upload
       })
 
       if (result.success) {

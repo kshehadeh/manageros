@@ -38,6 +38,7 @@ model User {
   person         Person?       @relation(fields: [personId], references: [id])
   sentInvitations OrganizationInvitation[]
   jiraCredentials UserJiraCredentials?
+  githubCredentials UserGithubCredentials?
   feedbackCampaigns FeedbackCampaign[]
   createdTasks   Task[]
   createdMeetings Meeting[]
@@ -92,6 +93,7 @@ model Person {
   events             Event[]
   user               User?
   jiraAccount        PersonJiraAccount?
+  githubAccount      PersonGithubAccount?
   feedbackCampaigns  FeedbackCampaign[] @relation("CampaignTarget")
   ownedMeetings      Meeting[]         @relation("MeetingOwner")
   meetingParticipants MeetingParticipant[] @relation("MeetingParticipant")
@@ -309,6 +311,29 @@ model PersonJiraAccount {
   
   @@index([jiraAccountId])
   @@index([jiraEmail])
+}
+
+model UserGithubCredentials {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  githubUsername String
+  encryptedPat String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model PersonGithubAccount {
+  id           String   @id @default(cuid())
+  personId     String   @unique
+  person       Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  githubUsername String
+  githubDisplayName String?
+  githubEmail  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  @@index([githubUsername])
 }
 
 model FeedbackCampaign {

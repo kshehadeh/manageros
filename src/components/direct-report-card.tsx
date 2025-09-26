@@ -180,7 +180,7 @@ export function PersonListItemCard({
 
   // Default 'simple' variant
   return (
-    <div className={`border border-neutral-800 rounded-xl p-3 ${className}`}>
+    <div className={`border rounded-xl p-3 ${className}`}>
       <div className='flex items-start justify-between'>
         <div className='flex-1'>
           <div className='flex items-center gap-2 mb-1'>

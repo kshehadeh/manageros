@@ -90,7 +90,13 @@ export function UserLinkForm({
           <div className='flex items-center justify-between'>
             <div>
               <div className='font-medium text-foreground'>
-                {linkedUser.name} ({linkedUser.email}) - {linkedUser.role}
+                {linkedUser.name}
+              </div>
+              <div className='text-sm text-muted-foreground'>
+                {linkedUser.email}
+              </div>
+              <div className='text-sm text-muted-foreground'>
+                {linkedUser.role}
               </div>
             </div>
             <Button

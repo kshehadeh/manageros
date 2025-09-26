@@ -324,10 +324,7 @@ export function InitiativeEditForm({
         </div>
         <div className='space-y-3'>
           {objectives.map((objective, index) => (
-            <div
-              key={index}
-              className='border border-neutral-800 rounded-xl p-3'
-            >
+            <div key={index} className='border rounded-xl p-3'>
               <div className='flex items-center justify-between mb-2'>
                 <span className='text-sm font-medium'>
                   Objective {index + 1}
@@ -378,10 +375,7 @@ export function InitiativeEditForm({
         </div>
         <div className='space-y-3'>
           {owners.map((owner, index) => (
-            <div
-              key={index}
-              className='border border-neutral-800 rounded-xl p-3'
-            >
+            <div key={index} className='border rounded-xl p-3'>
               <div className='flex items-center justify-between mb-2'>
                 <span className='text-sm font-medium'>Owner {index + 1}</span>
                 {owners.length > 1 && (

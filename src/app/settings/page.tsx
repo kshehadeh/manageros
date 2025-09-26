@@ -1,8 +1,10 @@
-import { getJiraCredentials } from '@/lib/actions'
+import { getJiraCredentials, getGithubCredentials } from '@/lib/actions'
 import { JiraCredentialsForm } from '@/components/jira-credentials-form'
+import { GithubCredentialsForm } from '@/components/github-credentials-form'
 
 export default async function SettingsPage() {
   const jiraCredentials = await getJiraCredentials()
+  const githubCredentials = await getGithubCredentials()
 
   return (
     <div className='page-container'>
@@ -13,9 +15,13 @@ export default async function SettingsPage() {
         </p>
       </div>
 
-      <div className='page-section'>
+      <div className='page-section space-y-6'>
         <div className='card'>
           <JiraCredentialsForm initialCredentials={jiraCredentials} />
+        </div>
+
+        <div className='card'>
+          <GithubCredentialsForm initialCredentials={githubCredentials} />
         </div>
       </div>
     </div>

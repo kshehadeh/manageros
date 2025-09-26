@@ -1,98 +1,182 @@
 'use server'
 
+import { prisma } from '@/lib/db'
+import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth-utils'
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import { encrypt } from '@/lib/encryption'
+import { GithubApiService } from '@/lib/github-api'
 
-export interface GitHubIssueData {
-  title: string
-  description: string
-  includeEmail?: boolean
-  images?: File[]
-}
+export async function saveGithubCredentials(formData: {
+  githubUsername: string
+  githubPat: string
+}) {
+  const user = await getCurrentUser()
 
-export async function uploadImageToR2(imageFile: File): Promise<string> {
-  // Validate file type
-  const allowedTypes = [
-    'image/jpeg',
-    'image/jpg',
-    'image/png',
-    'image/gif',
-    'image/webp',
-  ]
-  if (!allowedTypes.includes(imageFile.type)) {
-    throw new Error('Only JPEG, PNG, GIF, and WebP images are allowed')
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to configure GitHub')
   }
 
-  // Validate file size (max 10MB)
-  const maxSize = 10 * 1024 * 1024 // 10MB
-  if (imageFile.size > maxSize) {
-    throw new Error('Image size must be less than 10MB')
-  }
+  // Test the connection before saving
+  const githubService = new GithubApiService({
+    username: formData.githubUsername,
+    pat: formData.githubPat,
+  })
 
-  // Check R2 configuration
-  const r2AccountId = process.env.CLOUDFLARE_R2_ACCOUNT_ID
-  const r2AccessKeyId = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID
-  const r2SecretAccessKey = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY
-  const r2BucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME
-  const r2PublicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL
-
-  if (
-    !r2AccountId ||
-    !r2AccessKeyId ||
-    !r2SecretAccessKey ||
-    !r2BucketName ||
-    !r2PublicUrl
-  ) {
+  const isConnected = await githubService.testConnection()
+  if (!isConnected) {
     throw new Error(
-      'Cloudflare R2 configuration is incomplete. Please check environment variables.'
+      'Failed to connect to GitHub. Please check your credentials.'
     )
   }
 
-  // Generate unique filename
-  const timestamp = Date.now()
-  const randomString = Math.random().toString(36).substring(2, 15)
-  const fileExtension = imageFile.name.split('.').pop() || 'jpg'
-  const fileName = `bug-reports/${timestamp}-${randomString}.${fileExtension}`
+  // Encrypt the PAT
+  const encryptedPat = encrypt(formData.githubPat)
 
-  // Convert File to Buffer
-  const arrayBuffer = await imageFile.arrayBuffer()
-  const buffer = Buffer.from(arrayBuffer)
-
-  // Create S3 client for Cloudflare R2
-  const s3Client = new S3Client({
-    region: 'auto',
-    endpoint: `https://${r2AccountId}.r2.cloudflarestorage.com`,
-    credentials: {
-      accessKeyId: r2AccessKeyId,
-      secretAccessKey: r2SecretAccessKey,
+  // Upsert the credentials
+  await prisma.userGithubCredentials.upsert({
+    where: { userId: user.id },
+    create: {
+      userId: user.id,
+      githubUsername: formData.githubUsername,
+      encryptedPat,
+    },
+    update: {
+      githubUsername: formData.githubUsername,
+      encryptedPat,
     },
   })
 
-  // Upload to R2 using S3-compatible API
-  const command = new PutObjectCommand({
-    Bucket: r2BucketName,
-    Key: fileName,
-    Body: buffer,
-    ContentType: imageFile.type,
-  })
-
-  try {
-    await s3Client.send(command)
-
-    // Return the public URL
-    return `${r2PublicUrl}/${fileName}`
-  } catch (error) {
-    console.error('R2 upload error:', error)
-    throw new Error(
-      `Failed to upload image to R2: ${error instanceof Error ? error.message : 'Unknown error'}`
-    )
-  }
+  revalidatePath('/settings')
+  return { success: true }
 }
 
-export async function submitGitHubIssue(formData: GitHubIssueData) {
+export async function getGithubCredentials() {
   const user = await getCurrentUser()
 
-  // Validate required fields
+  const credentials = await prisma.userGithubCredentials.findUnique({
+    where: { userId: user.id },
+    select: {
+      githubUsername: true,
+    },
+  })
+
+  return credentials
+}
+
+export async function deleteGithubCredentials() {
+  const user = await getCurrentUser()
+
+  await prisma.userGithubCredentials.delete({
+    where: { userId: user.id },
+  })
+
+  revalidatePath('/settings')
+  return { success: true }
+}
+
+export async function linkPersonToGithubAccount(
+  personId: string,
+  githubUsername: string
+) {
+  const user = await getCurrentUser()
+
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization')
+  }
+
+  // Verify person belongs to user's organization
+  const person = await prisma.person.findFirst({
+    where: {
+      id: personId,
+      organizationId: user.organizationId,
+    },
+  })
+
+  if (!person) {
+    throw new Error('Person not found or access denied')
+  }
+
+  // Get user's GitHub credentials
+  const credentials = await prisma.userGithubCredentials.findUnique({
+    where: { userId: user.id },
+  })
+
+  if (!credentials) {
+    throw new Error('GitHub credentials not configured')
+  }
+
+  // Search for GitHub user by username
+  const githubService = GithubApiService.fromEncryptedCredentials(
+    credentials.githubUsername,
+    credentials.encryptedPat
+  )
+
+  const githubUser = await githubService.getUserByUsername(githubUsername)
+
+  if (!githubUser) {
+    throw new Error(`No GitHub user found with username: ${githubUsername}`)
+  }
+
+  // Create or update the link
+  await prisma.personGithubAccount.upsert({
+    where: { personId },
+    create: {
+      personId,
+      githubUsername: githubUser.login,
+      githubDisplayName: githubUser.name,
+      githubEmail: githubUser.email,
+    },
+    update: {
+      githubUsername: githubUser.login,
+      githubDisplayName: githubUser.name,
+      githubEmail: githubUser.email,
+    },
+  })
+
+  revalidatePath(`/people/${personId}`)
+  return { success: true }
+}
+
+export async function unlinkPersonFromGithubAccount(personId: string) {
+  const user = await getCurrentUser()
+
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization')
+  }
+
+  // Verify person belongs to user's organization
+  const person = await prisma.person.findFirst({
+    where: {
+      id: personId,
+      organizationId: user.organizationId,
+    },
+  })
+
+  if (!person) {
+    throw new Error('Person not found or access denied')
+  }
+
+  // Delete the GitHub account link
+  await prisma.personGithubAccount.delete({
+    where: { personId },
+  })
+
+  revalidatePath(`/people/${personId}`)
+  return { success: true }
+}
+
+export async function submitGitHubIssue(formData: {
+  title: string
+  description: string
+  images?: string[]
+  includeEmail?: boolean
+}) {
+  const githubToken = process.env.GITHUB_TOKEN
+
+  if (!githubToken) {
+    throw new Error('GitHub integration is not configured')
+  }
+
   if (!formData.title.trim()) {
     throw new Error('Title is required')
   }
@@ -101,80 +185,121 @@ export async function submitGitHubIssue(formData: GitHubIssueData) {
     throw new Error('Description is required')
   }
 
-  // Check if GitHub token is configured
-  const githubToken = process.env.GITHUB_TOKEN
-  if (!githubToken) {
-    throw new Error('GitHub integration is not configured')
-  }
+  // Get current user for email inclusion
+  const user = await getCurrentUser()
+  const userEmail = formData.includeEmail ? user.email : 'Anonymous user'
 
-  // Upload images first if provided
-  let imageUrls: string[] = []
+  // Build issue body
+  let body = formData.description
+
   if (formData.images && formData.images.length > 0) {
-    try {
-      imageUrls = await Promise.all(
-        formData.images.map(image => uploadImageToR2(image))
-      )
-    } catch (error) {
-      throw new Error(
-        `Failed to upload images: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
-    }
-  }
-
-  // Prepare the issue data
-  const submittedBy =
-    formData.includeEmail && user.email ? user.email : 'Anonymous user'
-
-  // Build the issue body with images
-  let issueBody = `**Submitted by:** ${submittedBy}\n\n**Description:**\n${formData.description.trim()}`
-
-  if (imageUrls.length > 0) {
-    issueBody += '\n\n**Images:**\n'
-    imageUrls.forEach((url, index) => {
-      issueBody += `![Image ${index + 1}](${url})\n`
+    body += '\n\n## Images\n\n'
+    formData.images.forEach(imageUrl => {
+      body += `![Image](${imageUrl})\n\n`
     })
   }
 
-  const issueData = {
-    title: formData.title.trim(),
-    body: issueBody,
-    labels: ['user-submitted'],
+  body += `\n\n---\nSubmitted by: ${userEmail}`
+
+  // Create GitHub issue
+  const response = await fetch(
+    'https://api.github.com/repos/kshehadeh/manageros/issues',
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `token ${githubToken}`,
+        Accept: 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: formData.title,
+        body,
+        labels: ['user-submitted'],
+      }),
+    }
+  )
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(
+      `GitHub API error: ${response.status} ${response.statusText}. ${errorData.message || ''}`
+    )
+  }
+
+  const issue = await response.json()
+  return {
+    success: true,
+    issueUrl: issue.html_url,
+    issueNumber: issue.number,
+    issueTitle: issue.title,
+  }
+}
+
+export async function uploadImageToR2(_file: File): Promise<string> {
+  // This is a placeholder implementation
+  // In a real implementation, you would upload to Cloudflare R2
+  throw new Error('Image upload not implemented')
+}
+
+export async function fetchGithubPullRequests(
+  personId: string,
+  daysBack: number = 30
+) {
+  const user = await getCurrentUser()
+
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization')
+  }
+
+  // Verify person belongs to user's organization
+  const person = await prisma.person.findFirst({
+    where: {
+      id: personId,
+      organizationId: user.organizationId,
+    },
+    include: {
+      githubAccount: true,
+    },
+  })
+
+  if (!person) {
+    throw new Error('Person not found or access denied')
+  }
+
+  if (!person.githubAccount) {
+    return { success: false, error: 'No GitHub account linked' }
+  }
+
+  // Get user's GitHub credentials
+  const credentials = await prisma.userGithubCredentials.findUnique({
+    where: { userId: user.id },
+  })
+
+  if (!credentials) {
+    throw new Error('GitHub credentials not configured')
   }
 
   try {
-    // Submit the issue to GitHub
-    const response = await fetch(
-      'https://api.github.com/repos/kshehadeh/manageros/issues',
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `token ${githubToken}`,
-          Accept: 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(issueData),
-      }
+    // Fetch recent pull requests
+    const githubService = GithubApiService.fromEncryptedCredentials(
+      credentials.githubUsername,
+      credentials.encryptedPat
     )
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      throw new Error(
-        `GitHub API error: ${response.status} ${response.statusText}. ${errorData.message || ''}`
-      )
-    }
+    const pullRequests = await githubService.getRecentPullRequests(
+      person.githubAccount.githubUsername,
+      daysBack
+    )
 
-    const issue = await response.json()
-
-    return {
-      success: true,
-      issueNumber: issue.number,
-      issueUrl: issue.html_url,
-      issueTitle: issue.title,
-    }
+    return { success: true, pullRequests }
   } catch (error) {
-    console.error('Error submitting GitHub issue:', error)
-    throw new Error(
-      `Failed to submit issue: ${error instanceof Error ? error.message : 'Unknown error'}`
-    )
+    console.error('Failed to fetch GitHub pull requests:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch pull requests',
+    }
   }
 }

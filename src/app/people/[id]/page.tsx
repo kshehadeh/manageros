@@ -6,6 +6,8 @@ import { FeedbackList } from '@/components/feedback-list'
 import { PersonActionsDropdown } from '@/components/person-actions-dropdown'
 import { PersonDetailClient } from '@/components/person-detail-client'
 import { JiraAccountLinker } from '@/components/jira-account-linker'
+import { GithubAccountLinker } from '@/components/github-account-linker'
+import { GithubPrsActivitySection } from '@/components/github-prs-activity-section'
 import { JiraWorkActivitySection } from '@/components/jira-work-activity-section'
 import { PersonListItemCard } from '@/components/person-list-item-card'
 import { PersonStatusBadge } from '@/components/person-status-badge'
@@ -70,6 +72,15 @@ type PersonWithRelations = Person & {
     jiraAccountId: string
     jiraEmail: string
     jiraDisplayName: string | null
+    createdAt: Date
+    updatedAt: Date
+  } | null
+  githubAccount: {
+    id: string
+    personId: string
+    githubUsername: string
+    githubDisplayName: string | null
+    githubEmail: string | null
     createdAt: Date
     updatedAt: Date
   } | null
@@ -187,6 +198,7 @@ export default async function PersonDetailPage({
         orderBy: { createdAt: 'desc' },
       },
       jiraAccount: true,
+      githubAccount: true,
       feedbackCampaigns: {
         where: {
           status: {
@@ -368,10 +380,7 @@ export default async function PersonDetailPage({
                 </h3>
                 <div className='space-y-3'>
                   {personWithRelations.tasks.slice(0, 5).map(task => (
-                    <div
-                      key={task.id}
-                      className='border border-neutral-800 rounded-xl p-3'
-                    >
+                    <div key={task.id} className='border rounded-xl p-3'>
                       <div className='flex items-center justify-between'>
                         <div>
                           <div className='font-medium'>{task.title}</div>
@@ -435,10 +444,7 @@ export default async function PersonDetailPage({
                 </div>
                 <div className='space-y-3'>
                   {personWithRelations.checkIns.slice(0, 3).map(checkIn => (
-                    <div
-                      key={checkIn.id}
-                      className='border border-neutral-800 rounded-xl p-3'
-                    >
+                    <div key={checkIn.id} className='border rounded-xl p-3'>
                       <div className='flex items-center justify-between'>
                         <div>
                           <Link
@@ -486,7 +492,7 @@ export default async function PersonDetailPage({
                           .map(oneOnOne => (
                             <div
                               key={oneOnOne.id}
-                              className='border border-neutral-800 rounded-xl p-3 mb-2'
+                              className='border rounded-xl p-3 mb-2'
                             >
                               <div className='flex items-center justify-between'>
                                 <div>
@@ -526,7 +532,7 @@ export default async function PersonDetailPage({
                           .map(oneOnOne => (
                             <div
                               key={oneOnOne.id}
-                              className='border border-neutral-800 rounded-xl p-3 mb-2'
+                              className='border rounded-xl p-3 mb-2'
                             >
                               <div className='flex items-center justify-between'>
                                 <div>
@@ -601,6 +607,15 @@ export default async function PersonDetailPage({
                 hasJiraAccount={!!personWithRelations.jiraAccount}
               />
             )}
+
+            {/* GitHub PR Activity - Show if person has GitHub account and PR activity */}
+            {personWithRelations.githubAccount && (
+              <GithubPrsActivitySection
+                personId={personWithRelations.id}
+                personName={personWithRelations.name}
+                hasGithubAccount={!!personWithRelations.githubAccount}
+              />
+            )}
           </div>
 
           {/* Right Sidebar */}
@@ -646,6 +661,18 @@ export default async function PersonDetailPage({
                   personName={personWithRelations.name}
                   personEmail={personWithRelations.email}
                   jiraAccount={personWithRelations.jiraAccount}
+                />
+              </section>
+            )}
+
+            {/* GitHub Integration - Only show for admins */}
+            {isAdmin(session.user) && (
+              <section>
+                <h3 className='font-semibold mb-4'>GitHub Linking</h3>
+                <GithubAccountLinker
+                  personId={personWithRelations.id}
+                  personName={personWithRelations.name}
+                  githubAccount={personWithRelations.githubAccount}
                 />
               </section>
             )}

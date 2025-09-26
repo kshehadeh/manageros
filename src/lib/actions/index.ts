@@ -153,4 +153,13 @@ export {
 } from './meeting-instance'
 
 // GitHub Integration Actions
-export { submitGitHubIssue, uploadImageToR2 } from './github'
+export {
+  saveGithubCredentials,
+  getGithubCredentials,
+  deleteGithubCredentials,
+  linkPersonToGithubAccount,
+  unlinkPersonFromGithubAccount,
+  submitGitHubIssue,
+  uploadImageToR2,
+  fetchGithubPullRequests,
+} from './github'
