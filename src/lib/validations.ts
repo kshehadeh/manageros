@@ -149,7 +149,6 @@ export const taskSchema = z.object({
       message: 'Priority must be between 1 and 5',
     })
     .default(DEFAULT_TASK_PRIORITY),
-  estimate: z.number().min(0).optional(),
   dueDate: z.string().optional(),
   initiativeId: z.string().optional(),
   objectiveId: z.string().optional(),

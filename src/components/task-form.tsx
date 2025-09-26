@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { EnhancedTaskInput } from '@/components/enhanced-task-input'
@@ -54,7 +53,6 @@ export function TaskForm({
     assigneeId: preselectedAssigneeId || initialData?.assigneeId || undefined,
     status: initialData?.status || DEFAULT_TASK_STATUS,
     priority: (initialData?.priority as number) || DEFAULT_TASK_PRIORITY,
-    estimate: initialData?.estimate || undefined,
     dueDate: initialData?.dueDate || undefined,
     initiativeId:
       preselectedInitiativeId || initialData?.initiativeId || undefined,
@@ -234,7 +232,7 @@ export function TaskForm({
           </div>
         </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div>
             <label
               htmlFor='priority'
@@ -263,34 +261,6 @@ export function TaskForm({
             </select>
             {errors.priority && (
               <p className='text-sm text-red-500 mt-1'>{errors.priority}</p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor='estimate'
-              className='block text-sm font-medium mb-2'
-            >
-              Estimate (hours)
-            </label>
-            <Input
-              type='number'
-              id='estimate'
-              name='estimate'
-              min='0'
-              step='0.5'
-              value={formData.estimate || ''}
-              onChange={e =>
-                handleInputChange(
-                  'estimate',
-                  e.target.value ? parseInt(e.target.value) : undefined
-                )
-              }
-              placeholder='Hours'
-              className={errors.estimate ? 'border-red-500' : ''}
-            />
-            {errors.estimate && (
-              <p className='text-sm text-red-500 mt-1'>{errors.estimate}</p>
             )}
           </div>
 
@@ -381,9 +351,6 @@ export function TaskForm({
             : isEditing
               ? 'Update Task'
               : 'Create Task'}
-        </Button>
-        <Button asChild variant='outline'>
-          <Link href='/tasks'>Cancel</Link>
         </Button>
       </div>
     </form>

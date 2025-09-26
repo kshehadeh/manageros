@@ -61,7 +61,6 @@ export default async function EditTaskPage({
     assigneeId: task.assigneeId || '',
     status: task.status as TaskStatus,
     priority: task.priority,
-    estimate: task.estimate || undefined,
     dueDate: task.dueDate
       ? new Date(task.dueDate).toISOString().split('T')[0]
       : '',
@@ -80,16 +79,14 @@ export default async function EditTaskPage({
         </div>
 
         <div className='page-section'>
-          <div className='card'>
-            <TaskForm
-              people={people}
-              initiatives={initiatives}
-              objectives={objectives}
-              initialData={initialData}
-              isEditing={true}
-              taskId={task.id}
-            />
-          </div>
+          <TaskForm
+            people={people}
+            initiatives={initiatives}
+            objectives={objectives}
+            initialData={initialData}
+            isEditing={true}
+            taskId={task.id}
+          />
         </div>
       </div>
     </TaskDetailBreadcrumbClient>
