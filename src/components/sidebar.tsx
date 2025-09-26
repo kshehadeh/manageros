@@ -13,11 +13,9 @@ import {
   Users,
   Users2,
   ClipboardList,
-  MessageSquare,
-  MessageCircle,
-  Mail,
   Settings,
   Calendar,
+  Building,
 } from 'lucide-react'
 
 interface NavItem {
@@ -34,12 +32,10 @@ const navigation: NavItem[] = [
   { name: 'Teams', href: '/teams', icon: Users2 },
   { name: 'Tasks', href: '/tasks', icon: ClipboardList },
   { name: 'Meetings', href: '/meetings', icon: Calendar },
-  { name: '1:1s', href: '/oneonones', icon: MessageSquare },
-  { name: 'Feedback', href: '/feedback', icon: MessageCircle },
   {
-    name: 'Invitations',
-    href: '/organization/invitations',
-    icon: Mail,
+    name: 'Org Settings',
+    href: '/organization/settings',
+    icon: Building,
     adminOnly: true,
   },
   { name: 'Your Settings', href: '/settings', icon: Settings },
@@ -151,16 +147,8 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* Settings and Sign Out */}
+        {/* Sign Out */}
         <div className='px-3 py-4 border-t space-y-1'>
-          <Link
-            href='/organization/settings'
-            onClick={() => setIsMobileMenuOpen(false)}
-            className='flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent hover:text-accent-foreground rounded-lg transition-colors'
-          >
-            <Settings className='h-5 w-5' />
-            Org Settings
-          </Link>
           <button
             onClick={async () => {
               setIsMobileMenuOpen(false)

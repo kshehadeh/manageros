@@ -28,6 +28,7 @@ export function AssignedTasks({ assignedTasks, people }: AssignedTasksProps) {
       people={people}
       showInitiative={true}
       showDueDate={true}
+      hideFilters={true}
     />
   )
 }

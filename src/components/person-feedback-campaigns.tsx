@@ -96,7 +96,7 @@ export function PersonFeedbackCampaigns({
               {campaign.name && (
                 <Link
                   href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`}
-                  className='font-medium text-foreground hover:text-blue-600 transition-colors'
+                  className='font-medium text-foreground hover:text-primary transition-colors'
                 >
                   {campaign.name}
                 </Link>

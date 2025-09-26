@@ -24,6 +24,7 @@ interface InitiativeCardProps {
   variant?: 'compact' | 'default'
   showTeam?: boolean
   showOwners?: boolean
+  showSummary?: boolean
   className?: string
 }
 
@@ -32,6 +33,7 @@ export function InitiativeCard({
   variant = 'default',
   showTeam = true,
   showOwners = false,
+  showSummary = true,
   className = '',
 }: InitiativeCardProps) {
   const cardClasses =
@@ -65,9 +67,11 @@ export function InitiativeCard({
           <Rag rag={initiative.rag} />
           <span className='badge'>{initiative.confidence}%</span>
         </div>
-        <div className={`${summaryClasses} truncate`}>
-          {initiative.summary ?? ''}
-        </div>
+        {showSummary && (
+          <div className={`${summaryClasses} truncate`}>
+            {initiative.summary ?? ''}
+          </div>
+        )}
         <div className={`${metadataClasses} truncate`}>
           {initiative.objectives.length} objectives •{' '}
           {initiative._count.checkIns} check-ins

@@ -15,6 +15,10 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  User as UserIcon,
+  Calendar,
+  Target,
+  Flag,
 } from 'lucide-react'
 import {
   Table,
@@ -109,7 +113,6 @@ export function TaskTable({
   people,
   initiatives = [],
   showInitiative = true,
-  showDueDate = true,
   hideFilters = false,
   onTaskUpdate,
 }: TaskTableProps) {
@@ -751,7 +754,7 @@ export function TaskTable({
                 <Check className='h-4 w-4' />
               </TableHead>
               <TableHead
-                className='text-muted-foreground cursor-pointer hover:text-foreground select-none'
+                className='text-muted-foreground cursor-pointer hover:text-foreground select-none w-full'
                 onClick={() => handleSort('title')}
               >
                 <div className='flex items-center gap-2'>
@@ -760,38 +763,7 @@ export function TaskTable({
                 </div>
               </TableHead>
               <TableHead
-                className='text-muted-foreground cursor-pointer hover:text-foreground select-none'
-                onClick={() => handleSort('assignee')}
-              >
-                <div className='flex items-center gap-2'>
-                  Assignee
-                  {getSortIcon('assignee')}
-                </div>
-              </TableHead>
-              {showDueDate && (
-                <TableHead
-                  className='text-muted-foreground cursor-pointer hover:text-foreground select-none'
-                  onClick={() => handleSort('dueDate')}
-                >
-                  <div className='flex items-center gap-2'>
-                    Due By
-                    {getSortIcon('dueDate')}
-                  </div>
-                </TableHead>
-              )}
-              {showInitiative && (
-                <TableHead
-                  className='text-muted-foreground cursor-pointer hover:text-foreground select-none'
-                  onClick={() => handleSort('initiative')}
-                >
-                  <div className='flex items-center gap-2'>
-                    Initiative
-                    {getSortIcon('initiative')}
-                  </div>
-                </TableHead>
-              )}
-              <TableHead
-                className='text-muted-foreground cursor-pointer hover:text-foreground select-none'
+                className='text-muted-foreground cursor-pointer hover:text-foreground select-none w-[120px]'
                 onClick={() => handleSort('status')}
               >
                 <div className='flex items-center gap-2'>
@@ -799,16 +771,7 @@ export function TaskTable({
                   {getSortIcon('status')}
                 </div>
               </TableHead>
-              <TableHead
-                className='text-muted-foreground cursor-pointer hover:text-foreground select-none'
-                onClick={() => handleSort('priority')}
-              >
-                <div className='flex items-center gap-2'>
-                  Priority
-                  {getSortIcon('priority')}
-                </div>
-              </TableHead>
-              <TableHead className='text-muted-foreground w-[50px]'>
+              <TableHead className='text-muted-foreground w-[60px]'>
                 Actions
               </TableHead>
             </TableRow>
@@ -888,98 +851,57 @@ export function TaskTable({
                             {task.description}
                           </div>
                         )}
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell className='text-muted-foreground'>
-                    {editField === 'assignee' ? (
-                      <div className='flex items-center gap-2'>
-                        <Select
-                          value={(editValue as string) || 'none'}
-                          onValueChange={value =>
-                            setEditing(prev => ({
-                              ...prev,
-                              [task.id]: {
-                                field: 'assignee',
-                                value: value === 'none' ? null : value,
-                              },
-                            }))
-                          }
-                        >
-                          <SelectTrigger className='h-8'>
-                            <SelectValue placeholder='Select assignee' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value='none'>No assignee</SelectItem>
-                            {people.map(person => (
-                              <SelectItem key={person.id} value={person.id}>
-                                {person.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          size='sm'
-                          variant='ghost'
-                          onClick={() => handleEditSave(task.id)}
-                          disabled={isUpdating}
-                        >
-                          <Check className='w-4 h-4' />
-                        </Button>
-                        <Button
-                          size='sm'
-                          variant='ghost'
-                          onClick={() => handleEditCancel(task.id)}
-                        >
-                          <X className='w-4 h-4' />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div
-                        className='cursor-pointer hover:bg-accent/50 p-1 rounded'
-                        onClick={() =>
-                          handleEditStart(task.id, 'assignee', task.assigneeId)
-                        }
-                      >
-                        {task.assignee ? (
-                          <Link
-                            href={`/people/${task.assignee.id}`}
-                            className='text-primary hover:text-primary/80 transition-colors'
-                            onClick={e => e.stopPropagation()}
-                          >
-                            {task.assignee.name}
-                          </Link>
-                        ) : (
-                          '—'
-                        )}
-                      </div>
-                    )}
-                  </TableCell>
-                  {showDueDate && (
-                    <TableCell className='text-muted-foreground'>
-                      {task.dueDate ? (
-                        <div className='text-sm'>
-                          {new Date(task.dueDate).toLocaleDateString()}
+                        {/* Task details with icons on same line */}
+                        <div className='text-xs text-muted-foreground mt-2 flex items-center gap-4 flex-wrap'>
+                          {task.assignee && (
+                            <div className='flex items-center gap-1'>
+                              <UserIcon className='h-3 w-3' />
+                              <Link
+                                href={`/people/${task.assignee.id}`}
+                                className='text-primary hover:text-primary/80 transition-colors'
+                                onClick={e => e.stopPropagation()}
+                              >
+                                {task.assignee.name}
+                              </Link>
+                            </div>
+                          )}
+                          <div className='flex items-center gap-1'>
+                            <Flag className='h-3 w-3' />
+                            <Badge
+                              variant={
+                                getPriorityVariant(
+                                  task.priority
+                                ) as BadgeVariant
+                              }
+                              className='text-xs px-1 py-0'
+                            >
+                              {getPriorityLabel(task.priority)}
+                            </Badge>
+                          </div>
+                          {task.dueDate && (
+                            <div className='flex items-center gap-1'>
+                              <Calendar className='h-3 w-3' />
+                              <span>
+                                {new Date(task.dueDate).toLocaleDateString()}
+                              </span>
+                            </div>
+                          )}
+                          {showInitiative && task.initiative && (
+                            <div className='flex items-center gap-1'>
+                              <Target className='h-3 w-3' />
+                              <Link
+                                href={`/initiatives/${task.initiative.id}`}
+                                className='text-primary hover:text-primary/80 transition-colors'
+                                onClick={e => e.stopPropagation()}
+                              >
+                                {task.initiative.title}
+                              </Link>
+                            </div>
+                          )}
                         </div>
-                      ) : (
-                        '—'
-                      )}
-                    </TableCell>
-                  )}
-                  {showInitiative && (
-                    <TableCell className='text-muted-foreground'>
-                      {task.initiative ? (
-                        <Link
-                          href={`/initiatives/${task.initiative.id}`}
-                          className='text-primary hover:text-primary/80 transition-colors'
-                        >
-                          {task.initiative.title}
-                        </Link>
-                      ) : (
-                        '—'
-                      )}
-                    </TableCell>
-                  )}
+                      </div>
+                    )}
+                  </TableCell>
                   <TableCell className='text-muted-foreground'>
                     {editField === 'status' ? (
                       <div className='flex items-center gap-2'>
@@ -1032,68 +954,6 @@ export function TaskTable({
                           )}
                         >
                           {taskStatusUtils.getLabel(task.status as TaskStatus)}
-                        </Badge>
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell className='text-muted-foreground'>
-                    {editField === 'priority' ? (
-                      <div className='flex items-center gap-2'>
-                        <Select
-                          value={editValue?.toString() || '2'}
-                          onValueChange={value =>
-                            setEditing(prev => ({
-                              ...prev,
-                              [task.id]: {
-                                field: 'priority',
-                                value: parseInt(value),
-                              },
-                            }))
-                          }
-                        >
-                          <SelectTrigger className='h-8'>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {ALL_TASK_PRIORITIES.map(priority => (
-                              <SelectItem
-                                key={priority}
-                                value={priority.toString()}
-                              >
-                                {taskPriorityUtils.getLabel(priority)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          size='sm'
-                          variant='ghost'
-                          onClick={() => handleEditSave(task.id)}
-                          disabled={isUpdating}
-                        >
-                          <Check className='w-4 h-4' />
-                        </Button>
-                        <Button
-                          size='sm'
-                          variant='ghost'
-                          onClick={() => handleEditCancel(task.id)}
-                        >
-                          <X className='w-4 h-4' />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div
-                        className='cursor-pointer hover:bg-accent/50 p-1 rounded'
-                        onClick={() =>
-                          handleEditStart(task.id, 'priority', task.priority)
-                        }
-                      >
-                        <Badge
-                          variant={
-                            getPriorityVariant(task.priority) as BadgeVariant
-                          }
-                        >
-                          {getPriorityLabel(task.priority)}
                         </Badge>
                       </div>
                     )}

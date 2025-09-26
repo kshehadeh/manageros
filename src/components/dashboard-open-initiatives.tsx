@@ -28,6 +28,7 @@ export function OpenInitiatives({ openInitiatives }: OpenInitiativesProps) {
           initiative={initiative}
           variant='compact'
           showTeam={true}
+          showSummary={false}
         />
       ))}
     </div>

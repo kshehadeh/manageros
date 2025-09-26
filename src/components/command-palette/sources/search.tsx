@@ -7,7 +7,7 @@ interface SearchResultBase {
   id: string
   title: string
   subtitle?: string
-  type: 'task' | 'initiative' | 'person' | 'feedback'
+  type: 'task' | 'initiative' | 'person' | 'feedback' | 'oneOnOne'
 }
 
 async function searchAll(query: string): Promise<SearchResultBase[]> {
@@ -56,6 +56,16 @@ export const searchCommandSource: CommandSource = {
           icon: <MessageSquare className='h-4 w-4' />,
           perform: ({ closePalette, router }) => {
             router.push(`/feedback/${r.id}`)
+            closePalette()
+          },
+        }
+      }
+      if (r.type === 'oneOnOne') {
+        return {
+          ...base,
+          icon: <MessageSquare className='h-4 w-4' />,
+          perform: ({ closePalette, router }) => {
+            router.push(`/oneonones/${r.id}`)
             closePalette()
           },
         }
