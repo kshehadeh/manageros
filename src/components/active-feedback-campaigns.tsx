@@ -41,7 +41,10 @@ export function ActiveFeedbackCampaigns({
   }
 
   return (
-    <ExpandableSection title='Feedback Campaigns' viewAllHref='/people'>
+    <ExpandableSection
+      title='Feedback Campaigns'
+      viewAllHref='/feedback-campaigns'
+    >
       {campaigns.map(campaign => (
         <div
           key={campaign.id}
@@ -54,8 +57,8 @@ export function ActiveFeedbackCampaigns({
                 <span>{campaign.targetPerson.name}</span>
               </div>
               <Link
-                href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}/responses`}
-                className='font-medium hover:text-blue-600'
+                href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`}
+                className='font-medium hover:text-primary transition-colors'
               >
                 {campaign.name || campaign.targetPerson.name}
               </Link>

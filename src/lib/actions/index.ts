@@ -80,6 +80,7 @@ export {
   updateCampaignStatus,
   getFeedbackCampaignResponses,
   getActiveFeedbackCampaignsForUser,
+  getAllFeedbackCampaignsForOrganization,
 } from './feedback-campaign'
 
 // Feedback Template Actions

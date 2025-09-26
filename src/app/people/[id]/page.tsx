@@ -270,7 +270,7 @@ export default async function PersonDetailPage({
                     <Building2 className='w-4 h-4' />
                     <Link
                       href={`/teams/${personWithRelations.team.id}`}
-                      className='hover:text-blue-400'
+                      className='hover:text-primary transition-colors'
                     >
                       {personWithRelations.team.name}
                     </Link>
@@ -281,7 +281,7 @@ export default async function PersonDetailPage({
                     <UserIcon className='w-4 h-4' />
                     <Link
                       href={`/people/${personWithRelations.manager.id}`}
-                      className='hover:text-blue-400'
+                      className='hover:text-primary transition-colors'
                     >
                       {personWithRelations.manager.name}
                     </Link>
@@ -375,10 +375,10 @@ export default async function PersonDetailPage({
                       <div className='flex items-center justify-between'>
                         <div>
                           <div className='font-medium'>{task.title}</div>
-                          <div className='text-sm text-neutral-400'>
+                          <div className='text-sm text-muted-foreground'>
                             {task.description ?? ''}
                           </div>
-                          <div className='text-xs text-neutral-500 mt-1'>
+                          <div className='text-xs text-muted-foreground mt-1'>
                             {task.initiative && (
                               <span>Initiative: {task.initiative.title}</span>
                             )}
@@ -443,14 +443,14 @@ export default async function PersonDetailPage({
                         <div>
                           <Link
                             href={`/initiatives/${checkIn.initiative.id}`}
-                            className='font-medium hover:text-blue-400'
+                            className='font-medium hover:text-primary transition-colors'
                           >
                             {checkIn.initiative.title}
                           </Link>
-                          <div className='text-sm text-neutral-400'>
+                          <div className='text-sm text-muted-foreground'>
                             {checkIn.summary}
                           </div>
-                          <div className='text-xs text-neutral-500 mt-1'>
+                          <div className='text-xs text-muted-foreground mt-1'>
                             Week of{' '}
                             {new Date(checkIn.weekOf).toLocaleDateString()}
                           </div>
@@ -492,11 +492,11 @@ export default async function PersonDetailPage({
                                 <div>
                                   <Link
                                     href={`/people/${oneOnOne.report.id}`}
-                                    className='font-medium hover:text-blue-400'
+                                    className='font-medium hover:text-primary transition-colors'
                                   >
                                     {oneOnOne.report.name}
                                   </Link>
-                                  <div className='text-xs text-neutral-500 mt-1'>
+                                  <div className='text-xs text-muted-foreground mt-1'>
                                     {oneOnOne.scheduledAt
                                       ? new Date(
                                           oneOnOne.scheduledAt
@@ -505,7 +505,9 @@ export default async function PersonDetailPage({
                                   </div>
                                 </div>
                                 <Button asChild variant='outline' size='sm'>
-                                  <Link href={`/oneonones/${oneOnOne.id}`}>View</Link>
+                                  <Link href={`/oneonones/${oneOnOne.id}`}>
+                                    View
+                                  </Link>
                                 </Button>
                               </div>
                             </div>
@@ -530,11 +532,11 @@ export default async function PersonDetailPage({
                                 <div>
                                   <Link
                                     href={`/people/${oneOnOne.manager.id}`}
-                                    className='font-medium hover:text-blue-400'
+                                    className='font-medium hover:text-primary transition-colors'
                                   >
                                     {oneOnOne.manager.name}
                                   </Link>
-                                  <div className='text-xs text-neutral-500 mt-1'>
+                                  <div className='text-xs text-muted-foreground mt-1'>
                                     {oneOnOne.scheduledAt
                                       ? new Date(
                                           oneOnOne.scheduledAt
@@ -543,7 +545,9 @@ export default async function PersonDetailPage({
                                   </div>
                                 </div>
                                 <Button asChild variant='outline' size='sm'>
-                                  <Link href={`/oneonones/${oneOnOne.id}`}>View</Link>
+                                  <Link href={`/oneonones/${oneOnOne.id}`}>
+                                    View
+                                  </Link>
                                 </Button>
                               </div>
                             </div>

@@ -147,16 +147,8 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* Settings and Sign Out */}
+        {/* Sign Out */}
         <div className='px-3 py-4 border-t space-y-1'>
-          <Link
-            href='/organization/settings'
-            onClick={() => setIsMobileMenuOpen(false)}
-            className='flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent hover:text-accent-foreground rounded-lg transition-colors'
-          >
-            <Settings className='h-5 w-5' />
-            Org Settings
-          </Link>
           <button
             onClick={async () => {
               setIsMobileMenuOpen(false)

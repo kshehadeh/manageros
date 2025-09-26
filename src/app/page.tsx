@@ -306,15 +306,15 @@ export default async function Home() {
           {recentFeedback.length > 0 && (
             <ExpandableSection title='Recent Feedback' viewAllHref='/people'>
               <div className='space-y-3'>
-                {recentFeedback.map((feedback: any) => (
+                {recentFeedback.map(feedback => (
                   <Link
                     key={feedback.id}
                     href={`/people/${feedback.about.id}#feedback`}
-                    className='block card hover:bg-neutral-800/60'
+                    className='block card hover:bg-accent/50 transition-colors'
                   >
                     <div className='flex items-start justify-between'>
                       <div className='flex-1'>
-                        <div className='text-sm font-medium'>
+                        <div className='text-sm font-medium text-card-foreground'>
                           {feedback.kind === 'praise' && '✨ '}
                           {feedback.kind === 'constructive' && '💡 '}
                           {feedback.kind === 'general' && '💬 '}
@@ -323,28 +323,28 @@ export default async function Home() {
                             : feedback.body}
                         </div>
                         <div className='flex items-center gap-2 mt-1'>
-                          <span className='text-xs text-neutral-500'>
+                          <span className='text-xs text-muted-foreground'>
                             About{' '}
-                            <span className='text-blue-400'>
+                            <span className='text-primary'>
                               {feedback.about.name}
                             </span>
                           </span>
                           {feedback.from.id !== feedback.about.id && (
-                            <span className='text-xs text-neutral-500'>
+                            <span className='text-xs text-muted-foreground'>
                               • From{' '}
-                              <span className='text-blue-400'>
+                              <span className='text-primary'>
                                 {feedback.from.name}
                               </span>
                             </span>
                           )}
-                          <span className='text-xs text-neutral-500'>
+                          <span className='text-xs text-muted-foreground'>
                             •{' '}
                             {new Date(feedback.createdAt).toLocaleDateString()}
                           </span>
                         </div>
                       </div>
                       {feedback.isPrivate && (
-                        <span className='text-xs text-neutral-500 italic'>
+                        <span className='text-xs text-muted-foreground italic'>
                           Private
                         </span>
                       )}
@@ -352,6 +352,27 @@ export default async function Home() {
                   </Link>
                 ))}
               </div>
+            </ExpandableSection>
+          )}
+
+          {/* Open Initiatives Section - only show if there are open initiatives */}
+          {openInitiatives.length > 0 && (
+            <ExpandableSection
+              title='Open Initiatives'
+              viewAllHref='/initiatives'
+            >
+              <Suspense
+                fallback={
+                  <div className='flex items-center justify-center py-8'>
+                    <Loading size='md' />
+                    <span className='ml-2 text-sm text-muted-foreground'>
+                      Loading initiatives...
+                    </span>
+                  </div>
+                }
+              >
+                <OpenInitiatives openInitiatives={openInitiatives} />
+              </Suspense>
             </ExpandableSection>
           )}
 
@@ -401,27 +422,6 @@ export default async function Home() {
                     </div>
                   </Link>
                 ))}
-              </ExpandableSection>
-            )}
-
-            {/* Open Initiatives Section - only show if there are open initiatives */}
-            {openInitiatives.length > 0 && (
-              <ExpandableSection
-                title='Open Initiatives'
-                viewAllHref='/initiatives'
-              >
-                <Suspense
-                  fallback={
-                    <div className='flex items-center justify-center py-8'>
-                      <Loading size='md' />
-                      <span className='ml-2 text-sm text-muted-foreground'>
-                        Loading initiatives...
-                      </span>
-                    </div>
-                  }
-                >
-                  <OpenInitiatives openInitiatives={openInitiatives} />
-                </Suspense>
               </ExpandableSection>
             )}
           </div>

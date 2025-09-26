@@ -718,3 +718,82 @@ export async function getActiveFeedbackCampaignsForUser() {
 
   return campaigns
 }
+
+export async function getAllFeedbackCampaignsForOrganization() {
+  const user = await getCurrentUser()
+
+  if (!user) {
+    throw new Error('Unauthorized')
+  }
+
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization')
+  }
+
+  // Get the current user's person record
+  const currentPerson = await prisma.person.findFirst({
+    where: {
+      user: {
+        id: user.id,
+      },
+    },
+  })
+
+  if (!currentPerson) {
+    throw new Error('No person record found for current user')
+  }
+
+  // Get all campaigns in the organization where the current user is a manager of the target person
+  const campaigns = await prisma.feedbackCampaign.findMany({
+    where: {
+      targetPerson: {
+        organizationId: user.organizationId,
+      },
+    },
+    include: {
+      targetPerson: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      template: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+        },
+      },
+      responses: {
+        select: {
+          id: true,
+          responderEmail: true,
+          submittedAt: true,
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  // Filter campaigns to only include those where the current user is a manager of the target person
+  const filteredCampaigns = []
+  for (const campaign of campaigns) {
+    const isManager = await isDirectOrIndirectManager(
+      currentPerson.id,
+      campaign.targetPersonId
+    )
+    if (isManager) {
+      filteredCampaigns.push(campaign)
+    }
+  }
+
+  return filteredCampaigns
+}
