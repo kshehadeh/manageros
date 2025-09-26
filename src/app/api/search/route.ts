@@ -64,37 +64,36 @@ export async function GET(request: Request) {
       },
       take: 6,
     }),
-    prisma.oneOnOne.findMany({
-      where: {
-        OR: [
-          { notes: { contains: q, mode: 'insensitive' } },
-          { manager: { name: { contains: q, mode: 'insensitive' } } },
-          { report: { name: { contains: q, mode: 'insensitive' } } },
-        ],
-        AND: [
-          {
+    // Only query 1:1s if the user has a personId (is linked to a Person record)
+    user.personId
+      ? prisma.oneOnOne.findMany({
+          where: {
             OR: [
-              // User is the manager
-              ...(user.personId
-                ? [{ managerId: user.personId }]
-                : []),
-              // User is the report
-              ...(user.personId
-                ? [{ reportId: user.personId }]
-                : []),
+              { notes: { contains: q, mode: 'insensitive' } },
+              { manager: { name: { contains: q, mode: 'insensitive' } } },
+              { report: { name: { contains: q, mode: 'insensitive' } } },
+            ],
+            AND: [
+              {
+                OR: [
+                  // User is the manager
+                  { managerId: user.personId },
+                  // User is the report
+                  { reportId: user.personId },
+                ],
+              },
             ],
           },
-        ],
-      },
-      select: {
-        id: true,
-        notes: true,
-        scheduledAt: true,
-        manager: { select: { id: true, name: true } },
-        report: { select: { id: true, name: true } },
-      },
-      take: 6,
-    }),
+          select: {
+            id: true,
+            notes: true,
+            scheduledAt: true,
+            manager: { select: { id: true, name: true } },
+            report: { select: { id: true, name: true } },
+          },
+          take: 6,
+        })
+      : Promise.resolve([]), // Return empty array if user has no personId
   ])
 
   const results = [
