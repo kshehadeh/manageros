@@ -6,8 +6,8 @@ alwaysApply: false
 
 ## Unit Tests
 
-* Use vitest tests for all unit testing
+* Only create unit tests for non-UI and non-database related business logic.
 
 ## Integration Tests
 
-* Use playwright for all integration testing
+* When creating integration tests, use playwright.

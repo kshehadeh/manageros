@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "bun run next dev",
-    "build": "bun run next build",
-    "start": "bun run next start",
+    "dev": "next dev --turbo",
+    "build": "next build",
+    "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "format": "prettier --write .",

@@ -79,13 +79,6 @@ export function UserLinkForm({
 
   return (
     <div className='space-y-4'>
-      <div>
-        <h4 className='font-medium mb-2'>User Account Link</h4>
-        <p className='text-sm text-muted-foreground mb-4'>
-          Link this person to a user account to enable login access.
-        </p>
-      </div>
-
       {error && (
         <div className='bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded'>
           {error}
@@ -97,13 +90,15 @@ export function UserLinkForm({
           <div className='flex items-center justify-between'>
             <div>
               <div className='font-medium text-foreground'>
-                Linked to User Account
-              </div>
-              <div className='text-sm text-foreground'>
                 {linkedUser.name} ({linkedUser.email}) - {linkedUser.role}
               </div>
             </div>
-            <Button onClick={handleUnlink} disabled={isLoading} variant='outline' size='sm'>
+            <Button
+              onClick={handleUnlink}
+              disabled={isLoading}
+              variant='outline'
+              size='sm'
+            >
               {isLoading ? 'Unlinking...' : 'Unlink'}
             </Button>
           </div>
@@ -111,9 +106,6 @@ export function UserLinkForm({
       ) : (
         <form onSubmit={handleLink} className='space-y-4'>
           <div>
-            <label className='block text-sm font-medium mb-2'>
-              Select User to Link
-            </label>
             <select
               value={selectedUserId}
               onChange={e => setSelectedUserId(e.target.value)}
@@ -127,15 +119,15 @@ export function UserLinkForm({
                 </option>
               ))}
             </select>
-            {availableUsers.length === 0 && (
-              <p className='text-sm text-neutral-500 mt-1'>
-                No available users to link. All users in your organization are
-                already linked to persons.
-              </p>
-            )}
           </div>
 
-          <Button type='submit' disabled={isLoading || !selectedUserId || availableUsers.length === 0} variant='outline'>
+          <Button
+            type='submit'
+            disabled={
+              isLoading || !selectedUserId || availableUsers.length === 0
+            }
+            variant='outline'
+          >
             {isLoading ? 'Linking...' : 'Link User Account'}
           </Button>
         </form>

@@ -20,7 +20,7 @@ interface JiraAccountLinkerProps {
 
 export function JiraAccountLinker({
   personId,
-  personName,
+  personName: _personName,
   personEmail,
   jiraAccount,
   onSuccess,
@@ -75,15 +75,26 @@ export function JiraAccountLinker({
   if (jiraAccount) {
     return (
       <div className='space-y-4'>
-        <div>
-          <h4 className='text-sm font-medium text-white'>Jira Account</h4>
-          <p className='text-sm text-neutral-400'>
-            Linked to Jira account:{' '}
-            <span className='font-medium text-white'>
-              {jiraAccount.jiraDisplayName}
-            </span>
-          </p>
-          <p className='text-xs text-neutral-500'>{jiraAccount.jiraEmail}</p>
+        <div className='bg-secondary/30 border rounded-lg p-4'>
+          <div className='flex items-center justify-between'>
+            <div>
+              <div className='font-medium text-foreground'>
+                {jiraAccount.jiraDisplayName}
+              </div>
+              <div className='text-sm text-muted-foreground'>
+                {jiraAccount.jiraEmail}
+              </div>
+            </div>
+            <Button
+              type='button'
+              onClick={handleUnlink}
+              disabled={isLoading}
+              variant='outline'
+              size='sm'
+            >
+              {isLoading ? 'Unlinking...' : 'Unlink'}
+            </Button>
+          </div>
         </div>
 
         {error && (
@@ -91,49 +102,22 @@ export function JiraAccountLinker({
             <div className='text-sm text-red-400'>{error}</div>
           </div>
         )}
-
-        <Button
-          type='button'
-          onClick={handleUnlink}
-          disabled={isLoading}
-          variant='outline'
-        >
-          {isLoading ? 'Unlinking...' : 'Unlink Jira Account'}
-        </Button>
       </div>
     )
   }
 
   return (
     <div className='space-y-4'>
-      <div>
-        <h4 className='text-sm font-medium text-white'>Link Jira Account</h4>
-        <p className='text-sm text-neutral-400'>
-          Link {personName} to their Jira account to enable work activity
-          tracking.
-        </p>
-      </div>
-
       <form onSubmit={handleLink} className='space-y-3'>
         <div>
-          <label
-            htmlFor='jiraEmail'
-            className='block text-sm font-medium text-white'
-          >
-            Jira Email Address
-          </label>
           <input
             type='email'
-            id='jiraEmail'
             value={jiraEmail}
             onChange={e => setJiraEmail(e.target.value)}
             placeholder='person@company.com'
             className='input'
             required
           />
-          <p className='mt-1 text-xs text-neutral-500'>
-            The email address associated with their Jira account
-          </p>
         </div>
 
         {error && (

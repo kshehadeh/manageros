@@ -6,7 +6,7 @@ import { FeedbackList } from '@/components/feedback-list'
 import { PersonActionsDropdown } from '@/components/person-actions-dropdown'
 import { PersonDetailClient } from '@/components/person-detail-client'
 import { JiraAccountLinker } from '@/components/jira-account-linker'
-import { JiraWorkActivity } from '@/components/jira-work-activity'
+import { JiraWorkActivitySection } from '@/components/jira-work-activity-section'
 import { PersonListItemCard } from '@/components/person-list-item-card'
 import { PersonStatusBadge } from '@/components/person-status-badge'
 import { PersonFeedbackCampaigns } from '@/components/person-feedback-campaigns'
@@ -14,7 +14,13 @@ import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { Eye } from 'lucide-react'
+import {
+  Eye,
+  Users,
+  User as UserIcon,
+  Building2,
+  CalendarDays,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TaskStatus, taskStatusUtils } from '@/lib/task-status'
 import {
@@ -245,7 +251,7 @@ export default async function PersonDetailPage({
       <div className='page-container'>
         <div className='page-header'>
           <div className='flex items-start justify-between'>
-            <div>
+            <div className='flex-1'>
               <div className='flex items-center gap-3 mb-2'>
                 <h1 className='page-title'>{personWithRelations.name}</h1>
                 <PersonStatusBadge status={personWithRelations.status} />
@@ -256,6 +262,52 @@ export default async function PersonDetailPage({
               <div className='text-xs text-muted-foreground'>
                 {personWithRelations.email}
               </div>
+
+              {/* Basic Information with Icons */}
+              <div className='flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground'>
+                {personWithRelations.team && (
+                  <div className='flex items-center gap-1'>
+                    <Building2 className='w-4 h-4' />
+                    <Link
+                      href={`/teams/${personWithRelations.team.id}`}
+                      className='hover:text-blue-400'
+                    >
+                      {personWithRelations.team.name}
+                    </Link>
+                  </div>
+                )}
+                {personWithRelations.manager && (
+                  <div className='flex items-center gap-1'>
+                    <UserIcon className='w-4 h-4' />
+                    <Link
+                      href={`/people/${personWithRelations.manager.id}`}
+                      className='hover:text-blue-400'
+                    >
+                      {personWithRelations.manager.name}
+                    </Link>
+                  </div>
+                )}
+                {personWithRelations.startedAt && (
+                  <div className='flex items-center gap-1'>
+                    <CalendarDays className='w-4 h-4' />
+                    <span>
+                      Started{' '}
+                      {new Date(
+                        personWithRelations.startedAt
+                      ).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+                {personWithRelations.reports.length > 0 && (
+                  <div className='flex items-center gap-1'>
+                    <Users className='w-4 h-4' />
+                    <span>
+                      {personWithRelations.reports.length} direct report
+                      {personWithRelations.reports.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
             <PersonActionsDropdown
               person={personWithRelations}
@@ -265,191 +317,16 @@ export default async function PersonDetailPage({
           </div>
         </div>
 
-        <div className='space-y-6'>
-          {/* Basic Information and Direct Reports */}
-          {personWithRelations.reports.length > 0 ? (
-            <div className='card-grid'>
-              {/* Basic Information */}
-              <section className='card'>
-                <h3 className='font-semibold mb-4'>Basic Information</h3>
-                <div className='space-y-3'>
-                  <div>
-                    <span className='text-sm font-medium'>Team:</span>
-                    <div className='text-sm text-neutral-400'>
-                      {personWithRelations.team ? (
-                        <Link
-                          href={`/teams/${personWithRelations.team.id}`}
-                          className='hover:text-blue-400'
-                        >
-                          {personWithRelations.team.name}
-                        </Link>
-                      ) : (
-                        'No team assigned'
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <span className='text-sm font-medium'>Manager:</span>
-                    <div className='text-sm text-neutral-400'>
-                      {personWithRelations.manager ? (
-                        <Link
-                          href={`/people/${personWithRelations.manager.id}`}
-                          className='hover:text-blue-400'
-                        >
-                          {personWithRelations.manager.name}
-                        </Link>
-                      ) : (
-                        'No manager assigned'
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <span className='text-sm font-medium'>User Account:</span>
-                    <div className='text-sm text-neutral-400'>
-                      {personWithRelations.user ? (
-                        <div>
-                          <div className='font-medium'>
-                            {personWithRelations.user.name}
-                          </div>
-                          <div className='text-xs text-neutral-500'>
-                            {personWithRelations.user.email} -{' '}
-                            {personWithRelations.user.role}
-                          </div>
-                        </div>
-                      ) : (
-                        'No user account linked'
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <span className='text-sm font-medium'>Start Date:</span>
-                    <div className='text-sm text-neutral-400'>
-                      {personWithRelations.startedAt
-                        ? new Date(
-                            personWithRelations.startedAt
-                          ).toLocaleDateString()
-                        : 'Not specified'}
-                    </div>
-                  </div>
-                  <div>
-                    <span className='text-sm font-medium'>Reports:</span>
-                    <div className='text-sm text-neutral-400'>
-                      {personWithRelations.reports.length} direct report
-                      {personWithRelations.reports.length !== 1 ? 's' : ''}
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              {/* Direct Reports */}
-              <section className='card'>
-                <div className='flex items-center justify-between mb-4'>
-                  <h3 className='font-semibold'>
-                    Direct Reports ({personWithRelations.reports.length})
-                  </h3>
-                </div>
-                <div className='space-y-3'>
-                  {personWithRelations.reports.map(report => (
-                    <PersonListItemCard
-                      key={report.id}
-                      person={report}
-                      variant='simple'
-                      showActions={true}
-                      currentPerson={currentPerson}
-                      isAdmin={isAdmin(session.user)}
-                    />
-                  ))}
-                </div>
-              </section>
-            </div>
-          ) : (
-            /* Basic Information - Full width when no direct reports */
-            <section className='card'>
-              <h3 className='font-semibold mb-4'>Basic Information</h3>
-              <div className='grid gap-6 md:grid-cols-2'>
-                <div className='space-y-3'>
-                  <div>
-                    <span className='text-sm font-medium'>Team:</span>
-                    <div className='text-sm text-neutral-400'>
-                      {personWithRelations.team ? (
-                        <Link
-                          href={`/teams/${personWithRelations.team.id}`}
-                          className='hover:text-blue-400'
-                        >
-                          {personWithRelations.team.name}
-                        </Link>
-                      ) : (
-                        'No team assigned'
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <span className='text-sm font-medium'>Manager:</span>
-                    <div className='text-sm text-neutral-400'>
-                      {personWithRelations.manager ? (
-                        <Link
-                          href={`/people/${personWithRelations.manager.id}`}
-                          className='hover:text-blue-400'
-                        >
-                          {personWithRelations.manager.name}
-                        </Link>
-                      ) : (
-                        'No manager assigned'
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <span className='text-sm font-medium'>User Account:</span>
-                    <div className='text-sm text-neutral-400'>
-                      {personWithRelations.user ? (
-                        <div>
-                          <div className='font-medium'>
-                            {personWithRelations.user.name}
-                          </div>
-                          <div className='text-xs text-neutral-500'>
-                            {personWithRelations.user.email} -{' '}
-                            {personWithRelations.user.role}
-                          </div>
-                        </div>
-                      ) : (
-                        'No user account linked'
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className='space-y-3'>
-                  <div>
-                    <span className='text-sm font-medium'>Start Date:</span>
-                    <div className='text-sm text-neutral-400'>
-                      {personWithRelations.startedAt
-                        ? new Date(
-                            personWithRelations.startedAt
-                          ).toLocaleDateString()
-                        : 'Not specified'}
-                    </div>
-                  </div>
-                  <div>
-                    <span className='text-sm font-medium'>Reports:</span>
-                    <div className='text-sm text-neutral-400'>
-                      {personWithRelations.reports.length} direct report
-                      {personWithRelations.reports.length !== 1 ? 's' : ''}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* Owned Initiatives - Only show if person has initiatives */}
-          {personWithRelations.initiativeOwners.length > 0 && (
-            <div className='card-grid'>
-              <section className='card'>
-                <div className='flex items-center justify-between mb-4'>
-                  <h3 className='font-semibold'>
-                    Owned Initiatives (
-                    {personWithRelations.initiativeOwners.length})
-                  </h3>
-                </div>
+        <div className='flex gap-6'>
+          {/* Main Content */}
+          <div className='flex-1 space-y-6'>
+            {/* Owned Initiatives - Only show if person has initiatives */}
+            {personWithRelations.initiativeOwners.length > 0 && (
+              <section>
+                <h3 className='font-semibold mb-4'>
+                  Owned Initiatives (
+                  {personWithRelations.initiativeOwners.length})
+                </h3>
                 <div className='space-y-3'>
                   {personWithRelations.initiativeOwners.map(ownership => (
                     <Link
@@ -481,77 +358,67 @@ export default async function PersonDetailPage({
                   ))}
                 </div>
               </section>
+            )}
 
-              {/* Assigned Tasks - Only show if person has tasks */}
-              {personWithRelations.tasks.length > 0 && (
-                <section className='card'>
-                  <div className='flex items-center justify-between mb-4'>
-                    <h3 className='font-semibold'>
-                      Assigned Tasks ({personWithRelations.tasks.length})
-                    </h3>
-                  </div>
-                  <div className='space-y-3'>
-                    {personWithRelations.tasks.slice(0, 5).map(task => (
-                      <div
-                        key={task.id}
-                        className='border border-neutral-800 rounded-xl p-3'
-                      >
-                        <div className='flex items-center justify-between'>
-                          <div>
-                            <div className='font-medium'>{task.title}</div>
-                            <div className='text-sm text-neutral-400'>
-                              {task.description ?? ''}
-                            </div>
-                            <div className='text-xs text-neutral-500 mt-1'>
-                              {task.initiative && (
-                                <span>Initiative: {task.initiative.title}</span>
-                              )}
-                              {task.objective && (
-                                <span>
-                                  {' '}
-                                  • Objective: {task.objective.title}
-                                </span>
-                              )}
-                            </div>
+            {/* Assigned Tasks - Only show if person has tasks */}
+            {personWithRelations.tasks.length > 0 && (
+              <section>
+                <h3 className='font-semibold mb-4'>
+                  Assigned Tasks ({personWithRelations.tasks.length})
+                </h3>
+                <div className='space-y-3'>
+                  {personWithRelations.tasks.slice(0, 5).map(task => (
+                    <div
+                      key={task.id}
+                      className='border border-neutral-800 rounded-xl p-3'
+                    >
+                      <div className='flex items-center justify-between'>
+                        <div>
+                          <div className='font-medium'>{task.title}</div>
+                          <div className='text-sm text-neutral-400'>
+                            {task.description ?? ''}
                           </div>
-                          <div className='flex items-center gap-2'>
-                            <span
-                              className={`badge ${taskStatusUtils.getVariant(task.status as TaskStatus)}`}
-                            >
-                              {taskStatusUtils
-                                .getLabel(task.status as TaskStatus)
-                                .toUpperCase()}
-                            </span>
-                            {task.priority && (
-                              <span className='badge'>P{task.priority}</span>
+                          <div className='text-xs text-neutral-500 mt-1'>
+                            {task.initiative && (
+                              <span>Initiative: {task.initiative.title}</span>
+                            )}
+                            {task.objective && (
+                              <span> • Objective: {task.objective.title}</span>
                             )}
                           </div>
                         </div>
-                      </div>
-                    ))}
-                    {personWithRelations.tasks.length > 5 && (
-                      <div className='text-center'>
-                        <Button asChild variant='ghost' size='sm'>
-                          <Link
-                            href='/tasks'
-                            className='flex items-center gap-1'
+                        <div className='flex items-center gap-2'>
+                          <span
+                            className={`badge ${taskStatusUtils.getVariant(task.status as TaskStatus)}`}
                           >
-                            <Eye className='w-4 h-4' />
-                            View all {personWithRelations.tasks.length} tasks
-                          </Link>
-                        </Button>
+                            {taskStatusUtils
+                              .getLabel(task.status as TaskStatus)
+                              .toUpperCase()}
+                          </span>
+                          {task.priority && (
+                            <span className='badge'>P{task.priority}</span>
+                          )}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </section>
-              )}
-            </div>
-          )}
+                    </div>
+                  ))}
+                  {personWithRelations.tasks.length > 5 && (
+                    <div className='text-center'>
+                      <Button asChild variant='ghost' size='sm'>
+                        <Link href='/tasks' className='flex items-center gap-1'>
+                          <Eye className='w-4 h-4' />
+                          View all {personWithRelations.tasks.length} tasks
+                        </Link>
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
 
-          {/* Recent Check-ins - Only show if person has check-ins */}
-          {personWithRelations.checkIns.length > 0 && (
-            <div className='card-grid'>
-              <section className='card'>
+            {/* Recent Check-ins - Only show if person has check-ins */}
+            {personWithRelations.checkIns.length > 0 && (
+              <section>
                 <div className='flex items-center justify-between mb-4'>
                   <h3 className='font-semibold'>
                     Recent Check-ins ({personWithRelations.checkIns.length})
@@ -597,205 +464,188 @@ export default async function PersonDetailPage({
                   ))}
                 </div>
               </section>
+            )}
 
-              {/* 1:1 Meetings - Only show if person has reports or a manager AND has 1:1s */}
-              {(personWithRelations.reports.length > 0 ||
-                personWithRelations.manager) &&
-                (personWithRelations.oneOnOnes.length > 0 ||
-                  personWithRelations.oneOnOnesAsManager.length > 0) && (
-                  <section className='card'>
-                    <div className='flex items-center justify-between mb-4'>
-                      <h3 className='font-semibold'>1:1 Meetings</h3>
-                    </div>
-                    <div className='space-y-3'>
-                      {/* As Manager */}
-                      {personWithRelations.oneOnOnesAsManager.length > 0 && (
-                        <div>
-                          <div className='text-sm font-medium mb-2'>
-                            As Manager (
-                            {personWithRelations.oneOnOnesAsManager.length})
-                          </div>
-                          {personWithRelations.oneOnOnesAsManager
-                            .slice(0, 2)
-                            .map(oneOnOne => (
-                              <div
-                                key={oneOnOne.id}
-                                className='border border-neutral-800 rounded-xl p-3 mb-2'
-                              >
-                                <div className='flex items-center justify-between'>
-                                  <div>
-                                    <Link
-                                      href={`/people/${oneOnOne.report.id}`}
-                                      className='font-medium hover:text-blue-400'
-                                    >
-                                      {oneOnOne.report.name}
-                                    </Link>
-                                    <div className='text-xs text-neutral-500 mt-1'>
-                                      {oneOnOne.scheduledAt
-                                        ? new Date(
-                                            oneOnOne.scheduledAt
-                                          ).toLocaleDateString()
-                                        : 'TBD'}
-                                    </div>
-                                  </div>
-                                  <Button asChild variant='outline' size='sm'>
-                                    <Link href='/oneonones'>Edit</Link>
-                                  </Button>
-                                </div>
-                              </div>
-                            ))}
+            {/* 1:1 Meetings - Only show if person has reports or a manager AND has 1:1s */}
+            {(personWithRelations.reports.length > 0 ||
+              personWithRelations.manager) &&
+              (personWithRelations.oneOnOnes.length > 0 ||
+                personWithRelations.oneOnOnesAsManager.length > 0) && (
+                <section>
+                  <h3 className='font-semibold mb-4'>1:1 Meetings</h3>
+                  <div className='space-y-3'>
+                    {/* As Manager */}
+                    {personWithRelations.oneOnOnesAsManager.length > 0 && (
+                      <div>
+                        <div className='text-sm font-medium mb-2'>
+                          As Manager (
+                          {personWithRelations.oneOnOnesAsManager.length})
                         </div>
-                      )}
-
-                      {/* As Report */}
-                      {personWithRelations.oneOnOnes.length > 0 && (
-                        <div>
-                          <div className='text-sm font-medium mb-2'>
-                            With Manager ({personWithRelations.oneOnOnes.length}
-                            )
-                          </div>
-                          {personWithRelations.oneOnOnes
-                            .slice(0, 2)
-                            .map(oneOnOne => (
-                              <div
-                                key={oneOnOne.id}
-                                className='border border-neutral-800 rounded-xl p-3 mb-2'
-                              >
-                                <div className='flex items-center justify-between'>
-                                  <div>
-                                    <Link
-                                      href={`/people/${oneOnOne.manager.id}`}
-                                      className='font-medium hover:text-blue-400'
-                                    >
-                                      {oneOnOne.manager.name}
-                                    </Link>
-                                    <div className='text-xs text-neutral-500 mt-1'>
-                                      {oneOnOne.scheduledAt
-                                        ? new Date(
-                                            oneOnOne.scheduledAt
-                                          ).toLocaleDateString()
-                                        : 'TBD'}
-                                    </div>
+                        {personWithRelations.oneOnOnesAsManager
+                          .slice(0, 2)
+                          .map(oneOnOne => (
+                            <div
+                              key={oneOnOne.id}
+                              className='border border-neutral-800 rounded-xl p-3 mb-2'
+                            >
+                              <div className='flex items-center justify-between'>
+                                <div>
+                                  <Link
+                                    href={`/people/${oneOnOne.report.id}`}
+                                    className='font-medium hover:text-blue-400'
+                                  >
+                                    {oneOnOne.report.name}
+                                  </Link>
+                                  <div className='text-xs text-neutral-500 mt-1'>
+                                    {oneOnOne.scheduledAt
+                                      ? new Date(
+                                          oneOnOne.scheduledAt
+                                        ).toLocaleDateString()
+                                      : 'TBD'}
                                   </div>
-                                  <Button asChild variant='outline' size='sm'>
-                                    <Link href='/oneonones'>Edit</Link>
-                                  </Button>
                                 </div>
+                                <Button asChild variant='outline' size='sm'>
+                                  <Link href='/oneonones'>Edit</Link>
+                                </Button>
                               </div>
-                            ))}
+                            </div>
+                          ))}
+                      </div>
+                    )}
+
+                    {/* As Report */}
+                    {personWithRelations.oneOnOnes.length > 0 && (
+                      <div>
+                        <div className='text-sm font-medium mb-2'>
+                          With Manager ({personWithRelations.oneOnOnes.length})
                         </div>
-                      )}
-                    </div>
-                  </section>
-                )}
-            </div>
-          )}
-
-          {/* Person Statistics - Only show if there are any statistics */}
-          {(personWithRelations.reports.length > 0 ||
-            personWithRelations.initiativeOwners.length > 0 ||
-            personWithRelations.tasks.length > 0 ||
-            personWithRelations.checkIns.length > 0) && (
-            <section className='card'>
-              <h3 className='font-semibold mb-4'>Statistics</h3>
-              <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
-                <div className='text-center'>
-                  <div className='text-2xl font-bold'>
-                    {personWithRelations.reports.length}
+                        {personWithRelations.oneOnOnes
+                          .slice(0, 2)
+                          .map(oneOnOne => (
+                            <div
+                              key={oneOnOne.id}
+                              className='border border-neutral-800 rounded-xl p-3 mb-2'
+                            >
+                              <div className='flex items-center justify-between'>
+                                <div>
+                                  <Link
+                                    href={`/people/${oneOnOne.manager.id}`}
+                                    className='font-medium hover:text-blue-400'
+                                  >
+                                    {oneOnOne.manager.name}
+                                  </Link>
+                                  <div className='text-xs text-neutral-500 mt-1'>
+                                    {oneOnOne.scheduledAt
+                                      ? new Date(
+                                          oneOnOne.scheduledAt
+                                        ).toLocaleDateString()
+                                      : 'TBD'}
+                                  </div>
+                                </div>
+                                <Button asChild variant='outline' size='sm'>
+                                  <Link href='/oneonones'>Edit</Link>
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    )}
                   </div>
-                  <div className='text-sm text-neutral-400'>Direct Reports</div>
+                </section>
+              )}
+
+            {/* Feedback Section - Only show if there's feedback or user can add feedback */}
+            {(visibleFeedback.length > 0 || currentPerson?.id) && (
+              <section id='feedback'>
+                <FeedbackList
+                  person={personWithRelations}
+                  feedback={visibleFeedback}
+                  currentUserId={currentPerson?.id}
+                />
+              </section>
+            )}
+
+            {/* Feedback Campaigns Section - Only show if there are active or draft campaigns */}
+            {personWithRelations.feedbackCampaigns.length > 0 && (
+              <section>
+                <div className='flex items-center justify-between mb-4'>
+                  <h3 className='font-semibold'>
+                    Feedback Campaigns (
+                    {personWithRelations.feedbackCampaigns.length})
+                  </h3>
+                  <Button asChild variant='outline' size='sm'>
+                    <Link
+                      href={`/people/${personWithRelations.id}/feedback-campaigns`}
+                      className='flex items-center gap-2'
+                    >
+                      <Eye className='w-4 h-4' />
+                      View All
+                    </Link>
+                  </Button>
                 </div>
-                <div className='text-center'>
-                  <div className='text-2xl font-bold'>
-                    {personWithRelations.initiativeOwners.length}
-                  </div>
-                  <div className='text-sm text-neutral-400'>
-                    Owned Initiatives
-                  </div>
-                </div>
-                <div className='text-center'>
-                  <div className='text-2xl font-bold'>
-                    {personWithRelations.tasks.length}
-                  </div>
-                  <div className='text-sm text-neutral-400'>Assigned Tasks</div>
-                </div>
-                <div className='text-center'>
-                  <div className='text-2xl font-bold'>
-                    {personWithRelations.checkIns.length}
-                  </div>
-                  <div className='text-sm text-neutral-400'>Check-ins</div>
-                </div>
-              </div>
-            </section>
-          )}
+                <PersonFeedbackCampaigns
+                  campaigns={personWithRelations.feedbackCampaigns}
+                />
+              </section>
+            )}
 
-          {/* Feedback Section - Only show if there's feedback or user can add feedback */}
-          {(visibleFeedback.length > 0 || currentPerson?.id) && (
-            <section id='feedback' className='card'>
-              <FeedbackList
-                person={personWithRelations}
-                feedback={visibleFeedback}
-                currentUserId={currentPerson?.id}
-              />
-            </section>
-          )}
-
-          {/* Feedback Campaigns Section - Only show if there are active or draft campaigns */}
-          {personWithRelations.feedbackCampaigns.length > 0 && (
-            <section className='card'>
-              <div className='flex items-center justify-between mb-4'>
-                <h3 className='font-semibold'>
-                  Feedback Campaigns (
-                  {personWithRelations.feedbackCampaigns.length})
-                </h3>
-                <Button asChild variant='outline' size='sm'>
-                  <Link
-                    href={`/people/${personWithRelations.id}/feedback-campaigns`}
-                    className='flex items-center gap-2'
-                  >
-                    <Eye className='w-4 h-4' />
-                    View All
-                  </Link>
-                </Button>
-              </div>
-              <PersonFeedbackCampaigns
-                campaigns={personWithRelations.feedbackCampaigns}
-              />
-            </section>
-          )}
-
-          {/* User Account Linking - Only show for admins */}
-          {isAdmin(session.user) && (
-            <section className='card'>
-              <UserLinkForm
-                personId={personWithRelations.id}
-                linkedUser={personWithRelations.user}
-              />
-            </section>
-          )}
-
-          {/* Jira Integration - Only show for admins */}
-          {isAdmin(session.user) && (
-            <section className='card'>
-              <JiraAccountLinker
-                personId={personWithRelations.id}
-                personName={personWithRelations.name}
-                personEmail={personWithRelations.email}
-                jiraAccount={personWithRelations.jiraAccount}
-              />
-            </section>
-          )}
-
-          {/* Jira Work Activity - Show if person has Jira account */}
-          {personWithRelations.jiraAccount && (
-            <section className='card'>
-              <JiraWorkActivity
+            {/* Jira Work Activity - Show if person has Jira account and work activity */}
+            {personWithRelations.jiraAccount && (
+              <JiraWorkActivitySection
                 personId={personWithRelations.id}
                 personName={personWithRelations.name}
                 hasJiraAccount={!!personWithRelations.jiraAccount}
               />
-            </section>
-          )}
+            )}
+          </div>
+
+          {/* Right Sidebar */}
+          <div className='w-80 space-y-6'>
+            {/* Direct Reports */}
+            {personWithRelations.reports.length > 0 && (
+              <section>
+                <h3 className='font-semibold mb-4'>
+                  Direct Reports ({personWithRelations.reports.length})
+                </h3>
+                <div className='space-y-3'>
+                  {personWithRelations.reports.map(report => (
+                    <PersonListItemCard
+                      key={report.id}
+                      person={report}
+                      variant='simple'
+                      showActions={true}
+                      currentPerson={currentPerson}
+                      isAdmin={isAdmin(session.user)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* User Account Link - Only show for admins */}
+            {isAdmin(session.user) && (
+              <section>
+                <h3 className='font-semibold mb-4'>User Linking</h3>
+                <UserLinkForm
+                  personId={personWithRelations.id}
+                  linkedUser={personWithRelations.user}
+                />
+              </section>
+            )}
+
+            {/* Jira Integration - Only show for admins */}
+            {isAdmin(session.user) && (
+              <section>
+                <h3 className='font-semibold mb-4'>Jira Linking</h3>
+                <JiraAccountLinker
+                  personId={personWithRelations.id}
+                  personName={personWithRelations.name}
+                  personEmail={personWithRelations.email}
+                  jiraAccount={personWithRelations.jiraAccount}
+                />
+              </section>
+            )}
+          </div>
         </div>
       </div>
     </PersonDetailClient>

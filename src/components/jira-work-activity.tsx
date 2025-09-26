@@ -135,14 +135,7 @@ export function JiraWorkActivity({
   }
 
   if (!hasJiraAccount) {
-    return (
-      <div className='rounded-md bg-card border p-4'>
-        <p className='text-sm text-muted-foreground'>
-          This person is not linked to a Jira account. Link their account to
-          view work activity.
-        </p>
-      </div>
-    )
+    return null
   }
 
   return (
