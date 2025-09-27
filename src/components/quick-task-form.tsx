@@ -5,8 +5,13 @@ import { Button } from '@/components/ui/button'
 import { EnhancedTaskInput } from '@/components/enhanced-task-input'
 import { createQuickTask } from '@/lib/actions'
 import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
 
-export function QuickTaskForm() {
+interface QuickTaskFormProps {
+  onSuccess?: () => void
+}
+
+export function QuickTaskForm({ onSuccess }: QuickTaskFormProps) {
   const [title, setTitle] = useState('')
   const [detectedDate, setDetectedDate] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -26,11 +31,24 @@ export function QuickTaskForm() {
       }
 
       await createQuickTask(taskData.title, taskData.dueDate)
-      setTitle('') // Clear the form after successful submission
-      setDetectedDate(null) // Clear detected date
+
+      // Show success toast
+      toast.success('Task created successfully!', {
+        description: `"${taskData.title}" has been added to your tasks.`,
+      })
+
+      // Clear the form after successful submission
+      setTitle('')
+      setDetectedDate(null)
+
+      // Close the modal
+      onSuccess?.()
     } catch (error) {
       console.error('Error creating quick task:', error)
-      // You could add a toast notification here if you have one
+      toast.error('Failed to create task', {
+        description:
+          'Please try again or contact support if the issue persists.',
+      })
     } finally {
       setIsSubmitting(false)
     }

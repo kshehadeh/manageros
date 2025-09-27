@@ -1,6 +1,13 @@
 'use client'
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 
 interface CommandPaletteContextValue {
   isOpen: boolean
@@ -8,21 +15,44 @@ interface CommandPaletteContextValue {
   toggle: () => void
 }
 
-const CommandPaletteContext = createContext<CommandPaletteContextValue | null>(null)
+const CommandPaletteContext = createContext<CommandPaletteContextValue | null>(
+  null
+)
 
-export function CommandPaletteProvider({ children }: { children: React.ReactNode }) {
+export function CommandPaletteProvider({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   const [isOpen, setIsOpen] = useState(false)
 
   const setOpen = useCallback((open: boolean) => setIsOpen(open), [])
   const toggle = useCallback(() => setIsOpen(prev => !prev), [])
 
-  // Global keyboard shortcut: Cmd/Ctrl + K
+  // Global keyboard shortcuts
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       const isMod = e.metaKey || e.ctrlKey
+
+      // Cmd/Ctrl + K: Open command palette
       if (isMod && e.key.toLowerCase() === 'k') {
         e.preventDefault()
         setIsOpen(prev => !prev)
+      }
+
+      // Q: Open task creation dialog (only when not in input/textarea)
+      if (e.key.toLowerCase() === 'q' && !isMod) {
+        const target = e.target as HTMLElement
+        const isInput =
+          target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.contentEditable === 'true'
+
+        if (!isInput) {
+          e.preventDefault()
+          const ev = new CustomEvent('command:openCreateTaskModal')
+          window.dispatchEvent(ev)
+        }
       }
     }
     window.addEventListener('keydown', onKeyDown)
@@ -35,13 +65,17 @@ export function CommandPaletteProvider({ children }: { children: React.ReactNode
   )
 
   return (
-    <CommandPaletteContext.Provider value={value}>{children}</CommandPaletteContext.Provider>
+    <CommandPaletteContext.Provider value={value}>
+      {children}
+    </CommandPaletteContext.Provider>
   )
 }
 
 export function useCommandPalette() {
   const ctx = useContext(CommandPaletteContext)
-  if (!ctx) throw new Error('useCommandPalette must be used within CommandPaletteProvider')
+  if (!ctx)
+    throw new Error(
+      'useCommandPalette must be used within CommandPaletteProvider'
+    )
   return ctx
 }
-

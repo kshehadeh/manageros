@@ -2,6 +2,11 @@
 
 The Command Palette provides fast access to actions and data via keyboard search. Open it with Ctrl/⌘ + K or the Command button in the top bar.
 
+### Keyboard Shortcuts
+
+- **Ctrl/⌘ + K**: Open command palette
+- **Q**: Open task creation dialog directly (when not focused on input fields)
+
 ### Files
 
 - `src/components/ui/command.tsx` – shadcn/cmdk UI primitives
@@ -19,6 +24,10 @@ The palette is wired globally in `server-conditional-layout.tsx` and can be open
 
 - Keyboard: Ctrl/⌘ + K
 - UI: Top bar Command button
+
+The task creation dialog can be opened directly via:
+
+- Keyboard: Q (when not focused on input fields)
 
 ### Adding Commands
 
@@ -88,8 +97,15 @@ window.dispatchEvent(new CustomEvent('command:openCreateTaskModal'))
 // In a component
 useEffect(() => {
   const onOpen = () => setOpen(true)
-  window.addEventListener('command:openCreateTaskModal', onOpen as EventListener)
-  return () => window.removeEventListener('command:openCreateTaskModal', onOpen as EventListener)
+  window.addEventListener(
+    'command:openCreateTaskModal',
+    onOpen as EventListener
+  )
+  return () =>
+    window.removeEventListener(
+      'command:openCreateTaskModal',
+      onOpen as EventListener
+    )
 }, [])
 ```
 
@@ -98,4 +114,3 @@ useEffect(() => {
 - Group results via `group` to keep quick actions on top.
 - `keywords` improve matching beyond `title`/`subtitle`.
 - The list queries all sources in parallel whenever the input changes.
-

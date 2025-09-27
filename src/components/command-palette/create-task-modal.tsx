@@ -1,7 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { QuickTaskForm } from '@/components/quick-task-form'
 
 export function CreateTaskModal() {
@@ -11,8 +16,15 @@ export function CreateTaskModal() {
     function onOpen() {
       setOpen(true)
     }
-    window.addEventListener('command:openCreateTaskModal', onOpen as EventListener)
-    return () => window.removeEventListener('command:openCreateTaskModal', onOpen as EventListener)
+    window.addEventListener(
+      'command:openCreateTaskModal',
+      onOpen as EventListener
+    )
+    return () =>
+      window.removeEventListener(
+        'command:openCreateTaskModal',
+        onOpen as EventListener
+      )
   }, [])
 
   return (
@@ -21,9 +33,8 @@ export function CreateTaskModal() {
         <DialogHeader>
           <DialogTitle>Create Task</DialogTitle>
         </DialogHeader>
-        <QuickTaskForm />
+        <QuickTaskForm onSuccess={() => setOpen(false)} />
       </DialogContent>
     </Dialog>
   )
 }
-
