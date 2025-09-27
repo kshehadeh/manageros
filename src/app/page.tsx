@@ -6,7 +6,6 @@ import { redirect } from 'next/navigation'
 import { getPendingInvitationsForUser } from '@/lib/actions'
 import PendingInvitations from '@/components/pending-invitations'
 import { Suspense } from 'react'
-import { Loading } from '@/components/ui/loading'
 import { DashboardAssignedTasksSection } from '@/components/dashboard-sections/assigned-tasks-section'
 import { DashboardOpenInitiativesSection } from '@/components/dashboard-sections/open-initiatives-section'
 import { DashboardDirectReportsSection } from '@/components/dashboard-sections/direct-reports-section'
@@ -14,6 +13,15 @@ import { DashboardRelatedTeamsSection } from '@/components/dashboard-sections/re
 import { DashboardRecentOneOnOnesSection } from '@/components/dashboard-sections/recent-oneonones-section'
 import { DashboardRecentFeedbackSection } from '@/components/dashboard-sections/recent-feedback-section'
 import { DashboardFeedbackCampaignsSection } from '@/components/dashboard-sections/feedback-campaigns-section'
+import {
+  TasksSectionFallback,
+  FeedbackCampaignsSectionFallback,
+  RecentFeedbackSectionFallback,
+  OpenInitiativesSectionFallback,
+  RecentOneOnOnesSectionFallback,
+  RelatedTeamsSectionFallback,
+  DirectReportsSectionFallback,
+} from '@/components/dashboard-sections/section-fallbacks'
 
 export default async function Home() {
   const session = await getServerSession(authOptions)
@@ -60,76 +68,31 @@ export default async function Home() {
       <div className='flex flex-col lg:flex-row gap-6'>
         {/* Main Content Area */}
         <div className='flex-1 space-y-6'>
-          <Suspense
-            fallback={
-              <div className='flex items-center justify-center py-8'>
-                <Loading size='md' />
-                <span className='ml-2 text-sm text-muted-foreground'>
-                  Loading tasks...
-                </span>
-              </div>
-            }
-          >
+          <Suspense fallback={<TasksSectionFallback />}>
             <DashboardAssignedTasksSection
               organizationId={session.user.organizationId!}
             />
           </Suspense>
 
-          <Suspense
-            fallback={
-              <div className='flex items-center justify-center py-8'>
-                <Loading size='md' />
-                <span className='ml-2 text-sm text-muted-foreground'>
-                  Loading campaigns...
-                </span>
-              </div>
-            }
-          >
+          <Suspense fallback={<FeedbackCampaignsSectionFallback />}>
             <DashboardFeedbackCampaignsSection />
           </Suspense>
 
-          <Suspense
-            fallback={
-              <div className='flex items-center justify-center py-8'>
-                <Loading size='md' />
-                <span className='ml-2 text-sm text-muted-foreground'>
-                  Loading feedback...
-                </span>
-              </div>
-            }
-          >
+          <Suspense fallback={<RecentFeedbackSectionFallback />}>
             <DashboardRecentFeedbackSection
               userId={session.user.id}
               organizationId={session.user.organizationId!}
             />
           </Suspense>
 
-          <Suspense
-            fallback={
-              <div className='flex items-center justify-center py-8'>
-                <Loading size='md' />
-                <span className='ml-2 text-sm text-muted-foreground'>
-                  Loading initiatives...
-                </span>
-              </div>
-            }
-          >
+          <Suspense fallback={<OpenInitiativesSectionFallback />}>
             <DashboardOpenInitiativesSection
               organizationId={session.user.organizationId!}
             />
           </Suspense>
 
           <div className='grid gap-6 md:grid-cols-2'>
-            <Suspense
-              fallback={
-                <div className='flex items-center justify-center py-8'>
-                  <Loading size='md' />
-                  <span className='ml-2 text-sm text-muted-foreground'>
-                    Loading 1:1s...
-                  </span>
-                </div>
-              }
-            >
+            <Suspense fallback={<RecentOneOnOnesSectionFallback />}>
               <DashboardRecentOneOnOnesSection userId={session.user.id} />
             </Suspense>
           </div>
@@ -137,32 +100,14 @@ export default async function Home() {
 
         {/* Right Sidebar */}
         <div className='w-80 space-y-6'>
-          <Suspense
-            fallback={
-              <div className='flex items-center justify-center py-8'>
-                <Loading size='md' />
-                <span className='ml-2 text-sm text-muted-foreground'>
-                  Loading teams...
-                </span>
-              </div>
-            }
-          >
+          <Suspense fallback={<RelatedTeamsSectionFallback />}>
             <DashboardRelatedTeamsSection
               userId={session.user.id}
               organizationId={session.user.organizationId!}
             />
           </Suspense>
 
-          <Suspense
-            fallback={
-              <div className='flex items-center justify-center py-8'>
-                <Loading size='md' />
-                <span className='ml-2 text-sm text-muted-foreground'>
-                  Loading reports...
-                </span>
-              </div>
-            }
-          >
+          <Suspense fallback={<DirectReportsSectionFallback />}>
             <DashboardDirectReportsSection
               userId={session.user.id}
               organizationId={session.user.organizationId!}
