@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation'
 import { TaskDetailBreadcrumbClient } from '@/components/task-detail-breadcrumb-client'
 import { TaskStatusSelector } from '@/components/task-status-selector'
 import { TaskActionsDropdown } from '@/components/task-actions-dropdown'
+import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { Calendar, User, Clock } from 'lucide-react'
 import { type TaskStatus } from '@/lib/task-status'
 import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
@@ -98,7 +99,11 @@ export default async function TaskDetailPage({
         <div className='page-section'>
           <h2 className='page-section-title'>Description</h2>
           {task.description ? (
-            <div className='prose prose-sm max-w-none'>{task.description}</div>
+            <ReadonlyNotesField
+              content={task.description}
+              variant='default'
+              emptyStateText='No description provided'
+            />
           ) : (
             <div className='text-muted-foreground italic'>
               No description provided

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { CalendarDays, Plus, X, ChevronDown, ChevronUp } from 'lucide-react'
 import { DeleteSynopsisButton } from '@/components/delete-synopsis-button'
+import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import type {
   ListSynopsesResponse,
   GenerateSynopsisResponse,
@@ -246,11 +247,11 @@ export function PersonSynopsisList({
                     )}
                   </div>
                 </div>
-                <div
-                  className={`prose prose-invert max-w-none whitespace-pre-wrap ${compact ? 'text-xs' : 'text-sm'} leading-relaxed`}
-                >
-                  {displayContent}
-                </div>
+                <ReadonlyNotesField
+                  content={displayContent}
+                  variant={compact ? 'compact' : 'default'}
+                  emptyStateText='No synopsis content available'
+                />
               </div>
             )
           })}
@@ -339,8 +340,12 @@ export function PersonSynopsisList({
                   {new Date(generatedSynopsis.createdAt).toLocaleString()} •
                   Sources: {generatedSynopsis.sources.join(', ')}
                 </div>
-                <div className='prose prose-invert max-w-none whitespace-pre-wrap border rounded-lg p-4 bg-muted/20'>
-                  {generatedSynopsis.content}
+                <div className='border rounded-lg p-4 bg-muted/20'>
+                  <ReadonlyNotesField
+                    content={generatedSynopsis.content}
+                    variant='detailed'
+                    emptyStateText='No synopsis content available'
+                  />
                 </div>
                 <div className='flex justify-end'>
                   <Button onClick={handleCloseModal}>Close</Button>

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import ReactMarkdown from 'react-markdown'
+import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { Eye } from 'lucide-react'
 import { EditIconButton } from '@/components/edit-icon-button'
 
@@ -76,9 +76,11 @@ export default async function OneOnOnesPage() {
               {i.notes && (
                 <div>
                   <h4 className='text-sm font-medium mb-1'>Notes:</h4>
-                  <div className='text-sm prose prose-sm max-w-none'>
-                    <ReactMarkdown>{i.notes}</ReactMarkdown>
-                  </div>
+                  <ReadonlyNotesField
+                    content={i.notes}
+                    variant='compact'
+                    showEmptyState={false}
+                  />
                 </div>
               )}
             </div>

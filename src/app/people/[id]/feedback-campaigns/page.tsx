@@ -73,10 +73,11 @@ export default async function FeedbackCampaignsPage({
     redirect('/people')
   }
 
-  // Get feedback campaigns for this person
+  // Get feedback campaigns for this person created by the current user
   const campaigns = await prisma.feedbackCampaign.findMany({
     where: {
       targetPersonId: person.id,
+      userId: session.user.id,
     },
     include: {
       targetPerson: {

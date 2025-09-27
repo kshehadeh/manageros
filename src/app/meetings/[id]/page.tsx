@@ -8,6 +8,7 @@ import { notFound } from 'next/navigation'
 import { MeetingDetailBreadcrumbClient } from '@/components/meeting-detail-breadcrumb-client'
 import { MeetingInstanceList } from '@/components/meeting-instance-list'
 import { MeetingActionsDropdown } from '@/components/meeting-actions-dropdown'
+import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import {
   Calendar,
   Clock,
@@ -292,14 +293,14 @@ export default async function MeetingDetailPage({
         )}
 
         {/* Notes */}
-        {meeting.notes && (
-          <div className='page-section'>
-            <h2 className='page-section-title'>Notes</h2>
-            <div className='prose prose-sm max-w-none'>
-              <pre className='whitespace-pre-wrap text-sm'>{meeting.notes}</pre>
-            </div>
-          </div>
-        )}
+        <div className='page-section'>
+          <h2 className='page-section-title'>Notes</h2>
+          <ReadonlyNotesField
+            content={meeting.notes || ''}
+            variant='default'
+            emptyStateText='No notes for this meeting'
+          />
+        </div>
 
         {/* Meeting Instances - Only show for recurring meetings */}
         {meeting.isRecurring && (

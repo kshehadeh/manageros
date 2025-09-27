@@ -13,7 +13,7 @@ function SectionHeader({ title }: { title: string }) {
 
 export function TasksSectionFallback() {
   return (
-    <section className='space-y-4'>
+    <section className='bg-card/30 border border-border/50 rounded-xl p-4 space-y-4'>
       <SectionHeader title='My Tasks' />
       <div className='card p-4'>
         <div className='mb-4 grid grid-cols-6 gap-4'>
@@ -41,7 +41,7 @@ export function TasksSectionFallback() {
 
 export function FeedbackCampaignsSectionFallback() {
   return (
-    <section className='space-y-4'>
+    <section className='bg-card/30 border border-border/50 rounded-xl p-4 space-y-4'>
       <SectionHeader title='Feedback Campaigns' />
       <div className='card p-4 space-y-4'>
         {Array.from({ length: 3 }).map((_, i) => (
@@ -64,7 +64,7 @@ export function FeedbackCampaignsSectionFallback() {
 
 export function RecentFeedbackSectionFallback() {
   return (
-    <section className='space-y-4'>
+    <section className='bg-card/30 border border-border/50 rounded-xl p-4 space-y-4'>
       <SectionHeader title='Recent Feedback' />
       <div className='space-y-3'>
         {Array.from({ length: 3 }).map((_, i) => (
@@ -84,7 +84,7 @@ export function RecentFeedbackSectionFallback() {
 
 export function OpenInitiativesSectionFallback() {
   return (
-    <section className='space-y-4'>
+    <section className='bg-card/30 border border-border/50 rounded-xl p-4 space-y-4'>
       <SectionHeader title='Open Initiatives' />
       <div className='grid gap-3'>
         {Array.from({ length: 3 }).map((_, i) => (
@@ -104,7 +104,7 @@ export function OpenInitiativesSectionFallback() {
 
 export function RecentOneOnOnesSectionFallback() {
   return (
-    <section className='space-y-4'>
+    <section className='bg-card/30 border border-border/50 rounded-xl p-4 space-y-4'>
       <SectionHeader title='Recent 1:1s' />
       <div className='grid gap-3'>
         {Array.from({ length: 3 }).map((_, i) => (
@@ -123,7 +123,7 @@ export function RecentOneOnOnesSectionFallback() {
 
 export function RelatedTeamsSectionFallback() {
   return (
-    <section className='space-y-4'>
+    <section className='bg-card/30 border border-border/50 rounded-xl p-4 space-y-4'>
       <SectionHeader title='Related Teams' />
       <div className='space-y-3'>
         {Array.from({ length: 4 }).map((_, i) => (
@@ -142,7 +142,7 @@ export function RelatedTeamsSectionFallback() {
 
 export function DirectReportsSectionFallback() {
   return (
-    <section className='space-y-4'>
+    <section className='bg-card/30 border border-border/50 rounded-xl p-4 space-y-4'>
       <SectionHeader title='Direct Reports' />
       <div className='grid gap-3'>
         {Array.from({ length: 4 }).map((_, i) => (
@@ -159,4 +159,3 @@ export function DirectReportsSectionFallback() {
     </section>
   )
 }
-

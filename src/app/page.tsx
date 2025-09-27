@@ -52,9 +52,6 @@ export default async function Home() {
             <Button asChild variant='outline'>
               <Link href='/organization/create'>Create Organization</Link>
             </Button>
-            <Button asChild variant='outline'>
-              <Link href='/teams'>Browse Teams</Link>
-            </Button>
           </div>
         </div>
       </div>
@@ -99,7 +96,7 @@ export default async function Home() {
         </div>
 
         {/* Right Sidebar */}
-        <div className='w-80 space-y-6'>
+        <div className='w-full lg:w-80 space-y-6'>
           <Suspense fallback={<RelatedTeamsSectionFallback />}>
             <DashboardRelatedTeamsSection
               userId={session.user.id}

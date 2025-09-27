@@ -1,9 +1,9 @@
 'use client'
 
-import ReactMarkdown from 'react-markdown'
 import { Trash2, Eye, MoreHorizontal, Edit } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import Link from 'next/link'
 import { useState, useRef, useEffect } from 'react'
 
@@ -210,63 +210,11 @@ export function FeedbackListItem({
         </div>
       )}
 
-      <div className='prose prose-sm max-w-none text-foreground'>
-        <ReactMarkdown
-          components={{
-            p: ({ children }) => (
-              <p className='mb-3 text-foreground'>{children}</p>
-            ),
-            strong: ({ children }) => (
-              <strong className='font-semibold text-foreground'>
-                {children}
-              </strong>
-            ),
-            em: ({ children }) => (
-              <em className='italic text-muted-foreground'>{children}</em>
-            ),
-            a: ({ href, children }) => (
-              <a
-                href={href}
-                className='text-primary hover:text-primary/90 underline'
-                target='_blank'
-                rel='noopener noreferrer'
-              >
-                {children}
-              </a>
-            ),
-            ul: ({ children }) => (
-              <ul className='list-disc list-inside mb-3 text-foreground'>
-                {children}
-              </ul>
-            ),
-            ol: ({ children }) => (
-              <ol className='list-decimal list-inside mb-3 text-foreground'>
-                {children}
-              </ol>
-            ),
-            li: ({ children }) => (
-              <li className='mb-1 text-foreground'>{children}</li>
-            ),
-            blockquote: ({ children }) => (
-              <blockquote className='border-l-4 border-border pl-4 italic text-muted-foreground mb-3'>
-                {children}
-              </blockquote>
-            ),
-            code: ({ children }) => (
-              <code className='bg-accent px-1 py-0.5 rounded text-sm font-mono text-foreground'>
-                {children}
-              </code>
-            ),
-            pre: ({ children }) => (
-              <pre className='bg-accent p-3 rounded overflow-x-auto mb-3 text-foreground'>
-                {children}
-              </pre>
-            ),
-          }}
-        >
-          {feedback.body}
-        </ReactMarkdown>
-      </div>
+      <ReadonlyNotesField
+        content={feedback.body}
+        variant={variant === 'compact' ? 'compact' : 'default'}
+        emptyStateText='No feedback content available'
+      />
     </div>
   )
 }

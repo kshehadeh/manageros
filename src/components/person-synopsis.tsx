@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { CalendarDays, Plus, X, Eye } from 'lucide-react'
 import Link from 'next/link'
 import { PersonSynopsisList } from '@/components/person-synopsis-list'
+import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 
 interface PersonSynopsisProps {
   personId: string
@@ -187,8 +188,12 @@ export function PersonSynopsis({ personId }: PersonSynopsisProps) {
                   {new Date(generatedSynopsis.createdAt).toLocaleString()} •
                   Sources: {generatedSynopsis.sources.join(', ')}
                 </div>
-                <div className='prose prose-invert max-w-none whitespace-pre-wrap border rounded-lg p-4 bg-muted/20'>
-                  {generatedSynopsis.content}
+                <div className='border rounded-lg p-4 bg-muted/20'>
+                  <ReadonlyNotesField
+                    content={generatedSynopsis.content}
+                    variant='detailed'
+                    emptyStateText='No synopsis content available'
+                  />
                 </div>
                 <div className='flex justify-end'>
                   <Button onClick={handleCloseModal}>Close</Button>

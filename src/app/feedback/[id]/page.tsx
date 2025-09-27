@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import ReactMarkdown from 'react-markdown'
+import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { FeedbackDetailClient } from '@/components/feedback-detail-client'
 import { EditIconButton } from '@/components/edit-icon-button'
 
@@ -126,9 +126,11 @@ export default async function FeedbackDetailPage({
             <h3 className='font-semibold mb-4'>Feedback Content</h3>
             <div className='text-sm text-neutral-400'>
               {feedback.body ? (
-                <div className='prose prose-sm max-w-none'>
-                  <ReactMarkdown>{feedback.body}</ReactMarkdown>
-                </div>
+                <ReadonlyNotesField
+                  content={feedback.body}
+                  variant='default'
+                  emptyStateText='No content recorded'
+                />
               ) : (
                 <div className='text-center py-8 text-neutral-500'>
                   No content recorded

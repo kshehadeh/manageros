@@ -1,5 +1,12 @@
 'use client'
-import { Plus, ListTodo, Users, Rocket, MessageCircle } from 'lucide-react'
+import {
+  Plus,
+  ListTodo,
+  User,
+  Users2,
+  Rocket,
+  MessageCircle,
+} from 'lucide-react'
 import { type CommandItemDescriptor, type CommandSource } from '../types'
 
 function createStaticItems(query: string): CommandItemDescriptor[] {
@@ -34,11 +41,23 @@ function createStaticItems(query: string): CommandItemDescriptor[] {
       id: 'nav.people',
       title: 'View People',
       subtitle: 'Go to people directory',
-      icon: <Users className='h-4 w-4' />,
+      icon: <User className='h-4 w-4' />,
       keywords: ['people', 'person', 'team', 'members'],
       group: 'Navigation',
       perform: ({ closePalette, router }) => {
         router.push('/people')
+        closePalette()
+      },
+    },
+    {
+      id: 'nav.teams',
+      title: 'View Teams',
+      subtitle: 'Go to teams directory',
+      icon: <Users2 className='h-4 w-4' />,
+      keywords: ['teams', 'team', 'groups', 'organization'],
+      group: 'Navigation',
+      perform: ({ closePalette, router }) => {
+        router.push('/teams')
         closePalette()
       },
     },

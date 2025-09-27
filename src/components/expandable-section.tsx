@@ -28,7 +28,9 @@ export function ExpandableSection({
     : childrenArray.slice(0, initialLimit)
 
   return (
-    <section className={`space-y-4 ${className}`}>
+    <section
+      className={`bg-card/30 border border-border/50 rounded-xl p-4 space-y-4 ${className}`}
+    >
       <div className='flex items-center justify-between mb-3'>
         <h2 className='font-semibold'>{title}</h2>
         <Button asChild variant='outline' size='sm'>

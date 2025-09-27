@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import ReactMarkdown from 'react-markdown'
+import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { OneOnOneDetailClient } from '@/components/oneonone-detail-client'
 import { EditIconButton } from '@/components/edit-icon-button'
 
@@ -106,9 +106,11 @@ export default async function OneOnOneViewPage({
             <h3 className='font-semibold mb-4'>Meeting Notes</h3>
             <div className='text-sm text-neutral-400'>
               {oneOnOne.notes ? (
-                <div className='prose prose-sm max-w-none'>
-                  <ReactMarkdown>{oneOnOne.notes}</ReactMarkdown>
-                </div>
+                <ReadonlyNotesField
+                  content={oneOnOne.notes}
+                  variant='default'
+                  emptyStateText='No notes recorded yet'
+                />
               ) : (
                 <div className='text-center py-8 text-neutral-500'>
                   No notes recorded yet

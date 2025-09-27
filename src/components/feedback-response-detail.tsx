@@ -2,6 +2,7 @@
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { JsonValue } from '@prisma/client/runtime/library'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -62,9 +63,11 @@ export function FeedbackResponseDetail({
 
       case 'text':
         return (
-          <div className='prose prose-sm max-w-none'>
-            <p className='whitespace-pre-wrap'>{String(value)}</p>
-          </div>
+          <ReadonlyNotesField
+            content={String(value)}
+            variant='compact'
+            emptyStateText='No response provided'
+          />
         )
 
       default:

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
+import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { taskStatusUtils, type TaskStatus } from '@/lib/task-status'
 import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
 import { Task, Person, Initiative, Objective, User } from '@prisma/client'
@@ -45,9 +46,13 @@ export function TaskCard({
         </div>
 
         {task.description && (
-          <p className='text-xs text-muted-foreground line-clamp-2'>
-            {task.description}
-          </p>
+          <div className='line-clamp-2'>
+            <ReadonlyNotesField
+              content={task.description}
+              variant='compact'
+              showEmptyState={false}
+            />
+          </div>
         )}
 
         <div className='space-y-1'>

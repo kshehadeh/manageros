@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Rag } from '@/components/rag'
+import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 
 interface InitiativeCardProps {
   initiative: {
@@ -64,12 +65,18 @@ export function InitiativeCard({
           >
             {initiative.title}
           </Link>
+        </div>
+        <div className='flex items-center gap-2 mt-1'>
           <Rag rag={initiative.rag} />
           <span className='badge'>{initiative.confidence}%</span>
         </div>
-        {showSummary && (
+        {showSummary && initiative.summary && (
           <div className={`${summaryClasses} truncate`}>
-            {initiative.summary ?? ''}
+            <ReadonlyNotesField
+              content={initiative.summary}
+              variant='compact'
+              showEmptyState={false}
+            />
           </div>
         )}
         <div className={`${metadataClasses} truncate`}>

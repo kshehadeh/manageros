@@ -13,6 +13,7 @@ import { PersonListItemCard } from '@/components/person-list-item-card'
 import { PersonStatusBadge } from '@/components/person-status-badge'
 import { PersonFeedbackCampaigns } from '@/components/person-feedback-campaigns'
 import { PersonSynopsis } from '@/components/person-synopsis'
+import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
@@ -205,6 +206,7 @@ export default async function PersonDetailPage({
           status: {
             in: ['active', 'draft'],
           },
+          userId: session.user.id,
         },
         include: {
           user: {
@@ -355,7 +357,13 @@ export default async function PersonDetailPage({
                             {ownership.initiative.title}
                           </div>
                           <div className='text-sm text-muted-foreground'>
-                            {ownership.initiative.summary ?? ''}
+                            {ownership.initiative.summary && (
+                              <ReadonlyNotesField
+                                content={ownership.initiative.summary}
+                                variant='compact'
+                                showEmptyState={false}
+                              />
+                            )}
                           </div>
                           <div className='text-xs text-muted-foreground mt-1'>
                             Role: {ownership.role} • Team:{' '}
@@ -388,7 +396,13 @@ export default async function PersonDetailPage({
                         <div>
                           <div className='font-medium'>{task.title}</div>
                           <div className='text-sm text-muted-foreground'>
-                            {task.description ?? ''}
+                            {task.description && (
+                              <ReadonlyNotesField
+                                content={task.description}
+                                variant='compact'
+                                showEmptyState={false}
+                              />
+                            )}
                           </div>
                           <div className='text-xs text-muted-foreground mt-1'>
                             {task.initiative && (

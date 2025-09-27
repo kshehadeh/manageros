@@ -289,10 +289,11 @@ export async function getFeedbackCampaignsForPerson(personId: string) {
     )
   }
 
-  // Get campaigns for the person
+  // Get campaigns for the person created by the current user
   const campaigns = await prisma.feedbackCampaign.findMany({
     where: {
       targetPersonId: personId,
+      userId: user.id,
     },
     include: {
       targetPerson: {
@@ -345,10 +346,11 @@ export async function getFeedbackCampaignById(id: string) {
     throw new Error('No person record found for current user')
   }
 
-  // Get the campaign
+  // Get the campaign created by the current user
   const campaign = await prisma.feedbackCampaign.findFirst({
     where: {
       id,
+      userId: user.id,
       // Ensure the campaign is for someone in the same organization
       targetPerson: {
         organizationId: user.organizationId,
@@ -743,9 +745,10 @@ export async function getAllFeedbackCampaignsForOrganization() {
     throw new Error('No person record found for current user')
   }
 
-  // Get all campaigns in the organization where the current user is a manager of the target person
+  // Get all campaigns in the organization created by the current user where the current user is a manager of the target person
   const campaigns = await prisma.feedbackCampaign.findMany({
     where: {
+      userId: user.id,
       targetPerson: {
         organizationId: user.organizationId,
       },

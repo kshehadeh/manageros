@@ -496,18 +496,13 @@ export function InitiativesTable({
         <Table>
           <TableHeader>
             <TableRow className='hover:bg-accent/50'>
+              <TableHead className='text-muted-foreground w-[60px]'>
+                RAG
+              </TableHead>
               <TableHead className='text-muted-foreground'>Title</TableHead>
               <TableHead className='text-muted-foreground'>Team</TableHead>
-              <TableHead className='text-muted-foreground'>RAG</TableHead>
               <TableHead className='text-muted-foreground'>
                 % Complete
-              </TableHead>
-              <TableHead className='text-muted-foreground'>
-                # Objectives
-              </TableHead>
-              <TableHead className='text-muted-foreground'># Tasks</TableHead>
-              <TableHead className='text-muted-foreground'>
-                # Check-ins
               </TableHead>
               <TableHead className='text-muted-foreground'>Owner</TableHead>
               <TableHead className='text-muted-foreground w-[50px]'>
@@ -523,38 +518,29 @@ export function InitiativesTable({
                 onDoubleClick={() => handleRowDoubleClick(initiative.id)}
                 onContextMenu={e => handleRowRightClick(e, initiative.id)}
               >
+                <TableCell className='text-muted-foreground'>
+                  <div className='flex items-center justify-center'>
+                    <div
+                      className={`w-3 h-3 rounded-full ${getRagColor(initiative.rag)}`}
+                    />
+                  </div>
+                </TableCell>
                 <TableCell className='font-medium text-foreground'>
-                  {initiative.title}
+                  <div>
+                    <div>{initiative.title}</div>
+                    <div className='text-xs text-muted-foreground mt-1'>
+                      {initiative.objectives.length} objectives •{' '}
+                      {initiative._count.tasks} tasks •{' '}
+                      {initiative._count.checkIns} check-ins
+                    </div>
+                  </div>
                 </TableCell>
                 <TableCell className='text-muted-foreground'>
                   {initiative.team?.name || '—'}
                 </TableCell>
                 <TableCell className='text-muted-foreground'>
-                  <div className='flex items-center gap-2'>
-                    <div
-                      className={`w-3 h-3 rounded-full ${getRagColor(initiative.rag)}`}
-                    />
-                    <span className='capitalize'>{initiative.rag}</span>
-                  </div>
-                </TableCell>
-                <TableCell className='text-muted-foreground'>
                   <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
                     {getCompletionPercentage(initiative)}%
-                  </span>
-                </TableCell>
-                <TableCell className='text-muted-foreground'>
-                  <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
-                    {initiative.objectives.length}
-                  </span>
-                </TableCell>
-                <TableCell className='text-muted-foreground'>
-                  <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
-                    {initiative._count.tasks}
-                  </span>
-                </TableCell>
-                <TableCell className='text-muted-foreground'>
-                  <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
-                    {initiative._count.checkIns}
                   </span>
                 </TableCell>
                 <TableCell className='text-muted-foreground'>

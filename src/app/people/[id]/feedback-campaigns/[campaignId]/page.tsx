@@ -82,6 +82,7 @@ export default async function FeedbackCampaignDetailPage({
     where: {
       id: campaignId,
       targetPersonId: id,
+      userId: session.user.id,
     },
     include: {
       template: {

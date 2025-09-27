@@ -10,7 +10,7 @@ import { IndigoIcon } from '@/components/indigo-icon'
 import {
   Home,
   Rocket,
-  Users,
+  User,
   Users2,
   ListTodo,
   Settings,
@@ -28,7 +28,7 @@ interface NavItem {
 const navigation: NavItem[] = [
   { name: 'Dashboard', href: '/', icon: Home },
   { name: 'Initiatives', href: '/initiatives', icon: Rocket },
-  { name: 'People', href: '/people', icon: Users },
+  { name: 'People', href: '/people', icon: User },
   { name: 'Teams', href: '/teams', icon: Users2 },
   { name: 'Tasks', href: '/tasks', icon: ListTodo },
   { name: 'Meetings', href: '/meetings', icon: Calendar },
@@ -85,9 +85,16 @@ export default function Sidebar() {
     )
   }
 
-  const filteredNavigation = navigation.filter(
-    item => !item.adminOnly || session.user.role === 'ADMIN'
-  )
+  // Filter navigation based on organization membership and admin role
+  const filteredNavigation = navigation.filter(item => {
+    // If user has no organization, only show Dashboard
+    if (!session.user.organizationId) {
+      return item.href === '/'
+    }
+
+    // If user has organization, filter by admin role for admin-only items
+    return !item.adminOnly || session.user.role === 'ADMIN'
+  })
 
   return (
     <>
@@ -117,12 +124,18 @@ export default function Sidebar() {
           <div className='text-sm text-foreground font-medium'>
             {session.user.name}
           </div>
-          <div className='text-xs text-muted-foreground'>
-            {session.user.organizationName}
-          </div>
-          <div className='text-xs text-muted-foreground'>
-            {session.user.role}
-          </div>
+          {session.user.organizationName ? (
+            <>
+              <div className='text-xs text-muted-foreground'>
+                {session.user.organizationName}
+              </div>
+              <div className='text-xs text-muted-foreground'>
+                {session.user.role}
+              </div>
+            </>
+          ) : (
+            <div className='text-xs text-muted-foreground'>No organization</div>
+          )}
         </div>
 
         {/* Navigation */}
@@ -137,7 +150,7 @@ export default function Sidebar() {
                 className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
                   isActive
                     ? 'bg-secondary text-secondary-foreground border'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-accent hover:text-accent-foreground'
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                 }`}
               >
                 <item.icon className='h-5 w-5' />

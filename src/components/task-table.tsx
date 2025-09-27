@@ -846,11 +846,6 @@ export function TaskTable({
                         >
                           {task.title}
                         </div>
-                        {task.description && (
-                          <div className='text-xs text-muted-foreground line-clamp-2'>
-                            {task.description}
-                          </div>
-                        )}
                         {/* Task details with icons on same line */}
                         <div className='text-xs text-muted-foreground mt-1.5 flex items-center gap-2 flex-wrap'>
                           {task.assignee && (

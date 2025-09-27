@@ -3,12 +3,12 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { notFound } from 'next/navigation'
-import { Calendar, Users } from 'lucide-react'
-import { MeetingDetailBreadcrumbClient } from '@/components/meeting-detail-breadcrumb-client'
+import { Calendar, Users, Clock, Edit3 } from 'lucide-react'
+import { MeetingInstanceDetailBreadcrumbClient } from '@/components/meeting-instance-detail-breadcrumb-client'
 import { MeetingInstanceActionsDropdown } from '@/components/meeting-instance-actions-dropdown'
+import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 
 export default async function MeetingInstanceDetailPage({
   params,
@@ -70,9 +70,10 @@ export default async function MeetingInstanceDetailPage({
   const totalParticipants = meetingInstance.participants.length
 
   return (
-    <MeetingDetailBreadcrumbClient
+    <MeetingInstanceDetailBreadcrumbClient
       meetingTitle={meetingInstance.meeting.title}
       meetingId={meetingInstance.meetingId}
+      instanceId={meetingInstance.id}
     >
       <div className='page-container'>
         <div className='page-header'>
@@ -80,6 +81,31 @@ export default async function MeetingInstanceDetailPage({
             <div className='flex-1'>
               <h1 className='page-title'>{meetingInstance.meeting.title}</h1>
               <p className='page-subtitle'>Meeting Instance</p>
+
+              {/* Instance details in header */}
+              <div className='flex flex-wrap items-center gap-4 mt-3 text-xs text-muted-foreground'>
+                <div className='flex items-center gap-1'>
+                  <Calendar className='h-3 w-3' />
+                  <span>{formatDateTime(scheduledDate)}</span>
+                </div>
+
+                <div className='flex items-center gap-1'>
+                  <Clock className='h-3 w-3' />
+                  <span>
+                    Created{' '}
+                    {new Date(meetingInstance.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+
+                <div className='flex items-center gap-1'>
+                  <Edit3 className='h-3 w-3' />
+                  <span>
+                    Updated{' '}
+                    {new Date(meetingInstance.updatedAt).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+
               <div className='flex items-center gap-3 mt-2'>
                 {isPast && <Badge variant='secondary'>Past Instance</Badge>}
                 <Badge variant='outline'>
@@ -94,52 +120,13 @@ export default async function MeetingInstanceDetailPage({
           </div>
         </div>
 
+        {/* Notes section */}
         <div className='page-section'>
-          <h2 className='text-lg font-semibold mb-4'>Instance Details</h2>
-          <div className='grid gap-6 md:grid-cols-2'>
-            <div className='space-y-4'>
-              <div>
-                <span className='text-sm font-medium text-muted-foreground'>
-                  Scheduled:
-                </span>
-                <div className='mt-1 flex items-center gap-2'>
-                  <Calendar className='h-4 w-4' />
-                  <span className='text-sm'>
-                    {formatDateTime(scheduledDate)}
-                  </span>
-                </div>
-              </div>
-
-              {meetingInstance.notes && (
-                <div>
-                  <span className='text-sm font-medium text-muted-foreground'>
-                    Notes:
-                  </span>
-                  <div className='mt-1 text-sm'>{meetingInstance.notes}</div>
-                </div>
-              )}
-            </div>
-
-            <div className='space-y-4'>
-              <div>
-                <span className='text-sm font-medium text-muted-foreground'>
-                  Created:
-                </span>
-                <div className='mt-1 text-sm'>
-                  {new Date(meetingInstance.createdAt).toLocaleString()}
-                </div>
-              </div>
-
-              <div>
-                <span className='text-sm font-medium text-muted-foreground'>
-                  Last Updated:
-                </span>
-                <div className='mt-1 text-sm'>
-                  {new Date(meetingInstance.updatedAt).toLocaleString()}
-                </div>
-              </div>
-            </div>
-          </div>
+          <ReadonlyNotesField
+            content={meetingInstance.notes || ''}
+            variant='default'
+            emptyStateText='No notes for this meeting instance'
+          />
         </div>
 
         {meetingInstance.participants.length > 0 && (
@@ -171,21 +158,7 @@ export default async function MeetingInstanceDetailPage({
             </div>
           </div>
         )}
-
-        <div className='page-section'>
-          <div className='flex items-center gap-3'>
-            <Button asChild variant='outline'>
-              <Link
-                href={`/meetings/${meetingInstance.meetingId}`}
-                className='flex items-center gap-2'
-              >
-                <Calendar className='w-4 h-4' />
-                Back to Meeting
-              </Link>
-            </Button>
-          </div>
-        </div>
       </div>
-    </MeetingDetailBreadcrumbClient>
+    </MeetingInstanceDetailBreadcrumbClient>
   )
 }

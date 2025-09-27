@@ -15,6 +15,7 @@ export async function DashboardOpenInitiativesSection({
       status: { notIn: ['done', 'canceled'] },
     },
     orderBy: { updatedAt: 'desc' },
+    take: 5,
     include: {
       team: true,
       objectives: true,
@@ -30,4 +31,3 @@ export async function DashboardOpenInitiativesSection({
     </ExpandableSection>
   )
 }
-

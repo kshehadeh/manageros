@@ -1,6 +1,7 @@
 import { Rag } from '@/components/rag'
 import Link from 'next/link'
 import { InitiativeActionsDropdown } from '@/components/initiative-actions-dropdown'
+import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 
 interface InitiativeHeaderProps {
   initiative: {
@@ -36,7 +37,13 @@ export function InitiativeHeader({ initiative }: InitiativeHeaderProps) {
             </div>
           </div>
           {initiative.summary && (
-            <p className='page-subtitle'>{initiative.summary}</p>
+            <div className='page-subtitle'>
+              <ReadonlyNotesField
+                content={initiative.summary}
+                variant='compact'
+                showEmptyState={false}
+              />
+            </div>
           )}
 
           {/* Team and Owner Details */}
