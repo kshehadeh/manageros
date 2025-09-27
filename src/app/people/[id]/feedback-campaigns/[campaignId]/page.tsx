@@ -3,22 +3,20 @@ import { notFound, redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { FeedbackCampaignDetailBreadcrumbClient } from '@/components/feedback-campaign-detail-breadcrumb-client'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { FeedbackCampaignActionsDropdown } from '@/components/feedback-campaign-actions-dropdown'
+import { FeedbackResponseLink } from '@/components/feedback-response-link'
+import { FeedbackInviteeList } from '@/components/feedback-invitee-list'
 import { Badge } from '@/components/ui/badge'
 import {
   Calendar,
   Mail,
   Users,
-  Edit,
-  Eye,
   CheckCircle,
   Clock,
   XCircle,
   AlertCircle,
 } from 'lucide-react'
 import { format } from 'date-fns'
-import Link from 'next/link'
 
 interface FeedbackCampaignDetailPageProps {
   params: Promise<{
@@ -157,211 +155,153 @@ export default async function FeedbackCampaignDetailPage({
       campaignTitle={campaignTitle}
       campaignId={campaign.id}
     >
-      <div className='space-y-6'>
-        {/* Header */}
-        <div className='flex items-center justify-between'>
-          <div>
-            <h1 className='text-2xl font-bold'>{campaignTitle}</h1>
-            <p className='text-neutral-400 mt-1'>
-              Feedback campaign for {person.name}
-            </p>
-          </div>
-          <div className='flex items-center gap-2'>
-            <Badge
-              variant={statusInfo.variant}
-              className='flex items-center gap-1'
-            >
-              <StatusIcon className='h-3 w-3' />
-              {statusInfo.label}
-            </Badge>
+      <div className='page-container'>
+        <div className='page-header'>
+          <div className='flex items-start justify-between'>
+            <div className='flex-1'>
+              <div className='flex items-center gap-3 mb-2'>
+                <h1 className='page-title'>{campaignTitle}</h1>
+                <Badge
+                  variant={statusInfo.variant}
+                  className='flex items-center gap-1'
+                >
+                  <StatusIcon className='h-3 w-3' />
+                  {statusInfo.label}
+                </Badge>
+              </div>
+              <div className='page-section-subtitle'>
+                Feedback campaign for {person.name}
+              </div>
+
+              {/* Basic Information with Icons */}
+              <div className='flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground'>
+                <div className='flex items-center gap-1'>
+                  <Calendar className='w-4 h-4' />
+                  <span>
+                    {format(campaign.startDate, 'MMM d, yyyy')} -{' '}
+                    {format(campaign.endDate, 'MMM d, yyyy')}
+                  </span>
+                </div>
+                <div className='flex items-center gap-1'>
+                  <Mail className='w-4 h-4' />
+                  <span>Created by {campaign.user.name}</span>
+                </div>
+                <div className='flex items-center gap-1'>
+                  <Users className='w-4 h-4' />
+                  <span>
+                    {totalInvites} invited, {totalResponses} responses (
+                    {responseRate}%)
+                  </span>
+                </div>
+              </div>
+            </div>
+            <FeedbackCampaignActionsDropdown
+              campaignId={campaign.id}
+              campaign={campaign}
+              personId={person.id}
+            />
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className='flex items-center gap-3'>
-          {campaign.status === 'draft' && (
-            <Button asChild>
-              <Link
-                href={`/people/${person.id}/feedback-campaigns/${campaign.id}/edit`}
-              >
-                <Edit className='h-4 w-4 mr-2' />
-                Edit Campaign
-              </Link>
-            </Button>
-          )}
-          <Button asChild variant='outline'>
-            <Link
-              href={`/people/${person.id}/feedback-campaigns/${campaign.id}/responses`}
-            >
-              <Eye className='h-4 w-4 mr-2' />
-              View Responses
-            </Link>
-          </Button>
-        </div>
-
-        <div className='grid gap-6 lg:grid-cols-3'>
-          {/* Campaign Details */}
-          <div className='lg:col-span-2 space-y-6'>
-            {/* Campaign Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Campaign Information</CardTitle>
-              </CardHeader>
-              <CardContent className='space-y-4'>
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                  <div className='space-y-2'>
-                    <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-                      <Calendar className='h-4 w-4' />
-                      <span>Campaign Period</span>
-                    </div>
-                    <p className='font-medium'>
-                      {format(campaign.startDate, 'MMM d, yyyy')} -{' '}
-                      {format(campaign.endDate, 'MMM d, yyyy')}
-                    </p>
-                  </div>
-
-                  <div className='space-y-2'>
-                    <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-                      <Mail className='h-4 w-4' />
-                      <span>Created by</span>
-                    </div>
-                    <p className='font-medium'>{campaign.user.name}</p>
-                  </div>
-
+        <div className='flex gap-6'>
+          {/* Main Content */}
+          <div className='flex-1 space-y-6'>
+            {/* Campaign Details */}
+            <div className='page-section'>
+              <h2 className='page-section-title'>Campaign Details</h2>
+              <div className='card-grid'>
+                <div className='space-y-4'>
                   {campaign.template && (
-                    <div className='space-y-2'>
-                      <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-                        <span>Template</span>
+                    <div>
+                      <span className='text-sm font-medium text-muted-foreground'>
+                        Template:
+                      </span>
+                      <div className='mt-1'>
+                        <span className='text-sm font-medium'>
+                          {campaign.template.name}
+                        </span>
+                        {campaign.template.description && (
+                          <p className='text-sm text-muted-foreground mt-1'>
+                            {campaign.template.description}
+                          </p>
+                        )}
                       </div>
-                      <p className='font-medium'>{campaign.template.name}</p>
-                      {campaign.template.description && (
-                        <p className='text-sm text-muted-foreground'>
-                          {campaign.template.description}
-                        </p>
-                      )}
+                    </div>
+                  )}
+
+                  <div>
+                    <span className='text-sm font-medium text-muted-foreground'>
+                      Campaign Period:
+                    </span>
+                    <div className='mt-1 flex items-center gap-2'>
+                      <Calendar className='h-4 w-4' />
+                      <span className='text-sm'>
+                        {format(campaign.startDate, 'MMM d, yyyy')} -{' '}
+                        {format(campaign.endDate, 'MMM d, yyyy')}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className='text-sm font-medium text-muted-foreground'>
+                      Created By:
+                    </span>
+                    <div className='mt-1 flex items-center gap-2'>
+                      <Mail className='h-4 w-4' />
+                      <span className='text-sm'>{campaign.user.name}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className='space-y-4'>
+                  <div>
+                    <span className='text-sm font-medium text-muted-foreground'>
+                      Created:
+                    </span>
+                    <div className='mt-1 text-sm'>
+                      {format(campaign.createdAt, 'MMM d, yyyy')}
+                    </div>
+                  </div>
+
+                  {campaign.updatedAt && (
+                    <div>
+                      <span className='text-sm font-medium text-muted-foreground'>
+                        Last Updated:
+                      </span>
+                      <div className='mt-1 text-sm'>
+                        {format(campaign.updatedAt, 'MMM d, yyyy')}
+                      </div>
                     </div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            {/* Response Statistics */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Response Statistics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-                  <div className='text-center'>
-                    <div className='text-2xl font-bold text-foreground'>
-                      {totalInvites}
-                    </div>
-                    <div className='text-sm text-muted-foreground'>Invited</div>
-                  </div>
-                  <div className='text-center'>
-                    <div className='text-2xl font-bold text-foreground'>
-                      {totalResponses}
-                    </div>
-                    <div className='text-sm text-muted-foreground'>
-                      Responses
-                    </div>
-                  </div>
-                  <div className='text-center'>
-                    <div className='text-2xl font-bold text-foreground'>
-                      {responseRate}%
-                    </div>
-                    <div className='text-sm text-muted-foreground'>
-                      Response Rate
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Feedback Response Link */}
+            {campaign.inviteLink && campaign.status === 'active' && (
+              <div className='page-section'>
+                <h2 className='page-section-title'>Feedback Response Link</h2>
+                <FeedbackResponseLink
+                  inviteLink={campaign.inviteLink}
+                  startDate={campaign.startDate}
+                  endDate={campaign.endDate}
+                />
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}
-          <div className='space-y-6'>
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className='space-y-3'>
-                {campaign.status === 'draft' && (
-                  <Button asChild className='w-full justify-start'>
-                    <Link
-                      href={`/people/${person.id}/feedback-campaigns/${campaign.id}/edit`}
-                    >
-                      <Edit className='h-4 w-4 mr-2' />
-                      Edit Campaign
-                    </Link>
-                  </Button>
-                )}
-                <Button
-                  asChild
-                  variant='outline'
-                  className='w-full justify-start'
-                >
-                  <Link
-                    href={`/people/${person.id}/feedback-campaigns/${campaign.id}/responses`}
-                  >
-                    <Eye className='h-4 w-4 mr-2' />
-                    View Responses
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  variant='outline'
-                  className='w-full justify-start'
-                >
-                  <Link href={`/people/${person.id}/feedback-campaigns`}>
-                    <Users className='h-4 w-4 mr-2' />
-                    All Campaigns
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Campaign Status */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Campaign Status</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className='space-y-3'>
-                  <div className='flex items-center justify-between'>
-                    <span className='text-sm text-muted-foreground'>
-                      Status
-                    </span>
-                    <Badge
-                      variant={statusInfo.variant}
-                      className='flex items-center gap-1'
-                    >
-                      <StatusIcon className='h-3 w-3' />
-                      {statusInfo.label}
-                    </Badge>
-                  </div>
-                  <div className='flex items-center justify-between'>
-                    <span className='text-sm text-muted-foreground'>
-                      Created
-                    </span>
-                    <span className='text-sm font-medium'>
-                      {format(campaign.createdAt, 'MMM d, yyyy')}
-                    </span>
-                  </div>
-                  {campaign.updatedAt && (
-                    <div className='flex items-center justify-between'>
-                      <span className='text-sm text-muted-foreground'>
-                        Last Updated
-                      </span>
-                      <span className='text-sm font-medium'>
-                        {format(campaign.updatedAt, 'MMM d, yyyy')}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+          <div className='w-80 space-y-6'>
+            {/* Invited People */}
+            <div className='page-section'>
+              <h2 className='page-section-title'>
+                Invited People ({campaign.inviteEmails.length})
+              </h2>
+              <FeedbackInviteeList
+                inviteEmails={campaign.inviteEmails}
+                responses={campaign.responses}
+              />
+            </div>
           </div>
         </div>
       </div>

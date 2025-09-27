@@ -281,7 +281,7 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
     if (!isEditing) {
       return (
         <div
-          className='cursor-pointer hover:bg-neutral-800 p-1 rounded'
+          className='cursor-pointer rounded-md px-2 py-1 transition-colors hover:bg-muted hover:text-foreground'
           onClick={() => handleEdit(person.id, field, displayValue)}
         >
           {displayValue || '—'}
