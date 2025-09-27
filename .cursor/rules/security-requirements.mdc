@@ -1,0 +1,193 @@
+---
+description: Security requirements and access control rules for ManagerOS application
+alwaysApply: true
+---
+
+# Security Requirements and Access Control Rules
+
+## Overview
+
+This document defines the security requirements and access control rules for the ManagerOS application. All data access must strictly enforce these rules to ensure users can only access data they are authorized to see.
+
+## Core Security Principles
+
+### 1. Organization-Level Isolation
+
+- **Rule**: Users who are not members of an organization should see NO data related to that organization
+- **Implementation**: All database queries must filter by `organizationId` to ensure strict organization boundaries
+- **Exception**: Public routes (like feedback forms) may have different access patterns
+
+### 2. Authentication Requirements
+
+- **Rule**: All protected routes require valid authentication
+- **Implementation**: Middleware enforces authentication for all routes except public ones
+- **Public Routes**: `/auth/signin`, `/auth/signup`, `/feedback-form/*`
+
+## Entity-Specific Access Control Rules
+
+### 1. One-on-One Meetings (OneOnOne)
+
+- **Rule**: One-on-ones are only visible to the people who are part of the 1:1s
+- **Implementation**:
+  - Filter by `managerId` OR `reportId` matching current user's person ID
+  - Both manager and report must belong to the same organization
+- **Functions**: `getOneOnOnes()`, `getOneOnOneById()`, `updateOneOnOne()`
+
+### 2. Feedback
+
+- **Rule**: Feedback is only visible to the people who are involved in the feedback and then only if the person who created the feedback can see if it is marked as private
+- **Implementation**:
+  - Public feedback (`isPrivate: false`): Visible to all organization members
+  - Private feedback (`isPrivate: true`): Only visible to the author (`fromId`)
+  - All feedback must be about people in the same organization
+- **Functions**: `getFeedbackForPerson()`, `getAllFeedback()`, `getFeedbackById()`
+
+### 3. Initiatives
+
+- **Rule**: Anyone can see initiatives who are in the organization
+- **Implementation**: Filter by `organizationId` - all organization members have read access
+- **Functions**: All initiative-related functions
+
+### 4. Meetings
+
+- **Rule**: Anyone can see meetings who are in the organization
+- **Implementation**: Filter by `organizationId` - all organization members have read access
+- **Functions**: All meeting-related functions
+
+### 5. Feedback Campaigns
+
+- **Rule**: Only the person who created feedback campaigns can see them and the responses
+- **Implementation**:
+  - Filter by `userId` matching current user
+  - Additional check: User must be a manager (direct or indirect) of the target person
+  - Campaigns must be for people in the same organization
+- **Functions**: `getFeedbackCampaignsForPerson()`, `getFeedbackCampaignById()`, `getFeedbackCampaignResponses()`
+
+### 6. Tasks
+
+- **Rule**: Tasks that are not associated with initiatives can only be seen by the person who created them or if they are assigned to the task
+- **Implementation**:
+  - Tasks created by users in the same organization (`createdBy: { organizationId }`)
+  - Tasks assigned to people in the same organization (`assignee: { organizationId }`)
+  - Tasks associated with initiatives in the same organization (`initiative: { organizationId }`)
+  - Tasks associated with objectives of initiatives in the same organization (`objective: { initiative: { organizationId } }`)
+- **Functions**: `getTasks()`, `getTask()`, `updateTask()`, `deleteTask()`, etc.
+
+## Implementation Guidelines
+
+### Database Query Patterns
+
+#### Standard Organization Filter
+
+```typescript
+where: {
+  organizationId: user.organizationId
+}
+```
+
+#### Task Access Control Pattern
+
+```typescript
+where: {
+  OR: [
+    { createdBy: { organizationId: user.organizationId } },
+    { assignee: { organizationId: user.organizationId } },
+    { initiative: { organizationId: user.organizationId } },
+    { objective: { initiative: { organizationId: user.organizationId } } },
+  ]
+}
+```
+
+#### One-on-One Access Pattern
+
+```typescript
+where: {
+  OR: [
+    { managerId: currentPerson.id },
+    { reportId: currentPerson.id }
+  ]
+}
+```
+
+#### Feedback Visibility Pattern
+
+```typescript
+where: {
+  OR: [
+    { isPrivate: false }, // Public feedback
+    { fromId: currentPerson.id } // Private feedback by current user
+  ],
+  about: {
+    organizationId: user.organizationId
+  }
+}
+```
+
+### Server Action Security Checklist
+
+Every server action must:
+
+1. ✅ **Authenticate User**: Call `getCurrentUser()` and verify user exists
+2. ✅ **Check Organization**: Verify `user.organizationId` exists
+3. ✅ **Validate Access**: Apply appropriate access control rules based on entity type
+4. ✅ **Filter Data**: Use proper WHERE clauses to enforce access control
+5. ✅ **Validate Relationships**: Ensure related entities belong to same organization
+6. ✅ **Handle Errors**: Throw appropriate errors for access denied scenarios
+
+### Error Handling
+
+#### Standard Error Messages
+
+- `"User must belong to an organization to [action]"`
+- `"[Entity] not found or access denied"`
+- `"You do not have permission to [action]"`
+- `"[Entity] not found or you do not have access to it"`
+
+## Security Testing Requirements
+
+### Test Coverage Required
+
+- ✅ Organization isolation (users cannot see other orgs' data)
+- ✅ Entity-specific access rules (one-on-ones, feedback, tasks, etc.)
+- ✅ Private vs public data visibility
+- ✅ Manager relationship validation
+- ✅ Cross-organization access prevention
+
+### Test Scenarios
+
+1. **Cross-Organization Access**: Verify users cannot access data from other organizations
+2. **Assigned Task Access**: Verify users can see tasks assigned to them
+3. **Private Feedback**: Verify private feedback is only visible to author
+4. **One-on-One Access**: Verify only participants can see 1:1 meetings
+5. **Feedback Campaign Access**: Verify only creators can see their campaigns
+
+## Security Monitoring
+
+### Recommended Monitoring
+
+- Audit logging for all data access attempts
+- Monitoring for unusual access patterns
+- Regular security reviews of access control logic
+- Database query analysis for potential security bypasses
+
+### Red Flags to Monitor
+
+- Users accessing data from other organizations
+- Unusual patterns of private data access
+- Failed authentication attempts
+- Unauthorized access attempts
+
+## Compliance Notes
+
+- All access control rules must be enforced at the database query level
+- Client-side filtering is NOT sufficient for security
+- Server actions must validate all access permissions
+- Error messages should not leak information about data existence
+- All user inputs must be validated and sanitized
+
+## Review Process
+
+- All new database queries must be reviewed for proper access control
+- All server actions must be reviewed for security compliance
+- Regular security audits should be conducted
+- Access control logic should be centralized where possible

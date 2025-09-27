@@ -8,6 +8,29 @@ import { getCurrentUser } from '@/lib/auth-utils'
 import { type TaskStatus } from '@/lib/task-status'
 import { taskPriorityUtils, DEFAULT_TASK_PRIORITY } from '@/lib/task-priority'
 
+/**
+ * Get the organization-scoped where clause for task access control.
+ * Tasks are accessible if they are:
+ * 1. Created by users in the same organization
+ * 2. Assigned to people in the same organization
+ * 3. Associated with initiatives in the same organization
+ * 4. Associated with objectives of initiatives in the same organization
+ */
+function getTaskAccessWhereClause(organizationId: string) {
+  return {
+    OR: [
+      // Tasks created by users in the same organization
+      { createdBy: { organizationId } },
+      // Tasks assigned to people in the same organization
+      { assignee: { organizationId } },
+      // Tasks associated with initiatives in the same organization
+      { initiative: { organizationId } },
+      // Tasks associated with objectives of initiatives in the same organization
+      { objective: { initiative: { organizationId } } },
+    ],
+  }
+}
+
 export async function createTask(formData: TaskFormData) {
   const user = await getCurrentUser()
 
@@ -110,11 +133,7 @@ export async function updateTask(taskId: string, formData: TaskFormData) {
   const existingTask = await prisma.task.findFirst({
     where: {
       id: taskId,
-      OR: [
-        { assignee: { organizationId: user.organizationId } },
-        { initiative: { organizationId: user.organizationId } },
-        { objective: { initiative: { organizationId: user.organizationId } } },
-      ],
+      ...getTaskAccessWhereClause(user.organizationId),
     },
   })
 
@@ -237,9 +256,7 @@ export async function getTasks() {
   }
 
   const tasks = await prisma.task.findMany({
-    where: {
-      createdBy: { organizationId: user.organizationId },
-    },
+    where: getTaskAccessWhereClause(user.organizationId),
     include: {
       assignee: true,
       initiative: true,
@@ -263,7 +280,7 @@ export async function getTask(taskId: string) {
   const task = await prisma.task.findFirst({
     where: {
       id: taskId,
-      createdBy: { organizationId: user.organizationId },
+      ...getTaskAccessWhereClause(user.organizationId),
     },
     include: {
       assignee: true,
@@ -434,11 +451,7 @@ export async function updateTaskStatus(taskId: string, status: TaskStatus) {
   const existingTask = await prisma.task.findFirst({
     where: {
       id: taskId,
-      OR: [
-        { assignee: { organizationId: user.organizationId } },
-        { initiative: { organizationId: user.organizationId } },
-        { objective: { initiative: { organizationId: user.organizationId } } },
-      ],
+      ...getTaskAccessWhereClause(user.organizationId),
     },
   })
 
@@ -489,11 +502,7 @@ export async function updateTaskTitle(taskId: string, title: string) {
   const existingTask = await prisma.task.findFirst({
     where: {
       id: taskId,
-      OR: [
-        { assignee: { organizationId: user.organizationId } },
-        { initiative: { organizationId: user.organizationId } },
-        { objective: { initiative: { organizationId: user.organizationId } } },
-      ],
+      ...getTaskAccessWhereClause(user.organizationId),
     },
   })
 
@@ -537,11 +546,7 @@ export async function updateTaskAssignee(
   const existingTask = await prisma.task.findFirst({
     where: {
       id: taskId,
-      OR: [
-        { assignee: { organizationId: user.organizationId } },
-        { initiative: { organizationId: user.organizationId } },
-        { objective: { initiative: { organizationId: user.organizationId } } },
-      ],
+      ...getTaskAccessWhereClause(user.organizationId),
     },
   })
 
@@ -600,11 +605,7 @@ export async function updateTaskPriority(taskId: string, priority: number) {
   const existingTask = await prisma.task.findFirst({
     where: {
       id: taskId,
-      OR: [
-        { assignee: { organizationId: user.organizationId } },
-        { initiative: { organizationId: user.organizationId } },
-        { objective: { initiative: { organizationId: user.organizationId } } },
-      ],
+      ...getTaskAccessWhereClause(user.organizationId),
     },
   })
 
