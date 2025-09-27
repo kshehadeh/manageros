@@ -10,7 +10,8 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { VisuallyHidden } from '@/components/ui/visually-hidden'
 import { useCommandPalette } from './provider'
 import { type CommandItemDescriptor, type CommandSource } from './types'
 import { coreCommandSource } from './sources/core'
@@ -60,6 +61,9 @@ export function CommandPalette() {
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogContent className='p-0 overflow-hidden sm:max-w-[640px]'>
+        <VisuallyHidden>
+          <DialogTitle>Command Palette</DialogTitle>
+        </VisuallyHidden>
         <Command>
           <CommandInput
             placeholder='Type a command or search...'
