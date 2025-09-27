@@ -64,29 +64,27 @@ export async function generatePersonSynopsis(
       },
       githubAccount: true,
       jiraAccount: true,
-      feedback: includeFeedback
-        ? {
-            where: {
-              createdAt: { gte: new Date(fromDate), lte: new Date(toDate) },
-              OR: [
-                { isPrivate: false },
-                currentPerson?.id
-                  ? { AND: [{ isPrivate: true }, { fromId: currentPerson.id }] }
-                  : { id: { equals: '' } }, // no private feedback if no current person
-              ],
-            },
-            orderBy: { createdAt: 'desc' },
-          }
-        : false,
-      feedbackCampaigns: includeFeedback
-        ? {
-            where: {
-              endDate: { gte: new Date(fromDate) },
-              startDate: { lte: new Date(toDate) },
-            },
-            include: { responses: true },
-          }
-        : false,
+      feedback: {
+        where: {
+          createdAt: { gte: new Date(fromDate), lte: new Date(toDate) },
+          OR: [
+            { isPrivate: false },
+            currentPerson?.id
+              ? { AND: [{ isPrivate: true }, { fromId: currentPerson.id }] }
+              : { id: { equals: '' } }, // no private feedback if no current person
+          ],
+        },
+        orderBy: { createdAt: 'desc' },
+      },
+      feedbackCampaigns: {
+        where: {
+          endDate: { gte: new Date(fromDate) },
+          startDate: { lte: new Date(toDate) },
+        },
+        include: {
+          responses: true,
+        },
+      },
     },
   })
 

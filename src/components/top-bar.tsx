@@ -29,6 +29,7 @@ export default function TopBar() {
           <Breadcrumb />
         </div>
         <div className='flex items-center gap-2'>
+          {/* Desktop command palette button */}
           <button
             onClick={toggle}
             className='hidden md:inline-flex items-center gap-2 px-3 py-2 bg-secondary border rounded-lg text-secondary-foreground hover:bg-secondary/80 transition-colors'
@@ -36,8 +37,20 @@ export default function TopBar() {
           >
             <CommandIcon className='h-4 w-4' />
             <span className='text-sm'>Command</span>
-            <span className='ml-2 hidden lg:inline text-xs text-muted-foreground border rounded px-1'>Ctrl/⌘ + K</span>
+            <span className='ml-2 hidden lg:inline text-xs text-muted-foreground border rounded px-1'>
+              Ctrl/⌘ + K
+            </span>
           </button>
+
+          {/* Mobile command palette button - icon only */}
+          <button
+            onClick={toggle}
+            className='md:hidden p-2 bg-secondary border rounded-lg text-secondary-foreground hover:bg-secondary/80 transition-colors'
+            title='Open Command Palette (Ctrl+K / ⌘K)'
+          >
+            <CommandIcon className='h-5 w-5' />
+          </button>
+
           <BugReportButton />
           <ModeToggle />
         </div>

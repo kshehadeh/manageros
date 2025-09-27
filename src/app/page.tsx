@@ -256,7 +256,7 @@ export default async function Home() {
 
   return (
     <div className='page-container'>
-      <div className='flex gap-6'>
+      <div className='flex flex-col lg:flex-row gap-6'>
         {/* Main Content Area */}
         <div className='flex-1 space-y-6'>
           {/* My Tasks Section - only show if there are assigned tasks */}
@@ -428,7 +428,7 @@ export default async function Home() {
         </div>
 
         {/* Right Sidebar */}
-        <div className='w-80 space-y-6'>
+        <div className='w-full lg:w-80 space-y-6'>
           {/* Teams Section - only show if there are teams */}
           {teams.length > 0 && (
             <ExpandableSection title='Related Teams' viewAllHref='/teams'>

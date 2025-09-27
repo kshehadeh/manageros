@@ -750,7 +750,7 @@ export function TaskTable({
         <Table>
           <TableHeader>
             <TableRow className='hover:bg-accent/50'>
-              <TableHead className='w-[50px] text-muted-foreground'>
+              <TableHead className='w-[50px] text-muted-foreground text-center'>
                 <Check className='h-4 w-4' />
               </TableHead>
               <TableHead
@@ -763,7 +763,7 @@ export function TaskTable({
                 </div>
               </TableHead>
               <TableHead
-                className='text-muted-foreground cursor-pointer hover:text-foreground select-none w-[120px]'
+                className='hidden md:table-cell text-muted-foreground cursor-pointer hover:text-foreground select-none'
                 onClick={() => handleSort('status')}
               >
                 <div className='flex items-center gap-2'>
@@ -771,7 +771,7 @@ export function TaskTable({
                   {getSortIcon('status')}
                 </div>
               </TableHead>
-              <TableHead className='text-muted-foreground w-[60px]'>
+              <TableHead className='hidden md:table-cell text-muted-foreground w-[50px]'>
                 Actions
               </TableHead>
             </TableRow>
@@ -793,7 +793,7 @@ export function TaskTable({
                   onDoubleClick={() => handleRowDoubleClick(task.id)}
                   onContextMenu={e => handleRowRightClick(e, task.id)}
                 >
-                  <TableCell>
+                  <TableCell className='py-2 px-2 text-center'>
                     <Checkbox
                       checked={isCompleted}
                       onCheckedChange={() =>
@@ -803,7 +803,7 @@ export function TaskTable({
                       className='data-[state=checked]:bg-primary data-[state=checked]:border-primary'
                     />
                   </TableCell>
-                  <TableCell className='font-medium text-foreground'>
+                  <TableCell className='font-medium text-foreground py-2 px-3'>
                     {editField === 'title' ? (
                       <div className='flex items-center gap-2'>
                         <Input
@@ -837,7 +837,7 @@ export function TaskTable({
                         </Button>
                       </div>
                     ) : (
-                      <div className='space-y-1'>
+                      <div className='space-y-0.5'>
                         <div
                           className={`${isCompleted ? 'line-through text-muted-foreground' : ''} cursor-pointer hover:bg-accent/50 p-1 rounded`}
                           onClick={() =>
@@ -852,7 +852,7 @@ export function TaskTable({
                           </div>
                         )}
                         {/* Task details with icons on same line */}
-                        <div className='text-xs text-muted-foreground mt-2 flex items-center gap-4 flex-wrap'>
+                        <div className='text-xs text-muted-foreground mt-1.5 flex items-center gap-2 flex-wrap'>
                           {task.assignee && (
                             <div className='flex items-center gap-1'>
                               <UserIcon className='h-3 w-3' />
@@ -898,11 +898,24 @@ export function TaskTable({
                               </Link>
                             </div>
                           )}
+                          {/* Mobile status badge - show on mobile when status column is hidden */}
+                          <div className='md:hidden flex items-center gap-1'>
+                            <Badge
+                              variant={taskStatusUtils.getUIVariant(
+                                task.status as TaskStatus
+                              )}
+                              className='text-xs px-1 py-0'
+                            >
+                              {taskStatusUtils.getLabel(
+                                task.status as TaskStatus
+                              )}
+                            </Badge>
+                          </div>
                         </div>
                       </div>
                     )}
                   </TableCell>
-                  <TableCell className='text-muted-foreground'>
+                  <TableCell className='hidden md:table-cell text-muted-foreground py-2 px-2'>
                     {editField === 'status' ? (
                       <div className='flex items-center gap-2'>
                         <Select
@@ -958,7 +971,7 @@ export function TaskTable({
                       </div>
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className='hidden md:table-cell py-2 px-2'>
                     <Button
                       variant='ghost'
                       className='h-8 w-8 p-0'

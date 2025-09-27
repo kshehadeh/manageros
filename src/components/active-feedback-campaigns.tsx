@@ -48,28 +48,30 @@ export function ActiveFeedbackCampaigns({
       {campaigns.map(campaign => (
         <div
           key={campaign.id}
-          className='flex items-center justify-between py-3'
+          className='flex items-start justify-between py-3'
         >
-          <div className='flex-1'>
-            <div className='flex items-center gap-3 mb-2'>
-              <FeedbackCampaignStatusBadge status={campaign.status} />
-              <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-                <span>{campaign.targetPerson.name}</span>
-              </div>
-              <Link
-                href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`}
-                className='font-medium hover:text-primary transition-colors'
-              >
-                {campaign.name || campaign.targetPerson.name}
-              </Link>
+          <div className='flex-1 space-y-1'>
+            {/* Campaign Title */}
+            <Link
+              href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`}
+              className='font-medium hover:text-primary transition-colors block'
+            >
+              {campaign.name || 'Feedback Campaign'}
+            </Link>
+
+            {/* Person Name */}
+            <div className='text-sm text-muted-foreground'>
+              <span>{campaign.targetPerson.name}</span>
             </div>
-            <div className='flex items-center gap-4 text-sm text-muted-foreground'>
+
+            {/* Campaign Details */}
+            <div className='flex items-center gap-4 text-xs text-muted-foreground'>
               <span>
                 {campaign.responses.length} / {campaign.inviteEmails.length}{' '}
                 responses
               </span>
               <div className='flex items-center gap-1'>
-                <Calendar className='h-4 w-4' />
+                <Calendar className='h-3 w-3' />
                 <span>
                   {campaign.status === 'active'
                     ? `Ends ${format(campaign.endDate, 'MMM d, yyyy')}`
@@ -77,6 +79,11 @@ export function ActiveFeedbackCampaigns({
                 </span>
               </div>
             </div>
+          </div>
+
+          {/* Status Badge - Pinned to Right */}
+          <div className='ml-4 flex-shrink-0'>
+            <FeedbackCampaignStatusBadge status={campaign.status} />
           </div>
         </div>
       ))}

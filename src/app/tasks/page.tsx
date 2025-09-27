@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { QuickTaskForm } from '@/components/quick-task-form'
-import { TaskTable } from '@/components/task-table'
+import { TasksPageClient } from '@/components/tasks-page-client'
 
 export default async function TasksPage() {
   const session = await getServerSession(authOptions)
@@ -53,11 +53,12 @@ export default async function TasksPage() {
       <div className='page-section'>
         <div className='flex items-center justify-between mb-4'>
           <h2 className='text-lg font-semibold'>All Tasks</h2>
-          <span className='text-sm text-muted-foreground'>
-            {tasks.length} total tasks
-          </span>
         </div>
-        <TaskTable tasks={tasks} people={people} initiatives={initiatives} />
+        <TasksPageClient
+          tasks={tasks}
+          people={people}
+          initiatives={initiatives}
+        />
       </div>
     </div>
   )
