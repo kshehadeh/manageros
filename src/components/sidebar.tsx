@@ -9,10 +9,10 @@ import { useMobileMenu } from '@/components/mobile-menu-provider'
 import { IndigoIcon } from '@/components/indigo-icon'
 import {
   Home,
-  Lightbulb,
+  Rocket,
   Users,
   Users2,
-  ClipboardList,
+  ListTodo,
   Settings,
   Calendar,
   Building,
@@ -27,10 +27,10 @@ interface NavItem {
 
 const navigation: NavItem[] = [
   { name: 'Dashboard', href: '/', icon: Home },
-  { name: 'Initiatives', href: '/initiatives', icon: Lightbulb },
+  { name: 'Initiatives', href: '/initiatives', icon: Rocket },
   { name: 'People', href: '/people', icon: Users },
   { name: 'Teams', href: '/teams', icon: Users2 },
-  { name: 'Tasks', href: '/tasks', icon: ClipboardList },
+  { name: 'Tasks', href: '/tasks', icon: ListTodo },
   { name: 'Meetings', href: '/meetings', icon: Calendar },
   {
     name: 'Org Settings',

@@ -10,7 +10,7 @@ import {
   Check,
   X,
   MessageCircle,
-  MessageSquare,
+  Handshake,
 } from 'lucide-react'
 import { PersonStatusBadge } from './person-status-badge'
 import {
@@ -557,7 +557,7 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
               }
             }}
           >
-            <MessageSquare className='w-4 h-4' />
+            <Handshake className='w-4 h-4' />
             Add 1:1
           </button>
           <button

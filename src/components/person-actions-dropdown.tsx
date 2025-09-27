@@ -6,12 +6,11 @@ import { FeedbackForm } from './feedback-form'
 import { type Person, type Team } from '@prisma/client'
 import {
   Plus,
-  FileText,
-  CheckSquare,
-  MessageSquare,
+  Rocket,
+  ListTodo,
   MessageCircle,
+  Handshake,
   Eye,
-  Users,
   MoreHorizontal,
   Edit,
 } from 'lucide-react'
@@ -147,7 +146,7 @@ export function PersonActionsDropdown({
                   className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
                   onClick={closeDropdown}
                 >
-                  <FileText className='w-4 h-4' />
+                  <Rocket className='w-4 h-4' />
                   New Initiative
                 </Link>
               )}
@@ -159,7 +158,7 @@ export function PersonActionsDropdown({
                   className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
                   onClick={closeDropdown}
                 >
-                  <CheckSquare className='w-4 h-4' />
+                  <ListTodo className='w-4 h-4' />
                   New Task
                 </Link>
               )}
@@ -199,7 +198,7 @@ export function PersonActionsDropdown({
                   className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
                   onClick={closeDropdown}
                 >
-                  <MessageSquare className='w-4 h-4' />
+                  <Handshake className='w-4 h-4' />
                   Add a 1:1
                 </Link>
               )}
@@ -211,7 +210,7 @@ export function PersonActionsDropdown({
                   className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
                   onClick={closeDropdown}
                 >
-                  <Users className='w-4 h-4' />
+                  <MessageCircle className='w-4 h-4' />
                   Feedback Campaigns
                 </Link>
               )}

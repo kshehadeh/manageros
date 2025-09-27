@@ -1,7 +1,7 @@
 'use client'
 
 import { type CommandItemDescriptor, type CommandSource } from '../types'
-import { ListTodo, Rocket, User, MessageSquare } from 'lucide-react'
+import { ListTodo, Rocket, Users, MessageCircle, Handshake } from 'lucide-react'
 
 interface SearchResultBase {
   id: string
@@ -53,7 +53,7 @@ export const searchCommandSource: CommandSource = {
       if (r.type === 'feedback') {
         return {
           ...base,
-          icon: <MessageSquare className='h-4 w-4' />,
+          icon: <MessageCircle className='h-4 w-4' />,
           perform: ({ closePalette, router }) => {
             router.push(`/feedback/${r.id}`)
             closePalette()
@@ -63,7 +63,7 @@ export const searchCommandSource: CommandSource = {
       if (r.type === 'oneOnOne') {
         return {
           ...base,
-          icon: <MessageSquare className='h-4 w-4' />,
+          icon: <Handshake className='h-4 w-4' />,
           perform: ({ closePalette, router }) => {
             router.push(`/oneonones/${r.id}`)
             closePalette()
@@ -72,7 +72,7 @@ export const searchCommandSource: CommandSource = {
       }
       return {
         ...base,
-        icon: <User className='h-4 w-4' />,
+        icon: <Users className='h-4 w-4' />,
         perform: ({ closePalette, router }) => {
           router.push(`/people/${r.id}`)
           closePalette()

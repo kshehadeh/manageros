@@ -6,7 +6,7 @@ import { type OneOnOneFormData } from '@/lib/validations'
 import Link from 'next/link'
 import { MarkdownEditor } from './markdown-editor'
 import { Button } from '@/components/ui/button'
-import { MessageSquare } from 'lucide-react'
+import { Handshake } from 'lucide-react'
 
 interface Person {
   id: string
@@ -211,7 +211,7 @@ export function OneOnOneForm({
           }
           className='flex items-center gap-2'
         >
-          <MessageSquare className='w-4 h-4' />
+          <Handshake className='w-4 h-4' />
           {isSubmitting
             ? existingOneOnOne
               ? 'Updating...'
