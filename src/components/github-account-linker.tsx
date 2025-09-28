@@ -75,7 +75,7 @@ export function GithubAccountLinker({
     return (
       <div className='space-y-4'>
         <div className='bg-secondary/30 border rounded-lg p-4'>
-          <div className='flex items-center justify-between'>
+          <div className='space-y-3'>
             <div>
               <div className='font-medium text-foreground'>
                 {githubAccount.githubDisplayName ||
@@ -96,6 +96,7 @@ export function GithubAccountLinker({
               disabled={isLoading}
               variant='outline'
               size='sm'
+              className='w-full'
             >
               {isLoading ? 'Unlinking...' : 'Unlink'}
             </Button>

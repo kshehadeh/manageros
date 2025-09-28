@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/command'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { VisuallyHidden } from '@/components/ui/visually-hidden'
+import { HelpIcon } from '@/components/help-icon'
 import { useCommandPalette } from './provider'
 import { type CommandItemDescriptor, type CommandSource } from './types'
 import { coreCommandSource } from './sources/core'
@@ -65,11 +66,20 @@ export function CommandPalette() {
           <DialogTitle>Command Palette</DialogTitle>
         </VisuallyHidden>
         <Command>
-          <CommandInput
-            placeholder='Type a command or search...'
-            value={query}
-            onValueChange={setQuery}
-          />
+          <div className='flex items-center px-3'>
+            <CommandInput
+              placeholder='Type a command or search...'
+              value={query}
+              onValueChange={setQuery}
+              className='flex-1'
+            />
+            <HelpIcon
+              helpId='keyboard-shortcuts'
+              size='sm'
+              className='ml-2 text-muted-foreground hover:text-foreground'
+              tooltip='Keyboard shortcuts'
+            />
+          </div>
           <CommandList>
             <CommandEmpty>
               {isLoading ? 'Searching…' : 'No results found.'}

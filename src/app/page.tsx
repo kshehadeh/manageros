@@ -1,10 +1,18 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { ArrowRight, BarChart3, CalendarRange, MessageSquare, ShieldCheck, Users } from 'lucide-react'
+import {
+  ArrowRight,
+  BarChart3,
+  CalendarRange,
+  MessageSquare,
+  ShieldCheck,
+  Users,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { FadeInOnScroll } from '@/components/marketing/fade-in'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import Image from 'next/image'
 
 const featureHighlights = [
   {
@@ -34,9 +42,21 @@ const featureHighlights = [
 ]
 
 const proofPoints = [
-  { title: 'Fewer surprise escalations', description: 'Detect delivery and morale drift before it hits the sprint review.' },
-  { title: 'Time back for coaching', description: 'Reclaim hours each week by automating prep and follow-up workflows.' },
-  { title: 'Happier engineering teams', description: 'Celebrate wins, catch burnout signals, and keep career conversations moving.' },
+  {
+    title: 'Fewer surprise escalations',
+    description:
+      'Detect delivery and morale drift before it hits the sprint review.',
+  },
+  {
+    title: 'Time back for coaching',
+    description:
+      'Reclaim hours each week by automating prep and follow-up workflows.',
+  },
+  {
+    title: 'Happier engineering teams',
+    description:
+      'Celebrate wins, catch burnout signals, and keep career conversations moving.',
+  },
 ]
 
 export const metadata = {
@@ -63,16 +83,26 @@ export default async function MarketingHome() {
       <div className='relative z-10'>
         <header className='mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-8 sm:px-8'>
           <div className='flex items-center gap-3'>
-            <span className='inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 text-lg font-semibold text-white shadow-[0_10px_30px_rgba(88,86,255,0.35)] backdrop-blur'>
-              MO
-            </span>
+            <Image
+              src='/images/indigo-logo-white.png'
+              alt='ManagerOS Logo'
+              width={40}
+              height={40}
+              className='h-10 w-10'
+              priority
+            />
             <div>
               <p className='text-lg font-semibold tracking-tight'>ManagerOS</p>
-              <p className='text-xs text-white/60'>Built for engineering leaders</p>
+              <p className='text-xs text-white/60'>
+                Built for engineering leaders
+              </p>
             </div>
           </div>
           <nav className='hidden items-center gap-8 text-sm font-medium text-white/70 md:flex'>
-            <Link href='#features' className='transition-colors hover:text-white'>
+            <Link
+              href='#features'
+              className='transition-colors hover:text-white'
+            >
               Features
             </Link>
             <Link href='#proof' className='transition-colors hover:text-white'>
@@ -83,10 +113,17 @@ export default async function MarketingHome() {
             </Link>
           </nav>
           <div className='flex items-center gap-3'>
-            <Button asChild variant='ghost' className='text-white/80 hover:text-white'>
+            <Button
+              asChild
+              variant='ghost'
+              className='text-white/80 hover:text-white'
+            >
               <Link href='/auth/signin'>Sign in</Link>
             </Button>
-            <Button asChild className='bg-white text-black shadow-[0_18px_40px_rgba(88,86,255,0.45)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90'>
+            <Button
+              asChild
+              className='bg-white text-black shadow-[0_18px_40px_rgba(88,86,255,0.45)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90'
+            >
               <Link href='/auth/signup'>Start free trial</Link>
             </Button>
           </div>
@@ -100,18 +137,25 @@ export default async function MarketingHome() {
           </FadeInOnScroll>
           <FadeInOnScroll delay={100}>
             <h1 className='text-4xl font-semibold tracking-tight text-white sm:text-5xl md:text-6xl'>
-              Give your teams clarity, coaching, and momentum in one operating system.
+              Give your teams clarity, coaching, and momentum in one operating
+              system.
             </h1>
           </FadeInOnScroll>
           <FadeInOnScroll delay={200}>
             <p className='mx-auto max-w-2xl text-base text-white/70 sm:text-lg'>
-              ManagerOS brings planning, 1:1s, feedback, and delivery signals together so engineering managers can lead with confidence—not
-              spreadsheets. Stay aligned, move faster, and grow people without losing sight of execution.
+              ManagerOS brings planning, 1:1s, feedback, and delivery signals
+              together so engineering managers can lead with confidence—not
+              spreadsheets. Stay aligned, move faster, and grow people without
+              losing sight of execution.
             </p>
           </FadeInOnScroll>
           <FadeInOnScroll delay={300}>
             <div className='flex flex-wrap items-center justify-center gap-4'>
-              <Button asChild size='lg' className='bg-primary text-primary-foreground shadow-[0_18px_40px_rgba(79,70,229,0.45)] transition-all duration-200 hover:-translate-y-0.5'>
+              <Button
+                asChild
+                size='lg'
+                className='bg-primary text-primary-foreground shadow-[0_18px_40px_rgba(79,70,229,0.45)] transition-all duration-200 hover:-translate-y-0.5'
+              >
                 <Link href='/auth/signup' className='flex items-center gap-2'>
                   Start building your rhythm
                   <ArrowRight className='h-4 w-4' />
@@ -133,11 +177,17 @@ export default async function MarketingHome() {
           <FadeInOnScroll className='rounded-3xl border border-white/5 bg-white/[0.03] p-10 shadow-[0_25px_60px_rgba(7,16,29,0.45)] backdrop-blur'>
             <div className='grid gap-10 md:grid-cols-[1.3fr_1fr] md:items-center'>
               <div className='space-y-6'>
-                <p className='text-sm font-semibold uppercase tracking-[0.3em] text-white/60'>Why teams choose ManagerOS</p>
-                <h2 className='text-3xl font-semibold text-white sm:text-4xl'>Operational calm meets empowered engineering teams.</h2>
+                <p className='text-sm font-semibold uppercase tracking-[0.3em] text-white/60'>
+                  Why teams choose ManagerOS
+                </p>
+                <h2 className='text-3xl font-semibold text-white sm:text-4xl'>
+                  Operational calm meets empowered engineering teams.
+                </h2>
                 <p className='text-base text-white/70'>
-                  Replace fragmented workflows with a single space designed for engineering managers. Every interaction—planning, coaching,
-                  and communicating—stays connected so you can focus on outcomes, not orchestration.
+                  Replace fragmented workflows with a single space designed for
+                  engineering managers. Every interaction—planning, coaching,
+                  and communicating—stays connected so you can focus on
+                  outcomes, not orchestration.
                 </p>
                 <div className='grid gap-4 sm:grid-cols-2'>
                   {featureHighlights.map((feature, index) => (
@@ -147,8 +197,12 @@ export default async function MarketingHome() {
                       className='rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-left transition-colors duration-300 hover:border-white/30'
                     >
                       <feature.icon className='mb-4 h-8 w-8 text-white' />
-                      <h3 className='text-lg font-semibold text-white'>{feature.name}</h3>
-                      <p className='mt-2 text-sm text-white/70'>{feature.description}</p>
+                      <h3 className='text-lg font-semibold text-white'>
+                        {feature.name}
+                      </h3>
+                      <p className='mt-2 text-sm text-white/70'>
+                        {feature.description}
+                      </p>
                     </FadeInOnScroll>
                   ))}
                 </div>
@@ -156,11 +210,17 @@ export default async function MarketingHome() {
               <div className='flex flex-col gap-4 rounded-2xl border border-emerald-400/20 bg-gradient-to-br from-emerald-400/10 via-emerald-500/10 to-transparent p-6 text-left shadow-[0_18px_50px_rgba(6,95,70,0.35)] backdrop-blur'>
                 <div className='flex items-center gap-3 text-emerald-200'>
                   <ShieldCheck className='h-6 w-6' />
-                  <span className='text-sm font-medium uppercase tracking-[0.25em]'>Built for focus</span>
+                  <span className='text-sm font-medium uppercase tracking-[0.25em]'>
+                    Built for focus
+                  </span>
                 </div>
-                <p className='text-lg font-semibold text-white'>Your weekly workflow, from Monday kickoff to Friday retros, in a single calm surface.</p>
+                <p className='text-lg font-semibold text-white'>
+                  Your weekly workflow, from Monday kickoff to Friday retros, in
+                  a single calm surface.
+                </p>
                 <p className='text-sm text-emerald-100/80'>
-                  Integrates with the tools you already love. Stay in flow with minimal setup and effortless onboarding for your leads.
+                  Integrates with the tools you already love. Stay in flow with
+                  minimal setup and effortless onboarding for your leads.
                 </p>
               </div>
             </div>
@@ -175,19 +235,32 @@ export default async function MarketingHome() {
                 delay={index * 120}
                 className='rounded-2xl border border-white/5 bg-white/[0.04] p-6 shadow-[0_22px_45px_rgba(7,16,29,0.35)] backdrop-blur'
               >
-                <p className='text-xs font-semibold uppercase tracking-[0.3em] text-primary/60'>Outcome</p>
-                <h3 className='mt-3 text-xl font-semibold text-white'>{point.title}</h3>
-                <p className='mt-2 text-sm text-white/70'>{point.description}</p>
+                <p className='text-xs font-semibold uppercase tracking-[0.3em] text-primary/60'>
+                  Outcome
+                </p>
+                <h3 className='mt-3 text-xl font-semibold text-white'>
+                  {point.title}
+                </h3>
+                <p className='mt-2 text-sm text-white/70'>
+                  {point.description}
+                </p>
               </FadeInOnScroll>
             ))}
           </div>
-          <FadeInOnScroll delay={360} className='mt-12 rounded-3xl border border-white/10 bg-[linear-gradient(135deg,_rgba(56,189,248,0.12),_rgba(88,86,255,0.18))] p-10 text-left shadow-[0_30px_60px_rgba(15,23,42,0.45)] backdrop-blur'>
+          <FadeInOnScroll
+            delay={360}
+            className='mt-12 rounded-3xl border border-white/10 bg-[linear-gradient(135deg,_rgba(56,189,248,0.12),_rgba(88,86,255,0.18))] p-10 text-left shadow-[0_30px_60px_rgba(15,23,42,0.45)] backdrop-blur'
+          >
             <blockquote className='space-y-6 text-lg text-white/80'>
               <p>
-                “ManagerOS helped us connect the dots between delivery, people health, and leadership rituals. Our managers prep faster, uncover
-                risks earlier, and our engineers finally see a clear growth path.”
+                “ManagerOS helped us connect the dots between delivery, people
+                health, and leadership rituals. Our managers prep faster,
+                uncover risks earlier, and our engineers finally see a clear
+                growth path.”
               </p>
-              <footer className='text-sm text-white/60'>Priya K., Director of Engineering</footer>
+              <footer className='text-sm text-white/60'>
+                Priya K., Director of Engineering
+              </footer>
             </blockquote>
           </FadeInOnScroll>
         </section>
@@ -196,14 +269,23 @@ export default async function MarketingHome() {
           <FadeInOnScroll className='relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.06] p-10 text-center shadow-[0_28px_70px_rgba(7,16,29,0.55)] backdrop-blur'>
             <div className='pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.08),_rgba(255,255,255,0))]' />
             <div className='relative space-y-6'>
-              <p className='text-sm font-semibold uppercase tracking-[0.35em] text-white/60'>Ready when you are</p>
-              <h2 className='text-3xl font-semibold text-white sm:text-4xl'>Bring harmony to how your engineering teams deliver.</h2>
+              <p className='text-sm font-semibold uppercase tracking-[0.35em] text-white/60'>
+                Ready when you are
+              </p>
+              <h2 className='text-3xl font-semibold text-white sm:text-4xl'>
+                Bring harmony to how your engineering teams deliver.
+              </h2>
               <p className='mx-auto max-w-2xl text-base text-white/70'>
-                Try ManagerOS free for 14 days. Invite your leads, connect your rituals, and see how a shared operating system transforms the
+                Try ManagerOS free for 14 days. Invite your leads, connect your
+                rituals, and see how a shared operating system transforms the
                 way you support engineers.
               </p>
               <div className='flex flex-wrap items-center justify-center gap-4'>
-                <Button asChild size='lg' className='bg-white text-black shadow-[0_18px_40px_rgba(148,163,255,0.45)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90'>
+                <Button
+                  asChild
+                  size='lg'
+                  className='bg-white text-black shadow-[0_18px_40px_rgba(148,163,255,0.45)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90'
+                >
                   <Link href='/auth/signup' className='flex items-center gap-2'>
                     Launch your trial
                     <ArrowRight className='h-4 w-4' />
@@ -224,15 +306,27 @@ export default async function MarketingHome() {
 
         <footer className='border-t border-white/10 bg-black/20'>
           <div className='mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 text-sm text-white/50 sm:flex-row sm:px-8'>
-            <p>© {new Date().getFullYear()} ManagerOS. Designed for engineering leaders.</p>
+            <p>
+              © {new Date().getFullYear()} ManagerOS. Designed for engineering
+              leaders.
+            </p>
             <div className='flex items-center gap-6'>
-              <Link href='/auth/signup' className='transition-colors hover:text-white'>
+              <Link
+                href='/auth/signup'
+                className='transition-colors hover:text-white'
+              >
                 Start trial
               </Link>
-              <Link href='/auth/signin' className='transition-colors hover:text-white'>
+              <Link
+                href='/auth/signin'
+                className='transition-colors hover:text-white'
+              >
                 Sign in
               </Link>
-              <Link href='mailto:hello@manageros.com' className='transition-colors hover:text-white'>
+              <Link
+                href='mailto:hello@manageros.com'
+                className='transition-colors hover:text-white'
+              >
                 Contact
               </Link>
             </div>

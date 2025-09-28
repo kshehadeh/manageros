@@ -9,6 +9,7 @@ import { isAdmin } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
 import { Upload, UserPlus, Workflow, User } from 'lucide-react'
 import { Person } from '@/types/person'
+import { HelpIcon } from '@/components/help-icon'
 
 interface PeoplePageClientProps {
   people: Person[]
@@ -26,6 +27,7 @@ export function PeoplePageClient({ people }: PeoplePageClientProps) {
             <div className='flex items-center gap-2'>
               <User className='h-6 w-6 text-muted-foreground' />
               <h1 className='page-title'>People</h1>
+              <HelpIcon helpId='people' size='md' />
             </div>
           </div>
           <div className='flex items-center gap-3'>

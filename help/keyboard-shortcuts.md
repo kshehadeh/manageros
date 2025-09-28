@@ -1,0 +1,52 @@
+---
+id: keyboard-shortcuts
+title: Keyboard Shortcuts
+category: Getting Started
+---
+
+# Keyboard Shortcuts
+
+ManagerOS includes several keyboard shortcuts to help you navigate and work more efficiently.
+
+## Global Shortcuts
+
+### Command Palette
+
+- **⌘K** (Mac) / **Ctrl+K** (Windows/Linux)
+- Opens the command palette where you can quickly navigate to any page or perform common actions
+- Type to search for pages, people, teams, initiatives, or tasks
+- Press Enter to navigate or Escape to close
+
+### Quick Task Creation
+
+- **Q** (anywhere in the app)
+- Opens the quick task creation dialog
+- Allows you to quickly create a new task without navigating to the tasks page
+- Press Escape to cancel
+
+## Navigation Tips
+
+- Use the command palette (⌘K) to quickly jump between different sections of the app
+- The command palette remembers your recent searches and frequently accessed items
+- You can search for specific people, teams, or initiatives by typing their names
+- Use arrow keys to navigate through search results in the command palette
+
+## Browser Shortcuts
+
+These standard browser shortcuts also work in ManagerOS:
+
+- **⌘R** (Mac) / **Ctrl+R** (Windows/Linux) - Refresh the page
+- **⌘L** (Mac) / **Ctrl+L** (Windows/Linux) - Focus the address bar
+- **⌘T** (Mac) / **Ctrl+T** (Windows/Linux) - Open new tab
+- **⌘W** (Mac) / **Ctrl+W** (Windows/Linux) - Close current tab
+
+## Accessibility
+
+All keyboard shortcuts are designed to work with screen readers and other assistive technologies. If you need to customize shortcuts or have accessibility concerns, please contact support.
+
+## Tips
+
+- The command palette is your fastest way to navigate the app
+- Use Q to quickly capture tasks as they come up in meetings or conversations
+- Keyboard shortcuts work consistently across all pages in ManagerOS
+- You can always use the mouse if you prefer - keyboard shortcuts are optional

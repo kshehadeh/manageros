@@ -1,14 +1,16 @@
 import { getMeetingInstance } from '@/lib/actions'
+import { getEntityLinks } from '@/lib/actions/entity-links'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { notFound } from 'next/navigation'
-import { Calendar, Users, Clock, Edit3 } from 'lucide-react'
+import { Calendar, Users } from 'lucide-react'
 import { MeetingInstanceDetailBreadcrumbClient } from '@/components/meeting-instance-detail-breadcrumb-client'
 import { MeetingInstanceActionsDropdown } from '@/components/meeting-instance-actions-dropdown'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
+import { LinkManager } from '@/components/entity-links'
 
 export default async function MeetingInstanceDetailPage({
   params,
@@ -26,7 +28,10 @@ export default async function MeetingInstanceDetailPage({
   }
 
   const { instanceId } = await params
-  const meetingInstance = await getMeetingInstance(instanceId)
+  const [meetingInstance, entityLinks] = await Promise.all([
+    getMeetingInstance(instanceId),
+    getEntityLinks('MeetingInstance', instanceId),
+  ])
 
   if (!meetingInstance) {
     notFound()
@@ -88,22 +93,6 @@ export default async function MeetingInstanceDetailPage({
                   <Calendar className='h-3 w-3' />
                   <span>{formatDateTime(scheduledDate)}</span>
                 </div>
-
-                <div className='flex items-center gap-1'>
-                  <Clock className='h-3 w-3' />
-                  <span>
-                    Created{' '}
-                    {new Date(meetingInstance.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-
-                <div className='flex items-center gap-1'>
-                  <Edit3 className='h-3 w-3' />
-                  <span>
-                    Updated{' '}
-                    {new Date(meetingInstance.updatedAt).toLocaleDateString()}
-                  </span>
-                </div>
               </div>
 
               <div className='flex items-center gap-3 mt-2'>
@@ -126,6 +115,15 @@ export default async function MeetingInstanceDetailPage({
             content={meetingInstance.notes || ''}
             variant='default'
             emptyStateText='No notes for this meeting instance'
+          />
+        </div>
+
+        {/* Links */}
+        <div className='page-section'>
+          <LinkManager
+            entityType='MeetingInstance'
+            entityId={meetingInstance.id}
+            links={entityLinks}
           />
         </div>
 

@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -17,6 +16,7 @@ import { createMeeting, updateMeeting } from '@/lib/actions'
 import { type MeetingFormData, meetingSchema } from '@/lib/validations'
 import { Person, Team, Initiative } from '@prisma/client'
 import { AlertCircle, Plus, X } from 'lucide-react'
+import { MarkdownEditor } from '@/components/markdown-editor'
 
 interface MeetingFormProps {
   people: Person[]
@@ -173,12 +173,10 @@ export function MeetingForm({
 
         <div>
           <Label htmlFor='description'>Description</Label>
-          <Textarea
-            id='description'
+          <MarkdownEditor
             value={formData.description}
-            onChange={e => handleInputChange('description', e.target.value)}
-            placeholder='Enter meeting description'
-            rows={3}
+            onChange={value => handleInputChange('description', value)}
+            placeholder='Enter meeting description... Use Markdown for formatting!'
           />
         </div>
 
@@ -398,12 +396,10 @@ export function MeetingForm({
 
         <div>
           <Label htmlFor='notes'>Notes</Label>
-          <Textarea
-            id='notes'
+          <MarkdownEditor
             value={formData.notes}
-            onChange={e => handleInputChange('notes', e.target.value)}
-            placeholder='Meeting notes and agenda items'
-            rows={4}
+            onChange={value => handleInputChange('notes', value)}
+            placeholder='Meeting notes and agenda items... Use Markdown for formatting!'
           />
         </div>
       </div>

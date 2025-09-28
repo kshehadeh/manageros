@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-09-28T17:04:50.579Z
+ * Generated on: 2025-09-28T17:17:29.871Z
  */
 
 export interface HelpContent {
@@ -92,7 +92,5 @@ Open these pages and click the help icon for deep dives:
 - Meetings & Communication: recurring meetings, instances, 1:1 best practices
 - Feedback & Development: campaigns, response visibility, synopses
 - Integrations: GitHub and Jira linking and data shown
-
-
 `,
 }

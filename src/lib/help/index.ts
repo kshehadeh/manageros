@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-09-28T17:04:50.580Z
+ * Generated on: 2025-09-28T17:17:29.874Z
  */
 
 export interface HelpContent {
@@ -17,8 +17,10 @@ export interface HelpContent {
 }
 
 // Import all help content files
+import { helpContent as keyboardShortcuts } from './keyboard-shortcuts'
 import { helpContent as peopleHierarchy } from './people-hierarchy'
 import { helpContent as directReports } from './direct-reports'
+import { helpContent as people } from './people'
 import { helpContent as oneOnOnes } from './one-on-ones'
 import { helpContent as meetingsAndInstances } from './meetings-and-instances'
 import { helpContent as gettingStarted } from './getting-started'
@@ -33,8 +35,10 @@ import { helpContent as taskPriorities } from './task-priorities'
 
 // Combine all help content into a single object
 export const helpContent: Record<string, HelpContent> = {
+  'keyboard-shortcuts': keyboardShortcuts,
   'people-hierarchy': peopleHierarchy,
   'direct-reports': directReports,
+  people: people,
   'one-on-ones': oneOnOnes,
   'meetings-and-instances': meetingsAndInstances,
   'getting-started': gettingStarted,
@@ -75,9 +79,9 @@ export function getAllHelpContent(): HelpContent[] {
 export function getHelpCategories(): string[] {
   return Array.from(
     new Set([
+      'Getting Started',
       'People & Teams',
       'Meetings & Communication',
-      'Getting Started',
       'Integrations',
       'Feedback & Development',
       'Tasks & Projects',
@@ -97,8 +101,10 @@ export function hasHelpContent(id: string): boolean {
  */
 export function getHelpIds(): string[] {
   return [
+    'keyboard-shortcuts',
     'people-hierarchy',
     'direct-reports',
+    'people',
     'one-on-ones',
     'meetings-and-instances',
     'getting-started',

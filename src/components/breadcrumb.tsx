@@ -19,7 +19,10 @@ export default function Breadcrumb() {
       {/* Desktop breadcrumb */}
       <nav className='hidden sm:flex items-center space-x-2 text-sm'>
         {breadcrumbs.map((item, index) => (
-          <div key={item.href} className='flex items-center space-x-2'>
+          <div
+            key={`${item.href}-${index}`}
+            className='flex items-center space-x-2'
+          >
             {index > 0 && (
               <ChevronRight className='h-4 w-4 text-muted-foreground' />
             )}
@@ -48,7 +51,7 @@ export default function Breadcrumb() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align='start' className='w-56'>
             {breadcrumbs.map((item, index) => (
-              <DropdownMenuItem key={item.href} asChild>
+              <DropdownMenuItem key={`${item.href}-${index}`} asChild>
                 <Link
                   href={item.href}
                   className={`w-full ${

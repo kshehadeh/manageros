@@ -36,7 +36,12 @@ export function DefaultBreadcrumbHandler() {
   useEffect(() => {
     const generateBreadcrumbs = (): BreadcrumbItem[] => {
       const segments = pathname.split('/').filter(Boolean)
-      const breadcrumbs: BreadcrumbItem[] = [{ name: 'Dashboard', href: '/dashboard' }]
+      const breadcrumbs: BreadcrumbItem[] = []
+
+      // Only add Dashboard if we're not already on the dashboard
+      if (pathname !== '/dashboard') {
+        breadcrumbs.push({ name: 'Dashboard', href: '/dashboard' })
+      }
 
       let currentPath = ''
 

@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -19,6 +18,7 @@ import {
 } from '@/lib/validations'
 import { Person } from '@prisma/client'
 import { AlertCircle, Plus, X } from 'lucide-react'
+import { MarkdownEditor } from '@/components/markdown-editor'
 
 interface MeetingInstanceFormProps {
   meetingId: string
@@ -148,12 +148,10 @@ export function MeetingInstanceForm({
 
         <div>
           <Label htmlFor='notes'>Notes</Label>
-          <Textarea
-            id='notes'
+          <MarkdownEditor
             value={formData.notes}
-            onChange={e => handleInputChange('notes', e.target.value)}
-            placeholder='Meeting notes and outcomes'
-            rows={4}
+            onChange={value => handleInputChange('notes', value)}
+            placeholder='Meeting notes and outcomes... Use Markdown for formatting!'
           />
         </div>
 
