@@ -16,12 +16,14 @@ export default async function SettingsPage() {
       </div>
 
       <div className='page-section space-y-6'>
-        <div className='card'>
-          <JiraCredentialsForm initialCredentials={jiraCredentials} />
-        </div>
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+          <div className='card'>
+            <JiraCredentialsForm initialCredentials={jiraCredentials} />
+          </div>
 
-        <div className='card'>
-          <GithubCredentialsForm initialCredentials={githubCredentials} />
+          <div className='card'>
+            <GithubCredentialsForm initialCredentials={githubCredentials} />
+          </div>
         </div>
       </div>
     </div>
