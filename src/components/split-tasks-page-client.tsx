@@ -4,7 +4,11 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { TaskTable } from '@/components/task-table'
 import { TasksFilterBar } from '@/components/tasks-filter-bar'
 import { Task, Person, Initiative, Objective, User } from '@prisma/client'
-import { ACTIVE_STATUSES, COMPLETED_STATUSES } from '@/lib/task-status'
+import {
+  ACTIVE_STATUSES,
+  COMPLETED_STATUSES,
+  TaskStatus,
+} from '@/lib/task-status'
 
 type TaskWithRelations = Task & {
   assignee: Person | null
@@ -41,10 +45,10 @@ export function SplitTasksPageClient({
   // Split tasks into incomplete and completed
   const { incompleteTasks, completedTasks } = useMemo(() => {
     const incomplete = filteredTasks.filter(task =>
-      ACTIVE_STATUSES.includes(task.status as any)
+      ACTIVE_STATUSES.includes(task.status as TaskStatus)
     )
     const completed = filteredTasks.filter(task =>
-      COMPLETED_STATUSES.includes(task.status as any)
+      COMPLETED_STATUSES.includes(task.status as TaskStatus)
     )
 
     // Sort incomplete tasks by due date (desc) then priority (desc)

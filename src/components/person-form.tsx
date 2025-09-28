@@ -17,6 +17,7 @@ interface PersonFormProps {
     email: string | null
     role?: string | null
     status: string
+    birthday?: Date | null
     teamId?: string | null
     managerId?: string | null
     startedAt?: Date | null
@@ -36,16 +37,24 @@ export function PersonForm({
   initialTeamId,
   person,
 }: PersonFormProps) {
+  // Format date for date input without timezone issues
+  const formatDateForInput = (date: Date | null) => {
+    if (!date) return ''
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
   const [formData, setFormData] = useState<PersonFormData>({
     name: person?.name || '',
     email: person?.email || '',
     role: person?.role || '',
     status: (person?.status as PersonFormData['status']) || 'active',
+    birthday: formatDateForInput(person?.birthday || null),
     teamId: person?.teamId || initialTeamId || '',
     managerId: person?.managerId || initialManagerId || '',
-    startedAt: person?.startedAt
-      ? person.startedAt.toISOString().split('T')[0]
-      : '',
+    startedAt: formatDateForInput(person?.startedAt || null),
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -116,7 +125,7 @@ export function PersonForm({
       {/* Status & Dates */}
       <div className='card'>
         <h3 className='font-semibold mb-4'>Status & Dates</h3>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
           <div>
             <label className='block text-sm font-medium mb-2'>Status</label>
             <select
@@ -133,6 +142,18 @@ export function PersonForm({
               <option value='inactive'>Inactive</option>
               <option value='on_leave'>On Leave</option>
             </select>
+          </div>
+
+          <div>
+            <label className='block text-sm font-medium mb-2'>Birthday</label>
+            <input
+              type='date'
+              value={formData.birthday}
+              onChange={e =>
+                setFormData({ ...formData, birthday: e.target.value })
+              }
+              className='input'
+            />
           </div>
 
           <div>

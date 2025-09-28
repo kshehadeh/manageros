@@ -584,6 +584,7 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
               person={{
                 id: feedbackModal.personId,
                 name: feedbackModal.personName,
+                birthday: null,
                 email: null,
                 role: null,
                 organizationId: '',

@@ -321,6 +321,22 @@ export default async function PersonDetailPage({
                     </span>
                   </div>
                 )}
+                {personWithRelations.birthday && (
+                  <div className='flex items-center gap-1'>
+                    <CalendarDays className='w-4 h-4' />
+                    <span>
+                      Birthday{' '}
+                      {personWithRelations.birthday.toLocaleDateString(
+                        'en-US',
+                        {
+                          year: 'numeric',
+                          month: 'numeric',
+                          day: 'numeric',
+                        }
+                      )}
+                    </span>
+                  </div>
+                )}
                 {personWithRelations.reports.length > 0 && (
                   <div className='flex items-center gap-1'>
                     <Users className='w-4 h-4' />

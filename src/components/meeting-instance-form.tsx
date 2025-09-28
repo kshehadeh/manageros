@@ -149,7 +149,7 @@ export function MeetingInstanceForm({
         <div>
           <Label htmlFor='notes'>Notes</Label>
           <MarkdownEditor
-            value={formData.notes}
+            value={formData.notes || ''}
             onChange={value => handleInputChange('notes', value)}
             placeholder='Meeting notes and outcomes... Use Markdown for formatting!'
           />

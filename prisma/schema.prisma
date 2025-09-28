@@ -76,6 +76,7 @@ model Person {
   name               String
   role               String?
   status             String            @default("active")
+  birthday           DateTime?
   organizationId     String
   organization       Organization      @relation(fields: [organizationId], references: [id])
   teamId             String?

@@ -51,6 +51,7 @@ export async function getPeopleHierarchy() {
             email: true,
             role: true,
             status: true,
+            birthday: true,
             reports: {
               select: {
                 id: true,
@@ -58,6 +59,7 @@ export async function getPeopleHierarchy() {
                 email: true,
                 role: true,
                 status: true,
+                birthday: true,
               },
             },
           },
@@ -69,6 +71,7 @@ export async function getPeopleHierarchy() {
             email: true,
             role: true,
             status: true,
+            birthday: true,
           },
         },
         team: {
@@ -142,6 +145,11 @@ export async function createPerson(formData: PersonFormData) {
     ? new Date(validatedData.startedAt)
     : null
 
+  // Parse birthday date if provided - treat as date-only to avoid timezone issues
+  const birthday = validatedData.birthday
+    ? new Date(validatedData.birthday + 'T00:00:00')
+    : null
+
   // Verify team belongs to user's organization if specified
   if (validatedData.teamId) {
     const team = await prisma.team.findFirst({
@@ -175,6 +183,7 @@ export async function createPerson(formData: PersonFormData) {
       email: validatedData.email || null,
       role: validatedData.role,
       status: validatedData.status,
+      birthday,
       teamId: validatedData.teamId || null,
       managerId: validatedData.managerId || null,
       startedAt,
@@ -212,6 +221,11 @@ export async function updatePerson(id: string, formData: PersonFormData) {
   // Parse startedAt date if provided
   const startedAt = validatedData.startedAt
     ? new Date(validatedData.startedAt)
+    : null
+
+  // Parse birthday date if provided - treat as date-only to avoid timezone issues
+  const birthday = validatedData.birthday
+    ? new Date(validatedData.birthday + 'T00:00:00')
     : null
 
   // Verify person belongs to user's organization
@@ -259,6 +273,7 @@ export async function updatePerson(id: string, formData: PersonFormData) {
       email: validatedData.email || null,
       role: validatedData.role,
       status: validatedData.status,
+      birthday,
       teamId: validatedData.teamId || null,
       managerId: validatedData.managerId || null,
       startedAt,
@@ -337,6 +352,11 @@ export async function updatePersonPartial(
     ? new Date(validatedData.startedAt)
     : undefined
 
+  // Parse birthday date if provided - treat as date-only to avoid timezone issues
+  const birthday = validatedData.birthday
+    ? new Date(validatedData.birthday + 'T00:00:00')
+    : undefined
+
   // Build update data object with only provided fields
   const updateFields: Partial<Prisma.PersonUpdateInput> = {}
   if (validatedData.name !== undefined) updateFields.name = validatedData.name
@@ -345,6 +365,7 @@ export async function updatePersonPartial(
   if (validatedData.role !== undefined) updateFields.role = validatedData.role
   if (validatedData.status !== undefined)
     updateFields.status = validatedData.status
+  if (birthday !== undefined) updateFields.birthday = birthday
   if (validatedData.teamId !== undefined) {
     updateFields.team = validatedData.teamId
       ? { connect: { id: validatedData.teamId } }
@@ -517,6 +538,7 @@ export async function getPeopleForOneOnOne() {
       name: true,
       email: true,
       role: true,
+      birthday: true,
       manager: {
         select: {
           id: true,
@@ -553,6 +575,7 @@ export async function getPeopleForFeedbackFilters() {
       name: true,
       email: true,
       role: true,
+      birthday: true,
     },
     orderBy: { name: 'asc' },
   })
