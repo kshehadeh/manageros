@@ -315,7 +315,7 @@ export function TeamsFlowChart({ teams }: TeamsFlowChartProps) {
         className='bg-background'
         style={{ height: '100%' }}
       >
-        <Controls className='bg-card border' />
+        <Controls />
         <Background
           variant={BackgroundVariant.Dots}
           gap={20}
@@ -323,7 +323,6 @@ export function TeamsFlowChart({ teams }: TeamsFlowChartProps) {
           className='text-muted'
         />
         <MiniMap
-          className='bg-card border'
           nodeColor={node => {
             switch (node.type) {
               case 'team':

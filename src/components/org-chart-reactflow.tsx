@@ -285,7 +285,7 @@ export function OrgChartReactFlow({ people }: OrgChartReactFlowProps) {
         className='bg-background'
         style={{ height: '100%' }}
       >
-        <Controls className='bg-card border' />
+        <Controls />
         <Background
           variant={BackgroundVariant.Dots}
           gap={20}
@@ -293,7 +293,6 @@ export function OrgChartReactFlow({ people }: OrgChartReactFlowProps) {
           className='text-muted'
         />
         <MiniMap
-          className='bg-card border'
           nodeColor={node => {
             switch (node.type) {
               case 'person':
