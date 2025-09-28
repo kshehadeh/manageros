@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { updateInitiative } from '@/lib/actions'
 import { type InitiativeFormData } from '@/lib/validations'
 import { Rag } from '@/components/rag'
+import { MarkdownEditor } from '@/components/markdown-editor'
 
 interface InitiativeEditFormProps {
   initiative: {
@@ -165,13 +166,10 @@ export function InitiativeEditForm({
 
           <div>
             <label className='block text-sm font-medium mb-2'>Summary</label>
-            <textarea
+            <MarkdownEditor
               value={formData.summary}
-              onChange={e =>
-                setFormData({ ...formData, summary: e.target.value })
-              }
-              className='input min-h-[80px] resize-none'
-              placeholder='Brief description of the initiative'
+              onChange={value => setFormData({ ...formData, summary: value })}
+              placeholder='Brief description of the initiative... Use Markdown for formatting!'
             />
           </div>
 
@@ -179,13 +177,10 @@ export function InitiativeEditForm({
             <label className='block text-sm font-medium mb-2'>
               Expected Outcome
             </label>
-            <textarea
+            <MarkdownEditor
               value={formData.outcome}
-              onChange={e =>
-                setFormData({ ...formData, outcome: e.target.value })
-              }
-              className='input min-h-[80px] resize-none'
-              placeholder='What success looks like'
+              onChange={value => setFormData({ ...formData, outcome: value })}
+              placeholder='What success looks like... Use Markdown for formatting!'
             />
           </div>
         </div>

@@ -7,6 +7,7 @@ import { InitiativeHeader } from '@/components/initiative-header'
 import { InitiativeObjectives } from '@/components/initiative-objectives'
 import { InitiativeTasks } from '@/components/initiative-tasks'
 import { InitiativeCheckIns } from '@/components/initiative-checkins'
+import { InitiativeSidebar } from '@/components/initiative-sidebar'
 import { Suspense } from 'react'
 import { Loading } from '@/components/ui/loading'
 
@@ -79,85 +80,136 @@ export default async function InitiativeDetail({
     orderBy: { createdAt: 'desc' },
   })
 
+  // Get entity links for this initiative
+  const entityLinks = await prisma.entityLink.findMany({
+    where: {
+      entityType: 'Initiative',
+      entityId: id,
+      organizationId: session.user.organizationId,
+    },
+    include: {
+      createdBy: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
   if (!init) return <div>Not found</div>
 
   return (
     <InitiativeDetailClient initiativeTitle={init.title} initiativeId={init.id}>
-      <div className='page-container'>
-        <InitiativeHeader initiative={init} />
+      <div className='flex flex-col lg:flex-row gap-6'>
+        {/* Main Content */}
+        <div className='flex-1 min-w-0 px-4 lg:px-0'>
+          <div className='page-container'>
+            <InitiativeHeader
+              initiative={{
+                id: init.id,
+                title: init.title,
+                summary: init.summary,
+                rag: init.rag,
+                confidence: init.confidence,
+              }}
+            />
 
-        <Suspense
-          fallback={
-            <div className='page-section'>
-              <div className='card'>
-                <div className='flex items-center justify-center py-8'>
-                  <Loading size='md' />
-                  <span className='ml-2 text-sm text-muted-foreground'>
-                    Loading objectives...
-                  </span>
+            <Suspense
+              fallback={
+                <div className='page-section'>
+                  <div className='card'>
+                    <div className='flex items-center justify-center py-8'>
+                      <Loading size='md' />
+                      <span className='ml-2 text-sm text-muted-foreground'>
+                        Loading objectives...
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          }
-        >
-          <InitiativeObjectives objectives={init.objectives} />
-        </Suspense>
+              }
+            >
+              <InitiativeObjectives objectives={init.objectives} />
+            </Suspense>
 
-        <Suspense
-          fallback={
-            <div className='page-section'>
-              <div className='card'>
-                <div className='flex items-center justify-center py-8'>
-                  <Loading size='md' />
-                  <span className='ml-2 text-sm text-muted-foreground'>
-                    Loading tasks...
-                  </span>
+            <Suspense
+              fallback={
+                <div className='page-section'>
+                  <div className='card'>
+                    <div className='flex items-center justify-center py-8'>
+                      <Loading size='md' />
+                      <span className='ml-2 text-sm text-muted-foreground'>
+                        Loading tasks...
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          }
-        >
-          <InitiativeTasks
-            initiativeId={init.id}
-            objectives={init.objectives}
-            allTasks={allTasks}
-            people={people}
-          />
-        </Suspense>
+              }
+            >
+              <InitiativeTasks
+                initiativeId={init.id}
+                objectives={init.objectives}
+                allTasks={allTasks}
+                people={people}
+              />
+            </Suspense>
 
-        <Suspense
-          fallback={
-            <div className='page-section'>
-              <div className='card'>
-                <div className='flex items-center justify-center py-8'>
-                  <Loading size='md' />
-                  <span className='ml-2 text-sm text-muted-foreground'>
-                    Loading check-ins...
-                  </span>
+            <Suspense
+              fallback={
+                <div className='page-section'>
+                  <div className='card'>
+                    <div className='flex items-center justify-center py-8'>
+                      <Loading size='md' />
+                      <span className='ml-2 text-sm text-muted-foreground'>
+                        Loading check-ins...
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          }
-        >
-          <InitiativeCheckIns
-            initiativeId={init.id}
-            initiativeTitle={init.title}
-            checkIns={init.checkIns.map(ci => ({
-              id: ci.id,
-              weekOf: ci.weekOf.toISOString(),
-              rag: ci.rag,
-              confidence: ci.confidence,
-              summary: ci.summary,
-              blockers: ci.blockers,
-              nextSteps: ci.nextSteps,
-              createdAt: ci.createdAt.toISOString(),
-              createdBy: {
-                id: ci.createdBy.id,
-                name: ci.createdBy.name,
-              },
+              }
+            >
+              <InitiativeCheckIns
+                initiativeId={init.id}
+                initiativeTitle={init.title}
+                checkIns={init.checkIns.map(ci => ({
+                  id: ci.id,
+                  weekOf: ci.weekOf.toISOString(),
+                  rag: ci.rag,
+                  confidence: ci.confidence,
+                  summary: ci.summary,
+                  blockers: ci.blockers,
+                  nextSteps: ci.nextSteps,
+                  createdAt: ci.createdAt.toISOString(),
+                  createdBy: {
+                    id: ci.createdBy.id,
+                    name: ci.createdBy.name,
+                  },
+                }))}
+              />
+            </Suspense>
+          </div>
+        </div>
+
+        {/* Right Sidebar - Full width on mobile, fixed width on desktop */}
+        <div className='w-full lg:w-80 lg:flex-shrink-0'>
+          <InitiativeSidebar
+            team={init.team}
+            owners={init.owners}
+            links={entityLinks.map(link => ({
+              id: link.id,
+              url: link.url,
+              title: link.title,
+              description: link.description,
+              createdAt: link.createdAt,
+              updatedAt: link.updatedAt,
+              createdBy: link.createdBy,
             }))}
+            entityType='Initiative'
+            entityId={init.id}
           />
-        </Suspense>
+        </div>
       </div>
     </InitiativeDetailClient>
   )

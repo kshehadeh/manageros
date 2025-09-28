@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { createInitiative } from '@/lib/actions'
 import { type InitiativeFormData } from '@/lib/validations'
 import { Rag } from '@/components/rag'
+import { MarkdownEditor } from '@/components/markdown-editor'
 
 interface InitiativeFormProps {
   teams: Array<{ id: string; name: string }>
@@ -177,11 +178,11 @@ export function InitiativeForm({
 
           <div>
             <label className='block text-sm font-medium mb-2'>Summary</label>
-            <textarea
-              value={formData.summary}
-              onChange={e => handleInputChange('summary', e.target.value)}
-              className={`input min-h-[80px] resize-none ${errors.summary ? 'border-red-500 focus:border-red-500' : ''}`}
-              placeholder='Brief description of the initiative'
+            <MarkdownEditor
+              value={formData.summary || ''}
+              onChange={value => handleInputChange('summary', value)}
+              placeholder='Brief description of the initiative... Use Markdown for formatting!'
+              className={errors.summary ? 'border-red-500' : ''}
             />
             {errors.summary && (
               <p className='text-red-600 text-sm mt-1'>{errors.summary}</p>
@@ -192,11 +193,11 @@ export function InitiativeForm({
             <label className='block text-sm font-medium mb-2'>
               Expected Outcome
             </label>
-            <textarea
-              value={formData.outcome}
-              onChange={e => handleInputChange('outcome', e.target.value)}
-              className={`input min-h-[80px] resize-none ${errors.outcome ? 'border-red-500 focus:border-red-500' : ''}`}
-              placeholder='What success looks like'
+            <MarkdownEditor
+              value={formData.outcome || ''}
+              onChange={value => handleInputChange('outcome', value)}
+              placeholder='What success looks like... Use Markdown for formatting!'
+              className={errors.outcome ? 'border-red-500' : ''}
             />
             {errors.outcome && (
               <p className='text-red-600 text-sm mt-1'>{errors.outcome}</p>

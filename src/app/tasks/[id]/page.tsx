@@ -1,4 +1,5 @@
 import { getTask } from '@/lib/actions'
+import { prisma } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -8,6 +9,7 @@ import { TaskDetailBreadcrumbClient } from '@/components/task-detail-breadcrumb-
 import { TaskStatusSelector } from '@/components/task-status-selector'
 import { TaskActionsDropdown } from '@/components/task-actions-dropdown'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
+import { LinkManager } from '@/components/entity-links'
 import { Badge } from '@/components/ui/badge'
 import { Calendar, User, Clock } from 'lucide-react'
 import { type TaskStatus } from '@/lib/task-status'
@@ -34,6 +36,25 @@ export default async function TaskDetailPage({
   if (!task) {
     notFound()
   }
+
+  // Get entity links for this task
+  const entityLinks = await prisma.entityLink.findMany({
+    where: {
+      entityType: 'Task',
+      entityId: id,
+      organizationId: session.user.organizationId,
+    },
+    include: {
+      createdBy: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
 
   return (
     <TaskDetailBreadcrumbClient taskTitle={task.title} taskId={task.id}>
@@ -181,6 +202,25 @@ export default async function TaskDetailPage({
             </div>
           </div>
         )}
+
+        {/* Links Section */}
+        <div className='page-section'>
+          <div className='card'>
+            <LinkManager
+              entityType='Task'
+              entityId={task.id}
+              links={entityLinks.map(link => ({
+                id: link.id,
+                url: link.url,
+                title: link.title,
+                description: link.description,
+                createdAt: link.createdAt,
+                updatedAt: link.updatedAt,
+                createdBy: link.createdBy,
+              }))}
+            />
+          </div>
+        </div>
       </div>
     </TaskDetailBreadcrumbClient>
   )
