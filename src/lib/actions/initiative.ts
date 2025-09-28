@@ -26,7 +26,7 @@ export async function createInitiative(formData: InitiativeFormData) {
     : null
 
   // Verify team belongs to user's organization if specified
-  if (validatedData.teamId) {
+  if (validatedData.teamId && validatedData.teamId.trim() !== '') {
     const team = await prisma.team.findFirst({
       where: {
         id: validatedData.teamId,
@@ -38,51 +38,93 @@ export async function createInitiative(formData: InitiativeFormData) {
     }
   }
 
+  // Verify all owners belong to user's organization
+  if (validatedData.owners && validatedData.owners.length > 0) {
+    const ownerIds = validatedData.owners.map(owner => owner.personId)
+    const validOwners = await prisma.person.findMany({
+      where: {
+        id: { in: ownerIds },
+        organizationId: user.organizationId,
+      },
+    })
+
+    if (validOwners.length !== ownerIds.length) {
+      throw new Error(
+        'One or more selected owners are invalid or do not belong to your organization'
+      )
+    }
+  }
+
   // Create the initiative with objectives and owners
-  const initiative = await prisma.initiative.create({
-    data: {
-      title: validatedData.title,
-      summary: validatedData.summary,
-      outcome: validatedData.outcome,
-      startDate,
-      targetDate,
-      status: validatedData.status,
-      rag: validatedData.rag,
-      confidence: validatedData.confidence,
-      teamId: validatedData.teamId,
-      organizationId: user.organizationId,
-      objectives: {
-        create:
-          validatedData.objectives?.map((obj, index) => ({
-            title: obj.title,
-            keyResult: obj.keyResult,
-            sortIndex: index,
-          })) || [],
-      },
-      owners: {
-        create:
-          validatedData.owners?.map(owner => ({
-            personId: owner.personId,
-            role: owner.role,
-          })) || [],
-      },
-    },
-    include: {
-      objectives: true,
-      owners: {
-        include: {
-          person: true,
+  try {
+    const initiative = await prisma.initiative.create({
+      data: {
+        title: validatedData.title,
+        summary: validatedData.summary,
+        outcome: validatedData.outcome,
+        startDate,
+        targetDate,
+        status: validatedData.status,
+        rag: validatedData.rag,
+        confidence: validatedData.confidence,
+        teamId:
+          validatedData.teamId && validatedData.teamId.trim() !== ''
+            ? validatedData.teamId
+            : null,
+        organizationId: user.organizationId,
+        objectives: {
+          create:
+            validatedData.objectives?.map((obj, index) => ({
+              title: obj.title,
+              keyResult: obj.keyResult,
+              sortIndex: index,
+            })) || [],
+        },
+        owners: {
+          create:
+            validatedData.owners?.map(owner => ({
+              personId: owner.personId,
+              role: owner.role,
+            })) || [],
         },
       },
-      team: true,
-    },
-  })
+      include: {
+        objectives: true,
+        owners: {
+          include: {
+            person: true,
+          },
+        },
+        team: true,
+      },
+    })
 
-  // Revalidate the initiatives page
-  revalidatePath('/initiatives')
+    // Revalidate the initiatives page
+    revalidatePath('/initiatives')
 
-  // Redirect to the new initiative
-  redirect(`/initiatives/${initiative.id}`)
+    // Redirect to the new initiative
+    redirect(`/initiatives/${initiative.id}`)
+  } catch (error) {
+    // Handle specific database errors with user-friendly messages
+    if (error && typeof error === 'object' && 'code' in error) {
+      const prismaError = error as { code: string; message: string }
+
+      if (prismaError.code === 'P2003') {
+        // Foreign key constraint violation
+        throw new Error(
+          'One or more selected team members or teams are invalid. Please check your selections and try again.'
+        )
+      } else if (prismaError.code === 'P2002') {
+        // Unique constraint violation
+        throw new Error(
+          'An initiative with this title already exists. Please choose a different title.'
+        )
+      }
+    }
+
+    // Re-throw the original error if it's not a known Prisma error
+    throw error
+  }
 }
 
 export async function updateInitiative(

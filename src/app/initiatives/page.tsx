@@ -27,7 +27,7 @@ export default async function InitiativesPage() {
   ])
 
   return (
-    <div className='page-container'>
+    <div className='page-container px-3 md:px-0'>
       <div className='page-header'>
         <div className='flex items-center justify-between'>
           <div>
@@ -42,7 +42,7 @@ export default async function InitiativesPage() {
           </Button>
         </div>
       </div>
-      <div className='page-section'>
+      <div className='page-section -mx-3 md:mx-0'>
         <InitiativesTable
           initiatives={initiatives}
           people={people}

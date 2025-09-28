@@ -293,7 +293,7 @@ export function InitiativesTable({
   return (
     <div className='space-y-4'>
       {/* Filter Controls */}
-      <div>
+      <div className='px-3 md:px-0'>
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-2'>
             <Button
@@ -492,7 +492,7 @@ export function InitiativesTable({
       </div>
 
       {/* Initiative Table */}
-      <div className='rounded-md border'>
+      <div className='rounded-md border -mx-3 md:mx-0'>
         <Table>
           <TableHeader>
             <TableRow className='hover:bg-accent/50'>
@@ -500,11 +500,12 @@ export function InitiativesTable({
                 RAG
               </TableHead>
               <TableHead className='text-muted-foreground'>Title</TableHead>
-              <TableHead className='text-muted-foreground'>Team</TableHead>
-              <TableHead className='text-muted-foreground'>
-                % Complete
+              <TableHead className='text-muted-foreground hidden md:table-cell'>
+                Team
               </TableHead>
-              <TableHead className='text-muted-foreground'>Owner</TableHead>
+              <TableHead className='text-muted-foreground hidden md:table-cell'>
+                Owner
+              </TableHead>
               <TableHead className='text-muted-foreground w-[50px]'>
                 Actions
               </TableHead>
@@ -533,17 +534,17 @@ export function InitiativesTable({
                       {initiative._count.tasks} tasks •{' '}
                       {initiative._count.checkIns} check-ins
                     </div>
+                    <div className='mt-1'>
+                      <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
+                        {getCompletionPercentage(initiative)}% complete
+                      </span>
+                    </div>
                   </div>
                 </TableCell>
-                <TableCell className='text-muted-foreground'>
+                <TableCell className='text-muted-foreground hidden md:table-cell'>
                   {initiative.team?.name || '—'}
                 </TableCell>
-                <TableCell className='text-muted-foreground'>
-                  <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
-                    {getCompletionPercentage(initiative)}%
-                  </span>
-                </TableCell>
-                <TableCell className='text-muted-foreground'>
+                <TableCell className='text-muted-foreground hidden md:table-cell'>
                   {initiative.owners.length > 0
                     ? initiative.owners
                         .map(owner => owner.person.name)
