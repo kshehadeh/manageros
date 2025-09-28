@@ -1,8 +1,6 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { redirect } from 'next/navigation'
+import { requireAuth } from '@/lib/auth-utils'
 import { getPendingInvitationsForUser } from '@/lib/actions'
 import PendingInvitations from '@/components/pending-invitations'
 import { Suspense } from 'react'
@@ -24,14 +22,10 @@ import {
 } from '@/components/dashboard-sections/section-fallbacks'
 
 export default async function Home() {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
+  const user = await requireAuth()
 
   // If user doesn't have an organization, show organization creation prompt and pending invitations
-  if (!session.user.organizationId) {
+  if (!user.organizationId) {
     const pendingInvitations = await getPendingInvitationsForUser()
 
     return (
@@ -67,7 +61,7 @@ export default async function Home() {
         <div className='flex-1 space-y-6'>
           <Suspense fallback={<TasksSectionFallback />}>
             <DashboardAssignedTasksSection
-              organizationId={session.user.organizationId!}
+              organizationId={user.organizationId!}
             />
           </Suspense>
 
@@ -77,20 +71,20 @@ export default async function Home() {
 
           <Suspense fallback={<RecentFeedbackSectionFallback />}>
             <DashboardRecentFeedbackSection
-              userId={session.user.id}
-              organizationId={session.user.organizationId!}
+              userId={user.id}
+              organizationId={user.organizationId!}
             />
           </Suspense>
 
           <Suspense fallback={<OpenInitiativesSectionFallback />}>
             <DashboardOpenInitiativesSection
-              organizationId={session.user.organizationId!}
+              organizationId={user.organizationId!}
             />
           </Suspense>
 
           <div className='grid gap-6 md:grid-cols-2'>
             <Suspense fallback={<RecentOneOnOnesSectionFallback />}>
-              <DashboardRecentOneOnOnesSection userId={session.user.id} />
+              <DashboardRecentOneOnOnesSection userId={user.id} />
             </Suspense>
           </div>
         </div>
@@ -99,15 +93,15 @@ export default async function Home() {
         <div className='w-full lg:w-80 space-y-6'>
           <Suspense fallback={<RelatedTeamsSectionFallback />}>
             <DashboardRelatedTeamsSection
-              userId={session.user.id}
-              organizationId={session.user.organizationId!}
+              userId={user.id}
+              organizationId={user.organizationId!}
             />
           </Suspense>
 
           <Suspense fallback={<DirectReportsSectionFallback />}>
             <DashboardDirectReportsSection
-              userId={session.user.id}
-              organizationId={session.user.organizationId!}
+              userId={user.id}
+              organizationId={user.organizationId!}
             />
           </Suspense>
         </div>

@@ -1,14 +1,9 @@
-import { redirect } from 'next/navigation'
 import { getMeetings } from '@/lib/actions'
 import { MeetingsPageClient } from '@/components/meetings-page-client'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { requireAuth } from '@/lib/auth-utils'
 
 export default async function MeetingsPage() {
-  try {
-    await getCurrentUser()
-  } catch {
-    redirect('/auth/signin')
-  }
+  await requireAuth({ requireOrganization: true })
 
   const meetings = await getMeetings()
 

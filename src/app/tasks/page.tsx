@@ -1,30 +1,18 @@
 import { getTasks, getInitiatives } from '@/lib/actions'
 import { prisma } from '@/lib/db'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { QuickTaskForm } from '@/components/quick-task-form'
-import { TasksPageClient } from '@/components/tasks-page-client'
+import { requireAuth } from '@/lib/auth-utils'
+import { SplitTasksPageClient } from '@/components/split-tasks-page-client'
+import { CreateTaskButton } from '@/components/create-task-button'
 import { ListTodo } from 'lucide-react'
 
 export default async function TasksPage() {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
-
-  if (!session.user.organizationId) {
-    redirect('/organization/create')
-  }
+  const user = await requireAuth({ requireOrganization: true })
 
   const [tasks, people, initiatives] = await Promise.all([
     getTasks(),
     prisma.person.findMany({
       where: {
-        organizationId: session.user.organizationId,
+        organizationId: user.organizationId!,
       },
       orderBy: { name: 'asc' },
     }),
@@ -32,7 +20,7 @@ export default async function TasksPage() {
   ])
 
   return (
-    <div className='page-container'>
+    <div className='page-container px-3 md:px-0'>
       <div className='page-header'>
         <div className='flex items-center justify-between'>
           <div>
@@ -44,21 +32,12 @@ export default async function TasksPage() {
               Manage and track all tasks across your organization
             </p>
           </div>
-          <Button asChild variant='outline'>
-            <Link href='/tasks/new'>Create Task</Link>
-          </Button>
+          <CreateTaskButton />
         </div>
       </div>
 
-      <div className='page-section'>
-        <QuickTaskForm />
-      </div>
-
-      <div className='page-section'>
-        <div className='flex items-center justify-between mb-4'>
-          <h2 className='text-lg font-semibold'>All Tasks</h2>
-        </div>
-        <TasksPageClient
+      <div className='page-section -mx-3 md:mx-0'>
+        <SplitTasksPageClient
           tasks={tasks}
           people={people}
           initiatives={initiatives}

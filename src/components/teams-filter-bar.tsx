@@ -155,7 +155,7 @@ export function TeamsFilterBar({
     childrenFilter !== 'all'
 
   return (
-    <div className='space-y-4'>
+    <div className='space-y-4 px-3 md:px-0'>
       {/* Search and Filter Bar */}
       <div className='flex items-center gap-4'>
         <div className='relative flex-1 max-w-sm'>

@@ -746,10 +746,10 @@ export function TaskTable({
       )}
 
       {/* Task Table */}
-      <div className='rounded-md border'>
+      <div className='md:rounded-md md:border'>
         <Table>
-          <TableHeader>
-            <TableRow className='hover:bg-accent/50'>
+          <TableHeader className='md:[&_tr]:border-b'>
+            <TableRow className='hover:bg-accent/50 md:border-b'>
               <TableHead className='w-[50px] text-muted-foreground text-center'>
                 <Check className='h-4 w-4' />
               </TableHead>
@@ -776,7 +776,7 @@ export function TaskTable({
               </TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody className='md:[&_tr:last-child]:border-0'>
             {filteredTasks.map(task => {
               const isUpdating = updatingTasks.has(task.id)
               const isCompleted = task.status === TASK_STATUS.DONE
@@ -787,7 +787,7 @@ export function TaskTable({
               return (
                 <TableRow
                   key={task.id}
-                  className={`hover:bg-accent/50 cursor-pointer ${
+                  className={`hover:bg-accent/50 cursor-pointer md:border-b ${
                     isCompleted ? 'opacity-75' : ''
                   }`}
                   onDoubleClick={() => handleRowDoubleClick(task.id)}

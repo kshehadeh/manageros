@@ -1,22 +1,12 @@
 import Link from 'next/link'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { redirect } from 'next/navigation'
+import { requireAuth } from '@/lib/auth-utils'
 import { TeamsPageClient } from '@/components/teams-page-client'
 import { getAllTeamsWithRelations } from '@/lib/actions'
 import { Button } from '@/components/ui/button'
 import { Upload, Plus, Workflow, Users2 } from 'lucide-react'
 
 export default async function TeamsPage() {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
-
-  if (!session.user.organizationId) {
-    redirect('/organization/create')
-  }
+  await requireAuth({ requireOrganization: true })
 
   const teams = await getAllTeamsWithRelations()
 

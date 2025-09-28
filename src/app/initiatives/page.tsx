@@ -2,35 +2,25 @@ import { getInitiatives } from '@/lib/actions'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { InitiativesTable } from '@/components/initiatives-table'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { redirect } from 'next/navigation'
+import { requireAuth } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
 import { Rocket } from 'lucide-react'
 import { HelpIcon } from '../../components/help-icon'
 
 export default async function InitiativesPage() {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
-
-  if (!session.user.organizationId) {
-    redirect('/organization/create')
-  }
+  const user = await requireAuth({ requireOrganization: true })
 
   const [initiatives, people, teams] = await Promise.all([
     getInitiatives(),
     prisma.person.findMany({
       where: {
-        organizationId: session.user.organizationId,
+        organizationId: user.organizationId!,
       },
       orderBy: { name: 'asc' },
     }),
     prisma.team.findMany({
       where: {
-        organizationId: session.user.organizationId,
+        organizationId: user.organizationId!,
       },
       orderBy: { name: 'asc' },
     }),

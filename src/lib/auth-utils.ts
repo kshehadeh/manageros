@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { redirect } from 'next/navigation'
 
 /**
  * Get the current authenticated user from the session
@@ -12,6 +13,58 @@ export async function getCurrentUser() {
     throw new Error('Unauthorized')
   }
   return session.user
+}
+
+/**
+ * Require authentication with optional organization requirement
+ * This is the standard way to handle authorization in page components
+ */
+export async function requireAuth(options?: {
+  requireOrganization?: boolean
+  redirectTo?: string
+}) {
+  const user = await getCurrentUser()
+
+  if (options?.requireOrganization && !user.organizationId) {
+    redirect(options.redirectTo || '/organization/create')
+  }
+
+  return user
+}
+
+/**
+ * Get navigation items filtered by user permissions
+ * This ensures server-side security for navigation filtering
+ */
+export async function getFilteredNavigation() {
+  const user = await getCurrentUser()
+
+  const navigation = [
+    { name: 'Dashboard', href: '/', icon: 'Home' },
+    { name: 'Initiatives', href: '/initiatives', icon: 'Rocket' },
+    { name: 'People', href: '/people', icon: 'User' },
+    { name: 'Teams', href: '/teams', icon: 'Users2' },
+    { name: 'Tasks', href: '/tasks', icon: 'ListTodo' },
+    { name: 'Meetings', href: '/meetings', icon: 'Calendar' },
+    {
+      name: 'Org Settings',
+      href: '/organization/settings',
+      icon: 'Building',
+      adminOnly: true,
+    },
+    { name: 'Your Settings', href: '/settings', icon: 'Settings' },
+  ]
+
+  // Filter navigation based on organization membership and admin role
+  return navigation.filter(item => {
+    // If user has no organization, only show Dashboard
+    if (!user.organizationId) {
+      return item.href === '/'
+    }
+
+    // If user has organization, filter by admin role for admin-only items
+    return !item.adminOnly || user.role === 'ADMIN'
+  })
 }
 
 /**

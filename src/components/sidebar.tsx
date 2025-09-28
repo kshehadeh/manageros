@@ -21,27 +21,26 @@ import {
 interface NavItem {
   name: string
   href: string
-  icon: React.ComponentType<{ className?: string }>
+  icon: string
   adminOnly?: boolean
 }
 
-const navigation: NavItem[] = [
-  { name: 'Dashboard', href: '/', icon: Home },
-  { name: 'Initiatives', href: '/initiatives', icon: Rocket },
-  { name: 'People', href: '/people', icon: User },
-  { name: 'Teams', href: '/teams', icon: Users2 },
-  { name: 'Tasks', href: '/tasks', icon: ListTodo },
-  { name: 'Meetings', href: '/meetings', icon: Calendar },
-  {
-    name: 'Org Settings',
-    href: '/organization/settings',
-    icon: Building,
-    adminOnly: true,
-  },
-  { name: 'Your Settings', href: '/settings', icon: Settings },
-]
+interface SidebarProps {
+  navigation?: NavItem[]
+}
 
-export default function Sidebar() {
+const iconMap = {
+  Home,
+  Rocket,
+  User,
+  Users2,
+  ListTodo,
+  Settings,
+  Calendar,
+  Building,
+}
+
+export default function Sidebar({ navigation = [] }: SidebarProps) {
   const { data: session, status } = useSession()
   const pathname = usePathname()
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useMobileMenu()
@@ -85,16 +84,8 @@ export default function Sidebar() {
     )
   }
 
-  // Filter navigation based on organization membership and admin role
-  const filteredNavigation = navigation.filter(item => {
-    // If user has no organization, only show Dashboard
-    if (!session.user.organizationId) {
-      return item.href === '/'
-    }
-
-    // If user has organization, filter by admin role for admin-only items
-    return !item.adminOnly || session.user.role === 'ADMIN'
-  })
+  // Use the navigation passed from server-side filtering
+  const filteredNavigation = navigation
 
   return (
     <>
@@ -142,6 +133,7 @@ export default function Sidebar() {
         <nav className='flex-1 px-3 py-4 space-y-1'>
           {filteredNavigation.map(item => {
             const isActive = pathname === item.href
+            const IconComponent = iconMap[item.icon as keyof typeof iconMap]
             return (
               <Link
                 key={item.name}
@@ -153,7 +145,7 @@ export default function Sidebar() {
                     : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                 }`}
               >
-                <item.icon className='h-5 w-5' />
+                {IconComponent && <IconComponent className='h-5 w-5' />}
                 {item.name}
               </Link>
             )
