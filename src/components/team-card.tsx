@@ -120,7 +120,7 @@ export function TeamCard({
 
           {showActions && (
             <div className='flex items-center gap-2'>
-              <TeamActionsDropdown team={team} />
+              <TeamActionsDropdown teamId={team.id} />
             </div>
           )}
         </div>
