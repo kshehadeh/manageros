@@ -452,3 +452,175 @@ export async function acceptInvitationForUser(invitationId: string) {
   revalidatePath('/')
   return result
 }
+
+// Organization Member Management Actions
+
+export async function getOrganizationMembers() {
+  const user = await getCurrentUser()
+
+  // Check if user is admin
+  if (user.role !== 'ADMIN') {
+    throw new Error('Only organization admins can view organization members')
+  }
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    return []
+  }
+
+  // Get all users in the organization with their linked person info
+  return await prisma.user.findMany({
+    where: {
+      organizationId: user.organizationId,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      createdAt: true,
+      person: {
+        select: {
+          id: true,
+          name: true,
+          role: true,
+          status: true,
+          team: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: { name: 'asc' },
+  })
+}
+
+export async function updateUserRole(
+  userId: string,
+  newRole: 'ADMIN' | 'USER'
+) {
+  const currentUser = await getCurrentUser()
+
+  // Check if current user is admin
+  if (currentUser.role !== 'ADMIN') {
+    throw new Error('Only organization admins can change user roles')
+  }
+
+  // Check if current user belongs to an organization
+  if (!currentUser.organizationId) {
+    throw new Error('User must belong to an organization to manage roles')
+  }
+
+  // Verify the target user belongs to the same organization
+  const targetUser = await prisma.user.findFirst({
+    where: {
+      id: userId,
+      organizationId: currentUser.organizationId,
+    },
+  })
+
+  if (!targetUser) {
+    throw new Error('User not found or access denied')
+  }
+
+  // Prevent users from changing their own role
+  if (userId === currentUser.id) {
+    throw new Error('You cannot change your own role')
+  }
+
+  // Prevent removing the last admin
+  if (targetUser.role === 'ADMIN' && newRole === 'USER') {
+    const adminCount = await prisma.user.count({
+      where: {
+        organizationId: currentUser.organizationId,
+        role: 'ADMIN',
+      },
+    })
+
+    if (adminCount <= 1) {
+      throw new Error('Cannot remove the last admin from the organization')
+    }
+  }
+
+  // Update the user's role
+  await prisma.user.update({
+    where: { id: userId },
+    data: { role: newRole },
+  })
+
+  revalidatePath('/organization/members')
+  revalidatePath('/organization/settings')
+}
+
+export async function removeUserFromOrganization(userId: string) {
+  const currentUser = await getCurrentUser()
+
+  // Check if current user is admin
+  if (currentUser.role !== 'ADMIN') {
+    throw new Error(
+      'Only organization admins can remove users from the organization'
+    )
+  }
+
+  // Check if current user belongs to an organization
+  if (!currentUser.organizationId) {
+    throw new Error('User must belong to an organization to manage members')
+  }
+
+  // Verify the target user belongs to the same organization
+  const targetUser = await prisma.user.findFirst({
+    where: {
+      id: userId,
+      organizationId: currentUser.organizationId,
+    },
+  })
+
+  if (!targetUser) {
+    throw new Error('User not found or access denied')
+  }
+
+  // Prevent users from removing themselves
+  if (userId === currentUser.id) {
+    throw new Error('You cannot remove yourself from the organization')
+  }
+
+  // Prevent removing the last admin
+  if (targetUser.role === 'ADMIN') {
+    const adminCount = await prisma.user.count({
+      where: {
+        organizationId: currentUser.organizationId,
+        role: 'ADMIN',
+      },
+    })
+
+    if (adminCount <= 1) {
+      throw new Error('Cannot remove the last admin from the organization')
+    }
+  }
+
+  // Remove user from organization in a transaction
+  await prisma.$transaction(async tx => {
+    // Unlink user from person if linked
+    if (targetUser.personId) {
+      await tx.user.update({
+        where: { id: userId },
+        data: { personId: null },
+      })
+    }
+
+    // Remove user from organization
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        organizationId: null,
+        role: 'USER', // Reset role to default
+      },
+    })
+  })
+
+  revalidatePath('/organization/members')
+  revalidatePath('/organization/settings')
+}

@@ -11,6 +11,9 @@ export {
   checkPendingInvitation,
   getPendingInvitationsForUser,
   acceptInvitationForUser,
+  getOrganizationMembers,
+  updateUserRole,
+  removeUserFromOrganization,
 } from './organization'
 
 // Person Actions

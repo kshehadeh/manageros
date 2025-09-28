@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-09-27T22:28:14.510Z
+ * Generated on: 2025-09-28T10:59:16.416Z
  */
 
 export interface HelpContent {

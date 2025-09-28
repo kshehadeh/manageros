@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-09-27T22:28:14.511Z
+ * Generated on: 2025-09-28T10:59:16.416Z
  */
 
 export interface HelpContent {
@@ -29,6 +29,7 @@ ManagerOS uses AI-powered synopsis generation to create concise, professional su
 ### What is Synopsis Generation?
 
 Synopsis generation automatically creates professional work summaries by analyzing:
+
 - **Task completion** and progress
 - **GitHub pull requests** and contributions
 - **Jira ticket activity** and work items

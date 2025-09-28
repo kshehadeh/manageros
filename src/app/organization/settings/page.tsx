@@ -144,14 +144,21 @@ export default async function OrganizationSettingsPage() {
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
               <Shield className='h-5 w-5' />
-              Access Control
+              Member Management
             </CardTitle>
-            <CardDescription>Manage roles and permissions</CardDescription>
+            <CardDescription>
+              Manage member roles and permissions
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className='text-sm text-muted-foreground'>
-              Role management coming soon
-            </p>
+            <div className='space-y-3'>
+              <Button asChild variant='outline' className='w-full'>
+                <Link href='/organization/members'>Manage Members</Link>
+              </Button>
+              <p className='text-sm text-muted-foreground'>
+                Change member roles and remove users from your organization
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>

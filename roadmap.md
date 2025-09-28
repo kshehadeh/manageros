@@ -86,6 +86,7 @@
 - **Feedback Campaign Security** - Creator-only access to campaigns and responses
 - **Centralized Access Control** - Utility functions for consistent security patterns
 - **Security Testing Suite** - Comprehensive tests for all access control scenarios
+- **Organization Member Management** (January 2025) - Admin ability to change member roles (admin/user) and remove members from organization with proper security checks
 
 ---
 
@@ -253,3 +254,14 @@ _Next Review: February 2025_
   - Server action `generatePersonSynopsis`, `listPersonSynopses`
   - UI section `PersonSynopsis` on person detail page
   - Uses tasks by default; optionally includes feedback; integrates Jira and GitHub when linked
+
+### Updates on 2025-01-26
+
+- **Organization Member Management** (Completed):
+  - Added server actions: `getOrganizationMembers`, `updateUserRole`, `removeUserFromOrganization`
+  - Created organization members management page at `/organization/members`
+  - Implemented role change functionality (admin ↔ user) with proper security checks
+  - Added member removal capability with confirmation dialogs
+  - Prevents removal of last admin and self-modification
+  - Updated organization settings page with link to member management
+  - All actions include proper organization-level access control and validation
