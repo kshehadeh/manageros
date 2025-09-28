@@ -12,13 +12,12 @@ export function BugReportButton() {
     <>
       <Button
         variant='outline'
-        size='sm'
+        size='icon'
         onClick={() => setIsModalOpen(true)}
-        className='flex items-center gap-2'
         title='Report a bug'
+        aria-label='Report a bug'
       >
         <Bug className='h-4 w-4' />
-        <span className='hidden sm:inline'>Report Bug</span>
       </Button>
 
       <BugSubmissionModal open={isModalOpen} onOpenChange={setIsModalOpen} />

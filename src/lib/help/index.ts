@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-09-28T14:11:27.981Z
+ * Generated on: 2025-09-28T17:04:50.580Z
  */
 
 export interface HelpContent {
@@ -21,6 +21,7 @@ import { helpContent as peopleHierarchy } from './people-hierarchy'
 import { helpContent as directReports } from './direct-reports'
 import { helpContent as oneOnOnes } from './one-on-ones'
 import { helpContent as meetingsAndInstances } from './meetings-and-instances'
+import { helpContent as gettingStarted } from './getting-started'
 import { helpContent as githubIntegration } from './github-integration'
 import { helpContent as jiraIntegration } from './jira-integration'
 import { helpContent as feedbackCampaignsAndResponses } from './feedback-campaigns-and-responses'
@@ -36,6 +37,7 @@ export const helpContent: Record<string, HelpContent> = {
   'direct-reports': directReports,
   'one-on-ones': oneOnOnes,
   'meetings-and-instances': meetingsAndInstances,
+  'getting-started': gettingStarted,
   'github-integration': githubIntegration,
   'jira-integration': jiraIntegration,
   'feedback-campaigns-and-responses': feedbackCampaignsAndResponses,
@@ -75,6 +77,7 @@ export function getHelpCategories(): string[] {
     new Set([
       'People & Teams',
       'Meetings & Communication',
+      'Getting Started',
       'Integrations',
       'Feedback & Development',
       'Tasks & Projects',
@@ -98,6 +101,7 @@ export function getHelpIds(): string[] {
     'direct-reports',
     'one-on-ones',
     'meetings-and-instances',
+    'getting-started',
     'github-integration',
     'jira-integration',
     'feedback-campaigns-and-responses',

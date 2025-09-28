@@ -4,6 +4,7 @@ import Breadcrumb from './breadcrumb'
 import { ModeToggle } from '@/components/mode-toggle'
 import { BugReportButton } from '@/components/bug-report-button'
 import { Menu, X, Command as CommandIcon } from 'lucide-react'
+import { GettingStartedButton } from '@/components/getting-started-button'
 import { useMobileMenu } from '@/components/mobile-menu-provider'
 import { useCommandPalette } from '@/components/command-palette/provider'
 
@@ -51,6 +52,7 @@ export default function TopBar() {
             <CommandIcon className='h-5 w-5' />
           </button>
 
+          <GettingStartedButton />
           <BugReportButton />
           <ModeToggle />
         </div>
