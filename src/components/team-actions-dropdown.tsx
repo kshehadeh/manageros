@@ -1,28 +1,23 @@
 'use client'
 
-import Link from 'next/link'
 import { useState, useRef, useEffect } from 'react'
-import { Team, Person, Initiative } from '@prisma/client'
-import { Plus, Users, Edit, Trash2, MoreHorizontal } from 'lucide-react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-
-type TeamWithChildren = Team & {
-  parent?: { id: string; name: string } | null
-  children?: TeamWithChildren[]
-  people: Person[]
-  initiatives: Initiative[]
-}
+import { MoreHorizontal, Edit, Trash2 } from 'lucide-react'
+import { deleteTeam } from '@/lib/actions'
 
 interface TeamActionsDropdownProps {
-  team: TeamWithChildren
+  teamId: string
   size?: 'sm' | 'default'
 }
 
 export function TeamActionsDropdown({
-  team,
+  teamId,
   size = 'default',
 }: TeamActionsDropdownProps) {
   const [openDropdown, setOpenDropdown] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const handleDropdownClick = (e: React.MouseEvent) => {
@@ -32,6 +27,20 @@ export function TeamActionsDropdown({
 
   const closeDropdown = () => {
     setOpenDropdown(false)
+    setShowConfirm(false)
+  }
+
+  const handleDelete = async () => {
+    setIsDeleting(true)
+    try {
+      await deleteTeam(teamId)
+      // Redirect to teams list after successful deletion
+      window.location.href = '/teams'
+    } catch (error) {
+      console.error('Error deleting team:', error)
+      setIsDeleting(false)
+      setShowConfirm(false)
+    }
   }
 
   // Close dropdown when clicking outside
@@ -42,6 +51,7 @@ export function TeamActionsDropdown({
         !dropdownRef.current.contains(event.target as Node)
       ) {
         setOpenDropdown(false)
+        setShowConfirm(false)
       }
     }
 
@@ -53,10 +63,6 @@ export function TeamActionsDropdown({
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [openDropdown])
-
-  const hasPeople = team.people.length > 0
-  const hasInitiatives = team.initiatives.length > 0
-  const hasChildren = Boolean(team.children && team.children.length > 0)
 
   return (
     <div className='relative' ref={dropdownRef}>
@@ -75,29 +81,9 @@ export function TeamActionsDropdown({
           onClick={e => e.stopPropagation()}
         >
           <div className='py-1'>
-            {/* Add Person */}
-            <Link
-              href={`/people/new?teamId=${team.id}`}
-              className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-              onClick={closeDropdown}
-            >
-              <Plus className='w-4 h-4' />
-              Add Person
-            </Link>
-
-            {/* Add Child Team */}
-            <Link
-              href={`/teams/new?parentTeamId=${team.id}`}
-              className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-              onClick={closeDropdown}
-            >
-              <Users className='w-4 h-4' />
-              Add Child Team
-            </Link>
-
             {/* Edit Team */}
             <Link
-              href={`/teams/${team.id}/edit`}
+              href={`/teams/${teamId}/edit`}
               className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
               onClick={closeDropdown}
             >
@@ -105,19 +91,41 @@ export function TeamActionsDropdown({
               Edit Team
             </Link>
 
-            {/* Delete Team - Only show if team can be deleted */}
-            {!hasPeople && !hasInitiatives && !hasChildren && (
-              <button
-                className='w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left text-destructive'
-                onClick={() => {
-                  // This would need to be implemented with a confirmation dialog
-                  // For now, we'll just close the dropdown
-                  closeDropdown()
-                }}
+            {/* Delete Team */}
+            {showConfirm ? (
+              <div className='px-3 py-2 space-y-2'>
+                <div className='text-sm font-medium text-destructive mb-2'>
+                  Are you sure you want to delete this team?
+                </div>
+                <div className='flex gap-2'>
+                  <Button
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    variant='destructive'
+                    size='sm'
+                    className='flex-1'
+                  >
+                    {isDeleting ? 'Deleting...' : 'Delete'}
+                  </Button>
+                  <Button
+                    onClick={() => setShowConfirm(false)}
+                    disabled={isDeleting}
+                    variant='outline'
+                    size='sm'
+                    className='flex-1'
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div
+                className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer'
+                onClick={() => setShowConfirm(true)}
               >
                 <Trash2 className='w-4 h-4' />
                 Delete Team
-              </button>
+              </div>
             )}
           </div>
         </div>

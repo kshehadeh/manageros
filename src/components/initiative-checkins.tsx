@@ -26,16 +26,14 @@ export function InitiativeCheckIns({
 }: InitiativeCheckInsProps) {
   return (
     <div className='page-section'>
-      <div className='card'>
-        <CheckInList
-          initiativeId={initiativeId}
-          initiativeTitle={initiativeTitle}
-          checkIns={checkIns.map(ci => ({
-            ...ci,
-            summary: ci.summary || '',
-          }))}
-        />
-      </div>
+      <CheckInList
+        initiativeId={initiativeId}
+        initiativeTitle={initiativeTitle}
+        checkIns={checkIns.map(ci => ({
+          ...ci,
+          summary: ci.summary || '',
+        }))}
+      />
     </div>
   )
 }

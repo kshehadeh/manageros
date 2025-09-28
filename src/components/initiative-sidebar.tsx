@@ -1,6 +1,5 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { LinkManager } from '@/components/entity-links'
@@ -57,38 +56,32 @@ export function InitiativeSidebar({
   entityId,
 }: InitiativeSidebarProps) {
   return (
-    <div className='w-full lg:w-80 space-y-6 px-4 lg:px-0'>
+    <div className='w-full lg:w-80 space-y-6'>
       {/* Team Section */}
       {team && (
-        <Card>
-          <CardHeader className='pb-3'>
-            <CardTitle className='flex items-center gap-2 text-lg'>
-              <Users className='h-5 w-5' />
-              Team
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className='flex items-center gap-2'>
-              <Link
-                href={`/teams/${team.id}`}
-                className='text-sm font-medium text-primary hover:underline'
-              >
-                {team.name}
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+        <div className='page-section'>
+          <h3 className='section-header flex items-center gap-2'>
+            <Users className='h-5 w-5' />
+            Team
+          </h3>
+          <div className='flex items-center gap-2'>
+            <Link
+              href={`/teams/${team.id}`}
+              className='text-sm font-medium text-primary hover:underline'
+            >
+              {team.name}
+            </Link>
+          </div>
+        </div>
       )}
 
       {/* Associated People Section */}
-      <Card>
-        <CardHeader className='pb-3'>
-          <CardTitle className='flex items-center gap-2 text-lg'>
-            <Users className='h-5 w-5' />
-            Associated People
-          </CardTitle>
-        </CardHeader>
-        <CardContent className='space-y-3'>
+      <div className='page-section'>
+        <h3 className='section-header flex items-center gap-2'>
+          <Users className='h-5 w-5' />
+          Associated People
+        </h3>
+        <div className='space-y-3'>
           {owners.length === 0 ? (
             <p className='text-sm text-muted-foreground'>
               No people associated with this initiative yet.
@@ -125,19 +118,17 @@ export function InitiativeSidebar({
               </div>
             ))
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Links Section */}
-      <Card>
-        <CardContent className='pt-6'>
-          <LinkManager
-            entityType={entityType}
-            entityId={entityId}
-            links={links}
-          />
-        </CardContent>
-      </Card>
+      <div className='page-section'>
+        <LinkManager
+          entityType={entityType}
+          entityId={entityId}
+          links={links}
+        />
+      </div>
     </div>
   )
 }

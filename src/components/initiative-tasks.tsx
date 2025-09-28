@@ -29,28 +29,26 @@ export function InitiativeTasks({
 }: InitiativeTasksProps) {
   return (
     <div className='page-section'>
-      <div className='card'>
-        <div className='flex items-center justify-between mb-3'>
-          <h3 className='font-semibold'>Tasks</h3>
-        </div>
+      <div className='flex items-center justify-between mb-4'>
+        <h3 className='section-header'>Tasks</h3>
+      </div>
 
-        <div className='mb-4'>
-          <InitiativeQuickTaskForm
-            initiativeId={initiativeId}
-            objectives={objectives.map(obj => ({
-              ...obj,
-              initiativeId,
-            }))}
-          />
-        </div>
-
-        <TaskTable
-          tasks={allTasks}
-          people={people}
-          showInitiative={false}
-          showDueDate={true}
+      <div className='mb-4'>
+        <InitiativeQuickTaskForm
+          initiativeId={initiativeId}
+          objectives={objectives.map(obj => ({
+            ...obj,
+            initiativeId,
+          }))}
         />
       </div>
+
+      <TaskTable
+        tasks={allTasks}
+        people={people}
+        showInitiative={false}
+        showDueDate={true}
+      />
     </div>
   )
 }

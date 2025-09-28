@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import { Users2 } from 'lucide-react'
 
 interface EditTeamPageProps {
   params: Promise<{
@@ -28,7 +29,10 @@ export default async function EditTeamPage({ params }: EditTeamPageProps) {
   return (
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
-        <h2 className='text-lg font-semibold'>Edit {team.name}</h2>
+        <div className='flex items-center gap-3'>
+          <Users2 className='h-6 w-6 text-muted-foreground' />
+          <h2 className='text-lg font-semibold'>Edit {team.name}</h2>
+        </div>
       </div>
 
       <TeamForm team={team} />

@@ -103,10 +103,10 @@ export default async function InitiativeDetail({
 
   return (
     <InitiativeDetailClient initiativeTitle={init.title} initiativeId={init.id}>
-      <div className='flex flex-col lg:flex-row gap-6'>
+      <div className='flex flex-col lg:flex-row gap-6 px-4 lg:px-6'>
         {/* Main Content */}
-        <div className='flex-1 min-w-0 px-4 lg:px-0'>
-          <div className='page-container'>
+        <div className='flex-1 min-w-0'>
+          <div className='space-y-6'>
             <InitiativeHeader
               initiative={{
                 id: init.id,
@@ -120,13 +120,11 @@ export default async function InitiativeDetail({
             <Suspense
               fallback={
                 <div className='page-section'>
-                  <div className='card'>
-                    <div className='flex items-center justify-center py-8'>
-                      <Loading size='md' />
-                      <span className='ml-2 text-sm text-muted-foreground'>
-                        Loading objectives...
-                      </span>
-                    </div>
+                  <div className='flex items-center justify-center py-8'>
+                    <Loading size='md' />
+                    <span className='ml-2 text-sm text-muted-foreground'>
+                      Loading objectives...
+                    </span>
                   </div>
                 </div>
               }
@@ -137,13 +135,11 @@ export default async function InitiativeDetail({
             <Suspense
               fallback={
                 <div className='page-section'>
-                  <div className='card'>
-                    <div className='flex items-center justify-center py-8'>
-                      <Loading size='md' />
-                      <span className='ml-2 text-sm text-muted-foreground'>
-                        Loading tasks...
-                      </span>
-                    </div>
+                  <div className='flex items-center justify-center py-8'>
+                    <Loading size='md' />
+                    <span className='ml-2 text-sm text-muted-foreground'>
+                      Loading tasks...
+                    </span>
                   </div>
                 </div>
               }
@@ -159,13 +155,11 @@ export default async function InitiativeDetail({
             <Suspense
               fallback={
                 <div className='page-section'>
-                  <div className='card'>
-                    <div className='flex items-center justify-center py-8'>
-                      <Loading size='md' />
-                      <span className='ml-2 text-sm text-muted-foreground'>
-                        Loading check-ins...
-                      </span>
-                    </div>
+                  <div className='flex items-center justify-center py-8'>
+                    <Loading size='md' />
+                    <span className='ml-2 text-sm text-muted-foreground'>
+                      Loading check-ins...
+                    </span>
                   </div>
                 </div>
               }
