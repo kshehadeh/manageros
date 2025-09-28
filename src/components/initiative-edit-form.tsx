@@ -167,7 +167,7 @@ export function InitiativeEditForm({
           <div>
             <label className='block text-sm font-medium mb-2'>Summary</label>
             <MarkdownEditor
-              value={formData.summary}
+              value={formData.summary || ''}
               onChange={value => setFormData({ ...formData, summary: value })}
               placeholder='Brief description of the initiative... Use Markdown for formatting!'
             />
@@ -178,7 +178,7 @@ export function InitiativeEditForm({
               Expected Outcome
             </label>
             <MarkdownEditor
-              value={formData.outcome}
+              value={formData.outcome || ''}
               onChange={value => setFormData({ ...formData, outcome: value })}
               placeholder='What success looks like... Use Markdown for formatting!'
             />

@@ -22,7 +22,7 @@ interface BreadcrumbProviderProps {
 
 export function BreadcrumbProvider({ children }: BreadcrumbProviderProps) {
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([
-    { name: 'Dashboard', href: '/' },
+    { name: 'Dashboard', href: '/dashboard' },
   ])
 
   return (

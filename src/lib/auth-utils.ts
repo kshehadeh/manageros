@@ -40,7 +40,7 @@ export async function getFilteredNavigation() {
   const user = await getCurrentUser()
 
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: 'Home' },
+    { name: 'Dashboard', href: '/dashboard', icon: 'Home' },
     { name: 'Initiatives', href: '/initiatives', icon: 'Rocket' },
     { name: 'People', href: '/people', icon: 'User' },
     { name: 'Teams', href: '/teams', icon: 'Users2' },
@@ -59,7 +59,7 @@ export async function getFilteredNavigation() {
   return navigation.filter(item => {
     // If user has no organization, only show Dashboard
     if (!user.organizationId) {
-      return item.href === '/'
+      return item.href === '/dashboard'
     }
 
     // If user has organization, filter by admin role for admin-only items

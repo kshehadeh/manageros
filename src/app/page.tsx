@@ -1,111 +1,244 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { ArrowRight, BarChart3, CalendarRange, MessageSquare, ShieldCheck, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { requireAuth } from '@/lib/auth-utils'
-import { getPendingInvitationsForUser } from '@/lib/actions'
-import PendingInvitations from '@/components/pending-invitations'
-import { Suspense } from 'react'
-import { DashboardAssignedTasksSection } from '@/components/dashboard-sections/assigned-tasks-section'
-import { DashboardOpenInitiativesSection } from '@/components/dashboard-sections/open-initiatives-section'
-import { DashboardDirectReportsSection } from '@/components/dashboard-sections/direct-reports-section'
-import { DashboardRelatedTeamsSection } from '@/components/dashboard-sections/related-teams-section'
-import { DashboardRecentOneOnOnesSection } from '@/components/dashboard-sections/recent-oneonones-section'
-import { DashboardRecentFeedbackSection } from '@/components/dashboard-sections/recent-feedback-section'
-import { DashboardFeedbackCampaignsSection } from '@/components/dashboard-sections/feedback-campaigns-section'
-import {
-  TasksSectionFallback,
-  FeedbackCampaignsSectionFallback,
-  RecentFeedbackSectionFallback,
-  OpenInitiativesSectionFallback,
-  RecentOneOnOnesSectionFallback,
-  RelatedTeamsSectionFallback,
-  DirectReportsSectionFallback,
-} from '@/components/dashboard-sections/section-fallbacks'
+import { FadeInOnScroll } from '@/components/marketing/fade-in'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
-export default async function Home() {
-  const user = await requireAuth()
+const featureHighlights = [
+  {
+    name: 'Team clarity at a glance',
+    description:
+      'See execution, sentiment, and risk signals across every squad in one adaptive dashboard so you always know where to lean in.',
+    icon: BarChart3,
+  },
+  {
+    name: 'Coaching superpowers',
+    description:
+      'Bring context-rich notes, commitments, and AI-assisted follow ups into every 1:1 without digging through docs and scattered tools.',
+    icon: Users,
+  },
+  {
+    name: 'Continuous feedback loops',
+    description:
+      'Launch campaigns in minutes, close the loop with nudges, and celebrate growth with stories your engineers actually feel.',
+    icon: MessageSquare,
+  },
+  {
+    name: 'Confident delivery rhythm',
+    description:
+      'Plan initiatives, surface blockers early, and keep stakeholders aligned with living roadmaps that stay current automatically.',
+    icon: CalendarRange,
+  },
+]
 
-  // If user doesn't have an organization, show organization creation prompt and pending invitations
-  if (!user.organizationId) {
-    const pendingInvitations = await getPendingInvitationsForUser()
+const proofPoints = [
+  { title: 'Fewer surprise escalations', description: 'Detect delivery and morale drift before it hits the sprint review.' },
+  { title: 'Time back for coaching', description: 'Reclaim hours each week by automating prep and follow-up workflows.' },
+  { title: 'Happier engineering teams', description: 'Celebrate wins, catch burnout signals, and keep career conversations moving.' },
+]
 
-    return (
-      <div className='space-y-6'>
-        {/* Show pending invitations first if any exist */}
-        {pendingInvitations.length > 0 && (
-          <PendingInvitations invitations={pendingInvitations} />
-        )}
+export const metadata = {
+  title: 'Lead high-performing engineering teams | ManagerOS',
+  description:
+    'ManagerOS gives engineering managers a unified operating system for clarity, coaching, and continuous improvement across their teams.',
+}
 
-        <div className='card text-center py-12'>
-          <h2 className='text-xl font-semibold mb-4'>Welcome to ManagerOS!</h2>
-          <p className='text-neutral-400 mb-6'>
-            {pendingInvitations.length > 0
-              ? 'You can accept one of the invitations above or create a new organization.'
-              : "To get started, you'll need to create an organization or be invited to an existing one."}
-          </p>
-          <div className='flex justify-center gap-4'>
-            <Button asChild variant='outline'>
-              <Link href='/organization/create'>Create Organization</Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-    )
+export default async function MarketingHome() {
+  const session = await getServerSession(authOptions)
+
+  if (session?.user) {
+    redirect('/dashboard')
   }
 
-  // Sections render below using independent Suspense-wrapped server components
-
   return (
-    <div className='page-container'>
-      <div className='flex flex-col lg:flex-row gap-6'>
-        {/* Main Content Area */}
-        <div className='flex-1 space-y-6'>
-          <Suspense fallback={<TasksSectionFallback />}>
-            <DashboardAssignedTasksSection
-              organizationId={user.organizationId!}
-            />
-          </Suspense>
-
-          <Suspense fallback={<FeedbackCampaignsSectionFallback />}>
-            <DashboardFeedbackCampaignsSection />
-          </Suspense>
-
-          <Suspense fallback={<RecentFeedbackSectionFallback />}>
-            <DashboardRecentFeedbackSection
-              userId={user.id}
-              organizationId={user.organizationId!}
-            />
-          </Suspense>
-
-          <Suspense fallback={<OpenInitiativesSectionFallback />}>
-            <DashboardOpenInitiativesSection
-              organizationId={user.organizationId!}
-            />
-          </Suspense>
-
-          <div className='grid gap-6 md:grid-cols-2'>
-            <Suspense fallback={<RecentOneOnOnesSectionFallback />}>
-              <DashboardRecentOneOnOnesSection userId={user.id} />
-            </Suspense>
-          </div>
-        </div>
-
-        {/* Right Sidebar */}
-        <div className='w-full lg:w-80 space-y-6'>
-          <Suspense fallback={<RelatedTeamsSectionFallback />}>
-            <DashboardRelatedTeamsSection
-              userId={user.id}
-              organizationId={user.organizationId!}
-            />
-          </Suspense>
-
-          <Suspense fallback={<DirectReportsSectionFallback />}>
-            <DashboardDirectReportsSection
-              userId={user.id}
-              organizationId={user.organizationId!}
-            />
-          </Suspense>
-        </div>
+    <main className='relative min-h-screen overflow-hidden bg-[#05070f] text-white'>
+      <div className='pointer-events-none absolute inset-0 overflow-hidden'>
+        <div className='absolute -top-32 left-1/2 h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,_rgba(88,86,255,0.25),_rgba(5,7,15,0))]' />
+        <div className='absolute bottom-0 left-1/3 h-[500px] w-[500px] translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,_rgba(16,185,129,0.18),_rgba(5,7,15,0))]' />
+        <div className='absolute top-1/3 right-0 h-[420px] w-[420px] translate-x-1/3 rounded-full bg-[radial-gradient(circle_at_center,_rgba(56,189,248,0.18),_rgba(5,7,15,0))]' />
       </div>
-    </div>
+
+      <div className='relative z-10'>
+        <header className='mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-8 sm:px-8'>
+          <div className='flex items-center gap-3'>
+            <span className='inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 text-lg font-semibold text-white shadow-[0_10px_30px_rgba(88,86,255,0.35)] backdrop-blur'>
+              MO
+            </span>
+            <div>
+              <p className='text-lg font-semibold tracking-tight'>ManagerOS</p>
+              <p className='text-xs text-white/60'>Built for engineering leaders</p>
+            </div>
+          </div>
+          <nav className='hidden items-center gap-8 text-sm font-medium text-white/70 md:flex'>
+            <Link href='#features' className='transition-colors hover:text-white'>
+              Features
+            </Link>
+            <Link href='#proof' className='transition-colors hover:text-white'>
+              Outcomes
+            </Link>
+            <Link href='#cta' className='transition-colors hover:text-white'>
+              Pricing
+            </Link>
+          </nav>
+          <div className='flex items-center gap-3'>
+            <Button asChild variant='ghost' className='text-white/80 hover:text-white'>
+              <Link href='/auth/signin'>Sign in</Link>
+            </Button>
+            <Button asChild className='bg-white text-black shadow-[0_18px_40px_rgba(88,86,255,0.45)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90'>
+              <Link href='/auth/signup'>Start free trial</Link>
+            </Button>
+          </div>
+        </header>
+
+        <section className='mx-auto flex w-full max-w-5xl flex-col gap-12 px-6 pb-20 pt-16 text-center sm:px-8 md:pt-24'>
+          <FadeInOnScroll>
+            <span className='inline-flex items-center justify-center gap-2 self-center rounded-full border border-white/10 bg-white/5 px-4 py-1 text-xs uppercase tracking-[0.3em] text-white/60'>
+              ENGINEERING MANAGEMENT, ELEVATED
+            </span>
+          </FadeInOnScroll>
+          <FadeInOnScroll delay={100}>
+            <h1 className='text-4xl font-semibold tracking-tight text-white sm:text-5xl md:text-6xl'>
+              Give your teams clarity, coaching, and momentum in one operating system.
+            </h1>
+          </FadeInOnScroll>
+          <FadeInOnScroll delay={200}>
+            <p className='mx-auto max-w-2xl text-base text-white/70 sm:text-lg'>
+              ManagerOS brings planning, 1:1s, feedback, and delivery signals together so engineering managers can lead with confidence—not
+              spreadsheets. Stay aligned, move faster, and grow people without losing sight of execution.
+            </p>
+          </FadeInOnScroll>
+          <FadeInOnScroll delay={300}>
+            <div className='flex flex-wrap items-center justify-center gap-4'>
+              <Button asChild size='lg' className='bg-primary text-primary-foreground shadow-[0_18px_40px_rgba(79,70,229,0.45)] transition-all duration-200 hover:-translate-y-0.5'>
+                <Link href='/auth/signup' className='flex items-center gap-2'>
+                  Start building your rhythm
+                  <ArrowRight className='h-4 w-4' />
+                </Link>
+              </Button>
+              <Button
+                asChild
+                size='lg'
+                variant='outline'
+                className='border-white/20 bg-white/5 text-white/80 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/40 hover:text-white'
+              >
+                <Link href='/auth/signin'>Explore the product</Link>
+              </Button>
+            </div>
+          </FadeInOnScroll>
+        </section>
+
+        <section id='features' className='mx-auto max-w-6xl px-6 pb-24 sm:px-8'>
+          <FadeInOnScroll className='rounded-3xl border border-white/5 bg-white/[0.03] p-10 shadow-[0_25px_60px_rgba(7,16,29,0.45)] backdrop-blur'>
+            <div className='grid gap-10 md:grid-cols-[1.3fr_1fr] md:items-center'>
+              <div className='space-y-6'>
+                <p className='text-sm font-semibold uppercase tracking-[0.3em] text-white/60'>Why teams choose ManagerOS</p>
+                <h2 className='text-3xl font-semibold text-white sm:text-4xl'>Operational calm meets empowered engineering teams.</h2>
+                <p className='text-base text-white/70'>
+                  Replace fragmented workflows with a single space designed for engineering managers. Every interaction—planning, coaching,
+                  and communicating—stays connected so you can focus on outcomes, not orchestration.
+                </p>
+                <div className='grid gap-4 sm:grid-cols-2'>
+                  {featureHighlights.map((feature, index) => (
+                    <FadeInOnScroll
+                      key={feature.name}
+                      delay={index * 80}
+                      className='rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-left transition-colors duration-300 hover:border-white/30'
+                    >
+                      <feature.icon className='mb-4 h-8 w-8 text-white' />
+                      <h3 className='text-lg font-semibold text-white'>{feature.name}</h3>
+                      <p className='mt-2 text-sm text-white/70'>{feature.description}</p>
+                    </FadeInOnScroll>
+                  ))}
+                </div>
+              </div>
+              <div className='flex flex-col gap-4 rounded-2xl border border-emerald-400/20 bg-gradient-to-br from-emerald-400/10 via-emerald-500/10 to-transparent p-6 text-left shadow-[0_18px_50px_rgba(6,95,70,0.35)] backdrop-blur'>
+                <div className='flex items-center gap-3 text-emerald-200'>
+                  <ShieldCheck className='h-6 w-6' />
+                  <span className='text-sm font-medium uppercase tracking-[0.25em]'>Built for focus</span>
+                </div>
+                <p className='text-lg font-semibold text-white'>Your weekly workflow, from Monday kickoff to Friday retros, in a single calm surface.</p>
+                <p className='text-sm text-emerald-100/80'>
+                  Integrates with the tools you already love. Stay in flow with minimal setup and effortless onboarding for your leads.
+                </p>
+              </div>
+            </div>
+          </FadeInOnScroll>
+        </section>
+
+        <section id='proof' className='mx-auto max-w-6xl px-6 pb-24 sm:px-8'>
+          <div className='grid gap-8 md:grid-cols-3'>
+            {proofPoints.map((point, index) => (
+              <FadeInOnScroll
+                key={point.title}
+                delay={index * 120}
+                className='rounded-2xl border border-white/5 bg-white/[0.04] p-6 shadow-[0_22px_45px_rgba(7,16,29,0.35)] backdrop-blur'
+              >
+                <p className='text-xs font-semibold uppercase tracking-[0.3em] text-primary/60'>Outcome</p>
+                <h3 className='mt-3 text-xl font-semibold text-white'>{point.title}</h3>
+                <p className='mt-2 text-sm text-white/70'>{point.description}</p>
+              </FadeInOnScroll>
+            ))}
+          </div>
+          <FadeInOnScroll delay={360} className='mt-12 rounded-3xl border border-white/10 bg-[linear-gradient(135deg,_rgba(56,189,248,0.12),_rgba(88,86,255,0.18))] p-10 text-left shadow-[0_30px_60px_rgba(15,23,42,0.45)] backdrop-blur'>
+            <blockquote className='space-y-6 text-lg text-white/80'>
+              <p>
+                “ManagerOS helped us connect the dots between delivery, people health, and leadership rituals. Our managers prep faster, uncover
+                risks earlier, and our engineers finally see a clear growth path.”
+              </p>
+              <footer className='text-sm text-white/60'>Priya K., Director of Engineering</footer>
+            </blockquote>
+          </FadeInOnScroll>
+        </section>
+
+        <section id='cta' className='mx-auto max-w-4xl px-6 pb-24 sm:px-8'>
+          <FadeInOnScroll className='relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.06] p-10 text-center shadow-[0_28px_70px_rgba(7,16,29,0.55)] backdrop-blur'>
+            <div className='pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.08),_rgba(255,255,255,0))]' />
+            <div className='relative space-y-6'>
+              <p className='text-sm font-semibold uppercase tracking-[0.35em] text-white/60'>Ready when you are</p>
+              <h2 className='text-3xl font-semibold text-white sm:text-4xl'>Bring harmony to how your engineering teams deliver.</h2>
+              <p className='mx-auto max-w-2xl text-base text-white/70'>
+                Try ManagerOS free for 14 days. Invite your leads, connect your rituals, and see how a shared operating system transforms the
+                way you support engineers.
+              </p>
+              <div className='flex flex-wrap items-center justify-center gap-4'>
+                <Button asChild size='lg' className='bg-white text-black shadow-[0_18px_40px_rgba(148,163,255,0.45)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90'>
+                  <Link href='/auth/signup' className='flex items-center gap-2'>
+                    Launch your trial
+                    <ArrowRight className='h-4 w-4' />
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  size='lg'
+                  variant='outline'
+                  className='border-white/20 bg-white/10 text-white/80 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/40 hover:text-white'
+                >
+                  <Link href='/auth/signin'>Talk with us</Link>
+                </Button>
+              </div>
+            </div>
+          </FadeInOnScroll>
+        </section>
+
+        <footer className='border-t border-white/10 bg-black/20'>
+          <div className='mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 text-sm text-white/50 sm:flex-row sm:px-8'>
+            <p>© {new Date().getFullYear()} ManagerOS. Designed for engineering leaders.</p>
+            <div className='flex items-center gap-6'>
+              <Link href='/auth/signup' className='transition-colors hover:text-white'>
+                Start trial
+              </Link>
+              <Link href='/auth/signin' className='transition-colors hover:text-white'>
+                Sign in
+              </Link>
+              <Link href='mailto:hello@manageros.com' className='transition-colors hover:text-white'>
+                Contact
+              </Link>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </main>
   )
 }

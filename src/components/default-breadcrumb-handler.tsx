@@ -10,7 +10,7 @@ interface BreadcrumbItem {
 }
 
 const routeMap: Record<string, string> = {
-  '/': 'Dashboard',
+  '/dashboard': 'Dashboard',
   '/initiatives': 'Initiatives',
   '/people': 'People',
   '/people/chart': 'Organization Chart',
@@ -36,7 +36,7 @@ export function DefaultBreadcrumbHandler() {
   useEffect(() => {
     const generateBreadcrumbs = (): BreadcrumbItem[] => {
       const segments = pathname.split('/').filter(Boolean)
-      const breadcrumbs: BreadcrumbItem[] = [{ name: 'Dashboard', href: '/' }]
+      const breadcrumbs: BreadcrumbItem[] = [{ name: 'Dashboard', href: '/dashboard' }]
 
       let currentPath = ''
 
