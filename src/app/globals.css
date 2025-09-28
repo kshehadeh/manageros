@@ -117,7 +117,7 @@
   @apply inline-flex items-center gap-2 rounded-xl border bg-secondary text-secondary-foreground px-3 py-2 text-sm hover:bg-secondary/80;
 }
 .input {
-  @apply w-full rounded-xl bg-background border px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring;
+  @apply w-full rounded-xl bg-background border px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring relative;
 }
 .badge {
   @apply inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium border;
@@ -201,6 +201,11 @@ input[type='time']::-webkit-calendar-picker-indicator {
     brightness(var(--calendar-icon-brightness))
     contrast(var(--calendar-icon-contrast));
   opacity: 0.8;
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
 }
 
 /* Page Layout Standardization */
@@ -213,7 +218,7 @@ input[type='time']::-webkit-calendar-picker-indicator {
 }
 
 .page-title {
-  @apply text-2xl font-bold text-foreground mb-2;
+  @apply text-2xl font-bold text-foreground;
 }
 
 .page-subtitle {

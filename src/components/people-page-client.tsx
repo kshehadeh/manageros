@@ -7,7 +7,7 @@ import { PeopleFilterBar } from '@/components/people-filter-bar'
 import { useSession } from 'next-auth/react'
 import { isAdmin } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
-import { Upload, UserPlus, Workflow } from 'lucide-react'
+import { Upload, UserPlus, Workflow, User } from 'lucide-react'
 import { Person } from '@/types/person'
 
 interface PeoplePageClientProps {
@@ -23,7 +23,10 @@ export function PeoplePageClient({ people }: PeoplePageClientProps) {
       <div className='page-header'>
         <div className='flex items-center justify-between'>
           <div>
-            <h1 className='page-title'>People</h1>
+            <div className='flex items-center gap-2'>
+              <User className='h-6 w-6 text-muted-foreground' />
+              <h1 className='page-title'>People</h1>
+            </div>
           </div>
           <div className='flex items-center gap-3'>
             <Button asChild variant='outline'>

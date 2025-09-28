@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { TeamsPageClient } from '@/components/teams-page-client'
 import { getAllTeamsWithRelations } from '@/lib/actions'
 import { Button } from '@/components/ui/button'
-import { Upload, Plus, Workflow } from 'lucide-react'
+import { Upload, Plus, Workflow, Users2 } from 'lucide-react'
 
 export default async function TeamsPage() {
   const session = await getServerSession(authOptions)
@@ -25,7 +25,10 @@ export default async function TeamsPage() {
       <div className='page-header'>
         <div className='flex items-center justify-between'>
           <div>
-            <h1 className='page-title'>Teams</h1>
+            <div className='flex items-center gap-2'>
+              <Users2 className='h-6 w-6 text-muted-foreground' />
+              <h1 className='page-title'>Teams</h1>
+            </div>
             <p className='page-subtitle'>
               Manage your organization&apos;s team structure
             </p>

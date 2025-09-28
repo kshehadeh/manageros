@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { PersonSynopsisList } from '@/components/person-synopsis-list'
 import { SynopsesBreadcrumbClient } from '@/components/synopses-breadcrumb-client'
+import { canAccessSynopsesForPerson } from '@/lib/auth-utils'
 
 interface PersonSynopsesPageProps {
   params: Promise<{
@@ -42,6 +43,9 @@ export default async function PersonSynopsesPage({
     notFound()
   }
 
+  // Check if user can access synopses for this person
+  const canAccess = await canAccessSynopsesForPerson(person.id)
+
   return (
     <SynopsesBreadcrumbClient personName={person.name} personId={person.id}>
       <div className='page-container'>
@@ -49,7 +53,17 @@ export default async function PersonSynopsesPage({
           <h1 className='page-title'>Synopses for {person.name}</h1>
         </div>
 
-        <PersonSynopsisList personId={person.id} />
+        {canAccess ? (
+          <PersonSynopsisList personId={person.id} canGenerate={canAccess} />
+        ) : (
+          <div className='text-center py-12'>
+            <div className='text-lg font-medium mb-2'>Access Denied</div>
+            <div className='text-sm text-muted-foreground'>
+              You can only view synopses for your own linked person or you must
+              be an organization administrator.
+            </div>
+          </div>
+        )}
       </div>
     </SynopsesBreadcrumbClient>
   )

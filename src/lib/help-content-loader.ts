@@ -3,8 +3,16 @@
  * This provides a more maintainable way to manage help content
  *
  * The help content is generated from markdown files in the help/ directory
- * using the generate-help-content.ts script. This approach works with both
- * webpack and Turbopack.
+ * using the generate-help-content.ts script. The help directory is now organized
+ * hierarchically by category folders:
+ *
+ * - tasks-projects/ - Task and project related help
+ * - people-teams/ - People and team management help
+ * - meetings-communication/ - Meeting and communication help
+ * - integrations/ - Third-party integration help
+ * - feedback-development/ - Feedback and development help
+ *
+ * This approach works with both webpack and Turbopack.
  */
 
 export interface HelpContent {

@@ -73,6 +73,15 @@ This document defines the security requirements and access control rules for the
   - Tasks associated with objectives of initiatives in the same organization (`objective: { initiative: { organizationId } }`)
 - **Functions**: `getTasks()`, `getTask()`, `updateTask()`, `deleteTask()`, etc.
 
+### 7. Synopses
+
+- **Rule**: Synopses can only be generated, viewed, or deleted by the person they belong to or by organization administrators
+- **Implementation**:
+  - Users can only access synopses for their own linked person record (`currentPerson.id === synopsis.personId`)
+  - Organization administrators (`user.role === 'ADMIN'`) can access synopses for any person in their organization
+  - All synopses must belong to people in the same organization
+- **Functions**: `generatePersonSynopsis()`, `listPersonSynopses()`, `deleteSynopsis()`
+
 ## Implementation Guidelines
 
 ### Database Query Patterns
@@ -123,6 +132,18 @@ where: {
 }
 ```
 
+#### Synopsis Access Control Pattern
+
+```typescript
+// Check if user can access synopses for a specific person
+const isOwnPerson = currentPerson?.id === personId
+const isOrgAdmin = user.role === 'ADMIN'
+
+if (!isOwnPerson && !isOrgAdmin) {
+  throw new Error('You can only access synopses for your linked person or you must be an organization admin')
+}
+```
+
 ### Server Action Security Checklist
 
 Every server action must:
@@ -160,6 +181,7 @@ Every server action must:
 3. **Private Feedback**: Verify private feedback is only visible to author
 4. **One-on-One Access**: Verify only participants can see 1:1 meetings
 5. **Feedback Campaign Access**: Verify only creators can see their campaigns
+6. **Synopsis Access**: Verify users can only access synopses for their own person or if they are org admins
 
 ## Security Monitoring
 

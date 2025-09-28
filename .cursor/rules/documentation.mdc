@@ -1,0 +1,11 @@
+---
+description: Review this when a new feature is being added or an existing one is being modified in a way that impacts the user
+alwaysApply: false
+---
+
+# Documentation Rules
+
+## General Rules
+
+* Update the documentation in the help directory in the root of the project.
+* Review the help/README.md file to see the current documentation and add the new feature or modification to the file.

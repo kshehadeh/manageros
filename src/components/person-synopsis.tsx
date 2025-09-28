@@ -11,6 +11,7 @@ import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 
 interface PersonSynopsisProps {
   personId: string
+  canGenerate?: boolean
 }
 
 function toISODate(date: Date) {
@@ -19,7 +20,10 @@ function toISODate(date: Date) {
   ).toISOString()
 }
 
-export function PersonSynopsis({ personId }: PersonSynopsisProps) {
+export function PersonSynopsis({
+  personId,
+  canGenerate = false,
+}: PersonSynopsisProps) {
   const [showModal, setShowModal] = useState(false)
   const [includeFeedback, setIncludeFeedback] = useState(false)
   const [daysBack, setDaysBack] = useState(14)
@@ -93,18 +97,24 @@ export function PersonSynopsis({ personId }: PersonSynopsisProps) {
               View All
             </Link>
           </Button>
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={() => setShowModal(true)}
-          >
-            <Plus className='w-4 h-4 mr-2' />
-            Add New
-          </Button>
+          {canGenerate && (
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => setShowModal(true)}
+            >
+              <Plus className='w-4 h-4 mr-2' />
+              Add New
+            </Button>
+          )}
         </div>
       </div>
 
-      <PersonSynopsisList personId={personId} compact={true} />
+      <PersonSynopsisList
+        personId={personId}
+        compact={true}
+        canGenerate={canGenerate}
+      />
 
       {/* Modal */}
       {showModal && (

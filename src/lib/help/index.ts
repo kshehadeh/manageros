@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-09-27T12:54:03.011Z
+ * Generated on: 2025-09-27T22:28:14.511Z
  */
 
 export interface HelpContent {
@@ -17,25 +17,33 @@ export interface HelpContent {
 }
 
 // Import all help content files
-import { helpContent as taskStatus } from './task-status'
-import { helpContent as initiatives } from './initiatives'
 import { helpContent as peopleHierarchy } from './people-hierarchy'
 import { helpContent as directReports } from './direct-reports'
-import { helpContent as taskPriorities } from './task-priorities'
 import { helpContent as oneOnOnes } from './one-on-ones'
+import { helpContent as meetingsAndInstances } from './meetings-and-instances'
+import { helpContent as githubIntegration } from './github-integration'
 import { helpContent as jiraIntegration } from './jira-integration'
+import { helpContent as feedbackCampaignsAndResponses } from './feedback-campaigns-and-responses'
+import { helpContent as synopsisGeneration } from './synopsis-generation'
 import { helpContent as feedbackCampaigns } from './feedback-campaigns'
+import { helpContent as taskStatus } from './task-status'
+import { helpContent as initiatives } from './initiatives'
+import { helpContent as taskPriorities } from './task-priorities'
 
 // Combine all help content into a single object
 export const helpContent: Record<string, HelpContent> = {
-  'task-status': taskStatus,
-  initiatives: initiatives,
   'people-hierarchy': peopleHierarchy,
   'direct-reports': directReports,
-  'task-priorities': taskPriorities,
   'one-on-ones': oneOnOnes,
+  'meetings-and-instances': meetingsAndInstances,
+  'github-integration': githubIntegration,
   'jira-integration': jiraIntegration,
+  'feedback-campaigns-and-responses': feedbackCampaignsAndResponses,
+  'synopsis-generation': synopsisGeneration,
   'feedback-campaigns': feedbackCampaigns,
+  'task-status': taskStatus,
+  initiatives: initiatives,
+  'task-priorities': taskPriorities,
 }
 
 /**
@@ -65,11 +73,11 @@ export function getAllHelpContent(): HelpContent[] {
 export function getHelpCategories(): string[] {
   return Array.from(
     new Set([
-      'Tasks & Projects',
       'People & Teams',
       'Meetings & Communication',
       'Integrations',
       'Feedback & Development',
+      'Tasks & Projects',
     ])
   ).sort()
 }
@@ -86,13 +94,17 @@ export function hasHelpContent(id: string): boolean {
  */
 export function getHelpIds(): string[] {
   return [
-    'task-status',
-    'initiatives',
     'people-hierarchy',
     'direct-reports',
-    'task-priorities',
     'one-on-ones',
+    'meetings-and-instances',
+    'github-integration',
     'jira-integration',
+    'feedback-campaigns-and-responses',
+    'synopsis-generation',
     'feedback-campaigns',
+    'task-status',
+    'initiatives',
+    'task-priorities',
   ]
 }

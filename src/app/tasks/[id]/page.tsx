@@ -8,6 +8,7 @@ import { TaskDetailBreadcrumbClient } from '@/components/task-detail-breadcrumb-
 import { TaskStatusSelector } from '@/components/task-status-selector'
 import { TaskActionsDropdown } from '@/components/task-actions-dropdown'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
+import { Badge } from '@/components/ui/badge'
 import { Calendar, User, Clock } from 'lucide-react'
 import { type TaskStatus } from '@/lib/task-status'
 import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
@@ -34,14 +35,6 @@ export default async function TaskDetailPage({
     notFound()
   }
 
-  const priorityColors = {
-    1: taskPriorityUtils.getRAGVariant(1),
-    2: taskPriorityUtils.getRAGVariant(2),
-    3: taskPriorityUtils.getRAGVariant(3),
-    4: taskPriorityUtils.getRAGVariant(4),
-    5: taskPriorityUtils.getRAGVariant(5),
-  }
-
   return (
     <TaskDetailBreadcrumbClient taskTitle={task.title} taskId={task.id}>
       <div className='page-container'>
@@ -54,11 +47,13 @@ export default async function TaskDetailPage({
                   taskId={task.id}
                   currentStatus={task.status as TaskStatus}
                 />
-                <span
-                  className={`badge ${priorityColors[task.priority as keyof typeof priorityColors]}`}
+                <Badge
+                  variant={taskPriorityUtils.getUIVariant(
+                    task.priority as TaskPriority
+                  )}
                 >
                   {taskPriorityUtils.getLabel(task.priority as TaskPriority)}
-                </span>
+                </Badge>
               </div>
 
               {/* Basic Information with Icons */}

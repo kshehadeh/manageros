@@ -1,0 +1,178 @@
+---
+id: meetings-and-instances
+title: Meetings and Meeting Instances
+category: Meetings & Communication
+---
+
+# Meetings and Meeting Instances
+
+ManagerOS provides comprehensive meeting management with support for both one-time meetings and recurring meeting series with individual instances.
+
+## Meeting Types
+
+### One-Time Meetings
+
+- **Single occurrence** meetings with specific date and time
+- **Direct scheduling** without recurrence patterns
+- **Simple participant management** and status tracking
+- **Individual notes** and follow-up actions
+
+### Recurring Meetings
+
+- **Series of meetings** with consistent participants and agenda
+- **Multiple recurrence patterns:**
+  - Daily
+  - Weekly
+  - Monthly
+  - Bi-monthly
+  - Semi-annually
+- **Automatic instance generation** based on pattern
+- **Consistent structure** across all instances
+
+## Meeting Creation
+
+### Basic Information
+
+- **Title** - Clear, descriptive meeting name
+- **Description** - Meeting purpose and agenda
+- **Date and time** - Scheduled start time
+- **Duration** - Meeting length in minutes
+- **Location** - Physical or virtual meeting space
+
+### Participants
+
+- **Add team members** from your organization
+- **Set initial status** (invited, accepted, declined, tentative)
+- **Include external participants** via email
+- **Assign meeting owner** for responsibility
+
+### Associations
+
+- **Link to teams** for team-specific meetings
+- **Connect to initiatives** for project meetings
+- **Associate with objectives** for goal-focused sessions
+- **Add meeting notes** for context and preparation
+
+## Meeting Instances
+
+### Instance Management
+
+- **Individual instances** for each occurrence of recurring meetings
+- **Instance-specific notes** and updates
+- **Participant status tracking** per instance
+- **Attendance recording** (attended, absent, excused)
+
+### Instance Features
+
+- **Flexible scheduling** - Modify individual instance times
+- **Instance-specific notes** - Capture unique discussion points
+- **Participant management** - Add/remove participants per instance
+- **Status updates** - Track attendance and participation
+
+### Instance Statuses
+
+- **Invited** - Participant has been invited
+- **Accepted** - Participant confirmed attendance
+- **Declined** - Participant cannot attend
+- **Tentative** - Participant unsure about attendance
+- **Attended** - Participant was present
+- **Absent** - Participant did not attend
+
+## Meeting Workflow
+
+### Planning Phase
+
+1. **Create meeting** with basic information
+2. **Add participants** and set initial statuses
+3. **Set recurrence pattern** if applicable
+4. **Add notes** and preparation materials
+
+### Execution Phase
+
+1. **Send invitations** to participants
+2. **Track responses** and update statuses
+3. **Hold meeting** and record attendance
+4. **Add instance notes** and follow-up items
+
+### Follow-up Phase
+
+1. **Review meeting outcomes** and decisions
+2. **Create action items** and assign responsibilities
+3. **Schedule follow-up meetings** if needed
+4. **Update recurring series** based on feedback
+
+## Best Practices
+
+### Meeting Planning
+
+- **Set clear objectives** for each meeting
+- **Prepare agenda** and share in advance
+- **Choose appropriate duration** based on content
+- **Select optimal timing** for all participants
+
+### Participant Management
+
+- **Invite relevant stakeholders** only
+- **Set realistic expectations** for attendance
+- **Provide context** in meeting descriptions
+- **Respect time zones** for distributed teams
+
+### Recurring Meetings
+
+- **Establish consistent schedule** and format
+- **Review series regularly** for relevance
+- **Adjust frequency** based on team needs
+- **Cancel or modify** when no longer needed
+
+### Documentation
+
+- **Take comprehensive notes** during meetings
+- **Record decisions** and action items clearly
+- **Follow up** on commitments and deadlines
+- **Archive completed** meeting instances
+
+## Integration Features
+
+### Team Association
+
+- **Link meetings to teams** for better organization
+- **Team-specific meeting** visibility and access
+- **Collaborative scheduling** within team context
+- **Team performance** and meeting analytics
+
+### Initiative Connection
+
+- **Connect meetings to initiatives** for project alignment
+- **Track project-related** discussions and decisions
+- **Monitor initiative progress** through meeting outcomes
+- **Coordinate cross-functional** project meetings
+
+### Task Integration
+
+- **Create tasks** from meeting action items
+- **Assign responsibilities** to meeting participants
+- **Track follow-up** and completion status
+- **Link tasks to meeting** instances for context
+
+## Troubleshooting
+
+### Scheduling Issues
+
+- **Check participant availability** before scheduling
+- **Verify time zones** for distributed teams
+- **Confirm meeting room** or virtual space access
+- **Test technology** for virtual meetings
+
+### Participant Problems
+
+- **Resend invitations** if participants don't receive them
+- **Update contact information** for external participants
+- **Handle conflicts** and reschedule when necessary
+- **Manage no-shows** and follow-up appropriately
+
+### Recurring Meeting Issues
+
+- **Review recurrence pattern** if instances aren't generating
+- **Check date ranges** for series validity
+- **Update participant lists** for new team members
+- **Modify series** when team structure changes

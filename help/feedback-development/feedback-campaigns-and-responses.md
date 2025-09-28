@@ -1,0 +1,201 @@
+---
+id: feedback-campaigns-and-responses
+title: Feedback Campaigns and Responses
+category: Feedback & Development
+---
+
+# Feedback Campaigns and Responses
+
+Feedback campaigns provide a structured way to collect comprehensive feedback from multiple sources about team members, enabling 360-degree reviews, performance evaluations, and pulse surveys.
+
+## Campaign Types
+
+### 360-Degree Feedback
+
+- **Multi-source evaluation** from peers, managers, and direct reports
+- **Comprehensive performance** and behavior assessment
+- **Anonymous responses** to encourage honest feedback
+- **Balanced perspective** on individual contributions
+
+### Performance Reviews
+
+- **Structured evaluation** of goals and objectives
+- **Development planning** and career discussions
+- **Documentation** for HR and performance records
+- **Goal setting** and improvement planning
+
+### Pulse Surveys
+
+- **Quick check-ins** on team satisfaction and engagement
+- **Regular monitoring** of team health and culture
+- **Trend analysis** over time
+- **Immediate feedback** on team dynamics
+
+## Campaign Setup
+
+### Basic Configuration
+
+- **Campaign name** - Descriptive title for the feedback cycle
+- **Target person** - Individual receiving feedback
+- **Template selection** - Pre-defined question sets
+- **Date range** - Start and end dates for responses
+- **Status management** - Draft, active, completed, cancelled
+
+### Participant Management
+
+- **Invite list** - Email addresses of feedback providers
+- **Role-based invitations** - Peers, managers, direct reports
+- **External participants** - Clients, partners, stakeholders
+- **Anonymous options** - Protect responder identity
+
+### Template System
+
+- **Pre-built templates** for common feedback scenarios
+- **Customizable questions** for specific needs
+- **Rating scales** and open-ended responses
+- **Consistent format** across campaigns
+
+## Response Collection
+
+### Invitation Process
+
+- **Email invitations** sent to all participants
+- **Unique invite links** for secure access
+- **Reminder notifications** for incomplete responses
+- **Deadline management** and extensions
+
+### Response Interface
+
+- **User-friendly forms** for easy completion
+- **Progress tracking** through multi-step surveys
+- **Save and resume** functionality
+- **Mobile-responsive** design for accessibility
+
+### Response Management
+
+- **Real-time tracking** of response completion
+- **Duplicate prevention** - one response per email
+- **Response validation** and quality checks
+- **Anonymous response** handling
+
+## Response Analysis
+
+### Data Collection
+
+- **Structured responses** in JSON format
+- **Response metadata** including timestamps
+- **Participant information** (when not anonymous)
+- **Campaign context** and target person details
+
+### Analysis Features
+
+- **Quantitative analysis** of rating scales
+- **Qualitative insights** from open-ended responses
+- **Trend identification** across multiple campaigns
+- **Comparative analysis** between team members
+
+### Reporting
+
+- **Summary reports** for managers and HR
+- **Individual feedback** summaries for recipients
+- **Team insights** and organizational patterns
+- **Actionable recommendations** based on data
+
+## Privacy and Security
+
+### Data Protection
+
+- **Encrypted storage** of sensitive feedback
+- **Access controls** based on organizational roles
+- **Audit trails** for compliance requirements
+- **Data retention** policies and cleanup
+
+### Anonymity Options
+
+- **Anonymous responses** to encourage honesty
+- **Aggregated reporting** to protect individual identity
+- **Minimum response thresholds** for statistical validity
+- **Confidential handling** of sensitive feedback
+
+### Compliance
+
+- **GDPR compliance** for European users
+- **Data minimization** principles
+- **Right to deletion** and data portability
+- **Consent management** for data processing
+
+## Best Practices
+
+### Campaign Design
+
+- **Clear objectives** and expected outcomes
+- **Appropriate question selection** for the context
+- **Balanced participant mix** for comprehensive feedback
+- **Realistic timelines** for response collection
+
+### Participant Engagement
+
+- **Clear communication** about purpose and process
+- **Sufficient time** for thoughtful responses
+- **Regular reminders** without being intrusive
+- **Appreciation** for participation and effort
+
+### Response Quality
+
+- **Specific examples** rather than general statements
+- **Constructive feedback** focused on improvement
+- **Balanced perspective** highlighting both strengths and areas for growth
+- **Actionable insights** that can drive development
+
+### Follow-up Actions
+
+- **Timely sharing** of results with recipients
+- **Development planning** based on feedback
+- **Goal setting** and improvement strategies
+- **Regular check-ins** on progress
+
+## Integration Features
+
+### Performance Management
+
+- **Link to performance reviews** and evaluations
+- **Goal setting** based on feedback insights
+- **Development planning** and career discussions
+- **Progress tracking** over time
+
+### Team Development
+
+- **Team-level insights** from aggregated feedback
+- **Training needs** identification
+- **Culture assessment** and improvement
+- **Organizational development** planning
+
+### HR Integration
+
+- **Performance records** and documentation
+- **Talent management** and succession planning
+- **Compensation decisions** and promotions
+- **Compliance reporting** and audits
+
+## Troubleshooting
+
+### Low Response Rates
+
+- **Review invitation timing** and frequency
+- **Simplify questions** and reduce complexity
+- **Provide clear value** proposition for participants
+- **Offer incentives** or recognition for participation
+
+### Technical Issues
+
+- **Test invite links** before sending campaigns
+- **Verify email delivery** and spam filters
+- **Check mobile compatibility** of response forms
+- **Monitor system performance** during peak usage
+
+### Data Quality
+
+- **Validate responses** for completeness and relevance
+- **Filter out spam** or inappropriate content
+- **Ensure anonymity** when promised
+- **Maintain data integrity** throughout the process

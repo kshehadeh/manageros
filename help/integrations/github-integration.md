@@ -1,0 +1,117 @@
+---
+id: github-integration
+title: GitHub Integration
+category: Integrations
+---
+
+# GitHub Integration
+
+ManagerOS integrates with GitHub to provide visibility into your team's development work, track pull requests, and link team members to their GitHub accounts.
+
+## Setup Process
+
+### 1. Configure GitHub Credentials
+
+- **Go to Settings** → GitHub Integration
+- **Enter your GitHub username** and Personal Access Token (PAT)
+- **Test the connection** to verify access
+- **Save credentials** securely (PAT is encrypted)
+
+### 2. Link Team Members
+
+- **Navigate to a person's profile**
+- **Click "Link GitHub Account"**
+- **Search for their GitHub username**
+- **Verify and confirm** the account link
+
+### 3. View GitHub Activity
+
+- **Pull request tracking** for linked accounts
+- **Recent activity** and contribution history
+- **Repository visibility** based on permissions
+
+## Features
+
+### Pull Request Tracking
+
+- **View recent pull requests** for each team member
+- **Track PR status** (open, merged, closed)
+- **Monitor contribution patterns** and activity levels
+- **Filter by date range** (default: last 30 days)
+
+### Account Linking
+
+- **Secure GitHub account association** with ManagerOS profiles
+- **Automatic profile matching** by username
+- **Display name and email** synchronization
+- **Easy unlinking** when needed
+
+### Work Activity Integration
+
+- **GitHub PRs** appear in work activity summaries
+- **Contribution tracking** for performance reviews
+- **Development metrics** and productivity insights
+
+## GitHub Personal Access Token Setup
+
+### Creating a PAT
+
+1. **Go to GitHub Settings** → Developer settings → Personal access tokens
+2. **Click "Generate new token (classic)"**
+3. **Select scopes:**
+   - `repo` - Full control of private repositories
+   - `read:user` - Read user profile data
+4. **Generate and copy** the token immediately
+5. **Enter in ManagerOS** settings
+
+### Required Permissions
+
+- **Repository access** - To fetch pull request data
+- **User profile access** - To verify account information
+- **Organization access** - If working with organization repos
+
+## Best Practices
+
+### Security
+
+- **Use fine-grained tokens** when possible
+- **Rotate tokens regularly** for security
+- **Limit token scope** to minimum required permissions
+- **Never share tokens** in plain text
+
+### Team Management
+
+- **Link accounts proactively** for new team members
+- **Verify permissions** before linking accounts
+- **Update links** when team members change GitHub usernames
+- **Unlink accounts** for departed team members
+
+### Data Privacy
+
+- **Respect GitHub's API rate limits**
+- **Only track public repositories** unless explicitly authorized
+- **Maintain confidentiality** of private repository data
+- **Follow your organization's** GitHub usage policies
+
+## Troubleshooting
+
+### Connection Issues
+
+- **Verify PAT permissions** and expiration
+- **Check GitHub username** spelling
+- **Test connection** in settings
+- **Review API rate limits** if experiencing failures
+
+### Missing Data
+
+- **Confirm account linking** for team members
+- **Check repository permissions** for private repos
+- **Verify date ranges** for activity queries
+- **Review GitHub API status** for service issues
+
+### Performance
+
+- **Limit date ranges** for large datasets
+- **Use appropriate filters** to reduce API calls
+- **Monitor API usage** to avoid rate limiting
+- **Cache data** when possible for better performance

@@ -18,6 +18,7 @@ import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import { canAccessSynopsesForPerson } from '@/lib/auth-utils'
 import {
   Eye,
   Users,
@@ -26,7 +27,9 @@ import {
   CalendarDays,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { TaskStatus, taskStatusUtils } from '@/lib/task-status'
+import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
 import {
   Person,
   Team,
@@ -250,6 +253,11 @@ export default async function PersonDetailPage({
 
   const personWithRelations = person as PersonWithRelations
 
+  // Check if user can access synopses for this person
+  const canAccessSynopses = await canAccessSynopsesForPerson(
+    personWithRelations.id
+  )
+
   // Filter feedback based on privacy rules
   // Only show feedback that is either:
   // 1. Not private (public feedback)
@@ -335,8 +343,13 @@ export default async function PersonDetailPage({
         <div className='flex gap-6'>
           {/* Main Content */}
           <div className='flex-1 space-y-6'>
-            {/* Synopsis */}
-            <PersonSynopsis personId={personWithRelations.id} />
+            {/* Synopsis - Only show if user can access synopses */}
+            {canAccessSynopses && (
+              <PersonSynopsis
+                personId={personWithRelations.id}
+                canGenerate={canAccessSynopses}
+              />
+            )}
             {/* Owned Initiatives - Only show if person has initiatives */}
             {personWithRelations.initiativeOwners.length > 0 && (
               <section>
@@ -414,15 +427,23 @@ export default async function PersonDetailPage({
                           </div>
                         </div>
                         <div className='flex items-center gap-2'>
-                          <span
-                            className={`badge ${taskStatusUtils.getVariant(task.status as TaskStatus)}`}
+                          <Badge
+                            variant={taskStatusUtils.getUIVariant(
+                              task.status as TaskStatus
+                            )}
                           >
                             {taskStatusUtils
                               .getLabel(task.status as TaskStatus)
                               .toUpperCase()}
-                          </span>
+                          </Badge>
                           {task.priority && (
-                            <span className='badge'>P{task.priority}</span>
+                            <Badge
+                              variant={taskPriorityUtils.getUIVariant(
+                                task.priority as TaskPriority
+                              )}
+                            >
+                              P{task.priority}
+                            </Badge>
                           )}
                         </div>
                       </div>

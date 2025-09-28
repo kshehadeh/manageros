@@ -15,6 +15,7 @@ import type {
 interface PersonSynopsisListProps {
   personId: string
   compact?: boolean
+  canGenerate?: boolean
 }
 
 function toISODate(date: Date) {
@@ -26,6 +27,7 @@ function toISODate(date: Date) {
 export function PersonSynopsisList({
   personId,
   compact = false,
+  canGenerate = false,
 }: PersonSynopsisListProps) {
   const [showModal, setShowModal] = useState(false)
   const [includeFeedback, setIncludeFeedback] = useState(false)
@@ -166,14 +168,16 @@ export function PersonSynopsisList({
           <div className='text-sm text-muted-foreground'>
             {synopses.length} synopsis{synopses.length !== 1 ? 'es' : ''} found
           </div>
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={() => setShowModal(true)}
-          >
-            <Plus className='w-4 h-4 mr-2' />
-            Generate New
-          </Button>
+          {canGenerate && (
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => setShowModal(true)}
+            >
+              <Plus className='w-4 h-4 mr-2' />
+              Generate New
+            </Button>
+          )}
         </div>
       )}
 
@@ -184,12 +188,16 @@ export function PersonSynopsisList({
           <div className='text-center py-12'>
             <div className='text-lg font-medium mb-2'>No synopses yet</div>
             <div className='text-sm text-muted-foreground mb-4'>
-              Generate your first synopsis to get started
+              {canGenerate
+                ? 'Generate your first synopsis to get started'
+                : 'No synopses have been generated yet'}
             </div>
-            <Button onClick={() => setShowModal(true)}>
-              <Plus className='w-4 h-4 mr-2' />
-              Generate Synopsis
-            </Button>
+            {canGenerate && (
+              <Button onClick={() => setShowModal(true)}>
+                <Plus className='w-4 h-4 mr-2' />
+                Generate Synopsis
+              </Button>
+            )}
           </div>
         )
       ) : (

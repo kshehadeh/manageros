@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { QuickTaskForm } from '@/components/quick-task-form'
 import { TasksPageClient } from '@/components/tasks-page-client'
+import { ListTodo } from 'lucide-react'
 
 export default async function TasksPage() {
   const session = await getServerSession(authOptions)
@@ -35,7 +36,10 @@ export default async function TasksPage() {
       <div className='page-header'>
         <div className='flex items-center justify-between'>
           <div>
-            <h1 className='page-title'>Tasks</h1>
+            <div className='flex items-center gap-2'>
+              <ListTodo className='h-6 w-6 text-muted-foreground' />
+              <h1 className='page-title'>Tasks</h1>
+            </div>
             <p className='page-subtitle'>
               Manage and track all tasks across your organization
             </p>

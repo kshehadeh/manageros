@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { EnhancedTaskInput } from '@/components/enhanced-task-input'
-import { Textarea } from '@/components/ui/textarea'
+import { MarkdownEditor } from '@/components/markdown-editor'
 import { createTask, updateTask } from '@/lib/actions'
 import { type TaskFormData, taskSchema } from '@/lib/validations'
 import { Person, Initiative, Objective } from '@prisma/client'
@@ -162,13 +162,10 @@ export function TaskForm({
           >
             Description
           </label>
-          <Textarea
-            id='description'
-            name='description'
-            rows={3}
+          <MarkdownEditor
             value={formData.description || ''}
-            onChange={e => handleInputChange('description', e.target.value)}
-            placeholder='Enter task description'
+            onChange={value => handleInputChange('description', value)}
+            placeholder='Enter task description... Use Markdown for formatting!'
             className={errors.description ? 'border-red-500' : ''}
           />
           {errors.description && (

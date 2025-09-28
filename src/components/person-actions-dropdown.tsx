@@ -232,7 +232,7 @@ export function PersonActionsDropdown({
       {/* Feedback Form - Show as modal when active */}
       {showFeedbackForm && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-          <div className='bg-neutral-800 border border-neutral-700 rounded-xl p-6 max-w-md w-full mx-4'>
+          <div className='bg-popover text-popover-foreground border rounded-xl p-6 max-w-md w-full mx-4'>
             <h4 className='font-medium mb-4'>Add New Feedback</h4>
             <FeedbackForm
               person={person}

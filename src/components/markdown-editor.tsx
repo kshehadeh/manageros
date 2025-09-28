@@ -2,6 +2,7 @@
 'use client'
 
 import MDEditor from '@uiw/react-md-editor'
+import { useTheme } from '@/lib/hooks/use-theme'
 
 interface MarkdownEditorProps {
   value: string
@@ -18,6 +19,8 @@ export function MarkdownEditor({
   maxLength,
   className = '',
 }: MarkdownEditorProps) {
+  const { theme } = useTheme()
+
   const handleChange = (val?: string) => {
     const newValue = val || ''
     if (!maxLength || newValue.length <= maxLength) {
@@ -30,7 +33,7 @@ export function MarkdownEditor({
       <MDEditor
         value={value}
         onChange={handleChange}
-        data-color-mode='dark'
+        data-color-mode={theme === 'dark' ? 'dark' : 'light'}
         preview='edit'
         hideToolbar={false}
         visibleDragbar={false}

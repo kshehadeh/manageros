@@ -10,7 +10,7 @@
  * - Clearing cache for development
  */
 
-import { readdirSync, readFileSync, writeFileSync } from 'fs'
+import { readdirSync, readFileSync, writeFileSync, statSync } from 'fs'
 import { join } from 'path'
 import {
   getAllHelpContent,
@@ -19,13 +19,44 @@ import {
 
 const helpDir = join(process.cwd(), 'help')
 
+/**
+ * Recursively find all markdown files in a directory
+ */
+function findMarkdownFiles(
+  dir: string,
+  relativePath = ''
+): Array<{ filePath: string; relativePath: string }> {
+  const files: Array<{ filePath: string; relativePath: string }> = []
+
+  try {
+    const items = readdirSync(dir)
+
+    for (const item of items) {
+      const itemPath = join(dir, item)
+      const itemRelativePath = relativePath ? join(relativePath, item) : item
+      const stat = statSync(itemPath)
+
+      if (stat.isDirectory()) {
+        // Recursively search subdirectories
+        files.push(...findMarkdownFiles(itemPath, itemRelativePath))
+      } else if (item.endsWith('.md') && item !== 'README.md') {
+        files.push({ filePath: itemPath, relativePath: itemRelativePath })
+      }
+    }
+  } catch (error) {
+    console.warn(`⚠️  Could not read directory ${dir}:`, error)
+  }
+
+  return files
+}
+
 function listHelpTopics() {
   console.log('📚 Available Help Topics:\n')
 
   try {
-    const files = readdirSync(helpDir).filter(file => file.endsWith('.md'))
+    const markdownFiles = findMarkdownFiles(helpDir)
 
-    if (files.length === 0) {
+    if (markdownFiles.length === 0) {
       console.log('No help topics found in the help directory.')
       return
     }
@@ -33,7 +64,7 @@ function listHelpTopics() {
     const content = getAllHelpContent()
     const categories = getHelpCategories()
 
-    console.log(`Total topics: ${files.length}`)
+    console.log(`Total topics: ${markdownFiles.length}`)
     console.log(`Categories: ${categories.join(', ')}\n`)
 
     // Group by category
@@ -42,28 +73,37 @@ function listHelpTopics() {
       const categoryContent = content.filter(item => item.category === category)
 
       categoryContent.forEach(item => {
-        const filePath = join(helpDir, `${item.id}.md`)
-        const stats = readFileSync(filePath, 'utf-8')
-        const lineCount = stats.split('\n').length
-        const wordCount = stats.split(/\s+/).length
+        // Find the file for this content item
+        const fileInfo = markdownFiles.find(f =>
+          f.relativePath.includes(`${item.id}.md`)
+        )
+        if (fileInfo) {
+          const stats = readFileSync(fileInfo.filePath, 'utf-8')
+          const lineCount = stats.split('\n').length
+          const wordCount = stats.split(/\s+/).length
 
-        console.log(`  • ${item.title} (${item.id})`)
-        console.log(`    📄 ${lineCount} lines, ${wordCount} words`)
+          console.log(`  • ${item.title} (${item.id})`)
+          console.log(
+            `    📄 ${fileInfo.relativePath} - ${lineCount} lines, ${wordCount} words`
+          )
+        } else {
+          console.log(`  • ${item.title} (${item.id}) - file not found`)
+        }
       })
       console.log()
     })
 
     // List files without metadata
     const contentIds = new Set(content.map(item => item.id))
-    const orphanFiles = files.filter(file => {
-      const id = file.replace('.md', '')
-      return !contentIds.has(id)
+    const orphanFiles = markdownFiles.filter(file => {
+      const id = file.relativePath.replace('.md', '').split('/').pop()
+      return !contentIds.has(id!)
     })
 
     if (orphanFiles.length > 0) {
       console.log('⚠️  Files without metadata:')
       orphanFiles.forEach(file => {
-        console.log(`  • ${file}`)
+        console.log(`  • ${file.relativePath}`)
       })
       console.log()
     }
@@ -166,9 +206,15 @@ import { HelpIcon } from '@/components/help-icon'
 
 To add new help content:
 
-1. Create a new markdown file in the \`help/\` directory
-2. Add metadata to \`src/lib/help-content-loader.ts\`
+1. Create a new markdown file in the appropriate category folder under \`help/\`
+   - \`help/tasks-projects/\` - Task and project related help
+   - \`help/people-teams/\` - People and team management help  
+   - \`help/meetings-communication/\` - Meeting and communication help
+   - \`help/integrations/\` - Third-party integration help
+   - \`help/feedback-development/\` - Feedback and development help
+2. Add front matter with id, title, and category to the markdown file
 3. Run \`bun scripts/help-content-manager.ts validate\` to check
+4. Run \`bun scripts/generate-help-content.ts\` to regenerate TypeScript files
 `
 
     const indexPath = join(process.cwd(), 'help', 'README.md')

@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Badge } from '@/components/ui/badge'
 import {
   type TaskStatus,
   taskStatusUtils,
@@ -44,13 +45,15 @@ export function TaskStatusSelector({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className={`badge ${taskStatusUtils.getVariant(currentStatus)} flex items-center gap-1 hover:opacity-80 transition-opacity ${
+          className={`flex items-center gap-1 hover:opacity-80 transition-opacity ${
             isUpdating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
           }`}
           disabled={isUpdating}
         >
-          {taskStatusUtils.getLabel(currentStatus)}
-          <ChevronDown className='w-3 h-3' />
+          <Badge variant={taskStatusUtils.getUIVariant(currentStatus)}>
+            {taskStatusUtils.getLabel(currentStatus)}
+            <ChevronDown className='w-3 h-3 ml-1' />
+          </Badge>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='start'>
@@ -58,13 +61,11 @@ export function TaskStatusSelector({
           <DropdownMenuItem
             key={status}
             onClick={() => handleStatusChange(status)}
-            className={status === currentStatus ? 'bg-neutral-800' : ''}
+            className={status === currentStatus ? 'bg-accent' : ''}
           >
-            <span
-              className={`badge ${taskStatusUtils.getVariant(status)} mr-2`}
-            >
+            <Badge variant={taskStatusUtils.getUIVariant(status)}>
               {taskStatusUtils.getLabel(status)}
-            </span>
+            </Badge>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

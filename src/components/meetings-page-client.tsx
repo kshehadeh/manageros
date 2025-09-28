@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Plus, Search, Filter, X } from 'lucide-react'
+import { Plus, Search, Filter, X, Calendar } from 'lucide-react'
 import {
   Meeting,
   Team,
@@ -20,6 +20,7 @@ import {
   Person,
   User as PrismaUser,
 } from '@prisma/client'
+import { HelpIcon } from '@/components/help-icon'
 
 type MeetingWithRelations = Meeting & {
   team: Team | null
@@ -178,7 +179,11 @@ export function MeetingsPageClient({ meetings }: MeetingsPageClientProps) {
       <div className='page-header'>
         <div className='flex items-center justify-between'>
           <div>
-            <h1 className='page-title'>Meetings</h1>
+            <div className='flex items-center gap-2'>
+              <Calendar className='h-6 w-6 text-muted-foreground' />
+              <h1 className='page-title'>Meetings</h1>
+              <HelpIcon helpId='meetings-and-instances' size='md' />
+            </div>
             <p className='page-subtitle'>
               Manage and track your organization&apos;s meetings
             </p>

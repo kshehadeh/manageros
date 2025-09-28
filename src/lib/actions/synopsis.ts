@@ -44,7 +44,7 @@ export async function generatePersonSynopsis(
 
   const { personId, fromDate, toDate, includeFeedback = false } = params
 
-  // Identify current person to enforce feedback privacy
+  // Identify current person to enforce access control and feedback privacy
   const currentPerson = await prisma.person.findFirst({
     where: { user: { id: user.id } },
     select: { id: true },
@@ -89,6 +89,18 @@ export async function generatePersonSynopsis(
   })
 
   if (!person) throw new Error('Person not found or access denied')
+
+  // Access control: Only allow synopsis generation for:
+  // 1. The user's linked person (currentPerson)
+  // 2. Organization admins can generate synopses for any person
+  const isOwnPerson = currentPerson?.id === person.id
+  const isOrgAdmin = user.role === 'ADMIN'
+
+  if (!isOwnPerson && !isOrgAdmin) {
+    throw new Error(
+      'You can only generate synopses for your linked person or you must be an organization admin'
+    )
+  }
 
   // Collect sources
   const sources: string[] = ['tasks']
@@ -252,11 +264,29 @@ export async function listPersonSynopses(
   if (!user.organizationId)
     throw new Error('User must belong to an organization')
 
+  // Identify current person to enforce access control
+  const currentPerson = await prisma.person.findFirst({
+    where: { user: { id: user.id } },
+    select: { id: true },
+  })
+
   const person = await prisma.person.findFirst({
     where: { id: personId, organizationId: user.organizationId },
     select: { id: true },
   })
   if (!person) throw new Error('Person not found or access denied')
+
+  // Access control: Only allow viewing synopses for:
+  // 1. The user's linked person (currentPerson)
+  // 2. Organization admins can view synopses for any person
+  const isOwnPerson = currentPerson?.id === person.id
+  const isOrgAdmin = user.role === 'ADMIN'
+
+  if (!isOwnPerson && !isOrgAdmin) {
+    throw new Error(
+      'You can only view synopses for your linked person or you must be an organization admin'
+    )
+  }
 
   const synopses = await prisma.personSynopsis.findMany({
     where: { personId },
@@ -282,16 +312,34 @@ export async function deleteSynopsis(synopsisId: string): Promise<void> {
   if (!user.organizationId)
     throw new Error('User must belong to an organization')
 
+  // Identify current person to enforce access control
+  const currentPerson = await prisma.person.findFirst({
+    where: { user: { id: user.id } },
+    select: { id: true },
+  })
+
   // Verify the synopsis belongs to a person in the user's organization
   const synopsis = await prisma.personSynopsis.findFirst({
     where: {
       id: synopsisId,
       person: { organizationId: user.organizationId },
     },
-    select: { id: true },
+    select: { id: true, personId: true },
   })
 
   if (!synopsis) throw new Error('Synopsis not found or access denied')
+
+  // Access control: Only allow deletion for:
+  // 1. The user's linked person (currentPerson)
+  // 2. Organization admins can delete synopses for any person
+  const isOwnPerson = currentPerson?.id === synopsis.personId
+  const isOrgAdmin = user.role === 'ADMIN'
+
+  if (!isOwnPerson && !isOrgAdmin) {
+    throw new Error(
+      'You can only delete synopses for your linked person or you must be an organization admin'
+    )
+  }
 
   await prisma.personSynopsis.delete({
     where: { id: synopsisId },

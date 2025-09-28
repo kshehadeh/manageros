@@ -1,0 +1,227 @@
+---
+id: synopsis-generation
+title: Synopsis Generation
+category: Feedback & Development
+---
+
+# Synopsis Generation
+
+ManagerOS uses AI-powered synopsis generation to create concise, professional summaries of team members' work activities, combining data from tasks, GitHub pull requests, Jira tickets, and feedback to provide comprehensive performance insights.
+
+## Overview
+
+### What is Synopsis Generation?
+
+Synopsis generation automatically creates professional work summaries by analyzing:
+
+- **Task completion** and progress
+- **GitHub pull requests** and contributions
+- **Jira ticket activity** and work items
+- **Feedback responses** and performance data
+- **Meeting participation** and outcomes
+
+### Benefits
+
+- **Time-saving** - Automated summary creation
+- **Consistency** - Standardized format and structure
+- **Comprehensive** - Multiple data sources combined
+- **Professional** - AI-generated, manager-ready content
+- **Historical** - Track performance over time
+
+## Data Sources
+
+### Task Management
+
+- **Completed tasks** within the specified date range
+- **Task status changes** and progress updates
+- **Priority levels** and initiative associations
+- **Completion dates** and effort tracking
+
+### GitHub Integration
+
+- **Pull request activity** for linked accounts
+- **Repository contributions** and code reviews
+- **Merge activity** and collaboration patterns
+- **Development metrics** and productivity
+
+### Jira Integration
+
+- **Assigned tickets** and work items
+- **Status updates** and progress tracking
+- **Project contributions** and deliverables
+- **Work activity** and capacity utilization
+
+### Feedback Data
+
+- **Feedback responses** from campaigns
+- **Performance evaluations** and ratings
+- **Peer feedback** and manager assessments
+- **Development insights** and recommendations
+
+## Generation Process
+
+### Configuration Options
+
+- **Date range** - Specify the period for analysis (default: 14 days)
+- **Include feedback** - Option to incorporate feedback data
+- **Data sources** - Select which integrations to include
+- **Customization** - Adjust tone and focus areas
+
+### AI Processing
+
+- **Data aggregation** from multiple sources
+- **Pattern recognition** and trend analysis
+- **Content synthesis** into coherent narrative
+- **Professional formatting** with bullet points
+- **Quality assurance** and fact-checking
+
+### Output Format
+
+- **Concise bullet points** (5-8 items typically)
+- **Past tense** professional language
+- **Specific outcomes** and metrics when available
+- **Action-oriented** descriptions
+- **Manager-ready** format
+
+## Usage Scenarios
+
+### Performance Reviews
+
+- **Quarterly summaries** for formal evaluations
+- **Goal achievement** tracking and documentation
+- **Development progress** and skill growth
+- **Contribution analysis** and impact assessment
+
+### Weekly Check-ins
+
+- **Regular updates** for manager meetings
+- **Progress tracking** and milestone monitoring
+- **Workload assessment** and capacity planning
+- **Quick status** updates and highlights
+
+### Project Reporting
+
+- **Initiative progress** and deliverable tracking
+- **Team contributions** to specific projects
+- **Cross-functional** collaboration insights
+- **Project milestone** achievements
+
+### Development Planning
+
+- **Skill development** tracking and progress
+- **Learning opportunities** identification
+- **Career growth** documentation
+- **Training needs** assessment
+
+## Privacy and Security
+
+### Data Access
+
+- **Organization-level** data isolation
+- **Role-based permissions** for synopsis access
+- **Private feedback** protection and filtering
+- **Secure data handling** throughout the process
+
+### Access Control
+
+- **Personal synopses**: Users can only generate synopses for their own linked person record
+- **Admin privileges**: Organization administrators can generate synopses for any person in their organization
+- **Viewing restrictions**: Same access control applies to viewing and deleting synopses
+- **Linked person requirement**: Users must have a linked person record to generate synopses for themselves
+
+### Feedback Privacy
+
+- **Private feedback** only visible to authors
+- **Public feedback** included in summaries
+- **Anonymous responses** handled appropriately
+- **Consent-based** data inclusion
+
+### AI Processing
+
+- **Secure API calls** to AI services
+- **Data minimization** - only necessary information processed
+- **No data retention** by external AI services
+- **Encrypted transmission** of sensitive data
+
+## Best Practices
+
+### Regular Generation
+
+- **Consistent timing** for synopsis creation
+- **Appropriate frequency** based on team needs
+- **Date range selection** for relevant periods
+- **Feedback inclusion** when appropriate
+
+### Data Quality
+
+- **Accurate task tracking** and status updates
+- **Complete GitHub** and Jira integrations
+- **Regular feedback** collection and campaigns
+- **Up-to-date** team member information
+
+### Usage Guidelines
+
+- **Review generated content** for accuracy
+- **Supplement with personal** observations
+- **Use as starting point** for discussions
+- **Combine with qualitative** feedback
+
+### Team Communication
+
+- **Share synopses** with team members
+- **Discuss insights** and development areas
+- **Set goals** based on generated summaries
+- **Track progress** over time
+
+## Customization Options
+
+### Content Focus
+
+- **Technical contributions** emphasis
+- **Leadership activities** highlighting
+- **Collaboration patterns** and teamwork
+- **Innovation and creativity** focus
+
+### Tone and Style
+
+- **Formal business** language
+- **Conversational** and approachable
+- **Technical detail** level adjustment
+- **Length and depth** customization
+
+### Data Integration
+
+- **Selective source** inclusion
+- **Custom date ranges** and periods
+- **Specific project** or initiative focus
+- **Team-level** vs individual summaries
+
+## Troubleshooting
+
+### Missing Data
+
+- **Verify integrations** are properly configured
+- **Check date ranges** for data availability
+- **Confirm account linking** for GitHub/Jira
+- **Review task completion** and status updates
+
+### Quality Issues
+
+- **Adjust date ranges** for more comprehensive data
+- **Include feedback** for richer context
+- **Verify data accuracy** in source systems
+- **Review AI prompts** and customization
+
+### Performance
+
+- **Optimize date ranges** for faster processing
+- **Limit data sources** if experiencing delays
+- **Check system resources** and API limits
+- **Monitor generation** frequency and usage
+
+### Integration Problems
+
+- **Test GitHub** and Jira connections
+- **Verify API permissions** and tokens
+- **Check account linking** for team members
+- **Review data sync** status and frequency

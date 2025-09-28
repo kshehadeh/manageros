@@ -19,15 +19,15 @@ Entity detail pages follow a standardized layout pattern with a header section, 
 
 **CSS Class**: `.page-container`
 
-- Provides consistent spacing between major sections (`space-y-6`)
+- Provides consistent spacing between major sections
 - Acts as the main wrapper for all detail page content
 
 ### 2. Header Section
 
 ```tsx
 <div className='page-header'>
-  <div className='flex items-start justify-between'>
-    <div className='flex-1'>{/* Title and basic info */}</div>
+  <div className='header-layout'>
+    <div className='header-content'>{/* Title and basic info */}</div>
     {/* Actions dropdown */}
   </div>
 </div>
@@ -35,7 +35,7 @@ Entity detail pages follow a standardized layout pattern with a header section, 
 
 **CSS Class**: `.page-header`
 
-- Provides bottom margin (`mb-6`) for separation from content
+- Provides bottom margin for separation from content
 - Contains the entity title, status, and key information
 - Includes action buttons/dropdowns on the right
 
@@ -44,31 +44,31 @@ Entity detail pages follow a standardized layout pattern with a header section, 
 **Title Section**:
 
 ```tsx
-<div className='flex items-center gap-3 mb-2'>
+<div className='title-section'>
   <h1 className='page-title'>{entityName}</h1>
   <StatusBadge status={entity.status} />
 </div>
 <div className='page-section-subtitle'>
   {entity.role ?? ''}
 </div>
-<div className='text-xs text-muted-foreground'>
+<div className='entity-email'>
   {entity.email}
 </div>
 ```
 
 **CSS Classes**:
 
-- `.page-title`: `text-2xl font-bold text-foreground mb-2`
-- `.page-section-subtitle`: `text-sm text-muted-foreground hidden md:block`
+- `.page-title`: Large bold title styling with bottom margin
+- `.page-section-subtitle`: Small muted text, hidden on mobile
 
 **Basic Information with Icons**:
 
 ```tsx
-<div className='flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground'>
+<div className='entity-info-row'>
   {entity.team && (
-    <div className='flex items-center gap-1'>
-      <Building2 className='w-4 h-4' />
-      <Link href={`/teams/${entity.team.id}`} className='hover:text-blue-400'>
+    <div className='info-item'>
+      <Building2 className='info-icon' />
+      <Link href={`/teams/${entity.team.id}`} className='info-link'>
         {entity.team.name}
       </Link>
     </div>
@@ -80,76 +80,69 @@ Entity detail pages follow a standardized layout pattern with a header section, 
 **Icon Guidelines**:
 
 - Use Lucide React icons consistently
-- Standard size: `w-4 h-4` (16px)
+- Standard size: 16px
 - Icons should be semantic and intuitive
-- Use `text-muted-foreground` for icon color
-- Links use `hover:text-blue-400` for hover state
+- Use muted foreground color for icon color
+- Links use blue hover state
 
 ### 3. Main Content Layout
 
 #### Two-Column Layout
 
 ```tsx
-<div className='flex gap-6'>
+<div className='main-layout'>
   {/* Main Content */}
-  <div className='flex-1 space-y-6'>{/* Content sections */}</div>
+  <div className='main-content'>{/* Content sections */}</div>
 
   {/* Right Sidebar */}
-  <div className='w-80 space-y-6'>{/* Sidebar sections */}</div>
+  <div className='sidebar'>{/* Sidebar sections */}</div>
 </div>
 ```
 
 **Layout Guidelines**:
 
-- Main content uses `flex-1` to take remaining space
-- Sidebar has fixed width `w-80` (320px)
-- Gap between columns: `gap-6` (24px)
-- Vertical spacing within sections: `space-y-6`
+- Main content uses flex-1 to take remaining space
+- Sidebar has fixed width of 320px
+- Gap between columns: 24px
+- Vertical spacing within sections: 24px
 
 #### Main Content Sections
 
 ```tsx
 <section>
-  <h3 className='font-semibold mb-4'>Section Title ({items.length})</h3>
-  <div className='space-y-3'>{/* Section content */}</div>
+  <h3 className='section-title'>Section Title ({items.length})</h3>
+  <div className='section-content'>{/* Section content */}</div>
 </section>
 ```
 
 **Section Guidelines**:
 
 - Use `<section>` elements for semantic structure
-- Section titles: `font-semibold mb-4`
+- Section titles: semibold font with bottom margin
 - Include count in parentheses when applicable
-- Content spacing: `space-y-3` (12px)
+- Content spacing: 12px between items
 
 #### Content Cards
 
 ```tsx
-<Link
-  href={`/entities/${item.id}`}
-  className='block border rounded-xl p-3 hover:bg-accent/50 transition-colors'
->
-  <div className='flex items-center justify-between'>
+<Link href={`/entities/${item.id}`} className='content-card'>
+  <div className='card-content'>
     <div>
-      <div className='font-medium'>{item.title}</div>
-      <div className='text-sm text-muted-foreground'>{item.description}</div>
-      <div className='text-xs text-muted-foreground mt-1'>
-        Additional metadata
-      </div>
+      <div className='card-title'>{item.title}</div>
+      <div className='card-description'>{item.description}</div>
+      <div className='card-metadata'>Additional metadata</div>
     </div>
-    <div className='flex items-center gap-2'>
-      {/* Status badges, actions */}
-    </div>
+    <div className='card-actions'>{/* Status badges, actions */}</div>
   </div>
 </Link>
 ```
 
 **Card Guidelines**:
 
-- Border radius: `rounded-xl` (12px)
-- Padding: `p-3` (12px)
-- Hover state: `hover:bg-accent/50 transition-colors`
-- Use `border` for subtle definition
+- Border radius: 12px
+- Padding: 12px
+- Hover state: accent background with transition
+- Use border for subtle definition
 - Content hierarchy: title → description → metadata
 
 ### 4. Sidebar Sections
@@ -157,9 +150,9 @@ Entity detail pages follow a standardized layout pattern with a header section, 
 #### Sidebar Structure
 
 ```tsx
-<div className='w-80 space-y-6'>
+<div className='sidebar'>
   <section>
-    <h3 className='font-semibold mb-4'>Section Title</h3>
+    <h3 className='section-title'>Section Title</h3>
     {/* Section content */}
   </section>
 </div>
@@ -167,8 +160,8 @@ Entity detail pages follow a standardized layout pattern with a header section, 
 
 **Sidebar Guidelines**:
 
-- Fixed width: `w-80` (320px)
-- Vertical spacing: `space-y-6` between sections
+- Fixed width: 320px
+- Vertical spacing: 24px between sections
 - Same section structure as main content
 - Typically contains secondary information, actions, or related entities
 
@@ -189,7 +182,7 @@ Only show sections when they have meaningful content:
 {
   entity.items.length > 0 && (
     <section>
-      <h3 className='font-semibold mb-4'>Items ({entity.items.length})</h3>
+      <h3 className='section-title'>Items ({entity.items.length})</h3>
       {/* Content */}
     </section>
   )
@@ -202,8 +195,8 @@ Handle empty states gracefully:
 
 ```tsx
 {items.length === 0 ? (
-  <div className='text-center py-8'>
-    <p className='text-muted-foreground'>No items found</p>
+  <div className='empty-state'>
+    <p className='empty-message'>No items found</p>
   </div>
 ) : (
   /* Content */
@@ -216,8 +209,8 @@ Provide loading feedback:
 
 ```tsx
 {isLoading ? (
-  <div className='flex justify-center py-4'>
-    <div className='text-sm text-muted-foreground'>
+  <div className='loading-state'>
+    <div className='loading-message'>
       Loading...
     </div>
   </div>
@@ -232,11 +225,7 @@ Display errors clearly:
 
 ```tsx
 {
-  error && (
-    <div className='bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded'>
-      {error}
-    </div>
-  )
+  error && <div className='error-state'>{error}</div>
 }
 ```
 
@@ -244,36 +233,36 @@ Display errors clearly:
 
 ### Text Hierarchy
 
-- **Page Title**: `text-2xl font-bold` (24px, bold)
-- **Section Titles**: `font-semibold` (600 weight)
-- **Content Titles**: `font-medium` (500 weight)
+- **Page Title**: Large bold text (24px, bold)
+- **Section Titles**: Semibold font (600 weight)
+- **Content Titles**: Medium font (500 weight)
 - **Body Text**: Default weight
-- **Metadata**: `text-sm` (14px)
-- **Small Text**: `text-xs` (12px)
+- **Metadata**: Small text (14px)
+- **Small Text**: Extra small text (12px)
 
 ### Color Usage
 
-- **Primary Text**: `text-foreground`
-- **Secondary Text**: `text-muted-foreground`
-- **Links**: `hover:text-blue-400`
-- **Errors**: `text-destructive`
-- **Success**: `text-badge-success-text`
+- **Primary Text**: Foreground color
+- **Secondary Text**: Muted foreground color
+- **Links**: Blue hover state
+- **Errors**: Destructive color
+- **Success**: Success badge text color
 
 ## Spacing
 
 ### Vertical Spacing
 
-- **Page sections**: `space-y-6` (24px)
-- **Section content**: `space-y-3` (12px)
-- **Card content**: `space-y-2` (8px)
-- **Form elements**: `space-y-4` (16px)
+- **Page sections**: 24px spacing
+- **Section content**: 12px spacing
+- **Card content**: 8px spacing
+- **Form elements**: 16px spacing
 
 ### Horizontal Spacing
 
-- **Column gap**: `gap-6` (24px)
-- **Icon spacing**: `gap-1` (4px)
-- **Button groups**: `gap-2` (8px)
-- **Content padding**: `p-3` (12px)
+- **Column gap**: 24px
+- **Icon spacing**: 4px
+- **Button groups**: 8px
+- **Content padding**: 12px
 
 ## Interactive Elements
 
@@ -288,7 +277,7 @@ Display errors clearly:
 ### Links
 
 ```tsx
-<Link href='/path' className='hover:text-blue-400'>
+<Link href='/path' className='hover-link'>
   Link Text
 </Link>
 ```
@@ -305,12 +294,12 @@ Display errors clearly:
 ### Breakpoints
 
 - **Mobile**: Default styles
-- **Tablet**: `md:` prefix (768px+)
-- **Desktop**: `lg:` prefix (1024px+)
+- **Tablet**: Medium breakpoint (768px+)
+- **Desktop**: Large breakpoint (1024px+)
 
 ### Responsive Patterns
 
-- Hide secondary information on mobile: `hidden md:block`
+- Hide secondary information on mobile
 - Stack sidebar below main content on mobile
 - Adjust text sizes for readability
 
@@ -353,23 +342,21 @@ export default function EntityDetailPage({
         <div className='page-header'>
           <div className='flex items-start justify-between'>
             <div className='flex-1'>
-              <div className='flex items-center gap-3 mb-2'>
+              <div className='title-section'>
                 <h1 className='page-title'>{entity.name}</h1>
                 <StatusBadge status={entity.status} />
               </div>
               <div className='page-section-subtitle'>{entity.role ?? ''}</div>
-              <div className='text-xs text-muted-foreground'>
-                {entity.email}
-              </div>
+              <div className='entity-email'>{entity.email}</div>
 
               {/* Basic Information with Icons */}
-              <div className='flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground'>
+              <div className='entity-info-row'>
                 {entity.team && (
-                  <div className='flex items-center gap-1'>
-                    <Building2 className='w-4 h-4' />
+                  <div className='info-item'>
+                    <Building2 className='info-icon' />
                     <Link
                       href={`/teams/${entity.team.id}`}
-                      className='hover:text-blue-400'
+                      className='info-link'
                     >
                       {entity.team.name}
                     </Link>
@@ -382,25 +369,23 @@ export default function EntityDetailPage({
           </div>
         </div>
 
-        <div className='flex gap-6'>
+        <div className='main-layout'>
           {/* Main Content */}
-          <div className='flex-1 space-y-6'>
+          <div className='main-content'>
             {entity.items.length > 0 && (
               <section>
-                <h3 className='font-semibold mb-4'>
-                  Items ({entity.items.length})
-                </h3>
-                <div className='space-y-3'>
+                <h3 className='section-title'>Items ({entity.items.length})</h3>
+                <div className='section-content'>
                   {entity.items.map(item => (
                     <Link
                       key={item.id}
                       href={`/items/${item.id}`}
-                      className='block border rounded-xl p-3 hover:bg-accent/50 transition-colors'
+                      className='content-card'
                     >
-                      <div className='flex items-center justify-between'>
+                      <div className='card-content'>
                         <div>
-                          <div className='font-medium'>{item.title}</div>
-                          <div className='text-sm text-muted-foreground'>
+                          <div className='card-title'>{item.title}</div>
+                          <div className='card-description'>
                             {item.description}
                           </div>
                         </div>
@@ -414,13 +399,13 @@ export default function EntityDetailPage({
           </div>
 
           {/* Right Sidebar */}
-          <div className='w-80 space-y-6'>
+          <div className='sidebar'>
             {entity.relatedItems.length > 0 && (
               <section>
-                <h3 className='font-semibold mb-4'>
+                <h3 className='section-title'>
                   Related Items ({entity.relatedItems.length})
                 </h3>
-                <div className='space-y-3'>{/* Sidebar content */}</div>
+                <div className='section-content'>{/* Sidebar content */}</div>
               </section>
             )}
           </div>

@@ -6,6 +6,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/db'
+import { Rocket } from 'lucide-react'
+import { HelpIcon } from '../../components/help-icon'
 
 export default async function InitiativesPage() {
   const session = await getServerSession(authOptions)
@@ -39,7 +41,11 @@ export default async function InitiativesPage() {
       <div className='page-header'>
         <div className='flex items-center justify-between'>
           <div>
-            <h1 className='page-title'>Initiatives</h1>
+            <div className='flex items-center gap-2'>
+              <Rocket className='h-6 w-6 text-muted-foreground' />
+              <h1 className='page-title'>Initiatives</h1>
+              <HelpIcon helpId='initiatives' size='md' />
+            </div>
           </div>
           <Button asChild variant='outline'>
             <Link href='/initiatives/new'>New Initiative</Link>
