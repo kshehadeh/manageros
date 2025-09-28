@@ -8,6 +8,7 @@ export default withAuth(
 
     // Set a custom header to indicate if this is a public route
     const isPublicRoute =
+      pathname === '/' ||
       pathname.startsWith('/feedback-form/') ||
       pathname.startsWith('/auth/signin') ||
       pathname.startsWith('/auth/signup')
@@ -23,7 +24,7 @@ export default withAuth(
 
     // Redirect users with organizations away from organization creation page
     if (token && token.organizationId && pathname === '/organization/create') {
-      return NextResponse.redirect(new URL('/', req.url))
+      return NextResponse.redirect(new URL('/dashboard', req.url))
     }
 
     // Note: We don't redirect users without organizations to organization creation
@@ -38,6 +39,7 @@ export default withAuth(
 
         // Allow public routes without authentication
         const isPublicRoute =
+          pathname === '/' ||
           pathname.startsWith('/feedback-form/') ||
           pathname.startsWith('/auth/signin') ||
           pathname.startsWith('/auth/signup')

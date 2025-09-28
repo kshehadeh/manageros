@@ -14,7 +14,7 @@ export default async function OrganizationInvitationsPage() {
 
   // Check if user is admin
   if (session.user.role !== 'ADMIN') {
-    redirect('/')
+    redirect('/dashboard')
   }
 
   // Check if user belongs to an organization

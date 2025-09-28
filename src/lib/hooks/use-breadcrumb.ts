@@ -29,7 +29,7 @@ export function useSetBreadcrumbs(breadcrumbs: BreadcrumbItem[]) {
  */
 export function usePageBreadcrumbs(additionalBreadcrumbs: BreadcrumbItem[]) {
   const breadcrumbs: BreadcrumbItem[] = [
-    { name: 'Dashboard', href: '/' },
+    { name: 'Dashboard', href: '/dashboard' },
     ...additionalBreadcrumbs,
   ]
 
