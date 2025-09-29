@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,6 +22,34 @@ export default function SignInPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const searchParams = useSearchParams()
+
+  // Check for error in URL parameters
+  useEffect(() => {
+    const urlError = searchParams.get('error')
+    if (urlError) {
+      switch (urlError) {
+        case 'CredentialsSignin':
+          setError(
+            'Invalid email or password. Please check your credentials and try again.'
+          )
+          break
+        case 'Configuration':
+          setError('There is a problem with the server configuration.')
+          break
+        case 'AccessDenied':
+          setError('Access denied. You do not have permission to sign in.')
+          break
+        case 'Verification':
+          setError(
+            'The verification token has expired or has already been used.'
+          )
+          break
+        default:
+          setError('An error occurred during sign in. Please try again.')
+      }
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,12 +60,34 @@ export default function SignInPage() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: true,
+        redirect: false, // Don't redirect immediately so we can handle errors
         callbackUrl: '/',
       })
 
       if (result?.error) {
-        setError('Invalid email or password')
+        switch (result.error) {
+          case 'CredentialsSignin':
+            setError(
+              'Invalid email or password. Please check your credentials and try again.'
+            )
+            break
+          case 'Configuration':
+            setError('There is a problem with the server configuration.')
+            break
+          case 'AccessDenied':
+            setError('Access denied. You do not have permission to sign in.')
+            break
+          case 'Verification':
+            setError(
+              'The verification token has expired or has already been used.'
+            )
+            break
+          default:
+            setError('An error occurred during sign in. Please try again.')
+        }
+      } else if (result?.ok) {
+        // Success - redirect manually
+        window.location.href = result.url || '/'
       }
     } catch (error) {
       console.error('Error signing in:', error)
@@ -60,7 +111,7 @@ export default function SignInPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className='space-y-4'>
             {error && (
-              <div className='flex items-center gap-2 rounded-lg bg-destructive/20 border border-destructive text-destructive px-4 py-3 text-sm'>
+              <div className='flex items-center gap-2 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 text-sm'>
                 <AlertCircle className='h-4 w-4 flex-shrink-0' />
                 <span>{error}</span>
               </div>
@@ -99,6 +150,14 @@ export default function SignInPage() {
           </form>
         </CardContent>
         <CardFooter className='flex flex-col space-y-2'>
+          <div className='text-sm text-muted-foreground text-center'>
+            <Link
+              href='/auth/forgot-password'
+              className='underline underline-offset-4'
+            >
+              Forgot your password?
+            </Link>
+          </div>
           <div className='text-sm text-muted-foreground text-center'>
             Don&apos;t have an account?{' '}
             <Link href='/auth/signup' className='underline underline-offset-4'>

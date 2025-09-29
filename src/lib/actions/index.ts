@@ -190,3 +190,11 @@ export {
   updateJobDomain,
   deleteJobDomain,
 } from './job-roles'
+
+// Password Reset Actions
+export {
+  createPasswordResetToken,
+  validatePasswordResetToken,
+  resetPasswordWithToken,
+  cleanupExpiredResetTokens,
+} from './password-reset'

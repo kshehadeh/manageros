@@ -1,21 +1,34 @@
 import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
 
+// Define public routes in a single location to avoid duplication
+const PUBLIC_ROUTES = [
+  '/',
+  '/feedback-form/',
+  '/auth/signin',
+  '/auth/signup',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+] as const
+
+// Helper function to check if a pathname is a public route
+function isPublicRoute(pathname: string): boolean {
+  return PUBLIC_ROUTES.some(route =>
+    route === '/' ? pathname === '/' : pathname.startsWith(route)
+  )
+}
+
 export default withAuth(
   function middleware(req) {
     const { pathname } = req.nextUrl
     const token = req.nextauth.token
 
     // Set a custom header to indicate if this is a public route
-    const isPublicRoute =
-      pathname === '/' ||
-      pathname.startsWith('/feedback-form/') ||
-      pathname.startsWith('/auth/signin') ||
-      pathname.startsWith('/auth/signup')
+    const isPublic = isPublicRoute(pathname)
 
     const response = NextResponse.next()
     response.headers.set('x-pathname', pathname)
-    response.headers.set('x-is-public', isPublicRoute.toString())
+    response.headers.set('x-is-public', isPublic.toString())
 
     // Allow access to organization creation page for users without organizations
     if (pathname === '/organization/create' && token && !token.organizationId) {
@@ -38,13 +51,7 @@ export default withAuth(
         const { pathname } = req.nextUrl
 
         // Allow public routes without authentication
-        const isPublicRoute =
-          pathname === '/' ||
-          pathname.startsWith('/feedback-form/') ||
-          pathname.startsWith('/auth/signin') ||
-          pathname.startsWith('/auth/signup')
-
-        if (isPublicRoute) {
+        if (isPublicRoute(pathname)) {
           return true
         }
 

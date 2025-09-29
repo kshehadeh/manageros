@@ -4,7 +4,7 @@
 
 ### Core Infrastructure
 
-- **Authentication System** - NextAuth.js integration with email/password authentication
+- **Authentication System** - NextAuth.js integration with email/password authentication and password reset flow
 - **Database Schema** - Comprehensive Prisma schema with PostgreSQL
 - **Organization Management** - Multi-tenant organization support with invitations
 - **User Management** - Role-based access control (ADMIN/USER permissions)
