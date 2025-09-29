@@ -3,17 +3,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { Command as CommandPrimitive } from 'cmdk'
+import { Search } from 'lucide-react'
 import {
   Command,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
 } from '@/components/ui/command'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { VisuallyHidden } from '@/components/ui/visually-hidden'
-import { HelpIcon } from '@/components/help-icon'
 import { useCommandPalette } from './provider'
 import { type CommandItemDescriptor, type CommandSource } from './types'
 import { coreCommandSource } from './sources/core'
@@ -71,18 +71,16 @@ export function CommandPalette() {
           <DialogTitle>Command Palette</DialogTitle>
         </VisuallyHidden>
         <Command>
-          <div className='flex items-center px-3'>
-            <CommandInput
+          <div
+            className='flex items-center border-b px-3'
+            cmdk-input-wrapper=''
+          >
+            <Search className='mr-2 h-4 w-4 shrink-0 opacity-50' />
+            <CommandPrimitive.Input
               placeholder='Type a command or search...'
               value={query}
               onValueChange={setQuery}
-              className='flex-1'
-            />
-            <HelpIcon
-              helpId='keyboard-shortcuts'
-              size='sm'
-              className='ml-2 text-muted-foreground hover:text-foreground'
-              tooltip='Keyboard shortcuts'
+              className='flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50'
             />
           </div>
           <CommandList>
