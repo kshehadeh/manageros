@@ -25,11 +25,11 @@ export function GettingStartedButton() {
         variant='outline'
         size='sm'
         onClick={() => setIsOpen(true)}
-        className='flex items-center gap-2'
+        className='flex items-center justify-center'
         title='Getting Started'
+        aria-label='Getting Started'
       >
         <BookOpen className='h-4 w-4' />
-        <span className='hidden sm:inline'>Getting Started</span>
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
