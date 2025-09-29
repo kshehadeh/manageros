@@ -10,6 +10,19 @@ export interface UserSettings {
   // Theme settings
   theme: 'light' | 'dark'
 
+  // Task view settings
+  taskGrouping: 'status' | 'initiative' | 'assignee'
+  taskFilters: {
+    textFilter: string
+    assigneeFilter: string
+    initiativeFilter: string
+    statusFilter: string
+    priorityFilter: string
+    dateRangeFilter: string
+    startDate: string
+    endDate: string
+  }
+
   // Future expandable settings can be added here:
   // sidebarCollapsed: boolean
   // defaultPageSize: number
@@ -21,6 +34,17 @@ export interface UserSettings {
 export const DEFAULT_USER_SETTINGS: UserSettings = {
   peopleViewMode: 'chart',
   theme: 'dark',
+  taskGrouping: 'status',
+  taskFilters: {
+    textFilter: '',
+    assigneeFilter: 'all',
+    initiativeFilter: 'all',
+    statusFilter: 'all',
+    priorityFilter: 'all',
+    dateRangeFilter: 'all',
+    startDate: '',
+    endDate: '',
+  },
   // When adding new settings, add their defaults here:
   // sidebarCollapsed: false
   // defaultPageSize: 25

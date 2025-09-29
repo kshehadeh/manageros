@@ -70,6 +70,9 @@ interface InitiativeWithRelations {
     checkIns: number
     tasks: number
   }
+  tasks: Array<{
+    status: string
+  }>
 }
 
 interface InitiativesTableProps {
@@ -272,14 +275,15 @@ export function InitiativesTable({
   }
 
   const getCompletionPercentage = (initiative: InitiativeWithRelations) => {
-    // Simple calculation based on completed tasks vs total tasks
-    // This could be enhanced with more sophisticated logic
     const totalTasks = initiative._count.tasks
     if (totalTasks === 0) return 0
 
-    // For now, we'll use a placeholder calculation
-    // In a real implementation, you'd count completed tasks
-    return Math.min(Math.floor((initiative._count.tasks / 10) * 100), 100)
+    // Count completed tasks (status 'done' or 'dropped')
+    const completedTasks = initiative.tasks.filter(
+      task => task.status === 'done' || task.status === 'dropped'
+    ).length
+
+    return Math.round((completedTasks / totalTasks) * 100)
   }
 
   if (initiatives.length === 0) {

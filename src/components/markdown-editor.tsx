@@ -46,7 +46,6 @@ export function MarkdownEditor({
               'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
           },
         }}
-        toolbarHeight={40}
       />
 
       {/* Character count */}

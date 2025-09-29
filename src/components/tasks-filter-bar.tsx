@@ -14,6 +14,7 @@ import {
 import { Task, Person, Initiative, Objective, User } from '@prisma/client'
 import { taskStatusUtils, ALL_TASK_STATUSES } from '@/lib/task-status'
 import { taskPriorityUtils, ALL_TASK_PRIORITIES } from '@/lib/task-priority'
+import { useUserSettings } from '@/lib/hooks/use-user-settings'
 
 type TaskWithRelations = Task & {
   assignee: Person | null
@@ -35,6 +36,7 @@ export function TasksFilterBar({
   initiatives,
   onFilteredTasksChange,
 }: TasksFilterBarProps) {
+  const { getSetting, updateSetting, isLoaded } = useUserSettings()
   const [textFilter, setTextFilter] = useState('')
   const [assigneeFilter, setAssigneeFilter] = useState('all')
   const [initiativeFilter, setInitiativeFilter] = useState('all')
@@ -45,6 +47,35 @@ export function TasksFilterBar({
   const [endDate, setEndDate] = useState('')
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const filterRef = useRef<HTMLDivElement>(null)
+
+  // Load filter values from user settings
+  useEffect(() => {
+    if (isLoaded) {
+      const savedFilters = getSetting('taskFilters')
+      setTextFilter(savedFilters.textFilter)
+      setAssigneeFilter(savedFilters.assigneeFilter)
+      setInitiativeFilter(savedFilters.initiativeFilter)
+      setStatusFilter(savedFilters.statusFilter)
+      setPriorityFilter(savedFilters.priorityFilter)
+      setDateRangeFilter(savedFilters.dateRangeFilter)
+      setStartDate(savedFilters.startDate)
+      setEndDate(savedFilters.endDate)
+    }
+  }, [isLoaded, getSetting])
+
+  // Helper function to save filter values to user settings
+  const saveFilters = (filters: {
+    textFilter: string
+    assigneeFilter: string
+    initiativeFilter: string
+    statusFilter: string
+    priorityFilter: string
+    dateRangeFilter: string
+    startDate: string
+    endDate: string
+  }) => {
+    updateSetting('taskFilters', filters)
+  }
 
   // Handle clicking outside to close filter popup
   useEffect(() => {
@@ -190,6 +221,18 @@ export function TasksFilterBar({
     }
 
     onFilteredTasksChange(filtered)
+
+    // Save filter values to user settings
+    saveFilters({
+      textFilter,
+      assigneeFilter,
+      initiativeFilter,
+      statusFilter,
+      priorityFilter,
+      dateRangeFilter,
+      startDate,
+      endDate,
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     tasks,
@@ -204,14 +247,28 @@ export function TasksFilterBar({
   ])
 
   const clearFilters = () => {
-    setTextFilter('')
-    setAssigneeFilter('all')
-    setInitiativeFilter('all')
-    setStatusFilter('all')
-    setPriorityFilter('all')
-    setDateRangeFilter('all')
-    setStartDate('')
-    setEndDate('')
+    const defaultFilters = {
+      textFilter: '',
+      assigneeFilter: 'all',
+      initiativeFilter: 'all',
+      statusFilter: 'all',
+      priorityFilter: 'all',
+      dateRangeFilter: 'all',
+      startDate: '',
+      endDate: '',
+    }
+
+    setTextFilter(defaultFilters.textFilter)
+    setAssigneeFilter(defaultFilters.assigneeFilter)
+    setInitiativeFilter(defaultFilters.initiativeFilter)
+    setStatusFilter(defaultFilters.statusFilter)
+    setPriorityFilter(defaultFilters.priorityFilter)
+    setDateRangeFilter(defaultFilters.dateRangeFilter)
+    setStartDate(defaultFilters.startDate)
+    setEndDate(defaultFilters.endDate)
+
+    // Save cleared filters to user settings
+    saveFilters(defaultFilters)
   }
 
   const hasActiveFilters =

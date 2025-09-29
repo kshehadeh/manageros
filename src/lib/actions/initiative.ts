@@ -274,6 +274,11 @@ export async function getInitiatives() {
           person: true,
         },
       },
+      tasks: {
+        select: {
+          status: true,
+        },
+      },
       _count: {
         select: {
           checkIns: true,

@@ -12,24 +12,38 @@ import { taskPriorityUtils, DEFAULT_TASK_PRIORITY } from '@/lib/task-priority'
  * Get the organization-scoped where clause for task access control.
  * Tasks are accessible if they are:
  * 1. Created by the current user within their organization
- * 2. Associated with initiatives in the same organization
- * 3. Associated with objectives of initiatives in the same organization
+ * 2. Assigned to the current user (if user has a linked person)
+ * 3. Associated with initiatives in the same organization
+ * 4. Associated with objectives of initiatives in the same organization
  */
-function getTaskAccessWhereClause(organizationId: string, userId: string) {
-  return {
-    OR: [
-      // Tasks created by the current user in their organization
-      {
-        createdBy: {
-          organizationId,
-          id: userId,
-        },
+function getTaskAccessWhereClause(
+  organizationId: string,
+  userId: string,
+  personId?: string
+) {
+  const conditions: any[] = [
+    // Tasks created by the current user in their organization
+    {
+      createdBy: {
+        organizationId,
+        id: userId,
       },
-      // Tasks associated with initiatives in the same organization
-      { initiative: { organizationId } },
-      // Tasks associated with objectives of initiatives in the same organization
-      { objective: { initiative: { organizationId } } },
-    ],
+    },
+    // Tasks associated with initiatives in the same organization
+    { initiative: { organizationId } },
+    // Tasks associated with objectives of initiatives in the same organization
+    { objective: { initiative: { organizationId } } },
+  ]
+
+  // Add condition for tasks assigned to the current user if they have a linked person
+  if (personId) {
+    conditions.push({
+      assigneeId: personId,
+    })
+  }
+
+  return {
+    OR: conditions,
   }
 }
 
@@ -135,7 +149,11 @@ export async function updateTask(taskId: string, formData: TaskFormData) {
   const existingTask = await prisma.task.findFirst({
     where: {
       id: taskId,
-      ...getTaskAccessWhereClause(user.organizationId, user.id),
+      ...getTaskAccessWhereClause(
+        user.organizationId,
+        user.id,
+        user.personId || undefined
+      ),
     },
   })
 
@@ -227,7 +245,11 @@ export async function deleteTask(taskId: string) {
   const task = await prisma.task.findFirst({
     where: {
       id: taskId,
-      ...getTaskAccessWhereClause(user.organizationId, user.id),
+      ...getTaskAccessWhereClause(
+        user.organizationId,
+        user.id,
+        user.personId || undefined
+      ),
     },
   })
 
@@ -253,7 +275,11 @@ export async function getTasks() {
   }
 
   const tasks = await prisma.task.findMany({
-    where: getTaskAccessWhereClause(user.organizationId, user.id),
+    where: getTaskAccessWhereClause(
+      user.organizationId,
+      user.id,
+      user.personId || undefined
+    ),
     include: {
       assignee: true,
       initiative: true,
@@ -277,7 +303,11 @@ export async function getTask(taskId: string) {
   const task = await prisma.task.findFirst({
     where: {
       id: taskId,
-      ...getTaskAccessWhereClause(user.organizationId, user.id),
+      ...getTaskAccessWhereClause(
+        user.organizationId,
+        user.id,
+        user.personId || undefined
+      ),
     },
     include: {
       assignee: true,
@@ -448,7 +478,11 @@ export async function updateTaskStatus(taskId: string, status: TaskStatus) {
   const existingTask = await prisma.task.findFirst({
     where: {
       id: taskId,
-      ...getTaskAccessWhereClause(user.organizationId, user.id),
+      ...getTaskAccessWhereClause(
+        user.organizationId,
+        user.id,
+        user.personId || undefined
+      ),
     },
   })
 
@@ -499,7 +533,11 @@ export async function updateTaskTitle(taskId: string, title: string) {
   const existingTask = await prisma.task.findFirst({
     where: {
       id: taskId,
-      ...getTaskAccessWhereClause(user.organizationId, user.id),
+      ...getTaskAccessWhereClause(
+        user.organizationId,
+        user.id,
+        user.personId || undefined
+      ),
     },
   })
 
@@ -543,7 +581,11 @@ export async function updateTaskAssignee(
   const existingTask = await prisma.task.findFirst({
     where: {
       id: taskId,
-      ...getTaskAccessWhereClause(user.organizationId, user.id),
+      ...getTaskAccessWhereClause(
+        user.organizationId,
+        user.id,
+        user.personId || undefined
+      ),
     },
   })
 
@@ -602,7 +644,11 @@ export async function updateTaskPriority(taskId: string, priority: number) {
   const existingTask = await prisma.task.findFirst({
     where: {
       id: taskId,
-      ...getTaskAccessWhereClause(user.organizationId, user.id),
+      ...getTaskAccessWhereClause(
+        user.organizationId,
+        user.id,
+        user.personId || undefined
+      ),
     },
   })
 
@@ -646,7 +692,17 @@ export async function getTasksAssignedToCurrentUser() {
 
   const tasks = await prisma.task.findMany({
     where: {
-      assigneeId: user.personId,
+      OR: [
+        // Tasks assigned to the current user
+        {
+          assigneeId: user.personId,
+        },
+        // Tasks created by the current user that are not assigned to anyone
+        {
+          createdById: user.id,
+          assigneeId: null,
+        },
+      ],
       status: {
         notIn: ['done', 'dropped'], // Only show active tasks
       },

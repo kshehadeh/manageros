@@ -1,7 +1,7 @@
 import { getTasks, getInitiatives } from '@/lib/actions'
 import { prisma } from '@/lib/db'
 import { requireAuth } from '@/lib/auth-utils'
-import { SplitTasksPageClient } from '@/components/split-tasks-page-client'
+import { GroupedTasksPageClient } from '@/components/grouped-tasks-page-client'
 import { CreateTaskButton } from '@/components/create-task-button'
 import { ListTodo } from 'lucide-react'
 
@@ -37,7 +37,7 @@ export default async function TasksPage() {
       </div>
 
       <div className='page-section -mx-3 md:mx-0'>
-        <SplitTasksPageClient
+        <GroupedTasksPageClient
           tasks={tasks}
           people={people}
           initiatives={initiatives}
