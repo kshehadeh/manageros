@@ -65,10 +65,9 @@ This document defines the security requirements and access control rules for the
 
 ### 6. Tasks
 
-- **Rule**: Tasks that are not associated with initiatives can only be seen by the person who created them or if they are assigned to the task
+- **Rule**: Tasks can only be seen by the person who created them within their organization, OR if they are associated with initiatives in the same organization
 - **Implementation**:
-  - Tasks created by users in the same organization (`createdBy: { organizationId }`)
-  - Tasks assigned to people in the same organization (`assignee: { organizationId }`)
+  - Tasks created by the current user in their organization (`createdBy: { organizationId, id: userId }`)
   - Tasks associated with initiatives in the same organization (`initiative: { organizationId }`)
   - Tasks associated with objectives of initiatives in the same organization (`objective: { initiative: { organizationId } }`)
 - **Functions**: `getTasks()`, `getTask()`, `updateTask()`, `deleteTask()`, etc.
@@ -99,8 +98,12 @@ where: {
 ```typescript
 where: {
   OR: [
-    { createdBy: { organizationId: user.organizationId } },
-    { assignee: { organizationId: user.organizationId } },
+    { 
+      createdBy: { 
+        organizationId: user.organizationId,
+        id: user.id
+      }
+    },
     { initiative: { organizationId: user.organizationId } },
     { objective: { initiative: { organizationId: user.organizationId } } },
   ]
