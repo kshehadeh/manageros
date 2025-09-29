@@ -11,7 +11,7 @@ import { TaskActionsDropdown } from '@/components/task-actions-dropdown'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { LinkManager } from '@/components/entity-links'
 import { Badge } from '@/components/ui/badge'
-import { Calendar, User, Clock } from 'lucide-react'
+import { Calendar, User, Clock, FileText, Info } from 'lucide-react'
 import { type TaskStatus } from '@/lib/task-status'
 import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
 
@@ -113,7 +113,10 @@ export default async function TaskDetailPage({
 
         {/* Task Description */}
         <div className='page-section'>
-          <h2 className='page-section-title'>Description</h2>
+          <h2 className='page-section-title font-bold flex items-center gap-2'>
+            <FileText className='w-4 h-4' />
+            Description
+          </h2>
           {task.description ? (
             <ReadonlyNotesField
               content={task.description}
@@ -134,6 +137,10 @@ export default async function TaskDetailPage({
           task.dueDate ||
           task.createdBy) && (
           <div className='page-section'>
+            <h2 className='page-section-title font-bold flex items-center gap-2'>
+              <Info className='w-4 h-4' />
+              Additional Details
+            </h2>
             <div className='card'>
               <div className='grid gap-4 md:grid-cols-2'>
                 {task.initiative && (

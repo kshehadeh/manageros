@@ -1,6 +1,7 @@
 import { InitiativeQuickTaskForm } from '@/components/initiative-quick-task-form'
 import { TaskTable } from '@/components/task-table'
 import { Task, Person, Initiative, Objective, User } from '@prisma/client'
+import { ListTodo } from 'lucide-react'
 
 type TaskWithRelations = Task & {
   assignee: Person | null
@@ -30,7 +31,10 @@ export function InitiativeTasks({
   return (
     <div className='page-section'>
       <div className='flex items-center justify-between mb-4'>
-        <h3 className='section-header'>Tasks</h3>
+        <h3 className='section-header font-bold flex items-center gap-2'>
+          <ListTodo className='w-4 h-4' />
+          Tasks
+        </h3>
       </div>
 
       <div className='mb-4'>
@@ -48,6 +52,7 @@ export function InitiativeTasks({
         people={people}
         showInitiative={false}
         showDueDate={true}
+        hideFilters={true}
       />
     </div>
   )

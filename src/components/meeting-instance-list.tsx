@@ -49,7 +49,10 @@ export function MeetingInstanceList({
   return (
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
-        <h3 className='text-lg font-semibold'>Meeting Instances</h3>
+        <h3 className='text-lg font-bold flex items-center gap-2'>
+          <Calendar className='w-4 h-4' />
+          Meeting Instances
+        </h3>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button className='flex items-center gap-2'>

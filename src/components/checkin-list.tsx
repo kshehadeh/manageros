@@ -7,6 +7,7 @@ import { CheckInForm } from '@/components/checkin-form'
 import { DeleteCheckInButton } from '@/components/delete-checkin-button'
 import { Button } from '@/components/ui/button'
 import { EditIconButton } from './edit-icon-button'
+import { CheckCircle } from 'lucide-react'
 
 interface CheckIn {
   id: string
@@ -62,8 +63,15 @@ export function CheckInList({
   return (
     <div className='space-y-4'>
       <div className='flex items-center justify-between'>
-        <h3 className='font-semibold'>Check-ins</h3>
-        <Button onClick={() => setShowNewForm(true)} variant='outline' size='sm'>
+        <h3 className='font-bold flex items-center gap-2'>
+          <CheckCircle className='w-4 h-4' />
+          Check-ins
+        </h3>
+        <Button
+          onClick={() => setShowNewForm(true)}
+          variant='outline'
+          size='sm'
+        >
           Add Check-in
         </Button>
       </div>
@@ -82,10 +90,7 @@ export function CheckInList({
       {/* Check-ins List */}
       <div className='space-y-3'>
         {checkIns.map(checkIn => (
-          <div
-            key={checkIn.id}
-            className='border rounded-xl p-4 space-y-3'
-          >
+          <div key={checkIn.id} className='border rounded-xl p-4 space-y-3'>
             {/* Header */}
             <div className='flex items-center justify-between'>
               <div className='flex items-center gap-3'>

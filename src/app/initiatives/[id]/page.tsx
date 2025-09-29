@@ -10,6 +10,7 @@ import { InitiativeCheckIns } from '@/components/initiative-checkins'
 import { InitiativeSidebar } from '@/components/initiative-sidebar'
 import { Suspense } from 'react'
 import { Loading } from '@/components/ui/loading'
+import { calculateTaskCompletionPercentage } from '@/lib/completion-utils'
 
 export default async function InitiativeDetail({
   params,
@@ -101,108 +102,117 @@ export default async function InitiativeDetail({
 
   if (!init) return <div>Not found</div>
 
+  // Calculate completion rate for the initiative
+  const completionRate = calculateTaskCompletionPercentage(allTasks)
+
   return (
     <InitiativeDetailClient initiativeTitle={init.title} initiativeId={init.id}>
-      <div className='flex flex-col lg:flex-row gap-6 px-4 lg:px-6'>
-        {/* Main Content */}
-        <div className='flex-1 min-w-0'>
-          <div className='space-y-6'>
-            <InitiativeHeader
-              initiative={{
-                id: init.id,
-                title: init.title,
-                summary: init.summary,
-                rag: init.rag,
-                confidence: init.confidence,
-              }}
-            />
-
-            <Suspense
-              fallback={
-                <div className='page-section'>
-                  <div className='flex items-center justify-center py-8'>
-                    <Loading size='md' />
-                    <span className='ml-2 text-sm text-muted-foreground'>
-                      Loading objectives...
-                    </span>
-                  </div>
-                </div>
-              }
-            >
-              <InitiativeObjectives objectives={init.objectives} />
-            </Suspense>
-
-            <Suspense
-              fallback={
-                <div className='page-section'>
-                  <div className='flex items-center justify-center py-8'>
-                    <Loading size='md' />
-                    <span className='ml-2 text-sm text-muted-foreground'>
-                      Loading tasks...
-                    </span>
-                  </div>
-                </div>
-              }
-            >
-              <InitiativeTasks
-                initiativeId={init.id}
-                objectives={init.objectives}
-                allTasks={allTasks}
-                people={people}
-              />
-            </Suspense>
-
-            <Suspense
-              fallback={
-                <div className='page-section'>
-                  <div className='flex items-center justify-center py-8'>
-                    <Loading size='md' />
-                    <span className='ml-2 text-sm text-muted-foreground'>
-                      Loading check-ins...
-                    </span>
-                  </div>
-                </div>
-              }
-            >
-              <InitiativeCheckIns
-                initiativeId={init.id}
-                initiativeTitle={init.title}
-                checkIns={init.checkIns.map(ci => ({
-                  id: ci.id,
-                  weekOf: ci.weekOf.toISOString(),
-                  rag: ci.rag,
-                  confidence: ci.confidence,
-                  summary: ci.summary,
-                  blockers: ci.blockers,
-                  nextSteps: ci.nextSteps,
-                  createdAt: ci.createdAt.toISOString(),
-                  createdBy: {
-                    id: ci.createdBy.id,
-                    name: ci.createdBy.name,
-                  },
-                }))}
-              />
-            </Suspense>
-          </div>
+      <div className='space-y-6'>
+        {/* Header - Full Width */}
+        <div className='px-4 lg:px-6'>
+          <InitiativeHeader
+            initiative={{
+              id: init.id,
+              title: init.title,
+              summary: init.summary,
+              rag: init.rag,
+              completionRate: completionRate,
+            }}
+          />
         </div>
 
-        {/* Right Sidebar - Full width on mobile, fixed width on desktop */}
-        <div className='w-full lg:w-80 lg:flex-shrink-0'>
-          <InitiativeSidebar
-            team={init.team}
-            owners={init.owners}
-            links={entityLinks.map(link => ({
-              id: link.id,
-              url: link.url,
-              title: link.title,
-              description: link.description,
-              createdAt: link.createdAt,
-              updatedAt: link.updatedAt,
-              createdBy: link.createdBy,
-            }))}
-            entityType='Initiative'
-            entityId={init.id}
-          />
+        {/* Main Content and Sidebar */}
+        <div className='flex flex-col lg:flex-row gap-6 px-4 lg:px-6'>
+          {/* Main Content */}
+          <div className='flex-1 min-w-0'>
+            <div className='space-y-6'>
+              <Suspense
+                fallback={
+                  <div className='page-section'>
+                    <div className='flex items-center justify-center py-8'>
+                      <Loading size='md' />
+                      <span className='ml-2 text-sm text-muted-foreground'>
+                        Loading objectives...
+                      </span>
+                    </div>
+                  </div>
+                }
+              >
+                <InitiativeObjectives objectives={init.objectives} />
+              </Suspense>
+
+              <Suspense
+                fallback={
+                  <div className='page-section'>
+                    <div className='flex items-center justify-center py-8'>
+                      <Loading size='md' />
+                      <span className='ml-2 text-sm text-muted-foreground'>
+                        Loading tasks...
+                      </span>
+                    </div>
+                  </div>
+                }
+              >
+                <InitiativeTasks
+                  initiativeId={init.id}
+                  objectives={init.objectives}
+                  allTasks={allTasks}
+                  people={people}
+                />
+              </Suspense>
+
+              <Suspense
+                fallback={
+                  <div className='page-section'>
+                    <div className='flex items-center justify-center py-8'>
+                      <Loading size='md' />
+                      <span className='ml-2 text-sm text-muted-foreground'>
+                        Loading check-ins...
+                      </span>
+                    </div>
+                  </div>
+                }
+              >
+                <InitiativeCheckIns
+                  initiativeId={init.id}
+                  initiativeTitle={init.title}
+                  checkIns={init.checkIns.map(ci => ({
+                    id: ci.id,
+                    weekOf: ci.weekOf.toISOString(),
+                    rag: ci.rag,
+                    confidence: ci.confidence,
+                    summary: ci.summary,
+                    blockers: ci.blockers,
+                    nextSteps: ci.nextSteps,
+                    createdAt: ci.createdAt.toISOString(),
+                    createdBy: {
+                      id: ci.createdBy.id,
+                      name: ci.createdBy.name,
+                    },
+                  }))}
+                />
+              </Suspense>
+            </div>
+          </div>
+
+          {/* Right Sidebar - Full width on mobile, fixed width on desktop */}
+          <div className='w-full lg:w-80 lg:flex-shrink-0'>
+            <InitiativeSidebar
+              team={init.team}
+              owners={init.owners}
+              links={entityLinks.map(link => ({
+                id: link.id,
+                url: link.url,
+                title: link.title,
+                description: link.description,
+                createdAt: link.createdAt,
+                updatedAt: link.updatedAt,
+                createdBy: link.createdBy,
+              }))}
+              entityType='Initiative'
+              entityId={init.id}
+            />
+          </div>
         </div>
       </div>
     </InitiativeDetailClient>

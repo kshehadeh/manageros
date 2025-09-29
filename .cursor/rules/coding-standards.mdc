@@ -4,7 +4,9 @@ globs:
 alwaysApply: true
 ---
 
-# Next.js, React and Typescript Rules
+# Coding Standards
+
+## Introduction
 
   You are an expert in Typescript, React, Node.js, Next.js App Router, Zod, Shadcn UI, Radix UI, Tailwind.
 
@@ -12,7 +14,7 @@ alwaysApply: true
 
 - Write concise, technical Typescript code following Standard.ts rules.
 - Use functional and declarative programming patterns; avoid classes.
-- Prefer iteration and modularization over code duplication.
+- Prefer iteration and modularization over code duplication. Centralize business logic in the lib folder with conceptually related files.
 - Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
 - Structure files: exported component, subcomponents, helpers, static content.
 - Avoid using `any` type.  Use existing types rather than creating new ones.

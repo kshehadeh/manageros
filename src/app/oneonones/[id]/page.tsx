@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { OneOnOneDetailClient } from '@/components/oneonone-detail-client'
 import { EditIconButton } from '@/components/edit-icon-button'
+import { MessageCircle, Info, StickyNote } from 'lucide-react'
 
 interface OneOnOneViewPageProps {
   params: Promise<{
@@ -37,7 +38,10 @@ export default async function OneOnOneViewPage({
         <div className='space-y-6'>
           <div className='flex items-center justify-between'>
             <div>
-              <h2 className='text-lg font-semibold'>1:1 Meeting</h2>
+              <h2 className='text-lg font-bold flex items-center gap-2'>
+                <MessageCircle className='w-4 h-4' />
+                1:1 Meeting
+              </h2>
               <p className='text-sm text-neutral-400 mt-1'>
                 Meeting between {oneOnOne.manager.name} and{' '}
                 {oneOnOne.report.name}
@@ -55,7 +59,10 @@ export default async function OneOnOneViewPage({
           <div className='grid gap-6 md:grid-cols-2'>
             {/* Meeting Details */}
             <section className='card'>
-              <h3 className='font-semibold mb-4'>Meeting Details</h3>
+              <h3 className='font-bold mb-4 flex items-center gap-2'>
+                <Info className='w-4 h-4' />
+                Meeting Details
+              </h3>
               <div className='space-y-3'>
                 <div>
                   <span className='text-sm font-medium'>Manager:</span>
@@ -103,7 +110,10 @@ export default async function OneOnOneViewPage({
 
           {/* Meeting Notes */}
           <section className='card'>
-            <h3 className='font-semibold mb-4'>Meeting Notes</h3>
+            <h3 className='font-bold mb-4 flex items-center gap-2'>
+              <StickyNote className='w-4 h-4' />
+              Meeting Notes
+            </h3>
             <div className='text-sm text-neutral-400'>
               {oneOnOne.notes ? (
                 <ReadonlyNotesField

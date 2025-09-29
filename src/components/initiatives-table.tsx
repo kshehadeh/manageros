@@ -23,6 +23,7 @@ import {
 import { deleteInitiative } from '@/lib/actions'
 import { toast } from 'sonner'
 import { Person, Team } from '@prisma/client'
+import { calculateInitiativeCompletionPercentage } from '@/lib/completion-utils'
 
 interface FilterState {
   keyword: string
@@ -79,6 +80,7 @@ interface InitiativesTableProps {
   initiatives: InitiativeWithRelations[]
   people: Person[]
   teams: Team[]
+  hideFilters?: boolean
 }
 
 interface ContextMenuState {
@@ -93,6 +95,7 @@ export function InitiativesTable({
   initiatives,
   people,
   teams,
+  hideFilters = false,
 }: InitiativesTableProps) {
   const [_isPending, startTransition] = useTransition()
   const router = useRouter()
@@ -274,18 +277,6 @@ export function InitiativesTable({
     }
   }
 
-  const getCompletionPercentage = (initiative: InitiativeWithRelations) => {
-    const totalTasks = initiative._count.tasks
-    if (totalTasks === 0) return 0
-
-    // Count completed tasks (status 'done' or 'dropped')
-    const completedTasks = initiative.tasks.filter(
-      task => task.status === 'done' || task.status === 'dropped'
-    ).length
-
-    return Math.round((completedTasks / totalTasks) * 100)
-  }
-
   if (initiatives.length === 0) {
     return (
       <div className='text-muted-foreground text-sm text-center py-8'>
@@ -297,203 +288,207 @@ export function InitiativesTable({
   return (
     <div className='space-y-4'>
       {/* Filter Controls */}
-      <div className='px-3 md:px-0'>
-        <div className='flex items-center justify-between'>
-          <div className='flex items-center gap-2'>
-            <Button
-              variant='outline'
-              size='sm'
-              onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-2 transition-all duration-200 ${
-                showFilters
-                  ? 'rounded-b-none border-b-0 bg-background'
-                  : 'rounded-lg'
-              }`}
-            >
-              <Filter className='h-4 w-4' />
-              Filters
-              {Object.values(filters).some(
-                filter => filter !== '' && filter !== 'all'
-              ) && <div className='h-2 w-2 bg-primary rounded-full' />}
-            </Button>
-          </div>
-          <div className='text-sm text-muted-foreground'>
-            Showing {filteredInitiatives.length} of {initiatives.length}{' '}
-            initiatives
-          </div>
-        </div>
-
-        {showFilters && (
-          <div className='border border-t-0 rounded-b-lg rounded-t-none p-4 bg-muted/30'>
-            <div>
-              <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-5'>
-                {/* Keyword Search */}
-                <div className='space-y-2'>
-                  <label className='text-sm font-medium'>Search</label>
-                  <div className='relative'>
-                    <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
-                    <Input
-                      placeholder='Search initiatives...'
-                      value={filters.keyword}
-                      onChange={e =>
-                        setFilters(prev => ({
-                          ...prev,
-                          keyword: e.target.value,
-                        }))
-                      }
-                      className='pl-8'
-                    />
-                  </div>
-                </div>
-
-                {/* Owner Filter */}
-                <div className='space-y-2'>
-                  <label className='text-sm font-medium'>Owner</label>
-                  <Select
-                    value={filters.ownerId}
-                    onValueChange={value =>
-                      setFilters(prev => ({ ...prev, ownerId: value }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder='All owners' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='all'>All owners</SelectItem>
-                      {people.map(person => (
-                        <SelectItem key={person.id} value={person.id}>
-                          {person.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Team Filter */}
-                <div className='space-y-2'>
-                  <label className='text-sm font-medium'>Team</label>
-                  <Select
-                    value={filters.teamId}
-                    onValueChange={value =>
-                      setFilters(prev => ({ ...prev, teamId: value }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder='All teams' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='all'>All teams</SelectItem>
-                      <SelectItem value='no-team'>No team</SelectItem>
-                      {teams.map(team => (
-                        <SelectItem key={team.id} value={team.id}>
-                          {team.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* RAG Filter */}
-                <div className='space-y-2'>
-                  <label className='text-sm font-medium'>RAG Status</label>
-                  <Select
-                    value={filters.rag}
-                    onValueChange={value =>
-                      setFilters(prev => ({ ...prev, rag: value }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder='All RAG statuses' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='all'>All RAG statuses</SelectItem>
-                      <SelectItem value='red'>Red</SelectItem>
-                      <SelectItem value='amber'>Amber</SelectItem>
-                      <SelectItem value='green'>Green</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Date Range Filter */}
-                <div className='space-y-2'>
-                  <label className='text-sm font-medium'>Date Range</label>
-                  <Select
-                    value={filters.dateRange}
-                    onValueChange={value =>
-                      setFilters(prev => ({ ...prev, dateRange: value }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder='All dates' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='all'>All dates</SelectItem>
-                      <SelectItem value='today'>Today</SelectItem>
-                      <SelectItem value='this-week'>This week</SelectItem>
-                      <SelectItem value='this-month'>This month</SelectItem>
-                      <SelectItem value='last-30-days'>Last 30 days</SelectItem>
-                      <SelectItem value='custom'>Custom range</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Custom Date Range Inputs */}
-              {filters.dateRange === 'custom' && (
-                <div className='grid gap-4 md:grid-cols-2 mt-4'>
-                  <div className='space-y-2'>
-                    <label className='text-sm font-medium'>Start Date</label>
-                    <Input
-                      type='date'
-                      value={filters.startDate}
-                      onChange={e =>
-                        setFilters(prev => ({
-                          ...prev,
-                          startDate: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className='space-y-2'>
-                    <label className='text-sm font-medium'>End Date</label>
-                    <Input
-                      type='date'
-                      value={filters.endDate}
-                      onChange={e =>
-                        setFilters(prev => ({
-                          ...prev,
-                          endDate: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Clear Filters Button */}
-              <div className='flex justify-end mt-4'>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  onClick={() =>
-                    setFilters({
-                      keyword: '',
-                      ownerId: 'all',
-                      teamId: 'all',
-                      rag: 'all',
-                      dateRange: 'all',
-                      startDate: '',
-                      endDate: '',
-                    })
-                  }
-                >
-                  Clear Filters
-                </Button>
-              </div>
+      {!hideFilters && (
+        <div className='px-3 md:px-0'>
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-2'>
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 transition-all duration-200 ${
+                  showFilters
+                    ? 'rounded-b-none border-b-0 bg-background'
+                    : 'rounded-lg'
+                }`}
+              >
+                <Filter className='h-4 w-4' />
+                Filters
+                {Object.values(filters).some(
+                  filter => filter !== '' && filter !== 'all'
+                ) && <div className='h-2 w-2 bg-primary rounded-full' />}
+              </Button>
+            </div>
+            <div className='text-sm text-muted-foreground'>
+              Showing {filteredInitiatives.length} of {initiatives.length}{' '}
+              initiatives
             </div>
           </div>
-        )}
-      </div>
+
+          {showFilters && (
+            <div className='border border-t-0 rounded-b-lg rounded-t-none p-4 bg-muted/30'>
+              <div>
+                <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-5'>
+                  {/* Keyword Search */}
+                  <div className='space-y-2'>
+                    <label className='text-sm font-medium'>Search</label>
+                    <div className='relative'>
+                      <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
+                      <Input
+                        placeholder='Search initiatives...'
+                        value={filters.keyword}
+                        onChange={e =>
+                          setFilters(prev => ({
+                            ...prev,
+                            keyword: e.target.value,
+                          }))
+                        }
+                        className='pl-8'
+                      />
+                    </div>
+                  </div>
+
+                  {/* Owner Filter */}
+                  <div className='space-y-2'>
+                    <label className='text-sm font-medium'>Owner</label>
+                    <Select
+                      value={filters.ownerId}
+                      onValueChange={value =>
+                        setFilters(prev => ({ ...prev, ownerId: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder='All owners' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='all'>All owners</SelectItem>
+                        {people.map(person => (
+                          <SelectItem key={person.id} value={person.id}>
+                            {person.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Team Filter */}
+                  <div className='space-y-2'>
+                    <label className='text-sm font-medium'>Team</label>
+                    <Select
+                      value={filters.teamId}
+                      onValueChange={value =>
+                        setFilters(prev => ({ ...prev, teamId: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder='All teams' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='all'>All teams</SelectItem>
+                        <SelectItem value='no-team'>No team</SelectItem>
+                        {teams.map(team => (
+                          <SelectItem key={team.id} value={team.id}>
+                            {team.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* RAG Filter */}
+                  <div className='space-y-2'>
+                    <label className='text-sm font-medium'>RAG Status</label>
+                    <Select
+                      value={filters.rag}
+                      onValueChange={value =>
+                        setFilters(prev => ({ ...prev, rag: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder='All RAG statuses' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='all'>All RAG statuses</SelectItem>
+                        <SelectItem value='red'>Red</SelectItem>
+                        <SelectItem value='amber'>Amber</SelectItem>
+                        <SelectItem value='green'>Green</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Date Range Filter */}
+                  <div className='space-y-2'>
+                    <label className='text-sm font-medium'>Date Range</label>
+                    <Select
+                      value={filters.dateRange}
+                      onValueChange={value =>
+                        setFilters(prev => ({ ...prev, dateRange: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder='All dates' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='all'>All dates</SelectItem>
+                        <SelectItem value='today'>Today</SelectItem>
+                        <SelectItem value='this-week'>This week</SelectItem>
+                        <SelectItem value='this-month'>This month</SelectItem>
+                        <SelectItem value='last-30-days'>
+                          Last 30 days
+                        </SelectItem>
+                        <SelectItem value='custom'>Custom range</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Custom Date Range Inputs */}
+                {filters.dateRange === 'custom' && (
+                  <div className='grid gap-4 md:grid-cols-2 mt-4'>
+                    <div className='space-y-2'>
+                      <label className='text-sm font-medium'>Start Date</label>
+                      <Input
+                        type='date'
+                        value={filters.startDate}
+                        onChange={e =>
+                          setFilters(prev => ({
+                            ...prev,
+                            startDate: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+                    <div className='space-y-2'>
+                      <label className='text-sm font-medium'>End Date</label>
+                      <Input
+                        type='date'
+                        value={filters.endDate}
+                        onChange={e =>
+                          setFilters(prev => ({
+                            ...prev,
+                            endDate: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Clear Filters Button */}
+                <div className='flex justify-end mt-4'>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={() =>
+                      setFilters({
+                        keyword: '',
+                        ownerId: 'all',
+                        teamId: 'all',
+                        rag: 'all',
+                        dateRange: 'all',
+                        startDate: '',
+                        endDate: '',
+                      })
+                    }
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Initiative Table */}
       <div className='rounded-md border -mx-3 md:mx-0'>
@@ -540,7 +535,8 @@ export function InitiativesTable({
                     </div>
                     <div className='mt-1'>
                       <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
-                        {getCompletionPercentage(initiative)}% complete
+                        {calculateInitiativeCompletionPercentage(initiative)}%
+                        complete
                       </span>
                     </div>
                   </div>

@@ -11,7 +11,15 @@ import { MeetingInstanceList } from '@/components/meeting-instance-list'
 import { MeetingActionsDropdown } from '@/components/meeting-actions-dropdown'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { LinkManager } from '@/components/entity-links'
-import { Clock, Users, User, Building2, Repeat } from 'lucide-react'
+import {
+  Clock,
+  Users,
+  User,
+  Building2,
+  Repeat,
+  FileText,
+  StickyNote,
+} from 'lucide-react'
 
 export default async function MeetingDetailPage({
   params,
@@ -132,7 +140,10 @@ export default async function MeetingDetailPage({
         {/* Description */}
         {meeting.description && (
           <div className='page-section'>
-            <h2 className='page-section-title'>Description</h2>
+            <h2 className='page-section-title font-bold flex items-center gap-2'>
+              <FileText className='w-4 h-4' />
+              Description
+            </h2>
             <ReadonlyNotesField
               content={meeting.description}
               variant='default'
@@ -144,7 +155,7 @@ export default async function MeetingDetailPage({
         {/* Participants */}
         {meeting.participants.length > 0 && (
           <div className='page-section'>
-            <h2 className='page-section-title flex items-center gap-2'>
+            <h2 className='page-section-title font-bold flex items-center gap-2'>
               <Users className='h-5 w-5' />
               Participants
             </h2>
@@ -174,7 +185,10 @@ export default async function MeetingDetailPage({
 
         {/* Notes */}
         <div className='page-section'>
-          <h2 className='page-section-title'>Notes</h2>
+          <h2 className='page-section-title font-bold flex items-center gap-2'>
+            <StickyNote className='w-4 h-4' />
+            Notes
+          </h2>
           <ReadonlyNotesField
             content={meeting.notes || ''}
             variant='default'

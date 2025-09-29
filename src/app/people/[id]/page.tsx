@@ -25,6 +25,10 @@ import {
   User as UserIcon,
   Building2,
   CalendarDays,
+  Rocket,
+  ListTodo,
+  CheckCircle,
+  MessageCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -369,7 +373,8 @@ export default async function PersonDetailPage({
             {/* Owned Initiatives - Only show if person has initiatives */}
             {personWithRelations.initiativeOwners.length > 0 && (
               <section>
-                <h3 className='font-semibold mb-4'>
+                <h3 className='font-bold mb-4 flex items-center gap-2'>
+                  <Rocket className='w-4 h-4' />
                   Owned Initiatives (
                   {personWithRelations.initiativeOwners.length})
                 </h3>
@@ -415,7 +420,8 @@ export default async function PersonDetailPage({
             {/* Assigned Tasks - Only show if person has tasks */}
             {personWithRelations.tasks.length > 0 && (
               <section>
-                <h3 className='font-semibold mb-4'>
+                <h3 className='font-bold mb-4 flex items-center gap-2'>
+                  <ListTodo className='w-4 h-4' />
                   Assigned Tasks ({personWithRelations.tasks.length})
                 </h3>
                 <div className='space-y-3'>
@@ -483,7 +489,8 @@ export default async function PersonDetailPage({
             {personWithRelations.checkIns.length > 0 && (
               <section>
                 <div className='flex items-center justify-between mb-4'>
-                  <h3 className='font-semibold'>
+                  <h3 className='font-bold flex items-center gap-2'>
+                    <CheckCircle className='w-4 h-4' />
                     Recent Check-ins ({personWithRelations.checkIns.length})
                   </h3>
                   <Button asChild variant='outline' size='sm'>
@@ -532,7 +539,10 @@ export default async function PersonDetailPage({
               (personWithRelations.oneOnOnes.length > 0 ||
                 personWithRelations.oneOnOnesAsManager.length > 0) && (
                 <section>
-                  <h3 className='font-semibold mb-4'>1:1 Meetings</h3>
+                  <h3 className='font-bold mb-4 flex items-center gap-2'>
+                    <MessageCircle className='w-4 h-4' />
+                    1:1 Meetings
+                  </h3>
                   <div className='space-y-3'>
                     {/* As Manager */}
                     {personWithRelations.oneOnOnesAsManager.length > 0 && (
@@ -633,7 +643,8 @@ export default async function PersonDetailPage({
             {personWithRelations.feedbackCampaigns.length > 0 && (
               <section>
                 <div className='flex items-center justify-between mb-4'>
-                  <h3 className='font-semibold'>
+                  <h3 className='font-bold flex items-center gap-2'>
+                    <MessageCircle className='w-4 h-4' />
                     Feedback Campaigns (
                     {personWithRelations.feedbackCampaigns.length})
                   </h3>
@@ -677,7 +688,8 @@ export default async function PersonDetailPage({
             {/* Direct Reports */}
             {personWithRelations.reports.length > 0 && (
               <section>
-                <h3 className='font-semibold mb-4'>
+                <h3 className='font-bold mb-4 flex items-center gap-2'>
+                  <Users className='w-4 h-4' />
                   Direct Reports ({personWithRelations.reports.length})
                 </h3>
                 <div className='space-y-3'>
@@ -698,7 +710,10 @@ export default async function PersonDetailPage({
             {/* User Account Link - Only show for admins */}
             {isAdmin(session.user) && (
               <section>
-                <h3 className='font-semibold mb-4'>User Linking</h3>
+                <h3 className='font-bold mb-4 flex items-center gap-2'>
+                  <UserIcon className='w-4 h-4' />
+                  User Linking
+                </h3>
                 <UserLinkForm
                   personId={personWithRelations.id}
                   linkedUser={personWithRelations.user}
@@ -709,7 +724,10 @@ export default async function PersonDetailPage({
             {/* Jira Integration - Only show for admins */}
             {isAdmin(session.user) && (
               <section>
-                <h3 className='font-semibold mb-4'>Jira Linking</h3>
+                <h3 className='font-bold mb-4 flex items-center gap-2'>
+                  <Building2 className='w-4 h-4' />
+                  Jira Linking
+                </h3>
                 <JiraAccountLinker
                   personId={personWithRelations.id}
                   personName={personWithRelations.name}
@@ -722,7 +740,10 @@ export default async function PersonDetailPage({
             {/* GitHub Integration - Only show for admins */}
             {isAdmin(session.user) && (
               <section>
-                <h3 className='font-semibold mb-4'>GitHub Linking</h3>
+                <h3 className='font-bold mb-4 flex items-center gap-2'>
+                  <Building2 className='w-4 h-4' />
+                  GitHub Linking
+                </h3>
                 <GithubAccountLinker
                   personId={personWithRelations.id}
                   personName={personWithRelations.name}

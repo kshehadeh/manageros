@@ -60,7 +60,7 @@ export function InitiativeSidebar({
       {/* Team Section */}
       {team && (
         <div className='page-section'>
-          <h3 className='section-header flex items-center gap-2'>
+          <h3 className='section-header font-bold flex items-center gap-2'>
             <Users className='h-5 w-5' />
             Team
           </h3>
@@ -77,7 +77,7 @@ export function InitiativeSidebar({
 
       {/* Associated People Section */}
       <div className='page-section'>
-        <h3 className='section-header flex items-center gap-2'>
+        <h3 className='section-header font-bold flex items-center gap-2'>
           <Users className='h-5 w-5' />
           Associated People
         </h3>

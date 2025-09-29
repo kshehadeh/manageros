@@ -9,7 +9,7 @@ interface InitiativeHeaderProps {
     title: string
     summary: string | null
     rag: string
-    confidence: number
+    completionRate: number
   }
 }
 
@@ -23,7 +23,9 @@ export function InitiativeHeader({ initiative }: InitiativeHeaderProps) {
             <h1 className='page-title'>{initiative.title}</h1>
             <div className='flex items-center gap-2'>
               <Rag rag={initiative.rag} />
-              <span className='badge'>{initiative.confidence}%</span>
+              <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
+                {initiative.completionRate}% complete
+              </span>
             </div>
           </div>
           {initiative.summary && (

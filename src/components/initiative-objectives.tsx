@@ -1,3 +1,5 @@
+import { Target } from 'lucide-react'
+
 interface InitiativeObjectivesProps {
   objectives: Array<{
     id: string
@@ -12,7 +14,10 @@ export function InitiativeObjectives({
 }: InitiativeObjectivesProps) {
   return (
     <div className='page-section'>
-      <h3 className='section-header'>Objectives & Key Results</h3>
+      <h3 className='section-header font-bold flex items-center gap-2'>
+        <Target className='w-4 h-4' />
+        Objectives & Key Results
+      </h3>
       <div className='space-y-4'>
         {objectives.length === 0 ? (
           <div className='text-muted-foreground text-sm'>

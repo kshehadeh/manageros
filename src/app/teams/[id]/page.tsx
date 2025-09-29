@@ -7,9 +7,9 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { TeamActionsDropdown } from '@/components/team-actions-dropdown'
-import { Users2 } from 'lucide-react'
-import { TeamMembersTable } from '../../../components/team-members-table'
-import { TeamInitiativesTable } from '../../../components/team-initiatives-table'
+import { Users2, User, Rocket, Building2 } from 'lucide-react'
+import { PeopleTable } from '@/components/people-table'
+import { InitiativesTable } from '@/components/initiatives-table'
 import { TeamChildTeamsTable } from '../../../components/team-child-teams-table'
 
 interface TeamDetailPageProps {
@@ -46,16 +46,34 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
       },
       people: {
         include: {
-          manager: true,
+          manager: {
+            include: {
+              reports: true,
+            },
+          },
+          team: true,
+          jobRole: {
+            include: {
+              level: true,
+              domain: true,
+            },
+          },
+          reports: true,
         },
         orderBy: { name: 'asc' },
       },
       initiatives: {
         include: {
           objectives: true,
+          team: true,
           owners: {
             include: {
               person: true,
+            },
+          },
+          tasks: {
+            select: {
+              status: true,
             },
           },
           _count: { select: { checkIns: true, tasks: true } },
@@ -65,9 +83,31 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
     },
   })
 
+  // Get all people and teams for the InitiativesTable component
+  const [allPeople, allTeams] = await Promise.all([
+    prisma.person.findMany({
+      where: {
+        organizationId: session.user.organizationId,
+      },
+      orderBy: { name: 'asc' },
+    }),
+    prisma.team.findMany({
+      where: {
+        organizationId: session.user.organizationId,
+      },
+      orderBy: { name: 'asc' },
+    }),
+  ])
+
   if (!team) {
     notFound()
   }
+
+  // Compute level field for people (needed by PeopleTable component)
+  const peopleWithLevel = team.people.map(person => ({
+    ...person,
+    level: 0, // For team members, we'll use level 0 since they're all at the same level
+  }))
 
   return (
     <TeamDetailClient teamName={team.name} teamId={team.id}>
@@ -104,20 +144,22 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
           {/* Team Members */}
           <div className='page-section'>
             <div className='flex items-center justify-between mb-4'>
-              <h3 className='section-header'>
+              <h3 className='section-header font-bold flex items-center gap-2'>
+                <User className='w-4 h-4' />
                 Team Members ({team.people.length})
               </h3>
               <Button asChild variant='outline' size='sm'>
                 <Link href={`/people/new?teamId=${team.id}`}>Add Member</Link>
               </Button>
             </div>
-            <TeamMembersTable people={team.people} />
+            <PeopleTable people={peopleWithLevel} />
           </div>
 
           {/* Team Initiatives */}
           <div className='page-section'>
             <div className='flex items-center justify-between mb-4'>
-              <h3 className='section-header'>
+              <h3 className='section-header font-bold flex items-center gap-2'>
+                <Rocket className='w-4 h-4' />
                 Team Initiatives ({team.initiatives.length})
               </h3>
               <Button asChild variant='outline' size='sm'>
@@ -126,13 +168,19 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
                 </Link>
               </Button>
             </div>
-            <TeamInitiativesTable initiatives={team.initiatives} />
+            <InitiativesTable
+              initiatives={team.initiatives}
+              people={allPeople}
+              teams={allTeams}
+              hideFilters={true}
+            />
           </div>
 
           {/* Child Teams */}
           <div className='page-section'>
             <div className='flex items-center justify-between mb-4'>
-              <h3 className='section-header'>
+              <h3 className='section-header font-bold flex items-center gap-2'>
+                <Building2 className='w-4 h-4' />
                 Child Teams ({team.children.length})
               </h3>
               <Button asChild variant='outline' size='sm'>
