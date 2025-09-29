@@ -21,7 +21,7 @@ function getTaskAccessWhereClause(
   userId: string,
   personId?: string
 ) {
-  const conditions: any[] = [
+  const conditions: Array<Record<string, unknown>> = [
     // Tasks created by the current user in their organization
     {
       createdBy: {

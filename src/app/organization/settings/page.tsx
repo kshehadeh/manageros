@@ -6,6 +6,7 @@ import {
   getJobRoles,
   getJobLevels,
   getJobDomains,
+  getOrganizationMembers,
 } from '@/lib/actions'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -16,10 +17,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Mail, Users, Building, Shield } from 'lucide-react'
+import { Mail, Users, Building, Shield, Bell } from 'lucide-react'
 import { JobRoleManagement } from '@/components/job-role-management'
 import { JobLevelManagement } from '@/components/job-level-management'
 import { JobDomainManagement } from '@/components/job-domain-management'
+import { CreateNotificationModal } from '@/components/create-notification-modal'
 
 export default async function OrganizationSettingsPage() {
   const session = await getServerSession(authOptions)
@@ -42,11 +44,12 @@ export default async function OrganizationSettingsPage() {
   const invitations = await getOrganizationInvitations()
   const openInvitations = invitations.filter(inv => inv.status === 'pending')
 
-  // Get job roles, levels, and domains for management
-  const [jobRoles, levels, domains] = await Promise.all([
+  // Get job roles, levels, domains, and members for management
+  const [jobRoles, levels, domains, members] = await Promise.all([
     getJobRoles(),
     getJobLevels(),
     getJobDomains(),
+    getOrganizationMembers(),
   ])
 
   return (
@@ -59,6 +62,34 @@ export default async function OrganizationSettingsPage() {
       </div>
 
       <div className='grid gap-6 md:grid-cols-2'>
+        {/* Notifications Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className='flex items-center gap-2'>
+              <Bell className='h-5 w-5' />
+              Notifications
+            </CardTitle>
+            <CardDescription>
+              Create and manage organization notifications
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className='space-y-3'>
+              <CreateNotificationModal
+                organizationMembers={members.map(member => ({
+                  id: member.id,
+                  name: member.name,
+                  email: member.email,
+                }))}
+              />
+              <p className='text-sm text-muted-foreground'>
+                Send notifications to specific users or broadcast to all
+                organization members
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Invitations Card */}
         <Card>
           <CardHeader>

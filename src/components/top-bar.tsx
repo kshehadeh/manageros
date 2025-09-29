@@ -7,6 +7,7 @@ import { Menu, X, Command as CommandIcon } from 'lucide-react'
 import { GettingStartedButton } from '@/components/getting-started-button'
 import { useMobileMenu } from '@/components/mobile-menu-provider'
 import { useCommandPalette } from '@/components/command-palette/provider'
+import { NotificationBell } from '@/components/notification-bell'
 
 export default function TopBar() {
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useMobileMenu()
@@ -52,6 +53,7 @@ export default function TopBar() {
             <CommandIcon className='h-5 w-5' />
           </button>
 
+          <NotificationBell />
           <GettingStartedButton />
           <BugReportButton />
           <ModeToggle />

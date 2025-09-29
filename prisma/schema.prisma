@@ -28,6 +28,7 @@ model Organization {
   jobRoles    JobRole[]
   levels      JobLevel[]
   domains     JobDomain[]
+  notifications Notification[]
 }
 
 model User {
@@ -47,6 +48,8 @@ model User {
   createdTasks   Task[]
   createdMeetings Meeting[]
   createdEntityLinks EntityLink[]
+  notifications  Notification[]
+  notificationResponses NotificationResponse[]
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   
@@ -591,5 +594,43 @@ model PasswordResetToken {
   
   @@index([email])
   @@index([token])
+}
+
+model Notification {
+  id             String   @id @default(cuid())
+  title          String
+  message        String
+  type           String   @default("info") // info|warning|success|error
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  userId         String?  // If null, it's an organization-wide notification
+  user           User?    @relation(fields: [userId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  // Relationships
+  responses      NotificationResponse[]
+  
+  @@index([organizationId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model NotificationResponse {
+  id             String       @id @default(cuid())
+  notificationId String
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status         String       @default("unread") // unread|read|dismissed
+  readAt         DateTime?
+  dismissedAt    DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  
+  @@unique([notificationId, userId])
+  @@index([notificationId])
+  @@index([userId])
+  @@index([status])
 }
 
