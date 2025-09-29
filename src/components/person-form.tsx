@@ -9,6 +9,12 @@ import { UserLinkForm } from '@/components/user-link-form'
 interface PersonFormProps {
   teams: Array<{ id: string; name: string }>
   people: Array<{ id: string; name: string; email: string | null }>
+  jobRoles: Array<{
+    id: string
+    title: string
+    level: { name: string }
+    domain: { name: string }
+  }>
   initialManagerId?: string
   initialTeamId?: string
   person?: {
@@ -20,6 +26,7 @@ interface PersonFormProps {
     birthday?: Date | null
     teamId?: string | null
     managerId?: string | null
+    jobRoleId?: string | null
     startedAt?: Date | null
     user?: {
       id: string
@@ -33,6 +40,7 @@ interface PersonFormProps {
 export function PersonForm({
   teams,
   people,
+  jobRoles,
   initialManagerId,
   initialTeamId,
   person,
@@ -54,6 +62,7 @@ export function PersonForm({
     birthday: formatDateForInput(person?.birthday || null),
     teamId: person?.teamId || initialTeamId || '',
     managerId: person?.managerId || initialManagerId || '',
+    jobRoleId: person?.jobRoleId || '',
     startedAt: formatDateForInput(person?.startedAt || null),
   })
 
@@ -110,7 +119,7 @@ export function PersonForm({
           </div>
 
           <div>
-            <label className='block text-sm font-medium mb-2'>Role</label>
+            <label className='block text-sm font-medium mb-2'>Title</label>
             <input
               type='text'
               value={formData.role}
@@ -206,6 +215,30 @@ export function PersonForm({
                 <option key={person.id} value={person.id}>
                   {person.name}
                   {person.email ? ` (${person.email})` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Job Role */}
+      <div className='card'>
+        <h3 className='font-semibold mb-4'>Job Role</h3>
+        <div className='space-y-4'>
+          <div>
+            <label className='block text-sm font-medium mb-2'>Job Role</label>
+            <select
+              value={formData.jobRoleId}
+              onChange={e =>
+                setFormData({ ...formData, jobRoleId: e.target.value })
+              }
+              className='input'
+            >
+              <option value=''>Select a job role</option>
+              {jobRoles.map(jobRole => (
+                <option key={jobRole.id} value={jobRole.id}>
+                  {jobRole.title} - {jobRole.level.name} ({jobRole.domain.name})
                 </option>
               ))}
             </select>

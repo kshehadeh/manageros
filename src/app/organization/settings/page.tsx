@@ -1,7 +1,12 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { getOrganizationInvitations } from '@/lib/actions'
+import {
+  getOrganizationInvitations,
+  getJobRoles,
+  getJobLevels,
+  getJobDomains,
+} from '@/lib/actions'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,6 +17,9 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Mail, Users, Building, Shield } from 'lucide-react'
+import { JobRoleManagement } from '@/components/job-role-management'
+import { JobLevelManagement } from '@/components/job-level-management'
+import { JobDomainManagement } from '@/components/job-domain-management'
 
 export default async function OrganizationSettingsPage() {
   const session = await getServerSession(authOptions)
@@ -33,6 +41,13 @@ export default async function OrganizationSettingsPage() {
   // Get open invitations (pending status only)
   const invitations = await getOrganizationInvitations()
   const openInvitations = invitations.filter(inv => inv.status === 'pending')
+
+  // Get job roles, levels, and domains for management
+  const [jobRoles, levels, domains] = await Promise.all([
+    getJobRoles(),
+    getJobLevels(),
+    getJobDomains(),
+  ])
 
   return (
     <div className='page-container'>
@@ -161,6 +176,37 @@ export default async function OrganizationSettingsPage() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Job Role Management Section */}
+      <div className='space-y-6 mt-8'>
+        <div>
+          <h2 className='text-xl font-semibold'>Job Role Management</h2>
+          <p className='text-muted-foreground'>
+            Configure job levels, domains, and roles for your organization.
+          </p>
+        </div>
+
+        <div className='grid gap-6 lg:grid-cols-3'>
+          {/* Job Level Management */}
+          <div className='card'>
+            <JobLevelManagement levels={levels} />
+          </div>
+
+          {/* Job Domain Management */}
+          <div className='card'>
+            <JobDomainManagement domains={domains} />
+          </div>
+
+          {/* Job Role Management */}
+          <div className='card lg:col-span-1'>
+            <JobRoleManagement
+              jobRoles={jobRoles}
+              levels={levels}
+              domains={domains}
+            />
+          </div>
+        </div>
       </div>
     </div>
   )

@@ -23,6 +23,18 @@ export async function getPeople() {
         status: 'active',
         organizationId: user.organizationId,
       },
+      include: {
+        jobRole: {
+          include: {
+            level: true,
+            domain: true,
+          },
+        },
+        team: true,
+        manager: true,
+        reports: true,
+        user: true,
+      },
       orderBy: { name: 'asc' },
     })
   } catch (error) {
@@ -86,6 +98,14 @@ export async function getPeopleHierarchy() {
             name: true,
             email: true,
             role: true,
+          },
+        },
+        jobRole: {
+          select: {
+            id: true,
+            title: true,
+            level: true,
+            domain: true,
           },
         },
       },
@@ -184,6 +204,19 @@ export async function createPerson(formData: PersonFormData) {
     }
   }
 
+  // Verify job role belongs to user's organization if specified
+  if (validatedData.jobRoleId) {
+    const jobRole = await prisma.jobRole.findFirst({
+      where: {
+        id: validatedData.jobRoleId,
+        organizationId: user.organizationId,
+      },
+    })
+    if (!jobRole) {
+      throw new Error('Job role not found or access denied')
+    }
+  }
+
   // Create the person
   await prisma.person.create({
     data: {
@@ -194,12 +227,19 @@ export async function createPerson(formData: PersonFormData) {
       birthday,
       teamId: validatedData.teamId || null,
       managerId: validatedData.managerId || null,
+      jobRoleId: validatedData.jobRoleId || null,
       startedAt,
       organizationId: user.organizationId,
     },
     include: {
       team: true,
       manager: true,
+      jobRole: {
+        include: {
+          level: true,
+          domain: true,
+        },
+      },
     },
   })
 
@@ -273,6 +313,19 @@ export async function updatePerson(id: string, formData: PersonFormData) {
     }
   }
 
+  // Verify job role belongs to user's organization if specified
+  if (validatedData.jobRoleId) {
+    const jobRole = await prisma.jobRole.findFirst({
+      where: {
+        id: validatedData.jobRoleId,
+        organizationId: user.organizationId,
+      },
+    })
+    if (!jobRole) {
+      throw new Error('Job role not found or access denied')
+    }
+  }
+
   // Update the person
   await prisma.person.update({
     where: { id },
@@ -284,11 +337,18 @@ export async function updatePerson(id: string, formData: PersonFormData) {
       birthday,
       teamId: validatedData.teamId || null,
       managerId: validatedData.managerId || null,
+      jobRoleId: validatedData.jobRoleId || null,
       startedAt,
     },
     include: {
       team: true,
       manager: true,
+      jobRole: {
+        include: {
+          level: true,
+          domain: true,
+        },
+      },
     },
   })
 
@@ -355,6 +415,19 @@ export async function updatePersonPartial(
     }
   }
 
+  // Verify job role belongs to user's organization if specified
+  if (validatedData.jobRoleId) {
+    const jobRole = await prisma.jobRole.findFirst({
+      where: {
+        id: validatedData.jobRoleId,
+        organizationId: user.organizationId,
+      },
+    })
+    if (!jobRole) {
+      throw new Error('Job role not found or access denied')
+    }
+  }
+
   // Parse startedAt date if provided
   const startedAt = validatedData.startedAt
     ? new Date(validatedData.startedAt)
@@ -384,6 +457,11 @@ export async function updatePersonPartial(
       ? { connect: { id: validatedData.managerId } }
       : { disconnect: true }
   }
+  if (validatedData.jobRoleId !== undefined) {
+    updateFields.jobRole = validatedData.jobRoleId
+      ? { connect: { id: validatedData.jobRoleId } }
+      : { disconnect: true }
+  }
   if (startedAt !== undefined) updateFields.startedAt = startedAt
 
   // Update the person
@@ -393,6 +471,12 @@ export async function updatePersonPartial(
     include: {
       team: true,
       manager: true,
+      jobRole: {
+        include: {
+          level: true,
+          domain: true,
+        },
+      },
     },
   })
 

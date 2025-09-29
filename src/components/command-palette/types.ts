@@ -21,5 +21,8 @@ export interface CommandItemDescriptor {
 export interface CommandSource {
   id: string
   label: string
-  getItems: (_query: string) => Promise<CommandItemDescriptor[]>
+  getItems: (
+    _query: string,
+    _userRole?: string
+  ) => Promise<CommandItemDescriptor[]>
 }

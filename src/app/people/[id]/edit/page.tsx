@@ -1,5 +1,10 @@
 import { PersonForm } from '@/components/person-form'
-import { getTeams, getPeople, getPerson } from '@/lib/actions'
+import {
+  getTeams,
+  getPeople,
+  getPerson,
+  getJobRolesForSelection,
+} from '@/lib/actions'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
@@ -25,9 +30,10 @@ export default async function EditPersonPage({ params }: EditPersonPageProps) {
   }
 
   const { id } = await params
-  const [teams, people, person] = await Promise.all([
+  const [teams, people, jobRoles, person] = await Promise.all([
     getTeams(),
     getPeople(),
+    getJobRolesForSelection(),
     getPerson(id),
   ])
 
@@ -42,7 +48,12 @@ export default async function EditPersonPage({ params }: EditPersonPageProps) {
           <h2 className='text-lg font-semibold'>Edit {person.name}</h2>
         </div>
 
-        <PersonForm teams={teams} people={people} person={person} />
+        <PersonForm
+          teams={teams}
+          people={people}
+          jobRoles={jobRoles}
+          person={person}
+        />
       </div>
     </PersonDetailClient>
   )

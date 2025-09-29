@@ -47,7 +47,10 @@ export interface CommandItemDescriptor {
 export interface CommandSource {
   id: string
   label: string
-  getItems: (query: string) => Promise<CommandItemDescriptor[]>
+  getItems: (
+    query: string,
+    userRole?: string
+  ) => Promise<CommandItemDescriptor[]>
 }
 ```
 
@@ -57,13 +60,40 @@ To add new commands:
 2. Export a `CommandSource` whose `getItems` returns matching `CommandItemDescriptor[]` based on the query.
 3. Register the source in `src/components/command-palette/command-palette.tsx` by adding it to the `sources` array.
 
+### Role-Based Commands
+
+Commands can be conditionally shown based on user roles. The `userRole` parameter is passed to `getItems()` and contains the current user's role ('ADMIN' or 'USER'). Use this to show admin-only commands:
+
+```ts
+export const adminSource: CommandSource = {
+  id: 'admin',
+  label: 'Admin',
+  getItems: async (query, userRole) => {
+    if (userRole !== 'ADMIN') return []
+
+    return [
+      {
+        id: 'admin.settings',
+        title: 'Organization Settings',
+        subtitle: 'Manage organization settings',
+        group: 'Administration',
+        perform: ({ closePalette, router }) => {
+          router.push('/organization/settings')
+          closePalette()
+        },
+      },
+    ]
+  },
+}
+```
+
 Example static command:
 
 ```ts
 export const exampleSource: CommandSource = {
   id: 'example',
   label: 'Example',
-  getItems: async q =>
+  getItems: async (q, userRole) =>
     q.includes('help')
       ? [
           {

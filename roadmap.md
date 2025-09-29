@@ -20,6 +20,7 @@
 - **Person Import** - Bulk import functionality for adding multiple people
 - **Team Import** - CSV import functionality for teams with automatic parent team creation, fuzzy matching, and update capabilities for existing teams
 - **User Linking** - Connect user accounts to person records for access control
+- **Job Role Management** - Structured job roles with levels and domains, markdown-enabled job descriptions, organization-wide role management, role assignment to people, drag-and-drop level ordering (January 2025)
 
 ### Initiative Management
 

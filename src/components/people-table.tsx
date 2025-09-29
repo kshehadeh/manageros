@@ -446,7 +446,8 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
         <TableHeader>
           <TableRow className='hover:bg-accent/50'>
             <TableHead className='text-muted-foreground'>Name</TableHead>
-            <TableHead className='text-muted-foreground'>Role</TableHead>
+            <TableHead className='text-muted-foreground'>Title</TableHead>
+            <TableHead className='text-muted-foreground'>Job Role</TableHead>
             <TableHead className='text-muted-foreground'>Team</TableHead>
             <TableHead className='text-muted-foreground'>Manager</TableHead>
             <TableHead className='text-muted-foreground w-[50px]'>
@@ -483,6 +484,16 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
               </TableCell>
               <TableCell className='text-muted-foreground'>
                 {renderEditableCell(person, 'role', person.role || '')}
+              </TableCell>
+              <TableCell className='text-muted-foreground'>
+                <div className='space-y-1'>
+                  <div>{person.jobRole?.title || '—'}</div>
+                  {person.jobRole && (
+                    <div className='text-xs text-muted-foreground'>
+                      {person.jobRole.level.name} • {person.jobRole.domain.name}
+                    </div>
+                  )}
+                </div>
               </TableCell>
               <TableCell className='text-muted-foreground'>
                 {renderEditableCell(person, 'team', person.team?.name || '')}
@@ -599,6 +610,7 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
                 status: 'active',
                 teamId: null,
                 managerId: null,
+                jobRoleId: null,
                 startedAt: null,
               }}
               onSuccess={handleFeedbackSuccess}

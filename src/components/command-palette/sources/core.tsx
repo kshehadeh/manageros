@@ -6,10 +6,14 @@ import {
   Users2,
   Rocket,
   MessageCircle,
+  Settings,
 } from 'lucide-react'
 import { type CommandItemDescriptor, type CommandSource } from '../types'
 
-function createStaticItems(query: string): CommandItemDescriptor[] {
+function createStaticItems(
+  query: string,
+  userRole?: string
+): CommandItemDescriptor[] {
   const q = query.toLowerCase()
   const items: CommandItemDescriptor[] = [
     {
@@ -87,6 +91,22 @@ function createStaticItems(query: string): CommandItemDescriptor[] {
     },
   ]
 
+  // Add admin-only commands
+  if (userRole === 'ADMIN') {
+    items.push({
+      id: 'nav.org-settings',
+      title: 'Organization Settings',
+      subtitle: 'Manage organization settings',
+      icon: <Settings className='h-4 w-4' />,
+      keywords: ['settings', 'organization', 'admin', 'config'],
+      group: 'Administration',
+      perform: ({ closePalette, router }) => {
+        router.push('/organization/settings')
+        closePalette()
+      },
+    })
+  }
+
   return items.filter(item => {
     if (!q) return true
     const hay = [
@@ -101,5 +121,7 @@ function createStaticItems(query: string): CommandItemDescriptor[] {
 export const coreCommandSource: CommandSource = {
   id: 'core',
   label: 'Core',
-  getItems: async (query: string) => createStaticItems(query),
+  getItems: async (query: string, userRole?: string) => {
+    return createStaticItems(query, userRole)
+  },
 }

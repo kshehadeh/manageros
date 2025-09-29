@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import {
   Command,
   CommandEmpty,
@@ -23,6 +24,7 @@ const sources: CommandSource[] = [coreCommandSource, searchCommandSource]
 export function CommandPalette() {
   const { isOpen, setOpen } = useCommandPalette()
   const router = useRouter()
+  const { data: session } = useSession()
   const [query, setQuery] = useState('')
   const [items, setItems] = useState<CommandItemDescriptor[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -32,7 +34,10 @@ export function CommandPalette() {
     async function run() {
       setIsLoading(true)
       try {
-        const all = await Promise.all(sources.map(s => s.getItems(query)))
+        const userRole = session?.user?.role
+        const all = await Promise.all(
+          sources.map(s => s.getItems(query, userRole))
+        )
         if (isCancelled) return
         setItems(all.flat())
       } finally {
@@ -43,7 +48,7 @@ export function CommandPalette() {
     return () => {
       isCancelled = true
     }
-  }, [query])
+  }, [query, session?.user?.role])
 
   const grouped = useMemo<Record<string, CommandItemDescriptor[]>>(() => {
     const byGroup: Record<string, CommandItemDescriptor[]> = {}

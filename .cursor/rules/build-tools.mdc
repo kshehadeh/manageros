@@ -5,7 +5,7 @@ alwaysApply: true
 
 ## Rules
 
-* Always use Bun for building the project.
+* Always use Bun for building the project - when testing new code, use bunx tsc --noEmit to check for errors.
 * Always use Prisma for database interactions.
 * Always use Next.js for the web framework.
 * Always use React for the UI.

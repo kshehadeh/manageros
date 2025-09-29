@@ -65,6 +65,7 @@ export const personSchema = z.object({
   birthday: z.string().optional(),
   teamId: z.string().optional(),
   managerId: z.string().optional(),
+  jobRoleId: z.string().optional(),
   startedAt: z.string().optional(),
 })
 
@@ -86,6 +87,7 @@ export const personUpdateSchema = z.object({
   birthday: z.string().optional(),
   teamId: z.string().optional(),
   managerId: z.string().optional(),
+  jobRoleId: z.string().optional(),
   startedAt: z.string().optional(),
 })
 

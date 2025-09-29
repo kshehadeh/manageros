@@ -25,6 +25,9 @@ model Organization {
   meetings    Meeting[]
   meetingInstances MeetingInstance[]
   entityLinks EntityLink[]
+  jobRoles    JobRole[]
+  levels      JobLevel[]
+  domains     JobDomain[]
 }
 
 model User {
@@ -84,6 +87,8 @@ model Person {
   managerId          String?
   manager            Person?           @relation("MgrReports", fields: [managerId], references: [id])
   reports            Person[]          @relation("MgrReports")
+  jobRoleId          String?
+  jobRole            JobRole?          @relation(fields: [jobRoleId], references: [id])
   startedAt          DateTime?
   tasks              Task[]
   oneOnOnes          OneOnOne[]        @relation("OOOReport")
@@ -99,6 +104,7 @@ model Person {
   githubAccount      PersonGithubAccount?
   feedbackCampaigns  FeedbackCampaign[] @relation("CampaignTarget")
   ownedMeetings      Meeting[]         @relation("MeetingOwner")
+    
   meetingParticipants MeetingParticipant[] @relation("MeetingParticipant")
   meetingInstanceParticipants MeetingInstanceParticipant[] @relation("MeetingInstanceParticipant")
   createdAt          DateTime          @default(now())
@@ -106,6 +112,7 @@ model Person {
   synopses           PersonSynopsis[]
   
   @@index([organizationId])
+  @@index([jobRoleId])
 }
 
 model Initiative {
@@ -526,5 +533,52 @@ model EntityLink {
   @@index([entityType, entityId])
   @@index([organizationId])
   @@index([createdById])
+}
+
+model JobRole {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?  // Markdown-enabled job description
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  levelId      String
+  level        JobLevel @relation("JobRoleLevel", fields: [levelId], references: [id], onDelete: Restrict)
+  domainId     String
+  domain       JobDomain @relation("JobRoleDomain", fields: [domainId], references: [id], onDelete: Restrict)
+  people       Person[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([levelId])
+  @@index([domainId])
+}
+
+model JobLevel {
+  id           String   @id @default(cuid())
+  name         String
+  order        Int      @default(0)
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  jobRoles     JobRole[] @relation("JobRoleLevel")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([name, organizationId])
+  @@index([organizationId])
+  @@index([order])
+}
+
+model JobDomain {
+  id           String   @id @default(cuid())
+  name         String
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  jobRoles     JobRole[] @relation("JobRoleDomain")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([name, organizationId])
+  @@index([organizationId])
 }
 

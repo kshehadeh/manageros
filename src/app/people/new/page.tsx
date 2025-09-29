@@ -1,5 +1,5 @@
 import { PersonForm } from '@/components/person-form'
-import { getTeams, getPeople } from '@/lib/actions'
+import { getTeams, getPeople, getJobRolesForSelection } from '@/lib/actions'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -29,7 +29,11 @@ export default async function NewPersonPage({
   const managerId = params.managerId
   const teamId = params.teamId
 
-  const [teams, people] = await Promise.all([getTeams(), getPeople()])
+  const [teams, people, jobRoles] = await Promise.all([
+    getTeams(),
+    getPeople(),
+    getJobRolesForSelection(),
+  ])
 
   return (
     <div className='space-y-6'>
@@ -40,6 +44,7 @@ export default async function NewPersonPage({
       <PersonForm
         teams={teams}
         people={people}
+        jobRoles={jobRoles}
         initialManagerId={managerId}
         initialTeamId={teamId}
       />

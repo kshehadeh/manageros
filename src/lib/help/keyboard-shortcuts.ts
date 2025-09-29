@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-09-28T17:17:29.869Z
+ * Generated on: 2025-09-29T09:13:45.817Z
  */
 
 export interface HelpContent {
@@ -27,12 +27,14 @@ ManagerOS includes several keyboard shortcuts to help you navigate and work more
 ## Global Shortcuts
 
 ### Command Palette
+
 - **⌘K** (Mac) / **Ctrl+K** (Windows/Linux)
 - Opens the command palette where you can quickly navigate to any page or perform common actions
 - Type to search for pages, people, teams, initiatives, or tasks
 - Press Enter to navigate or Escape to close
 
 ### Quick Task Creation
+
 - **Q** (anywhere in the app)
 - Opens the quick task creation dialog
 - Allows you to quickly create a new task without navigating to the tasks page

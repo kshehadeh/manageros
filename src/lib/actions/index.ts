@@ -169,3 +169,24 @@ export {
 
 // Synopsis Actions
 export { generatePersonSynopsis, listPersonSynopses } from './synopsis'
+
+// JobRoles Actions
+export {
+  getJobRoles,
+  getJobRole,
+  getJobRolesForSelection,
+  createJobRole,
+  updateJobRole,
+  deleteJobRole,
+  getJobLevels,
+  getJobLevelsForSelection,
+  createJobLevel,
+  updateJobLevel,
+  updateJobLevelOrder,
+  deleteJobLevel,
+  getJobDomains,
+  getJobDomainsForSelection,
+  createJobDomain,
+  updateJobDomain,
+  deleteJobDomain,
+} from './job-roles'

@@ -6,6 +6,12 @@ export interface Person {
   status: string
   birthday: Date | null
   team: { id: string; name: string } | null
+  jobRole: {
+    id: string
+    title: string
+    level: { id: string; name: string }
+    domain: { id: string; name: string }
+  } | null
   manager: {
     id: string
     name: string
