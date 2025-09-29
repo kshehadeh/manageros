@@ -11,6 +11,7 @@ import {
   X,
   MessageCircle,
   Handshake,
+  User,
 } from 'lucide-react'
 import { PersonStatusBadge } from './person-status-badge'
 import {
@@ -448,9 +449,6 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
             <TableHead className='text-muted-foreground'>Role</TableHead>
             <TableHead className='text-muted-foreground'>Team</TableHead>
             <TableHead className='text-muted-foreground'>Manager</TableHead>
-            <TableHead className='text-muted-foreground'>
-              Direct Reports
-            </TableHead>
             <TableHead className='text-muted-foreground w-[50px]'>
               Actions
             </TableHead>
@@ -465,9 +463,22 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
               onContextMenu={e => handleRowRightClick(e, person.id)}
             >
               <TableCell className='font-medium text-foreground'>
-                <div className='flex items-center gap-2'>
-                  <PersonStatusBadge status={person.status} size='sm' />
-                  {person.name}
+                <div className='flex flex-col gap-1'>
+                  <div className='flex items-center gap-2'>
+                    {person.name}
+                    {person.user && (
+                      <div title='Linked to user account'>
+                        <User className='h-3 w-3 text-blue-500' />
+                      </div>
+                    )}
+                  </div>
+                  <div className='flex items-center gap-2'>
+                    <PersonStatusBadge status={person.status} size='sm' />
+                    <span className='text-xs text-muted-foreground'>
+                      {person.reports.length} report
+                      {person.reports.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
                 </div>
               </TableCell>
               <TableCell className='text-muted-foreground'>
@@ -482,11 +493,6 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
                   'manager',
                   person.manager?.name || ''
                 )}
-              </TableCell>
-              <TableCell className='text-muted-foreground'>
-                <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
-                  {person.reports.length}
-                </span>
               </TableCell>
               <TableCell>
                 <Button

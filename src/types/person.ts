@@ -31,4 +31,10 @@ export interface Person {
     birthday: Date | null
   }>
   level: number
+  user?: {
+    id: string
+    name: string
+    email: string
+    role: string
+  } | null
 }
