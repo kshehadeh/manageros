@@ -176,6 +176,7 @@ export {
   runReport,
   listReportInstances,
   getReportInstance,
+  deleteReportInstance,
 } from './report'
 
 // JobRoles Actions

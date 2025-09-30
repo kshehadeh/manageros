@@ -1,18 +1,31 @@
 'use server'
 
+import type { z } from 'zod'
 import type { ReportDefinition, ReportSummaryMeta } from './types'
 
-const registry = new Map<string, ReportDefinition<any, any>>()
-
-export function registerReport(def: ReportDefinition<any, any>) {
-  registry.set(def.codeId, def)
+// Use a more flexible type that can handle any report definition
+type AnyReportDefinition = ReportDefinition<z.ZodTypeAny, unknown> & {
+  renderers: Partial<
+    Record<string, (_output: unknown) => string | Promise<string>>
+  >
 }
 
-export function getReport(codeId: string) {
+const registry = new Map<string, AnyReportDefinition>()
+
+export async function registerReport<
+  InputSchema extends z.ZodTypeAny,
+  OutputJson,
+>(def: ReportDefinition<InputSchema, OutputJson>) {
+  registry.set(def.codeId, def as unknown as AnyReportDefinition)
+}
+
+export async function getReport(
+  codeId: string
+): Promise<AnyReportDefinition | undefined> {
   return registry.get(codeId)
 }
 
-export function listReports(): ReportSummaryMeta[] {
+export async function listReports(): Promise<ReportSummaryMeta[]> {
   return Array.from(registry.values()).map(def => ({
     codeId: def.codeId,
     name: def.name,
@@ -20,4 +33,3 @@ export function listReports(): ReportSummaryMeta[] {
     supportedRenderers: def.supportedRenderers,
   }))
 }
-

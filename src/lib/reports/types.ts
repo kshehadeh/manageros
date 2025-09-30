@@ -15,21 +15,26 @@ export interface ReportExecutionContext {
   }
 }
 
-export interface ReportDefinition<InputSchema extends z.ZodTypeAny, OutputJson> {
+export interface ReportDefinition<
+  InputSchema extends z.ZodTypeAny,
+  OutputJson,
+> {
   codeId: string
   name: string
   description?: string
   supportedRenderers: ReportRendererId[]
   inputSchema: InputSchema
   authorize: (
-    ctx: ReportExecutionContext,
-    parsedInput: z.infer<InputSchema>
+    _ctx: ReportExecutionContext,
+    _parsedInput: z.infer<InputSchema>
   ) => Promise<void>
   execute: (
-    ctx: ReportExecutionContext,
-    parsedInput: z.infer<InputSchema>
+    _ctx: ReportExecutionContext,
+    _parsedInput: z.infer<InputSchema>
   ) => Promise<OutputJson>
-  renderers: Partial<Record<ReportRendererId, (output: OutputJson) => string>>
+  renderers: Partial<
+    Record<ReportRendererId, (_output: OutputJson) => string | Promise<string>>
+  >
 }
 
 export interface ReportSummaryMeta {
@@ -38,4 +43,3 @@ export interface ReportSummaryMeta {
   description?: string
   supportedRenderers: ReportRendererId[]
 }
-
