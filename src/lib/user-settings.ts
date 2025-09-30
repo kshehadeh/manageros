@@ -23,6 +23,19 @@ export interface UserSettings {
     endDate: string
   }
 
+  // Initiative view settings
+  initiativeGrouping: 'team' | 'rag'
+  initiativeFilters: {
+    textFilter: string
+    ownerFilter: string
+    teamFilter: string
+    ragFilter: string
+    statusFilter: string
+    dateRangeFilter: string
+    startDate: string
+    endDate: string
+  }
+
   // Future expandable settings can be added here:
   // sidebarCollapsed: boolean
   // defaultPageSize: number
@@ -41,6 +54,17 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
     initiativeFilter: 'all',
     statusFilter: 'all',
     priorityFilter: 'all',
+    dateRangeFilter: 'all',
+    startDate: '',
+    endDate: '',
+  },
+  initiativeGrouping: 'rag',
+  initiativeFilters: {
+    textFilter: '',
+    ownerFilter: 'all',
+    teamFilter: 'all',
+    ragFilter: 'all',
+    statusFilter: 'all',
     dateRangeFilter: 'all',
     startDate: '',
     endDate: '',

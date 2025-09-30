@@ -1,7 +1,7 @@
 import { getInitiatives } from '@/lib/actions'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { InitiativesTable } from '@/components/initiatives-table'
+import { GroupedInitiativesPageClient } from '@/components/grouped-initiatives-page-client'
 import { requireAuth } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
 import { Rocket } from 'lucide-react'
@@ -43,7 +43,7 @@ export default async function InitiativesPage() {
         </div>
       </div>
       <div className='page-section -mx-3 md:mx-0'>
-        <InitiativesTable
+        <GroupedInitiativesPageClient
           initiatives={initiatives}
           people={people}
           teams={teams}
