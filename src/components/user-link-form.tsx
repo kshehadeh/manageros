@@ -41,10 +41,9 @@ export function UserLinkForm({
       }
     }
     loadUsers()
-  }, [])
+  }, [personId])
 
-  const handleLink = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleLink = async () => {
     if (!selectedUserId) return
 
     setIsLoading(true)
@@ -111,7 +110,7 @@ export function UserLinkForm({
           </div>
         </div>
       ) : (
-        <form onSubmit={handleLink} className='space-y-4'>
+        <div className='space-y-4'>
           <div>
             <select
               value={selectedUserId}
@@ -129,7 +128,7 @@ export function UserLinkForm({
           </div>
 
           <Button
-            type='submit'
+            onClick={handleLink}
             disabled={
               isLoading || !selectedUserId || availableUsers.length === 0
             }
@@ -137,7 +136,7 @@ export function UserLinkForm({
           >
             {isLoading ? 'Linking...' : 'Link User Account'}
           </Button>
-        </form>
+        </div>
       )}
     </div>
   )

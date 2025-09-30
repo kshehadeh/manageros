@@ -1,9 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import React from 'react'
 import Link from 'next/link'
-import { PeopleTable } from '@/components/people-table'
-import { PeopleFilterBar } from '@/components/people-filter-bar'
+import { GroupedPeoplePageClient } from '@/components/grouped-people-page-client'
 import { useSession } from 'next-auth/react'
 import { isAdmin } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
@@ -17,7 +16,6 @@ interface PeoplePageClientProps {
 
 export function PeoplePageClient({ people }: PeoplePageClientProps) {
   const { data: session } = useSession()
-  const [filteredPeople, setFilteredPeople] = useState<Person[]>(people)
 
   return (
     <div className='page-container'>
@@ -62,12 +60,7 @@ export function PeoplePageClient({ people }: PeoplePageClientProps) {
       </div>
 
       <div className='page-section'>
-        <PeopleFilterBar
-          people={people}
-          onFilteredPeopleChange={setFilteredPeople}
-        />
-
-        <PeopleTable people={people} filteredPeople={filteredPeople} />
+        <GroupedPeoplePageClient people={people} />
       </div>
     </div>
   )

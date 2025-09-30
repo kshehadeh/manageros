@@ -6,6 +6,7 @@
 export interface UserSettings {
   // People page settings
   peopleViewMode: 'list' | 'chart'
+  peopleGrouping: 'manager' | 'team' | 'status' | 'jobRole'
 
   // Theme settings
   theme: 'light' | 'dark'
@@ -46,6 +47,7 @@ export interface UserSettings {
 
 export const DEFAULT_USER_SETTINGS: UserSettings = {
   peopleViewMode: 'chart',
+  peopleGrouping: 'team',
   theme: 'dark',
   taskGrouping: 'status',
   taskFilters: {
