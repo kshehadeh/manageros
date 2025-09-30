@@ -170,6 +170,15 @@ export {
 // Synopsis Actions
 export { generatePersonSynopsis, listPersonSynopses } from './synopsis'
 
+// Report Actions
+export {
+  listAvailableReports,
+  runReport,
+  listReportInstances,
+  getReportInstance,
+  deleteReportInstance,
+} from './report'
+
 // JobRoles Actions
 export {
   getJobRoles,

@@ -29,6 +29,7 @@ model Organization {
   levels      JobLevel[]
   domains     JobDomain[]
   notifications Notification[]
+  reportInstances ReportInstance[]
 }
 
 model User {
@@ -50,6 +51,8 @@ model User {
   createdEntityLinks EntityLink[]
   notifications  Notification[]
   notificationResponses NotificationResponse[]
+  ownedReports   Report[]      @relation("ReportOwner")
+  reportRuns     ReportInstance[]
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   
@@ -632,5 +635,48 @@ model NotificationResponse {
   @@index([notificationId])
   @@index([userId])
   @@index([status])
+}
+
+/// Reports define executable, extensible data aggregations.
+model Report {
+  id              String         @id @default(cuid())
+  codeId          String         @unique // Stable code identifier that maps to implementation/registry
+  name            String
+  description     String?
+  ownerId         String?
+  owner           User?          @relation("ReportOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  inputSchema     Json?          // Optional JSON schema/Zod-like descriptor for dynamic forms
+  enabled         Boolean        @default(true)
+  renderers       String[]       // Supported renderer identifiers (e.g., ["markdown"]) 
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  instances       ReportInstance[]
+
+  @@index([ownerId])
+}
+
+/// A single execution of a report with captured inputs and outputs
+model ReportInstance {
+  id              String    @id @default(cuid())
+  reportId        String
+  report          Report    @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  userId          String    // The user who executed the report
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId  String    // Redundant but used for strong org isolation filters
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  renderer        String    // Renderer used for this instance (e.g., "markdown")
+  input           Json      // Input values used to execute the report
+  output          Json      // Raw JSON output of the report execution
+  status          String    @default("completed") // queued|running|failed|completed
+  errorMessage    String?
+  startedAt       DateTime  @default(now())
+  completedAt     DateTime?
+
+  @@index([reportId])
+  @@index([userId])
+  @@index([organizationId])
+  @@index([status])
+  @@index([startedAt])
+  @@index([completedAt])
 }
 
