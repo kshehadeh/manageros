@@ -46,6 +46,7 @@ export async function getFilteredNavigation() {
     { name: 'Teams', href: '/teams', icon: 'Users2' },
     { name: 'Tasks', href: '/tasks', icon: 'ListTodo' },
     { name: 'Meetings', href: '/meetings', icon: 'Calendar' },
+    { name: 'Reports', href: '/reports', icon: 'BarChart3' },
     {
       name: 'Org Settings',
       href: '/organization/settings',

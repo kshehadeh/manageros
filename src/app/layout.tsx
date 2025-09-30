@@ -1,6 +1,7 @@
 import './globals.css'
 import ServerConditionalLayout from '@/components/server-conditional-layout'
 import type { ReactNode } from 'react'
+import '@/lib/reports/register-all'
 
 export const metadata = {
   title: 'ManagerOS',
