@@ -677,6 +677,90 @@ export async function updateTaskPriority(taskId: string, priority: number) {
   return task
 }
 
+export async function updateTaskQuickEdit(
+  taskId: string,
+  updates: {
+    title?: string
+    description?: string
+    assigneeId?: string | null
+    dueDate?: string | null
+    priority?: number
+  }
+) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to update tasks')
+  }
+
+  // Verify task belongs to user's organization
+  const existingTask = await prisma.task.findFirst({
+    where: {
+      id: taskId,
+      ...getTaskAccessWhereClause(
+        user.organizationId,
+        user.id,
+        user.personId || undefined
+      ),
+    },
+  })
+
+  if (!existingTask) {
+    throw new Error('Task not found or access denied')
+  }
+
+  // Verify assignee belongs to user's organization if specified
+  if (updates.assigneeId) {
+    const assignee = await prisma.person.findFirst({
+      where: {
+        id: updates.assigneeId,
+        organizationId: user.organizationId,
+      },
+    })
+    if (!assignee) {
+      throw new Error('Assignee not found or access denied')
+    }
+  }
+
+  // Parse due date if provided
+  const dueDate = updates.dueDate ? new Date(updates.dueDate) : undefined
+
+  // Prepare update data
+  const updateData: {
+    title?: string
+    description?: string | null
+    assigneeId?: string | null
+    priority?: number
+    dueDate?: Date
+  } = {}
+  if (updates.title !== undefined) updateData.title = updates.title
+  if (updates.description !== undefined)
+    updateData.description = updates.description || null
+  if (updates.assigneeId !== undefined)
+    updateData.assigneeId = updates.assigneeId
+  if (updates.priority !== undefined) updateData.priority = updates.priority
+  if (dueDate !== undefined) updateData.dueDate = dueDate
+
+  // Update the task
+  const task = await prisma.task.update({
+    where: { id: taskId },
+    data: updateData,
+    include: {
+      assignee: true,
+      initiative: true,
+      objective: true,
+      createdBy: true,
+    },
+  })
+
+  // Revalidate the tasks page and task detail page
+  revalidatePath('/tasks')
+  revalidatePath(`/tasks/${taskId}`)
+
+  return task
+}
+
 export async function getTasksAssignedToCurrentUser() {
   const user = await getCurrentUser()
 

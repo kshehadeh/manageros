@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { CalendarDays, Plus, X, ChevronDown, ChevronUp } from 'lucide-react'
 import { DeleteSynopsisButton } from '@/components/delete-synopsis-button'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
+import { SynopsisCard } from '@/components/synopsis-card'
 import type {
   ListSynopsesResponse,
   GenerateSynopsisResponse,
@@ -201,30 +202,36 @@ export function PersonSynopsisList({
           </div>
         )
       ) : (
-        <div className={compact ? 'space-y-3' : 'space-y-4'}>
-          {synopses.map(s => {
+        <div className={compact ? 'flex flex-wrap gap-4' : 'space-y-4'}>
+          {synopses.slice(0, compact ? 1 : synopses.length).map(s => {
+            if (compact) {
+              return (
+                <SynopsisCard
+                  key={s.id}
+                  synopsis={s}
+                  onRefresh={handleSynopsisDeleted}
+                />
+              )
+            }
+
+            // Full mode - keep existing layout for now
             const isExpanded = expandedSynopses.has(s.id)
             const displayContent = getDisplayContent(s.content, s.id)
             const showToggle = shouldShowToggle(s.content)
 
             return (
-              <div
-                key={s.id}
-                className={`border rounded-xl ${compact ? 'p-3' : 'p-4'}`}
-              >
+              <div key={s.id} className='border rounded-xl p-4'>
                 <div className='flex items-start justify-between mb-3'>
                   <div className='text-xs text-muted-foreground space-y-1'>
                     <div>
                       Generated on {new Date(s.createdAt).toLocaleString()} •
                       Sources: {s.sources.join(', ')}
                     </div>
-                    {!compact && (
-                      <div>
-                        Period: {new Date(s.fromDate).toLocaleDateString()} -{' '}
-                        {new Date(s.toDate).toLocaleDateString()}
-                        {s.includeFeedback && ' • Includes feedback'}
-                      </div>
-                    )}
+                    <div>
+                      Period: {new Date(s.fromDate).toLocaleDateString()} -{' '}
+                      {new Date(s.toDate).toLocaleDateString()}
+                      {s.includeFeedback && ' • Includes feedback'}
+                    </div>
                   </div>
                   <div className='flex items-center gap-2'>
                     {showToggle && (
@@ -247,17 +254,15 @@ export function PersonSynopsisList({
                         )}
                       </Button>
                     )}
-                    {!compact && (
-                      <DeleteSynopsisButton
-                        synopsisId={s.id}
-                        onSuccess={handleSynopsisDeleted}
-                      />
-                    )}
+                    <DeleteSynopsisButton
+                      synopsisId={s.id}
+                      onSuccess={handleSynopsisDeleted}
+                    />
                   </div>
                 </div>
                 <ReadonlyNotesField
                   content={displayContent}
-                  variant={compact ? 'compact' : 'default'}
+                  variant='default'
                   emptyStateText='No synopsis content available'
                 />
               </div>

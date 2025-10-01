@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import { deleteFeedback } from '@/lib/actions'
 import { type Person } from '@prisma/client'
-import { FeedbackListItem } from './feedback-list-item'
+import { FeedbackCard } from './feedback-card'
+import { Button } from '@/components/ui/button'
+import { Eye, Plus } from 'lucide-react'
+import Link from 'next/link'
 
 type FeedbackWithRelations = {
   id: string
@@ -34,46 +35,38 @@ export function FeedbackList({
   currentUserId,
   onRefresh,
 }: FeedbackListProps) {
-  const [deletingId, setDeletingId] = useState<string | null>(null)
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this feedback?')) return
-
-    setDeletingId(id)
-    try {
-      await deleteFeedback(id)
-      onRefresh?.()
-    } catch (error) {
-      console.error('Failed to delete feedback:', error)
-      alert('Failed to delete feedback. Please try again.')
-    } finally {
-      setDeletingId(null)
-    }
-  }
-
   return (
     <div className='space-y-4'>
-      <div className='flex items-center justify-between'>
+      <div className='flex items-center justify-between pb-3 border-b border-border'>
         <h3 className='font-semibold text-foreground'>
           Feedback ({feedback.length})
         </h3>
+        <div className='flex items-center gap-2'>
+          <Button variant='outline' size='sm' asChild title='View All Feedback'>
+            <Link href={`/feedback?person=${person.id}`}>
+              <Eye className='w-4 h-4' />
+            </Link>
+          </Button>
+          <Button variant='outline' size='sm' asChild title='Add New Feedback'>
+            <Link href={`/people/${person.id}/feedback/new`}>
+              <Plus className='w-4 h-4' />
+            </Link>
+          </Button>
+        </div>
       </div>
 
-      <div className='space-y-3'>
-        {feedback.map(item => (
-          <FeedbackListItem
+      <div className='flex flex-wrap gap-4'>
+        {feedback.slice(0, 1).map(item => (
+          <FeedbackCard
             key={item.id}
             feedback={item}
             currentUserId={currentUserId}
-            onDelete={handleDelete}
-            isDeleting={deletingId === item.id}
-            showAboutPerson={false}
-            variant='default'
+            onRefresh={onRefresh}
           />
         ))}
 
         {feedback.length === 0 && (
-          <div className='text-muted-foreground text-sm text-center py-8'>
+          <div className='w-full text-muted-foreground text-sm text-center py-8'>
             No feedback yet. Be the first to share feedback about {person.name}.
           </div>
         )}

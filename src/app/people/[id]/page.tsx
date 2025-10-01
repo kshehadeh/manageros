@@ -13,14 +13,18 @@ import { PersonListItemCard } from '@/components/person-list-item-card'
 import { PersonStatusBadge } from '@/components/person-status-badge'
 import { PersonFeedbackCampaigns } from '@/components/person-feedback-campaigns'
 import { PersonSynopsis } from '@/components/person-synopsis'
-import { ReadonlyNotesField } from '@/components/readonly-notes-field'
+import { TaskTable } from '@/components/task-table'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import { getPeople } from '@/lib/actions'
+import { TASK_STATUS } from '@/lib/task-status'
 import { canAccessSynopsesForPerson } from '@/lib/auth-utils'
+import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import {
   Eye,
+  Plus,
   Users,
   User as UserIcon,
   Building2,
@@ -30,10 +34,8 @@ import {
   CheckCircle,
   MessageCircle,
 } from 'lucide-react'
+import { FaJira, FaGithub } from 'react-icons/fa'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { TaskStatus, taskStatusUtils } from '@/lib/task-status'
-import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
 import {
   Person,
   Team,
@@ -54,8 +56,10 @@ type PersonWithRelations = Person & {
   user: User | null
   reports: (Person & { team: Team | null })[]
   tasks: (Task & {
+    assignee: Person | null
     initiative: Initiative | null
     objective: Objective | null
+    createdBy: User | null
   })[]
   initiativeOwners: (InitiativeOwner & {
     initiative: Initiative & {
@@ -156,8 +160,15 @@ export default async function PersonDetailPage({
       },
       tasks: {
         include: {
+          assignee: true,
           initiative: true,
           objective: true,
+          createdBy: true,
+        },
+        where: {
+          status: {
+            notIn: [TASK_STATUS.DONE, TASK_STATUS.DROPPED],
+          },
         },
         orderBy: { updatedAt: 'desc' },
       },
@@ -256,6 +267,9 @@ export default async function PersonDetailPage({
   })
 
   const personWithRelations = person as PersonWithRelations
+
+  // Get people data for TaskTable
+  const people = await getPeople()
 
   // Check if user can access synopses for this person
   const canAccessSynopses = await canAccessSynopsesForPerson(
@@ -363,13 +377,81 @@ export default async function PersonDetailPage({
         <div className='flex gap-6'>
           {/* Main Content */}
           <div className='flex-1 space-y-6'>
-            {/* Synopsis - Only show if user can access synopses */}
-            {canAccessSynopses && (
-              <PersonSynopsis
-                personId={personWithRelations.id}
-                canGenerate={canAccessSynopses}
-              />
+            {/* Synopsis, Feedback, and Feedback Campaigns Side by Side */}
+            {(canAccessSynopses ||
+              visibleFeedback.length > 0 ||
+              currentPerson?.id ||
+              personWithRelations.feedbackCampaigns.length > 0) && (
+              <div className='flex flex-wrap gap-6'>
+                {/* Synopsis - Only show if user can access synopses */}
+                {canAccessSynopses && (
+                  <div className='flex-1 min-w-[300px] max-w-[500px]'>
+                    <PersonSynopsis
+                      personId={personWithRelations.id}
+                      canGenerate={canAccessSynopses}
+                    />
+                  </div>
+                )}
+
+                {/* Feedback Section - Only show if there's feedback or user can add feedback */}
+                {(visibleFeedback.length > 0 || currentPerson?.id) && (
+                  <div className='flex-1 min-w-[300px] max-w-[500px]'>
+                    <section id='feedback'>
+                      <FeedbackList
+                        person={personWithRelations}
+                        feedback={visibleFeedback}
+                        currentUserId={currentPerson?.id}
+                      />
+                    </section>
+                  </div>
+                )}
+
+                {/* Feedback Campaigns Section - Only show if there are active or draft campaigns */}
+                {personWithRelations.feedbackCampaigns.length > 0 && (
+                  <div className='flex-1 min-w-[300px] max-w-[500px]'>
+                    <section>
+                      <div className='flex items-center justify-between mb-4 pb-3 border-b border-border'>
+                        <h3 className='font-bold flex items-center gap-2'>
+                          <MessageCircle className='w-4 h-4' />
+                          Feedback Campaigns (
+                          {personWithRelations.feedbackCampaigns.length})
+                        </h3>
+                        <div className='flex items-center gap-2'>
+                          <Button
+                            asChild
+                            variant='outline'
+                            size='sm'
+                            title='View All Feedback Campaigns'
+                          >
+                            <Link
+                              href={`/people/${personWithRelations.id}/feedback-campaigns`}
+                            >
+                              <Eye className='w-4 h-4' />
+                            </Link>
+                          </Button>
+                          <Button
+                            asChild
+                            variant='outline'
+                            size='sm'
+                            title='Create New Feedback Campaign'
+                          >
+                            <Link
+                              href={`/people/${personWithRelations.id}/feedback-campaigns/new`}
+                            >
+                              <Plus className='w-4 h-4' />
+                            </Link>
+                          </Button>
+                        </div>
+                      </div>
+                      <PersonFeedbackCampaigns
+                        campaigns={personWithRelations.feedbackCampaigns}
+                      />
+                    </section>
+                  </div>
+                )}
+              </div>
             )}
+
             {/* Owned Initiatives - Only show if person has initiatives */}
             {personWithRelations.initiativeOwners.length > 0 && (
               <section>
@@ -417,71 +499,20 @@ export default async function PersonDetailPage({
               </section>
             )}
 
-            {/* Assigned Tasks - Only show if person has tasks */}
+            {/* Active Tasks - Only show if person has active tasks */}
             {personWithRelations.tasks.length > 0 && (
               <section>
                 <h3 className='font-bold mb-4 flex items-center gap-2'>
                   <ListTodo className='w-4 h-4' />
-                  Assigned Tasks ({personWithRelations.tasks.length})
+                  Active Tasks ({personWithRelations.tasks.length})
                 </h3>
-                <div className='space-y-3'>
-                  {personWithRelations.tasks.slice(0, 5).map(task => (
-                    <div key={task.id} className='border rounded-xl p-3'>
-                      <div className='flex items-center justify-between'>
-                        <div>
-                          <div className='font-medium'>{task.title}</div>
-                          <div className='text-sm text-muted-foreground'>
-                            {task.description && (
-                              <ReadonlyNotesField
-                                content={task.description}
-                                variant='compact'
-                                showEmptyState={false}
-                              />
-                            )}
-                          </div>
-                          <div className='text-xs text-muted-foreground mt-1'>
-                            {task.initiative && (
-                              <span>Initiative: {task.initiative.title}</span>
-                            )}
-                            {task.objective && (
-                              <span> • Objective: {task.objective.title}</span>
-                            )}
-                          </div>
-                        </div>
-                        <div className='flex items-center gap-2'>
-                          <Badge
-                            variant={taskStatusUtils.getUIVariant(
-                              task.status as TaskStatus
-                            )}
-                          >
-                            {taskStatusUtils
-                              .getLabel(task.status as TaskStatus)
-                              .toUpperCase()}
-                          </Badge>
-                          {task.priority && (
-                            <Badge
-                              variant={taskPriorityUtils.getUIVariant(
-                                task.priority as TaskPriority
-                              )}
-                            >
-                              P{task.priority}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  {personWithRelations.tasks.length > 5 && (
-                    <div className='text-center'>
-                      <Button asChild variant='ghost' size='sm'>
-                        <Link href='/tasks' className='flex items-center gap-1'>
-                          <Eye className='w-4 h-4' />
-                          View all {personWithRelations.tasks.length} tasks
-                        </Link>
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                <TaskTable
+                  tasks={personWithRelations.tasks}
+                  people={people}
+                  showInitiative={true}
+                  showDueDate={true}
+                  hideFilters={true}
+                />
               </section>
             )}
 
@@ -628,42 +659,6 @@ export default async function PersonDetailPage({
                 </section>
               )}
 
-            {/* Feedback Section - Only show if there's feedback or user can add feedback */}
-            {(visibleFeedback.length > 0 || currentPerson?.id) && (
-              <section id='feedback'>
-                <FeedbackList
-                  person={personWithRelations}
-                  feedback={visibleFeedback}
-                  currentUserId={currentPerson?.id}
-                />
-              </section>
-            )}
-
-            {/* Feedback Campaigns Section - Only show if there are active or draft campaigns */}
-            {personWithRelations.feedbackCampaigns.length > 0 && (
-              <section>
-                <div className='flex items-center justify-between mb-4'>
-                  <h3 className='font-bold flex items-center gap-2'>
-                    <MessageCircle className='w-4 h-4' />
-                    Feedback Campaigns (
-                    {personWithRelations.feedbackCampaigns.length})
-                  </h3>
-                  <Button asChild variant='outline' size='sm'>
-                    <Link
-                      href={`/people/${personWithRelations.id}/feedback-campaigns`}
-                      className='flex items-center gap-2'
-                    >
-                      <Eye className='w-4 h-4' />
-                      View All
-                    </Link>
-                  </Button>
-                </div>
-                <PersonFeedbackCampaigns
-                  campaigns={personWithRelations.feedbackCampaigns}
-                />
-              </section>
-            )}
-
             {/* Jira Work Activity - Show if person has Jira account and work activity */}
             {personWithRelations.jiraAccount && (
               <JiraWorkActivitySection
@@ -725,7 +720,7 @@ export default async function PersonDetailPage({
             {isAdmin(session.user) && (
               <section>
                 <h3 className='font-bold mb-4 flex items-center gap-2'>
-                  <Building2 className='w-4 h-4' />
+                  <FaJira className='w-4 h-4' />
                   Jira Linking
                 </h3>
                 <JiraAccountLinker
@@ -741,7 +736,7 @@ export default async function PersonDetailPage({
             {isAdmin(session.user) && (
               <section>
                 <h3 className='font-bold mb-4 flex items-center gap-2'>
-                  <Building2 className='w-4 h-4' />
+                  <FaGithub className='w-4 h-4' />
                   GitHub Linking
                 </h3>
                 <GithubAccountLinker

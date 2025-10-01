@@ -79,6 +79,20 @@ export async function getJiraCredentials() {
   }
 }
 
+export async function getJiraBaseUrl() {
+  const user = await getCurrentUser()
+
+  const credentials = await prisma.userJiraCredentials.findUnique({
+    where: { userId: user.id },
+  })
+
+  if (!credentials) {
+    return null
+  }
+
+  return credentials.jiraBaseUrl
+}
+
 export async function deleteJiraCredentials() {
   const user = await getCurrentUser()
 

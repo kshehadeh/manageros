@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { GithubPrsActivity } from './github-prs-activity'
+import { GithubPrsActivityTable } from './github-prs-activity-table'
 import { fetchGithubPullRequests } from '@/lib/actions'
+import { FaGithub } from 'react-icons/fa'
 
 interface GithubPrsActivitySectionProps {
   personId: string
@@ -46,8 +47,11 @@ export function GithubPrsActivitySection({
 
   return (
     <section>
-      <h3 className='font-semibold mb-4'>GitHub Activity</h3>
-      <GithubPrsActivity
+      <h3 className='font-semibold mb-4 flex items-center gap-2'>
+        <FaGithub className='w-4 h-4' />
+        GitHub Activity
+      </h3>
+      <GithubPrsActivityTable
         personId={personId}
         personName={personName}
         hasGithubAccount={hasGithubAccount}

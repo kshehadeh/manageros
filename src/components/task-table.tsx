@@ -1,6 +1,12 @@
 'use client'
 
-import { useState, useTransition, useEffect, useMemo } from 'react'
+import {
+  useState,
+  useTransition,
+  useEffect,
+  useMemo,
+  useOptimistic,
+} from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -59,6 +65,7 @@ import {
 } from '@/lib/task-priority'
 import { toast } from 'sonner'
 import { Task, Person, Initiative, Objective, User } from '@prisma/client'
+import { TaskQuickEditDialog } from '@/components/task-quick-edit-dialog'
 
 interface FilterState {
   keyword: string
@@ -127,6 +134,23 @@ export function TaskTable({
   })
   const [updatingTasks, setUpdatingTasks] = useState<Set<string>>(new Set())
   const [editing, setEditing] = useState<EditingState>({})
+  const [optimisticTasks, addOptimisticTask] = useOptimistic(
+    tasks,
+    (
+      state,
+      optimisticUpdate: {
+        type: string
+        taskId: string
+        data: Partial<TaskWithRelations>
+      }
+    ) => {
+      return state.map(task =>
+        task.id === optimisticUpdate.taskId
+          ? { ...task, ...optimisticUpdate.data }
+          : task
+      )
+    }
+  )
   const [filters, setFilters] = useState<FilterState>({
     keyword: '',
     assigneeId: 'all',
@@ -141,6 +165,13 @@ export function TaskTable({
   const [sorting, setSorting] = useState<SortState>({
     column: null,
     direction: 'asc',
+  })
+  const [quickEditDialog, setQuickEditDialog] = useState<{
+    open: boolean
+    taskId: string | null
+  }>({
+    open: false,
+    taskId: null,
   })
 
   // Handle column sorting
@@ -176,7 +207,7 @@ export function TaskTable({
 
   // Filter and sort tasks based on current filter and sort state
   const filteredTasks = useMemo(() => {
-    const filtered = tasks.filter(task => {
+    const filtered = optimisticTasks.filter(task => {
       // Keyword filter (searches title and description)
       if (filters.keyword) {
         const keyword = filters.keyword.toLowerCase()
@@ -333,7 +364,7 @@ export function TaskTable({
     }
 
     return filtered
-  }, [tasks, filters, sorting])
+  }, [optimisticTasks, filters, sorting])
 
   // Handle clicking outside context menu to close it
   useEffect(() => {
@@ -353,6 +384,13 @@ export function TaskTable({
   ) => {
     const newStatus =
       currentStatus === TASK_STATUS.DONE ? TASK_STATUS.TODO : TASK_STATUS.DONE
+
+    // Optimistic update
+    addOptimisticTask({
+      type: 'update-status',
+      taskId,
+      data: { status: newStatus },
+    })
 
     setUpdatingTasks(prev => new Set(prev).add(taskId))
 
@@ -422,6 +460,33 @@ export function TaskTable({
     const editState = editing[taskId]
     if (!editState?.field) return
 
+    // Prepare optimistic update data
+    const optimisticData: Partial<TaskWithRelations> = {}
+    switch (editState.field) {
+      case 'title':
+        optimisticData.title = editState.value as string
+        break
+      case 'assignee':
+        optimisticData.assigneeId = editState.value as string | null
+        optimisticData.assignee = editState.value
+          ? people.find(p => p.id === editState.value) || null
+          : null
+        break
+      case 'status':
+        optimisticData.status = editState.value as TaskStatus
+        break
+      case 'priority':
+        optimisticData.priority = editState.value as number
+        break
+    }
+
+    // Optimistic update
+    addOptimisticTask({
+      type: 'update-field',
+      taskId,
+      data: optimisticData,
+    })
+
     setUpdatingTasks(prev => new Set(prev).add(taskId))
 
     try {
@@ -460,6 +525,10 @@ export function TaskTable({
   }
 
   const handleRowDoubleClick = (taskId: string) => {
+    // Don't navigate if any field is being edited
+    if (editing[taskId]?.field) {
+      return
+    }
     router.push(`/tasks/${taskId}`)
   }
 
@@ -486,6 +555,14 @@ export function TaskTable({
     })
   }
 
+  const handleQuickEdit = (taskId: string) => {
+    setQuickEditDialog({
+      open: true,
+      taskId,
+    })
+    setContextMenu(prev => ({ ...prev, visible: false }))
+  }
+
   const getPriorityVariant = (priority: number) => {
     return taskPriorityUtils.getVariant(priority as TaskPriority)
   }
@@ -494,7 +571,7 @@ export function TaskTable({
     return taskPriorityUtils.getLabel(priority as TaskPriority)
   }
 
-  if (tasks.length === 0) {
+  if (optimisticTasks.length === 0) {
     return (
       <div className='text-muted-foreground text-sm text-center py-8'>
         No tasks yet.
@@ -527,7 +604,7 @@ export function TaskTable({
               </Button>
             </div>
             <div className='text-sm text-muted-foreground'>
-              Showing {filteredTasks.length} of {tasks.length} tasks
+              Showing {filteredTasks.length} of {optimisticTasks.length} tasks
             </div>
           </div>
 
@@ -1005,12 +1082,11 @@ export function TaskTable({
             <button
               className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
               onClick={() => {
-                router.push(`/tasks/${contextMenu.taskId}/edit`)
-                setContextMenu(prev => ({ ...prev, visible: false }))
+                handleQuickEdit(contextMenu.taskId)
               }}
             >
               <Edit className='w-4 h-4' />
-              Edit
+              Quick Edit
             </button>
             <button
               className='w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 flex items-center gap-2'
@@ -1025,6 +1101,32 @@ export function TaskTable({
           </div>
         )}
       </div>
+
+      {/* Quick Edit Dialog */}
+      {quickEditDialog.open &&
+        quickEditDialog.taskId &&
+        (() => {
+          const task = optimisticTasks.find(
+            t => t.id === quickEditDialog.taskId
+          )!
+          return (
+            <TaskQuickEditDialog
+              open={quickEditDialog.open}
+              onOpenChange={open => setQuickEditDialog({ open, taskId: null })}
+              task={{
+                id: task.id,
+                title: task.title,
+                description: task.description,
+                assigneeId: task.assigneeId,
+                dueDate: task.dueDate,
+                priority: task.priority,
+                status: task.status as TaskStatus,
+              }}
+              people={people}
+              onTaskUpdate={onTaskUpdate}
+            />
+          )
+        })()}
     </div>
   )
 }

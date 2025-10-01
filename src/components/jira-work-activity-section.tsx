@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { JiraWorkActivity } from './jira-work-activity'
+import { JiraWorkActivityTable } from './jira-work-activity-table'
 import { fetchJiraAssignedTickets } from '@/lib/actions'
+import { FaJira } from 'react-icons/fa'
 
 interface JiraWorkActivitySectionProps {
   personId: string
@@ -46,8 +47,11 @@ export function JiraWorkActivitySection({
 
   return (
     <section>
-      <h3 className='font-semibold mb-4'>Work Activity</h3>
-      <JiraWorkActivity
+      <h3 className='font-semibold mb-4 flex items-center gap-2'>
+        <FaJira className='w-4 h-4' />
+        Jira Activity
+      </h3>
+      <JiraWorkActivityTable
         personId={personId}
         personName={personName}
         hasJiraAccount={hasJiraAccount}

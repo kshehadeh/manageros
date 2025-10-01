@@ -88,13 +88,12 @@ export function PersonSynopsis({
 
   return (
     <section>
-      <div className='flex items-center justify-between mb-3'>
+      <div className='flex items-center justify-between mb-3 pb-3 border-b border-border'>
         <h3 className='font-semibold'>Synopsis</h3>
         <div className='flex items-center gap-2'>
-          <Button variant='outline' size='sm' asChild>
+          <Button variant='outline' size='sm' asChild title='View All Synopses'>
             <Link href={`/people/${personId}/synopses`}>
-              <Eye className='w-4 h-4 mr-2' />
-              View All
+              <Eye className='w-4 h-4' />
             </Link>
           </Button>
           {canGenerate && (
@@ -102,9 +101,9 @@ export function PersonSynopsis({
               variant='outline'
               size='sm'
               onClick={() => setShowModal(true)}
+              title='Add New Synopsis'
             >
-              <Plus className='w-4 h-4 mr-2' />
-              Add New
+              <Plus className='w-4 h-4' />
             </Button>
           )}
         </div>

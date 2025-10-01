@@ -122,6 +122,7 @@ export {
 export {
   saveJiraCredentials,
   getJiraCredentials,
+  getJiraBaseUrl,
   deleteJiraCredentials,
   linkPersonToJiraAccount,
   unlinkPersonFromJiraAccount,
