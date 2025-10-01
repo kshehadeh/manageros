@@ -54,7 +54,7 @@ export function MeetingsPageClient({ meetings }: MeetingsPageClientProps) {
             <div className='flex items-center gap-2'>
               <Calendar className='h-6 w-6 text-muted-foreground' />
               <h1 className='page-title'>Meetings</h1>
-              <HelpIcon helpId='meetings-and-instances' size='md' />
+              <HelpIcon helpId='meetings' size='md' />
             </div>
             <p className='page-subtitle'>
               Manage and track your organization&apos;s meetings

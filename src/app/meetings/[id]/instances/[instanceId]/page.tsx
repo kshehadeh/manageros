@@ -11,6 +11,7 @@ import { MeetingInstanceDetailBreadcrumbClient } from '@/components/meeting-inst
 import { MeetingInstanceActionsDropdown } from '@/components/meeting-instance-actions-dropdown'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { LinkManager } from '@/components/entity-links'
+import { HelpIcon } from '@/components/help-icon'
 
 export default async function MeetingInstanceDetailPage({
   params,
@@ -84,7 +85,10 @@ export default async function MeetingInstanceDetailPage({
         <div className='page-header'>
           <div className='flex items-center justify-between'>
             <div className='flex-1'>
-              <h1 className='page-title'>{meetingInstance.meeting.title}</h1>
+              <div className='flex items-center gap-2'>
+                <h1 className='page-title'>{meetingInstance.meeting.title}</h1>
+                <HelpIcon helpId='meeting-instances' size='md' />
+              </div>
               <p className='page-subtitle'>Meeting Instance</p>
 
               {/* Instance details in header */}
