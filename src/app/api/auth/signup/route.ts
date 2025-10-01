@@ -4,55 +4,16 @@ import { prisma } from '@/lib/db'
 import { checkPendingInvitation } from '@/lib/actions'
 import { z } from 'zod'
 
-const signupSchema = z
-  .object({
-    name: z.string().min(1, 'Name is required'),
-    email: z.string().email('Invalid email address'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
-    organizationName: z.string().optional(),
-    organizationSlug: z
-      .string()
-      .regex(
-        /^[a-z0-9-]+$/,
-        'Organization slug can only contain lowercase letters, numbers, and hyphens'
-      )
-      .optional(),
-  })
-  .refine(
-    data => {
-      // If organizationName is provided, organizationSlug must also be provided
-      if (data.organizationName && !data.organizationSlug) {
-        return false
-      }
-      if (data.organizationSlug && !data.organizationName) {
-        return false
-      }
-      return true
-    },
-    {
-      message: 'Both organization name and slug must be provided together',
-      path: ['organizationSlug'],
-    }
-  )
+const signupSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+})
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const validatedData = signupSchema.parse(body)
-
-    // Check if organization slug already exists (only if provided)
-    if (validatedData.organizationSlug) {
-      const existingOrg = await prisma.organization.findUnique({
-        where: { slug: validatedData.organizationSlug },
-      })
-
-      if (existingOrg) {
-        return NextResponse.json(
-          { error: 'Organization slug already exists' },
-          { status: 400 }
-        )
-      }
-    }
 
     // Check if user email already exists
     const existingUser = await prisma.user.findUnique({
@@ -72,7 +33,7 @@ export async function POST(request: NextRequest) {
     // Check for pending invitation
     const pendingInvitation = await checkPendingInvitation(validatedData.email)
 
-    // Create organization and user in a transaction
+    // Create user in a transaction
     const result = await prisma.$transaction(async tx => {
       let organization = null
       let userRole = 'USER'
@@ -92,18 +53,6 @@ export async function POST(request: NextRequest) {
             acceptedAt: new Date(),
           },
         })
-      } else if (
-        validatedData.organizationName &&
-        validatedData.organizationSlug
-      ) {
-        // Create organization if provided and no invitation
-        organization = await tx.organization.create({
-          data: {
-            name: validatedData.organizationName,
-            slug: validatedData.organizationSlug,
-          },
-        })
-        userRole = 'ADMIN' // User creating org becomes admin
       }
 
       // Create user
@@ -126,7 +75,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       message: result.wasInvited
         ? 'Account created successfully and you have been added to the organization!'
-        : 'Account created successfully',
+        : 'Account created successfully! You can now create or join an organization.',
       user: {
         id: result.user.id,
         name: result.user.name,

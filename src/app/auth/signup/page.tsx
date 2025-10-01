@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
   Card,
   CardContent,
@@ -23,9 +22,6 @@ export default function SignUpPage() {
     email: '',
     password: '',
     confirmPassword: '',
-    organizationName: '',
-    organizationSlug: '',
-    createOrganization: false,
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -53,12 +49,6 @@ export default function SignUpPage() {
           name: formData.name,
           email: formData.email,
           password: formData.password,
-          organizationName: formData.createOrganization
-            ? formData.organizationName
-            : undefined,
-          organizationSlug: formData.createOrganization
-            ? formData.organizationSlug
-            : undefined,
         }),
       })
 
@@ -165,71 +155,6 @@ export default function SignUpPage() {
                 className=''
               />
             </div>
-
-            <div className='border-t pt-4'>
-              <div className='flex items-center space-x-2'>
-                <Checkbox
-                  id='createOrganization'
-                  checked={formData.createOrganization}
-                  onCheckedChange={checked =>
-                    setFormData(prev => ({
-                      ...prev,
-                      createOrganization: checked as boolean,
-                    }))
-                  }
-                />
-                <Label
-                  htmlFor='createOrganization'
-                  className='text-sm font-normal cursor-pointer'
-                >
-                  Create a new organization
-                </Label>
-              </div>
-              <p className='mt-1 text-xs text-muted-foreground'>
-                If unchecked, you&apos;ll need to be invited to an existing
-                organization to access the platform.
-              </p>
-            </div>
-
-            {formData.createOrganization && (
-              <>
-                <div className='space-y-2'>
-                  <Label htmlFor='organizationName' className=''>
-                    Organization Name
-                  </Label>
-                  <Input
-                    id='organizationName'
-                    name='organizationName'
-                    type='text'
-                    required={formData.createOrganization}
-                    placeholder='Acme Corp'
-                    value={formData.organizationName}
-                    onChange={handleInputChange}
-                    className=''
-                  />
-                </div>
-
-                <div className='space-y-2'>
-                  <Label htmlFor='organizationSlug' className=''>
-                    Organization Slug
-                  </Label>
-                  <Input
-                    id='organizationSlug'
-                    name='organizationSlug'
-                    type='text'
-                    required={formData.createOrganization}
-                    placeholder='acme-corp'
-                    value={formData.organizationSlug}
-                    onChange={handleInputChange}
-                    className=''
-                  />
-                  <p className='text-xs text-muted-foreground'>
-                    Used in URLs. Only lowercase letters, numbers, and hyphens
-                    allowed.
-                  </p>
-                </div>
-              </>
-            )}
 
             <div className='space-y-2'>
               <Label htmlFor='password'>Password</Label>

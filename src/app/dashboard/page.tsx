@@ -1,8 +1,6 @@
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { requireAuth } from '@/lib/auth-utils'
 import { getPendingInvitationsForUser } from '@/lib/actions'
-import PendingInvitations from '@/components/pending-invitations'
+import { OrganizationSetupCards } from '@/components/organization-setup-cards'
 import { Suspense } from 'react'
 import { DashboardAssignedTasksSection } from '@/components/dashboard-sections/assigned-tasks-section'
 import { DashboardOpenInitiativesSection } from '@/components/dashboard-sections/open-initiatives-section'
@@ -24,30 +22,13 @@ import {
 export default async function Home() {
   const user = await requireAuth()
 
-  // If user doesn't have an organization, show organization creation prompt and pending invitations
+  // If user doesn't have an organization, show organization setup cards
   if (!user.organizationId) {
     const pendingInvitations = await getPendingInvitationsForUser()
 
     return (
-      <div className='space-y-6'>
-        {/* Show pending invitations first if any exist */}
-        {pendingInvitations.length > 0 && (
-          <PendingInvitations invitations={pendingInvitations} />
-        )}
-
-        <div className='card text-center py-12'>
-          <h2 className='text-xl font-semibold mb-4'>Welcome to ManagerOS!</h2>
-          <p className='text-neutral-400 mb-6'>
-            {pendingInvitations.length > 0
-              ? 'You can accept one of the invitations above or create a new organization.'
-              : "To get started, you'll need to create an organization or be invited to an existing one."}
-          </p>
-          <div className='flex justify-center gap-4'>
-            <Button asChild variant='outline'>
-              <Link href='/organization/create'>Create Organization</Link>
-            </Button>
-          </div>
-        </div>
+      <div className='page-container'>
+        <OrganizationSetupCards pendingInvitations={pendingInvitations} />
       </div>
     )
   }
