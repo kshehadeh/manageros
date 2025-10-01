@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db'
-import { OpenInitiatives } from '@/components/dashboard-open-initiatives'
+import { DashboardInitiativesTable } from '@/components/dashboard-initiatives-table'
 import { ExpandableSection } from '@/components/expandable-section'
 
 interface DashboardOpenInitiativesSectionProps {
@@ -18,16 +18,65 @@ export async function DashboardOpenInitiativesSection({
     take: 5,
     include: {
       team: true,
-      objectives: true,
-      _count: { select: { checkIns: true } },
+      objectives: {
+        select: {
+          id: true,
+          title: true,
+          keyResult: true,
+          sortIndex: true,
+        },
+      },
+      owners: {
+        include: {
+          person: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+      tasks: {
+        select: {
+          status: true,
+        },
+      },
+      _count: {
+        select: {
+          checkIns: true,
+          tasks: true,
+        },
+      },
     },
   })
+
+  // Get people and teams for the table
+  const [people, teams] = await Promise.all([
+    prisma.person.findMany({
+      where: { organizationId },
+      select: {
+        id: true,
+        name: true,
+      },
+    }),
+    prisma.team.findMany({
+      where: { organizationId },
+      select: {
+        id: true,
+        name: true,
+      },
+    }),
+  ])
 
   if (!openInitiatives || openInitiatives.length === 0) return null
 
   return (
     <ExpandableSection title='Open Initiatives' viewAllHref='/initiatives'>
-      <OpenInitiatives openInitiatives={openInitiatives} />
+      <DashboardInitiativesTable
+        initiatives={openInitiatives}
+        people={people}
+        teams={teams}
+      />
     </ExpandableSection>
   )
 }

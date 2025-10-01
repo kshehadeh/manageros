@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import { MeetingInstanceEditClient } from '@/components/meeting-instance-edit-client'
+import { utcToLocalDateTimeString } from '@/lib/timezone-utils'
 
 export default async function EditMeetingInstancePage({
   params,
@@ -33,9 +34,7 @@ export default async function EditMeetingInstancePage({
   // Format the instance data for the form
   const initialData = {
     meetingId: meetingInstance.meetingId,
-    scheduledAt: new Date(meetingInstance.scheduledAt)
-      .toISOString()
-      .slice(0, 16), // Format for datetime-local input
+    scheduledAt: utcToLocalDateTimeString(meetingInstance.scheduledAt), // Convert UTC to local time for datetime-local input
     notes: meetingInstance.notes || '',
     participants: meetingInstance.participants.map(p => ({
       personId: p.personId,

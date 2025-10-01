@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import { MeetingForm } from '@/components/meeting-form'
+import { utcToLocalDateTimeString } from '@/lib/timezone-utils'
 
 export default async function EditMeetingPage({
   params,
@@ -36,7 +37,7 @@ export default async function EditMeetingPage({
   const initialData = {
     title: meeting.title,
     description: meeting.description || '',
-    scheduledAt: new Date(meeting.scheduledAt).toISOString().slice(0, 16), // Format for datetime-local input
+    scheduledAt: utcToLocalDateTimeString(meeting.scheduledAt), // Convert UTC to local time for datetime-local input
     duration: meeting.duration || undefined,
     location: meeting.location || '',
     notes: meeting.notes || '',

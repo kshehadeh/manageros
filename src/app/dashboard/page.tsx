@@ -7,16 +7,16 @@ import { DashboardOpenInitiativesSection } from '@/components/dashboard-sections
 import { DashboardDirectReportsSection } from '@/components/dashboard-sections/direct-reports-section'
 import { DashboardRelatedTeamsSection } from '@/components/dashboard-sections/related-teams-section'
 import { DashboardRecentOneOnOnesSection } from '@/components/dashboard-sections/recent-oneonones-section'
-import { DashboardRecentFeedbackSection } from '@/components/dashboard-sections/recent-feedback-section'
 import { DashboardFeedbackCampaignsSection } from '@/components/dashboard-sections/feedback-campaigns-section'
+import { DashboardUpcomingMeetingsSection } from '@/components/dashboard-sections/upcoming-meetings-section'
 import {
   TasksSectionFallback,
   FeedbackCampaignsSectionFallback,
-  RecentFeedbackSectionFallback,
   OpenInitiativesSectionFallback,
   RecentOneOnOnesSectionFallback,
   RelatedTeamsSectionFallback,
   DirectReportsSectionFallback,
+  UpcomingMeetingsSectionFallback,
 } from '@/components/dashboard-sections/section-fallbacks'
 
 export default async function Home() {
@@ -50,13 +50,6 @@ export default async function Home() {
             <DashboardFeedbackCampaignsSection />
           </Suspense>
 
-          <Suspense fallback={<RecentFeedbackSectionFallback />}>
-            <DashboardRecentFeedbackSection
-              userId={user.id}
-              organizationId={user.organizationId!}
-            />
-          </Suspense>
-
           <Suspense fallback={<OpenInitiativesSectionFallback />}>
             <DashboardOpenInitiativesSection
               organizationId={user.organizationId!}
@@ -68,6 +61,13 @@ export default async function Home() {
               <DashboardRecentOneOnOnesSection userId={user.id} />
             </Suspense>
           </div>
+
+          <Suspense fallback={<UpcomingMeetingsSectionFallback />}>
+            <DashboardUpcomingMeetingsSection
+              userId={user.id}
+              organizationId={user.organizationId!}
+            />
+          </Suspense>
         </div>
 
         {/* Right Sidebar */}
