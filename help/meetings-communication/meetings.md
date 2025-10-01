@@ -1,0 +1,53 @@
+---
+id: meetings
+title: Meetings
+category: Meetings & Communication
+---
+
+# Meetings
+
+Meetings in ManagerOS let you plan one-time or recurring sessions, invite participants, and connect discussions to work.
+
+## Create a meeting
+
+- **Title**: Name the meeting clearly
+- **Description**: Purpose, agenda, or context
+- **Date & time**: Start time; add duration in minutes
+- **Location**: Room or video link
+- **Participants**: Add people from your org and external guests
+- **Owner**: Assign the coordinator responsible for the meeting
+
+## Recurrence (optional)
+
+Create a series with a repeat pattern. ManagerOS generates individual instances you can manage separately.
+
+- Patterns: daily, weekly, monthly, bi‑monthly, semi‑annually
+- Start/end dates define the range of generated instances
+
+## Associations
+
+Link meetings so work stays connected:
+
+- Teams
+- Initiatives and objectives
+- Notes for preparation and outcomes
+
+## Participant status
+
+Track responses at the meeting level:
+
+- invited, accepted, declined, tentative
+
+## Best practices
+
+- Share a short agenda and materials in advance
+- Keep duration aligned to the content
+- Invite only necessary participants
+- Respect time zones for distributed teams
+
+## Troubleshooting
+
+- If invites aren’t received, verify email addresses and resend
+- Adjust recurrence dates if instances aren’t appearing
+- Update participants when team membership changes
+

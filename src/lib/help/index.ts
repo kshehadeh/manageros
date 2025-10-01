@@ -26,6 +26,8 @@ import { helpContent as directReports } from './direct-reports'
 import { helpContent as people } from './people'
 import { helpContent as oneOnOnes } from './one-on-ones'
 import { helpContent as meetingsAndInstances } from './meetings-and-instances'
+import { helpContent as meetings } from './meetings'
+import { helpContent as meetingInstances } from './meeting-instances'
 import { helpContent as gettingStarted } from './getting-started'
 import { helpContent as githubIntegration } from './github-integration'
 import { helpContent as jiraIntegration } from './jira-integration'
@@ -47,6 +49,8 @@ export const helpContent: Record<string, HelpContent> = {
   people: people,
   'one-on-ones': oneOnOnes,
   'meetings-and-instances': meetingsAndInstances,
+  meetings: meetings,
+  'meeting-instances': meetingInstances,
   'getting-started': gettingStarted,
   'github-integration': githubIntegration,
   'jira-integration': jiraIntegration,
@@ -117,6 +121,8 @@ export function getHelpIds(): string[] {
     'people',
     'one-on-ones',
     'meetings-and-instances',
+    'meetings',
+    'meeting-instances',
     'getting-started',
     'github-integration',
     'jira-integration',
