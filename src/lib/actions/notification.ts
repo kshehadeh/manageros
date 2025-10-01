@@ -3,6 +3,7 @@
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
+import { InputJsonValue } from '@prisma/client/runtime/library'
 
 export interface CreateNotificationData {
   title: string
@@ -10,6 +11,7 @@ export interface CreateNotificationData {
   type?: 'info' | 'warning' | 'success' | 'error'
   organizationId?: string
   userId?: string
+  metadata?: Record<string, unknown>
 }
 
 export interface NotificationWithResponse {
@@ -24,6 +26,35 @@ export interface NotificationWithResponse {
     readAt: Date | null
     dismissedAt: Date | null
   }
+}
+
+/**
+ * Create a notification directly without authentication
+ * This is for system-level operations like cron jobs
+ * Requires organizationId and optionally userId
+ */
+export async function createSystemNotification(
+  data: Required<
+    Pick<CreateNotificationData, 'title' | 'message' | 'organizationId'>
+  > &
+    Pick<CreateNotificationData, 'type' | 'userId' | 'metadata'>
+) {
+  if (!data.organizationId) {
+    throw new Error('Organization ID is required for system notifications')
+  }
+
+  const notification = await prisma.notification.create({
+    data: {
+      title: data.title,
+      message: data.message,
+      type: data.type || 'info',
+      organizationId: data.organizationId,
+      userId: data.userId || null,
+      metadata: (data.metadata as InputJsonValue) || undefined,
+    },
+  })
+
+  return notification
 }
 
 /**
@@ -71,6 +102,7 @@ export async function createNotification(data: CreateNotificationData) {
       type: data.type || 'info',
       organizationId: data.organizationId || user.organizationId,
       userId: data.userId || null,
+      metadata: (data.metadata as InputJsonValue) || undefined,
     },
   })
 

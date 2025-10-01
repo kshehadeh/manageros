@@ -30,6 +30,7 @@ model Organization {
   domains     JobDomain[]
   notifications Notification[]
   reportInstances ReportInstance[]
+  cronJobExecutions CronJobExecution[]
 }
 
 model User {
@@ -608,6 +609,7 @@ model Notification {
   organization   Organization? @relation(fields: [organizationId], references: [id])
   userId         String?  // If null, it's an organization-wide notification
   user           User?    @relation(fields: [userId], references: [id])
+  metadata       Json?    // Additional data for deduplication and job tracking
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   
@@ -634,6 +636,27 @@ model NotificationResponse {
   @@unique([notificationId, userId])
   @@index([notificationId])
   @@index([userId])
+  @@index([status])
+}
+
+model CronJobExecution {
+  id             String   @id @default(cuid())
+  jobId          String
+  jobName        String
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  status         String   @default("running") // running|completed|failed
+  startedAt      DateTime @default(now())
+  completedAt    DateTime?
+  notificationsCreated Int @default(0)
+  error          String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  @@index([jobId])
+  @@index([organizationId])
+  @@index([startedAt])
   @@index([status])
 }
 

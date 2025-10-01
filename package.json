@@ -25,6 +25,9 @@
     "help:clear": "bun scripts/help-content-manager.ts clear",
     "cleanup:tokens": "bun scripts/cleanup-expired-tokens.ts",
     "test:email": "bun scripts/test-email-config.ts",
+    "cron:run": "bun scripts/run-cron-jobs.ts",
+    "cron:birthdays": "bun scripts/run-cron-jobs.ts --job birthday-notification",
+    "cron:activity": "bun scripts/run-cron-jobs.ts --job activity-monitoring",
     "postinstall": "bunx prisma generate && bun run help:generate",
     "prepare": "husky"
   },
