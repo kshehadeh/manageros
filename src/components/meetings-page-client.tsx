@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { MeetingsTable } from '@/components/meetings-table'
+import { SharedMeetingsTable } from '@/components/shared-meetings-table'
 import { MeetingsFilterBar } from '@/components/meetings-filter-bar'
 import { Button } from '@/components/ui/button'
 import { Plus, Calendar } from 'lucide-react'
@@ -75,9 +75,10 @@ export function MeetingsPageClient({ meetings }: MeetingsPageClientProps) {
           onFilteredMeetingsChange={handleFilteredMeetingsChange}
         />
 
-        <MeetingsTable
+        <SharedMeetingsTable
           meetings={meetings}
           filteredMeetings={filteredMeetings}
+          variant='full'
         />
       </div>
     </div>

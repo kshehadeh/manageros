@@ -157,7 +157,7 @@ export async function DashboardUpcomingMeetingsSection({
 
   return (
     <ExpandableSection title='Upcoming Meetings' viewAllHref='/meetings'>
-      <DashboardUpcomingMeetings meetings={allUpcomingMeetings} />
+      <DashboardUpcomingMeetings meetings={allUpcomingMeetings as any} />
     </ExpandableSection>
   )
 }
