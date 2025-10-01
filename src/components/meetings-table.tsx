@@ -10,7 +10,6 @@ import {
   Target,
   Calendar,
   Building2,
-  User,
 } from 'lucide-react'
 import {
   Table,
@@ -21,7 +20,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { deleteMeeting } from '@/lib/actions'
 import { toast } from 'sonner'
 import {
@@ -145,19 +143,6 @@ export function MeetingsTable({
     return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`
   }
 
-  const getStatusBadge = (meeting: MeetingWithRelations) => {
-    const now = new Date()
-    const scheduledAt = new Date(meeting.scheduledAt)
-
-    if (scheduledAt < now) {
-      return <Badge variant='secondary'>Past</Badge>
-    } else if (scheduledAt.getTime() - now.getTime() < 24 * 60 * 60 * 1000) {
-      return <Badge variant='default'>Today</Badge>
-    } else {
-      return <Badge variant='outline'>Upcoming</Badge>
-    }
-  }
-
   if (displayMeetings.length === 0) {
     return (
       <div className='text-muted-foreground text-sm text-center py-8'>
@@ -176,13 +161,8 @@ export function MeetingsTable({
             <TableHead className='text-muted-foreground'>Title</TableHead>
             <TableHead className='text-muted-foreground'>Scheduled</TableHead>
             <TableHead className='text-muted-foreground'>Duration</TableHead>
-            <TableHead className='text-muted-foreground'>Status</TableHead>
             <TableHead className='text-muted-foreground'>Team</TableHead>
             <TableHead className='text-muted-foreground'>Initiative</TableHead>
-            <TableHead className='text-muted-foreground'>Owner</TableHead>
-            <TableHead className='text-muted-foreground'>
-              Participants
-            </TableHead>
             <TableHead className='text-muted-foreground w-[50px]'>
               Actions
             </TableHead>
@@ -209,9 +189,6 @@ export function MeetingsTable({
                 {formatDuration(meeting.duration || 0)}
               </TableCell>
               <TableCell className='text-muted-foreground'>
-                {getStatusBadge(meeting)}
-              </TableCell>
-              <TableCell className='text-muted-foreground'>
                 {meeting.team ? (
                   <div className='flex items-center gap-1'>
                     <Building2 className='h-3 w-3' />
@@ -230,21 +207,6 @@ export function MeetingsTable({
                 ) : (
                   '—'
                 )}
-              </TableCell>
-              <TableCell className='text-muted-foreground'>
-                {meeting.owner ? (
-                  <div className='flex items-center gap-1'>
-                    <User className='h-3 w-3' />
-                    {meeting.owner.name}
-                  </div>
-                ) : (
-                  '—'
-                )}
-              </TableCell>
-              <TableCell className='text-muted-foreground'>
-                <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
-                  {meeting.participants.length}
-                </span>
               </TableCell>
               <TableCell>
                 <Button

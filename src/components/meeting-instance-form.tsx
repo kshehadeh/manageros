@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -39,6 +40,7 @@ export function MeetingInstanceForm({
 }: MeetingInstanceFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const router = useRouter()
 
   // Form state to prevent clearing on errors
   const [formData, setFormData] = useState<MeetingInstanceFormData>({
@@ -59,13 +61,14 @@ export function MeetingInstanceForm({
 
       if (isEditing && instanceId) {
         await updateMeetingInstance(instanceId, validatedData)
+        // Redirect to the meeting instance detail page
+        router.push(`/meetings/${meetingId}/instances/${instanceId}`)
       } else {
         await createMeetingInstance(validatedData)
-      }
-
-      // Call success callback if provided
-      if (onSuccess) {
-        onSuccess()
+        // Call success callback if provided (for dialog forms)
+        if (onSuccess) {
+          onSuccess()
+        }
       }
     } catch (error) {
       if (error instanceof Error) {

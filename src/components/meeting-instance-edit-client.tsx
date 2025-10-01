@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { useRouter } from 'next/navigation'
 import { MeetingInstanceForm } from '@/components/meeting-instance-form'
 import { Person } from '@prisma/client'
 import { type MeetingInstanceFormData } from '@/lib/validations'
@@ -17,19 +16,12 @@ interface MeetingInstanceEditClientProps {
 
 export function MeetingInstanceEditClient({
   meetingId,
-  instanceId,
+  instanceId: _instanceId,
   meetingTitle,
   people,
   initialData,
   meetingInstanceId,
 }: MeetingInstanceEditClientProps) {
-  const router = useRouter()
-
-  const handleSuccess = () => {
-    // Navigate back to the meeting instance detail page
-    router.push(`/meetings/${meetingId}/instances/${instanceId}`)
-  }
-
   return (
     <div className='space-y-6'>
       <div>
@@ -46,7 +38,6 @@ export function MeetingInstanceEditClient({
           initialData={initialData}
           isEditing={true}
           instanceId={meetingInstanceId}
-          onSuccess={handleSuccess}
         />
       </div>
     </div>

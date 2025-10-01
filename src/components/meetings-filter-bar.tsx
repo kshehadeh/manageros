@@ -42,8 +42,6 @@ export function MeetingsFilterBar({
   const [textFilter, setTextFilter] = useState('')
   const [teamFilter, setTeamFilter] = useState('all')
   const [initiativeFilter, setInitiativeFilter] = useState('all')
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [ownerFilter, setOwnerFilter] = useState('all')
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const filterRef = useRef<HTMLDivElement>(null)
 
@@ -66,17 +64,6 @@ export function MeetingsFilterBar({
         .map(meeting => [
           meeting.initiative!.id,
           { id: meeting.initiative!.id, title: meeting.initiative!.title },
-        ])
-    ).values()
-  )
-
-  const owners = Array.from(
-    new Map(
-      meetings
-        .filter(meeting => meeting.owner)
-        .map(meeting => [
-          meeting.owner!.id,
-          { id: meeting.owner!.id, name: meeting.owner!.name },
         ])
     ).values()
   )
@@ -145,41 +132,12 @@ export function MeetingsFilterBar({
       )
     }
 
-    // Status filter
-    if (statusFilter !== 'all') {
-      const now = new Date()
-      filtered = filtered.filter(meeting => {
-        const scheduledAt = new Date(meeting.scheduledAt)
-        switch (statusFilter) {
-          case 'past':
-            return scheduledAt < now
-          case 'today':
-            const today = new Date()
-            today.setHours(0, 0, 0, 0)
-            const tomorrow = new Date(today)
-            tomorrow.setDate(tomorrow.getDate() + 1)
-            return scheduledAt >= today && scheduledAt < tomorrow
-          case 'upcoming':
-            return scheduledAt >= now
-          default:
-            return true
-        }
-      })
-    }
-
-    // Owner filter
-    if (ownerFilter !== 'all') {
-      filtered = filtered.filter(meeting => meeting.owner?.id === ownerFilter)
-    }
-
     onFilteredMeetingsChange(filtered)
   }, [
     meetings,
     textFilter,
     teamFilter,
     initiativeFilter,
-    statusFilter,
-    ownerFilter,
     onFilteredMeetingsChange,
   ])
 
@@ -187,16 +145,10 @@ export function MeetingsFilterBar({
     setTextFilter('')
     setTeamFilter('all')
     setInitiativeFilter('all')
-    setStatusFilter('all')
-    setOwnerFilter('all')
   }
 
   const hasActiveFilters =
-    textFilter.trim() ||
-    teamFilter !== 'all' ||
-    initiativeFilter !== 'all' ||
-    statusFilter !== 'all' ||
-    ownerFilter !== 'all'
+    textFilter.trim() || teamFilter !== 'all' || initiativeFilter !== 'all'
 
   return (
     <div className='space-y-4 px-3 md:px-0'>
@@ -261,38 +213,6 @@ export function MeetingsFilterBar({
                       {initiatives.map(initiative => (
                         <SelectItem key={initiative.id} value={initiative.id}>
                           {initiative.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className='space-y-2'>
-                  <label className='text-sm font-medium'>Status</label>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger>
-                      <SelectValue placeholder='All statuses' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='all'>All statuses</SelectItem>
-                      <SelectItem value='past'>Past</SelectItem>
-                      <SelectItem value='today'>Today</SelectItem>
-                      <SelectItem value='upcoming'>Upcoming</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className='space-y-2'>
-                  <label className='text-sm font-medium'>Owner</label>
-                  <Select value={ownerFilter} onValueChange={setOwnerFilter}>
-                    <SelectTrigger>
-                      <SelectValue placeholder='All owners' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='all'>All owners</SelectItem>
-                      {owners.map(owner => (
-                        <SelectItem key={owner.id} value={owner.id}>
-                          {owner.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
