@@ -7,6 +7,7 @@ import { InitiativeHeader } from '@/components/initiative-header'
 import { InitiativeObjectives } from '@/components/initiative-objectives'
 import { InitiativeTasks } from '@/components/initiative-tasks'
 import { InitiativeCheckIns } from '@/components/initiative-checkins'
+import { InitiativeMeetings } from '@/components/initiative-meetings'
 import { InitiativeSidebar } from '@/components/initiative-sidebar'
 import { Suspense } from 'react'
 import { Loading } from '@/components/ui/loading'
@@ -28,7 +29,7 @@ export default async function InitiativeDetail({
   }
 
   const { id } = await params
-  const [init, people] = await Promise.all([
+  const [init, people, meetings] = await Promise.all([
     prisma.initiative.findFirst({
       where: {
         id,
@@ -64,6 +65,24 @@ export default async function InitiativeDetail({
         organizationId: session.user.organizationId,
       },
       orderBy: { name: 'asc' },
+    }),
+    prisma.meeting.findMany({
+      where: {
+        initiativeId: id,
+        organizationId: session.user.organizationId,
+      },
+      include: {
+        team: true,
+        initiative: true,
+        owner: true,
+        createdBy: true,
+        participants: {
+          include: {
+            person: true,
+          },
+        },
+      },
+      orderBy: { scheduledAt: 'asc' },
     }),
   ])
 
@@ -158,6 +177,24 @@ export default async function InitiativeDetail({
                   objectives={init.objectives}
                   allTasks={allTasks}
                   people={people}
+                />
+              </Suspense>
+
+              <Suspense
+                fallback={
+                  <div className='page-section'>
+                    <div className='flex items-center justify-center py-8'>
+                      <Loading size='md' />
+                      <span className='ml-2 text-sm text-muted-foreground'>
+                        Loading meetings...
+                      </span>
+                    </div>
+                  </div>
+                }
+              >
+                <InitiativeMeetings
+                  meetings={meetings}
+                  initiativeId={init.id}
                 />
               </Suspense>
 
