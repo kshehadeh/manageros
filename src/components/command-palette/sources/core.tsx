@@ -7,6 +7,7 @@ import {
   Rocket,
   MessageCircle,
   Settings,
+  BarChart3,
 } from 'lucide-react'
 import { type CommandItemDescriptor, type CommandSource } from '../types'
 
@@ -86,6 +87,18 @@ function createStaticItems(
       group: 'Navigation',
       perform: ({ closePalette, router }) => {
         router.push('/feedback')
+        closePalette()
+      },
+    },
+    {
+      id: 'nav.reports',
+      title: 'View Reports',
+      subtitle: 'Go to reports page',
+      icon: <BarChart3 className='h-4 w-4' />,
+      keywords: ['reports', 'analytics', 'data', 'charts'],
+      group: 'Navigation',
+      perform: ({ closePalette, router }) => {
+        router.push('/reports')
         closePalette()
       },
     },

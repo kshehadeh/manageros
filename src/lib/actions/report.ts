@@ -105,15 +105,50 @@ export async function listReportInstances(limit = 20) {
     include: { report: true },
   })
 
-  return instances.map(i => ({
-    id: i.id,
-    reportCodeId: i.report.codeId,
-    reportName: i.report.name,
-    renderer: i.renderer,
-    status: i.status,
-    createdAt: i.startedAt.toISOString(),
-    completedAt: i.completedAt?.toISOString() ?? null,
-  }))
+  // Resolve identifiers for each instance
+  const instancesWithIdentifiers = await Promise.all(
+    instances.map(async i => {
+      const def = await getReport(i.report.codeId)
+      let identifierText = ''
+
+      if (def?.identifierFields && i.input) {
+        const inputData = i.input as Record<string, unknown>
+        const resolvedIdentifiers = await Promise.all(
+          def.identifierFields.map(async field => {
+            const value = inputData[field.fieldName]
+            if (value && typeof value === 'string') {
+              const ctx = {
+                prisma,
+                user: {
+                  id: user.id,
+                  role: user.role,
+                  organizationId: user.organizationId!,
+                  personId: user.personId ?? null,
+                },
+              }
+              const resolvedName = await field.resolveToName(value, ctx)
+              return `${field.displayName}: ${resolvedName}`
+            }
+            return null
+          })
+        )
+        identifierText = resolvedIdentifiers.filter(Boolean).join(', ')
+      }
+
+      return {
+        id: i.id,
+        reportCodeId: i.report.codeId,
+        reportName: i.report.name,
+        renderer: i.renderer,
+        status: i.status,
+        createdAt: i.startedAt.toISOString(),
+        completedAt: i.completedAt?.toISOString() ?? null,
+        identifierText,
+      }
+    })
+  )
+
+  return instancesWithIdentifiers
 }
 
 export async function getReportInstance(id: string) {

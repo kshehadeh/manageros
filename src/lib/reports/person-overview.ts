@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { ReportDefinition } from './types'
+import type { ReportDefinition, ReportExecutionContext } from './types'
 import { GithubApiService } from '@/lib/github-api'
 import { JiraApiService } from '@/lib/jira-api'
 
@@ -61,9 +61,22 @@ export const PersonOverviewReport: ReportDefinition<
 > = {
   codeId: 'person_overview',
   name: 'Person Overview',
-  description: 'Overview of a person’s activity between two dates',
+  description: "Overview of a person's activity between two dates",
   supportedRenderers: ['markdown'],
   inputSchema: personOverviewInput,
+  identifierFields: [
+    {
+      fieldName: 'personId',
+      displayName: 'Person',
+      resolveToName: async (personId: string, ctx: ReportExecutionContext) => {
+        const person = await ctx.prisma.person.findFirst({
+          where: { id: personId, organizationId: ctx.user.organizationId },
+          select: { name: true },
+        })
+        return person?.name || `Unknown Person (${personId})`
+      },
+    },
+  ],
   authorize: async (ctx, input) => {
     if (!ctx.user.organizationId) {
       throw new Error('User must belong to an organization to run reports')

@@ -76,6 +76,8 @@
 - **Tag System** - Flexible tagging for cross-cutting concerns
 - **Bulk Operations** - Import/export capabilities
 - **Data Validation** - Zod schema validation throughout
+- **Report System** - Extensible reporting framework with markdown output (January 2025)
+- **AI Synopsis Report** - AI-generated work summaries combining tasks, initiatives, GitHub, Jira, and feedback data (January 2025)
 
 ### Security & Access Control
 
@@ -255,6 +257,16 @@ _Next Review: February 2025_
   - Server action `generatePersonSynopsis`, `listPersonSynopses`
   - UI section `PersonSynopsis` on person detail page
   - Uses tasks by default; optionally includes feedback; integrates Jira and GitHub when linked
+
+### Updates on 2025-01-30
+
+- **AI Synopsis Report** (Completed):
+  - Created new report type `person-ai-synopsis` for AI-generated work summaries
+  - Integrates data from tasks, initiatives, GitHub PRs, Jira tickets, and feedback
+  - Time-period focused analysis with configurable date ranges
+  - Professional markdown output with data source attribution
+  - Proper access control - users can only generate synopses for their own person or as organization admins
+  - Registered in report system and available through report execution API
 
 ### Updates on 2025-01-26
 

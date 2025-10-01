@@ -1,6 +1,23 @@
 import { listAvailableReports, listReportInstances } from '@/lib/actions'
 import { requireAuth } from '@/lib/auth-utils'
 import Link from 'next/link'
+import { BarChart3 } from 'lucide-react'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from '@/components/ui/table'
 
 export default async function ReportsPage() {
   await requireAuth({ requireOrganization: true })
@@ -13,56 +30,95 @@ export default async function ReportsPage() {
   return (
     <div className='p-6 space-y-8'>
       <div>
-        <h1 className='text-2xl font-semibold'>Reports</h1>
+        <div className='flex items-center gap-3 mb-2'>
+          <BarChart3 className='h-8 w-8 text-muted-foreground' />
+          <h1 className='text-2xl font-semibold'>Reports</h1>
+        </div>
         <p className='text-muted-foreground'>
           Run data reports and view recent runs
         </p>
       </div>
 
-      <section className='space-y-3'>
+      <section className='space-y-4'>
         <h2 className='text-xl font-medium'>Available reports</h2>
-        <ul className='space-y-2'>
+        <div className='grid gap-4 md:grid-cols-2'>
           {reports.map(r => (
-            <li
-              key={r.codeId}
-              className='flex items-center justify-between border rounded p-3'
-            >
-              <div>
-                <div className='font-medium'>{r.name}</div>
-                {r.description ? (
-                  <div className='text-sm text-muted-foreground'>
-                    {r.description}
-                  </div>
-                ) : null}
-              </div>
-              <Link className='underline' href={`/reports/${r.codeId}/run`}>
-                Run
-              </Link>
-            </li>
+            <Card key={r.codeId} className='hover:shadow-md transition-shadow'>
+              <CardHeader>
+                <CardTitle className='text-lg'>{r.name}</CardTitle>
+                {r.description && (
+                  <CardDescription>{r.description}</CardDescription>
+                )}
+              </CardHeader>
+              <CardContent>
+                <Button asChild className='w-full'>
+                  <Link href={`/reports/${r.codeId}/run`}>Run Report</Link>
+                </Button>
+              </CardContent>
+            </Card>
           ))}
-        </ul>
+        </div>
       </section>
 
-      <section className='space-y-3'>
+      <section className='space-y-4'>
         <h2 className='text-xl font-medium'>Recent runs</h2>
-        <ul className='space-y-2'>
-          {recent.map(i => (
-            <li
-              key={i.id}
-              className='flex items-center justify-between border rounded p-3'
-            >
-              <div>
-                <div className='font-medium'>{i.reportName}</div>
-                <div className='text-sm text-muted-foreground'>
-                  {new Date(i.createdAt).toLocaleString()} · {i.status}
-                </div>
-              </div>
-              <Link className='underline' href={`/reports/instances/${i.id}`}>
-                View
-              </Link>
-            </li>
-          ))}
-        </ul>
+        {recent.length === 0 ? (
+          <div className='text-center py-8'>
+            <p className='text-muted-foreground'>No recent report runs</p>
+          </div>
+        ) : (
+          <div className='rounded-md border'>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Date Run</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recent.map(i => (
+                  <TableRow
+                    key={i.id}
+                    className='hover:bg-accent/50 cursor-pointer'
+                  >
+                    <TableCell className='font-medium'>
+                      <div className='space-y-1'>
+                        <Link
+                          href={`/reports/instances/${i.id}`}
+                          className='hover:text-primary transition-colors'
+                        >
+                          {i.reportName}
+                        </Link>
+                        {i.identifierText && (
+                          <div className='text-xs text-muted-foreground'>
+                            {i.identifierText}
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className='text-muted-foreground'>
+                      {new Date(i.createdAt).toLocaleString()}
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          i.status === 'completed'
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                            : i.status === 'failed'
+                              ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                              : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                        }`}
+                      >
+                        {i.status}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </section>
     </div>
   )

@@ -15,6 +15,15 @@ export interface ReportExecutionContext {
   }
 }
 
+export interface ReportIdentifierField {
+  fieldName: string
+  displayName: string
+  resolveToName: (
+    _value: string,
+    _ctx: ReportExecutionContext
+  ) => Promise<string>
+}
+
 export interface ReportDefinition<
   InputSchema extends z.ZodTypeAny,
   OutputJson,
@@ -24,6 +33,7 @@ export interface ReportDefinition<
   description?: string
   supportedRenderers: ReportRendererId[]
   inputSchema: InputSchema
+  identifierFields?: ReportIdentifierField[]
   authorize: (
     _ctx: ReportExecutionContext,
     _parsedInput: z.infer<InputSchema>

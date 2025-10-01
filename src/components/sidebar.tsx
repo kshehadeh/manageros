@@ -17,6 +17,7 @@ import {
   Calendar,
   Building,
   Keyboard,
+  BarChart3,
 } from 'lucide-react'
 import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
@@ -48,6 +49,7 @@ const iconMap = {
   Settings,
   Calendar,
   Building,
+  BarChart3,
 }
 
 export default function Sidebar({ navigation = [] }: SidebarProps) {
