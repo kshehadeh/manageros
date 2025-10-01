@@ -18,6 +18,13 @@ import {
   TableRow,
   TableCell,
 } from '@/components/ui/table'
+import { HelpIcon } from '@/components/help-icon'
+
+// Map report codeId to help documentation ID
+const reportHelpMap: Record<string, string> = {
+  'person-overview': 'person-overview-report',
+  'person-ai-synopsis': 'ai-synopsis-report',
+}
 
 export default async function ReportsPage() {
   await requireAuth({ requireOrganization: true })
@@ -33,6 +40,7 @@ export default async function ReportsPage() {
         <div className='flex items-center gap-3 mb-2'>
           <BarChart3 className='h-8 w-8 text-muted-foreground' />
           <h1 className='text-2xl font-semibold'>Reports</h1>
+          <HelpIcon helpId='reports' size='lg' />
         </div>
         <p className='text-muted-foreground'>
           Run data reports and view recent runs
@@ -45,10 +53,21 @@ export default async function ReportsPage() {
           {reports.map(r => (
             <Card key={r.codeId} className='hover:shadow-md transition-shadow'>
               <CardHeader>
-                <CardTitle className='text-lg'>{r.name}</CardTitle>
-                {r.description && (
-                  <CardDescription>{r.description}</CardDescription>
-                )}
+                <div className='flex items-start justify-between'>
+                  <div className='flex-1'>
+                    <CardTitle className='text-lg'>{r.name}</CardTitle>
+                    {r.description && (
+                      <CardDescription>{r.description}</CardDescription>
+                    )}
+                  </div>
+                  {reportHelpMap[r.codeId] && (
+                    <HelpIcon
+                      helpId={reportHelpMap[r.codeId]}
+                      size='md'
+                      className='ml-2 flex-shrink-0'
+                    />
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 <Button asChild className='w-full'>

@@ -10,6 +10,7 @@
 - **User Management** - Role-based access control (ADMIN/USER permissions)
 - **Responsive UI** - Tailwind CSS with dark theme and modern design
 - **Help System** - Centralized contextual help with markdown-rendered modals (January 2025)
+- **Reports Documentation** - Comprehensive help documentation for reports system with individual report guides (January 2025)
 
 ### People Management
 

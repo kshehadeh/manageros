@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-09-29T22:15:56.488Z
+ * Generated on: 2025-10-01T09:59:51.118Z
  */
 
 export interface HelpContent {
@@ -17,6 +17,9 @@ export interface HelpContent {
 }
 
 // Import all help content files
+import { helpContent as reports } from './reports'
+import { helpContent as personOverviewReport } from './person-overview-report'
+import { helpContent as aiSynopsisReport } from './ai-synopsis-report'
 import { helpContent as keyboardShortcuts } from './keyboard-shortcuts'
 import { helpContent as peopleHierarchy } from './people-hierarchy'
 import { helpContent as directReports } from './direct-reports'
@@ -35,6 +38,9 @@ import { helpContent as taskPriorities } from './task-priorities'
 
 // Combine all help content into a single object
 export const helpContent: Record<string, HelpContent> = {
+  reports: reports,
+  'person-overview-report': personOverviewReport,
+  'ai-synopsis-report': aiSynopsisReport,
   'keyboard-shortcuts': keyboardShortcuts,
   'people-hierarchy': peopleHierarchy,
   'direct-reports': directReports,
@@ -79,6 +85,7 @@ export function getAllHelpContent(): HelpContent[] {
 export function getHelpCategories(): string[] {
   return Array.from(
     new Set([
+      'Reports & Analytics',
       'Getting Started',
       'People & Teams',
       'Meetings & Communication',
@@ -101,6 +108,9 @@ export function hasHelpContent(id: string): boolean {
  */
 export function getHelpIds(): string[] {
   return [
+    'reports',
+    'person-overview-report',
+    'ai-synopsis-report',
     'keyboard-shortcuts',
     'people-hierarchy',
     'direct-reports',

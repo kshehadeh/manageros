@@ -59,7 +59,7 @@ export const PersonOverviewReport: ReportDefinition<
   typeof personOverviewInput,
   Output
 > = {
-  codeId: 'person_overview',
+  codeId: 'person-overview',
   name: 'Person Overview',
   description: "Overview of a person's activity between two dates",
   supportedRenderers: ['markdown'],
