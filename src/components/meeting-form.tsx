@@ -58,6 +58,8 @@ export function MeetingForm({
     recurrenceType:
       (initialData?.recurrenceType as MeetingFormData['recurrenceType']) ||
       'none',
+    isPrivate:
+      initialData?.isPrivate !== undefined ? initialData.isPrivate : true,
     teamId: preselectedTeamId || initialData?.teamId || 'none',
     initiativeId:
       preselectedInitiativeId || initialData?.initiativeId || 'none',
@@ -267,6 +269,19 @@ export function MeetingForm({
               )}
             </div>
           )}
+
+          <div className='flex items-center space-x-2'>
+            <Checkbox
+              id='isPrivate'
+              checked={formData.isPrivate}
+              onCheckedChange={checked =>
+                handleInputChange('isPrivate', checked)
+              }
+            />
+            <Label htmlFor='isPrivate'>
+              Private meeting (only visible to participants)
+            </Label>
+          </div>
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>

@@ -88,6 +88,7 @@ export async function createMeeting(formData: MeetingFormData) {
       notes: validatedData.notes,
       isRecurring: validatedData.isRecurring,
       recurrenceType: validatedData.recurrenceType,
+      isPrivate: validatedData.isPrivate,
       organizationId: user.organizationId,
       teamId: validatedData.teamId,
       initiativeId: validatedData.initiativeId,
@@ -209,6 +210,7 @@ export async function updateMeeting(id: string, formData: MeetingUpdateData) {
       notes: validatedData.notes,
       isRecurring: validatedData.isRecurring,
       recurrenceType: validatedData.recurrenceType,
+      isPrivate: validatedData.isPrivate,
       teamId: validatedData.teamId,
       initiativeId: validatedData.initiativeId,
       ownerId: validatedData.ownerId,
@@ -280,9 +282,33 @@ export async function getMeetings() {
     throw new Error('User must belong to an organization to view meetings')
   }
 
+  // Get the current user's person record (may be null if not linked)
+  const currentPerson = await prisma.person.findFirst({
+    where: {
+      user: {
+        id: user.id,
+      },
+    },
+  })
+
   const meetings = await prisma.meeting.findMany({
     where: {
       organizationId: user.organizationId,
+      OR: [
+        { isPrivate: false }, // Public meetings
+        { createdById: user.id }, // Private meetings created by current user
+        ...(currentPerson
+          ? [
+              {
+                participants: {
+                  some: {
+                    personId: currentPerson.id,
+                  },
+                },
+              } as const,
+            ]
+          : []),
+      ],
     },
     include: {
       organization: true,
@@ -324,10 +350,34 @@ export async function getMeeting(id: string) {
     throw new Error('User must belong to an organization to view meetings')
   }
 
+  // Get the current user's person record (may be null if not linked)
+  const currentPerson = await prisma.person.findFirst({
+    where: {
+      user: {
+        id: user.id,
+      },
+    },
+  })
+
   const meeting = await prisma.meeting.findFirst({
     where: {
       id,
       organizationId: user.organizationId,
+      OR: [
+        { isPrivate: false }, // Public meetings
+        { createdById: user.id }, // Private meetings created by current user
+        ...(currentPerson
+          ? [
+              {
+                participants: {
+                  some: {
+                    personId: currentPerson.id,
+                  },
+                },
+              } as const,
+            ]
+          : []),
+      ],
     },
     include: {
       organization: true,

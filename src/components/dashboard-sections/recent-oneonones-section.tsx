@@ -38,25 +38,30 @@ export async function DashboardRecentOneOnOnesSection({
               <div className='font-medium'>
                 {oneOnOne.manager?.user?.id === userId ? (
                   <span>
-                    With <span className='hover:text-blue-400'>{oneOnOne.report.name}</span>
+                    With{' '}
+                    <span className='hover:text-blue-400'>
+                      {oneOnOne.report.name}
+                    </span>
                   </span>
                 ) : (
                   <span>
-                    With <span className='hover:text-blue-400'>{oneOnOne.manager.name}</span>
+                    With{' '}
+                    <span className='hover:text-blue-400'>
+                      {oneOnOne.manager.name}
+                    </span>
                   </span>
                 )}
               </div>
               <div className='text-xs text-neutral-500 mt-1'>
-                {oneOnOne.scheduledAt ? new Date(oneOnOne.scheduledAt).toLocaleDateString() : 'TBD'}
+                {oneOnOne.scheduledAt
+                  ? new Date(oneOnOne.scheduledAt).toLocaleDateString()
+                  : 'TBD'}
               </div>
             </div>
-            <div className='text-xs text-neutral-500'>
-              {oneOnOne.manager?.user?.id === userId ? 'Manager' : 'Report'}
-            </div>
+            <div className='text-xs text-neutral-500'>Participant</div>
           </div>
         </Link>
       ))}
     </ExpandableSection>
   )
 }
-

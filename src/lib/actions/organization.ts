@@ -624,3 +624,117 @@ export async function removeUserFromOrganization(userId: string) {
   revalidatePath('/organization/members')
   revalidatePath('/organization/settings')
 }
+
+// User Settings Actions - Allow users to link themselves to a person
+
+export async function getAvailablePersonsForSelfLinking() {
+  const currentUser = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!currentUser.organizationId) {
+    throw new Error('User must belong to an organization to link to a person')
+  }
+
+  // Get persons in the same organization who aren't linked to a user
+  return await prisma.person.findMany({
+    where: {
+      organizationId: currentUser.organizationId,
+      user: null, // No user linked
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      status: true,
+    },
+    orderBy: { name: 'asc' },
+  })
+}
+
+export async function linkSelfToPerson(personId: string) {
+  const currentUser = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!currentUser.organizationId) {
+    throw new Error('User must belong to an organization to link to a person')
+  }
+
+  // Check if user is already linked to a person
+  if (currentUser.personId) {
+    throw new Error(
+      'You are already linked to a person. Unlink first to link elsewhere.'
+    )
+  }
+
+  // Verify the person belongs to the same organization and isn't already linked
+  const person = await prisma.person.findFirst({
+    where: {
+      id: personId,
+      organizationId: currentUser.organizationId,
+      user: null, // Ensure not already linked
+    },
+  })
+
+  if (!person)
+    throw new Error(
+      'Person not found, access denied, or already linked to another user'
+    )
+
+  // Link the current user to the person
+  await prisma.user.update({
+    where: { id: currentUser.id },
+    data: { personId: personId },
+  })
+
+  revalidatePath('/settings')
+  revalidatePath('/dashboard')
+}
+
+export async function unlinkSelfFromPerson() {
+  const currentUser = await getCurrentUser()
+
+  // Check if user is actually linked to a person
+  if (!currentUser.personId) {
+    throw new Error('You are not currently linked to any person')
+  }
+
+  // Unlink the current user from their person
+  await prisma.user.update({
+    where: { id: currentUser.id },
+    data: { personId: null },
+  })
+
+  revalidatePath('/settings')
+  revalidatePath('/dashboard')
+}
+
+export async function getCurrentUserWithPerson() {
+  const currentUser = await getCurrentUser()
+
+  if (!currentUser.organizationId) {
+    return {
+      user: currentUser,
+      person: null,
+    }
+  }
+
+  // Get the linked person if it exists
+  const person = currentUser.personId
+    ? await prisma.person.findUnique({
+        where: { id: currentUser.personId },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          status: true,
+        },
+      })
+    : null
+
+  return {
+    user: currentUser,
+    person,
+  }
+}

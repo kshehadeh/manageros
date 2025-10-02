@@ -23,8 +23,8 @@ interface Person {
 
 interface OneOnOneData {
   id: string
-  managerId: string
-  reportId: string
+  managerId: string // participant1
+  reportId: string // participant2
   scheduledAt: Date | null
   notes?: string | null
 }
@@ -48,8 +48,8 @@ export function OneOnOneForm({
   // Use utility functions for proper timezone handling
 
   const [formData, setFormData] = useState<OneOnOneFormData>({
-    managerId: existingOneOnOne?.managerId || preFilledManagerId || '',
-    reportId: existingOneOnOne?.reportId || preFilledReportId || '',
+    participant1Id: existingOneOnOne?.managerId || preFilledManagerId || '',
+    participant2Id: existingOneOnOne?.reportId || preFilledReportId || '',
     scheduledAt: existingOneOnOne?.scheduledAt
       ? utcToLocalDateTimeString(existingOneOnOne.scheduledAt)
       : getCurrentLocalDateTimeString(),
@@ -84,8 +84,8 @@ export function OneOnOneForm({
       <div className='card text-center py-8'>
         <h3 className='font-semibold mb-2'>No Meeting Partners Available</h3>
         <p className='text-sm text-muted-foreground mb-4'>
-          You don&apos;t have any direct reports or a manager assigned. Contact
-          your administrator to set up reporting relationships.
+          No participants available for 1:1 meetings. Contact your administrator
+          to add people to your organization.
         </p>
         <Button asChild variant='outline'>
           <Link href='/people'>Manage People</Link>
@@ -105,16 +105,18 @@ export function OneOnOneForm({
         <div className='space-y-4'>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <div>
-              <label className='block text-sm font-medium mb-2'>Host *</label>
+              <label className='block text-sm font-medium mb-2'>
+                Participant 1 *
+              </label>
               <select
-                value={formData.managerId}
+                value={formData.participant1Id}
                 onChange={e =>
-                  setFormData({ ...formData, managerId: e.target.value })
+                  setFormData({ ...formData, participant1Id: e.target.value })
                 }
                 className='input'
                 required
               >
-                <option value=''>Select a host</option>
+                <option value=''>Select participant 1</option>
                 {managerOptions.map(person => (
                   <option key={person.id} value={person.id}>
                     {person.name}
@@ -125,16 +127,18 @@ export function OneOnOneForm({
             </div>
 
             <div>
-              <label className='block text-sm font-medium mb-2'>Guest *</label>
+              <label className='block text-sm font-medium mb-2'>
+                Participant 2 *
+              </label>
               <select
-                value={formData.reportId}
+                value={formData.participant2Id}
                 onChange={e =>
-                  setFormData({ ...formData, reportId: e.target.value })
+                  setFormData({ ...formData, participant2Id: e.target.value })
                 }
                 className='input'
                 required
               >
-                <option value=''>Select a guest</option>
+                <option value=''>Select participant 2</option>
                 {reportOptions.map(person => (
                   <option key={person.id} value={person.id}>
                     {person.name}
@@ -184,8 +188,8 @@ export function OneOnOneForm({
           variant='outline'
           disabled={
             isSubmitting ||
-            !formData.managerId ||
-            !formData.reportId ||
+            !formData.participant1Id ||
+            !formData.participant2Id ||
             !formData.scheduledAt
           }
           className='flex items-center gap-2'

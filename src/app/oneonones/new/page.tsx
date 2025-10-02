@@ -7,8 +7,10 @@ import { prisma } from '@/lib/db'
 
 interface NewOneOnOnePageProps {
   searchParams: Promise<{
-    managerId?: string
-    reportId?: string
+    participant1Id?: string
+    participant2Id?: string
+    managerId?: string // Legacy support
+    reportId?: string // Legacy support
   }>
 }
 
@@ -41,21 +43,33 @@ export default async function NewOneOnOnePage({
     throw new Error('No person record found for current user')
   }
 
-  // Determine the correct pre-fill values based on the relationship
-  let validManagerId: string | undefined
-  let validReportId: string | undefined
+  // Determine the correct pre-fill values based on URL parameters
+  let validParticipant1Id: string | undefined
+  let validParticipant2Id: string | undefined
 
-  if (params.managerId) {
-    // If managerId is provided, check if it's valid
-    if (people.some(p => p.id === params.managerId)) {
-      validManagerId = params.managerId
+  // Handle new participant parameters
+  if (params.participant1Id) {
+    if (people.some(p => p.id === params.participant1Id)) {
+      validParticipant1Id = params.participant1Id
     }
   }
 
-  if (params.reportId) {
-    // If reportId is provided, check if it's valid
+  if (params.participant2Id) {
+    if (people.some(p => p.id === params.participant2Id)) {
+      validParticipant2Id = params.participant2Id
+    }
+  }
+
+  // Legacy support for old managerId/reportId parameters
+  if (!validParticipant1Id && params.managerId) {
+    if (people.some(p => p.id === params.managerId)) {
+      validParticipant1Id = params.managerId
+    }
+  }
+
+  if (!validParticipant2Id && params.reportId) {
     if (people.some(p => p.id === params.reportId)) {
-      validReportId = params.reportId
+      validParticipant2Id = params.reportId
     }
   }
 
@@ -72,8 +86,8 @@ export default async function NewOneOnOnePage({
 
       <OneOnOneForm
         people={people}
-        preFilledManagerId={validManagerId}
-        preFilledReportId={validReportId}
+        preFilledManagerId={validParticipant1Id}
+        preFilledReportId={validParticipant2Id}
       />
     </div>
   )

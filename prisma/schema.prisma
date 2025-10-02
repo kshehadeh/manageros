@@ -433,6 +433,7 @@ model Meeting {
   notes          String?      // Open area for notes
   isRecurring    Boolean      @default(false)
   recurrenceType String?      // daily|weekly|monthly|bi_monthly|semi_annually
+  isPrivate      Boolean      @default(true) // Private meetings are only visible to creator and participants
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
   teamId         String?      // Optional team association
@@ -479,6 +480,7 @@ model MeetingInstance {
   meeting        Meeting      @relation(fields: [meetingId], references: [id], onDelete: Cascade)
   scheduledAt    DateTime     // Specific date/time for this instance
   notes          String?      // Notes for this specific instance
+  isPrivate      Boolean      @default(true) // Inherits privacy from parent meeting
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
   participants   MeetingInstanceParticipant[]

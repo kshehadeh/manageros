@@ -65,7 +65,7 @@ export default async function OneOnOneViewPage({
               </h3>
               <div className='space-y-3'>
                 <div>
-                  <span className='text-sm font-medium'>Manager:</span>
+                  <span className='text-sm font-medium'>Participant 1:</span>
                   <div className='text-sm text-neutral-400'>
                     <Link
                       href={`/people/${oneOnOne.manager.id}`}
@@ -81,7 +81,7 @@ export default async function OneOnOneViewPage({
                 </div>
 
                 <div>
-                  <span className='text-sm font-medium'>Report:</span>
+                  <span className='text-sm font-medium'>Participant 2:</span>
                   <div className='text-sm text-neutral-400'>
                     <Link
                       href={`/people/${oneOnOne.report.id}`}

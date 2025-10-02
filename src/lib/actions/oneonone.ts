@@ -16,35 +16,36 @@ export async function createOneOnOne(formData: OneOnOneFormData) {
   // Validate form data
   const validatedData = oneOnOneSchema.parse(formData)
 
-  // Verify both manager and report belong to the same organization
-  const [manager, report] = await Promise.all([
+  // Verify both participants belong to the same organization
+  const [participant1, participant2] = await Promise.all([
     prisma.person.findFirst({
       where: {
-        id: validatedData.managerId,
+        id: validatedData.participant1Id,
         organizationId: user.organizationId,
       },
     }),
     prisma.person.findFirst({
       where: {
-        id: validatedData.reportId,
+        id: validatedData.participant2Id,
         organizationId: user.organizationId,
       },
     }),
   ])
 
-  if (!manager) {
-    throw new Error('Manager not found or not in your organization')
+  if (!participant1) {
+    throw new Error('Participant 1 not found or not in your organization')
   }
 
-  if (!report) {
-    throw new Error('Report not found or not in your organization')
+  if (!participant2) {
+    throw new Error('Participant 2 not found or not in your organization')
   }
 
   // Create the one-on-one record
+  // Map participants to managerId and reportId for database compatibility
   await prisma.oneOnOne.create({
     data: {
-      managerId: validatedData.managerId,
-      reportId: validatedData.reportId,
+      managerId: validatedData.participant1Id,
+      reportId: validatedData.participant2Id,
       scheduledAt: new Date(validatedData.scheduledAt),
       notes: validatedData.notes,
     },
@@ -55,8 +56,8 @@ export async function createOneOnOne(formData: OneOnOneFormData) {
   })
 
   revalidatePath('/oneonones')
-  revalidatePath(`/people/${report.id}`)
-  revalidatePath(`/people/${manager.id}`)
+  revalidatePath(`/people/${participant1.id}`)
+  revalidatePath(`/people/${participant2.id}`)
 
   // Redirect to the one-on-ones page
   redirect('/oneonones')
@@ -81,8 +82,8 @@ export async function getOneOnOnes() {
   return await prisma.oneOnOne.findMany({
     where: {
       OR: [
-        { managerId: currentPerson?.id || '' },
-        { reportId: currentPerson?.id || '' },
+        { managerId: currentPerson?.id || '' }, // participant1
+        { reportId: currentPerson?.id || '' }, // participant2
       ],
     },
     include: {
@@ -113,7 +114,7 @@ export async function getOneOnOneById(id: string) {
   const oneOnOne = await prisma.oneOnOne.findFirst({
     where: {
       id,
-      OR: [{ managerId: currentPerson.id }, { reportId: currentPerson.id }],
+      OR: [{ managerId: currentPerson.id }, { reportId: currentPerson.id }], // participant1 or participant2
     },
     include: {
       manager: {
@@ -165,7 +166,7 @@ export async function updateOneOnOne(id: string, formData: OneOnOneFormData) {
   const existingOneOnOne = await prisma.oneOnOne.findFirst({
     where: {
       id,
-      OR: [{ managerId: currentPerson.id }, { reportId: currentPerson.id }],
+      OR: [{ managerId: currentPerson.id }, { reportId: currentPerson.id }], // participant1 or participant2
     },
   })
 
@@ -173,36 +174,37 @@ export async function updateOneOnOne(id: string, formData: OneOnOneFormData) {
     throw new Error('One-on-one not found or you do not have access to it')
   }
 
-  // Verify both manager and report belong to the same organization
-  const [manager, report] = await Promise.all([
+  // Verify both participants belong to the same organization
+  const [participant1, participant2] = await Promise.all([
     prisma.person.findFirst({
       where: {
-        id: validatedData.managerId,
+        id: validatedData.participant1Id,
         organizationId: user.organizationId,
       },
     }),
     prisma.person.findFirst({
       where: {
-        id: validatedData.reportId,
+        id: validatedData.participant2Id,
         organizationId: user.organizationId,
       },
     }),
   ])
 
-  if (!manager) {
-    throw new Error('Manager not found or not in your organization')
+  if (!participant1) {
+    throw new Error('Participant 1 not found or not in your organization')
   }
 
-  if (!report) {
-    throw new Error('Report not found or not in your organization')
+  if (!participant2) {
+    throw new Error('Participant 2 not found or not in your organization')
   }
 
   // Update the one-on-one record
+  // Map participants to managerId and reportId for database compatibility
   await prisma.oneOnOne.update({
     where: { id },
     data: {
-      managerId: validatedData.managerId,
-      reportId: validatedData.reportId,
+      managerId: validatedData.participant1Id,
+      reportId: validatedData.participant2Id,
       scheduledAt: new Date(validatedData.scheduledAt),
       notes: validatedData.notes,
     },

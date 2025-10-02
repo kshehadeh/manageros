@@ -120,7 +120,10 @@ export default function Sidebar({ navigation = [] }: SidebarProps) {
       >
         {/* Header */}
         <div className='flex h-16 items-center px-6 border-b'>
-          <IndigoIcon width={40} height={33} color='currentColor' />
+          <div className='flex items-center gap-3'>
+            <IndigoIcon width={40} height={33} color='currentColor' />
+            <h1 className='text-xl font-semibold text-foreground'>ManagerOS</h1>
+          </div>
         </div>
 
         {/* User Info */}

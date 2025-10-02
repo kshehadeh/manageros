@@ -27,7 +27,8 @@ export default async function OneOnOnesPage() {
               <h1 className='page-title'>1:1s</h1>
             </div>
             <p className='page-section-subtitle'>
-              Your private 1:1 meetings (only visible to participants)
+              Your 1:1 meetings with anyone in your organization (only visible
+              to participants)
             </p>
           </div>
           <Button asChild variant='outline'>
@@ -48,7 +49,7 @@ export default async function OneOnOnesPage() {
                     >
                       {i.manager.name}
                     </Link>
-                    <span className='text-muted-foreground'>→</span>
+                    <span className='text-muted-foreground'>↔</span>
                     <Link
                       href={`/people/${i.report.id}`}
                       className='font-medium link-hover'

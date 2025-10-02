@@ -77,14 +77,8 @@ export function PersonActionsDropdown({
     }
   }, [openDropdown])
 
-  // Determine if current user can create a 1:1 with this person
-  const canCreateOneOnOne =
-    // Current user is viewing their own profile and has reports
-    (currentPerson?.id === person.id && (person.reports?.length ?? 0) > 0) ||
-    // Current user is viewing their manager's profile
-    currentPerson?.managerId === person.id ||
-    // Current user is viewing one of their reports' profiles
-    person.managerId === currentPerson?.id
+  // Anyone in the organization can create a 1:1 with anyone else
+  const canCreateOneOnOne = currentPerson && currentPerson.id !== person.id
 
   // Determine if current user can create feedback campaigns for this person
   // Only managers (direct or indirect) can create feedback campaigns
@@ -180,21 +174,7 @@ export function PersonActionsDropdown({
               {/* Add a 1:1 - Show if current user can create a meeting with this person */}
               {canCreateOneOnOne && (
                 <Link
-                  href={`/oneonones/new?managerId=${
-                    // If viewing own profile, current user is the manager
-                    currentPerson?.id === person.id
-                      ? currentPerson.id
-                      : person.id
-                  }&reportId=${
-                    // If viewing own profile, no report pre-filled (user will select)
-                    // If viewing manager's profile, current user is the report
-                    // If viewing report's profile, the report is the report
-                    currentPerson?.id === person.id
-                      ? ''
-                      : currentPerson?.managerId === person.id
-                        ? currentPerson?.id
-                        : person.id
-                  }`}
+                  href={`/oneonones/new?participant1Id=${currentPerson?.id || ''}&participant2Id=${person.id}`}
                   className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
                   onClick={closeDropdown}
                 >

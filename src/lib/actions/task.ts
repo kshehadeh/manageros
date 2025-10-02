@@ -12,10 +12,9 @@ import { TASK_LIST_SELECT, type TaskListItem } from '@/lib/task-list-select'
 /**
  * Get the organization-scoped where clause for task access control.
  * Tasks are accessible if they are:
- * 1. Created by the current user within their organization
- * 2. Assigned to the current user (if user has a linked person)
- * 3. Associated with initiatives in the same organization
- * 4. Associated with objectives of initiatives in the same organization
+ * 1. Created by the current user within their organization, OR
+ * 2. Assigned to the current user AND associated with an initiative in the same organization, OR
+ * 3. Associated with objectives of initiatives in the same organization
  */
 function getTaskAccessWhereClause(
   organizationId: string,
@@ -36,10 +35,11 @@ function getTaskAccessWhereClause(
     { objective: { initiative: { organizationId } } },
   ]
 
-  // Add condition for tasks assigned to the current user if they have a linked person
+  // Add condition for tasks assigned to the current user AND associated with initiatives
   if (personId) {
     conditions.push({
       assigneeId: personId,
+      initiative: { organizationId },
     })
   }
 
@@ -773,14 +773,27 @@ export async function getTasksAssignedToCurrentUser(): Promise<TaskListItem[]> {
   const tasks = await prisma.task.findMany({
     where: {
       OR: [
-        // Tasks assigned to the current user
+        // Tasks assigned to the current user (respecting organization boundaries)
         {
           assigneeId: user.personId,
-        },
-        // Tasks created by the current user that are not assigned to anyone
-        {
-          createdById: user.id,
-          assigneeId: null,
+          OR: [
+            // Tasks created by someone in the user's organization
+            {
+              createdBy: {
+                organizationId: user.organizationId,
+              },
+            },
+            // Tasks associated with initiatives in the user's organization
+            {
+              initiative: { organizationId: user.organizationId },
+            },
+            // Tasks associated with objectives of initiatives in the user's organization
+            {
+              objective: {
+                initiative: { organizationId: user.organizationId },
+              },
+            },
+          ],
         },
       ],
       status: {

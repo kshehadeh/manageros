@@ -14,6 +14,11 @@ export {
   getOrganizationMembers,
   updateUserRole,
   removeUserFromOrganization,
+  // User Settings Actions
+  getAvailablePersonsForSelfLinking,
+  linkSelfToPerson,
+  unlinkSelfFromPerson,
+  getCurrentUserWithPerson,
 } from './organization'
 
 // Person Actions

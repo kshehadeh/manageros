@@ -58,6 +58,7 @@ export async function createMeetingInstance(formData: MeetingInstanceFormData) {
       meetingId: validatedData.meetingId,
       scheduledAt,
       notes: validatedData.notes,
+      isPrivate: meeting.isPrivate, // Inherit privacy from parent meeting
       organizationId: user.organizationId,
       participants: {
         create: validatedData.participants.map(participant => ({
@@ -213,10 +214,38 @@ export async function getMeetingInstance(id: string) {
     )
   }
 
+  // Get the current user's person record (may be null if not linked)
+  const currentPerson = await prisma.person.findFirst({
+    where: {
+      user: {
+        id: user.id,
+      },
+    },
+  })
+
   const meetingInstance = await prisma.meetingInstance.findFirst({
     where: {
       id,
       organizationId: user.organizationId,
+      OR: [
+        { isPrivate: false }, // Public meeting instances
+        {
+          meeting: {
+            createdById: user.id,
+          },
+        }, // Private meeting instances from meetings created by current user
+        ...(currentPerson
+          ? [
+              {
+                participants: {
+                  some: {
+                    personId: currentPerson.id,
+                  },
+                },
+              } as const,
+            ]
+          : []),
+      ],
     },
     include: {
       meeting: {
@@ -252,11 +281,35 @@ export async function getMeetingInstances(meetingId: string) {
     )
   }
 
+  // Get the current user's person record (may be null if not linked)
+  const currentPerson = await prisma.person.findFirst({
+    where: {
+      user: {
+        id: user.id,
+      },
+    },
+  })
+
   // Check if meeting exists and belongs to user's organization
   const meeting = await prisma.meeting.findFirst({
     where: {
       id: meetingId,
       organizationId: user.organizationId,
+      OR: [
+        { isPrivate: false }, // Public meetings
+        { createdById: user.id }, // Private meetings created by current user
+        ...(currentPerson
+          ? [
+              {
+                participants: {
+                  some: {
+                    personId: currentPerson.id,
+                  },
+                },
+              } as const,
+            ]
+          : []),
+      ],
     },
   })
 

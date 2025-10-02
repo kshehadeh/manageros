@@ -107,12 +107,17 @@ export const teamSchema = z.object({
 
 export type TeamFormData = z.infer<typeof teamSchema>
 
-export const oneOnOneSchema = z.object({
-  managerId: z.string().min(1, 'Manager is required'),
-  reportId: z.string().min(1, 'Report is required'),
-  scheduledAt: z.string().min(1, 'Date is required'),
-  notes: z.string().optional(),
-})
+export const oneOnOneSchema = z
+  .object({
+    participant1Id: z.string().min(1, 'Participant 1 is required'),
+    participant2Id: z.string().min(1, 'Participant 2 is required'),
+    scheduledAt: z.string().min(1, 'Date is required'),
+    notes: z.string().optional(),
+  })
+  .refine(data => data.participant1Id !== data.participant2Id, {
+    message: 'Both participants must be different people',
+    path: ['participant2Id'],
+  })
 
 export type OneOnOneFormData = z.infer<typeof oneOnOneSchema>
 
@@ -256,6 +261,7 @@ export const meetingSchema = z
     recurrenceType: z
       .enum(['daily', 'weekly', 'monthly', 'bi_monthly', 'semi_annually'])
       .optional(),
+    isPrivate: z.boolean().default(true), // Default to private for user privacy
     teamId: z.string().optional(),
     initiativeId: z.string().optional(),
     ownerId: z.string().optional(),
@@ -310,6 +316,7 @@ export const meetingUpdateSchema = z
     recurrenceType: z
       .enum(['daily', 'weekly', 'monthly', 'bi_monthly', 'semi_annually'])
       .optional(),
+    isPrivate: z.boolean().optional(),
     teamId: z.string().optional(),
     initiativeId: z.string().optional(),
     ownerId: z.string().optional(),

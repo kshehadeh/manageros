@@ -610,7 +610,7 @@ export default async function PersonDetailPage({
                     {personWithRelations.oneOnOnes.length > 0 && (
                       <div>
                         <div className='text-sm font-medium mb-2'>
-                          With Manager ({personWithRelations.oneOnOnes.length})
+                          1:1 Meetings ({personWithRelations.oneOnOnes.length})
                         </div>
                         {personWithRelations.oneOnOnes
                           .slice(0, 2)
