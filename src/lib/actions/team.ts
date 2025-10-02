@@ -9,6 +9,7 @@ import type {
   TeamWithHierarchy,
   TeamForSelection,
   TeamWithRelations,
+  TeamWithCounts,
 } from '@/types/team'
 
 export async function getTeams() {
@@ -28,10 +29,10 @@ export async function getTeams() {
 }
 
 /**
- * Gets all teams with their relations for data table display
+ * Gets all teams with parent info and relation counts for data table display
  * Returns a flat list of all teams (not hierarchical)
  */
-export async function getAllTeamsWithRelations(): Promise<TeamWithRelations[]> {
+export async function getAllTeamsWithRelations(): Promise<TeamWithCounts[]> {
   try {
     const user = await getCurrentUser()
     if (!user.organizationId) {
@@ -40,10 +41,19 @@ export async function getAllTeamsWithRelations(): Promise<TeamWithRelations[]> {
     return await prisma.team.findMany({
       where: { organizationId: user.organizationId },
       include: {
-        people: true,
-        initiatives: true,
-        parent: true,
-        children: true,
+        parent: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            people: true,
+            initiatives: true,
+            children: true,
+          },
+        },
       },
       orderBy: { name: 'asc' },
     })

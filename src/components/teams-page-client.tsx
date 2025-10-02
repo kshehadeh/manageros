@@ -3,14 +3,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import { TeamsTable } from '@/components/teams-table'
 import { TeamsFilterBar } from '@/components/teams-filter-bar'
-import { TeamWithRelations } from '@/types/team'
+import { TeamWithCounts } from '@/types/team'
 
 interface TeamsPageClientProps {
-  teams: TeamWithRelations[]
+  teams: TeamWithCounts[]
 }
 
 export function TeamsPageClient({ teams }: TeamsPageClientProps) {
-  const [filteredTeams, setFilteredTeams] = useState<TeamWithRelations[]>(teams)
+  const [filteredTeams, setFilteredTeams] = useState<TeamWithCounts[]>(teams)
 
   // Update filtered teams when teams prop changes
   useEffect(() => {
@@ -18,7 +18,7 @@ export function TeamsPageClient({ teams }: TeamsPageClientProps) {
   }, [teams])
 
   const handleFilteredTeamsChange = useCallback(
-    (newFilteredTeams: TeamWithRelations[]) => {
+    (newFilteredTeams: TeamWithCounts[]) => {
       setFilteredTeams(newFilteredTeams)
     },
     []

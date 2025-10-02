@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { deleteTeam } from '@/lib/actions'
 import { toast } from 'sonner'
-import { TeamWithRelations } from '@/types/team'
+import { TeamWithCounts } from '@/types/team'
 
 interface SortState {
   column: string | null
@@ -40,7 +40,7 @@ interface SortState {
 }
 
 interface TeamsTableProps {
-  teams: TeamWithRelations[]
+  teams: TeamWithCounts[]
   onTeamUpdate?: () => void
 }
 
@@ -102,16 +102,16 @@ export function TeamsTable({ teams, onTeamUpdate }: TeamsTableProps) {
             bValue = b.parent?.name?.toLowerCase() || ''
             break
           case 'members':
-            aValue = a.people.length
-            bValue = b.people.length
+            aValue = a._count.people
+            bValue = b._count.people
             break
           case 'initiatives':
-            aValue = a.initiatives.length
-            bValue = b.initiatives.length
+            aValue = a._count.initiatives
+            bValue = b._count.initiatives
             break
           case 'children':
-            aValue = a.children?.length || 0
-            bValue = b.children?.length || 0
+            aValue = a._count.children
+            bValue = b._count.children
             break
           default:
             return 0
@@ -243,19 +243,19 @@ export function TeamsTable({ teams, onTeamUpdate }: TeamsTableProps) {
                 <TableCell className='text-center text-muted-foreground'>
                   <div className='flex items-center justify-center gap-1'>
                     <Users className='h-3 w-3' />
-                    {team.people.length}
+                    {team._count.people}
                   </div>
                 </TableCell>
                 <TableCell className='text-center text-muted-foreground'>
                   <div className='flex items-center justify-center gap-1'>
                     <Target className='h-3 w-3' />
-                    {team.initiatives.length}
+                    {team._count.initiatives}
                   </div>
                 </TableCell>
                 <TableCell className='text-center text-muted-foreground'>
                   <div className='flex items-center justify-center gap-1'>
                     <Building2 className='h-3 w-3' />
-                    {team.children?.length || 0}
+                    {team._count.children}
                   </div>
                 </TableCell>
                 <TableCell onClick={e => e.stopPropagation()}>
