@@ -3,22 +3,16 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { TaskTable } from '@/components/task-table'
 import { TasksFilterBar } from '@/components/tasks-filter-bar'
-import { Task, Person, Initiative, Objective, User } from '@prisma/client'
+import type { TaskListItem } from '@/lib/task-list-select'
+import type { Person, Initiative } from '@prisma/client'
 import {
   ACTIVE_STATUSES,
   COMPLETED_STATUSES,
   TaskStatus,
 } from '@/lib/task-status'
 
-type TaskWithRelations = Task & {
-  assignee: Person | null
-  initiative: Initiative | null
-  objective: Objective | null
-  createdBy: User | null
-}
-
 interface SplitTasksPageClientProps {
-  tasks: TaskWithRelations[]
+  tasks: TaskListItem[]
   people: Person[]
   initiatives: Initiative[]
 }
@@ -28,7 +22,7 @@ export function SplitTasksPageClient({
   people,
   initiatives,
 }: SplitTasksPageClientProps) {
-  const [filteredTasks, setFilteredTasks] = useState<TaskWithRelations[]>(tasks)
+  const [filteredTasks, setFilteredTasks] = useState<TaskListItem[]>(tasks)
 
   // Update filtered tasks when tasks prop changes
   useEffect(() => {
@@ -36,7 +30,7 @@ export function SplitTasksPageClient({
   }, [tasks])
 
   const handleFilteredTasksChange = useCallback(
-    (newFilteredTasks: TaskWithRelations[]) => {
+    (newFilteredTasks: TaskListItem[]) => {
       setFilteredTasks(newFilteredTasks)
     },
     []

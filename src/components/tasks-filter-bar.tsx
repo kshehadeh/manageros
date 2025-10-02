@@ -11,23 +11,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Task, Person, Initiative, Objective, User } from '@prisma/client'
+import type { TaskListItem } from '@/lib/task-list-select'
+import type { Person, Initiative } from '@prisma/client'
 import { taskStatusUtils, ALL_TASK_STATUSES } from '@/lib/task-status'
 import { taskPriorityUtils, ALL_TASK_PRIORITIES } from '@/lib/task-priority'
 import { useUserSettings } from '@/lib/hooks/use-user-settings'
 
-type TaskWithRelations = Task & {
-  assignee: Person | null
-  initiative: Initiative | null
-  objective: Objective | null
-  createdBy: User | null
-}
-
 interface TasksFilterBarProps {
-  tasks: TaskWithRelations[]
+  tasks: TaskListItem[]
   people: Person[]
   initiatives: Initiative[]
-  onFilteredTasksChange: (_filteredTasks: TaskWithRelations[]) => void
+  onFilteredTasksChange: (_filteredTasks: TaskListItem[]) => void
 }
 
 export function TasksFilterBar({
@@ -61,7 +55,7 @@ export function TasksFilterBar({
       setStartDate(savedFilters.startDate)
       setEndDate(savedFilters.endDate)
     }
-  }, [isLoaded, getSetting])
+  }, [isLoaded]) // Remove getSetting from dependencies to prevent infinite loop
 
   // Helper function to save filter values to user settings
   const saveFilters = (filters: {
@@ -105,7 +99,11 @@ export function TasksFilterBar({
 
   // Apply filters whenever filter values change
   useEffect(() => {
-    let filtered = [...tasks]
+    if (!isLoaded) {
+      return
+    }
+
+    let filtered = tasks
 
     // Text filter - search in title and description
     if (textFilter.trim()) {
@@ -244,6 +242,7 @@ export function TasksFilterBar({
     dateRangeFilter,
     startDate,
     endDate,
+    isLoaded,
   ])
 
   const clearFilters = () => {

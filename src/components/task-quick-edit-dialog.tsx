@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { updateTaskQuickEdit } from '@/lib/actions/task'
-import { Person } from '@prisma/client'
+import type { Person } from '@prisma/client'
 import { type TaskStatus } from '@/lib/task-status'
 import { taskPriorityUtils } from '@/lib/task-priority'
 import { AlertCircle, ExternalLink } from 'lucide-react'

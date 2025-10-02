@@ -3,17 +3,10 @@ import { Badge } from '@/components/ui/badge'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { taskStatusUtils, type TaskStatus } from '@/lib/task-status'
 import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
-import { Task, Person, Initiative, Objective, User } from '@prisma/client'
-
-type TaskWithRelations = Task & {
-  assignee: Person | null
-  initiative: Initiative | null
-  objective: Objective | null
-  createdBy: User | null
-}
+import type { TaskListItem } from '@/lib/task-list-select'
 
 interface TaskCardProps {
-  task: TaskWithRelations
+  task: TaskListItem
   statusVariant: 'neutral' | 'warning' | 'error' | 'success'
   priorityVariant: 'neutral' | 'warning' | 'error' | 'success'
 }

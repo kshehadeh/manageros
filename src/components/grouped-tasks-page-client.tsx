@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { TaskTable } from '@/components/task-table'
 import { TasksFilterBar } from '@/components/tasks-filter-bar'
-import { Task, Person, Initiative, Objective, User } from '@prisma/client'
+import type { TaskListItem } from '@/lib/task-list-select'
+import type { Person, Initiative } from '@prisma/client'
 import { TaskStatus, taskStatusUtils } from '@/lib/task-status'
 import {
   Select,
@@ -16,17 +17,26 @@ import { Badge } from '@/components/ui/badge'
 import { Group, User as UserIcon, Target } from 'lucide-react'
 import { useUserSettings } from '@/lib/hooks/use-user-settings'
 
-type TaskWithRelations = Task & {
-  assignee: Person | null
-  initiative: Initiative | null
-  objective: Objective | null
-  createdBy: User | null
-}
+const STATUS_SORT_ORDER: TaskStatus[] = [
+  'todo',
+  'doing',
+  'blocked',
+  'done',
+  'dropped',
+]
+
+const STATUS_ORDER_RANK = STATUS_SORT_ORDER.reduce<Record<string, number>>(
+  (acc, status, index) => {
+    acc[status] = index
+    return acc
+  },
+  {}
+)
 
 type GroupingOption = 'status' | 'initiative' | 'assignee'
 
 interface GroupedTasksPageClientProps {
-  tasks: TaskWithRelations[]
+  tasks: TaskListItem[]
   people: Person[]
   initiatives: Initiative[]
 }
@@ -34,7 +44,7 @@ interface GroupedTasksPageClientProps {
 interface TaskGroup {
   key: string
   label: string
-  tasks: TaskWithRelations[]
+  tasks: TaskListItem[]
   count: number
 }
 
@@ -44,7 +54,7 @@ export function GroupedTasksPageClient({
   initiatives,
 }: GroupedTasksPageClientProps) {
   const { getSetting, updateSetting, isLoaded } = useUserSettings()
-  const [filteredTasks, setFilteredTasks] = useState<TaskWithRelations[]>(tasks)
+  const [filteredTasks, setFilteredTasks] = useState<TaskListItem[]>(tasks)
   const [groupingOption, setGroupingOption] = useState<GroupingOption>('status')
 
   // Load grouping option from user settings
@@ -53,7 +63,7 @@ export function GroupedTasksPageClient({
       const savedGrouping = getSetting('taskGrouping')
       setGroupingOption(savedGrouping)
     }
-  }, [isLoaded, getSetting])
+  }, [isLoaded]) // Remove getSetting from dependencies to prevent infinite loop
 
   // Update filtered tasks when tasks prop changes
   useEffect(() => {
@@ -61,7 +71,7 @@ export function GroupedTasksPageClient({
   }, [tasks])
 
   const handleFilteredTasksChange = useCallback(
-    (newFilteredTasks: TaskWithRelations[]) => {
+    (newFilteredTasks: TaskListItem[]) => {
       setFilteredTasks(newFilteredTasks)
     },
     []
@@ -74,7 +84,7 @@ export function GroupedTasksPageClient({
     switch (groupingOption) {
       case 'status':
         // Group by task status
-        const statusGroups = new Map<string, TaskWithRelations[]>()
+        const statusGroups = new Map<string, TaskListItem[]>()
 
         filteredTasks.forEach(task => {
           const status = task.status as TaskStatus
@@ -85,14 +95,7 @@ export function GroupedTasksPageClient({
         })
 
         // Create groups in a specific order
-        const statusOrder: TaskStatus[] = [
-          'todo',
-          'doing',
-          'blocked',
-          'done',
-          'dropped',
-        ]
-        statusOrder.forEach(status => {
+        STATUS_SORT_ORDER.forEach(status => {
           const tasks = statusGroups.get(status) || []
           if (tasks.length > 0) {
             groups.push({
@@ -120,7 +123,7 @@ export function GroupedTasksPageClient({
 
       case 'initiative':
         // Group by initiative
-        const initiativeGroups = new Map<string, TaskWithRelations[]>()
+        const initiativeGroups = new Map<string, TaskListItem[]>()
 
         filteredTasks.forEach(task => {
           const key = task.initiative?.id || 'no-initiative'
@@ -138,15 +141,12 @@ export function GroupedTasksPageClient({
             label: initiative?.title || 'No Initiative',
             tasks: tasks.sort((a, b) => {
               // Sort by status priority, then due date, then priority
-              const statusOrder = [
-                'todo',
-                'doing',
-                'blocked',
-                'done',
-                'dropped',
-              ]
-              const aStatusIndex = statusOrder.indexOf(a.status as TaskStatus)
-              const bStatusIndex = statusOrder.indexOf(b.status as TaskStatus)
+              const aStatusIndex =
+                STATUS_ORDER_RANK[a.status as TaskStatus] ??
+                STATUS_SORT_ORDER.length
+              const bStatusIndex =
+                STATUS_ORDER_RANK[b.status as TaskStatus] ??
+                STATUS_SORT_ORDER.length
 
               if (aStatusIndex !== bStatusIndex) {
                 return aStatusIndex - bStatusIndex
@@ -179,7 +179,7 @@ export function GroupedTasksPageClient({
 
       case 'assignee':
         // Group by assignee
-        const assigneeGroups = new Map<string, TaskWithRelations[]>()
+        const assigneeGroups = new Map<string, TaskListItem[]>()
 
         filteredTasks.forEach(task => {
           const key = task.assignee?.id || 'unassigned'
@@ -197,15 +197,12 @@ export function GroupedTasksPageClient({
             label: person?.name || 'Unassigned',
             tasks: tasks.sort((a, b) => {
               // Sort by status priority, then due date, then priority
-              const statusOrder = [
-                'todo',
-                'doing',
-                'blocked',
-                'done',
-                'dropped',
-              ]
-              const aStatusIndex = statusOrder.indexOf(a.status as TaskStatus)
-              const bStatusIndex = statusOrder.indexOf(b.status as TaskStatus)
+              const aStatusIndex =
+                STATUS_ORDER_RANK[a.status as TaskStatus] ??
+                STATUS_SORT_ORDER.length
+              const bStatusIndex =
+                STATUS_ORDER_RANK[b.status as TaskStatus] ??
+                STATUS_SORT_ORDER.length
 
               if (aStatusIndex !== bStatusIndex) {
                 return aStatusIndex - bStatusIndex

@@ -14,6 +14,8 @@ import { PersonStatusBadge } from '@/components/person-status-badge'
 import { PersonFeedbackCampaigns } from '@/components/person-feedback-campaigns'
 import { PersonSynopsis } from '@/components/person-synopsis'
 import { TaskTable } from '@/components/task-table'
+import { TASK_LIST_SELECT } from '@/lib/task-list-select'
+import type { TaskListItem } from '@/lib/task-list-select'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
@@ -40,12 +42,10 @@ import {
   Person,
   Team,
   User,
-  Task,
   InitiativeOwner,
   OneOnOne,
   CheckIn,
   Initiative,
-  Objective,
   Feedback,
   FeedbackCampaign,
 } from '@prisma/client'
@@ -55,12 +55,7 @@ type PersonWithRelations = Person & {
   manager: Person | null
   user: User | null
   reports: (Person & { team: Team | null })[]
-  tasks: (Task & {
-    assignee: Person | null
-    initiative: Initiative | null
-    objective: Objective | null
-    createdBy: User | null
-  })[]
+  tasks: TaskListItem[]
   initiativeOwners: (InitiativeOwner & {
     initiative: Initiative & {
       team: Team | null
@@ -159,12 +154,7 @@ export default async function PersonDetailPage({
         orderBy: { name: 'asc' },
       },
       tasks: {
-        include: {
-          assignee: true,
-          initiative: true,
-          objective: true,
-          createdBy: true,
-        },
+        select: TASK_LIST_SELECT,
         where: {
           status: {
             notIn: [TASK_STATUS.DONE, TASK_STATUS.DROPPED],

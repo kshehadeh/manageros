@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { type TaskStatus } from '@/lib/task-status'
 import { taskPriorityUtils, DEFAULT_TASK_PRIORITY } from '@/lib/task-priority'
+import { TASK_LIST_SELECT, type TaskListItem } from '@/lib/task-list-select'
 
 /**
  * Get the organization-scoped where clause for task access control.
@@ -266,7 +267,7 @@ export async function deleteTask(taskId: string) {
   revalidatePath('/tasks')
 }
 
-export async function getTasks() {
+export async function getTasks(): Promise<TaskListItem[]> {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
@@ -280,12 +281,7 @@ export async function getTasks() {
       user.id,
       user.personId || undefined
     ),
-    include: {
-      assignee: true,
-      initiative: true,
-      objective: true,
-      createdBy: true,
-    },
+    select: TASK_LIST_SELECT,
     orderBy: { updatedAt: 'desc' },
   })
 
@@ -761,7 +757,7 @@ export async function updateTaskQuickEdit(
   return task
 }
 
-export async function getTasksAssignedToCurrentUser() {
+export async function getTasksAssignedToCurrentUser(): Promise<TaskListItem[]> {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
@@ -791,12 +787,7 @@ export async function getTasksAssignedToCurrentUser() {
         notIn: ['done', 'dropped'], // Only show active tasks
       },
     },
-    include: {
-      assignee: true,
-      initiative: true,
-      objective: true,
-      createdBy: true,
-    },
+    select: TASK_LIST_SELECT,
     orderBy: [
       { priority: 'asc' }, // Lower number = higher priority
       { dueDate: 'asc' }, // Earlier dates first

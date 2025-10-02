@@ -1,15 +1,9 @@
 import { TaskTable } from '@/components/task-table'
-import { Task, Person, User, Initiative, Objective } from '@prisma/client'
-
-type TaskWithRelations = Task & {
-  assignee: Person | null
-  createdBy: User | null
-  objective: Objective | null
-  initiative: Initiative | null
-}
+import type { TaskListItem } from '@/lib/task-list-select'
+import type { Person } from '@prisma/client'
 
 interface AssignedTasksProps {
-  assignedTasks: TaskWithRelations[]
+  assignedTasks: TaskListItem[]
   people: Person[]
 }
 

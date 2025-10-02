@@ -1,14 +1,8 @@
 import { InitiativeQuickTaskForm } from '@/components/initiative-quick-task-form'
 import { TaskTable } from '@/components/task-table'
-import { Task, Person, Initiative, Objective, User } from '@prisma/client'
+import type { TaskListItem } from '@/lib/task-list-select'
+import type { Person } from '@prisma/client'
 import { ListTodo } from 'lucide-react'
-
-type TaskWithRelations = Task & {
-  assignee: Person | null
-  initiative: Initiative | null
-  objective: Objective | null
-  createdBy: User | null
-}
 
 interface InitiativeTasksProps {
   initiativeId: string
@@ -18,7 +12,7 @@ interface InitiativeTasksProps {
     keyResult: string | null
     sortIndex: number
   }>
-  allTasks: TaskWithRelations[]
+  allTasks: TaskListItem[]
   people: Person[]
 }
 

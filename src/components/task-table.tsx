@@ -64,7 +64,8 @@ import {
   ALL_TASK_PRIORITIES,
 } from '@/lib/task-priority'
 import { toast } from 'sonner'
-import { Task, Person, Initiative, Objective, User } from '@prisma/client'
+import type { Person, Initiative } from '@prisma/client'
+import type { TaskListItem } from '@/lib/task-list-select'
 import { TaskQuickEditDialog } from '@/components/task-quick-edit-dialog'
 
 interface FilterState {
@@ -78,15 +79,8 @@ interface FilterState {
   endDate: string
 }
 
-type TaskWithRelations = Task & {
-  assignee: Person | null
-  initiative: Initiative | null
-  objective: Objective | null
-  createdBy: User | null
-}
-
 interface TaskTableProps {
-  tasks: TaskWithRelations[]
+  tasks: TaskListItem[]
   people: Person[]
   initiatives?: Initiative[]
   showInitiative?: boolean
@@ -141,7 +135,7 @@ export function TaskTable({
       optimisticUpdate: {
         type: string
         taskId: string
-        data: Partial<TaskWithRelations>
+        data: Partial<TaskListItem>
       }
     ) => {
       return state.map(task =>
@@ -207,7 +201,11 @@ export function TaskTable({
 
   // Filter and sort tasks based on current filter and sort state
   const filteredTasks = useMemo(() => {
-    const filtered = optimisticTasks.filter(task => {
+    if (hideFilters) {
+      return optimisticTasks
+    }
+
+    return optimisticTasks.filter(task => {
       // Keyword filter (searches title and description)
       if (filters.keyword) {
         const keyword = filters.keyword.toLowerCase()
@@ -221,8 +219,8 @@ export function TaskTable({
       if (filters.assigneeId && filters.assigneeId !== 'all') {
         if (filters.assigneeId === 'unassigned') {
           if (task.assigneeId) return false
-        } else {
-          if (task.assigneeId !== filters.assigneeId) return false
+        } else if (task.assigneeId !== filters.assigneeId) {
+          return false
         }
       }
 
@@ -230,8 +228,8 @@ export function TaskTable({
       if (filters.initiativeId && filters.initiativeId !== 'all') {
         if (filters.initiativeId === 'no-initiative') {
           if (task.initiativeId) return false
-        } else {
-          if (task.initiativeId !== filters.initiativeId) return false
+        } else if (task.initiativeId !== filters.initiativeId) {
+          return false
         }
       }
 
@@ -259,7 +257,7 @@ export function TaskTable({
         const now = new Date()
 
         switch (filters.dateRange) {
-          case 'today':
+          case 'today': {
             const today = new Date(
               now.getFullYear(),
               now.getMonth(),
@@ -268,23 +266,27 @@ export function TaskTable({
             const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000)
             if (taskDate < today || taskDate >= tomorrow) return false
             break
-          case 'this-week':
+          }
+          case 'this-week': {
             const startOfWeek = new Date(now)
             startOfWeek.setDate(now.getDate() - now.getDay())
             startOfWeek.setHours(0, 0, 0, 0)
             if (taskDate < startOfWeek) return false
             break
-          case 'this-month':
+          }
+          case 'this-month': {
             const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
             if (taskDate < startOfMonth) return false
             break
-          case 'last-30-days':
+          }
+          case 'last-30-days': {
             const thirtyDaysAgo = new Date(
               now.getTime() - 30 * 24 * 60 * 60 * 1000
             )
             if (taskDate < thirtyDaysAgo) return false
             break
-          case 'custom':
+          }
+          case 'custom': {
             if (filters.startDate) {
               const startDate = new Date(filters.startDate)
               startDate.setHours(0, 0, 0, 0)
@@ -296,75 +298,69 @@ export function TaskTable({
               if (taskDate > endDate) return false
             }
             break
+          }
         }
       }
 
       return true
     })
+  }, [optimisticTasks, hideFilters, filters])
 
-    // Sort the filtered tasks
-    if (sorting.column) {
-      return [...filtered].sort((a, b) => {
-        let aValue: string | number
-        let bValue: string | number
-
-        switch (sorting.column) {
-          case 'title':
-            aValue = a.title.toLowerCase()
-            bValue = b.title.toLowerCase()
-            break
-          case 'assignee':
-            aValue = a.assignee?.name?.toLowerCase() || ''
-            bValue = b.assignee?.name?.toLowerCase() || ''
-            break
-          case 'status':
-            aValue = a.status
-            bValue = b.status
-            break
-          case 'priority':
-            aValue = a.priority
-            bValue = b.priority
-            break
-          case 'dueDate':
-            aValue = a.dueDate
-              ? new Date(a.dueDate).getTime()
-              : Number.MAX_SAFE_INTEGER
-            bValue = b.dueDate
-              ? new Date(b.dueDate).getTime()
-              : Number.MAX_SAFE_INTEGER
-            break
-          case 'createdAt':
-            aValue = new Date(a.createdAt).getTime()
-            bValue = new Date(b.createdAt).getTime()
-            break
-          case 'initiative':
-            aValue = a.initiative?.title?.toLowerCase() || ''
-            bValue = b.initiative?.title?.toLowerCase() || ''
-            break
-          case 'dueDate':
-            aValue = a.dueDate
-              ? new Date(a.dueDate).getTime()
-              : Number.MAX_SAFE_INTEGER
-            bValue = b.dueDate
-              ? new Date(b.dueDate).getTime()
-              : Number.MAX_SAFE_INTEGER
-            break
-          default:
-            return 0
-        }
-
-        if (aValue < bValue) {
-          return sorting.direction === 'asc' ? -1 : 1
-        }
-        if (aValue > bValue) {
-          return sorting.direction === 'asc' ? 1 : -1
-        }
-        return 0
-      })
+  const visibleTasks = useMemo(() => {
+    if (!sorting.column) {
+      return filteredTasks
     }
 
-    return filtered
-  }, [optimisticTasks, filters, sorting])
+    return [...filteredTasks].sort((a, b) => {
+      let aValue: string | number
+      let bValue: string | number
+
+      switch (sorting.column) {
+        case 'title':
+          aValue = a.title.toLowerCase()
+          bValue = b.title.toLowerCase()
+          break
+        case 'assignee':
+          aValue = a.assignee?.name?.toLowerCase() || ''
+          bValue = b.assignee?.name?.toLowerCase() || ''
+          break
+        case 'status':
+          aValue = a.status
+          bValue = b.status
+          break
+        case 'priority':
+          aValue = a.priority
+          bValue = b.priority
+          break
+        case 'dueDate':
+          aValue = a.dueDate
+            ? new Date(a.dueDate).getTime()
+            : Number.MAX_SAFE_INTEGER
+          bValue = b.dueDate
+            ? new Date(b.dueDate).getTime()
+            : Number.MAX_SAFE_INTEGER
+          break
+        case 'createdAt':
+          aValue = new Date(a.createdAt).getTime()
+          bValue = new Date(b.createdAt).getTime()
+          break
+        case 'initiative':
+          aValue = a.initiative?.title?.toLowerCase() || ''
+          bValue = b.initiative?.title?.toLowerCase() || ''
+          break
+        default:
+          return 0
+      }
+
+      if (aValue < bValue) {
+        return sorting.direction === 'asc' ? -1 : 1
+      }
+      if (aValue > bValue) {
+        return sorting.direction === 'asc' ? 1 : -1
+      }
+      return 0
+    })
+  }, [filteredTasks, sorting])
 
   // Handle clicking outside context menu to close it
   useEffect(() => {
@@ -461,7 +457,7 @@ export function TaskTable({
     if (!editState?.field) return
 
     // Prepare optimistic update data
-    const optimisticData: Partial<TaskWithRelations> = {}
+    const optimisticData: Partial<TaskListItem> = {}
     switch (editState.field) {
       case 'title':
         optimisticData.title = editState.value as string
@@ -854,7 +850,7 @@ export function TaskTable({
             </TableRow>
           </TableHeader>
           <TableBody className='md:[&_tr:last-child]:border-0'>
-            {filteredTasks.map(task => {
+            {visibleTasks.map(task => {
               const isUpdating = updatingTasks.has(task.id)
               const isCompleted = task.status === TASK_STATUS.DONE
               const isEditing = editing[task.id]
