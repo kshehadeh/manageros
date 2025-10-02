@@ -7,7 +7,7 @@ import { Menu, X, Command as CommandIcon } from 'lucide-react'
 import { GettingStartedButton } from '@/components/getting-started-button'
 import { useMobileMenu } from '@/components/mobile-menu-provider'
 import { useCommandPalette } from '@/components/command-palette/provider'
-import { NotificationBell } from '@/components/notification-bell'
+import { NotificationBell } from '@/components/notifications/notification-bell'
 
 export default function TopBar() {
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useMobileMenu()

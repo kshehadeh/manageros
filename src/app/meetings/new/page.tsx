@@ -2,7 +2,7 @@ import { getTeams, getInitiatives, getPeople } from '@/lib/actions'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { MeetingForm } from '@/components/meeting-form'
+import { MeetingForm } from '@/components/meetings/meeting-form'
 
 export default async function NewMeetingPage() {
   const session = await getServerSession(authOptions)

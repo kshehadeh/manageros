@@ -1,7 +1,7 @@
 import { getInitiatives } from '@/lib/actions'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { GroupedInitiativesPageClient } from '@/components/grouped-initiatives-page-client'
+import { GroupedInitiativesPageClient } from '@/components/initiatives/grouped-initiatives-page-client'
 import { requireAuth } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
 import { Rocket } from 'lucide-react'

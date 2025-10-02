@@ -1,5 +1,5 @@
 import { getDirectReports } from '@/lib/actions'
-import { PersonListItemCard } from '@/components/person-list-item-card'
+import { PersonListItemCard } from '@/components/people/person-list-item-card'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { getServerSession } from 'next-auth'

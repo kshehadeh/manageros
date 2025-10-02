@@ -1,8 +1,8 @@
 import { getTasks, getInitiatives } from '@/lib/actions'
 import { prisma } from '@/lib/db'
 import { requireAuth } from '@/lib/auth-utils'
-import { GroupedTasksPageClient } from '@/components/grouped-tasks-page-client'
-import { CreateTaskButton } from '@/components/create-task-button'
+import { GroupedTasksPageClient } from '@/components/tasks/grouped-tasks-page-client'
+import { CreateTaskButton } from '@/components/tasks/create-task-button'
 import { ListTodo } from 'lucide-react'
 
 export default async function TasksPage() {

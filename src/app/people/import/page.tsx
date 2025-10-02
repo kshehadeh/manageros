@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { PersonImportForm } from '@/components/person-import-form'
+import { PersonImportForm } from '@/components/people/person-import-form'
 import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function ImportPeoplePage() {

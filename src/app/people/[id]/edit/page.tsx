@@ -1,4 +1,4 @@
-import { PersonForm } from '@/components/person-form'
+import { PersonForm } from '@/components/people/person-form'
 import {
   getTeams,
   getPeople,
@@ -9,7 +9,7 @@ import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { PersonDetailClient } from '@/components/person-detail-client'
+import { PersonDetailClient } from '@/components/people/person-detail-client'
 
 interface EditPersonPageProps {
   params: Promise<{

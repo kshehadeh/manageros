@@ -2,8 +2,8 @@ import { prisma } from '@/lib/db'
 import { notFound, redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { FeedbackCampaignList } from '@/components/feedback-campaign-list'
-import { FeedbackCampaignsBreadcrumbClient } from '@/components/feedback-campaigns-breadcrumb-client'
+import { FeedbackCampaignList } from '@/components/feedback/feedback-campaign-list'
+import { FeedbackCampaignsBreadcrumbClient } from '@/components/feedback/feedback-campaigns-breadcrumb-client'
 import { Button } from '@/components/ui/button'
 import {
   Card,

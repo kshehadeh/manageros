@@ -2,7 +2,7 @@ import { prisma } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { TaskForm } from '@/components/task-form'
+import { TaskForm } from '@/components/tasks/task-form'
 
 export default async function NewTaskPage() {
   const session = await getServerSession(authOptions)

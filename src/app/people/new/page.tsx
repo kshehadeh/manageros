@@ -1,4 +1,4 @@
-import { PersonForm } from '@/components/person-form'
+import { PersonForm } from '@/components/people/person-form'
 import { getTeams, getPeople, getJobRolesForSelection } from '@/lib/actions'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'

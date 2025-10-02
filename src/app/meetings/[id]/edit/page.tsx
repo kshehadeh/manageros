@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
-import { MeetingForm } from '@/components/meeting-form'
+import { MeetingForm } from '@/components/meetings/meeting-form'
 import { utcToLocalDateTimeString } from '@/lib/timezone-utils'
 
 export default async function EditMeetingPage({
