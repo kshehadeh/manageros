@@ -55,7 +55,7 @@ export function TasksFilterBar({
       setStartDate(savedFilters.startDate)
       setEndDate(savedFilters.endDate)
     }
-  }, [isLoaded]) // Remove getSetting from dependencies to prevent infinite loop
+  }, [isLoaded, getSetting])
 
   // Helper function to save filter values to user settings
   const saveFilters = (filters: {
