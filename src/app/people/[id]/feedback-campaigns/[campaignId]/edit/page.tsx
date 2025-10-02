@@ -3,7 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { FeedbackCampaignForm } from '@/components/feedback/feedback-campaign-form'
-import { EditFeedbackCampaignBreadcrumbClient } from '@/components/edit-feedback-campaign-breadcrumb-client'
+import { EditFeedbackCampaignBreadcrumbClient } from '@/components/feedback/edit-feedback-campaign-breadcrumb-client'
 
 interface EditFeedbackCampaignPageProps {
   params: Promise<{

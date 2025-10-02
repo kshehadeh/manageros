@@ -10,7 +10,7 @@ import { TeamActionsDropdown } from '@/components/teams/team-actions-dropdown'
 import { Users2, User, Rocket, Building2 } from 'lucide-react'
 import { PeopleTable } from '@/components/people/people-table'
 import { InitiativesTable } from '@/components/initiatives/initiatives-table'
-import { TeamChildTeamsTable } from '../../../components/team-child-teams-table'
+import { TeamChildTeamsTable } from '@/components/teams/team-child-teams-table'
 
 interface TeamDetailPageProps {
   params: Promise<{

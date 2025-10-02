@@ -1,4 +1,4 @@
-import { ActiveFeedbackCampaigns } from '@/components/active-feedback-campaigns'
+import { ActiveFeedbackCampaigns } from '@/components/feedback/active-feedback-campaigns'
 import { getActiveFeedbackCampaignsForUser } from '@/lib/actions'
 
 export async function DashboardFeedbackCampaignsSection() {
@@ -10,7 +10,11 @@ export async function DashboardFeedbackCampaignsSection() {
     <ActiveFeedbackCampaigns
       campaigns={campaigns.map(campaign => ({
         ...campaign,
-        status: campaign.status as 'draft' | 'active' | 'completed' | 'cancelled',
+        status: campaign.status as
+          | 'draft'
+          | 'active'
+          | 'completed'
+          | 'cancelled',
         template: campaign.template
           ? {
               id: campaign.template.id,
@@ -26,4 +30,3 @@ export async function DashboardFeedbackCampaignsSection() {
     />
   )
 }
-

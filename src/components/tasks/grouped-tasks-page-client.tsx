@@ -63,7 +63,7 @@ export function GroupedTasksPageClient({
       const savedGrouping = getSetting('taskGrouping')
       setGroupingOption(savedGrouping)
     }
-  }, [isLoaded]) // Remove getSetting from dependencies to prevent infinite loop
+  }, [isLoaded, getSetting])
 
   // Update filtered tasks when tasks prop changes
   useEffect(() => {

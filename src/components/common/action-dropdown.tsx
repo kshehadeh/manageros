@@ -18,19 +18,19 @@ interface ActionDropdownRenderProps {
 
 interface ActionDropdownTriggerProps {
   open: boolean
-  toggle: (event: ReactMouseEvent) => void
+  toggle: (_event: ReactMouseEvent) => void
   close: () => void
 }
 
 interface ActionDropdownProps {
-  children: (helpers: ActionDropdownRenderProps) => ReactNode
+  children: (_helpers: ActionDropdownRenderProps) => ReactNode
   size?: 'sm' | 'default'
   align?: 'left' | 'right'
   className?: string
   menuClassName?: string
   triggerClassName?: string
-  trigger?: (props: ActionDropdownTriggerProps) => ReactNode
-  onOpenChange?: (open: boolean) => void
+  trigger?: (_props: ActionDropdownTriggerProps) => ReactNode
+  onOpenChange?: (_open: boolean) => void
 }
 
 export function ActionDropdown({
@@ -99,7 +99,7 @@ export function ActionDropdown({
           className={cn(
             'absolute top-full mt-2 bg-popover text-popover-foreground border rounded-md shadow-lg z-10 min-w-48',
             align === 'right' ? 'right-0' : 'left-0',
-            menuClassName,
+            menuClassName
           )}
           onClick={event => event.stopPropagation()}
         >
