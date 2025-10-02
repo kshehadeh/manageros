@@ -1,7 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Bell, X } from 'lucide-react'
+import {
+  Bell,
+  X,
+  CheckCircle,
+  AlertTriangle,
+  XCircle,
+  Info,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -38,13 +45,13 @@ export function NotificationBell({ className }: NotificationBellProps) {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'success':
-        return '✅'
+        return <CheckCircle className='h-4 w-4 text-green-500' />
       case 'warning':
-        return '⚠️'
+        return <AlertTriangle className='h-4 w-4 text-yellow-500' />
       case 'error':
-        return '❌'
+        return <XCircle className='h-4 w-4 text-red-500' />
       default:
-        return 'ℹ️'
+        return <Info className='h-4 w-4 text-blue-500' />
     }
   }
 
@@ -116,9 +123,7 @@ export function NotificationBell({ className }: NotificationBellProps) {
                       <div key={notification.id}>
                         <div className='p-3 hover:bg-muted/50 transition-colors'>
                           <div className='flex items-start gap-3'>
-                            <span className='text-lg'>
-                              {getNotificationIcon(notification.type)}
-                            </span>
+                            <div>{getNotificationIcon(notification.type)}</div>
                             <div className='flex-1 min-w-0'>
                               <div className='flex items-start justify-between gap-2'>
                                 <div className='flex-1 min-w-0'>

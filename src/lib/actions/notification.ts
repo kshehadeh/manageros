@@ -20,6 +20,12 @@ export interface NotificationWithResponse {
   message: string
   type: string
   createdAt: Date
+  userId?: string | null
+  targetUser?: {
+    id: string
+    name: string
+    email: string
+  } | null
   response?: {
     id: string
     status: string
@@ -142,6 +148,13 @@ export async function getUserNotifications(limit: number = 10) {
           userId: user.id,
         },
       },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
     },
     orderBy: {
       createdAt: 'desc',
@@ -155,6 +168,14 @@ export async function getUserNotifications(limit: number = 10) {
     message: notification.message,
     type: notification.type,
     createdAt: notification.createdAt,
+    userId: notification.userId,
+    targetUser: notification.user
+      ? {
+          id: notification.user.id,
+          name: notification.user.name,
+          email: notification.user.email,
+        }
+      : null,
     response: notification.responses[0] || null,
   }))
 }
@@ -362,7 +383,8 @@ export async function getUnreadNotificationCount() {
  */
 export async function getAllUserNotifications(
   page: number = 1,
-  limit: number = 20
+  limit: number = 20,
+  showAllOrganizationNotifications: boolean = false
 ) {
   const user = await getCurrentUser()
   if (!user) {
@@ -375,23 +397,39 @@ export async function getAllUserNotifications(
 
   const skip = (page - 1) * limit
 
+  const whereClause =
+    showAllOrganizationNotifications && user.role === 'ADMIN'
+      ? {
+          // Admin view: all notifications in the organization
+          organizationId: user.organizationId,
+        }
+      : {
+          // Regular user view: only their notifications and organization-wide ones
+          OR: [
+            // User-specific notifications
+            { userId: user.id },
+            // Organization-wide notifications
+            {
+              organizationId: user.organizationId,
+              userId: null,
+            },
+          ],
+        }
+
   const [notifications, totalCount] = await Promise.all([
     prisma.notification.findMany({
-      where: {
-        OR: [
-          // User-specific notifications
-          { userId: user.id },
-          // Organization-wide notifications
-          {
-            organizationId: user.organizationId,
-            userId: null,
-          },
-        ],
-      },
+      where: whereClause,
       include: {
         responses: {
           where: {
             userId: user.id,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
           },
         },
       },
@@ -402,17 +440,7 @@ export async function getAllUserNotifications(
       take: limit,
     }),
     prisma.notification.count({
-      where: {
-        OR: [
-          // User-specific notifications
-          { userId: user.id },
-          // Organization-wide notifications
-          {
-            organizationId: user.organizationId,
-            userId: null,
-          },
-        ],
-      },
+      where: whereClause,
     }),
   ])
 
@@ -423,6 +451,16 @@ export async function getAllUserNotifications(
       message: notification.message,
       type: notification.type,
       createdAt: notification.createdAt,
+      userId: notification.userId,
+      targetUser: notification.user
+        ? {
+            id: notification.user.id,
+            name: notification.user.name,
+            email: notification.user.email,
+          }
+        : notification.userId === null
+          ? { id: 'organization', name: 'Organization', email: '' }
+          : null,
       response: notification.responses[0] || null,
     })),
     totalCount,

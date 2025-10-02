@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/db'
 import { DashboardUpcomingMeetings } from '@/components/dashboard-upcoming-meetings'
 import { ExpandableSection } from '@/components/expandable-section'
+import { type UpcomingMeeting } from '@/components/shared-meetings-table'
 
 interface DashboardUpcomingMeetingsSectionProps {
   userId: string
@@ -123,6 +124,7 @@ export async function DashboardUpcomingMeetingsSection({
       team: true,
       initiative: true,
       owner: true,
+      createdBy: true,
       participants: {
         include: {
           person: true,
@@ -136,7 +138,7 @@ export async function DashboardUpcomingMeetingsSection({
 
   // Combine and sort all upcoming meetings
   // For recurring meetings, we only show instances, not the main meeting
-  const allUpcomingMeetings = [
+  const allUpcomingMeetings: UpcomingMeeting[] = [
     ...upcomingMeetings.map(meeting => ({
       ...meeting,
       type: 'meeting' as const,
@@ -157,7 +159,7 @@ export async function DashboardUpcomingMeetingsSection({
 
   return (
     <ExpandableSection title='Upcoming Meetings' viewAllHref='/meetings'>
-      <DashboardUpcomingMeetings meetings={allUpcomingMeetings as any} />
+      <DashboardUpcomingMeetings meetings={allUpcomingMeetings} />
     </ExpandableSection>
   )
 }

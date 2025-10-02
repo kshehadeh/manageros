@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-10-01T09:59:51.118Z
+ * Generated on: 2025-10-02T11:09:33.101Z
  */
 
 export interface HelpContent {
@@ -25,8 +25,8 @@ import { helpContent as peopleHierarchy } from './people-hierarchy'
 import { helpContent as directReports } from './direct-reports'
 import { helpContent as people } from './people'
 import { helpContent as oneOnOnes } from './one-on-ones'
-import { helpContent as meetingsAndInstances } from './meetings-and-instances'
 import { helpContent as meetings } from './meetings'
+import { helpContent as meetingsAndInstances } from './meetings-and-instances'
 import { helpContent as meetingInstances } from './meeting-instances'
 import { helpContent as gettingStarted } from './getting-started'
 import { helpContent as githubIntegration } from './github-integration'
@@ -48,8 +48,8 @@ export const helpContent: Record<string, HelpContent> = {
   'direct-reports': directReports,
   people: people,
   'one-on-ones': oneOnOnes,
-  'meetings-and-instances': meetingsAndInstances,
   meetings: meetings,
+  'meetings-and-instances': meetingsAndInstances,
   'meeting-instances': meetingInstances,
   'getting-started': gettingStarted,
   'github-integration': githubIntegration,
@@ -120,8 +120,8 @@ export function getHelpIds(): string[] {
     'direct-reports',
     'people',
     'one-on-ones',
-    'meetings-and-instances',
     'meetings',
+    'meetings-and-instances',
     'meeting-instances',
     'getting-started',
     'github-integration',

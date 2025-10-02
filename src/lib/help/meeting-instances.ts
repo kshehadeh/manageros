@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-10-01T00:00:00.000Z
+ * Generated on: 2025-10-02T11:09:33.098Z
  */
 
 export interface HelpContent {
@@ -52,6 +52,6 @@ Meeting instances are the individual occurrences of a recurring meeting series. 
 
 - If an instance is missing, verify the series date range and recurrence
 - If participants don’t appear, confirm they were added to the series or instance
+
 `,
 }
-

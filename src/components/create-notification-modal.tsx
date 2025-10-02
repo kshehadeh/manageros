@@ -83,7 +83,7 @@ export function CreateNotificationModal({
       <DialogTrigger asChild>
         <Button variant='outline' className='flex items-center gap-2'>
           <Plus className='h-4 w-4' />
-          Create Notification
+          Add
         </Button>
       </DialogTrigger>
 
@@ -167,7 +167,7 @@ export function CreateNotificationModal({
               Cancel
             </Button>
             <Button type='submit' disabled={isLoading}>
-              {isLoading ? 'Creating...' : 'Create Notification'}
+              {isLoading ? 'Creating...' : 'Create'}
             </Button>
           </div>
         </form>

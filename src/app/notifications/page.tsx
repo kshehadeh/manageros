@@ -1,28 +1,48 @@
-import { Suspense } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+'use client'
+
+import { Suspense, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { NotificationsList } from '@/components/notifications-list'
+import { NotificationsHeader } from '@/components/notifications-header'
+import { useSession } from 'next-auth/react'
 
 export default function NotificationsPage() {
+  const [showAllNotifications, setShowAllNotifications] = useState(false)
+  const { data: session } = useSession()
+  const isAdmin = session?.user?.role === 'ADMIN'
+
+  const handleRefresh = () => {
+    window.location.reload()
+  }
+
+  const handleToggleView = (showAll: boolean) => {
+    setShowAllNotifications(showAll)
+  }
+
   return (
-    <div className='container mx-auto py-6'>
-      <div className='mb-6'>
-        <h1 className='text-2xl font-bold'>Notifications</h1>
-        <p className='text-muted-foreground'>
-          View and manage all your notifications
-        </p>
+    <div className='page-container'>
+      <div className='page-header flex justify-between items-start'>
+        <div>
+          <h1 className='page-title'>Notifications</h1>
+          <p className='page-subtitle'>
+            View and manage all your notifications
+          </p>
+        </div>
+        <NotificationsHeader
+          onRefresh={handleRefresh}
+          isAdmin={isAdmin}
+          showAllNotifications={showAllNotifications}
+          onToggleView={handleToggleView}
+        />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All Notifications</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Suspense fallback={<NotificationsSkeleton />}>
-            <NotificationsList />
-          </Suspense>
-        </CardContent>
-      </Card>
+      <div className='page-section'>
+        <Suspense fallback={<NotificationsSkeleton />}>
+          <NotificationsList
+            showAllOrganizationNotifications={showAllNotifications}
+          />
+        </Suspense>
+      </div>
     </div>
   )
 }

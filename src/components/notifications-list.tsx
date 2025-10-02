@@ -10,9 +10,21 @@ import {
 } from '@/lib/actions/notification'
 import { NotificationWithResponse } from '@/lib/actions/notification'
 import { formatDistanceToNow } from 'date-fns'
-import { ChevronRight, RefreshCw } from 'lucide-react'
+import {
+  ChevronRight,
+  CheckCircle,
+  AlertTriangle,
+  XCircle,
+  Info,
+} from 'lucide-react'
 
-export function NotificationsList() {
+interface NotificationsListProps {
+  showAllOrganizationNotifications?: boolean
+}
+
+export function NotificationsList({
+  showAllOrganizationNotifications = false,
+}: NotificationsListProps) {
   const [notifications, setNotifications] = useState<
     NotificationWithResponse[]
   >([])
@@ -21,45 +33,42 @@ export function NotificationsList() {
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
 
-  const [isRefreshing, setIsRefreshing] = useState(false)
+  const loadNotifications = useCallback(
+    async (page: number = 1, append: boolean = false) => {
+      try {
+        if (append) {
+          setIsLoadingMore(true)
+        } else {
+          setIsLoading(true)
+        }
 
-  const loadNotifications = async (
-    page: number = 1,
-    append: boolean = false
-  ) => {
-    try {
-      if (append) {
-        setIsLoadingMore(true)
-      } else {
-        setIsLoading(true)
+        const result = await getAllUserNotifications(
+          page,
+          20,
+          showAllOrganizationNotifications
+        )
+
+        if (append) {
+          setNotifications(prev => [...prev, ...result.notifications])
+        } else {
+          setNotifications(result.notifications)
+        }
+
+        setTotalPages(result.totalPages)
+        setCurrentPage(page)
+      } catch (error) {
+        console.error('Failed to load notifications:', error)
+      } finally {
+        setIsLoading(false)
+        setIsLoadingMore(false)
       }
-
-      const result = await getAllUserNotifications(page, 20)
-
-      if (append) {
-        setNotifications(prev => [...prev, ...result.notifications])
-      } else {
-        setNotifications(result.notifications)
-      }
-
-      setTotalPages(result.totalPages)
-      setCurrentPage(page)
-    } catch (error) {
-      console.error('Failed to load notifications:', error)
-    } finally {
-      setIsLoading(false)
-      setIsLoadingMore(false)
-    }
-  }
+    },
+    [showAllOrganizationNotifications]
+  )
 
   const refreshNotifications = useCallback(async () => {
-    setIsRefreshing(true)
-    try {
-      await loadNotifications(1, false)
-    } finally {
-      setIsRefreshing(false)
-    }
-  }, [])
+    await loadNotifications(1, false)
+  }, [loadNotifications])
 
   useEffect(() => {
     loadNotifications(1)
@@ -70,7 +79,11 @@ export function NotificationsList() {
     }, 60000)
 
     return () => clearInterval(interval)
-  }, [refreshNotifications])
+  }, [
+    refreshNotifications,
+    showAllOrganizationNotifications,
+    loadNotifications,
+  ])
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
@@ -110,13 +123,13 @@ export function NotificationsList() {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'success':
-        return '✅'
+        return <CheckCircle className='h-5 w-5 text-green-500' />
       case 'warning':
-        return '⚠️'
+        return <AlertTriangle className='h-5 w-5 text-yellow-500' />
       case 'error':
-        return '❌'
+        return <XCircle className='h-5 w-5 text-red-500' />
       default:
-        return 'ℹ️'
+        return <Info className='h-5 w-5 text-blue-500' />
     }
   }
 
@@ -167,29 +180,10 @@ export function NotificationsList() {
 
   return (
     <div className='space-y-4'>
-      {/* Refresh Button */}
-      <div className='flex justify-between items-center'>
-        <h3 className='text-lg font-semibold'>All Notifications</h3>
-        <Button
-          variant='outline'
-          size='sm'
-          onClick={refreshNotifications}
-          disabled={isRefreshing}
-          className='flex items-center gap-2'
-        >
-          <RefreshCw
-            className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
-          />
-          {isRefreshing ? 'Refreshing...' : 'Refresh'}
-        </Button>
-      </div>
-
       {notifications.map((notification, index) => (
         <div key={notification.id}>
           <div className='flex items-start gap-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors'>
-            <span className='text-lg mt-1'>
-              {getNotificationIcon(notification.type)}
-            </span>
+            <div className='mt-1'>{getNotificationIcon(notification.type)}</div>
 
             <div className='flex-1 min-w-0'>
               <div className='flex items-start justify-between gap-4'>
@@ -205,11 +199,19 @@ export function NotificationsList() {
                     {notification.message}
                   </p>
 
-                  <p className='text-xs text-muted-foreground'>
-                    {formatDistanceToNow(notification.createdAt, {
-                      addSuffix: true,
-                    })}
-                  </p>
+                  <div className='flex items-center gap-2 text-xs text-muted-foreground'>
+                    <span>
+                      {formatDistanceToNow(notification.createdAt, {
+                        addSuffix: true,
+                      })}
+                    </span>
+                    {notification.targetUser && (
+                      <>
+                        <span>•</span>
+                        <span>To: {notification.targetUser.name}</span>
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 <div className='flex gap-2'>

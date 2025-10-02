@@ -41,13 +41,17 @@ The Job Role Management feature provides structured job role definitions within 
 
 ## User Interface
 
-### Organization Settings Page
+### Job Role Management Page
 
-Located at `/organization/settings`, the Job Role Management section includes three main components:
+Located at `/organization/job-roles`, the dedicated Job Role Management page includes three main components:
 
 1. **Job Level Management**: Create and manage organizational job levels
 2. **Job Domain Management**: Create and manage functional domains
 3. **Job Role Management**: Create and manage specific job roles with level and domain assignments
+
+### Organization Settings Page
+
+The organization settings page at `/organization/settings` includes a navigation card that links to the dedicated Job Role Management page for easy access.
 
 ### Person Forms
 
@@ -172,9 +176,10 @@ if (user.role !== 'ADMIN') {
 ### Initial Setup (Admin)
 
 1. Navigate to Organization Settings
-2. Create job levels (e.g., Junior, Senior, Staff, Principal)
-3. Create job domains (e.g., Engineering, Product, Design)
-4. Create job roles combining levels and domains
+2. Click on "Manage Job Roles" to access the dedicated Job Role Management page
+3. Create job levels (e.g., Junior, Senior, Staff, Principal)
+4. Create job domains (e.g., Engineering, Product, Design)
+5. Create job roles combining levels and domains
 
 ### Assigning Roles
 
@@ -230,12 +235,13 @@ All job role management operations use server actions for security:
 
 ### Organization Settings
 
-- Centralized management interface in organization settings
+- Navigation card in organization settings linking to dedicated Job Role Management page
 - Administrative controls for level, domain, and role management
 
 ### Navigation
 
-- Accessible through Organization Settings → Job Role Management section
+- Accessible through Organization Settings → "Manage Job Roles" card
+- Dedicated page at `/organization/job-roles` for comprehensive job role management
 - Integrated with existing person creation and editing workflows
 
 ## Migration Notes

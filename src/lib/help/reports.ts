@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-10-01T09:59:51.111Z
+ * Generated on: 2025-10-02T11:09:33.095Z
  */
 
 export interface HelpContent {
@@ -44,6 +44,7 @@ Reports are structured data analysis tools that combine information from various
 ### Person Overview Report
 
 A comprehensive analysis of an individual's work activity, including:
+
 - Task completion and progress
 - Initiative involvement
 - GitHub pull request activity
@@ -55,6 +56,7 @@ A comprehensive analysis of an individual's work activity, including:
 ### Person AI Synopsis Report
 
 AI-powered professional summaries of work activity, featuring:
+
 - Intelligent content generation
 - Multi-source data analysis
 - Professional manager-ready output
@@ -124,6 +126,7 @@ Reports can integrate data from multiple sources:
 #### Report-Specific Parameters
 
 Each report type has specific parameters tailored to its purpose:
+
 - **Person Overview**: Task filtering, initiative scope, feedback inclusion
 - **AI Synopsis**: Content focus, summary length, data source weighting
 
