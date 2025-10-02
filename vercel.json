@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/notifications?job=birthday-notification",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/notifications?job=activity-monitoring",
+      "schedule": "0 10 * * 1"
+    }
+  ]
+}

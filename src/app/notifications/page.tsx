@@ -40,6 +40,7 @@ export default function NotificationsPage() {
         <Suspense fallback={<NotificationsSkeleton />}>
           <NotificationsList
             showAllOrganizationNotifications={showAllNotifications}
+            isAdmin={isAdmin}
           />
         </Suspense>
       </div>
@@ -49,17 +50,27 @@ export default function NotificationsPage() {
 
 function NotificationsSkeleton() {
   return (
-    <div className='space-y-4'>
+    <div className='rounded-md border'>
+      <div className='border-b p-4'>
+        <div className='grid grid-cols-7 gap-4'>
+          <Skeleton className='h-4 w-12' />
+          <Skeleton className='h-4 w-16' />
+          <Skeleton className='h-4 w-20' />
+          <Skeleton className='h-4 w-16' />
+          <Skeleton className='h-4 w-12' />
+          <Skeleton className='h-4 w-16' />
+          <Skeleton className='h-4 w-20' />
+        </div>
+      </div>
       {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className='flex items-start gap-3 p-4 border rounded-lg'>
-          <Skeleton className='h-6 w-6 rounded-full' />
-          <div className='flex-1 space-y-2'>
+        <div key={i} className='border-b p-4 last:border-b-0'>
+          <div className='grid grid-cols-7 gap-4 items-center'>
+            <Skeleton className='h-5 w-5 rounded-full' />
             <Skeleton className='h-4 w-3/4' />
             <Skeleton className='h-3 w-full' />
-            <Skeleton className='h-3 w-1/2' />
-          </div>
-          <div className='flex gap-2'>
-            <Skeleton className='h-8 w-20' />
+            <Skeleton className='h-6 w-16' />
+            <Skeleton className='h-3 w-20' />
+            <Skeleton className='h-3 w-24' />
             <Skeleton className='h-8 w-20' />
           </div>
         </div>

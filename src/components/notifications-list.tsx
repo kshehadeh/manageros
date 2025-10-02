@@ -3,12 +3,20 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import {
   getAllUserNotifications,
   markNotificationAsRead,
 } from '@/lib/actions/notification'
 import { NotificationWithResponse } from '@/lib/actions/notification'
+import { NotificationActionsDropdown } from '@/components/notification-actions-dropdown'
 import { formatDistanceToNow } from 'date-fns'
 import {
   ChevronRight,
@@ -20,10 +28,12 @@ import {
 
 interface NotificationsListProps {
   showAllOrganizationNotifications?: boolean
+  isAdmin?: boolean
 }
 
 export function NotificationsList({
   showAllOrganizationNotifications = false,
+  isAdmin = false,
 }: NotificationsListProps) {
   const [notifications, setNotifications] = useState<
     NotificationWithResponse[]
@@ -148,24 +158,47 @@ export function NotificationsList({
 
   if (isLoading) {
     return (
-      <div className='space-y-4'>
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div
-            key={i}
-            className='flex items-start gap-3 p-4 border rounded-lg animate-pulse'
-          >
-            <div className='h-6 w-6 rounded-full bg-muted' />
-            <div className='flex-1 space-y-2'>
-              <div className='h-4 w-3/4 bg-muted rounded' />
-              <div className='h-3 w-full bg-muted rounded' />
-              <div className='h-3 w-1/2 bg-muted rounded' />
-            </div>
-            <div className='flex gap-2'>
-              <div className='h-8 w-20 bg-muted rounded' />
-              <div className='h-8 w-20 bg-muted rounded' />
-            </div>
-          </div>
-        ))}
+      <div className='rounded-md border'>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Type</TableHead>
+              <TableHead>Title</TableHead>
+              <TableHead>Message</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Target</TableHead>
+              <TableHead className='w-[100px]'>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <TableRow key={i} className='animate-pulse'>
+                <TableCell>
+                  <div className='h-5 w-5 rounded-full bg-muted' />
+                </TableCell>
+                <TableCell>
+                  <div className='h-4 w-3/4 bg-muted rounded' />
+                </TableCell>
+                <TableCell>
+                  <div className='h-3 w-full bg-muted rounded' />
+                </TableCell>
+                <TableCell>
+                  <div className='h-6 w-16 bg-muted rounded' />
+                </TableCell>
+                <TableCell>
+                  <div className='h-3 w-20 bg-muted rounded' />
+                </TableCell>
+                <TableCell>
+                  <div className='h-3 w-24 bg-muted rounded' />
+                </TableCell>
+                <TableCell>
+                  <div className='h-8 w-20 bg-muted rounded' />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     )
   }
@@ -180,59 +213,70 @@ export function NotificationsList({
 
   return (
     <div className='space-y-4'>
-      {notifications.map((notification, index) => (
-        <div key={notification.id}>
-          <div className='flex items-start gap-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors'>
-            <div className='mt-1'>{getNotificationIcon(notification.type)}</div>
-
-            <div className='flex-1 min-w-0'>
-              <div className='flex items-start justify-between gap-4'>
-                <div className='flex-1 min-w-0'>
-                  <div className='flex items-center gap-2 mb-2'>
-                    <h3 className='font-medium text-foreground'>
-                      {notification.title}
-                    </h3>
-                    {getStatusBadge(notification.response)}
-                  </div>
-
-                  <p className='text-sm text-muted-foreground mb-2'>
+      <div className='rounded-md border'>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Type</TableHead>
+              <TableHead>Title</TableHead>
+              <TableHead>Message</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Target</TableHead>
+              <TableHead className='w-[100px]'>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {notifications.map(notification => (
+              <TableRow key={notification.id} className='hover:bg-muted/50'>
+                <TableCell>{getNotificationIcon(notification.type)}</TableCell>
+                <TableCell className='font-medium'>
+                  {notification.title}
+                </TableCell>
+                <TableCell className='max-w-md'>
+                  <div className='truncate' title={notification.message}>
                     {notification.message}
-                  </p>
-
-                  <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-                    <span>
-                      {formatDistanceToNow(notification.createdAt, {
-                        addSuffix: true,
-                      })}
-                    </span>
-                    {notification.targetUser && (
-                      <>
-                        <span>•</span>
-                        <span>To: {notification.targetUser.name}</span>
-                      </>
+                  </div>
+                </TableCell>
+                <TableCell>{getStatusBadge(notification.response)}</TableCell>
+                <TableCell className='text-sm text-muted-foreground'>
+                  {formatDistanceToNow(notification.createdAt, {
+                    addSuffix: true,
+                  })}
+                </TableCell>
+                <TableCell className='text-sm text-muted-foreground'>
+                  {notification.targetUser ? (
+                    <span>To: {notification.targetUser.name}</span>
+                  ) : (
+                    <span>Organization</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <div className='flex items-center gap-2'>
+                    {(!notification.response ||
+                      notification.response.status === 'unread') && (
+                      <Button
+                        variant='outline'
+                        size='sm'
+                        onClick={() => handleMarkAsRead(notification.id)}
+                      >
+                        Mark as read
+                      </Button>
+                    )}
+                    {isAdmin && (
+                      <NotificationActionsDropdown
+                        notificationId={notification.id}
+                        notificationTitle={notification.title}
+                        size='sm'
+                      />
                     )}
                   </div>
-                </div>
-
-                <div className='flex gap-2'>
-                  {(!notification.response ||
-                    notification.response.status === 'unread') && (
-                    <Button
-                      variant='outline'
-                      size='sm'
-                      onClick={() => handleMarkAsRead(notification.id)}
-                    >
-                      Mark as read
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {index < notifications.length - 1 && <Separator />}
-        </div>
-      ))}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       {currentPage < totalPages && (
         <div className='flex justify-center pt-4'>

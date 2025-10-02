@@ -12,7 +12,8 @@ import {
 import { MarkdownEditor } from '@/components/markdown-editor'
 import { createJobRole, updateJobRole, deleteJobRole } from '@/lib/actions'
 import { type JobRoleFormData } from '@/lib/actions/job-roles'
-import { Edit2, Trash2 } from 'lucide-react'
+import { Edit2, Trash2, Eye } from 'lucide-react'
+import Link from 'next/link'
 import styles from './job-role-management.module.css'
 
 interface JobRole {
@@ -176,6 +177,17 @@ export function JobRoleManagement({
                     </div>
                   </div>
                   <div className='flex gap-1'>
+                    <Button
+                      size='sm'
+                      variant='outline'
+                      asChild
+                      className='h-8 w-8 p-0'
+                      title='View job role details'
+                    >
+                      <Link href={`/job-roles/${jobRole.id}`}>
+                        <Eye className='h-3 w-3' />
+                      </Link>
+                    </Button>
                     <Button
                       size='sm'
                       variant='outline'

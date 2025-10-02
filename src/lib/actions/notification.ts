@@ -379,6 +379,47 @@ export async function getUnreadNotificationCount() {
 }
 
 /**
+ * Delete a notification (admin only)
+ */
+export async function deleteNotification(notificationId: string) {
+  const user = await getCurrentUser()
+  if (!user) {
+    throw new Error('Authentication required')
+  }
+
+  if (!user.organizationId) {
+    throw new Error(
+      'User must belong to an organization to delete notifications'
+    )
+  }
+
+  // Only admins can delete notifications
+  if (user.role !== 'ADMIN') {
+    throw new Error('Only administrators can delete notifications')
+  }
+
+  // Verify the notification exists and belongs to the user's organization
+  const notification = await prisma.notification.findFirst({
+    where: {
+      id: notificationId,
+      organizationId: user.organizationId,
+    },
+  })
+
+  if (!notification) {
+    throw new Error('Notification not found or access denied')
+  }
+
+  // Delete the notification (this will cascade delete related responses)
+  await prisma.notification.delete({
+    where: { id: notificationId },
+  })
+
+  revalidatePath('/notifications')
+  revalidatePath('/')
+}
+
+/**
  * Get all notifications for the current user (for the full notifications page)
  */
 export async function getAllUserNotifications(
