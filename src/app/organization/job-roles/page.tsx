@@ -2,9 +2,9 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { getJobRoles, getJobLevels, getJobDomains } from '@/lib/actions'
-import { JobRoleManagement } from '@/components/job-role-management'
-import { JobLevelManagement } from '@/components/job-level-management'
-import { JobDomainManagement } from '@/components/job-domain-management'
+import { JobRoleManagement } from '@/components/jobs/job-role-management'
+import { JobLevelManagement } from '@/components/jobs/job-level-management'
+import { JobDomainManagement } from '@/components/jobs/job-domain-management'
 
 export default async function JobRoleManagementPage() {
   const session = await getServerSession(authOptions)

@@ -15,7 +15,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Building, Shield, Bell, Briefcase } from 'lucide-react'
-import { CreateNotificationModal } from '@/components/create-notification-modal'
+import { CreateNotificationModal } from '@/components/notifications/create-notification-modal'
 
 export default async function OrganizationSettingsPage() {
   const session = await getServerSession(authOptions)

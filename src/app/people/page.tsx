@@ -1,5 +1,5 @@
 import { getPeopleHierarchy } from '@/lib/actions'
-import { PeoplePageClient } from '@/components/people-page-client'
+import { PeoplePageClient } from '@/components/people/people-page-client'
 import { requireAuth } from '@/lib/auth-utils'
 
 export default async function PeoplePage() {

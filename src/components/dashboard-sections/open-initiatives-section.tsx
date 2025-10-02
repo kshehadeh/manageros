@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db'
-import { DashboardInitiativesTable } from '@/components/dashboard-initiatives-table'
+import { DashboardInitiativesTable } from '@/components/initiatives/dashboard-initiatives-table'
 import { ExpandableSection } from '@/components/expandable-section'
 
 interface DashboardOpenInitiativesSectionProps {

@@ -20,7 +20,7 @@ import ReactFlow, {
 import dagre from 'dagre'
 import 'reactflow/dist/style.css'
 import { Person } from '@/types/person'
-import { PersonStatusBadge } from './person-status-badge'
+import { PersonStatusBadge } from '@/components/people/person-status-badge'
 
 interface OrgChartReactFlowProps {
   people: Person[]

@@ -2,8 +2,8 @@
 
 import { Suspense, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
-import { NotificationsList } from '@/components/notifications-list'
-import { NotificationsHeader } from '@/components/notifications-header'
+import { NotificationsList } from '@/components/notifications/notifications-list'
+import { NotificationsHeader } from '@/components/notifications/notifications-header'
 import { useSession } from 'next-auth/react'
 
 export default function NotificationsPage() {

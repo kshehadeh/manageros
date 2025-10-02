@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { PersonSynopsisList } from '@/components/person-synopsis-list'
+import { PersonSynopsisList } from '@/components/people/person-synopsis-list'
 import { SynopsesBreadcrumbClient } from '@/components/synopses-breadcrumb-client'
 import { canAccessSynopsesForPerson } from '@/lib/auth-utils'
 

@@ -1,4 +1,4 @@
-import { TeamForm } from '@/components/team-form'
+import { TeamForm } from '@/components/teams/team-form'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
