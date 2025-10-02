@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { getFeedbackCampaignByInviteLink } from '@/lib/actions/feedback-campaign'
-import { FeedbackSubmissionForm } from '@/components/feedback-submission-form'
+import { FeedbackSubmissionForm } from '@/components/feedback/feedback-submission-form'
 
 interface FeedbackFormPageProps {
   params: Promise<{

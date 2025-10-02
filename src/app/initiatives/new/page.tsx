@@ -1,4 +1,4 @@
-import { InitiativeForm } from '@/components/initiative-form'
+import { InitiativeForm } from '@/components/initiatives/initiative-form'
 import { getTeams, getPeople } from '@/lib/actions'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'

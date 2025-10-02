@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db'
-import { AssignedTasks } from '@/components/dashboard-assigned-tasks'
+import { AssignedTasks } from '@/components/tasks/dashboard-assigned-tasks'
 import { ExpandableSection } from '@/components/expandable-section'
 import { getTasksAssignedToCurrentUser } from '@/lib/actions/task'
 

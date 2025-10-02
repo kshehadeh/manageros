@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { CheckInForm } from '@/components/checkin-form'
-import { InitiativeDetailClient } from '@/components/initiative-detail-client'
+import { InitiativeDetailClient } from '@/components/initiatives/initiative-detail-client'
 
 export default async function EditCheckInPage({
   params,

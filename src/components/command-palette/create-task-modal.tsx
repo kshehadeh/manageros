@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { QuickTaskForm } from '@/components/quick-task-form'
+import { QuickTaskForm } from '@/components/tasks/quick-task-form'
 
 export function CreateTaskModal() {
   const [open, setOpen] = useState(false)

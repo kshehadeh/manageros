@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
-import { MeetingInstanceForm } from '@/components/meeting-instance-form'
+import { MeetingInstanceForm } from '@/components/meetings/meeting-instance-form'
 
 export default async function NewMeetingInstancePage({
   params,

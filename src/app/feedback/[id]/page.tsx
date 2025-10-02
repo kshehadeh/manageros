@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
-import { FeedbackDetailClient } from '@/components/feedback-detail-client'
+import { FeedbackDetailClient } from '@/components/feedback/feedback-detail-client'
 import { EditIconButton } from '@/components/edit-icon-button'
 
 interface FeedbackDetailPageProps {

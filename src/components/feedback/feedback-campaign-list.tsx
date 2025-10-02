@@ -1,0 +1,400 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { FeedbackCampaignStatusBadge } from '@/components/feedback/feedback-campaign-status-badge'
+import { updateCampaignStatus, deleteFeedbackCampaign } from '@/lib/actions'
+import {
+  Calendar,
+  Users,
+  Mail,
+  Trash2,
+  Play,
+  Pause,
+  CheckCircle,
+  Link as LinkIcon,
+  Copy,
+  Eye,
+  Edit,
+  MoreHorizontal,
+} from 'lucide-react'
+import { format } from 'date-fns'
+import Link from 'next/link'
+
+interface FeedbackCampaign {
+  id: string
+  name?: string | null
+  targetPersonId: string
+  startDate: Date
+  endDate: Date
+  inviteEmails: string[]
+  inviteLink?: string
+  status: 'draft' | 'active' | 'completed' | 'cancelled'
+  createdAt: Date
+  updatedAt: Date
+  template?: {
+    id: string
+    name: string
+    description?: string
+  }
+  responses: {
+    id: string
+    responderEmail: string
+    submittedAt: Date
+  }[]
+  user: {
+    id: string
+    name: string
+    email: string
+  }
+}
+
+interface FeedbackCampaignListProps {
+  campaigns: FeedbackCampaign[]
+  onCampaignUpdate?: () => void
+}
+
+export function FeedbackCampaignList({
+  campaigns,
+  onCampaignUpdate,
+}: FeedbackCampaignListProps) {
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null)
+  const [deletingCampaign, setDeletingCampaign] = useState<string | null>(null)
+  const [copiedLink, setCopiedLink] = useState<string | null>(null)
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+
+  const handleStatusUpdate = async (
+    campaignId: string,
+    newStatus: 'active' | 'completed' | 'cancelled'
+  ) => {
+    setUpdatingStatus(campaignId)
+    try {
+      await updateCampaignStatus(campaignId, newStatus)
+      if (onCampaignUpdate) {
+        onCampaignUpdate()
+      }
+    } catch (error) {
+      console.error('Failed to update campaign status:', error)
+    } finally {
+      setUpdatingStatus(null)
+    }
+  }
+
+  const handleDeleteCampaign = async (campaignId: string) => {
+    if (
+      !confirm(
+        'Are you sure you want to delete this campaign? This action cannot be undone.'
+      )
+    ) {
+      return
+    }
+
+    setDeletingCampaign(campaignId)
+    try {
+      await deleteFeedbackCampaign(campaignId)
+      if (onCampaignUpdate) {
+        onCampaignUpdate()
+      }
+    } catch (error) {
+      console.error('Failed to delete campaign:', error)
+    } finally {
+      setDeletingCampaign(null)
+    }
+  }
+
+  const copyInviteLink = async (inviteLink: string) => {
+    try {
+      const baseUrl = window.location.origin
+      const fullUrl = `${baseUrl}/feedback-form/${inviteLink}`
+      await navigator.clipboard.writeText(fullUrl)
+      setCopiedLink(inviteLink)
+      setTimeout(() => setCopiedLink(null), 2000)
+    } catch (error) {
+      console.error('Failed to copy link:', error)
+    }
+  }
+
+  const handleDropdownClick = (e: React.MouseEvent, campaignId: string) => {
+    e.stopPropagation()
+    setOpenDropdown(openDropdown === campaignId ? null : campaignId)
+  }
+
+  const closeDropdown = () => {
+    setOpenDropdown(null)
+  }
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setOpenDropdown(null)
+    }
+
+    if (openDropdown) {
+      document.addEventListener('click', handleClickOutside)
+      return () => document.removeEventListener('click', handleClickOutside)
+    }
+  }, [openDropdown])
+
+  const isCampaignActive = (campaign: FeedbackCampaign) => {
+    const now = new Date()
+    return (
+      campaign.status === 'active' &&
+      now >= campaign.startDate &&
+      now <= campaign.endDate
+    )
+  }
+
+  if (campaigns.length === 0) {
+    return (
+      <Card>
+        <CardContent className='p-6 text-center'>
+          <Calendar className='h-12 w-12 mx-auto text-muted-foreground mb-4' />
+          <h3 className='text-lg font-medium text-foreground mb-2'>
+            No Feedback Campaigns
+          </h3>
+          <p className='text-muted-foreground'>
+            No feedback campaigns have been created for this person yet.
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <div className='space-y-4'>
+      {campaigns.map(campaign => (
+        <Card key={campaign.id}>
+          <CardHeader>
+            <div className='flex items-center justify-between'>
+              <div className='flex items-center gap-3'>
+                {campaign.name && (
+                  <Link
+                    href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`}
+                    className='text-lg font-semibold text-foreground hover:text-blue-600 transition-colors'
+                  >
+                    {campaign.name}
+                  </Link>
+                )}
+                <FeedbackCampaignStatusBadge
+                  status={campaign.status}
+                  isCurrentlyActive={isCampaignActive(campaign)}
+                />
+              </div>
+              <div className='relative'>
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  className='h-8 w-8 p-0'
+                  onClick={e => handleDropdownClick(e, campaign.id)}
+                >
+                  <MoreHorizontal className='h-4 w-4' />
+                </Button>
+
+                {openDropdown === campaign.id && (
+                  <div
+                    className='absolute top-full right-0 mt-2 bg-popover text-popover-foreground border rounded-md shadow-lg z-10 min-w-48'
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <div className='py-1'>
+                      <Link
+                        href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`}
+                        className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                        onClick={closeDropdown}
+                      >
+                        <Eye className='w-4 h-4' />
+                        View Details
+                      </Link>
+                      {campaign.status === 'draft' && (
+                        <>
+                          <Link
+                            href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}/edit`}
+                            className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                            onClick={closeDropdown}
+                          >
+                            <Edit className='w-4 h-4' />
+                            Edit
+                          </Link>
+                          <button
+                            className='w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
+                            onClick={() => {
+                              handleStatusUpdate(campaign.id, 'active')
+                              closeDropdown()
+                            }}
+                            disabled={updatingStatus === campaign.id}
+                          >
+                            <Play className='w-4 h-4' />
+                            {updatingStatus === campaign.id
+                              ? 'Activating...'
+                              : 'Activate'}
+                          </button>
+                        </>
+                      )}
+                      {campaign.status === 'active' && (
+                        <>
+                          <button
+                            className='w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
+                            onClick={() => {
+                              handleStatusUpdate(campaign.id, 'completed')
+                              closeDropdown()
+                            }}
+                            disabled={updatingStatus === campaign.id}
+                          >
+                            <CheckCircle className='w-4 h-4' />
+                            {updatingStatus === campaign.id
+                              ? 'Completing...'
+                              : 'Complete'}
+                          </button>
+                          <button
+                            className='w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
+                            onClick={() => {
+                              handleStatusUpdate(campaign.id, 'cancelled')
+                              closeDropdown()
+                            }}
+                            disabled={updatingStatus === campaign.id}
+                          >
+                            <Pause className='w-4 h-4' />
+                            {updatingStatus === campaign.id
+                              ? 'Cancelling...'
+                              : 'Cancel'}
+                          </button>
+                        </>
+                      )}
+                      {(campaign.status === 'active' ||
+                        campaign.status === 'completed') && (
+                        <Link
+                          href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}/responses`}
+                          className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                          onClick={closeDropdown}
+                        >
+                          <Eye className='w-4 h-4' />
+                          View Responses
+                        </Link>
+                      )}
+                      <button
+                        className='w-full flex items-center gap-3 px-3 py-2 text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 transition-colors text-left'
+                        onClick={() => {
+                          handleDeleteCampaign(campaign.id)
+                          closeDropdown()
+                        }}
+                        disabled={deletingCampaign === campaign.id}
+                      >
+                        <Trash2 className='w-4 h-4' />
+                        {deletingCampaign === campaign.id
+                          ? 'Deleting...'
+                          : 'Delete'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+              <div>
+                <h4 className='font-medium text-sm text-muted-foreground mb-1'>
+                  Campaign Period
+                </h4>
+                <p className='text-sm'>
+                  {format(campaign.startDate, 'MMM d, yyyy')} -{' '}
+                  {format(campaign.endDate, 'MMM d, yyyy')}
+                </p>
+              </div>
+              <div>
+                <h4 className='font-medium text-sm text-muted-foreground mb-1'>
+                  Invited
+                </h4>
+                <div className='flex items-center gap-1 text-sm'>
+                  <Users className='h-4 w-4' />
+                  {campaign.inviteEmails.length} people
+                </div>
+              </div>
+              <div>
+                <h4 className='font-medium text-sm text-muted-foreground mb-1'>
+                  Responses
+                </h4>
+                <div className='flex items-center gap-1 text-sm'>
+                  <Mail className='h-4 w-4' />
+                  {campaign.responses.length} / {campaign.inviteEmails.length}
+                </div>
+              </div>
+            </div>
+
+            <div className='mt-4'>
+              <h4 className='font-medium text-sm text-muted-foreground mb-2'>
+                Invited Emails
+              </h4>
+              <div className='flex flex-wrap gap-2'>
+                {campaign.inviteEmails.map((email, index) => {
+                  const hasResponded = campaign.responses.some(
+                    r => r.responderEmail === email
+                  )
+                  return (
+                    <Badge
+                      key={index}
+                      variant={hasResponded ? 'success' : 'outline'}
+                    >
+                      {email}
+                      {hasResponded && <CheckCircle className='h-3 w-3 ml-1' />}
+                    </Badge>
+                  )
+                })}
+              </div>
+            </div>
+
+            {campaign.inviteLink && (
+              <div className='mt-4'>
+                <h4 className='font-medium text-sm text-muted-foreground mb-2'>
+                  Invite Link
+                </h4>
+                <div className='flex items-center gap-2 p-3 bg-muted rounded-md'>
+                  <LinkIcon className='h-4 w-4 text-muted-foreground' />
+                  <span className='text-sm text-foreground flex-1 truncate'>
+                    {`/feedback-form/${campaign.inviteLink}`}
+                  </span>
+                  <Button
+                    size='sm'
+                    variant='outline'
+                    onClick={() => copyInviteLink(campaign.inviteLink!)}
+                    className='shrink-0'
+                  >
+                    {copiedLink === campaign.inviteLink ? (
+                      <>
+                        <CheckCircle className='h-3 w-3 mr-1' />
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className='h-3 w-3 mr-1' />
+                        Copy
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <p className='text-xs text-muted-foreground mt-1'>
+                  Share this link with invitees to allow them to submit feedback
+                </p>
+              </div>
+            )}
+
+            <div className='mt-4 pt-4 border-t'>
+              <div className='flex items-center justify-between'>
+                <p className='text-xs text-muted-foreground'>
+                  Created by {campaign.user.name} on{' '}
+                  {format(campaign.createdAt, 'MMM d, yyyy')}
+                </p>
+                {campaign.template && (
+                  <Badge variant='outline' className='text-xs'>
+                    {campaign.template.name}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )
+}

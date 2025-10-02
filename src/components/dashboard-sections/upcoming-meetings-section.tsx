@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/db'
-import { DashboardUpcomingMeetings } from '@/components/dashboard-upcoming-meetings'
+import { DashboardUpcomingMeetings } from '@/components/meetings/dashboard-upcoming-meetings'
 import { ExpandableSection } from '@/components/expandable-section'
-import { type UpcomingMeeting } from '@/components/shared-meetings-table'
+import { type UpcomingMeeting } from '@/components/meetings/shared-meetings-table'
 
 interface DashboardUpcomingMeetingsSectionProps {
   userId: string

@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { TeamImportForm } from '@/components/team-import-form'
+import { TeamImportForm } from '@/components/teams/team-import-form'
 import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function ImportTeamsPage() {

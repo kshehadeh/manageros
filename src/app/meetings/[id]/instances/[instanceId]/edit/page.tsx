@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
-import { MeetingInstanceEditClient } from '@/components/meeting-instance-edit-client'
+import { MeetingInstanceEditClient } from '@/components/meetings/meeting-instance-edit-client'
 import { utcToLocalDateTimeString } from '@/lib/timezone-utils'
 
 export default async function EditMeetingInstancePage({

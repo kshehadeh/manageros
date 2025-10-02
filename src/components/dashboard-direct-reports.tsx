@@ -1,4 +1,4 @@
-import { PersonListItemCard } from '@/components/person-list-item-card'
+import { PersonListItemCard } from '@/components/people/person-list-item-card'
 import { Person, Team } from '@prisma/client'
 
 type PersonWithRelations = Person & {

@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { PersonActionsDropdown } from '@/components/person-actions-dropdown'
-import { PersonStatusBadge } from '@/components/person-status-badge'
+import { PersonActionsDropdown } from '@/components/people/person-actions-dropdown'
+import { PersonStatusBadge } from '@/components/people/person-status-badge'
 import { Person, Team } from '@prisma/client'
 
 // Define the type for a person with all the relations needed for direct reports

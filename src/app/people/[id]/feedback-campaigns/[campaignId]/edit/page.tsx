@@ -2,7 +2,7 @@ import { prisma } from '@/lib/db'
 import { notFound, redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { FeedbackCampaignForm } from '@/components/feedback-campaign-form'
+import { FeedbackCampaignForm } from '@/components/feedback/feedback-campaign-form'
 import { EditFeedbackCampaignBreadcrumbClient } from '@/components/edit-feedback-campaign-breadcrumb-client'
 
 interface EditFeedbackCampaignPageProps {

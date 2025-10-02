@@ -1,7 +1,7 @@
 import { getJiraCredentials, getGithubCredentials } from '@/lib/actions'
 import { JiraCredentialsForm } from '@/components/jira-credentials-form'
 import { GithubCredentialsForm } from '@/components/github-credentials-form'
-import { PersonLinkForm } from '@/components/person-link-form'
+import { PersonLinkForm } from '@/components/people/person-link-form'
 
 export default async function SettingsPage() {
   const jiraCredentials = await getJiraCredentials()

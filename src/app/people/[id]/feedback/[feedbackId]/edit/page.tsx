@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db'
-import { FeedbackForm } from '@/components/feedback-form'
+import { FeedbackForm } from '@/components/feedback/feedback-form'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
