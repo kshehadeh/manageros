@@ -11,11 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { TeamWithRelations } from '@/types/team'
+import { TeamWithCounts } from '@/types/team'
 
 interface TeamsFilterBarProps {
-  teams: TeamWithRelations[]
-  onFilteredTeamsChange: (_filteredTeams: TeamWithRelations[]) => void
+  teams: TeamWithCounts[]
+  onFilteredTeamsChange: (_filteredTeams: TeamWithCounts[]) => void
 }
 
 export function TeamsFilterBar({
@@ -100,31 +100,27 @@ export function TeamsFilterBar({
     // Members filter
     if (membersFilter !== 'all') {
       if (membersFilter === 'has-members') {
-        filtered = filtered.filter(team => team.people.length > 0)
+        filtered = filtered.filter(team => team._count.people > 0)
       } else if (membersFilter === 'no-members') {
-        filtered = filtered.filter(team => team.people.length === 0)
+        filtered = filtered.filter(team => team._count.people === 0)
       }
     }
 
     // Initiatives filter
     if (initiativesFilter !== 'all') {
       if (initiativesFilter === 'has-initiatives') {
-        filtered = filtered.filter(team => team.initiatives.length > 0)
+        filtered = filtered.filter(team => team._count.initiatives > 0)
       } else if (initiativesFilter === 'no-initiatives') {
-        filtered = filtered.filter(team => team.initiatives.length === 0)
+        filtered = filtered.filter(team => team._count.initiatives === 0)
       }
     }
 
     // Children filter
     if (childrenFilter !== 'all') {
       if (childrenFilter === 'has-children') {
-        filtered = filtered.filter(
-          team => team.children && team.children.length > 0
-        )
+        filtered = filtered.filter(team => team._count.children > 0)
       } else if (childrenFilter === 'no-children') {
-        filtered = filtered.filter(
-          team => !team.children || team.children.length === 0
-        )
+        filtered = filtered.filter(team => team._count.children === 0)
       }
     }
 

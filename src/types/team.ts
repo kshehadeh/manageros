@@ -26,3 +26,12 @@ export type TeamWithRelations = Team & {
   parent: Team | null
   children: Team[]
 }
+
+export type TeamWithCounts = Team & {
+  parent: Pick<Team, 'id' | 'name'> | null
+  _count: {
+    people: number
+    initiatives: number
+    children: number
+  }
+}
