@@ -18,16 +18,10 @@ import {
   Building,
   Keyboard,
   BarChart3,
+  Command,
 } from 'lucide-react'
 import { useState } from 'react'
-import ReactMarkdown from 'react-markdown'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { getHelpContent } from '@/lib/help-content-loader'
+import { HelpDialog } from '@/components/shared'
 
 interface NavItem {
   name: string
@@ -207,73 +201,12 @@ export default function Sidebar({ navigation = [] }: SidebarProps) {
       </div>
 
       {/* Keyboard Shortcuts Modal */}
-      <Dialog
-        open={isKeyboardShortcutsOpen}
+      <HelpDialog
+        helpId='keyboard-shortcuts'
+        icon={Command}
+        isOpen={isKeyboardShortcutsOpen}
         onOpenChange={setIsKeyboardShortcutsOpen}
-      >
-        <DialogContent className='max-w-2xl max-h-[80vh] overflow-y-auto'>
-          <DialogHeader>
-            <DialogTitle className='flex items-center gap-2'>
-              Keyboard Shortcuts
-              <span className='text-sm font-normal text-muted-foreground'>
-                • Getting Started
-              </span>
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className='prose prose-sm max-w-none dark:prose-invert'>
-            <ReactMarkdown
-              components={{
-                h1: ({ children }) => (
-                  <h1 className='text-lg font-semibold mb-3 text-foreground'>
-                    {children}
-                  </h1>
-                ),
-                h2: ({ children }) => (
-                  <h2 className='text-base font-semibold mb-2 mt-4 text-foreground'>
-                    {children}
-                  </h2>
-                ),
-                h3: ({ children }) => (
-                  <h3 className='text-sm font-semibold mb-2 mt-3 text-foreground'>
-                    {children}
-                  </h3>
-                ),
-                p: ({ children }) => (
-                  <p className='mb-3 text-sm leading-relaxed text-muted-foreground'>
-                    {children}
-                  </p>
-                ),
-                ul: ({ children }) => (
-                  <ul className='mb-3 ml-4 list-disc space-y-1 text-sm text-muted-foreground'>
-                    {children}
-                  </ul>
-                ),
-                ol: ({ children }) => (
-                  <ol className='mb-3 ml-4 list-decimal space-y-1 text-sm text-muted-foreground'>
-                    {children}
-                  </ol>
-                ),
-                li: ({ children }) => (
-                  <li className='text-sm text-muted-foreground'>{children}</li>
-                ),
-                strong: ({ children }) => (
-                  <strong className='font-semibold text-foreground'>
-                    {children}
-                  </strong>
-                ),
-                code: ({ children }) => (
-                  <code className='bg-muted px-1 py-0.5 rounded text-xs font-mono text-foreground'>
-                    {children}
-                  </code>
-                ),
-              }}
-            >
-              {getHelpContent('keyboard-shortcuts')?.content || ''}
-            </ReactMarkdown>
-          </div>
-        </DialogContent>
-      </Dialog>
+      />
     </>
   )
 }
