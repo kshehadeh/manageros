@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import React, { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   MoreHorizontal,
@@ -640,7 +640,11 @@ export function SharedMeetingsTable({
                   finalEnableRightClick && handleRowRightClick(e, meetingId)
                 }
               >
-                {finalColumns.map(column => renderColumnCell(column, meeting))}
+                {finalColumns.map(column => (
+                  <React.Fragment key={column.type}>
+                    {renderColumnCell(column, meeting)}
+                  </React.Fragment>
+                ))}
               </TableRow>
             )
           })}
