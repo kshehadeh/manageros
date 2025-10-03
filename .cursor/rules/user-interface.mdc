@@ -11,7 +11,7 @@ Entities like meetings, initiatives, people, etc. should follow these rules:
 * Avoid using cards to surround groups of information.  Instead, use a page section with a header and appropriate spacing.
 * Use breadcrumbs to navigate between pages using the useBreadcrumb hook and the Breadcrumb component with the client specific component.
 * When displaying a list of entities, use the shadcn table component instead of a list of cards.  Limit the columns to those that are necessary and relevant to the entity.
-* When creating a new table list, add support for filtering using the same UI as the persons table.  Where the filter button can be expanded to show the filters.  Support filtering based on the columns in the table unless it doesn't make sense for that property.
+* When creating a new table list, add support for filtering using the same UI as the persons table.  Use the search bar and the filter button to filter the table. The filter button will popup a modal with the filters.
 * We do not need to include a "Back to..." button since we have the breadcrumbs to navigate back to the previous page.
 * Use consistent iconography for all entities.  Use the Lucide icons for all icons. Determine the right icon based on the icon used in the sidebar
 

@@ -2,9 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { getJobRoles, getJobLevels, getJobDomains } from '@/lib/actions'
-import { JobRoleManagement } from '@/components/jobs/job-role-management'
-import { JobLevelManagement } from '@/components/jobs/job-level-management'
-import { JobDomainManagement } from '@/components/jobs/job-domain-management'
+import { JobRolesPageClient } from '@/components/jobs/job-roles-page-client'
 
 export default async function JobRoleManagementPage() {
   const session = await getServerSession(authOptions)
@@ -39,26 +37,11 @@ export default async function JobRoleManagementPage() {
         </p>
       </div>
 
-      <div className='grid gap-6 lg:grid-cols-3'>
-        {/* Job Level Management */}
-        <div className='card'>
-          <JobLevelManagement levels={levels} />
-        </div>
-
-        {/* Job Domain Management */}
-        <div className='card'>
-          <JobDomainManagement domains={domains} />
-        </div>
-
-        {/* Job Role Management */}
-        <div className='card lg:col-span-1'>
-          <JobRoleManagement
-            jobRoles={jobRoles}
-            levels={levels}
-            domains={domains}
-          />
-        </div>
-      </div>
+      <JobRolesPageClient
+        jobRoles={jobRoles}
+        levels={levels}
+        domains={domains}
+      />
     </div>
   )
 }

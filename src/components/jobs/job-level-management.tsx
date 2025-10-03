@@ -82,7 +82,7 @@ function SortableItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={`card p-2 transition-all ${isDragging ? 'shadow-lg' : ''}`}
+      className={`border rounded-lg p-2 transition-all bg-background hover:bg-muted/50 ${isDragging ? 'shadow-lg' : ''}`}
     >
       {editingId === level.id ? (
         // Edit Form
@@ -277,7 +277,7 @@ export function JobLevelManagement({ levels }: JobLevelManagementProps) {
 
       {/* Create Form */}
       {creating && (
-        <div className='card p-4 border border-primary'>
+        <div className='border border-primary rounded-lg p-4 bg-muted/50'>
           <h4 className='font-medium mb-3'>Create New Job Level</h4>
           <form onSubmit={e => handleSubmit(e)} className='space-y-3'>
             <div>

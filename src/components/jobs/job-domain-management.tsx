@@ -8,14 +8,8 @@ import {
   deleteJobDomain,
 } from '@/lib/actions'
 import { type JobDomainFormData } from '@/lib/actions/job-roles'
+import type { JobDomain } from '@/types/job-roles'
 import { Edit2, Trash2 } from 'lucide-react'
-
-interface JobDomain {
-  id: string
-  name: string
-  createdAt: Date
-  updatedAt: Date
-}
 
 interface JobDomainManagementProps {
   domains: JobDomain[]
@@ -93,7 +87,7 @@ export function JobDomainManagement({ domains }: JobDomainManagementProps) {
 
       {/* Create Form */}
       {creating && (
-        <div className='card p-3 border border-primary'>
+        <div className='border border-primary rounded-lg p-3 bg-muted/50'>
           <h4 className='font-medium mb-2'>Create New Job Domain</h4>
           <form onSubmit={e => handleSubmit(e)} className='space-y-2'>
             <div>
@@ -138,7 +132,10 @@ export function JobDomainManagement({ domains }: JobDomainManagementProps) {
           </p>
         ) : (
           domains.map(domain => (
-            <div key={domain.id} className='card p-2'>
+            <div
+              key={domain.id}
+              className='border rounded-lg p-2 bg-background hover:bg-muted/50'
+            >
               {editingId === domain.id ? (
                 // Edit Form
                 <form
