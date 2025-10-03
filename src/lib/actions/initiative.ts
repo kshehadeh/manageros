@@ -288,3 +288,115 @@ export async function getInitiatives() {
 
   return initiatives
 }
+
+export async function createObjective(
+  initiativeId: string,
+  title: string,
+  keyResult?: string
+) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to create objectives')
+  }
+
+  // Validate the title
+  if (!title || title.trim().length === 0) {
+    throw new Error('Objective title is required')
+  }
+
+  if (title.length > 200) {
+    throw new Error('Title must be less than 200 characters')
+  }
+
+  // Verify initiative belongs to user's organization
+  const initiative = await prisma.initiative.findFirst({
+    where: {
+      id: initiativeId,
+      organizationId: user.organizationId,
+    },
+  })
+  if (!initiative) {
+    throw new Error('Initiative not found or access denied')
+  }
+
+  // Get the current highest sort index for this initiative
+  const lastObjective = await prisma.objective.findFirst({
+    where: {
+      initiativeId: initiativeId,
+    },
+    orderBy: {
+      sortIndex: 'desc',
+    },
+  })
+
+  const nextSortIndex = lastObjective ? lastObjective.sortIndex + 1 : 0
+
+  // Create the objective
+  const objective = await prisma.objective.create({
+    data: {
+      title: title.trim(),
+      keyResult: keyResult?.trim() || null,
+      initiativeId: initiativeId,
+      sortIndex: nextSortIndex,
+    },
+  })
+
+  // Revalidate the initiative page
+  revalidatePath(`/initiatives/${initiativeId}`)
+
+  return objective
+}
+
+export async function updateInitiativeTeam(
+  initiativeId: string,
+  teamId: string | null
+) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to update initiatives')
+  }
+
+  // Verify initiative belongs to user's organization
+  const existingInitiative = await prisma.initiative.findFirst({
+    where: {
+      id: initiativeId,
+      organizationId: user.organizationId,
+    },
+  })
+  if (!existingInitiative) {
+    throw new Error('Initiative not found or access denied')
+  }
+
+  // Verify team belongs to user's organization if specified
+  if (teamId) {
+    const team = await prisma.team.findFirst({
+      where: {
+        id: teamId,
+        organizationId: user.organizationId,
+      },
+    })
+    if (!team) {
+      throw new Error('Team not found or access denied')
+    }
+  }
+
+  // Update the initiative team
+  const initiative = await prisma.initiative.update({
+    where: { id: initiativeId },
+    data: {
+      teamId: teamId,
+    },
+    include: {
+      team: true,
+    },
+  })
+
+  // Revalidate the initiative page
+  revalidatePath(`/initiatives/${initiativeId}`)
+
+  return initiative
+}

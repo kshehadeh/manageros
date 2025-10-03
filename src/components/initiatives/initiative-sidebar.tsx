@@ -3,6 +3,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { LinkManager } from '@/components/entity-links'
+import { ChangeTeamModal } from './change-team-modal'
 import { Users } from 'lucide-react'
 import Link from 'next/link'
 
@@ -46,6 +47,7 @@ interface InitiativeSidebarProps {
   links: EntityLink[]
   entityType: string
   entityId: string
+  teams: Team[]
 }
 
 export function InitiativeSidebar({
@@ -54,16 +56,24 @@ export function InitiativeSidebar({
   links,
   entityType,
   entityId,
+  teams,
 }: InitiativeSidebarProps) {
   return (
     <div className='w-full lg:w-80 space-y-6'>
       {/* Team Section */}
-      {team && (
-        <div className='page-section'>
+      <div className='page-section'>
+        <div className='flex items-center justify-between mb-3'>
           <h3 className='section-header font-bold flex items-center gap-2'>
             <Users className='h-5 w-5' />
             Team
           </h3>
+          <ChangeTeamModal
+            initiativeId={entityId}
+            currentTeam={team}
+            teams={teams}
+          />
+        </div>
+        {team ? (
           <div className='flex items-center gap-2'>
             <Link
               href={`/teams/${team.id}`}
@@ -72,8 +82,10 @@ export function InitiativeSidebar({
               {team.name}
             </Link>
           </div>
-        </div>
-      )}
+        ) : (
+          <p className='text-sm text-muted-foreground'>No team assigned</p>
+        )}
+      </div>
 
       {/* Associated People Section */}
       <div className='page-section'>

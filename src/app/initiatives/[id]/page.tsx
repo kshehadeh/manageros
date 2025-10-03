@@ -31,7 +31,7 @@ export default async function InitiativeDetail({
   }
 
   const { id } = await params
-  const [init, people, meetings, notes] = await Promise.all([
+  const [init, people, meetings, notes, teams] = await Promise.all([
     prisma.initiative.findFirst({
       where: {
         id,
@@ -87,6 +87,12 @@ export default async function InitiativeDetail({
       orderBy: { scheduledAt: 'asc' },
     }),
     getNotesForEntity('Initiative', id),
+    prisma.team.findMany({
+      where: {
+        organizationId: session.user.organizationId,
+      },
+      orderBy: { name: 'asc' },
+    }),
   ])
 
   // Get all tasks associated with this initiative (both direct and through objectives)
@@ -160,7 +166,10 @@ export default async function InitiativeDetail({
                   </div>
                 }
               >
-                <InitiativeObjectives objectives={init.objectives} />
+                <InitiativeObjectives
+                  objectives={init.objectives}
+                  initiativeId={init.id}
+                />
               </Suspense>
 
               <Suspense
@@ -198,6 +207,9 @@ export default async function InitiativeDetail({
                 <InitiativeMeetings
                   meetings={meetings}
                   initiativeId={init.id}
+                  people={people}
+                  teams={teams}
+                  currentTeam={init.team}
                 />
               </Suspense>
 
@@ -270,6 +282,7 @@ export default async function InitiativeDetail({
               }))}
               entityType='Initiative'
               entityId={init.id}
+              teams={teams}
             />
           </div>
         </div>
