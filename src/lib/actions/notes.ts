@@ -198,7 +198,7 @@ export async function updateNote(formData: { id: string; content: string }) {
       createdAt: note.createdAt.toISOString(),
       updatedAt: note.updatedAt.toISOString(),
       createdBy: note.createdBy,
-      attachments: note.attachments.map((att: any) => ({
+      attachments: note.attachments.map(att => ({
         id: att.id,
         fileName: att.fileName,
         originalName: att.originalName,
