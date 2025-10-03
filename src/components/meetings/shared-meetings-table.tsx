@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition, useEffect } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   MoreHorizontal,
@@ -24,14 +24,9 @@ import {
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { deleteMeeting } from '@/lib/actions'
 import { toast } from 'sonner'
+import { DeleteModal } from '@/components/common/delete-modal'
 import {
   Meeting,
   Team,
@@ -92,15 +87,38 @@ export type UpcomingMeeting =
   | (MeetingWithRelations & { type: 'meeting' })
   | (MeetingInstanceWithRelations & { type: 'instance' })
 
-export type MeetingsTableVariant = 'full' | 'initiative' | 'dashboard'
+// Column configuration types
+export type MeetingColumnType =
+  | 'title'
+  | 'dateTime'
+  | 'time'
+  | 'scheduled'
+  | 'duration'
+  | 'team'
+  | 'initiative'
+  | 'participants'
+  | 'actions'
+
+export interface MeetingColumnConfig {
+  type: MeetingColumnType
+  header: string
+  show?: boolean
+  width?: string
+}
 
 export interface SharedMeetingsTableProps {
   meetings: (MeetingWithRelations | UpcomingMeeting)[]
   filteredMeetings?: MeetingWithRelations[]
-  variant?: MeetingsTableVariant
+  columns?: MeetingColumnConfig[]
+  // Legacy props for backward compatibility
+  variant?: 'full' | 'initiative' | 'dashboard'
   initiativeId?: string
   showCreateButton?: boolean
   onCreateMeeting?: () => void
+  enableRowClick?: boolean
+  enableDoubleClick?: boolean
+  enableRightClick?: boolean
+  rowClickHandler?: (_meetingId: string, _isInstance?: boolean) => void
   emptyStateMessage?: string
   emptyStateAction?: {
     label: string
@@ -180,13 +198,209 @@ function getStatusBadge(meeting: MeetingWithRelations) {
   return <Badge variant='outline'>Upcoming</Badge>
 }
 
+// Cell rendering functions
+function renderTitleCell(
+  meeting: MeetingWithRelations | UpcomingMeeting,
+  showBadge = false,
+  router?: ReturnType<typeof useRouter>
+) {
+  const isInstance = 'type' in meeting && meeting.type === 'instance'
+  const meetingData = isInstance
+    ? (meeting as MeetingInstanceWithRelations).meeting
+    : (meeting as MeetingWithRelations)
+
+  return (
+    <TableCell className='font-medium text-foreground'>
+      <div className='space-y-1'>
+        <div className='flex items-center gap-2'>
+          <Calendar className='h-4 w-4 text-muted-foreground flex-shrink-0' />
+          <button
+            onClick={e => {
+              e.stopPropagation()
+              if (router) {
+                router.push(`/meetings/${meetingData.id}`)
+              }
+            }}
+            className='text-left hover:text-blue-600 hover:underline transition-colors'
+          >
+            {meetingData.title}
+          </button>
+        </div>
+        {showBadge && (
+          <div className='flex items-center gap-3 text-xs text-muted-foreground ml-6'>
+            {getStatusBadge(meeting as MeetingWithRelations)}
+            <div className='flex items-center gap-1'>
+              <Clock className='h-3 w-3 flex-shrink-0' />
+              {formatDuration(meetingData.duration)}
+            </div>
+            <div className='flex items-center gap-1'>
+              <Users className='h-3 w-3 flex-shrink-0' />
+              {isInstance
+                ? Math.max(
+                    (meeting as MeetingInstanceWithRelations).participants
+                      .length,
+                    meetingData.participants.length
+                  )
+                : meeting.participants.length}{' '}
+              participant
+              {(isInstance
+                ? Math.max(
+                    (meeting as MeetingInstanceWithRelations).participants
+                      .length,
+                    meetingData.participants.length
+                  )
+                : meeting.participants.length) !== 1
+                ? 's'
+                : ''}
+            </div>
+          </div>
+        )}
+      </div>
+    </TableCell>
+  )
+}
+
+function renderDateTimeCell(meeting: MeetingWithRelations | UpcomingMeeting) {
+  return (
+    <TableCell>
+      <div className='flex items-center gap-1 text-sm'>
+        <Calendar className='h-3 w-3 text-muted-foreground flex-shrink-0' />
+        <span className='font-semibold'>
+          {formatDateTime(meeting.scheduledAt)}
+        </span>
+      </div>
+    </TableCell>
+  )
+}
+
+function renderScheduledCell(meeting: MeetingWithRelations | UpcomingMeeting) {
+  return (
+    <TableCell className='text-muted-foreground'>
+      <div className='font-medium'>{formatDate(meeting.scheduledAt)}</div>
+    </TableCell>
+  )
+}
+
+function renderTimeCell(meeting: MeetingWithRelations | UpcomingMeeting) {
+  return (
+    <TableCell className='text-muted-foreground'>
+      <div className='space-y-1'>
+        <div className='font-medium'>{formatDate(meeting.scheduledAt)}</div>
+        <div className='text-sm'>{formatTime(meeting.scheduledAt)}</div>
+      </div>
+    </TableCell>
+  )
+}
+
+function renderDurationCell(meeting: MeetingWithRelations | UpcomingMeeting) {
+  const isInstance = 'type' in meeting && meeting.type === 'instance'
+  const meetingData = isInstance
+    ? (meeting as MeetingInstanceWithRelations).meeting
+    : (meeting as MeetingWithRelations)
+
+  return (
+    <TableCell className='text-muted-foreground'>
+      {meetingData.duration ? (
+        <div className='flex items-center gap-1 text-sm'>
+          <Clock className='h-3 w-3 text-muted-foreground flex-shrink-0' />
+          {formatDuration(meetingData.duration)}
+        </div>
+      ) : (
+        <span className='text-muted-foreground text-sm'>—</span>
+      )}
+    </TableCell>
+  )
+}
+
+function renderTeamCell(meeting: MeetingWithRelations | UpcomingMeeting) {
+  const isInstance = 'type' in meeting && meeting.type === 'instance'
+  const meetingData = isInstance
+    ? (meeting as MeetingInstanceWithRelations).meeting
+    : (meeting as MeetingWithRelations)
+
+  return (
+    <TableCell className='text-muted-foreground'>
+      {meetingData.team ? (
+        <div className='flex items-center gap-1'>
+          <Building2 className='h-3 w-3 flex-shrink-0' />
+          <span className='px-1.5 py-0.5 bg-secondary/50 rounded text-xs'>
+            {meetingData.team.name}
+          </span>
+        </div>
+      ) : (
+        '—'
+      )}
+    </TableCell>
+  )
+}
+
+function renderInitiativeCell(meeting: MeetingWithRelations | UpcomingMeeting) {
+  const isInstance = 'type' in meeting && meeting.type === 'instance'
+  const meetingData = isInstance
+    ? (meeting as MeetingInstanceWithRelations).meeting
+    : (meeting as MeetingWithRelations)
+
+  return (
+    <TableCell className='text-muted-foreground'>
+      {meetingData.initiative ? (
+        <div className='flex items-center gap-1'>
+          <Target className='h-3 w-3 flex-shrink-0' />
+          {meetingData.initiative.title}
+        </div>
+      ) : (
+        '—'
+      )}
+    </TableCell>
+  )
+}
+
+function renderParticipantsCell(
+  meeting: MeetingWithRelations | UpcomingMeeting
+) {
+  const isInstance = 'type' in meeting && meeting.type === 'instance'
+  const participantCount = isInstance
+    ? Math.max(
+        (meeting as MeetingInstanceWithRelations).participants.length,
+        (meeting as MeetingInstanceWithRelations).meeting.participants.length
+      )
+    : meeting.participants.length
+
+  return (
+    <TableCell className='text-muted-foreground'>
+      <div className='flex items-center gap-1'>
+        <Users className='h-3 w-3 flex-shrink-0' />
+        {participantCount} participant
+        {participantCount !== 1 ? 's' : ''}
+      </div>
+    </TableCell>
+  )
+}
+
+function renderActionsCell(
+  meeting: MeetingWithRelations | UpcomingMeeting,
+  onClick: (_e: React.MouseEvent) => void
+) {
+  return (
+    <TableCell>
+      <Button variant='ghost' className='h-8 w-8 p-0' onClick={onClick}>
+        <MoreHorizontal className='h-4 w-4' />
+      </Button>
+    </TableCell>
+  )
+}
+
 export function SharedMeetingsTable({
   meetings,
   filteredMeetings,
-  variant = 'full',
+  columns,
+  variant,
   initiativeId: _initiativeId,
-  showCreateButton = false,
-  onCreateMeeting,
+  showCreateButton: _showCreateButton,
+  onCreateMeeting: _onCreateMeeting,
+  enableRowClick = false,
+  enableDoubleClick = false,
+  enableRightClick = false,
+  rowClickHandler,
   emptyStateMessage,
   emptyStateAction,
 }: SharedMeetingsTableProps) {
@@ -199,56 +413,31 @@ export function SharedMeetingsTable({
     meetingId: '',
     triggerType: 'rightClick',
   })
-
-  // Handle clicking outside context menu to close it
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setContextMenu(prev => ({ ...prev, visible: false }))
-    }
-
-    if (contextMenu.visible) {
-      document.addEventListener('click', handleClickOutside)
-      return () => document.removeEventListener('click', handleClickOutside)
-    }
-  }, [contextMenu.visible])
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
   const handleDelete = async (meetingId: string) => {
-    if (confirm('Are you sure you want to delete this meeting?')) {
-      startTransition(async () => {
-        try {
-          await deleteMeeting(meetingId)
-          toast.success('Meeting deleted successfully')
-        } catch (error) {
-          console.error('Failed to delete meeting:', error)
-          toast.error(
-            error instanceof Error ? error.message : 'Failed to delete meeting'
-          )
-        }
-      })
-    }
+    await deleteMeeting(meetingId)
+    toast.success('Meeting deleted successfully')
+    startTransition(() => {
+      router.refresh()
+    })
   }
 
   const handleRowClick = (meetingId: string, isInstance = false) => {
-    if (variant === 'initiative') {
-      startTransition(() => {
-        router.push(`/meetings/${meetingId}`)
-      })
-    } else if (variant === 'dashboard') {
-      const href = isInstance
-        ? `/meetings/${meetingId.split('-')[0]}/instances/${meetingId.split('-')[1]}`
-        : `/meetings/${meetingId}`
-      window.location.href = href
+    if (effectiveRowClickHandler) {
+      effectiveRowClickHandler(meetingId, isInstance)
     }
   }
 
   const handleRowDoubleClick = (meetingId: string) => {
-    if (variant === 'full') {
+    if (enableDoubleClick) {
       router.push(`/meetings/${meetingId}`)
     }
   }
 
   const handleRowRightClick = (e: React.MouseEvent, meetingId: string) => {
-    if (variant === 'full') {
+    if (enableRightClick) {
       e.preventDefault()
       setContextMenu({
         visible: true,
@@ -262,374 +451,273 @@ export function SharedMeetingsTable({
 
   const handleButtonClick = (e: React.MouseEvent, meetingId: string) => {
     e.stopPropagation()
-    if (variant === 'full') {
-      const rect = e.currentTarget.getBoundingClientRect()
-      setContextMenu({
-        visible: true,
-        x: rect.right - 160,
-        y: rect.bottom + 4,
-        meetingId,
-        triggerType: 'button',
-      })
+    const rect = e.currentTarget.getBoundingClientRect()
+    setContextMenu({
+      visible: true,
+      x: rect.right - 160,
+      y: rect.bottom + 4,
+      meetingId,
+      triggerType: 'button',
+    })
+  }
+
+  // Convert variant to column configuration for backward compatibility
+  const getColumnsFromVariant = (variant?: string): MeetingColumnConfig[] => {
+    if (columns) return columns
+
+    switch (variant) {
+      case 'dashboard':
+        return [
+          { type: 'title', header: 'Title' },
+          { type: 'dateTime', header: 'Date/Time' },
+          { type: 'duration', header: 'Duration' },
+        ]
+      case 'initiative':
+        return [
+          { type: 'title', header: 'Title' },
+          { type: 'time', header: 'Date & Time' },
+          { type: 'team', header: 'Team' },
+          { type: 'actions', header: '', width: '50px' },
+        ]
+      case 'full':
+      default:
+        return [
+          { type: 'title', header: 'Title' },
+          { type: 'scheduled', header: 'Scheduled' },
+          { type: 'duration', header: 'Duration' },
+          { type: 'team', header: 'Team' },
+          { type: 'initiative', header: 'Initiative' },
+          { type: 'actions', header: 'Actions', width: '50px' },
+        ]
     }
   }
+
+  const finalColumns = getColumnsFromVariant(variant)
+
+  // Set interaction behavior based on variant
+  const handleVariantBehavior = (variant?: string) => {
+    switch (variant) {
+      case 'dashboard':
+        return {
+          enableRowClick: true,
+          enableDoubleClick: false,
+          enableRightClick: false,
+          rowClickHandler: (meetingId: string, isInstance?: boolean) => {
+            const href = isInstance
+              ? `/meetings/${meetingId.split('-')[0]}/instances/${meetingId.split('-')[1]}`
+              : `/meetings/${meetingId}`
+            window.location.href = href
+          },
+        }
+      case 'initiative':
+        return {
+          enableRowClick: true,
+          enableDoubleClick: false,
+          enableRightClick: false,
+          rowClickHandler: (meetingId: string) => {
+            startTransition(() => {
+              router.push(`/meetings/${meetingId}`)
+            })
+          },
+        }
+      case 'full':
+      default:
+        return {
+          enableRowClick: enableRowClick,
+          enableDoubleClick: enableDoubleClick || true,
+          enableRightClick: enableRightClick || true,
+          rowClickHandler: rowClickHandler,
+        }
+    }
+  }
+
+  const behaviorConfig = handleVariantBehavior(variant)
+  const finalEnableRowClick = behaviorConfig.enableRowClick || enableRowClick
+  const finalEnableDoubleClick =
+    behaviorConfig.enableDoubleClick || enableDoubleClick
+  const finalEnableRightClick =
+    behaviorConfig.enableRightClick || enableRightClick
+
+  // Override rowClickHandler if variant provides one
+  const effectiveRowClickHandler =
+    behaviorConfig.rowClickHandler || rowClickHandler
 
   // Determine which meetings to display
   const displayMeetings = filteredMeetings || meetings
 
   // Handle empty state
   if (displayMeetings.length === 0) {
-    if (variant === 'initiative') {
-      return (
-        <div className='page-section'>
-          <div className='flex items-center justify-between mb-4'>
-            <h2 className='text-lg font-semibold'>Meetings</h2>
-            {showCreateButton && onCreateMeeting && (
-              <Button onClick={onCreateMeeting} size='sm'>
-                <Plus className='h-4 w-4 mr-2' />
-                Add Meeting
-              </Button>
-            )}
-          </div>
-          <div className='text-center py-8'>
-            <Calendar className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
-            <p className='text-muted-foreground mb-4'>
-              {emptyStateMessage || 'No meetings scheduled for this initiative'}
-            </p>
-            {emptyStateAction && (
-              <Button onClick={emptyStateAction.onClick} variant='outline'>
-                <Plus className='h-4 w-4 mr-2' />
-                {emptyStateAction.label}
-              </Button>
-            )}
-          </div>
-        </div>
-      )
+    return (
+      <div className='text-center py-8'>
+        <Calendar className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
+        <p className='text-muted-foreground text-sm mb-4'>
+          {emptyStateMessage || 'No meetings scheduled.'}
+        </p>
+        {emptyStateAction && (
+          <Button onClick={emptyStateAction.onClick} variant='outline'>
+            <Plus className='h-4 w-4 mr-2' />
+            {emptyStateAction.label}
+          </Button>
+        )}
+      </div>
+    )
+  }
+
+  // Column cell rendering function
+  const renderColumnCell = (
+    column: MeetingColumnConfig,
+    meeting: MeetingWithRelations | UpcomingMeeting
+  ) => {
+    const isInstance = 'type' in meeting && meeting.type === 'instance'
+    const meetingId = isInstance
+      ? `${(meeting as MeetingInstanceWithRelations).meeting.id}-${meeting.id}`
+      : meeting.id
+
+    switch (column.type) {
+      case 'title':
+        return renderTitleCell(
+          meeting,
+          finalColumns.some(col => col.type === 'participants' && col.show),
+          router
+        )
+      case 'dateTime':
+        return renderDateTimeCell(meeting)
+      case 'time':
+        return renderTimeCell(meeting)
+      case 'scheduled':
+        return renderScheduledCell(meeting)
+      case 'duration':
+        return renderDurationCell(meeting)
+      case 'team':
+        return renderTeamCell(meeting)
+      case 'initiative':
+        return renderInitiativeCell(meeting)
+      case 'participants':
+        return renderParticipantsCell(meeting)
+      case 'actions':
+        return renderActionsCell(meeting, (e: React.MouseEvent) =>
+          handleButtonClick(e, meetingId)
+        )
+      default:
+        return <TableCell>—</TableCell>
     }
-
-    if (variant === 'dashboard') {
-      return (
-        <div className='text-center py-8'>
-          <p className='text-muted-foreground text-sm'>
-            {emptyStateMessage || 'No upcoming meetings'}
-          </p>
-        </div>
-      )
-    }
-
-    return (
-      <div className='text-muted-foreground text-sm text-center py-8'>
-        {emptyStateMessage || 'No meetings yet.'}
-      </div>
-    )
   }
 
-  // Render table based on variant
-  if (variant === 'dashboard') {
-    return (
-      <div className='rounded-md border'>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className='p-2'>Title</TableHead>
-              <TableHead className='p-2'>Date/Time</TableHead>
-              <TableHead className='p-2'>Duration</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {(displayMeetings as UpcomingMeeting[]).map(meeting => {
-              const isInstance = meeting.type === 'instance'
-              const meetingData = isInstance ? meeting.meeting : meeting
-              const meetingId = isInstance
-                ? `${meeting.meeting.id}-${meeting.id}`
-                : meeting.id
-
-              const participantCount = isInstance
-                ? Math.max(
-                    meeting.participants.length,
-                    meetingData.participants.length
-                  )
-                : meeting.participants.length
-
-              return (
-                <TableRow
-                  key={`${meeting.type}-${meeting.id}`}
-                  className='hover:bg-accent/50 cursor-pointer'
-                  onClick={() => handleRowClick(meetingId, isInstance)}
-                >
-                  <TableCell className='p-2'>
-                    <div>
-                      <div className='font-medium text-sm'>
-                        {meetingData.title}
-                      </div>
-                      <div className='flex items-center gap-2 text-xs text-muted-foreground mt-1'>
-                        <div className='flex items-center gap-1'>
-                          <Users className='h-3 w-3 flex-shrink-0' />
-                          {participantCount} participant
-                          {participantCount !== 1 ? 's' : ''}
-                        </div>
-                        {meetingData.team && (
-                          <span className='px-1.5 py-0.5 bg-secondary/50 rounded text-xs'>
-                            {meetingData.team.name}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className='p-2'>
-                    <div className='flex items-center gap-1 text-sm'>
-                      <Calendar className='h-3 w-3 text-muted-foreground flex-shrink-0' />
-                      <span className='font-semibold'>
-                        {formatDateTime(meeting.scheduledAt)}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className='p-2'>
-                    {meetingData.duration ? (
-                      <div className='flex items-center gap-1 text-sm'>
-                        <Clock className='h-3 w-3 text-muted-foreground flex-shrink-0' />
-                        {formatDuration(meetingData.duration)}
-                      </div>
-                    ) : (
-                      <span className='text-muted-foreground text-sm'>—</span>
-                    )}
-                  </TableCell>
-                </TableRow>
-              )
-            })}
-          </TableBody>
-        </Table>
-      </div>
-    )
-  }
-
-  if (variant === 'initiative') {
-    return (
-      <div className='page-section'>
-        <div className='flex items-center justify-between mb-4'>
-          <h2 className='text-lg font-semibold'>
-            Meetings ({(displayMeetings as MeetingWithRelations[]).length})
-          </h2>
-          {showCreateButton && onCreateMeeting && (
-            <Button onClick={onCreateMeeting} size='sm'>
-              <Plus className='h-4 w-4 mr-2' />
-              Add Meeting
-            </Button>
-          )}
-        </div>
-
-        <div className='rounded-md border'>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Date & Time</TableHead>
-                <TableHead>Team</TableHead>
-                <TableHead className='w-[50px]'></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {(displayMeetings as MeetingWithRelations[]).map(meeting => (
-                <TableRow
-                  key={meeting.id}
-                  className='hover:bg-accent/50 cursor-pointer'
-                  onClick={() => handleRowClick(meeting.id)}
-                >
-                  <TableCell className='font-medium text-foreground'>
-                    <div className='space-y-1'>
-                      <div className='flex items-center gap-2'>
-                        <Calendar className='h-4 w-4 text-muted-foreground flex-shrink-0' />
-                        {meeting.title}
-                      </div>
-                      <div className='flex items-center gap-3 text-xs text-muted-foreground ml-6'>
-                        {getStatusBadge(meeting)}
-                        <div className='flex items-center gap-1'>
-                          <Clock className='h-3 w-3 flex-shrink-0' />
-                          {formatDuration(meeting.duration)}
-                        </div>
-                        <div className='flex items-center gap-1'>
-                          <Users className='h-3 w-3 flex-shrink-0' />
-                          {meeting.participants.length} participant
-                          {meeting.participants.length !== 1 ? 's' : ''}
-                        </div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className='text-muted-foreground'>
-                    <div className='space-y-1'>
-                      <div className='font-medium'>
-                        {formatDate(meeting.scheduledAt)}
-                      </div>
-                      <div className='text-sm'>
-                        {formatTime(meeting.scheduledAt)}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className='text-muted-foreground'>
-                    {meeting.team ? (
-                      <div className='flex items-center gap-1'>
-                        <Building2 className='h-3 w-3 flex-shrink-0' />
-                        {meeting.team.name}
-                      </div>
-                    ) : (
-                      '—'
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          className='h-8 w-8 p-0'
-                          onClick={e => e.stopPropagation()}
-                        >
-                          <MoreHorizontal className='h-4 w-4' />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align='end'>
-                        <DropdownMenuItem
-                          onClick={e => {
-                            e.stopPropagation()
-                            handleRowClick(meeting.id)
-                          }}
-                        >
-                          <Eye className='h-4 w-4 mr-2' />
-                          View
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={e => {
-                            e.stopPropagation()
-                            router.push(`/meetings/${meeting.id}/edit`)
-                          }}
-                        >
-                          <Edit className='h-4 w-4 mr-2' />
-                          Edit
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
-    )
-  }
-
-  // Full variant (default)
+  // Render the dynamic table
   return (
     <div className='rounded-md border'>
       <Table>
         <TableHeader>
-          <TableRow className='hover:bg-accent/50'>
-            <TableHead className='text-muted-foreground'>Title</TableHead>
-            <TableHead className='text-muted-foreground'>Scheduled</TableHead>
-            <TableHead className='text-muted-foreground'>Duration</TableHead>
-            <TableHead className='text-muted-foreground'>Team</TableHead>
-            <TableHead className='text-muted-foreground'>Initiative</TableHead>
-            <TableHead className='text-muted-foreground w-[50px]'>
-              Actions
-            </TableHead>
+          <TableRow>
+            {finalColumns.map(column => (
+              <TableHead
+                key={column.type}
+                className={column.width ? `w-[${column.width}]` : undefined}
+              >
+                {column.header}
+              </TableHead>
+            ))}
           </TableRow>
         </TableHeader>
         <TableBody>
-          {(displayMeetings as MeetingWithRelations[]).map(meeting => (
-            <TableRow
-              key={meeting.id}
-              className='hover:bg-accent/50 cursor-pointer'
-              onDoubleClick={() => handleRowDoubleClick(meeting.id)}
-              onContextMenu={e => handleRowRightClick(e, meeting.id)}
-            >
-              <TableCell className='font-medium text-foreground'>
-                <div className='flex items-center gap-2'>
-                  <Calendar className='h-4 w-4 text-muted-foreground flex-shrink-0' />
-                  {meeting.title}
-                </div>
-              </TableCell>
-              <TableCell className='text-muted-foreground'>
-                {formatDate(meeting.scheduledAt)}
-              </TableCell>
-              <TableCell className='text-muted-foreground'>
-                {formatDuration(meeting.duration || 0)}
-              </TableCell>
-              <TableCell className='text-muted-foreground'>
-                {meeting.team ? (
-                  <div className='flex items-center gap-1'>
-                    <Building2 className='h-3 w-3 flex-shrink-0' />
-                    {meeting.team.name}
-                  </div>
-                ) : (
-                  '—'
-                )}
-              </TableCell>
-              <TableCell className='text-muted-foreground'>
-                {meeting.initiative ? (
-                  <div className='flex items-center gap-1'>
-                    <Target className='h-3 w-3 flex-shrink-0' />
-                    {meeting.initiative.title}
-                  </div>
-                ) : (
-                  '—'
-                )}
-              </TableCell>
-              <TableCell>
-                <Button
-                  variant='ghost'
-                  className='h-8 w-8 p-0'
-                  onClick={e => handleButtonClick(e, meeting.id)}
-                >
-                  <MoreHorizontal className='h-4 w-4' />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
+          {displayMeetings.map(meeting => {
+            const isInstance = 'type' in meeting && meeting.type === 'instance'
+            const meetingId = isInstance
+              ? `${(meeting as MeetingInstanceWithRelations).meeting.id}-${meeting.id}`
+              : meeting.id
+
+            return (
+              <TableRow
+                key={isInstance ? `${meeting.type}-${meeting.id}` : meeting.id}
+                className={`hover:bg-accent/50 ${finalEnableRowClick ? 'cursor-pointer' : ''}`}
+                onClick={() =>
+                  finalEnableRowClick && handleRowClick(meetingId, isInstance)
+                }
+                onDoubleClick={() =>
+                  finalEnableDoubleClick && handleRowDoubleClick(meetingId)
+                }
+                onContextMenu={e =>
+                  finalEnableRightClick && handleRowRightClick(e, meetingId)
+                }
+              >
+                {finalColumns.map(column => renderColumnCell(column, meeting))}
+              </TableRow>
+            )
+          })}
         </TableBody>
       </Table>
 
       {/* Context Menu */}
       {contextMenu.visible && (
-        <div
-          className='fixed z-50 bg-popover text-popover-foreground border rounded-md shadow-lg py-1 min-w-[160px]'
-          style={{
-            left: contextMenu.x,
-            top: contextMenu.y,
-          }}
-          onClick={e => e.stopPropagation()}
-        >
-          <button
-            className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
-            onClick={() => {
-              router.push(`/meetings/${contextMenu.meetingId}`)
+        <>
+          {/* Backdrop to close menu */}
+          <div
+            className='fixed inset-0 z-40'
+            onClick={() =>
               setContextMenu(prev => ({ ...prev, visible: false }))
+            }
+          />
+
+          {/* Context Menu */}
+          <div
+            className='fixed z-50 bg-popover text-popover-foreground border rounded-md shadow-lg py-1 min-w-[160px]'
+            style={{
+              left: contextMenu.x,
+              top: contextMenu.y,
             }}
+            onClick={e => e.stopPropagation()}
           >
-            <Eye className='w-4 h-4' />
-            View
-          </button>
-          <button
-            className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
-            onClick={() => {
-              router.push(`/meetings/${contextMenu.meetingId}/edit`)
-              setContextMenu(prev => ({ ...prev, visible: false }))
-            }}
-          >
-            <Edit className='w-4 h-4' />
-            Edit
-          </button>
-          <button
-            className='w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 flex items-center gap-2'
-            onClick={() => {
-              handleDelete(contextMenu.meetingId)
-              setContextMenu(prev => ({ ...prev, visible: false }))
-            }}
-          >
-            <Trash2 className='w-4 h-4' />
-            Delete
-          </button>
-        </div>
+            <button
+              className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
+              onClick={() => {
+                router.push(`/meetings/${contextMenu.meetingId}`)
+                setContextMenu(prev => ({ ...prev, visible: false }))
+              }}
+            >
+              <Eye className='w-4 h-4' />
+              View
+            </button>
+            <button
+              className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
+              onClick={() => {
+                router.push(`/meetings/${contextMenu.meetingId}/edit`)
+                setContextMenu(prev => ({ ...prev, visible: false }))
+              }}
+            >
+              <Edit className='w-4 h-4' />
+              Edit
+            </button>
+            <button
+              className='w-full px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors flex items-center gap-2'
+              onClick={event => {
+                event.stopPropagation()
+                setContextMenu(prev => ({ ...prev, visible: false }))
+                setDeleteTargetId(contextMenu.meetingId)
+                setShowDeleteModal(true)
+              }}
+            >
+              <Trash2 className='w-4 h-4' />
+              Delete
+            </button>
+          </div>
+        </>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false)
+          setDeleteTargetId(null)
+        }}
+        onConfirm={() => {
+          if (deleteTargetId) {
+            return handleDelete(deleteTargetId)
+          }
+        }}
+        title='Delete Meeting'
+        entityName='meeting'
+      />
     </div>
   )
 }

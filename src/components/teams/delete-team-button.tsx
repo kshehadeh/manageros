@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { deleteTeam } from '@/lib/actions'
+import { DeleteModal } from '@/components/common/delete-modal'
+import { toast } from 'sonner'
 
 interface DeleteTeamButtonProps {
   teamId: string
@@ -20,24 +22,7 @@ export function DeleteTeamButton({
   hasInitiatives,
   hasChildren,
 }: DeleteTeamButtonProps) {
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
-
-  const handleDelete = async () => {
-    setIsDeleting(true)
-    try {
-      await deleteTeam(teamId)
-    } catch (error) {
-      console.error('Error deleting team:', error)
-      alert(
-        error instanceof Error
-          ? error.message
-          : 'Error deleting team. Please try again.'
-      )
-      setIsDeleting(false)
-      setShowConfirm(false)
-    }
-  }
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   // Check if team can be deleted
   const canDelete = !hasPeople && !hasInitiatives && !hasChildren
@@ -63,39 +48,38 @@ export function DeleteTeamButton({
     )
   }
 
-  if (showConfirm) {
-    return (
-      <div className='flex items-center gap-2'>
-        <Button
-          onClick={handleDelete}
-          disabled={isDeleting}
-          variant='destructive'
-          size='sm'
-        >
-          {isDeleting ? 'Deleting...' : 'Confirm Delete'}
-        </Button>
-        <Button
-          onClick={() => setShowConfirm(false)}
-          disabled={isDeleting}
-          variant='outline'
-          size='sm'
-        >
-          Cancel
-        </Button>
-      </div>
-    )
+  const handleDelete = async () => {
+    try {
+      await deleteTeam(teamId)
+      toast.success('Team deleted successfully')
+    } catch (error) {
+      console.error('Error deleting team:', error)
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to delete team'
+      )
+    }
   }
 
   return (
-    <Button
-      onClick={() => setShowConfirm(true)}
-      variant='outline'
-      size='sm'
-      className='text-destructive border-destructive hover:text-destructive-foreground hover:bg-destructive'
-      title={`Delete "${teamName}"`}
-    >
-      <Trash2 className='w-4 h-4 mr-2' />
-      Delete
-    </Button>
+    <>
+      <Button
+        onClick={() => setShowDeleteModal(true)}
+        variant='outline'
+        size='sm'
+        className='text-destructive border-destructive hover:text-destructive-foreground hover:bg-destructive'
+        title={`Delete "${teamName}"`}
+      >
+        <Trash2 className='w-4 h-4 mr-2' />
+        Delete
+      </Button>
+
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title={`Delete "${teamName}"`}
+        entityName='team'
+      />
+    </>
   )
 }

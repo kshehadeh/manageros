@@ -273,7 +273,7 @@ export function FeedbackCampaignList({
                         </Link>
                       )}
                       <button
-                        className='w-full flex items-center gap-3 px-3 py-2 text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 transition-colors text-left'
+                        className='w-full flex items-center gap-3 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors text-left'
                         onClick={() => {
                           handleDeleteCampaign(campaign.id)
                           closeDropdown()

@@ -20,7 +20,7 @@ export function PeoplePageClient({ people }: PeoplePageClientProps) {
   return (
     <div className='page-container'>
       <div className='page-header'>
-        <div className='flex items-center justify-between'>
+        <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
           <div>
             <div className='flex items-center gap-2'>
               <User className='h-6 w-6 text-muted-foreground' />
@@ -28,11 +28,11 @@ export function PeoplePageClient({ people }: PeoplePageClientProps) {
               <HelpIcon helpId='people' size='md' />
             </div>
           </div>
-          <div className='flex items-center gap-3'>
+          <div className='flex flex-wrap items-center gap-3'>
             <Button asChild variant='outline'>
               <Link href='/people/chart' className='flex items-center gap-2'>
                 <Workflow className='w-4 h-4' />
-                Chart
+                <span className='hidden sm:inline'>Chart</span>
               </Link>
             </Button>
 
@@ -44,13 +44,13 @@ export function PeoplePageClient({ people }: PeoplePageClientProps) {
                     className='flex items-center gap-2'
                   >
                     <Upload className='w-4 h-4' />
-                    Import CSV
+                    <span className='hidden sm:inline'>Import CSV</span>
                   </Link>
                 </Button>
                 <Button asChild variant='outline'>
                   <Link href='/people/new' className='flex items-center gap-2'>
                     <UserPlus className='w-4 h-4' />
-                    New Person
+                    <span className='hidden sm:inline'>New Person</span>
                   </Link>
                 </Button>
               </>

@@ -204,7 +204,7 @@ export default async function FeedbackCampaignDetailPage({
           </div>
         </div>
 
-        <div className='flex gap-6'>
+        <div className='flex flex-col lg:flex-row gap-6'>
           {/* Main Content */}
           <div className='flex-1 space-y-6'>
             {/* Campaign Details */}
@@ -292,7 +292,7 @@ export default async function FeedbackCampaignDetailPage({
           </div>
 
           {/* Sidebar */}
-          <div className='w-80 space-y-6'>
+          <div className='w-full lg:w-80 space-y-6'>
             {/* Invited People */}
             <div className='page-section'>
               <h2 className='page-section-title'>

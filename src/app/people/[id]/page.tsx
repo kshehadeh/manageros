@@ -364,7 +364,7 @@ export default async function PersonDetailPage({
           </div>
         </div>
 
-        <div className='flex gap-6'>
+        <div className='flex flex-col lg:flex-row gap-6'>
           {/* Main Content */}
           <div className='flex-1 space-y-6'>
             {/* Synopsis, Feedback, and Feedback Campaigns Side by Side */}
@@ -669,7 +669,7 @@ export default async function PersonDetailPage({
           </div>
 
           {/* Right Sidebar */}
-          <div className='w-80 space-y-6'>
+          <div className='w-full lg:w-80 space-y-6'>
             {/* Direct Reports */}
             {personWithRelations.reports.length > 0 && (
               <section>

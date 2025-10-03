@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition, useEffect } from 'react'
+import { useState, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { MoreHorizontal, Edit, Eye, Trash2, Calendar } from 'lucide-react'
 import {
@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { deleteMeetingInstance } from '@/lib/actions/meeting-instance'
 import { toast } from 'sonner'
+import { ConfirmAction } from '@/components/common/confirm-action'
 import {
   MeetingInstance,
   Person,
@@ -44,7 +45,7 @@ export function MeetingInstanceTable({
   instances,
   meetingId,
 }: MeetingInstanceTableProps) {
-  const [_isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const router = useRouter()
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({
     visible: false,
@@ -67,21 +68,11 @@ export function MeetingInstanceTable({
   }, [contextMenu.visible])
 
   const handleDelete = async (instanceId: string) => {
-    if (confirm('Are you sure you want to delete this meeting instance?')) {
-      startTransition(async () => {
-        try {
-          await deleteMeetingInstance(instanceId)
-          toast.success('Meeting instance deleted successfully')
-        } catch (error) {
-          console.error('Failed to delete meeting instance:', error)
-          toast.error(
-            error instanceof Error
-              ? error.message
-              : 'Failed to delete meeting instance'
-          )
-        }
-      })
-    }
+    await deleteMeetingInstance(instanceId)
+    toast.success('Meeting instance deleted successfully')
+    startTransition(() => {
+      router.refresh()
+    })
   }
 
   const handleRowDoubleClick = (instanceId: string) => {
@@ -274,16 +265,68 @@ export function MeetingInstanceTable({
             <Edit className='w-4 h-4' />
             Edit
           </button>
-          <button
-            className='w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 flex items-center gap-2'
-            onClick={() => {
-              handleDelete(contextMenu.instanceId)
-              setContextMenu(prev => ({ ...prev, visible: false }))
+          <ConfirmAction
+            onConfirm={() => handleDelete(contextMenu.instanceId)}
+            onError={error => {
+              console.error('Failed to delete meeting instance:', error)
+              toast.error(
+                error instanceof Error
+                  ? error.message
+                  : 'Failed to delete meeting instance'
+              )
             }}
-          >
-            <Trash2 className='w-4 h-4' />
-            Delete
-          </button>
+            onOpenChange={open => {
+              if (!open) {
+                setContextMenu(prev => ({ ...prev, visible: false }))
+              }
+            }}
+            renderTrigger={({ open, isPending }) => (
+              <button
+                className='w-full px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors flex items-center gap-2'
+                onClick={event => {
+                  event.stopPropagation()
+                  open()
+                }}
+                disabled={isPending}
+              >
+                <Trash2 className='w-4 h-4' />
+                Delete
+              </button>
+            )}
+            renderConfirm={({ confirm, cancel, isPending }) => (
+              <div
+                onClick={event => event.stopPropagation()}
+                className='px-3 py-2 space-y-2'
+              >
+                <div className='text-sm font-medium text-destructive'>
+                  Delete this meeting instance?
+                </div>
+                <div className='text-xs text-muted-foreground'>
+                  This action cannot be undone.
+                </div>
+                <div className='flex gap-2'>
+                  <Button
+                    onClick={confirm}
+                    disabled={isPending}
+                    variant='destructive'
+                    size='sm'
+                    className='flex-1'
+                  >
+                    {isPending ? 'Deleting...' : 'Delete'}
+                  </Button>
+                  <Button
+                    onClick={cancel}
+                    disabled={isPending}
+                    variant='outline'
+                    size='sm'
+                    className='flex-1'
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          />
         </div>
       )}
     </div>

@@ -67,6 +67,7 @@ import { toast } from 'sonner'
 import type { Person, Initiative } from '@prisma/client'
 import type { TaskListItem } from '@/lib/task-list-select'
 import { TaskQuickEditDialog } from '@/components/tasks/task-quick-edit-dialog'
+import { DeleteModal } from '@/components/common/delete-modal'
 
 interface FilterState {
   keyword: string
@@ -126,6 +127,8 @@ export function TaskTable({
     taskId: '',
     triggerType: 'rightClick',
   })
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [updatingTasks, setUpdatingTasks] = useState<Set<string>>(new Set())
   const [editing, setEditing] = useState<EditingState>({})
   const [optimisticTasks, addOptimisticTask] = useOptimistic(
@@ -414,23 +417,21 @@ export function TaskTable({
     }
   }
 
-  const handleDelete = async (taskId: string) => {
-    if (confirm('Are you sure you want to delete this task?')) {
-      startTransition(async () => {
-        try {
-          await deleteTask(taskId)
-          toast.success('Task deleted successfully')
-          if (onTaskUpdate) {
-            onTaskUpdate()
-          }
-        } catch (error) {
-          console.error('Failed to delete task:', error)
-          toast.error(
-            error instanceof Error ? error.message : 'Failed to delete task'
-          )
+  const handleDeleteConfirm = async (taskId: string) => {
+    startTransition(async () => {
+      try {
+        await deleteTask(taskId)
+        toast.success('Task deleted successfully')
+        if (onTaskUpdate) {
+          onTaskUpdate()
         }
-      })
-    }
+      } catch (error) {
+        console.error('Failed to delete task:', error)
+        toast.error(
+          error instanceof Error ? error.message : 'Failed to delete task'
+        )
+      }
+    })
   }
 
   const handleEditStart = (
@@ -1085,10 +1086,11 @@ export function TaskTable({
               Quick Edit
             </button>
             <button
-              className='w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 flex items-center gap-2'
+              className='w-full px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors flex items-center gap-2'
               onClick={() => {
-                handleDelete(contextMenu.taskId)
                 setContextMenu(prev => ({ ...prev, visible: false }))
+                setDeleteTargetId(contextMenu.taskId)
+                setShowDeleteModal(true)
               }}
             >
               <Trash2 className='w-4 h-4' />
@@ -1123,6 +1125,22 @@ export function TaskTable({
             />
           )
         })()}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false)
+          setDeleteTargetId(null)
+        }}
+        onConfirm={() => {
+          if (deleteTargetId) {
+            return handleDeleteConfirm(deleteTargetId)
+          }
+        }}
+        title='Delete Task'
+        entityName='task'
+      />
     </div>
   )
 }

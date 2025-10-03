@@ -224,7 +224,7 @@ export function GroupedInitiativesPageClient({
   return (
     <div className='space-y-6'>
       {/* Filter and Grouping Controls */}
-      <div className='space-y-4 px-3 md:px-0'>
+      <div className='space-y-4 px-0'>
         <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4'>
           {/* Filter Bar */}
           <div className='flex-1'>
@@ -285,7 +285,7 @@ export function GroupedInitiativesPageClient({
       <div className='space-y-6'>
         {groupedInitiatives.map(group => (
           <div key={group.key} className='space-y-4'>
-            <div className='flex items-center justify-between px-3 md:px-0'>
+            <div className='flex items-center justify-between px-0'>
               <div className='flex items-center gap-3'>
                 {groupingOption === 'rag' && (
                   <div

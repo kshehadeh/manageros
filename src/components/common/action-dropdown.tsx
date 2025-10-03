@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -46,10 +47,13 @@ export function ActionDropdown({
   const [open, setOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const setOpenState = (value: boolean) => {
-    setOpen(value)
-    onOpenChange?.(value)
-  }
+  const setOpenState = useCallback(
+    (value: boolean) => {
+      setOpen(value)
+      onOpenChange?.(value)
+    },
+    [onOpenChange]
+  )
 
   const toggle = (event: ReactMouseEvent) => {
     event.stopPropagation()
@@ -77,7 +81,7 @@ export function ActionDropdown({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [open])
+  }, [open, setOpenState])
 
   return (
     <div className={cn('relative', className)} ref={dropdownRef}>

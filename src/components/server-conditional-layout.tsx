@@ -77,7 +77,7 @@ export default async function ServerConditionalLayout({
                 <Sidebar navigation={filteredNavigation} />
                 <div className='flex-1 flex flex-col overflow-hidden lg:ml-0'>
                   <TopBar />
-                  <main className='flex-1 overflow-auto py-3 px-0 md:p-6'>
+                  <main className='flex-1 overflow-auto p-3 md:p-6'>
                     <div className='w-full'>{children}</div>
                   </main>
                 </div>

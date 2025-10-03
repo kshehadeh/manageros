@@ -3,7 +3,9 @@
 import Link from 'next/link'
 import { Edit, Trash2 } from 'lucide-react'
 import { ActionDropdown } from '@/components/common/action-dropdown'
+import { ConfirmAction } from '@/components/common/confirm-action'
 import { deleteJobRole } from '@/lib/actions'
+import { toast } from 'sonner'
 
 interface JobRoleActionsDropdownProps {
   jobRoleId: string
@@ -17,19 +19,15 @@ export function JobRoleActionsDropdown({
   size = 'default',
 }: JobRoleActionsDropdownProps) {
   const handleDelete = async () => {
-    if (
-      !confirm(
-        `Are you sure you want to delete the job role "${jobRoleTitle}"? This action cannot be undone.`,
-      )
-    ) {
-      return
-    }
-
     try {
       await deleteJobRole(jobRoleId)
+      toast.success('Job role deleted successfully')
       window.location.href = '/organization/job-roles'
     } catch (error) {
       console.error('Error deleting job role:', error)
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to delete job role'
+      )
     }
   }
 
@@ -45,13 +43,22 @@ export function JobRoleActionsDropdown({
             <Edit className='h-4 w-4' />
             Edit Job Role
           </Link>
-          <button
-            onClick={handleDelete}
-            className='flex w-full items-center gap-3 px-3 py-2 text-sm text-destructive hover:bg-accent hover:text-destructive transition-colors'
-          >
-            <Trash2 className='h-4 w-4' />
-            Delete Job Role
-          </button>
+          <div className='border-t border-border my-1' />
+
+          <ConfirmAction
+            onConfirm={handleDelete}
+            renderTrigger={({ open }) => (
+              <button
+                className='flex w-full items-center gap-3 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors text-left'
+                onClick={open}
+              >
+                <Trash2 className='h-4 w-4' />
+                Delete Job Role
+              </button>
+            )}
+            confirmMessage={`Are you sure you want to delete "${jobRoleTitle}"?`}
+            confirmDescription='This action cannot be undone.'
+          />
         </div>
       )}
     </ActionDropdown>

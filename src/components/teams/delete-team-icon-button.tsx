@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { deleteTeam } from '@/lib/actions'
+import { DeleteModal } from '@/components/common/delete-modal'
+import { toast } from 'sonner'
 
 interface DeleteTeamIconButtonProps {
   teamId: string
@@ -23,28 +25,10 @@ export function DeleteTeamIconButton({
   hasInitiatives,
   hasChildren,
   size = 'sm',
-  // keep outline by default; destructive used only in confirm state
   variant = 'outline',
   className = '',
 }: DeleteTeamIconButtonProps) {
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
-
-  const handleDelete = async () => {
-    setIsDeleting(true)
-    try {
-      await deleteTeam(teamId)
-    } catch (error) {
-      console.error('Error deleting team:', error)
-      alert(
-        error instanceof Error
-          ? error.message
-          : 'Error deleting team. Please try again.'
-      )
-      setIsDeleting(false)
-      setShowConfirm(false)
-    }
-  }
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   // Check if team can be deleted
   const canDelete = !hasPeople && !hasInitiatives && !hasChildren
@@ -70,40 +54,38 @@ export function DeleteTeamIconButton({
     )
   }
 
-  if (showConfirm) {
-    return (
-      <div className='flex items-center gap-2'>
-        <Button
-          onClick={handleDelete}
-          disabled={isDeleting}
-          size='default'
-          variant='destructive'
-          className={className}
-        >
-          {isDeleting ? 'Deleting...' : 'Confirm'}
-        </Button>
-        <Button
-          onClick={() => setShowConfirm(false)}
-          disabled={isDeleting}
-          size='default'
-          variant='outline'
-        >
-          Cancel
-        </Button>
-      </div>
-    )
+  const handleDelete = async () => {
+    try {
+      await deleteTeam(teamId)
+      toast.success('Team deleted successfully')
+    } catch (error) {
+      console.error('Error deleting team:', error)
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to delete team'
+      )
+    }
   }
 
   return (
-    <Button
-      onClick={() => setShowConfirm(true)}
-      size={size}
-      variant={variant}
-      className={className}
-      title={`Delete "${teamName}"`}
-    >
-      <Trash2 className='w-4 h-4' />
-      <span className='sr-only'>Delete Team</span>
-    </Button>
+    <>
+      <Button
+        onClick={() => setShowDeleteModal(true)}
+        size={size}
+        variant={variant}
+        className={className}
+        title={`Delete "${teamName}"`}
+      >
+        <Trash2 className='w-4 h-4' />
+        <span className='sr-only'>Delete Team</span>
+      </Button>
+
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title={`Delete "${teamName}"`}
+        entityName='team'
+      />
+    </>
   )
 }

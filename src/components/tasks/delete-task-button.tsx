@@ -5,57 +5,48 @@ import { useRouter } from 'next/navigation'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { deleteTask } from '@/lib/actions'
+import { DeleteModal } from '@/components/common/delete-modal'
+import { toast } from 'sonner'
 
 interface DeleteTaskButtonProps {
   taskId: string
 }
 
 export function DeleteTaskButton({ taskId }: DeleteTaskButtonProps) {
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
   const router = useRouter()
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   async function handleDelete() {
-    setIsDeleting(true)
     try {
       await deleteTask(taskId)
-      // Redirect to tasks list page after successful deletion
+      toast.success('Task deleted successfully')
       router.push('/tasks')
     } catch (error) {
       console.error('Error deleting task:', error)
-      alert('Error deleting task. Please try again.')
-    } finally {
-      setIsDeleting(false)
-      setShowConfirm(false)
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to delete task'
+      )
     }
   }
 
-  if (showConfirm) {
-    return (
-      <div className='flex items-center gap-2'>
-        <Button
-          onClick={handleDelete}
-          disabled={isDeleting}
-          variant='destructive'
-          size='default'
-        >
-          {isDeleting ? 'Deleting...' : 'Confirm Delete'}
-        </Button>
-        <Button
-          onClick={() => setShowConfirm(false)}
-          variant='outline'
-          size='default'
-        >
-          Cancel
-        </Button>
-      </div>
-    )
-  }
-
   return (
-    <Button onClick={() => setShowConfirm(true)} variant='outline' size='icon'>
-      <Trash2 className='w-4 h-4' />
-      <span className='sr-only'>Delete Task</span>
-    </Button>
+    <>
+      <Button
+        onClick={() => setShowDeleteModal(true)}
+        variant='outline'
+        size='icon'
+      >
+        <Trash2 className='w-4 h-4' />
+        <span className='sr-only'>Delete Task</span>
+      </Button>
+
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title='Delete Task'
+        entityName='task'
+      />
+    </>
   )
 }

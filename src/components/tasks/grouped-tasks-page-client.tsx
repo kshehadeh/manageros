@@ -259,7 +259,7 @@ export function GroupedTasksPageClient({
   return (
     <div className='space-y-6'>
       {/* Filter and Grouping Controls */}
-      <div className='space-y-4 px-3 md:px-0'>
+      <div className='space-y-4 px-0'>
         <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4'>
           {/* Filter Bar */}
           <div className='flex-1'>
@@ -325,7 +325,7 @@ export function GroupedTasksPageClient({
       <div className='space-y-6'>
         {groupedTasks.map(group => (
           <div key={group.key} className='space-y-4'>
-            <div className='flex items-center justify-between px-3 md:px-0'>
+            <div className='flex items-center justify-between px-0'>
               <div className='flex items-center gap-3'>
                 {getGroupIcon(groupingOption)}
                 <h3 className='text-lg font-semibold'>{group.label}</h3>

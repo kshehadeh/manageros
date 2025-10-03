@@ -251,9 +251,6 @@ export async function deleteInitiative(id: string) {
 
   // Revalidate the initiatives page
   revalidatePath('/initiatives')
-
-  // Redirect to the initiatives list
-  redirect('/initiatives')
 }
 
 export async function getInitiatives() {

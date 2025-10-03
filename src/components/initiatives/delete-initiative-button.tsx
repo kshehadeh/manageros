@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { deleteInitiative } from '@/lib/actions'
+import { DeleteModal } from '@/components/common/delete-modal'
+import { toast } from 'sonner'
 
 interface DeleteInitiativeButtonProps {
   initiativeId: string
@@ -12,51 +14,38 @@ interface DeleteInitiativeButtonProps {
 export function DeleteInitiativeButton({
   initiativeId,
 }: DeleteInitiativeButtonProps) {
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const handleDelete = async () => {
-    setIsDeleting(true)
     try {
       await deleteInitiative(initiativeId)
+      toast.success('Initiative deleted successfully')
     } catch (error) {
       console.error('Error deleting initiative:', error)
-      setIsDeleting(false)
-      setShowConfirm(false)
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to delete initiative'
+      )
     }
   }
 
-  if (showConfirm) {
-    return (
-      <div className='flex items-center gap-2'>
-        <Button
-          onClick={handleDelete}
-          disabled={isDeleting}
-          variant='destructive'
-          size='default'
-        >
-          {isDeleting ? 'Deleting...' : 'Confirm Delete'}
-        </Button>
-        <Button
-          onClick={() => setShowConfirm(false)}
-          disabled={isDeleting}
-          variant='outline'
-          size='default'
-        >
-          Cancel
-        </Button>
-      </div>
-    )
-  }
-
   return (
-    <Button
-      onClick={() => setShowConfirm(true)}
-      variant='outline'
-      size='icon'
-    >
-      <Trash2 className='w-4 h-4' />
-      <span className='sr-only'>Delete Initiative</span>
-    </Button>
+    <>
+      <Button
+        onClick={() => setShowDeleteModal(true)}
+        variant='outline'
+        size='icon'
+      >
+        <Trash2 className='w-4 h-4' />
+        <span className='sr-only'>Delete Initiative</span>
+      </Button>
+
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title='Delete Initiative'
+        entityName='initiative'
+      />
+    </>
   )
 }

@@ -14,6 +14,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { updateCampaignStatus, deleteFeedbackCampaign } from '@/lib/actions'
 import { ActionDropdown } from '@/components/common/action-dropdown'
+import { ConfirmAction } from '@/components/common/confirm-action'
+import { toast } from 'sonner'
 
 interface FeedbackCampaignActionsDropdownProps {
   campaignId: string
@@ -33,12 +35,11 @@ export function FeedbackCampaignActionsDropdown({
   onCampaignUpdate,
 }: FeedbackCampaignActionsDropdownProps) {
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null)
-  const [deletingCampaign, setDeletingCampaign] = useState(false)
   const [copiedLink, setCopiedLink] = useState(false)
 
   const handleStatusUpdate = async (
     newStatus: 'active' | 'completed' | 'cancelled',
-    close: () => void,
+    close: () => void
   ) => {
     setUpdatingStatus(newStatus)
     try {
@@ -52,24 +53,18 @@ export function FeedbackCampaignActionsDropdown({
     }
   }
 
-  const handleDeleteCampaign = async (close: () => void) => {
-    if (
-      !confirm(
-        'Are you sure you want to delete this campaign? This action cannot be undone.',
-      )
-    ) {
-      return
-    }
-
-    setDeletingCampaign(true)
+  const handleDeleteCampaign = async () => {
     try {
       await deleteFeedbackCampaign(campaignId)
+      toast.success('Feedback campaign deleted successfully')
       onCampaignUpdate?.()
     } catch (error) {
       console.error('Failed to delete campaign:', error)
-    } finally {
-      setDeletingCampaign(false)
-      close()
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to delete feedback campaign'
+      )
     }
   }
 
@@ -167,16 +162,22 @@ export function FeedbackCampaignActionsDropdown({
 
           <div className='border-t border-border my-1' />
 
-          <Button
-            onClick={() => handleDeleteCampaign(close)}
-            disabled={deletingCampaign}
-            variant='destructive'
-            size='sm'
-            className='mx-3 my-2 flex w-[calc(100%-1.5rem)] items-center justify-center gap-2'
-          >
-            <Trash2 className='w-4 h-4' />
-            {deletingCampaign ? 'Deleting…' : 'Delete Campaign'}
-          </Button>
+          <ConfirmAction
+            onConfirm={handleDeleteCampaign}
+            renderTrigger={({ open }) => (
+              <Button
+                onClick={open}
+                variant='destructive'
+                size='sm'
+                className='mx-3 my-2 flex w-[calc(100%-1.5rem)] items-center justify-center gap-2'
+              >
+                <Trash2 className='w-4 h-4' />
+                Delete Campaign
+              </Button>
+            )}
+            confirmMessage='Are you sure you want to delete this campaign?'
+            confirmDescription='This action cannot be undone.'
+          />
         </div>
       )}
     </ActionDropdown>

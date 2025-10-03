@@ -24,6 +24,7 @@ import { deleteInitiative } from '@/lib/actions'
 import { toast } from 'sonner'
 import { Person, Team } from '@prisma/client'
 import { calculateInitiativeCompletionPercentage } from '@/lib/completion-utils'
+import { DeleteModal } from '@/components/common/delete-modal'
 
 interface FilterState {
   keyword: string
@@ -106,6 +107,8 @@ export function InitiativesTable({
     initiativeId: '',
     triggerType: 'rightClick',
   })
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [filters, setFilters] = useState<FilterState>({
     keyword: '',
     ownerId: 'all',
@@ -219,22 +222,18 @@ export function InitiativesTable({
     }
   }, [contextMenu.visible])
 
-  const handleDelete = async (initiativeId: string) => {
-    if (confirm('Are you sure you want to delete this initiative?')) {
-      startTransition(async () => {
-        try {
-          await deleteInitiative(initiativeId)
-          toast.success('Initiative deleted successfully')
-        } catch (error) {
-          console.error('Failed to delete initiative:', error)
-          toast.error(
-            error instanceof Error
-              ? error.message
-              : 'Failed to delete initiative'
-          )
-        }
-      })
-    }
+  const handleDeleteConfirm = async (initiativeId: string) => {
+    startTransition(async () => {
+      try {
+        await deleteInitiative(initiativeId)
+        toast.success('Initiative deleted successfully')
+      } catch (error) {
+        console.error('Failed to delete initiative:', error)
+        toast.error(
+          error instanceof Error ? error.message : 'Failed to delete initiative'
+        )
+      }
+    })
   }
 
   const handleRowDoubleClick = (initiativeId: string) => {
@@ -289,7 +288,7 @@ export function InitiativesTable({
     <div className='space-y-4'>
       {/* Filter Controls */}
       {!hideFilters && (
-        <div className='px-3 md:px-0'>
+        <div className='px-0'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-2'>
               <Button
@@ -597,10 +596,11 @@ export function InitiativesTable({
             Edit
           </button>
           <button
-            className='w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 flex items-center gap-2'
+            className='w-full px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors flex items-center gap-2'
             onClick={() => {
-              handleDelete(contextMenu.initiativeId)
               setContextMenu(prev => ({ ...prev, visible: false }))
+              setDeleteTargetId(contextMenu.initiativeId)
+              setShowDeleteModal(true)
             }}
           >
             <Trash2 className='w-4 h-4' />
@@ -608,6 +608,22 @@ export function InitiativesTable({
           </button>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false)
+          setDeleteTargetId(null)
+        }}
+        onConfirm={() => {
+          if (deleteTargetId) {
+            return handleDeleteConfirm(deleteTargetId)
+          }
+        }}
+        title='Delete Initiative'
+        entityName='initiative'
+      />
     </div>
   )
 }

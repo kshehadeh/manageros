@@ -41,6 +41,7 @@ import { toast } from 'sonner'
 import { Person } from '@/types/person'
 import { FeedbackForm } from '@/components/feedback/feedback-form'
 import { OneOnOneForm } from '@/components/oneonone-form'
+import { DeleteModal } from '@/components/common/delete-modal'
 
 interface PeopleTableProps {
   people: Person[]
@@ -90,6 +91,8 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
     personId: '',
     triggerType: 'rightClick',
   })
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [feedbackModal, setFeedbackModal] = useState<FeedbackModalState>({
     visible: false,
     personId: '',
@@ -195,20 +198,18 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
     })
   }
 
-  const handleDelete = async (personId: string) => {
-    if (confirm('Are you sure you want to delete this person?')) {
-      startTransition(async () => {
-        try {
-          await deletePerson(personId)
-          toast.success('Person deleted successfully')
-        } catch (error) {
-          console.error('Failed to delete person:', error)
-          toast.error(
-            error instanceof Error ? error.message : 'Failed to delete person'
-          )
-        }
-      })
-    }
+  const handleDeleteConfirm = async (personId: string) => {
+    startTransition(async () => {
+      try {
+        await deletePerson(personId)
+        toast.success('Person deleted successfully')
+      } catch (error) {
+        console.error('Failed to delete person:', error)
+        toast.error(
+          error instanceof Error ? error.message : 'Failed to delete person'
+        )
+      }
+    })
   }
 
   const handleRowDoubleClick = (personId: string) => {
@@ -578,10 +579,11 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
             Add 1:1
           </button>
           <button
-            className='w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 flex items-center gap-2'
+            className='w-full px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors flex items-center gap-2'
             onClick={() => {
-              handleDelete(contextMenu.personId)
               setContextMenu(prev => ({ ...prev, visible: false }))
+              setDeleteTargetId(contextMenu.personId)
+              setShowDeleteModal(true)
             }}
           >
             <Trash2 className='w-4 h-4' />
@@ -641,6 +643,22 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false)
+          setDeleteTargetId(null)
+        }}
+        onConfirm={() => {
+          if (deleteTargetId) {
+            return handleDeleteConfirm(deleteTargetId)
+          }
+        }}
+        title='Delete Person'
+        entityName='person'
+      />
     </div>
   )
 }

@@ -85,7 +85,7 @@ export function SplitTasksPageClient({
 
       {/* Incomplete Tasks Section */}
       <div className='space-y-4'>
-        <div className='flex items-center justify-between px-3 md:px-0'>
+        <div className='flex items-center justify-between px-0'>
           <h3 className='text-lg font-semibold'>
             Incomplete Tasks ({incompleteTasks.length})
           </h3>
@@ -101,7 +101,7 @@ export function SplitTasksPageClient({
       {/* Completed Tasks Section */}
       {completedTasks.length > 0 && (
         <div className='space-y-4'>
-          <div className='flex items-center justify-between px-3 md:px-0'>
+          <div className='flex items-center justify-between px-0'>
             <h3 className='text-lg font-semibold'>
               Recently Completed ({completedTasks.length})
             </h3>

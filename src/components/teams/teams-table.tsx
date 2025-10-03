@@ -33,6 +33,7 @@ import {
 import { deleteTeam } from '@/lib/actions'
 import { toast } from 'sonner'
 import { TeamWithCounts } from '@/types/team'
+import { DeleteModal } from '@/components/common/delete-modal'
 
 interface SortState {
   column: string | null
@@ -51,6 +52,8 @@ export function TeamsTable({ teams, onTeamUpdate }: TeamsTableProps) {
     column: null,
     direction: 'asc',
   })
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
   // Handle column sorting
   const handleSort = (column: string) => {
@@ -130,23 +133,21 @@ export function TeamsTable({ teams, onTeamUpdate }: TeamsTableProps) {
     return sorted
   }, [teams, sorting])
 
-  const handleDelete = (teamId: string, teamName: string) => {
-    if (confirm(`Are you sure you want to delete "${teamName}"?`)) {
-      startTransition(async () => {
-        try {
-          await deleteTeam(teamId)
-          toast.success('Team deleted successfully')
-          if (onTeamUpdate) {
-            onTeamUpdate()
-          }
-        } catch (error) {
-          console.error('Error deleting team:', error)
-          toast.error(
-            error instanceof Error ? error.message : 'Failed to delete team'
-          )
+  const handleDeleteConfirm = (teamId: string) => {
+    startTransition(async () => {
+      try {
+        await deleteTeam(teamId)
+        toast.success('Team deleted successfully')
+        if (onTeamUpdate) {
+          onTeamUpdate()
         }
-      })
-    }
+      } catch (error) {
+        console.error('Error deleting team:', error)
+        toast.error(
+          error instanceof Error ? error.message : 'Failed to delete team'
+        )
+      }
+    })
   }
 
   const handleRowClick = (teamId: string) => {
@@ -285,7 +286,10 @@ export function TeamsTable({ teams, onTeamUpdate }: TeamsTableProps) {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handleDelete(team.id, team.name)}
+                        onClick={() => {
+                          setDeleteTargetId(team.id)
+                          setShowDeleteModal(true)
+                        }}
                         className='text-destructive focus:text-destructive'
                       >
                         <Trash2 className='h-4 w-4' />
@@ -305,6 +309,22 @@ export function TeamsTable({ teams, onTeamUpdate }: TeamsTableProps) {
           No teams found.
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false)
+          setDeleteTargetId(null)
+        }}
+        onConfirm={() => {
+          if (deleteTargetId) {
+            return handleDeleteConfirm(deleteTargetId)
+          }
+        }}
+        title='Delete Team'
+        entityName='team'
+      />
     </div>
   )
 }
