@@ -82,6 +82,9 @@ interface InitiativesTableProps {
   people: Person[]
   teams: Team[]
   hideFilters?: boolean
+  compact?: boolean // For dashboard view
+  hideOwner?: boolean // Hide owner column for compact view
+  hideActions?: boolean // Hide actions column for compact view
 }
 
 interface ContextMenuState {
@@ -97,6 +100,9 @@ export function InitiativesTable({
   people,
   teams,
   hideFilters = false,
+  compact = false,
+  hideOwner = false,
+  hideActions = false,
 }: InitiativesTableProps) {
   const [_isPending, startTransition] = useTransition()
   const router = useRouter()
@@ -278,8 +284,10 @@ export function InitiativesTable({
 
   if (initiatives.length === 0) {
     return (
-      <div className='text-muted-foreground text-sm text-center py-8'>
-        No initiatives yet.
+      <div className='text-center py-8'>
+        <p className='text-muted-foreground text-sm'>
+          {compact ? 'No open initiatives' : 'No initiatives yet.'}
+        </p>
       </div>
     )
   }
@@ -490,23 +498,37 @@ export function InitiativesTable({
       )}
 
       {/* Initiative Table */}
-      <div className='rounded-md border -mx-3 md:mx-0'>
+      <div className={`rounded-md border ${compact ? '' : '-mx-3 md:mx-0'}`}>
         <Table>
           <TableHeader>
             <TableRow className='hover:bg-accent/50'>
-              <TableHead className='text-muted-foreground w-[60px]'>
+              <TableHead
+                className={`text-muted-foreground ${compact ? 'w-8 p-2' : 'w-[60px]'}`}
+              >
                 RAG
               </TableHead>
-              <TableHead className='text-muted-foreground'>Title</TableHead>
-              <TableHead className='text-muted-foreground hidden md:table-cell'>
+              <TableHead
+                className={`text-muted-foreground ${compact ? 'p-2' : ''}`}
+              >
+                {compact ? 'Initiative' : 'Title'}
+              </TableHead>
+              <TableHead
+                className={`text-muted-foreground hidden md:table-cell ${compact ? 'p-2' : ''}`}
+              >
                 Team
               </TableHead>
-              <TableHead className='text-muted-foreground hidden md:table-cell'>
-                Owner
-              </TableHead>
-              <TableHead className='text-muted-foreground w-[50px]'>
-                Actions
-              </TableHead>
+              {!hideOwner && (
+                <TableHead className='text-muted-foreground hidden md:table-cell'>
+                  Owner
+                </TableHead>
+              )}
+              {!hideActions && (
+                <TableHead
+                  className={`text-muted-foreground ${compact ? 'text-right p-2' : 'w-[50px]'}`}
+                >
+                  {compact ? 'Progress' : 'Actions'}
+                </TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -514,51 +536,84 @@ export function InitiativesTable({
               <TableRow
                 key={initiative.id}
                 className='hover:bg-accent/50 cursor-pointer'
-                onDoubleClick={() => handleRowDoubleClick(initiative.id)}
-                onContextMenu={e => handleRowRightClick(e, initiative.id)}
+                onClick={
+                  compact
+                    ? () => handleRowDoubleClick(initiative.id)
+                    : undefined
+                }
+                onDoubleClick={
+                  compact
+                    ? undefined
+                    : () => handleRowDoubleClick(initiative.id)
+                }
+                onContextMenu={
+                  compact
+                    ? undefined
+                    : e => handleRowRightClick(e, initiative.id)
+                }
               >
-                <TableCell className='text-muted-foreground'>
+                <TableCell
+                  className={`text-muted-foreground ${compact ? 'p-2' : ''}`}
+                >
                   <div className='flex items-center justify-center'>
                     <div
                       className={`w-3 h-3 rounded-full ${getRagColor(initiative.rag)}`}
                     />
                   </div>
                 </TableCell>
-                <TableCell className='font-medium text-foreground'>
+                <TableCell
+                  className={`font-medium text-foreground ${compact ? 'p-2' : ''}`}
+                >
                   <div>
-                    <div>{initiative.title}</div>
+                    <div className={compact ? 'font-medium' : ''}>
+                      {initiative.title}
+                    </div>
                     <div className='text-xs text-muted-foreground mt-1'>
                       {initiative.objectives.length} objectives •{' '}
                       {initiative._count.tasks} tasks •{' '}
                       {initiative._count.checkIns} check-ins
                     </div>
-                    <div className='mt-1'>
-                      <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
-                        {calculateInitiativeCompletionPercentage(initiative)}%
-                        complete
-                      </span>
-                    </div>
+                    {!compact && (
+                      <div className='mt-1'>
+                        <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
+                          {calculateInitiativeCompletionPercentage(initiative)}%
+                          complete
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </TableCell>
-                <TableCell className='text-muted-foreground hidden md:table-cell'>
+                <TableCell
+                  className={`text-muted-foreground hidden md:table-cell ${compact ? 'p-2' : ''}`}
+                >
                   {initiative.team?.name || '—'}
                 </TableCell>
-                <TableCell className='text-muted-foreground hidden md:table-cell'>
-                  {initiative.owners.length > 0
-                    ? initiative.owners
-                        .map(owner => owner.person.name)
-                        .join(', ')
-                    : '—'}
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant='ghost'
-                    className='h-8 w-8 p-0'
-                    onClick={e => handleButtonClick(e, initiative.id)}
-                  >
-                    <MoreHorizontal className='h-4 w-4' />
-                  </Button>
-                </TableCell>
+                {!hideOwner && (
+                  <TableCell className='text-muted-foreground hidden md:table-cell'>
+                    {initiative.owners.length > 0
+                      ? initiative.owners
+                          .map(owner => owner.person.name)
+                          .join(', ')
+                      : '—'}
+                  </TableCell>
+                )}
+                {!hideActions && (
+                  <TableCell className={compact ? 'text-right p-2' : ''}>
+                    {compact ? (
+                      <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
+                        {calculateInitiativeCompletionPercentage(initiative)}%
+                      </span>
+                    ) : (
+                      <Button
+                        variant='ghost'
+                        className='h-8 w-8 p-0'
+                        onClick={e => handleButtonClick(e, initiative.id)}
+                      >
+                        <MoreHorizontal className='h-4 w-4' />
+                      </Button>
+                    )}
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>

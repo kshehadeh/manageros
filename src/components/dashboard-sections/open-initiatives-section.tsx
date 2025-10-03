@@ -54,17 +54,9 @@ export async function DashboardOpenInitiativesSection({
   const [people, teams] = await Promise.all([
     prisma.person.findMany({
       where: { organizationId },
-      select: {
-        id: true,
-        name: true,
-      },
     }),
     prisma.team.findMany({
       where: { organizationId },
-      select: {
-        id: true,
-        name: true,
-      },
     }),
   ])
 
