@@ -213,3 +213,16 @@ export {
   resetPasswordWithToken,
   cleanupExpiredResetTokens,
 } from './password-reset'
+
+// Notes Actions
+export {
+  createNote,
+  updateNote,
+  deleteNote,
+  getNotesForEntity,
+  addAttachmentsToNote,
+  deleteFileAttachment,
+} from './notes'
+
+// Test Actions
+export { testR2Config } from './test-r2'

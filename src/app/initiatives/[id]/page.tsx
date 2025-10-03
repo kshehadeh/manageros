@@ -9,9 +9,11 @@ import { InitiativeTasks } from '@/components/initiatives/initiative-tasks'
 import { InitiativeCheckIns } from '@/components/initiatives/initiative-checkins'
 import { InitiativeMeetings } from '@/components/initiatives/initiative-meetings'
 import { InitiativeSidebar } from '@/components/initiatives/initiative-sidebar'
+import { NotesSection } from '@/components/notes/notes-section'
 import { Suspense } from 'react'
 import { Loading } from '@/components/ui/loading'
 import { calculateTaskCompletionPercentage } from '@/lib/completion-utils'
+import { getNotesForEntity } from '@/lib/actions'
 
 export default async function InitiativeDetail({
   params,
@@ -29,7 +31,7 @@ export default async function InitiativeDetail({
   }
 
   const { id } = await params
-  const [init, people, meetings] = await Promise.all([
+  const [init, people, meetings, notes] = await Promise.all([
     prisma.initiative.findFirst({
       where: {
         id,
@@ -84,6 +86,7 @@ export default async function InitiativeDetail({
       },
       orderBy: { scheduledAt: 'asc' },
     }),
+    getNotesForEntity('Initiative', id),
   ])
 
   // Get all tasks associated with this initiative (both direct and through objectives)
@@ -195,6 +198,25 @@ export default async function InitiativeDetail({
                 <InitiativeMeetings
                   meetings={meetings}
                   initiativeId={init.id}
+                />
+              </Suspense>
+
+              <Suspense
+                fallback={
+                  <div className='page-section'>
+                    <div className='flex items-center justify-center py-8'>
+                      <Loading size='md' />
+                      <span className='ml-2 text-sm text-muted-foreground'>
+                        Loading notes...
+                      </span>
+                    </div>
+                  </div>
+                }
+              >
+                <NotesSection
+                  entityType='Initiative'
+                  entityId={init.id}
+                  notes={notes}
                 />
               </Suspense>
 

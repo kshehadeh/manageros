@@ -10,6 +10,7 @@ import {
   Person,
   User as PrismaUser,
 } from '@prisma/client'
+import { Calendar } from 'lucide-react'
 
 type MeetingWithRelations = Meeting & {
   team: Team | null
@@ -41,17 +42,23 @@ export function InitiativeMeetings({
   }
 
   return (
-    <SharedMeetingsTable
-      meetings={meetings}
-      variant='initiative'
-      initiativeId={initiativeId}
-      showCreateButton={true}
-      onCreateMeeting={handleCreateMeeting}
-      emptyStateMessage='No meetings scheduled for this initiative'
-      emptyStateAction={{
-        label: 'Schedule First Meeting',
-        onClick: handleCreateMeeting,
-      }}
-    />
+    <div className='page-section'>
+      <h3 className='section-header font-bold flex items-center gap-2'>
+        <Calendar className='w-4 h-4' />
+        Meetings
+      </h3>
+      <SharedMeetingsTable
+        meetings={meetings}
+        variant='initiative'
+        initiativeId={initiativeId}
+        showCreateButton={true}
+        onCreateMeeting={handleCreateMeeting}
+        emptyStateMessage='No meetings scheduled for this initiative'
+        emptyStateAction={{
+          label: 'Schedule First Meeting',
+          onClick: handleCreateMeeting,
+        }}
+      />
+    </div>
   )
 }
