@@ -31,6 +31,8 @@ model Organization {
   notifications Notification[]
   reportInstances ReportInstance[]
   cronJobExecutions CronJobExecution[]
+  notes          Note[]
+  fileAttachments FileAttachment[]
 }
 
 model User {
@@ -54,6 +56,8 @@ model User {
   notificationResponses NotificationResponse[]
   ownedReports   Report[]      @relation("ReportOwner")
   reportRuns     ReportInstance[]
+  notes          Note[]
+  fileAttachments FileAttachment[]
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   
@@ -703,5 +707,49 @@ model ReportInstance {
   @@index([status])
   @@index([startedAt])
   @@index([completedAt])
+}
+
+model Note {
+  id             String   @id @default(cuid())
+  entityType     String   // The type of entity (e.g., "Initiative", "Task", "Meeting", "Person")
+  entityId       String   // The ID of the entity
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  content        String
+  createdById    String
+  createdBy      User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  attachments    FileAttachment[]
+
+  @@index([entityType, entityId])
+  @@index([organizationId])
+  @@index([createdById])
+  @@index([createdAt])
+}
+
+model FileAttachment {
+  id             String   @id @default(cuid())
+  noteId         String?
+  note           Note?    @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  entityType     String   // The type of entity (e.g., "Initiative", "Task", "Meeting", "Person")
+  entityId       String   // The ID of the entity
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  fileName       String
+  originalName   String
+  fileSize       Int
+  mimeType       String
+  r2Key          String   // Cloudflare R2 object key
+  r2Url          String   // Public URL for the file
+  uploadedById   String
+  uploadedBy     User     @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+
+  @@index([noteId])
+  @@index([entityType, entityId])
+  @@index([organizationId])
+  @@index([uploadedById])
+  @@index([createdAt])
 }
 

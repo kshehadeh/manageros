@@ -31,6 +31,7 @@
 - **Check-ins** - Weekly progress updates with RAG status and blockers tracking
 - **Initiative Owners** - Multiple ownership roles (owner, sponsor, collaborator)
 - **Metrics Tracking** - Quantitative measurement capabilities
+- **Notes and File Attachments** - Rich text notes with file attachments, Cloudflare R2 storage, organization-scoped access control (October 3, 2025)
 
 ### Task Management
 
@@ -303,3 +304,20 @@ _Next Review: February 2025_
   - Added navigation card in organization settings linking to job role management
   - Improved organization settings page organization and user experience
   - Maintained all existing functionality while providing better separation of concerns
+
+### Updates on 2025-10-03
+
+- **Notes and File Attachments System** (Completed):
+  - Created comprehensive notes system with file attachment support
+  - Implemented reusable Cloudflare R2 file upload system with configurable options
+  - Added database models: `Note` and `FileAttachment` with proper relationships
+  - Created server actions: `createNote`, `updateNote`, `deleteNote`, `getNotesForEntity`, `addAttachmentsToNote`, `deleteFileAttachment`
+  - Built `NotesSection` UI component with drag-and-drop file upload, file preview, and management
+  - Integrated notes into initiative detail pages with proper loading states
+  - Implemented organization-scoped access control and security
+  - Added file type validation, size limits, and proper error handling
+  - Created comprehensive documentation in `docs/notes-and-attachments.md`
+  - Updated existing GitHub bug reporting to use new R2 upload system
+  - System supports multiple entity types (initiatives, tasks, meetings, people) for future expansion
+  - Files organized in R2 with proper folder structure and unique naming
+  - Added file icons, size formatting, and download functionality
