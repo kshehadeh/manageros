@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Users, Target, ChevronDown, ChevronRight } from 'lucide-react'
 import { Team, Person, Initiative } from '@prisma/client'
 import { TeamActionsDropdown } from '@/components/teams/team-actions-dropdown'
+import { TeamAvatar } from '@/components/teams/team-avatar'
 import {
   Collapsible,
   CollapsibleContent,
@@ -86,12 +87,15 @@ export function TeamCard({
             ) : null}
 
             <div className='flex-1'>
-              <Link
-                href={`/teams/${team.id}`}
-                className='font-medium hover:text-primary transition-colors'
-              >
-                {team.name}
-              </Link>
+              <div className='flex items-center gap-3'>
+                <TeamAvatar name={team.name} avatar={team.avatar} size='sm' />
+                <Link
+                  href={`/teams/${team.id}`}
+                  className='font-medium hover:text-primary transition-colors'
+                >
+                  {team.name}
+                </Link>
+              </div>
               {team.description && (
                 <div className='text-sm text-muted-foreground mt-1'>
                   {team.description}

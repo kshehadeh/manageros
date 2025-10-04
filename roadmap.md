@@ -23,6 +23,7 @@
 - **User Linking** - Connect user accounts to person records for access control
 - **Job Role Management** - Structured job roles with levels and domains, markdown-enabled job descriptions, organization-wide role management, role assignment to people, drag-and-drop level ordering, dedicated management page (January 2025)
 - **Avatar Management** - Person avatar support with multiple sources: upload to R2 storage, Jira account avatars, GitHub account avatars, initials fallback display, comprehensive avatar editor in person settings (October 4, 2025)
+- **Team Avatar Management** - Team avatar support with upload to R2 storage, initials fallback display, avatar editor in team settings, integrated display in team cards and tables (October 4, 2025)
 
 ### Initiative Management
 
@@ -338,3 +339,13 @@ _Next Review: February 2025_
   - Enhanced edit person page to fetch and display linked account avatars
   - Created comprehensive documentation in `docs/avatar-management.md`
   - Added database migration: `20251004000000_add_avatar_to_person`
+
+- **Team Avatar Management** (Completed):
+  - Extended Team model with optional `avatar` field for storing avatar URLs
+  - Created `TeamAvatarEditor` component for team avatar management (upload only, no Jira/GitHub integration)
+  - Built reusable `TeamAvatar` component with automatic initials fallback
+  - Created server actions: `uploadTeamAvatar`, `updateTeamAvatar`
+  - Updated team forms to include avatar editor with real-time preview
+  - Integrated avatar display in team cards and teams table
+  - Implemented proper access control (admin-only) and organization isolation
+  - Added database migration: `20251004124451_add_avatar_to_team`

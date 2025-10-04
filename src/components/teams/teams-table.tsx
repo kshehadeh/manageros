@@ -34,6 +34,7 @@ import { deleteTeam } from '@/lib/actions'
 import { toast } from 'sonner'
 import { TeamWithCounts } from '@/types/team'
 import { DeleteModal } from '@/components/common/delete-modal'
+import { TeamAvatar } from '@/components/teams/team-avatar'
 
 interface SortState {
   column: string | null
@@ -217,15 +218,22 @@ export function TeamsTable({ teams, onTeamUpdate }: TeamsTableProps) {
                 onClick={() => handleRowClick(team.id)}
               >
                 <TableCell className='font-medium'>
-                  <div>
-                    <div className='font-medium text-foreground'>
-                      {team.name}
-                    </div>
-                    {team.description && (
-                      <div className='text-sm text-muted-foreground mt-1'>
-                        {team.description}
+                  <div className='flex items-center gap-3'>
+                    <TeamAvatar
+                      name={team.name}
+                      avatar={team.avatar}
+                      size='sm'
+                    />
+                    <div>
+                      <div className='font-medium text-foreground'>
+                        {team.name}
                       </div>
-                    )}
+                      {team.description && (
+                        <div className='text-sm text-muted-foreground mt-1'>
+                          {team.description}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </TableCell>
                 <TableCell className='text-muted-foreground'>

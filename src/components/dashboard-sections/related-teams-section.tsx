@@ -1,6 +1,6 @@
-import Link from 'next/link'
 import { prisma } from '@/lib/db'
 import { ExpandableSection } from '@/components/expandable-section'
+import { TeamListItem } from '@/components/teams/team-list-item'
 
 interface DashboardRelatedTeamsSectionProps {
   userId: string
@@ -56,36 +56,7 @@ export async function DashboardRelatedTeamsSection({
   return (
     <ExpandableSection title='Related Teams' icon='Users2' viewAllHref='/teams'>
       {teams.map(team => (
-        <div key={team.id} className='flex items-center justify-between'>
-          <div>
-            <Link
-              href={`/teams/${team.id}`}
-              className='font-medium hover:text-blue-400'
-            >
-              {team.name}
-            </Link>
-            <div className='text-neutral-400 text-sm'>
-              {team.description ?? ''}
-            </div>
-            <div className='text-xs text-neutral-500 mt-1'>
-              {team.people.length} member{team.people.length !== 1 ? 's' : ''} •{' '}
-              {team.initiatives.length} initiative
-              {team.initiatives.length !== 1 ? 's' : ''}
-              {team.parent && (
-                <span>
-                  {' '}
-                  • Parent:{' '}
-                  <Link
-                    href={`/teams/${team.parent.id}`}
-                    className='hover:text-blue-400'
-                  >
-                    {team.parent.name}
-                  </Link>
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
+        <TeamListItem key={team.id} team={team} />
       ))}
     </ExpandableSection>
   )

@@ -229,6 +229,10 @@ export async function createTeam(formData: TeamFormData) {
     data: {
       name: validatedData.name,
       description: validatedData.description,
+      avatar:
+        validatedData.avatar && validatedData.avatar.trim() !== ''
+          ? validatedData.avatar
+          : null,
       organizationId: user.organizationId,
       parentId:
         validatedData.parentId && validatedData.parentId.trim() !== ''
@@ -297,6 +301,10 @@ export async function updateTeam(id: string, formData: TeamFormData) {
     data: {
       name: validatedData.name,
       description: validatedData.description,
+      avatar:
+        validatedData.avatar && validatedData.avatar.trim() !== ''
+          ? validatedData.avatar
+          : null,
       parentId:
         validatedData.parentId && validatedData.parentId.trim() !== ''
           ? validatedData.parentId

@@ -7,7 +7,8 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { TeamActionsDropdown } from '@/components/teams/team-actions-dropdown'
-import { Users2, User, Rocket, Building2 } from 'lucide-react'
+import { TeamAvatar } from '@/components/teams/team-avatar'
+import { User, Rocket, Building2 } from 'lucide-react'
 import { PeopleTable } from '@/components/people/people-table'
 import { InitiativesTable } from '@/components/initiatives/initiatives-table'
 import { TeamChildTeamsTable } from '@/components/teams/team-child-teams-table'
@@ -116,7 +117,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
           <div className='flex items-center justify-between'>
             <div>
               <div className='flex items-center gap-3 mb-2'>
-                <Users2 className='h-6 w-6 text-muted-foreground' />
+                <TeamAvatar name={team.name} avatar={team.avatar} size='lg' />
                 <h1 className='page-title'>{team.name}</h1>
               </div>
               {team.description && (

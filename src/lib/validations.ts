@@ -101,6 +101,7 @@ export const teamSchema = z.object({
     .min(1, 'Team name is required')
     .max(100, 'Team name must be less than 100 characters'),
   description: z.string().optional(),
+  avatar: z.string().url('Valid URL is required').optional().or(z.literal('')),
   parentId: z
     .string()
     .optional()

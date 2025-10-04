@@ -69,6 +69,7 @@ model Team {
   id             String       @id @default(cuid())
   name           String
   description    String?
+  avatar         String?      // Avatar URL (external URL or R2 storage URL)
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
   parentId       String?

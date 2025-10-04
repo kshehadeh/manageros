@@ -162,3 +162,93 @@ export async function getLinkedAccountAvatars(personId: string) {
 
   return avatars
 }
+
+/**
+ * Upload a team avatar image to R2 storage and return the URL
+ */
+export async function uploadTeamAvatar(formData: FormData, teamId: string) {
+  const user = await getCurrentUser()
+
+  // Check if user is admin
+  if (user.role !== 'ADMIN') {
+    throw new Error('Only organization admins can upload team avatars')
+  }
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error(
+      'User must belong to an organization to upload team avatars'
+    )
+  }
+
+  // Verify team belongs to user's organization
+  const team = await prisma.team.findFirst({
+    where: {
+      id: teamId,
+      organizationId: user.organizationId,
+    },
+  })
+
+  if (!team) {
+    throw new Error('Team not found or access denied')
+  }
+
+  // Get the file from form data
+  const file = formData.get('file') as File
+  if (!file) {
+    throw new Error('No file provided')
+  }
+
+  // Upload to R2 with specific options for team avatars
+  const uploadResult = await uploadFileToR2(file, {
+    entityType: 'team',
+    entityId: teamId,
+    folder: 'avatars',
+    maxSizeBytes: 5 * 1024 * 1024, // 5MB max for avatars
+    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+  })
+
+  return uploadResult.r2Url
+}
+
+/**
+ * Update a team's avatar URL
+ */
+export async function updateTeamAvatar(
+  teamId: string,
+  avatarUrl: string | null
+) {
+  const user = await getCurrentUser()
+
+  // Check if user is admin
+  if (user.role !== 'ADMIN') {
+    throw new Error('Only organization admins can update team avatars')
+  }
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error(
+      'User must belong to an organization to update team avatars'
+    )
+  }
+
+  // Verify team belongs to user's organization
+  const team = await prisma.team.findFirst({
+    where: {
+      id: teamId,
+      organizationId: user.organizationId,
+    },
+  })
+
+  if (!team) {
+    throw new Error('Team not found or access denied')
+  }
+
+  // Update the team's avatar
+  await prisma.team.update({
+    where: { id: teamId },
+    data: { avatar: avatarUrl },
+  })
+
+  return { success: true }
+}

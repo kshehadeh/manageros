@@ -40,6 +40,8 @@ export {
   uploadAvatar,
   updatePersonAvatar,
   getLinkedAccountAvatars,
+  uploadTeamAvatar,
+  updateTeamAvatar,
 } from './avatar'
 
 // Team Actions

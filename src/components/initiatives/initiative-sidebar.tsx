@@ -6,6 +6,7 @@ import { ChangeTeamModal } from './change-team-modal'
 import { ManageOwnersModal } from './manage-owners-modal'
 import { Users } from 'lucide-react'
 import { PersonListItem } from '@/components/people/person-list-item'
+import { TeamAvatar } from '@/components/teams/team-avatar'
 import Link from 'next/link'
 
 interface Person {
@@ -26,6 +27,7 @@ interface InitiativeOwner {
 interface Team {
   id: string
   name: string
+  avatar?: string | null
 }
 
 interface EntityLink {
@@ -78,7 +80,8 @@ export function InitiativeSidebar({
           className='mb-3'
         />
         {team ? (
-          <div className='flex items-center gap-2'>
+          <div className='flex items-center gap-3'>
+            <TeamAvatar name={team.name} avatar={team.avatar} size='sm' />
             <Link
               href={`/teams/${team.id}`}
               className='text-sm font-medium text-primary hover:underline'
