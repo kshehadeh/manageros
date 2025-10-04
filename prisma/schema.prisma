@@ -91,6 +91,7 @@ model Person {
   role               String?
   status             String            @default("active")
   birthday           DateTime?
+  avatar             String?           // Avatar URL (external URL or R2 storage URL)
   organizationId     String
   organization       Organization      @relation(fields: [organizationId], references: [id])
   teamId             String?
