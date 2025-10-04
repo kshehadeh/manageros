@@ -115,17 +115,17 @@ export function ManageOwnersModal({
         <DialogHeader>
           <DialogTitle className='flex items-center gap-2'>
             <Users className='h-5 w-5' />
-            Manage Owners
+            Manage People
           </DialogTitle>
         </DialogHeader>
 
         <div className='space-y-4'>
           {/* Current Owners */}
           <div className='space-y-2'>
-            <h4 className='text-sm font-medium'>Current Owners</h4>
+            <h4 className='text-sm font-medium'>Current People</h4>
             {owners.length === 0 ? (
               <p className='text-sm text-muted-foreground'>
-                No owners assigned yet.
+                No people assigned yet.
               </p>
             ) : (
               <div className='space-y-2'>
@@ -160,7 +160,7 @@ export function ManageOwnersModal({
           {/* Add New Owner */}
           {availablePeople.length > 0 && (
             <div className='space-y-3 border-t pt-4'>
-              <h4 className='text-sm font-medium'>Add New Owner</h4>
+              <h4 className='text-sm font-medium'>Add New Person</h4>
               <div className='grid grid-cols-2 gap-2'>
                 <Select
                   value={selectedPersonId}
@@ -200,7 +200,7 @@ export function ManageOwnersModal({
                 disabled={isLoading || !selectedPersonId}
                 className='w-full'
               >
-                {isLoading ? 'Adding...' : 'Add Owner'}
+                {isLoading ? 'Adding...' : 'Add Person'}
               </Button>
             </div>
           )}
@@ -208,7 +208,8 @@ export function ManageOwnersModal({
           {availablePeople.length === 0 && owners.length > 0 && (
             <div className='text-center py-4 border-t'>
               <p className='text-sm text-muted-foreground'>
-                All organization members are already owners of this initiative.
+                All organization members are already associated with this
+                initiative.
               </p>
             </div>
           )}

@@ -1,12 +1,28 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { useState } from 'react'
 import { createInitiative } from '@/lib/actions'
-import { type InitiativeFormData } from '@/lib/validations'
+import { type InitiativeFormData, initiativeSchema } from '@/lib/validations'
 import { Rag } from '@/components/rag'
 import { MarkdownEditor } from '@/components/markdown-editor'
+import { AlertCircle, Trash2 } from 'lucide-react'
 
 interface InitiativeFormProps {
   teams: Array<{ id: string; name: string }>
@@ -56,43 +72,35 @@ export function InitiativeForm({
     try {
       const submitData = {
         ...formData,
-        // Convert empty strings to undefined for optional fields
-        teamId:
-          formData.teamId && formData.teamId.trim() !== ''
-            ? formData.teamId
-            : undefined,
-        startDate:
-          formData.startDate && formData.startDate.trim() !== ''
-            ? formData.startDate
-            : undefined,
-        targetDate:
-          formData.targetDate && formData.targetDate.trim() !== ''
-            ? formData.targetDate
-            : undefined,
-        summary:
-          formData.summary && formData.summary.trim() !== ''
-            ? formData.summary
-            : undefined,
-        outcome:
-          formData.outcome && formData.outcome.trim() !== ''
-            ? formData.outcome
-            : undefined,
         objectives: objectives.filter(obj => obj.title.trim()),
         owners: owners.filter(owner => owner.personId),
       }
 
-      await createInitiative(submitData)
-    } catch (error) {
-      if (error instanceof Error) {
-        setErrors({ general: error.message })
-      } else if (error && typeof error === 'object' && 'issues' in error) {
+      // Validate the form data using Zod schema
+      const validatedData = initiativeSchema.parse(submitData)
+      await createInitiative(validatedData)
+    } catch (error: unknown) {
+      console.error('Error creating initiative:', error)
+
+      if (error && typeof error === 'object' && 'issues' in error) {
+        // Handle Zod validation errors
         const fieldErrors: Record<string, string> = {}
-        ;(
-          error as { issues: Array<{ path: string[]; message: string }> }
-        ).issues.forEach(issue => {
-          fieldErrors[issue.path[0]] = issue.message
+        const zodError = error as {
+          issues: Array<{ path: string[]; message: string }>
+        }
+        zodError.issues.forEach(issue => {
+          if (issue.path && issue.path.length > 0) {
+            fieldErrors[issue.path[0]] = issue.message
+          }
         })
         setErrors(fieldErrors)
+      } else {
+        // Handle other errors (server errors, etc.)
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : 'Error creating initiative. Please try again.'
+        setErrors({ general: errorMessage })
       }
     } finally {
       setIsSubmitting(false)
@@ -139,7 +147,7 @@ export function InitiativeForm({
 
   const handleInputChange = (
     field: keyof InitiativeFormData,
-    value: string | number
+    value: string | number | undefined
   ) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     // Clear error when user starts typing
@@ -148,333 +156,440 @@ export function InitiativeForm({
     }
   }
 
+  // Helper functions to convert between empty strings and "none" for Select components
+  const getSelectValue = (value: string | undefined) => value || 'none'
+  const getFormValue = (value: string) => (value === 'none' ? '' : value)
+
   return (
     <form onSubmit={handleSubmit} className='space-y-6'>
       {/* General Error Message */}
       {errors.general && (
-        <div className='bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg'>
+        <div className='bg-destructive/10 border border-destructive/20 rounded-lg p-3 text-destructive text-sm flex items-center gap-2'>
+          <AlertCircle className='h-4 w-4' />
           {errors.general}
         </div>
       )}
 
-      {/* Basic Information */}
-      <div>
-        <h3 className='font-semibold mb-4'>Basic Information</h3>
-        <div className='space-y-4'>
-          <div>
-            <label className='block text-sm font-medium mb-2'>Title *</label>
-            <input
-              type='text'
-              value={formData.title}
-              onChange={e => handleInputChange('title', e.target.value)}
-              className={`input ${errors.title ? 'border-red-500 focus:border-red-500' : ''}`}
-              placeholder='Enter initiative title'
-              required
-            />
-            {errors.title && (
-              <p className='text-red-600 text-sm mt-1'>{errors.title}</p>
-            )}
-          </div>
-
-          <div>
-            <label className='block text-sm font-medium mb-2'>Summary</label>
-            <MarkdownEditor
-              value={formData.summary || ''}
-              onChange={value => handleInputChange('summary', value)}
-              placeholder='Brief description of the initiative... Use Markdown for formatting!'
-              className={errors.summary ? 'border-red-500' : ''}
-            />
-            {errors.summary && (
-              <p className='text-red-600 text-sm mt-1'>{errors.summary}</p>
-            )}
-          </div>
-
-          <div>
-            <label className='block text-sm font-medium mb-2'>
-              Expected Outcome
-            </label>
-            <MarkdownEditor
-              value={formData.outcome || ''}
-              onChange={value => handleInputChange('outcome', value)}
-              placeholder='What success looks like... Use Markdown for formatting!'
-              className={errors.outcome ? 'border-red-500' : ''}
-            />
-            {errors.outcome && (
-              <p className='text-red-600 text-sm mt-1'>{errors.outcome}</p>
-            )}
-          </div>
-
-          {/* Timeline fields moved here */}
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            <div>
-              <label className='block text-sm font-medium mb-2'>
-                Start Date
-              </label>
-              <input
-                type='date'
-                value={formData.startDate}
-                onChange={e => handleInputChange('startDate', e.target.value)}
-                className={`input ${errors.startDate ? 'border-red-500 focus:border-red-500' : ''}`}
-              />
-              {errors.startDate && (
-                <p className='text-red-600 text-sm mt-1'>{errors.startDate}</p>
-              )}
-            </div>
-
-            <div>
-              <label className='block text-sm font-medium mb-2'>
-                Target Date
-              </label>
-              <input
-                type='date'
-                value={formData.targetDate}
-                onChange={e => handleInputChange('targetDate', e.target.value)}
-                className={`input ${errors.targetDate ? 'border-red-500 focus:border-red-500' : ''}`}
-              />
-              {errors.targetDate && (
-                <p className='text-red-600 text-sm mt-1'>{errors.targetDate}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Team field moved here */}
-          <div>
-            <label className='block text-sm font-medium mb-2'>Team</label>
-            <select
-              value={formData.teamId}
-              onChange={e => handleInputChange('teamId', e.target.value)}
-              className={`input ${errors.teamId ? 'border-red-500 focus:border-red-500' : ''}`}
-            >
-              <option value=''>Select a team</option>
-              {teams.map(team => (
-                <option key={team.id} value={team.id}>
-                  {team.name}
-                </option>
-              ))}
-            </select>
-            {errors.teamId && (
-              <p className='text-red-600 text-sm mt-1'>{errors.teamId}</p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Status & Tracking */}
-      <div>
-        <h3 className='font-semibold mb-4'>Status & Tracking</h3>
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-          <div>
-            <label className='block text-sm font-medium mb-2'>Status</label>
-            <select
-              value={formData.status}
-              onChange={e =>
-                handleInputChange(
-                  'status',
-                  e.target.value as InitiativeFormData['status']
-                )
-              }
-              className={`input ${errors.status ? 'border-red-500 focus:border-red-500' : ''}`}
-            >
-              <option value='planned'>Planned</option>
-              <option value='in_progress'>In Progress</option>
-              <option value='paused'>Paused</option>
-              <option value='done'>Done</option>
-              <option value='canceled'>Canceled</option>
-            </select>
-            {errors.status && (
-              <p className='text-red-600 text-sm mt-1'>{errors.status}</p>
-            )}
-          </div>
-
-          <div>
-            <label className='block text-sm font-medium mb-2'>RAG Status</label>
-            <div className='flex items-center gap-2'>
-              <select
-                value={formData.rag}
-                onChange={e =>
-                  handleInputChange(
-                    'rag',
-                    e.target.value as InitiativeFormData['rag']
-                  )
-                }
-                className={`input flex-1 ${errors.rag ? 'border-red-500 focus:border-red-500' : ''}`}
-              >
-                <option value='green'>Green</option>
-                <option value='amber'>Amber</option>
-                <option value='red'>Red</option>
-              </select>
-              <Rag rag={formData.rag} />
-            </div>
-            {errors.rag && (
-              <p className='text-red-600 text-sm mt-1'>{errors.rag}</p>
-            )}
-          </div>
-
-          <div>
-            <label className='block text-sm font-medium mb-2'>
-              Confidence (%)
-            </label>
-            <input
-              type='number'
-              min='0'
-              max='100'
-              value={formData.confidence}
-              onChange={e =>
-                handleInputChange('confidence', parseInt(e.target.value) || 0)
-              }
-              className={`input ${errors.confidence ? 'border-red-500 focus:border-red-500' : ''}`}
-            />
-            {errors.confidence && (
-              <p className='text-red-600 text-sm mt-1'>{errors.confidence}</p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Objectives */}
-      <div>
-        <div className='flex items-center justify-between mb-4'>
-          <h3 className='font-semibold'>Objectives</h3>
-          <Button
-            type='button'
-            onClick={addObjective}
-            variant='outline'
-            size='sm'
-          >
-            Add Objective
-          </Button>
-        </div>
-        <div className='space-y-3'>
-          {objectives.map((objective, index) => (
-            <div key={index} className='border rounded-xl p-3'>
-              <div className='flex items-center justify-between mb-2'>
-                <span className='text-sm font-medium'>
-                  Objective {index + 1}
-                </span>
-                {objectives.length > 1 && (
-                  <Button
-                    type='button'
-                    onClick={() => removeObjective(index)}
-                    variant='outline'
-                    size='sm'
-                  >
-                    Remove
-                  </Button>
-                )}
-              </div>
+      <div className='flex flex-col lg:flex-row gap-6'>
+        {/* Main Form Content */}
+        <div className='flex-1 space-y-6'>
+          {/* Basic Information */}
+          <Card>
+            <CardHeader className='pb-3'>
+              <CardTitle className='text-lg'>Basic Information</CardTitle>
+              <CardDescription className='text-sm'>
+                Essential details about the initiative
+              </CardDescription>
+            </CardHeader>
+            <CardContent className='space-y-4'>
               <div className='space-y-2'>
-                <input
+                <Label htmlFor='title'>
+                  Title <span className='text-destructive'>*</span>
+                </Label>
+                <Input
+                  id='title'
                   type='text'
-                  value={objective.title}
-                  onChange={e =>
-                    updateObjective(index, 'title', e.target.value)
-                  }
-                  className={`input ${errors[`objectives.${index}.title`] ? 'border-red-500 focus:border-red-500' : ''}`}
-                  placeholder='Objective title'
+                  value={formData.title}
+                  onChange={e => handleInputChange('title', e.target.value)}
+                  placeholder='Enter initiative title'
+                  className={errors.title ? 'border-destructive' : ''}
+                  required
                 />
-                {errors[`objectives.${index}.title`] && (
-                  <p className='text-red-600 text-sm'>
-                    {errors[`objectives.${index}.title`]}
-                  </p>
-                )}
-                <input
-                  type='text'
-                  value={objective.keyResult}
-                  onChange={e =>
-                    updateObjective(index, 'keyResult', e.target.value)
-                  }
-                  className={`input ${errors[`objectives.${index}.keyResult`] ? 'border-red-500 focus:border-red-500' : ''}`}
-                  placeholder='Key result (optional)'
-                />
-                {errors[`objectives.${index}.keyResult`] && (
-                  <p className='text-red-600 text-sm'>
-                    {errors[`objectives.${index}.keyResult`]}
-                  </p>
+                {errors.title && (
+                  <p className='text-sm text-destructive'>{errors.title}</p>
                 )}
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Associated People */}
-      <div>
-        <div className='flex items-center justify-between mb-4'>
-          <h3 className='font-semibold'>Associated People</h3>
-          <Button type='button' onClick={addOwner} variant='outline' size='sm'>
-            Add Person
-          </Button>
-        </div>
-        <div className='space-y-3'>
-          {owners.map((owner, index) => (
-            <div key={index} className='border rounded-xl p-3'>
-              <div className='flex items-center justify-between mb-2'>
-                <span className='text-sm font-medium'>Person {index + 1}</span>
-                {owners.length > 1 && (
-                  <Button
-                    type='button'
-                    onClick={() => removeOwner(index)}
-                    variant='outline'
-                    size='sm'
-                  >
-                    Remove
-                  </Button>
+              <div className='space-y-2'>
+                <Label htmlFor='summary'>Summary</Label>
+                <MarkdownEditor
+                  value={formData.summary || ''}
+                  onChange={value => handleInputChange('summary', value)}
+                  placeholder='Brief description of the initiative... Use Markdown for formatting!'
+                />
+                {errors.summary && (
+                  <p className='text-sm text-destructive'>{errors.summary}</p>
                 )}
               </div>
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
-                <div>
-                  <select
-                    value={owner.personId}
+
+              <div className='space-y-2'>
+                <Label htmlFor='outcome'>Expected Outcome</Label>
+                <MarkdownEditor
+                  value={formData.outcome || ''}
+                  onChange={value => handleInputChange('outcome', value)}
+                  placeholder='What success looks like... Use Markdown for formatting!'
+                />
+                {errors.outcome && (
+                  <p className='text-sm text-destructive'>{errors.outcome}</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Timeline */}
+          <Card>
+            <CardHeader className='pb-3'>
+              <CardTitle className='text-lg'>Timeline</CardTitle>
+              <CardDescription className='text-sm'>
+                Important dates for the initiative
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                <div className='space-y-2'>
+                  <Label htmlFor='startDate'>Start Date</Label>
+                  <Input
+                    id='startDate'
+                    type='date'
+                    value={formData.startDate}
                     onChange={e =>
-                      updateOwner(index, 'personId', e.target.value)
+                      handleInputChange('startDate', e.target.value)
                     }
-                    className={`input ${errors[`owners.${index}.personId`] ? 'border-red-500 focus:border-red-500' : ''}`}
-                  >
-                    <option value=''>Select person</option>
-                    {people.map(person => (
-                      <option key={person.id} value={person.id}>
-                        {person.name}
-                        {person.email ? ` (${person.email})` : ''}
-                      </option>
-                    ))}
-                  </select>
-                  {errors[`owners.${index}.personId`] && (
-                    <p className='text-red-600 text-sm mt-1'>
-                      {errors[`owners.${index}.personId`]}
+                    className={errors.startDate ? 'border-destructive' : ''}
+                  />
+                  {errors.startDate && (
+                    <p className='text-sm text-destructive'>
+                      {errors.startDate}
                     </p>
                   )}
                 </div>
-                <div>
-                  <select
-                    value={owner.role}
-                    onChange={e => updateOwner(index, 'role', e.target.value)}
-                    className={`input ${errors[`owners.${index}.role`] ? 'border-red-500 focus:border-red-500' : ''}`}
-                  >
-                    <option value='owner'>Owner</option>
-                    <option value='sponsor'>Sponsor</option>
-                    <option value='collaborator'>Collaborator</option>
-                  </select>
-                  {errors[`owners.${index}.role`] && (
-                    <p className='text-red-600 text-sm mt-1'>
-                      {errors[`owners.${index}.role`]}
+
+                <div className='space-y-2'>
+                  <Label htmlFor='targetDate'>Target Date</Label>
+                  <Input
+                    id='targetDate'
+                    type='date'
+                    value={formData.targetDate}
+                    onChange={e =>
+                      handleInputChange('targetDate', e.target.value)
+                    }
+                    className={errors.targetDate ? 'border-destructive' : ''}
+                  />
+                  {errors.targetDate && (
+                    <p className='text-sm text-destructive'>
+                      {errors.targetDate}
                     </p>
                   )}
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
+            </CardContent>
+          </Card>
 
-      {/* Submit Button */}
-      <div className='flex justify-end'>
-        <Button
-          type='submit'
-          disabled={isSubmitting || !formData.title.trim()}
-          variant='outline'
-        >
-          {isSubmitting ? 'Creating...' : 'Create Initiative'}
-        </Button>
+          {/* Team Assignment */}
+          <Card>
+            <CardHeader className='pb-3'>
+              <CardTitle className='text-lg'>Team Assignment</CardTitle>
+              <CardDescription className='text-sm'>
+                Assign the initiative to a team
+              </CardDescription>
+            </CardHeader>
+            <CardContent className='space-y-4'>
+              <div className='space-y-2'>
+                <Label htmlFor='team'>Team</Label>
+                <Select
+                  value={getSelectValue(formData.teamId)}
+                  onValueChange={value =>
+                    handleInputChange('teamId', getFormValue(value))
+                  }
+                >
+                  <SelectTrigger
+                    className={errors.teamId ? 'border-destructive' : ''}
+                  >
+                    <SelectValue placeholder='Select a team' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='none'>No team</SelectItem>
+                    {teams.map(team => (
+                      <SelectItem key={team.id} value={team.id}>
+                        {team.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.teamId && (
+                  <p className='text-sm text-destructive'>{errors.teamId}</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Status & Tracking */}
+          <Card>
+            <CardHeader className='pb-3'>
+              <CardTitle className='text-lg'>Status & Tracking</CardTitle>
+              <CardDescription className='text-sm'>
+                Current status and progress tracking
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+                <div className='space-y-2'>
+                  <Label htmlFor='status'>Status</Label>
+                  <Select
+                    value={formData.status}
+                    onValueChange={value =>
+                      handleInputChange(
+                        'status',
+                        value as InitiativeFormData['status']
+                      )
+                    }
+                  >
+                    <SelectTrigger
+                      className={errors.status ? 'border-destructive' : ''}
+                    >
+                      <SelectValue placeholder='Select status' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='planned'>Planned</SelectItem>
+                      <SelectItem value='in_progress'>In Progress</SelectItem>
+                      <SelectItem value='paused'>Paused</SelectItem>
+                      <SelectItem value='done'>Done</SelectItem>
+                      <SelectItem value='canceled'>Canceled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.status && (
+                    <p className='text-sm text-destructive'>{errors.status}</p>
+                  )}
+                </div>
+
+                <div className='space-y-2'>
+                  <Label htmlFor='rag'>RAG Status</Label>
+                  <Select
+                    value={formData.rag}
+                    onValueChange={value =>
+                      handleInputChange(
+                        'rag',
+                        value as InitiativeFormData['rag']
+                      )
+                    }
+                  >
+                    <SelectTrigger
+                      className={errors.rag ? 'border-destructive' : ''}
+                    >
+                      <SelectValue placeholder='Select RAG status' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='green'>Green</SelectItem>
+                      <SelectItem value='amber'>Amber</SelectItem>
+                      <SelectItem value='red'>Red</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <div className='mt-2'>
+                    <Rag rag={formData.rag} />
+                  </div>
+                  {errors.rag && (
+                    <p className='text-sm text-destructive'>{errors.rag}</p>
+                  )}
+                </div>
+
+                <div className='space-y-2'>
+                  <Label htmlFor='confidence'>Confidence (%)</Label>
+                  <Input
+                    id='confidence'
+                    type='number'
+                    min='0'
+                    max='100'
+                    value={formData.confidence}
+                    onChange={e =>
+                      handleInputChange(
+                        'confidence',
+                        parseInt(e.target.value) || 0
+                      )
+                    }
+                    className={errors.confidence ? 'border-destructive' : ''}
+                  />
+                  {errors.confidence && (
+                    <p className='text-sm text-destructive'>
+                      {errors.confidence}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Objectives */}
+          <Card>
+            <CardHeader className='pb-3'>
+              <div className='flex items-center justify-between'>
+                <div>
+                  <CardTitle className='text-lg'>Objectives</CardTitle>
+                  <CardDescription className='text-sm'>
+                    Define the goals and key results for this initiative
+                  </CardDescription>
+                </div>
+                <Button
+                  type='button'
+                  onClick={addObjective}
+                  variant='outline'
+                  size='sm'
+                >
+                  Add Objective
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className='space-y-3'>
+                {objectives.map((objective, index) => (
+                  <div key={index} className='border rounded-xl p-3'>
+                    <div className='flex items-center justify-between mb-2'>
+                      <span className='text-sm font-medium'>
+                        Objective {index + 1}
+                      </span>
+                      {objectives.length > 1 && (
+                        <Button
+                          type='button'
+                          onClick={() => removeObjective(index)}
+                          variant='outline'
+                          size='sm'
+                        >
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                    <div className='space-y-2'>
+                      <div className='space-y-2'>
+                        <Label htmlFor={`objective-title-${index}`}>
+                          Title
+                        </Label>
+                        <Input
+                          id={`objective-title-${index}`}
+                          type='text'
+                          value={objective.title}
+                          onChange={e =>
+                            updateObjective(index, 'title', e.target.value)
+                          }
+                          placeholder='Objective title'
+                        />
+                      </div>
+                      <div className='space-y-2'>
+                        <Label htmlFor={`objective-keyresult-${index}`}>
+                          Key Result
+                        </Label>
+                        <Input
+                          id={`objective-keyresult-${index}`}
+                          type='text'
+                          value={objective.keyResult}
+                          onChange={e =>
+                            updateObjective(index, 'keyResult', e.target.value)
+                          }
+                          placeholder='Key result (optional)'
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* People */}
+          <Card>
+            <CardHeader className='pb-3'>
+              <div className='flex items-center justify-between'>
+                <div>
+                  <CardTitle className='text-lg'>People</CardTitle>
+                  <CardDescription className='text-sm'>
+                    Assign people responsible for this initiative
+                  </CardDescription>
+                </div>
+                <Button
+                  type='button'
+                  onClick={addOwner}
+                  variant='outline'
+                  size='sm'
+                >
+                  Add Person
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className='space-y-0'>
+                {owners.map((owner, index) => (
+                  <div
+                    key={index}
+                    className={`p-3 ${index < owners.length - 1 ? 'border-b' : ''}`}
+                  >
+                    <div className='flex items-end gap-2'>
+                      <div className='flex-1 grid grid-cols-1 md:grid-cols-2 gap-2'>
+                        <div className='space-y-2'>
+                          <Label htmlFor={`owner-person-${index}`}>
+                            Person
+                          </Label>
+                          <Select
+                            value={getSelectValue(owner.personId)}
+                            onValueChange={value =>
+                              updateOwner(
+                                index,
+                                'personId',
+                                getFormValue(value)
+                              )
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder='Select person' />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value='none'>No person</SelectItem>
+                              {people.map(person => (
+                                <SelectItem key={person.id} value={person.id}>
+                                  {person.name}
+                                  {person.email ? ` (${person.email})` : ''}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className='space-y-2'>
+                          <Label htmlFor={`owner-role-${index}`}>Role</Label>
+                          <Select
+                            value={owner.role}
+                            onValueChange={value =>
+                              updateOwner(index, 'role', value)
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder='Select role' />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value='owner'>Owner</SelectItem>
+                              <SelectItem value='sponsor'>Sponsor</SelectItem>
+                              <SelectItem value='collaborator'>
+                                Collaborator
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      {owners.length > 1 && (
+                        <Button
+                          type='button'
+                          onClick={() => removeOwner(index)}
+                          variant='outline'
+                          size='sm'
+                          className='h-10 w-10 p-0'
+                        >
+                          <Trash2 className='h-4 w-4' />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Submit Button */}
+          <div className='flex justify-end gap-2'>
+            <Button
+              type='submit'
+              disabled={isSubmitting || !formData.title.trim()}
+              className='min-w-[120px]'
+            >
+              {isSubmitting ? 'Creating...' : 'Create Initiative'}
+            </Button>
+          </div>
+        </div>
       </div>
     </form>
   )
