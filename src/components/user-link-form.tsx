@@ -116,7 +116,6 @@ export function UserLinkForm({
               value={selectedUserId}
               onChange={e => setSelectedUserId(e.target.value)}
               className='input'
-              required
             >
               <option value=''>Choose a user...</option>
               {availableUsers.map(user => (

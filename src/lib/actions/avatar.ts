@@ -3,6 +3,7 @@
 import { uploadFileToR2 } from '@/lib/r2-upload'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
+import { getJiraBaseUrl } from '@/lib/actions/jira'
 
 /**
  * Upload an avatar image to R2 storage and return the URL
@@ -53,7 +54,10 @@ export async function uploadAvatar(formData: FormData, personId: string) {
 /**
  * Update a person's avatar URL
  */
-export async function updatePersonAvatar(personId: string, avatarUrl: string | null) {
+export async function updatePersonAvatar(
+  personId: string,
+  avatarUrl: string | null
+) {
   const user = await getCurrentUser()
 
   // Check if user is admin
@@ -119,18 +123,19 @@ export async function getLinkedAccountAvatars(personId: string) {
     githubAvatar?: string
   } = {}
 
-  // For Jira, we can use the Jira avatar API
+  // For Jira, construct the avatar URL using the Jira base URL
   if (person.jiraAccount) {
-    // Jira avatar API: https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-users/#api-rest-api-3-user-get
-    // We'll need to fetch this from Jira API, but for now we'll store the account ID
-    // The frontend can construct the URL or we can fetch it here
-    avatars.jiraAvatar = person.jiraAccount.jiraAccountId
+    const jiraBaseUrl = await getJiraBaseUrl()
+    if (jiraBaseUrl) {
+      // Jira avatar URL pattern: {baseUrl}/secure/useravatar?avatarId={accountId}&size=large
+      avatars.jiraAvatar = `${jiraBaseUrl}/secure/useravatar?avatarId=${person.jiraAccount.jiraAccountId}&size=large`
+    }
   }
 
   // For GitHub, we can use the GitHub avatar URL
   if (person.githubAccount) {
-    // GitHub avatar URL pattern: https://avatars.githubusercontent.com/u/{user_id}
-    avatars.githubAvatar = `https://github.com/${person.githubAccount.githubUsername}.png`
+    // GitHub avatar URL pattern: https://avatars.githubusercontent.com/{username}
+    avatars.githubAvatar = `https://avatars.githubusercontent.com/${person.githubAccount.githubUsername}`
   }
 
   return avatars
