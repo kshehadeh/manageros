@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useBreadcrumb } from '@/components/breadcrumb-provider'
 
 interface BreadcrumbItem {
@@ -11,21 +11,23 @@ interface BreadcrumbItem {
 /**
  * Hook to set breadcrumbs for a page
  * @param breadcrumbs - Array of breadcrumb items
- * @param deps - Dependencies array for useEffect
  */
 export function useSetBreadcrumbs(breadcrumbs: BreadcrumbItem[]) {
   const { setBreadcrumbs } = useBreadcrumb()
+  const prevBreadcrumbsRef = useRef<string>('')
 
   useEffect(() => {
-    setBreadcrumbs(breadcrumbs)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    const breadcrumbsString = JSON.stringify(breadcrumbs)
+    if (breadcrumbsString !== prevBreadcrumbsRef.current) {
+      setBreadcrumbs(breadcrumbs)
+      prevBreadcrumbsRef.current = breadcrumbsString
+    }
+  }, [setBreadcrumbs, breadcrumbs])
 }
 
 /**
  * Hook to set breadcrumbs with a default Dashboard breadcrumb
  * @param additionalBreadcrumbs - Additional breadcrumb items (Dashboard will be prepended)
- * @param deps - Dependencies array for useEffect
  */
 export function usePageBreadcrumbs(additionalBreadcrumbs: BreadcrumbItem[]) {
   const breadcrumbs: BreadcrumbItem[] = [
