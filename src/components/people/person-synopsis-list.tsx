@@ -209,6 +209,7 @@ export function PersonSynopsisList({
                 <SynopsisCard
                   key={s.id}
                   synopsis={s}
+                  personId={personId}
                   onRefresh={handleSynopsisDeleted}
                 />
               )
