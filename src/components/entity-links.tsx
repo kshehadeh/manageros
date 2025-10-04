@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { SectionHeader } from '@/components/ui/section-header'
 import {
   Dialog,
   DialogContent,
@@ -342,24 +343,21 @@ export function LinkManager({
 
   return (
     <div className='space-y-4'>
-      <div className='flex items-center justify-between'>
-        <h3 className='font-bold flex items-center gap-2'>
-          <LinkIcon className='h-5 w-5' />
-          Links ({links.length})
-        </h3>
-        <Button onClick={handleAddLink} size='sm'>
-          <Plus className='h-4 w-4 mr-2' />
-          Add Link
-        </Button>
-      </div>
+      <SectionHeader
+        icon={LinkIcon}
+        title={`Links (${links.length})`}
+        action={
+          <Button onClick={handleAddLink} size='sm'>
+            <Plus className='h-4 w-4 mr-2' />
+            Add Link
+          </Button>
+        }
+      />
 
       {links.length === 0 ? (
         <div className='text-center py-8 text-gray-500'>
-          <LinkIcon className='h-12 w-12 mx-auto mb-4 text-gray-300' />
+          <LinkIcon className='h-8 w-8 mx-auto mb-4 text-gray-300' />
           <p>No links added yet</p>
-          <p className='text-sm'>
-            Add links to provide additional context and resources
-          </p>
         </div>
       ) : (
         <div className='space-y-3'>

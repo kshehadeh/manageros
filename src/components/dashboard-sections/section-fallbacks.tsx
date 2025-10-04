@@ -1,9 +1,19 @@
 import { Skeleton } from '@/components/ui/loading'
+import { Users, Users2 } from 'lucide-react'
 
-function SectionHeader({ title }: { title: string }) {
+function SectionHeader({
+  title,
+  icon: Icon,
+}: {
+  title: string
+  icon?: React.ComponentType<{ className?: string }>
+}) {
   return (
     <div className='flex items-center justify-between mb-3'>
-      <h2 className='font-semibold'>{title}</h2>
+      <h2 className='font-semibold flex items-center gap-2'>
+        {Icon && <Icon className='w-4 h-4' />}
+        {title}
+      </h2>
       <div className='h-8 w-20'>
         <Skeleton className='h-full w-full' />
       </div>
@@ -124,7 +134,7 @@ export function RecentOneOnOnesSectionFallback() {
 export function RelatedTeamsSectionFallback() {
   return (
     <section className='bg-card/30 border border-border/50 rounded-xl p-4 space-y-4'>
-      <SectionHeader title='Related Teams' />
+      <SectionHeader icon={Users2} title='Related Teams' />
       <div className='space-y-3'>
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className='flex items-start justify-between'>
@@ -143,7 +153,7 @@ export function RelatedTeamsSectionFallback() {
 export function DirectReportsSectionFallback() {
   return (
     <section className='bg-card/30 border border-border/50 rounded-xl p-4 space-y-4'>
-      <SectionHeader title='Direct Reports' />
+      <SectionHeader icon={Users} title='Direct Reports' />
       <div className='grid gap-3'>
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className='card p-4'>

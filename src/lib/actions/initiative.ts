@@ -400,3 +400,105 @@ export async function updateInitiativeTeam(
 
   return initiative
 }
+
+export async function addInitiativeOwner(
+  initiativeId: string,
+  personId: string,
+  role: string = 'owner'
+) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error(
+      'User must belong to an organization to manage initiative owners'
+    )
+  }
+
+  // Verify initiative belongs to user's organization
+  const initiative = await prisma.initiative.findFirst({
+    where: {
+      id: initiativeId,
+      organizationId: user.organizationId,
+    },
+  })
+  if (!initiative) {
+    throw new Error('Initiative not found or access denied')
+  }
+
+  // Verify person belongs to user's organization
+  const person = await prisma.person.findFirst({
+    where: {
+      id: personId,
+      organizationId: user.organizationId,
+    },
+  })
+  if (!person) {
+    throw new Error('Person not found or access denied')
+  }
+
+  // Check if owner already exists
+  const existingOwner = await prisma.initiativeOwner.findFirst({
+    where: {
+      initiativeId,
+      personId,
+    },
+  })
+
+  if (existingOwner) {
+    throw new Error('This person is already an owner of this initiative')
+  }
+
+  // Add the owner
+  const owner = await prisma.initiativeOwner.create({
+    data: {
+      initiativeId,
+      personId,
+      role,
+    },
+    include: {
+      person: true,
+    },
+  })
+
+  // Revalidate the initiative page
+  revalidatePath(`/initiatives/${initiativeId}`)
+
+  return owner
+}
+
+export async function removeInitiativeOwner(
+  initiativeId: string,
+  personId: string
+) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error(
+      'User must belong to an organization to manage initiative owners'
+    )
+  }
+
+  // Verify initiative belongs to user's organization
+  const initiative = await prisma.initiative.findFirst({
+    where: {
+      id: initiativeId,
+      organizationId: user.organizationId,
+    },
+  })
+  if (!initiative) {
+    throw new Error('Initiative not found or access denied')
+  }
+
+  // Remove the owner
+  await prisma.initiativeOwner.deleteMany({
+    where: {
+      initiativeId,
+      personId,
+    },
+  })
+
+  // Revalidate the initiative page
+  revalidatePath(`/initiatives/${initiativeId}`)
+}

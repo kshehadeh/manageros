@@ -51,6 +51,23 @@ export default async function FeedbackPage({
     Object.entries(filters).filter(([_, value]) => value !== undefined)
   )
 
+  // Get the person name if aboutPersonId is provided
+  const aboutPerson = params.aboutPersonId
+    ? await prisma.person.findFirst({
+        where: {
+          id: params.aboutPersonId,
+          organizationId: session.user.organizationId,
+        },
+        select: {
+          id: true,
+          name: true,
+        },
+      })
+    : null
+
+  // If aboutPersonId was provided but person not found, show generic title
+  const personName = aboutPerson?.name || 'Unknown Person'
+
   const [feedback, people, currentPerson] = await Promise.all([
     getAllFeedback(cleanFilters),
     getPeopleForFeedbackFilters(),
@@ -66,10 +83,15 @@ export default async function FeedbackPage({
   return (
     <div className='page-container'>
       <div className='page-header'>
-        <h1 className='page-title'>Feedback</h1>
+        <h1 className='page-title'>
+          {params.aboutPersonId
+            ? `Feedback Involving ${personName}`
+            : 'Feedback'}
+        </h1>
         <p className='page-subtitle'>
-          View and filter feedback across your organization. You can see all
-          public feedback and any private feedback you&apos;ve written.
+          {params.aboutPersonId
+            ? `View feedback about ${personName}. You can see all public feedback and any private feedback you've written.`
+            : "View and filter feedback across your organization. You can see all public feedback and any private feedback you've written."}
         </p>
       </div>
 

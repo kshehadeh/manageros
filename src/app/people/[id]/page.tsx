@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
-import { Rag } from '@/components/rag'
 import { UserLinkForm } from '@/components/user-link-form'
 import { FeedbackList } from '@/components/feedback/feedback-list'
 import { PersonActionsDropdown } from '@/components/people/person-actions-dropdown'
@@ -9,11 +8,13 @@ import { JiraAccountLinker } from '@/components/jira-account-linker'
 import { GithubAccountLinker } from '@/components/github-account-linker'
 import { GithubPrsActivitySection } from '@/components/github-prs-activity-section'
 import { JiraWorkActivitySection } from '@/components/jira-work-activity-section'
-import { PersonListItemCard } from '@/components/people/person-list-item-card'
+import { PersonListItem } from '@/components/people/person-list-item'
 import { PersonStatusBadge } from '@/components/people/person-status-badge'
 import { PersonFeedbackCampaigns } from '@/components/people/person-feedback-campaigns'
-import { PersonSynopsis } from '@/components/people/person-synopsis'
+import { PersonSynopsisList } from '@/components/people/person-synopsis-list'
 import { TaskTable } from '@/components/tasks/task-table'
+import { InitiativesTable } from '@/components/initiatives/initiatives-table'
+import { SectionHeader } from '@/components/ui/section-header'
 import { TASK_LIST_SELECT } from '@/lib/task-list-select'
 import type { TaskListItem } from '@/lib/task-list-select'
 import { notFound } from 'next/navigation'
@@ -23,7 +24,6 @@ import { redirect } from 'next/navigation'
 import { getPeople } from '@/lib/actions'
 import { TASK_STATUS } from '@/lib/task-status'
 import { canAccessSynopsesForPerson } from '@/lib/auth-utils'
-import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import {
   Eye,
   Plus,
@@ -33,10 +33,9 @@ import {
   CalendarDays,
   Rocket,
   ListTodo,
-  CheckCircle,
   MessageCircle,
+  FileText,
 } from 'lucide-react'
-import { FaJira, FaGithub } from 'react-icons/fa'
 import { Button } from '@/components/ui/button'
 import {
   Person,
@@ -44,11 +43,11 @@ import {
   User,
   InitiativeOwner,
   OneOnOne,
-  CheckIn,
   Initiative,
   Feedback,
   FeedbackCampaign,
 } from '@prisma/client'
+import { FaGithub, FaJira } from 'react-icons/fa'
 
 type PersonWithRelations = Person & {
   team: Team | null
@@ -59,6 +58,27 @@ type PersonWithRelations = Person & {
   initiativeOwners: (InitiativeOwner & {
     initiative: Initiative & {
       team: Team | null
+      objectives: Array<{
+        id: string
+        title: string
+        keyResult: string | null
+        sortIndex: number
+      }>
+      owners: Array<{
+        personId: string
+        role: string
+        person: {
+          id: string
+          name: string
+        }
+      }>
+      _count: {
+        checkIns: number
+        tasks: number
+      }
+      tasks: Array<{
+        status: string
+      }>
     }
   })[]
   oneOnOnes: (OneOnOne & {
@@ -67,12 +87,15 @@ type PersonWithRelations = Person & {
   oneOnOnesAsManager: (OneOnOne & {
     report: Person
   })[]
-  checkIns: (CheckIn & {
-    initiative: Initiative
-  })[]
   feedback: (Feedback & {
-    about: Person
-    from: Person
+    about: {
+      id: string
+      name: string
+    }
+    from: {
+      id: string
+      name: string
+    }
   })[]
   jiraAccount: {
     id: string
@@ -167,6 +190,36 @@ export default async function PersonDetailPage({
           initiative: {
             include: {
               team: true,
+              objectives: {
+                select: {
+                  id: true,
+                  title: true,
+                  keyResult: true,
+                  sortIndex: true,
+                },
+                orderBy: { sortIndex: 'asc' },
+              },
+              owners: {
+                include: {
+                  person: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
+                },
+              },
+              _count: {
+                select: {
+                  checkIns: true,
+                  tasks: true,
+                },
+              },
+              tasks: {
+                select: {
+                  status: true,
+                },
+              },
             },
           },
         },
@@ -183,12 +236,6 @@ export default async function PersonDetailPage({
           report: true,
         },
         orderBy: { scheduledAt: 'desc' },
-      },
-      checkIns: {
-        include: {
-          initiative: true,
-        },
-        orderBy: { createdAt: 'desc' },
       },
       feedback: {
         include: {
@@ -260,6 +307,14 @@ export default async function PersonDetailPage({
 
   // Get people data for TaskTable
   const people = await getPeople()
+
+  // Get teams for the InitiativesTable component
+  const teams = await prisma.team.findMany({
+    where: {
+      organizationId: session.user.organizationId,
+    },
+    orderBy: { name: 'asc' },
+  })
 
   // Check if user can access synopses for this person
   const canAccessSynopses = await canAccessSynopsesForPerson(
@@ -376,10 +431,45 @@ export default async function PersonDetailPage({
                 {/* Synopsis - Only show if user can access synopses */}
                 {canAccessSynopses && (
                   <div className='flex-1 min-w-[300px] max-w-[500px]'>
-                    <PersonSynopsis
-                      personId={personWithRelations.id}
-                      canGenerate={canAccessSynopses}
-                    />
+                    <section>
+                      <SectionHeader
+                        icon={FileText}
+                        title='Synopsis'
+                        action={
+                          <div className='flex items-center gap-2'>
+                            <Button
+                              variant='outline'
+                              size='sm'
+                              asChild
+                              title='View All Synopses'
+                            >
+                              <Link
+                                href={`/people/${personWithRelations.id}/synopses`}
+                              >
+                                <Eye className='w-4 h-4' />
+                              </Link>
+                            </Button>
+                            <Button
+                              variant='outline'
+                              size='sm'
+                              asChild
+                              title='Add New Synopsis'
+                            >
+                              <Link
+                                href={`/people/${personWithRelations.id}/synopses/new`}
+                              >
+                                <Plus className='w-4 h-4' />
+                              </Link>
+                            </Button>
+                          </div>
+                        }
+                      />
+                      <PersonSynopsisList
+                        personId={personWithRelations.id}
+                        compact={true}
+                        canGenerate={canAccessSynopses}
+                      />
+                    </section>
                   </div>
                 )}
 
@@ -387,6 +477,38 @@ export default async function PersonDetailPage({
                 {(visibleFeedback.length > 0 || currentPerson?.id) && (
                   <div className='flex-1 min-w-[300px] max-w-[500px]'>
                     <section id='feedback'>
+                      <SectionHeader
+                        icon={MessageCircle}
+                        title={`Feedback (${visibleFeedback.length})`}
+                        action={
+                          <div className='flex items-center gap-2'>
+                            <Button
+                              variant='outline'
+                              size='sm'
+                              asChild
+                              title='View All Feedback'
+                            >
+                              <Link
+                                href={`/feedback?aboutPersonId=${personWithRelations.id}`}
+                              >
+                                <Eye className='w-4 h-4' />
+                              </Link>
+                            </Button>
+                            <Button
+                              variant='outline'
+                              size='sm'
+                              asChild
+                              title='Add New Feedback'
+                            >
+                              <Link
+                                href={`/people/${personWithRelations.id}/feedback/new`}
+                              >
+                                <Plus className='w-4 h-4' />
+                              </Link>
+                            </Button>
+                          </div>
+                        }
+                      />
                       <FeedbackList
                         person={personWithRelations}
                         feedback={visibleFeedback}
@@ -400,39 +522,38 @@ export default async function PersonDetailPage({
                 {personWithRelations.feedbackCampaigns.length > 0 && (
                   <div className='flex-1 min-w-[300px] max-w-[500px]'>
                     <section>
-                      <div className='flex items-center justify-between mb-4 pb-3 border-b border-border'>
-                        <h3 className='font-bold flex items-center gap-2'>
-                          <MessageCircle className='w-4 h-4' />
-                          Feedback Campaigns (
-                          {personWithRelations.feedbackCampaigns.length})
-                        </h3>
-                        <div className='flex items-center gap-2'>
-                          <Button
-                            asChild
-                            variant='outline'
-                            size='sm'
-                            title='View All Feedback Campaigns'
-                          >
-                            <Link
-                              href={`/people/${personWithRelations.id}/feedback-campaigns`}
+                      <SectionHeader
+                        icon={MessageCircle}
+                        title={`Feedback Campaigns (${personWithRelations.feedbackCampaigns.length})`}
+                        action={
+                          <div className='flex items-center gap-2'>
+                            <Button
+                              asChild
+                              variant='outline'
+                              size='sm'
+                              title='View All Feedback Campaigns'
                             >
-                              <Eye className='w-4 h-4' />
-                            </Link>
-                          </Button>
-                          <Button
-                            asChild
-                            variant='outline'
-                            size='sm'
-                            title='Create New Feedback Campaign'
-                          >
-                            <Link
-                              href={`/people/${personWithRelations.id}/feedback-campaigns/new`}
+                              <Link
+                                href={`/people/${personWithRelations.id}/feedback-campaigns`}
+                              >
+                                <Eye className='w-4 h-4' />
+                              </Link>
+                            </Button>
+                            <Button
+                              asChild
+                              variant='outline'
+                              size='sm'
+                              title='Create New Feedback Campaign'
                             >
-                              <Plus className='w-4 h-4' />
-                            </Link>
-                          </Button>
-                        </div>
-                      </div>
+                              <Link
+                                href={`/people/${personWithRelations.id}/feedback-campaigns/new`}
+                              >
+                                <Plus className='w-4 h-4' />
+                              </Link>
+                            </Button>
+                          </div>
+                        }
+                      />
                       <PersonFeedbackCampaigns
                         campaigns={personWithRelations.feedbackCampaigns}
                       />
@@ -445,57 +566,38 @@ export default async function PersonDetailPage({
             {/* Owned Initiatives - Only show if person has initiatives */}
             {personWithRelations.initiativeOwners.length > 0 && (
               <section>
-                <h3 className='font-bold mb-4 flex items-center gap-2'>
-                  <Rocket className='w-4 h-4' />
-                  Owned Initiatives (
-                  {personWithRelations.initiativeOwners.length})
-                </h3>
-                <div className='space-y-3'>
-                  {personWithRelations.initiativeOwners.map(ownership => (
-                    <Link
-                      key={ownership.initiative.id}
-                      href={`/initiatives/${ownership.initiative.id}`}
-                      className='block border rounded-xl p-3 hover:bg-accent/50 transition-colors'
-                    >
-                      <div className='flex items-center justify-between'>
-                        <div>
-                          <div className='font-medium'>
-                            {ownership.initiative.title}
-                          </div>
-                          <div className='text-sm text-muted-foreground'>
-                            {ownership.initiative.summary && (
-                              <ReadonlyNotesField
-                                content={ownership.initiative.summary}
-                                variant='compact'
-                                showEmptyState={false}
-                              />
-                            )}
-                          </div>
-                          <div className='text-xs text-muted-foreground mt-1'>
-                            Role: {ownership.role} • Team:{' '}
-                            {ownership.initiative.team?.name || 'No team'}
-                          </div>
-                        </div>
-                        <div className='flex items-center gap-2'>
-                          <Rag rag={ownership.initiative.rag} />
-                          <span className='badge'>
-                            {ownership.initiative.confidence}%
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+                <SectionHeader
+                  icon={Rocket}
+                  title={`Owned Initiatives (${personWithRelations.initiativeOwners.length})`}
+                />
+                <InitiativesTable
+                  initiatives={personWithRelations.initiativeOwners.map(
+                    ownership => ({
+                      ...ownership.initiative,
+                      objectives: ownership.initiative.objectives || [],
+                      owners: ownership.initiative.owners || [],
+                      _count: ownership.initiative._count || {
+                        checkIns: 0,
+                        tasks: 0,
+                      },
+                      tasks: ownership.initiative.tasks || [],
+                    })
+                  )}
+                  people={people}
+                  teams={teams}
+                  hideFilters={true}
+                  hideActions={true}
+                />
               </section>
             )}
 
             {/* Active Tasks - Only show if person has active tasks */}
             {personWithRelations.tasks.length > 0 && (
               <section>
-                <h3 className='font-bold mb-4 flex items-center gap-2'>
-                  <ListTodo className='w-4 h-4' />
-                  Active Tasks ({personWithRelations.tasks.length})
-                </h3>
+                <SectionHeader
+                  icon={ListTodo}
+                  title={`Active Tasks (${personWithRelations.tasks.length})`}
+                />
                 <TaskTable
                   tasks={personWithRelations.tasks}
                   people={people}
@@ -506,64 +608,13 @@ export default async function PersonDetailPage({
               </section>
             )}
 
-            {/* Recent Check-ins - Only show if person has check-ins */}
-            {personWithRelations.checkIns.length > 0 && (
-              <section>
-                <div className='flex items-center justify-between mb-4'>
-                  <h3 className='font-bold flex items-center gap-2'>
-                    <CheckCircle className='w-4 h-4' />
-                    Recent Check-ins ({personWithRelations.checkIns.length})
-                  </h3>
-                  <Button asChild variant='outline' size='sm'>
-                    <Link
-                      href='/initiatives'
-                      className='flex items-center gap-2'
-                    >
-                      <Eye className='w-4 h-4' />
-                      View All
-                    </Link>
-                  </Button>
-                </div>
-                <div className='space-y-3'>
-                  {personWithRelations.checkIns.slice(0, 3).map(checkIn => (
-                    <div key={checkIn.id} className='border rounded-xl p-3'>
-                      <div className='flex items-center justify-between'>
-                        <div>
-                          <Link
-                            href={`/initiatives/${checkIn.initiative.id}`}
-                            className='font-medium hover:text-primary transition-colors'
-                          >
-                            {checkIn.initiative.title}
-                          </Link>
-                          <div className='text-sm text-muted-foreground'>
-                            {checkIn.summary}
-                          </div>
-                          <div className='text-xs text-muted-foreground mt-1'>
-                            Week of{' '}
-                            {new Date(checkIn.weekOf).toLocaleDateString()}
-                          </div>
-                        </div>
-                        <div className='flex items-center gap-2'>
-                          <Rag rag={checkIn.rag} />
-                          <span className='badge'>{checkIn.confidence}%</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
             {/* 1:1 Meetings - Only show if person has reports or a manager AND has 1:1s */}
             {(personWithRelations.reports.length > 0 ||
               personWithRelations.manager) &&
               (personWithRelations.oneOnOnes.length > 0 ||
                 personWithRelations.oneOnOnesAsManager.length > 0) && (
                 <section>
-                  <h3 className='font-bold mb-4 flex items-center gap-2'>
-                    <MessageCircle className='w-4 h-4' />
-                    1:1 Meetings
-                  </h3>
+                  <SectionHeader icon={MessageCircle} title='1:1 Meetings' />
                   <div className='space-y-3'>
                     {/* As Manager */}
                     {personWithRelations.oneOnOnesAsManager.length > 0 && (
@@ -673,19 +724,17 @@ export default async function PersonDetailPage({
             {/* Direct Reports */}
             {personWithRelations.reports.length > 0 && (
               <section>
-                <h3 className='font-bold mb-4 flex items-center gap-2'>
-                  <Users className='w-4 h-4' />
-                  Direct Reports ({personWithRelations.reports.length})
-                </h3>
+                <SectionHeader
+                  icon={Users}
+                  title={`Direct Reports (${personWithRelations.reports.length})`}
+                />
                 <div className='space-y-3'>
                   {personWithRelations.reports.map(report => (
-                    <PersonListItemCard
+                    <PersonListItem
                       key={report.id}
                       person={report}
-                      variant='simple'
-                      showActions={true}
-                      currentPerson={currentPerson}
-                      isAdmin={isAdmin(session.user)}
+                      showRole={true}
+                      showTeam={true}
                     />
                   ))}
                 </div>
@@ -695,10 +744,7 @@ export default async function PersonDetailPage({
             {/* User Account Link - Only show for admins */}
             {isAdmin(session.user) && (
               <section>
-                <h3 className='font-bold mb-4 flex items-center gap-2'>
-                  <UserIcon className='w-4 h-4' />
-                  User Linking
-                </h3>
+                <SectionHeader icon={UserIcon} title='User Linking' />
                 <UserLinkForm
                   personId={personWithRelations.id}
                   linkedUser={personWithRelations.user}
@@ -709,10 +755,7 @@ export default async function PersonDetailPage({
             {/* Jira Integration - Only show for admins */}
             {isAdmin(session.user) && (
               <section>
-                <h3 className='font-bold mb-4 flex items-center gap-2'>
-                  <FaJira className='w-4 h-4' />
-                  Jira Linking
-                </h3>
+                <SectionHeader icon={FaJira} title='Jira Linking' />
                 <JiraAccountLinker
                   personId={personWithRelations.id}
                   personName={personWithRelations.name}
@@ -725,10 +768,7 @@ export default async function PersonDetailPage({
             {/* GitHub Integration - Only show for admins */}
             {isAdmin(session.user) && (
               <section>
-                <h3 className='font-bold mb-4 flex items-center gap-2'>
-                  <FaGithub className='w-4 h-4' />
-                  GitHub Linking
-                </h3>
+                <SectionHeader icon={FaGithub} title='GitHub Linking' />
                 <GithubAccountLinker
                   personId={personWithRelations.id}
                   personName={personWithRelations.name}

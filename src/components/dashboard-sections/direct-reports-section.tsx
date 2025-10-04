@@ -23,9 +23,12 @@ export async function DashboardDirectReportsSection({
   if (!directReports || directReports.length === 0) return null
 
   return (
-    <ExpandableSection title='Direct Reports' viewAllHref='/direct-reports'>
+    <ExpandableSection
+      title='Direct Reports'
+      icon='User'
+      viewAllHref='/direct-reports'
+    >
       <DirectReports directReports={directReports} />
     </ExpandableSection>
   )
 }
-

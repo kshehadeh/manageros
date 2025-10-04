@@ -2,11 +2,43 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { SectionHeader } from '@/components/ui/section-header'
+import {
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  ListTodo,
+  Calendar,
+  FileText,
+  Target,
+  MessageSquare,
+  GitPullRequest,
+  BarChart3,
+  Rocket,
+  Users2,
+  User,
+} from 'lucide-react'
 import Link from 'next/link'
+
+// Icon mapping for commonly used icons
+const iconMap = {
+  User,
+  ListTodo,
+  Calendar,
+  FileText,
+  Target,
+  MessageSquare,
+  GitPullRequest,
+  BarChart3,
+  Rocket,
+  Users2,
+} as const
+
+type IconName = keyof typeof iconMap
 
 interface ExpandableSectionProps {
   title: string
+  icon?: IconName
   viewAllHref: string
   children: React.ReactNode
   initialLimit?: number
@@ -15,6 +47,7 @@ interface ExpandableSectionProps {
 
 export function ExpandableSection({
   title,
+  icon,
   viewAllHref,
   children,
   initialLimit = 5,
@@ -27,16 +60,22 @@ export function ExpandableSection({
     ? childrenArray
     : childrenArray.slice(0, initialLimit)
 
+  const IconComponent = icon ? iconMap[icon] : null
+
   return (
-    <section
-      className={`bg-card/30 border border-border/50 rounded-xl p-4 space-y-4 ${className}`}
-    >
-      <div className='flex items-center justify-between mb-3'>
-        <h2 className='font-semibold'>{title}</h2>
-        <Button asChild variant='outline' size='sm'>
-          <Link href={viewAllHref}>View all</Link>
-        </Button>
-      </div>
+    <section className={`rounded-xl p-4 space-y-4 ${className}`}>
+      <SectionHeader
+        icon={IconComponent || User}
+        title={title}
+        action={
+          <Button asChild variant='outline' size='sm'>
+            <Link href={viewAllHref} className='flex items-center gap-2'>
+              <Eye className='w-4 h-4' />
+              View all
+            </Link>
+          </Button>
+        }
+      />
       <div className='space-y-3'>
         {visibleItems}
         {childrenArray.length === 0 && (

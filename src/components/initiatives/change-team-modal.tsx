@@ -74,8 +74,9 @@ export function ChangeTeamModal({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant='ghost' size='sm' className='h-6 w-6 p-0'>
-          <Edit2 className='h-3 w-3' />
+        <Button variant='outline' size='sm'>
+          <Edit2 className='h-4 w-4 mr-2' />
+          Edit
         </Button>
       </DialogTrigger>
 

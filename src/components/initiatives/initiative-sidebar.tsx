@@ -1,10 +1,11 @@
 'use client'
 
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { SectionHeader } from '@/components/ui/section-header'
 import { LinkManager } from '@/components/entity-links'
 import { ChangeTeamModal } from './change-team-modal'
+import { ManageOwnersModal } from './manage-owners-modal'
 import { Users } from 'lucide-react'
+import { PersonListItem } from '@/components/people/person-list-item'
 import Link from 'next/link'
 
 interface Person {
@@ -48,6 +49,7 @@ interface InitiativeSidebarProps {
   entityType: string
   entityId: string
   teams: Team[]
+  people: Person[]
 }
 
 export function InitiativeSidebar({
@@ -57,22 +59,24 @@ export function InitiativeSidebar({
   entityType,
   entityId,
   teams,
+  people,
 }: InitiativeSidebarProps) {
   return (
     <div className='w-full lg:w-80 space-y-6'>
       {/* Team Section */}
       <div className='page-section'>
-        <div className='flex items-center justify-between mb-3'>
-          <h3 className='section-header font-bold flex items-center gap-2'>
-            <Users className='h-5 w-5' />
-            Team
-          </h3>
-          <ChangeTeamModal
-            initiativeId={entityId}
-            currentTeam={team}
-            teams={teams}
-          />
-        </div>
+        <SectionHeader
+          icon={Users}
+          title='Team'
+          action={
+            <ChangeTeamModal
+              initiativeId={entityId}
+              currentTeam={team}
+              teams={teams}
+            />
+          }
+          className='mb-3'
+        />
         {team ? (
           <div className='flex items-center gap-2'>
             <Link
@@ -89,10 +93,18 @@ export function InitiativeSidebar({
 
       {/* Associated People Section */}
       <div className='page-section'>
-        <h3 className='section-header font-bold flex items-center gap-2'>
-          <Users className='h-5 w-5' />
-          Associated People
-        </h3>
+        <SectionHeader
+          icon={Users}
+          title='Associated People'
+          action={
+            <ManageOwnersModal
+              initiativeId={entityId}
+              owners={owners}
+              people={people}
+            />
+          }
+          className='mb-3'
+        />
         <div className='space-y-3'>
           {owners.length === 0 ? (
             <p className='text-sm text-muted-foreground'>
@@ -100,34 +112,13 @@ export function InitiativeSidebar({
             </p>
           ) : (
             owners.map(owner => (
-              <div
+              <PersonListItem
                 key={`${owner.initiativeId}-${owner.personId}`}
-                className='flex items-center gap-3'
-              >
-                <Avatar className='h-8 w-8'>
-                  <AvatarImage src={owner.person.avatar || undefined} />
-                  <AvatarFallback className='text-xs'>
-                    {owner.person.name
-                      .split(' ')
-                      .map(n => n[0])
-                      .join('')
-                      .toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className='flex-1 min-w-0'>
-                  <Link
-                    href={`/people/${owner.person.id}`}
-                    className='text-sm font-medium hover:text-primary transition-colors'
-                  >
-                    {owner.person.name}
-                  </Link>
-                  {owner.role && owner.role !== 'owner' && (
-                    <Badge variant='secondary' className='text-xs mt-1'>
-                      {owner.role}
-                    </Badge>
-                  )}
-                </div>
-              </div>
+                person={owner.person}
+                roleBadge={
+                  owner.role && owner.role !== 'owner' ? owner.role : undefined
+                }
+              />
             ))
           )}
         </div>

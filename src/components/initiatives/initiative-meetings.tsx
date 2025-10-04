@@ -3,6 +3,7 @@
 import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { SharedMeetingsTable } from '@/components/meetings/shared-meetings-table'
+import { SectionHeader } from '@/components/ui/section-header'
 import { CreateMeetingModal } from './create-meeting-modal'
 import {
   Meeting,
@@ -50,29 +51,26 @@ export function InitiativeMeetings({
 
   return (
     <div className='page-section'>
-      <div className='flex items-center justify-between mb-4'>
-        <h3 className='section-header font-bold flex items-center gap-2'>
-          <Calendar className='w-4 h-4' />
-          Meetings
-        </h3>
-        <CreateMeetingModal
-          initiativeId={initiativeId}
-          people={people}
-          teams={teams}
-          currentTeam={currentTeam}
-        />
-      </div>
+      <SectionHeader
+        icon={Calendar}
+        title='Meetings'
+        action={
+          <CreateMeetingModal
+            initiativeId={initiativeId}
+            people={people}
+            teams={teams}
+            currentTeam={currentTeam}
+          />
+        }
+        className='mb-4'
+      />
       <SharedMeetingsTable
         meetings={meetings}
         variant='initiative'
         initiativeId={initiativeId}
         showCreateButton={false}
         onCreateMeeting={handleCreateMeeting}
-        emptyStateMessage='No meetings scheduled for this initiative'
-        emptyStateAction={{
-          label: 'Schedule First Meeting',
-          onClick: handleCreateMeeting,
-        }}
+        emptyStateMessage='No meetings for this initiative'
       />
     </div>
   )

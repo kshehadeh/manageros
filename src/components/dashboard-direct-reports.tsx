@@ -1,4 +1,4 @@
-import { PersonListItemCard } from '@/components/people/person-list-item-card'
+import { PersonListItem } from '@/components/people/person-list-item'
 import { Person, Team } from '@prisma/client'
 
 type PersonWithRelations = Person & {
@@ -22,7 +22,12 @@ export function DirectReports({ directReports }: DirectReportsProps) {
   return (
     <div className='grid gap-3'>
       {directReports.map(person => (
-        <PersonListItemCard key={person.id} person={person} />
+        <PersonListItem
+          key={person.id}
+          person={person}
+          showRole={true}
+          showTeam={true}
+        />
       ))}
     </div>
   )

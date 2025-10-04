@@ -54,22 +54,31 @@ export async function DashboardRelatedTeamsSection({
   if (!teams || teams.length === 0) return null
 
   return (
-    <ExpandableSection title='Related Teams' viewAllHref='/teams'>
+    <ExpandableSection title='Related Teams' icon='Users2' viewAllHref='/teams'>
       {teams.map(team => (
         <div key={team.id} className='flex items-center justify-between'>
           <div>
-            <Link href={`/teams/${team.id}`} className='font-medium hover:text-blue-400'>
+            <Link
+              href={`/teams/${team.id}`}
+              className='font-medium hover:text-blue-400'
+            >
               {team.name}
             </Link>
             <div className='text-neutral-400 text-sm'>
               {team.description ?? ''}
             </div>
             <div className='text-xs text-neutral-500 mt-1'>
-              {team.people.length} member{team.people.length !== 1 ? 's' : ''} • {team.initiatives.length} initiative{team.initiatives.length !== 1 ? 's' : ''}
+              {team.people.length} member{team.people.length !== 1 ? 's' : ''} •{' '}
+              {team.initiatives.length} initiative
+              {team.initiatives.length !== 1 ? 's' : ''}
               {team.parent && (
                 <span>
-                  {' '}• Parent:{' '}
-                  <Link href={`/teams/${team.parent.id}`} className='hover:text-blue-400'>
+                  {' '}
+                  • Parent:{' '}
+                  <Link
+                    href={`/teams/${team.parent.id}`}
+                    className='hover:text-blue-400'
+                  >
                     {team.parent.name}
                   </Link>
                 </span>
@@ -81,4 +90,3 @@ export async function DashboardRelatedTeamsSection({
     </ExpandableSection>
   )
 }
-

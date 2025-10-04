@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { GithubPrsActivityTable } from './github-prs-activity-table'
 import { fetchGithubPullRequests } from '@/lib/actions'
+import { SectionHeader } from '@/components/ui/section-header'
+import { Button } from '@/components/ui/button'
 import { FaGithub } from 'react-icons/fa'
 
 interface GithubPrsActivitySectionProps {
@@ -17,6 +19,24 @@ export function GithubPrsActivitySection({
   hasGithubAccount,
 }: GithubPrsActivitySectionProps) {
   const [hasPrActivity, setHasPrActivity] = useState<boolean | null>(null)
+  const [daysBack, setDaysBack] = useState(30)
+  const [isFetching, setIsFetching] = useState(false)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
+
+  const handleRefresh = async () => {
+    setIsFetching(true)
+    try {
+      const result = await fetchGithubPullRequests(personId, daysBack)
+      if (result.success && result.pullRequests) {
+        setHasPrActivity(result.pullRequests.length > 0)
+        setRefreshTrigger(prev => prev + 1)
+      }
+    } catch {
+      // Error handling is done in the table component
+    } finally {
+      setIsFetching(false)
+    }
+  }
 
   useEffect(() => {
     const checkPrActivity = async () => {
@@ -38,23 +58,48 @@ export function GithubPrsActivitySection({
     }
 
     checkPrActivity()
-  }, [personId, hasGithubAccount])
+  }, [personId, hasGithubAccount, daysBack])
 
   // Don't render anything while checking or if no PR activity
   if (hasPrActivity === null || !hasPrActivity) {
     return null
   }
 
+  const headerActions = [
+    <select
+      key='days-back'
+      value={daysBack}
+      onChange={e => setDaysBack(Number(e.target.value))}
+      className='input'
+    >
+      <option value={7}>Last 7 days</option>
+      <option value={30}>Last 30 days</option>
+      <option value={90}>Last 90 days</option>
+    </select>,
+    <Button
+      key='refresh'
+      type='button'
+      onClick={handleRefresh}
+      disabled={isFetching}
+      variant='outline'
+    >
+      {isFetching ? 'Fetching...' : 'Refresh'}
+    </Button>,
+  ]
+
   return (
     <section>
-      <h3 className='font-semibold mb-4 flex items-center gap-2'>
-        <FaGithub className='w-4 h-4' />
-        GitHub Activity
-      </h3>
+      <SectionHeader
+        icon={FaGithub}
+        title='GitHub Activity'
+        action={headerActions}
+      />
       <GithubPrsActivityTable
         personId={personId}
         personName={personName}
         hasGithubAccount={hasGithubAccount}
+        daysBack={daysBack}
+        refreshTrigger={refreshTrigger}
       />
     </section>
   )

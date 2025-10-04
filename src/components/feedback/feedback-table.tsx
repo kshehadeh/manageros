@@ -229,7 +229,9 @@ export function FeedbackTable({
   }
 
   const clearFilters = () => {
+    // Clear all filters including aboutPersonId
     setFilters(initialFilters)
+
     startTransition(() => {
       router.push('/feedback')
     })
@@ -307,9 +309,23 @@ export function FeedbackTable({
     return content.substring(0, maxLength).trim() + '...'
   }
 
-  const hasActiveFilters = Object.values(filters).some(
-    value => value !== undefined && value !== '' && value !== 'all'
-  )
+  const hasActiveFilters = useMemo(() => {
+    // Check if aboutPersonId is coming from URL (not user-applied filter)
+    const aboutPersonIdFromUrl = searchParams.get('aboutPersonId')
+
+    const hasActive =
+      filters.keyword !== '' ||
+      filters.fromPersonId !== 'all' ||
+      // Only consider aboutPersonId as active if it's not from URL
+      (filters.aboutPersonId !== 'all' && !aboutPersonIdFromUrl) ||
+      filters.kind !== 'all' ||
+      filters.isPrivate !== 'all' ||
+      filters.dateRange !== 'all' ||
+      filters.startDate !== '' ||
+      filters.endDate !== ''
+
+    return hasActive
+  }, [filters, searchParams])
 
   const canEdit = (feedbackItem: FeedbackWithRelations) =>
     feedbackItem.fromId === currentUserId ||
@@ -365,6 +381,15 @@ export function FeedbackTable({
                     )}
                   </div>
 
+                  {/* Show locked person filter notice */}
+                  {searchParams.get('aboutPersonId') && (
+                    <div className='text-xs text-muted-foreground bg-muted/50 p-2 rounded border'>
+                      <strong>Person filter locked:</strong> Currently viewing
+                      feedback about a specific person. Use the &quot;View All
+                      Feedback&quot; button to see all organization feedback.
+                    </div>
+                  )}
+
                   <div className='space-y-4'>
                     {/* From Person Filter */}
                     <div>
@@ -391,31 +416,33 @@ export function FeedbackTable({
                       </Select>
                     </div>
 
-                    {/* About Person Filter */}
-                    <div>
-                      <label className='text-sm font-medium mb-2 block'>
-                        About
-                      </label>
-                      <Select
-                        value={filters.aboutPersonId}
-                        onValueChange={value =>
-                          updateFilters({ aboutPersonId: value })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder='All people' />
-                        </SelectTrigger>
+                    {/* About Person Filter - Only show if not filtering by URL */}
+                    {!searchParams.get('aboutPersonId') && (
+                      <div>
+                        <label className='text-sm font-medium mb-2 block'>
+                          About
+                        </label>
+                        <Select
+                          value={filters.aboutPersonId}
+                          onValueChange={value =>
+                            updateFilters({ aboutPersonId: value })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder='All people' />
+                          </SelectTrigger>
 
-                        <SelectContent>
-                          <SelectItem value='all'>All people</SelectItem>
-                          {people.map(person => (
-                            <SelectItem key={person.id} value={person.id}>
-                              {person.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                          <SelectContent>
+                            <SelectItem value='all'>All people</SelectItem>
+                            {people.map(person => (
+                              <SelectItem key={person.id} value={person.id}>
+                                {person.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
 
                     {/* Kind Filter */}
                     <div>

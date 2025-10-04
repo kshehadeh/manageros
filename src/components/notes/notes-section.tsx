@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { Button } from '@/components/ui/button'
+import { SectionHeader } from '@/components/ui/section-header'
 import { Textarea } from '@/components/ui/textarea'
 import {
   Dialog,
@@ -17,7 +18,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -233,159 +233,165 @@ export function NotesSection({
   }
 
   return (
-    <div className='space-y-4'>
-      <div className='flex items-center justify-between'>
-        <h3 className='text-lg font-semibold'>Notes</h3>
-        <Button
-          onClick={() => setIsCreateDialogOpen(true)}
-          size='sm'
-          className='flex items-center gap-2'
-        >
-          <Plus className='h-4 w-4' />
-          Add Note
-        </Button>
-      </div>
+    <div className='page-section'>
+      <div className='space-y-4'>
+        <SectionHeader
+          icon={FileText}
+          title='Notes'
+          action={
+            <Button
+              onClick={() => setIsCreateDialogOpen(true)}
+              size='sm'
+              className='flex items-center gap-2'
+            >
+              <Plus className='h-4 w-4' />
+              Add Note
+            </Button>
+          }
+        />
 
-      {notes.length === 0 ? (
-        <Card>
-          <CardContent className='flex flex-col items-center justify-center py-8 text-center'>
+        {notes.length === 0 ? (
+          <div className='flex flex-col items-center justify-center py-8 text-center'>
             <FileText className='h-8 w-8 text-muted-foreground mb-2' />
-            <p className='text-muted-foreground'>No notes yet</p>
-            <p className='text-sm text-muted-foreground'>
-              Add the first note to get started
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className='space-y-4'>
-          {notes.map(note => (
-            <Card key={note.id}>
-              <CardHeader className='pb-3'>
-                <div className='flex items-start justify-between'>
-                  <div className='flex items-center gap-3'>
-                    <Avatar className='h-8 w-8'>
-                      <AvatarFallback>
-                        {note.createdBy.name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className='font-medium text-sm'>
-                        {note.createdBy.name}
-                      </p>
-                      <p className='text-xs text-muted-foreground'>
-                        {formatDistanceToNow(new Date(note.createdAt), {
-                          addSuffix: true,
-                        })}
-                      </p>
+            <p className='text-muted-foreground text-sm mb-4'>No notes yet</p>
+          </div>
+        ) : (
+          <div className='space-y-4'>
+            {notes.map(note => (
+              <div key={note.id}>
+                <div className='p-4 pb-3'>
+                  <div className='flex items-start justify-between'>
+                    <div className='flex items-center gap-3'>
+                      <Avatar className='h-8 w-8'>
+                        <AvatarFallback>
+                          {note.createdBy.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className='font-medium text-sm'>
+                          {note.createdBy.name}
+                        </p>
+                        <p className='text-xs text-muted-foreground'>
+                          {formatDistanceToNow(new Date(note.createdAt), {
+                            addSuffix: true,
+                          })}
+                        </p>
+                      </div>
                     </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          className='h-8 w-8 p-0'
+                        >
+                          <MoreHorizontal className='h-4 w-4' />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align='end'>
+                        <DropdownMenuItem onClick={() => openEditDialog(note)}>
+                          <Edit className='h-4 w-4 mr-2' />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDeleteNote(note.id)}
+                          className='text-destructive'
+                        >
+                          <Trash2 className='h-4 w-4 mr-2' />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant='ghost' size='sm' className='h-8 w-8 p-0'>
-                        <MoreHorizontal className='h-4 w-4' />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align='end'>
-                      <DropdownMenuItem onClick={() => openEditDialog(note)}>
-                        <Edit className='h-4 w-4 mr-2' />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleDeleteNote(note.id)}
-                        className='text-destructive'
-                      >
-                        <Trash2 className='h-4 w-4 mr-2' />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
-              </CardHeader>
-              <CardContent className='pt-0'>
-                <div className='prose prose-sm max-w-none'>
-                  <p className='whitespace-pre-wrap'>
-                    {expandedNotes.has(note.id)
-                      ? note.content
-                      : getTruncatedContent(note.content)}
-                  </p>
-                  {note.content.length > 200 && (
-                    <button
-                      onClick={() => toggleNoteExpansion(note.id)}
-                      className='mt-2 text-sm text-primary hover:text-primary/80 flex items-center gap-1'
-                    >
-                      {expandedNotes.has(note.id) ? (
-                        <>
-                          <ChevronUp className='h-3 w-3' />
-                          Show less
-                        </>
-                      ) : (
-                        <>
-                          <ChevronDown className='h-3 w-3' />
-                          Show more
-                        </>
-                      )}
-                    </button>
-                  )}
-                </div>
-
-                {note.attachments.length > 0 && (
-                  <div className='mt-4 space-y-2'>
-                    <p className='text-sm font-medium text-muted-foreground'>
-                      Attachments:
+                <div className='px-4 pb-4'>
+                  <div className='prose prose-sm max-w-none'>
+                    <p className='whitespace-pre-wrap'>
+                      {expandedNotes.has(note.id)
+                        ? note.content
+                        : getTruncatedContent(note.content)}
                     </p>
-                    <div className='grid grid-cols-1 gap-2'>
-                      {note.attachments.map(
-                        (attachment: NoteWithAttachments['attachments'][0]) => (
-                          <div
-                            key={attachment.id}
-                            className='flex items-center justify-between p-2 border rounded-lg bg-muted/50'
-                          >
-                            <div className='flex items-center gap-2 flex-1 min-w-0'>
-                              <span className='text-lg'>
-                                {getFileIcon(attachment.mimeType)}
-                              </span>
-                              <div className='min-w-0 flex-1'>
-                                <p className='text-sm font-medium truncate'>
-                                  {attachment.originalName}
-                                </p>
-                                <p className='text-xs text-muted-foreground'>
-                                  {formatFileSize(attachment.fileSize)}
-                                </p>
+                    {note.content.length > 200 && (
+                      <button
+                        onClick={() => toggleNoteExpansion(note.id)}
+                        className='mt-2 text-sm text-primary hover:text-primary/80 flex items-center gap-1'
+                      >
+                        {expandedNotes.has(note.id) ? (
+                          <>
+                            <ChevronUp className='h-3 w-3' />
+                            Show less
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown className='h-3 w-3' />
+                            Show more
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+
+                  {note.attachments.length > 0 && (
+                    <div className='mt-4 space-y-2'>
+                      <p className='text-sm font-medium text-muted-foreground'>
+                        Attachments:
+                      </p>
+                      <div className='grid grid-cols-1 gap-2'>
+                        {note.attachments.map(
+                          (
+                            attachment: NoteWithAttachments['attachments'][0]
+                          ) => (
+                            <div
+                              key={attachment.id}
+                              className='flex items-center justify-between p-2 border rounded-lg bg-muted/50'
+                            >
+                              <div className='flex items-center gap-2 flex-1 min-w-0'>
+                                <span className='text-lg'>
+                                  {getFileIcon(attachment.mimeType)}
+                                </span>
+                                <div className='min-w-0 flex-1'>
+                                  <p className='text-sm font-medium truncate'>
+                                    {attachment.originalName}
+                                  </p>
+                                  <p className='text-xs text-muted-foreground'>
+                                    {formatFileSize(attachment.fileSize)}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className='flex items-center gap-1'>
+                                <Button
+                                  variant='ghost'
+                                  size='sm'
+                                  onClick={() =>
+                                    window.open(attachment.r2Url, '_blank')
+                                  }
+                                  className='h-8 w-8 p-0'
+                                >
+                                  <Download className='h-4 w-4' />
+                                </Button>
+                                <Button
+                                  variant='ghost'
+                                  size='sm'
+                                  onClick={() =>
+                                    handleDeleteAttachment(attachment.id)
+                                  }
+                                  className='h-8 w-8 p-0 text-destructive hover:text-destructive'
+                                >
+                                  <X className='h-4 w-4' />
+                                </Button>
                               </div>
                             </div>
-                            <div className='flex items-center gap-1'>
-                              <Button
-                                variant='ghost'
-                                size='sm'
-                                onClick={() =>
-                                  window.open(attachment.r2Url, '_blank')
-                                }
-                                className='h-8 w-8 p-0'
-                              >
-                                <Download className='h-4 w-4' />
-                              </Button>
-                              <Button
-                                variant='ghost'
-                                size='sm'
-                                onClick={() =>
-                                  handleDeleteAttachment(attachment.id)
-                                }
-                                className='h-8 w-8 p-0 text-destructive hover:text-destructive'
-                              >
-                                <X className='h-4 w-4' />
-                              </Button>
-                            </div>
-                          </div>
-                        )
-                      )}
+                          )
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Create Note Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>

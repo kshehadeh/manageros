@@ -160,24 +160,6 @@ export default async function InitiativeDetail({
                     <div className='flex items-center justify-center py-8'>
                       <Loading size='md' />
                       <span className='ml-2 text-sm text-muted-foreground'>
-                        Loading objectives...
-                      </span>
-                    </div>
-                  </div>
-                }
-              >
-                <InitiativeObjectives
-                  objectives={init.objectives}
-                  initiativeId={init.id}
-                />
-              </Suspense>
-
-              <Suspense
-                fallback={
-                  <div className='page-section'>
-                    <div className='flex items-center justify-center py-8'>
-                      <Loading size='md' />
-                      <span className='ml-2 text-sm text-muted-foreground'>
                         Loading tasks...
                       </span>
                     </div>
@@ -189,6 +171,24 @@ export default async function InitiativeDetail({
                   objectives={init.objectives}
                   allTasks={allTasks}
                   people={people}
+                />
+              </Suspense>
+
+              <Suspense
+                fallback={
+                  <div className='page-section'>
+                    <div className='flex items-center justify-center py-8'>
+                      <Loading size='md' />
+                      <span className='ml-2 text-sm text-muted-foreground'>
+                        Loading objectives...
+                      </span>
+                    </div>
+                  </div>
+                }
+              >
+                <InitiativeObjectives
+                  objectives={init.objectives}
+                  initiativeId={init.id}
                 />
               </Suspense>
 
@@ -283,6 +283,7 @@ export default async function InitiativeDetail({
               entityType='Initiative'
               entityId={init.id}
               teams={teams}
+              people={people}
             />
           </div>
         </div>

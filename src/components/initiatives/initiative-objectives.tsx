@@ -1,4 +1,5 @@
-import { Target } from 'lucide-react'
+import { Target, TargetIcon } from 'lucide-react'
+import { SectionHeader } from '@/components/ui/section-header'
 import { CreateObjectiveModal } from './create-objective-modal'
 
 interface InitiativeObjectivesProps {
@@ -17,17 +18,19 @@ export function InitiativeObjectives({
 }: InitiativeObjectivesProps) {
   return (
     <div className='page-section'>
-      <div className='flex items-center justify-between mb-4'>
-        <h3 className='section-header font-bold flex items-center gap-2'>
-          <Target className='w-4 h-4' />
-          Objectives & Key Results
-        </h3>
-        <CreateObjectiveModal initiativeId={initiativeId} />
-      </div>
+      <SectionHeader
+        icon={Target}
+        title='Objectives & Key Results'
+        action={<CreateObjectiveModal initiativeId={initiativeId} />}
+        className='mb-4'
+      />
       <div className='space-y-4'>
         {objectives.length === 0 ? (
-          <div className='text-muted-foreground text-sm'>
-            No objectives yet.
+          <div className='flex flex-col items-center justify-center py-8 text-center'>
+            <TargetIcon className='h-8 w-8 text-muted-foreground mb-2' />
+            <p className='text-muted-foreground text-sm mb-4'>
+              No objectives yet
+            </p>
           </div>
         ) : (
           objectives

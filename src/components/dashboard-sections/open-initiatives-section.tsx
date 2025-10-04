@@ -63,7 +63,11 @@ export async function DashboardOpenInitiativesSection({
   if (!openInitiatives || openInitiatives.length === 0) return null
 
   return (
-    <ExpandableSection title='Open Initiatives' viewAllHref='/initiatives'>
+    <ExpandableSection
+      title='Open Initiatives'
+      icon='Rocket'
+      viewAllHref='/initiatives'
+    >
       <DashboardInitiativesTable
         initiatives={openInitiatives}
         people={people}

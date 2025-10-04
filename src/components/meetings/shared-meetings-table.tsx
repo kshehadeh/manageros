@@ -549,9 +549,9 @@ export function SharedMeetingsTable({
   if (displayMeetings.length === 0) {
     return (
       <div className='text-center py-8'>
-        <Calendar className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
+        <Calendar className='h-8 w-8 text-muted-foreground mx-auto mb-4' />
         <p className='text-muted-foreground text-sm mb-4'>
-          {emptyStateMessage || 'No meetings scheduled.'}
+          {emptyStateMessage || '; meetings scheduled.'}
         </p>
         {emptyStateAction && (
           <Button onClick={emptyStateAction.onClick} variant='outline'>

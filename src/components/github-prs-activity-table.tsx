@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
   Table,
@@ -17,6 +16,8 @@ interface GithubPrsActivityTableProps {
   personId: string
   personName: string
   hasGithubAccount: boolean
+  daysBack: number
+  refreshTrigger: number
 }
 
 interface PullRequestItem {
@@ -44,34 +45,12 @@ interface PullRequestItem {
 export function GithubPrsActivityTable({
   personId,
   hasGithubAccount,
+  daysBack,
+  refreshTrigger,
 }: GithubPrsActivityTableProps) {
   const [pullRequests, setPullRequests] = useState<PullRequestItem[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [isFetching, setIsFetching] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [daysBack, setDaysBack] = useState(30)
-
-  const handleFetchFromGithub = async () => {
-    setIsFetching(true)
-    setError(null)
-
-    try {
-      const result = await fetchGithubPullRequests(personId, daysBack)
-      if (result.success && result.pullRequests) {
-        setPullRequests(result.pullRequests)
-      } else {
-        setError(result.error || 'Failed to fetch pull requests')
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Failed to fetch pull requests from GitHub'
-      )
-    } finally {
-      setIsFetching(false)
-    }
-  }
 
   useEffect(() => {
     const loadPullRequests = async () => {
@@ -96,7 +75,7 @@ export function GithubPrsActivityTable({
     if (hasGithubAccount) {
       loadPullRequests()
     }
-  }, [personId, hasGithubAccount, daysBack])
+  }, [personId, hasGithubAccount, daysBack, refreshTrigger])
 
   const getStateColor = (
     state: string,
@@ -136,31 +115,6 @@ export function GithubPrsActivityTable({
 
   return (
     <div className='space-y-4'>
-      <div className='flex items-center justify-between'>
-        <h4 className='text-sm font-medium text-foreground'>
-          Recent Pull Requests
-        </h4>
-        <div className='flex items-center space-x-2'>
-          <select
-            value={daysBack}
-            onChange={e => setDaysBack(Number(e.target.value))}
-            className='input'
-          >
-            <option value={7}>Last 7 days</option>
-            <option value={30}>Last 30 days</option>
-            <option value={90}>Last 90 days</option>
-          </select>
-          <Button
-            type='button'
-            onClick={handleFetchFromGithub}
-            disabled={isFetching}
-            variant='outline'
-          >
-            {isFetching ? 'Fetching...' : 'Refresh'}
-          </Button>
-        </div>
-      </div>
-
       {error && (
         <div className='rounded-md bg-badge-error/20 border-badge-error p-3'>
           <div className='text-sm text-badge-error-text'>{error}</div>

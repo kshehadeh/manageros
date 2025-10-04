@@ -6,8 +6,9 @@ import { Rag } from '@/components/rag'
 import { CheckInForm } from '@/components/checkin-form'
 import { DeleteCheckInButton } from '@/components/delete-checkin-button'
 import { Button } from '@/components/ui/button'
+import { SectionHeader } from '@/components/ui/section-header'
 import { EditIconButton } from './edit-icon-button'
-import { CheckCircle } from 'lucide-react'
+import { CheckCircle, Plus } from 'lucide-react'
 
 interface CheckIn {
   id: string
@@ -62,19 +63,20 @@ export function CheckInList({
 
   return (
     <div className='space-y-4'>
-      <div className='flex items-center justify-between'>
-        <h3 className='font-bold flex items-center gap-2'>
-          <CheckCircle className='w-4 h-4' />
-          Check-ins
-        </h3>
-        <Button
-          onClick={() => setShowNewForm(true)}
-          variant='outline'
-          size='sm'
-        >
-          Add Check-in
-        </Button>
-      </div>
+      <SectionHeader
+        icon={CheckCircle}
+        title='Check-ins'
+        action={
+          <Button
+            onClick={() => setShowNewForm(true)}
+            variant='outline'
+            size='sm'
+          >
+            <Plus className='h-4 w-4' />
+            Add Check-in
+          </Button>
+        }
+      />
 
       {/* New Check-in Form */}
       {showNewForm && (
@@ -164,14 +166,11 @@ export function CheckInList({
         ))}
 
         {checkIns.length === 0 && !showNewForm && (
-          <div className='text-center py-8 text-muted-foreground'>
-            <div className='text-lg font-medium mb-2'>No check-ins yet</div>
-            <div className='text-sm mb-4'>
-              Start tracking progress with regular check-ins
-            </div>
-            <Button onClick={() => setShowNewForm(true)} variant='outline'>
-              Add First Check-in
-            </Button>
+          <div className='flex flex-col items-center justify-center py-8 text-center'>
+            <CheckCircle className='h-8 w-8 text-muted-foreground mb-2' />
+            <p className='text-muted-foreground text-sm mb-4'>
+              No check-ins yet
+            </p>
           </div>
         )}
       </div>

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
   Table,
@@ -17,6 +16,8 @@ interface JiraWorkActivityTableProps {
   personId: string
   personName: string
   hasJiraAccount: boolean
+  daysBack: number
+  refreshTrigger: number
 }
 
 interface AssignedTicketItem {
@@ -35,35 +36,15 @@ interface AssignedTicketItem {
 export function JiraWorkActivityTable({
   personId,
   hasJiraAccount,
+  daysBack,
+  refreshTrigger,
 }: JiraWorkActivityTableProps) {
   const [assignedTickets, setAssignedTickets] = useState<AssignedTicketItem[]>(
     []
   )
   const [isLoading, setIsLoading] = useState(false)
-  const [isFetching, setIsFetching] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [daysBack, setDaysBack] = useState(30)
   const [jiraBaseUrl, setJiraBaseUrl] = useState<string | null>(null)
-
-  const handleFetchFromJira = async () => {
-    setIsFetching(true)
-    setError(null)
-
-    try {
-      const result = await fetchJiraAssignedTickets(personId, daysBack)
-      if (result.success) {
-        setAssignedTickets(result.tickets)
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Failed to fetch assigned tickets from Jira'
-      )
-    } finally {
-      setIsFetching(false)
-    }
-  }
 
   useEffect(() => {
     const loadJiraBaseUrl = async () => {
@@ -98,7 +79,7 @@ export function JiraWorkActivityTable({
     if (hasJiraAccount) {
       loadAssignedTickets()
     }
-  }, [personId, hasJiraAccount, daysBack])
+  }, [personId, hasJiraAccount, daysBack, refreshTrigger])
 
   const getStatusColor = (status: string): string => {
     const statusLower = status.toLowerCase()
@@ -134,31 +115,6 @@ export function JiraWorkActivityTable({
 
   return (
     <div className='space-y-4'>
-      <div className='flex items-center justify-between'>
-        <h4 className='text-sm font-medium text-foreground'>
-          Assigned Tickets
-        </h4>
-        <div className='flex items-center space-x-2'>
-          <select
-            value={daysBack}
-            onChange={e => setDaysBack(Number(e.target.value))}
-            className='input'
-          >
-            <option value={7}>Last 7 days</option>
-            <option value={30}>Last 30 days</option>
-            <option value={90}>Last 90 days</option>
-          </select>
-          <Button
-            type='button'
-            onClick={handleFetchFromJira}
-            disabled={isFetching}
-            variant='outline'
-          >
-            {isFetching ? 'Fetching...' : 'Refresh'}
-          </Button>
-        </div>
-      </div>
-
       {error && (
         <div className='rounded-md bg-badge-error/20 border-badge-error p-3'>
           <div className='text-sm text-badge-error-text'>{error}</div>
@@ -202,8 +158,8 @@ export function JiraWorkActivityTable({
                     </a>
                   </TableCell>
                   <TableCell>
-                    <div className='max-w-[300px]'>
-                      <div className='truncate font-medium text-card-foreground'>
+                    <div>
+                      <div className='font-medium text-card-foreground'>
                         {item.issueTitle}
                       </div>
                       <div className='text-xs text-muted-foreground'>
@@ -214,13 +170,13 @@ export function JiraWorkActivityTable({
                   <TableCell>
                     <Badge
                       variant='outline'
-                      className={`text-xs ${getStatusColor(item.status)}`}
+                      className={`text-xs ${getStatusColor(item.status)} whitespace-nowrap`}
                     >
                       {item.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <span className='text-sm text-muted-foreground'>
+                    <span className='text-sm text-muted-foreground whitespace-nowrap'>
                       {item.issueType}
                     </span>
                   </TableCell>
