@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import Link from 'next/link'
 import { PeopleTable } from '@/components/people/people-table'
 import { PeopleFilterBar } from '@/components/people/people-filter-bar'
 import { Person } from '@/types/person'
@@ -14,18 +15,14 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Users, Building, UserCheck, Briefcase } from 'lucide-react'
 import { useUserSettings } from '@/lib/hooks/use-user-settings'
-
-type GroupingOption = 'manager' | 'team' | 'status' | 'jobRole'
+import {
+  groupPeople,
+  type GroupingOption,
+  type PeopleGroup,
+} from '@/lib/utils/people-utils'
 
 interface GroupedPeoplePageClientProps {
   people: Person[]
-}
-
-interface PeopleGroup {
-  key: string
-  label: string
-  people: Person[]
-  count: number
 }
 
 export function GroupedPeoplePageClient({
@@ -57,135 +54,7 @@ export function GroupedPeoplePageClient({
 
   // Group people based on the selected option
   const groupedPeople = useMemo(() => {
-    const groups: PeopleGroup[] = []
-
-    switch (groupingOption) {
-      case 'manager':
-        // Group by manager
-        const managerGroups = new Map<string, Person[]>()
-
-        filteredPeople.forEach(person => {
-          const key = person.manager?.id || 'no-manager'
-          if (!managerGroups.has(key)) {
-            managerGroups.set(key, [])
-          }
-          managerGroups.get(key)!.push(person)
-        })
-
-        // Create groups
-        managerGroups.forEach((people, key) => {
-          const manager =
-            people.find(p => p.id === key)?.manager ||
-            filteredPeople.find(p => p.id === key)
-          groups.push({
-            key,
-            label: manager?.name || 'No Manager',
-            people: people.sort((a, b) => a.name.localeCompare(b.name)),
-            count: people.length,
-          })
-        })
-
-        // Sort groups by manager name
-        groups.sort((a, b) => {
-          if (a.key === 'no-manager') return 1
-          if (b.key === 'no-manager') return -1
-          return a.label.localeCompare(b.label)
-        })
-        break
-
-      case 'team':
-        // Group by team
-        const teamGroups = new Map<string, Person[]>()
-
-        filteredPeople.forEach(person => {
-          const key = person.team?.id || 'no-team'
-          if (!teamGroups.has(key)) {
-            teamGroups.set(key, [])
-          }
-          teamGroups.get(key)!.push(person)
-        })
-
-        // Create groups
-        teamGroups.forEach((people, key) => {
-          const team = people.find(p => p.team?.id === key)?.team
-          groups.push({
-            key,
-            label: team?.name || 'No Team',
-            people: people.sort((a, b) => a.name.localeCompare(b.name)),
-            count: people.length,
-          })
-        })
-
-        // Sort groups by team name
-        groups.sort((a, b) => {
-          if (a.key === 'no-team') return 1
-          if (b.key === 'no-team') return -1
-          return a.label.localeCompare(b.label)
-        })
-        break
-
-      case 'status':
-        // Group by status
-        const statusGroups = new Map<string, Person[]>()
-
-        filteredPeople.forEach(person => {
-          const status = person.status
-          if (!statusGroups.has(status)) {
-            statusGroups.set(status, [])
-          }
-          statusGroups.get(status)!.push(person)
-        })
-
-        // Create groups in a specific order
-        const statusOrder = ['active', 'inactive', 'on_leave', 'terminated']
-        statusOrder.forEach(status => {
-          const people = statusGroups.get(status) || []
-          if (people.length > 0) {
-            groups.push({
-              key: status,
-              label:
-                status.charAt(0).toUpperCase() +
-                status.slice(1).replace('_', ' '),
-              people: people.sort((a, b) => a.name.localeCompare(b.name)),
-              count: people.length,
-            })
-          }
-        })
-        break
-
-      case 'jobRole':
-        // Group by job role
-        const jobRoleGroups = new Map<string, Person[]>()
-
-        filteredPeople.forEach(person => {
-          const key = person.jobRole?.id || 'no-job-role'
-          if (!jobRoleGroups.has(key)) {
-            jobRoleGroups.set(key, [])
-          }
-          jobRoleGroups.get(key)!.push(person)
-        })
-
-        // Create groups
-        jobRoleGroups.forEach((people, key) => {
-          const jobRole = people.find(p => p.jobRole?.id === key)?.jobRole
-          groups.push({
-            key,
-            label: jobRole?.title || 'No Job Role',
-            people: people.sort((a, b) => a.name.localeCompare(b.name)),
-            count: people.length,
-          })
-        })
-
-        // Sort groups by job role title
-        groups.sort((a, b) => {
-          if (a.key === 'no-job-role') return 1
-          if (b.key === 'no-job-role') return -1
-          return a.label.localeCompare(b.label)
-        })
-        break
-    }
-
-    return groups
+    return groupPeople(filteredPeople, groupingOption)
   }, [filteredPeople, groupingOption])
 
   const getGroupIcon = (option: GroupingOption) => {
@@ -297,7 +166,16 @@ export function GroupedPeoplePageClient({
             <div className='flex items-center justify-between px-0'>
               <div className='flex items-center gap-3'>
                 {getGroupIcon(groupingOption)}
-                <h3 className='text-lg font-semibold'>{group.label}</h3>
+                {group.link ? (
+                  <Link
+                    href={group.link.href}
+                    className='text-lg font-semibold hover:text-primary transition-colors'
+                  >
+                    {group.label}
+                  </Link>
+                ) : (
+                  <h3 className='text-lg font-semibold'>{group.label}</h3>
+                )}
                 <Badge variant={getGroupBadgeVariant(group)}>
                   {group.count}
                 </Badge>
