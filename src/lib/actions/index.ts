@@ -35,6 +35,13 @@ export {
   getPeopleForFeedbackFilters,
 } from './person'
 
+// Avatar Actions
+export {
+  uploadAvatar,
+  updatePersonAvatar,
+  getLinkedAccountAvatars,
+} from './avatar'
+
 // Team Actions
 export {
   getTeams,

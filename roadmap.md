@@ -22,6 +22,7 @@
 - **Team Import** - CSV import functionality for teams with automatic parent team creation, fuzzy matching, and update capabilities for existing teams
 - **User Linking** - Connect user accounts to person records for access control
 - **Job Role Management** - Structured job roles with levels and domains, markdown-enabled job descriptions, organization-wide role management, role assignment to people, drag-and-drop level ordering, dedicated management page (January 2025)
+- **Avatar Management** - Person avatar support with multiple sources: upload to R2 storage, Jira account avatars, GitHub account avatars, initials fallback display, comprehensive avatar editor in person settings (October 4, 2025)
 
 ### Initiative Management
 
@@ -321,3 +322,19 @@ _Next Review: February 2025_
   - System supports multiple entity types (initiatives, tasks, meetings, people) for future expansion
   - Files organized in R2 with proper folder structure and unique naming
   - Added file icons, size formatting, and download functionality
+
+### Updates on 2025-10-04
+
+- **Avatar Management** (Completed):
+  - Extended Person model with optional `avatar` field for storing avatar URLs
+  - Created comprehensive `AvatarEditor` component integrated into person settings form (Basic Information section)
+  - Implemented avatar upload functionality to Cloudflare R2 with 5MB size limit
+  - Added support for using Jira and GitHub account avatars from linked accounts
+  - Built reusable `PersonAvatar` component with automatic initials fallback
+  - Created server actions: `uploadAvatar`, `updatePersonAvatar`, `getLinkedAccountAvatars`
+  - Implemented proper access control (admin-only) and organization isolation
+  - Added support for multiple image formats: JPEG, PNG, GIF, WebP
+  - Updated PersonForm to include avatar editor with real-time preview
+  - Enhanced edit person page to fetch and display linked account avatars
+  - Created comprehensive documentation in `docs/avatar-management.md`
+  - Added database migration: `20251004000000_add_avatar_to_person`

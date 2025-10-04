@@ -12,6 +12,7 @@ import { PersonListItem } from '@/components/people/person-list-item'
 import { PersonStatusBadge } from '@/components/people/person-status-badge'
 import { PersonFeedbackCampaigns } from '@/components/people/person-feedback-campaigns'
 import { PersonSynopsisList } from '@/components/people/person-synopsis-list'
+import { PersonAvatar } from '@/components/people/person-avatar'
 import { TaskTable } from '@/components/tasks/task-table'
 import { InitiativesTable } from '@/components/initiatives/initiatives-table'
 import { SectionHeader } from '@/components/ui/section-header'
@@ -339,8 +340,15 @@ export default async function PersonDetailPage({
           <div className='flex items-start justify-between'>
             <div className='flex-1'>
               <div className='flex items-center gap-3 mb-2'>
-                <h1 className='page-title'>{personWithRelations.name}</h1>
-                <PersonStatusBadge status={personWithRelations.status} />
+                <PersonAvatar
+                  name={personWithRelations.name}
+                  avatar={personWithRelations.avatar}
+                  size='lg'
+                />
+                <div className='flex items-center gap-3'>
+                  <h1 className='page-title'>{personWithRelations.name}</h1>
+                  <PersonStatusBadge status={personWithRelations.status} />
+                </div>
               </div>
               <div className='page-section-subtitle'>
                 {personWithRelations.role ?? ''}

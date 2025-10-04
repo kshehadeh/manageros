@@ -4,6 +4,7 @@ import {
   getPeople,
   getPerson,
   getJobRolesForSelection,
+  getLinkedAccountAvatars,
 } from '@/lib/actions'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
@@ -41,6 +42,14 @@ export default async function EditPersonPage({ params }: EditPersonPageProps) {
     notFound()
   }
 
+  // Get linked account avatars
+  let linkedAvatars: { jiraAvatar?: string; githubAvatar?: string } = {}
+  try {
+    linkedAvatars = await getLinkedAccountAvatars(id)
+  } catch (error) {
+    console.error('Error fetching linked account avatars:', error)
+  }
+
   return (
     <PersonDetailClient personName={person.name} personId={person.id}>
       <div className='space-y-6'>
@@ -53,6 +62,7 @@ export default async function EditPersonPage({ params }: EditPersonPageProps) {
           people={people}
           jobRoles={jobRoles}
           person={person}
+          linkedAvatars={linkedAvatars}
         />
       </div>
     </PersonDetailClient>

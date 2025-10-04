@@ -225,6 +225,7 @@ export async function createPerson(formData: PersonFormData) {
       role: validatedData.role,
       status: validatedData.status,
       birthday,
+      avatar: validatedData.avatar || null,
       teamId: validatedData.teamId || null,
       managerId: validatedData.managerId || null,
       jobRoleId: validatedData.jobRoleId || null,
@@ -335,6 +336,7 @@ export async function updatePerson(id: string, formData: PersonFormData) {
       role: validatedData.role,
       status: validatedData.status,
       birthday,
+      avatar: validatedData.avatar || null,
       teamId: validatedData.teamId || null,
       managerId: validatedData.managerId || null,
       jobRoleId: validatedData.jobRoleId || null,
@@ -447,6 +449,8 @@ export async function updatePersonPartial(
   if (validatedData.status !== undefined)
     updateFields.status = validatedData.status
   if (birthday !== undefined) updateFields.birthday = birthday
+  if (validatedData.avatar !== undefined)
+    updateFields.avatar = validatedData.avatar || null
   if (validatedData.teamId !== undefined) {
     updateFields.team = validatedData.teamId
       ? { connect: { id: validatedData.teamId } }

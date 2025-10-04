@@ -112,6 +112,7 @@ export function FeedbackDialog({
     role: null,
     status: 'ACTIVE',
     birthday: null,
+    avatar: null,
     organizationId: '', // This will be filled by the form
     teamId: null,
     managerId: null,

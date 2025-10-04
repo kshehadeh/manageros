@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { createPerson, updatePerson } from '@/lib/actions'
 import { type PersonFormData } from '@/lib/validations'
 import { UserLinkForm } from '@/components/user-link-form'
+import { AvatarEditor } from '@/components/people/avatar-editor'
 
 interface PersonFormProps {
   teams: Array<{ id: string; name: string }>
@@ -24,6 +25,7 @@ interface PersonFormProps {
     role?: string | null
     status: string
     birthday?: Date | null
+    avatar?: string | null
     teamId?: string | null
     managerId?: string | null
     jobRoleId?: string | null
@@ -35,6 +37,10 @@ interface PersonFormProps {
       role: string
     } | null
   }
+  linkedAvatars?: {
+    jiraAvatar?: string
+    githubAvatar?: string
+  }
 }
 
 export function PersonForm({
@@ -44,6 +50,7 @@ export function PersonForm({
   initialManagerId,
   initialTeamId,
   person,
+  linkedAvatars,
 }: PersonFormProps) {
   // Format date for date input without timezone issues
   const formatDateForInput = (date: Date | null) => {
@@ -60,6 +67,7 @@ export function PersonForm({
     role: person?.role || '',
     status: (person?.status as PersonFormData['status']) || 'active',
     birthday: formatDateForInput(person?.birthday || null),
+    avatar: person?.avatar || '',
     teamId: person?.teamId || initialTeamId || '',
     managerId: person?.managerId || initialManagerId || '',
     jobRoleId: person?.jobRoleId || '',
@@ -93,6 +101,21 @@ export function PersonForm({
       <div className='card'>
         <h3 className='font-semibold mb-4'>Basic Information</h3>
         <div className='space-y-4'>
+          {/* Avatar Editor */}
+          <div>
+            <label className='block text-sm font-medium mb-2'>Avatar</label>
+            <AvatarEditor
+              personId={person?.id}
+              personName={formData.name || 'New Person'}
+              currentAvatar={formData.avatar || null}
+              jiraAvatar={linkedAvatars?.jiraAvatar}
+              githubAvatar={linkedAvatars?.githubAvatar}
+              onAvatarChange={(avatarUrl) => {
+                setFormData({ ...formData, avatar: avatarUrl || '' })
+              }}
+            />
+          </div>
+
           <div>
             <label className='block text-sm font-medium mb-2'>Name *</label>
             <input
