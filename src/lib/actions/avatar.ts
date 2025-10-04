@@ -3,7 +3,7 @@
 import { uploadFileToR2 } from '@/lib/r2-upload'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
-import { getJiraBaseUrl } from '@/lib/actions/jira'
+import { JiraApiService } from '@/lib/jira-api'
 
 /**
  * Upload an avatar image to R2 storage and return the URL
@@ -123,12 +123,34 @@ export async function getLinkedAccountAvatars(personId: string) {
     githubAvatar?: string
   } = {}
 
-  // For Jira, construct the avatar URL using the Jira base URL
+  // For Jira, fetch the actual avatar URL from Jira API
   if (person.jiraAccount) {
-    const jiraBaseUrl = await getJiraBaseUrl()
-    if (jiraBaseUrl) {
-      // Jira avatar URL pattern: {baseUrl}/secure/useravatar?avatarId={accountId}&size=large
-      avatars.jiraAvatar = `${jiraBaseUrl}/secure/useravatar?avatarId=${person.jiraAccount.jiraAccountId}&size=large`
+    try {
+      // Get user's Jira credentials
+      const credentials = await prisma.userJiraCredentials.findUnique({
+        where: { userId: user.id },
+      })
+
+      if (credentials) {
+        const jiraService = JiraApiService.fromEncryptedCredentials(
+          credentials.jiraUsername,
+          credentials.encryptedApiKey,
+          credentials.jiraBaseUrl
+        )
+
+        // Get user details with avatar URLs
+        const jiraUser = await jiraService.getUserByAccountId(
+          person.jiraAccount.jiraAccountId
+        )
+
+        if (jiraUser.avatarUrls) {
+          // Use the largest available avatar (48x48)
+          avatars.jiraAvatar = jiraUser.avatarUrls['48x48']
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch Jira avatar:', error)
+      // Continue without Jira avatar
     }
   }
 

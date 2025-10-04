@@ -6,6 +6,7 @@ import {
   getJobRolesForSelection,
   getLinkedAccountAvatars,
 } from '@/lib/actions'
+import { prisma } from '@/lib/db'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
@@ -31,12 +32,19 @@ export default async function EditPersonPage({ params }: EditPersonPageProps) {
   }
 
   const { id } = await params
-  const [teams, people, jobRoles, person] = await Promise.all([
-    getTeams(),
-    getPeople(),
-    getJobRolesForSelection(),
-    getPerson(id),
-  ])
+  const [teams, people, jobRoles, person, jiraAccount, githubAccount] =
+    await Promise.all([
+      getTeams(),
+      getPeople(),
+      getJobRolesForSelection(),
+      getPerson(id),
+      prisma.personJiraAccount.findFirst({
+        where: { personId: id },
+      }),
+      prisma.personGithubAccount.findFirst({
+        where: { personId: id },
+      }),
+    ])
 
   if (!person) {
     notFound()
@@ -63,6 +71,8 @@ export default async function EditPersonPage({ params }: EditPersonPageProps) {
           jobRoles={jobRoles}
           person={person}
           linkedAvatars={linkedAvatars}
+          jiraAccount={jiraAccount}
+          githubAccount={githubAccount}
         />
       </div>
     </PersonDetailClient>

@@ -16,6 +16,12 @@ export interface JiraUser {
   emailAddress: string
   displayName: string
   active: boolean
+  avatarUrls?: {
+    '48x48': string
+    '24x24': string
+    '16x16': string
+    '32x32': string
+  }
 }
 
 export interface JiraIssue {
@@ -156,6 +162,13 @@ export class JiraApiService {
       user =>
         user.emailAddress.toLowerCase() === email.toLowerCase() && user.active
     )
+  }
+
+  /**
+   * Get user details by account ID (includes avatar URLs)
+   */
+  async getUserByAccountId(accountId: string): Promise<JiraUser> {
+    return this.makeRequest<JiraUser>(`user?accountId=${accountId}`)
   }
 
   /**
