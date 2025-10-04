@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Calendar, X } from 'lucide-react'
 import {
   detectDatesInText,
@@ -9,27 +9,25 @@ import {
   type DetectedDate,
 } from '@/lib/utils/date-detection'
 
-interface EnhancedTaskInputProps {
+interface EnhancedTaskTextareaProps {
   value: string
   onChange: (_value: string) => void
   onDateDetected?: (_date: string | null) => void
   placeholder?: string
   className?: string
   disabled?: boolean
-  showDatePreview?: boolean
-  showInlineDate?: boolean
+  rows?: number
 }
 
-export function EnhancedTaskInput({
+export function EnhancedTaskTextarea({
   value,
   onChange,
   onDateDetected,
-  placeholder = 'Enter task title...',
+  placeholder = 'Enter task details...',
   className = '',
   disabled = false,
-  showDatePreview = false,
-  showInlineDate = true,
-}: EnhancedTaskInputProps) {
+  rows = 4,
+}: EnhancedTaskTextareaProps) {
   const [detectedDates, setDetectedDates] = useState<DetectedDate[]>([])
   const [isDetecting, setIsDetecting] = useState(false)
 
@@ -70,7 +68,7 @@ export function EnhancedTaskInput({
     }
   }, [value, debouncedDetectDates, onDateDetected])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e.target.value)
   }
 
@@ -83,43 +81,34 @@ export function EnhancedTaskInput({
   }
 
   return (
-    <div className={`space-y-2 ${className}`}>
+    <div className={`space-y-3 ${className}`}>
       <div className='relative'>
-        <Input
-          type='text'
+        <Textarea
           value={value}
-          onChange={handleInputChange}
+          onChange={handleTextareaChange}
           placeholder={placeholder}
           disabled={disabled}
-          className='pr-8'
+          rows={rows}
+          className='resize-none'
         />
 
         {isDetecting && (
-          <div className='absolute right-2 top-1/2 transform -translate-y-1/2'>
+          <div className='absolute right-2 top-2'>
             <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-foreground'></div>
-          </div>
-        )}
-        {!isDetecting && detectedDates.length > 0 && showInlineDate && (
-          <div className='absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none'>
-            <span className='text-sm text-muted-foreground bg-background px-1'>
-              {formatDetectedDate(detectedDates[detectedDates.length - 1].date)}
-            </span>
           </div>
         )}
       </div>
 
-      {showDatePreview && detectedDates.length > 0 && (
+      {/* Status area for detected dates */}
+      {detectedDates.length > 0 && (
         <div className='space-y-2'>
-          <div className='text-sm text-muted-foreground flex items-center gap-1'>
-            <Calendar className='h-4 w-4' />
-            <span>Detected dates:</span>
-          </div>
           <div className='flex flex-wrap gap-2'>
             {detectedDates.map((detectedDate, index) => (
               <div
                 key={index}
                 className='flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-sm'
               >
+                <Calendar className='h-3 w-3' />
                 <span>{formatDetectedDate(detectedDate.date)}</span>
                 <button
                   type='button'

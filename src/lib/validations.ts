@@ -151,7 +151,7 @@ export const taskSchema = z.object({
   title: z
     .string()
     .min(1, 'Task title is required')
-    .max(200, 'Title must be less than 200 characters'),
+    .max(1500, 'Title must be less than 1500 characters'),
   description: z.string().optional(),
   assigneeId: z.string().optional(),
   status: z.enum(ALL_TASK_STATUSES as [string, ...string[]]).default('todo'),

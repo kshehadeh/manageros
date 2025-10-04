@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { EnhancedTaskInput } from '@/components/tasks/enhanced-task-input'
+import { EnhancedTaskTextarea } from '@/components/tasks/enhanced-task-textarea'
 import { MarkdownEditor } from '@/components/markdown-editor'
 import { createTask, updateTask } from '@/lib/actions'
 import { type TaskFormData, taskSchema } from '@/lib/validations'
@@ -139,16 +139,15 @@ export function TaskForm({
       <div className='space-y-4'>
         <div>
           <label htmlFor='title' className='block text-sm font-medium mb-2'>
-            Task Title *
+            Task Details *
           </label>
-          <EnhancedTaskInput
+          <EnhancedTaskTextarea
             value={formData.title}
             onChange={value => handleInputChange('title', value)}
             onDateDetected={handleDateDetected}
-            placeholder='Enter task title'
+            placeholder='Enter task title and details...'
             className={errors.title ? 'border-red-500' : ''}
-            showDatePreview={false}
-            showInlineDate={true}
+            rows={4}
           />
           {errors.title && (
             <p className='text-sm text-red-500 mt-1'>{errors.title}</p>

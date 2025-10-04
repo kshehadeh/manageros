@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { EnhancedTaskInput } from '@/components/tasks/enhanced-task-input'
+import { EnhancedTaskTextarea } from '@/components/tasks/enhanced-task-textarea'
 import { createQuickTask } from '@/lib/actions'
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
@@ -55,26 +55,28 @@ export function QuickTaskForm({ onSuccess }: QuickTaskFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className='flex gap-2'>
-      <EnhancedTaskInput
-        value={title}
-        onChange={setTitle}
-        onDateDetected={setDetectedDate}
-        placeholder='Add a new task...'
-        className='flex-1'
-        disabled={isSubmitting}
-        showDatePreview={false}
-        showInlineDate={true}
-      />
-      <Button
-        type='submit'
-        disabled={isSubmitting || !title.trim()}
-        variant='outline'
-        size='icon'
-        className='shrink-0'
-      >
-        <Plus className='h-4 w-4' />
-      </Button>
+    <form onSubmit={handleSubmit} className='space-y-3'>
+      <div className='flex gap-2'>
+        <div className='flex-1'>
+          <EnhancedTaskTextarea
+            value={title}
+            onChange={setTitle}
+            onDateDetected={setDetectedDate}
+            placeholder='Add a new task...'
+            disabled={isSubmitting}
+            rows={2}
+          />
+        </div>
+        <Button
+          type='submit'
+          disabled={isSubmitting || !title.trim()}
+          variant='outline'
+          size='icon'
+          className='shrink-0 self-start'
+        >
+          <Plus className='h-4 w-4' />
+        </Button>
+      </div>
     </form>
   )
 }
