@@ -1,7 +1,7 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useRef } from 'react'
 import {
   UserSettings,
   DEFAULT_USER_SETTINGS,
@@ -18,8 +18,14 @@ export function useUserSettings() {
   const { data: session } = useSession()
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_USER_SETTINGS)
   const [isLoaded, setIsLoaded] = useState(false)
+  const settingsRef = useRef<UserSettings>(DEFAULT_USER_SETTINGS)
 
   const userId = session?.user?.id
+
+  // Keep ref in sync with settings state
+  useEffect(() => {
+    settingsRef.current = settings
+  }, [settings])
 
   // Load settings when user changes
   useEffect(() => {
@@ -51,9 +57,9 @@ export function useUserSettings() {
   // Get a specific setting value
   const getSetting = useCallback(
     <K extends keyof UserSettings>(key: K): UserSettings[K] => {
-      return settings[key]
+      return settingsRef.current[key]
     },
-    [settings]
+    [] // No dependencies - uses ref for stable reference
   )
 
   // Reset all settings to defaults

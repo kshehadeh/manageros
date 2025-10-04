@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Search, Filter, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -58,18 +58,21 @@ export function TasksFilterBar({
   }, [isLoaded, getSetting])
 
   // Helper function to save filter values to user settings
-  const saveFilters = (filters: {
-    textFilter: string
-    assigneeFilter: string
-    initiativeFilter: string
-    statusFilter: string
-    priorityFilter: string
-    dateRangeFilter: string
-    startDate: string
-    endDate: string
-  }) => {
-    updateSetting('taskFilters', filters)
-  }
+  const saveFilters = useCallback(
+    (filters: {
+      textFilter: string
+      assigneeFilter: string
+      initiativeFilter: string
+      statusFilter: string
+      priorityFilter: string
+      dateRangeFilter: string
+      startDate: string
+      endDate: string
+    }) => {
+      updateSetting('taskFilters', filters)
+    },
+    [updateSetting]
+  )
 
   // Handle clicking outside to close filter popup
   useEffect(() => {
@@ -219,19 +222,6 @@ export function TasksFilterBar({
     }
 
     onFilteredTasksChange(filtered)
-
-    // Save filter values to user settings
-    saveFilters({
-      textFilter,
-      assigneeFilter,
-      initiativeFilter,
-      statusFilter,
-      priorityFilter,
-      dateRangeFilter,
-      startDate,
-      endDate,
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     tasks,
     textFilter,
@@ -243,6 +233,36 @@ export function TasksFilterBar({
     startDate,
     endDate,
     isLoaded,
+    onFilteredTasksChange,
+  ])
+
+  // Separate effect to save filter values to user settings
+  useEffect(() => {
+    if (!isLoaded) {
+      return
+    }
+
+    saveFilters({
+      textFilter,
+      assigneeFilter,
+      initiativeFilter,
+      statusFilter,
+      priorityFilter,
+      dateRangeFilter,
+      startDate,
+      endDate,
+    })
+  }, [
+    textFilter,
+    assigneeFilter,
+    initiativeFilter,
+    statusFilter,
+    priorityFilter,
+    dateRangeFilter,
+    startDate,
+    endDate,
+    isLoaded,
+    saveFilters,
   ])
 
   const clearFilters = () => {
