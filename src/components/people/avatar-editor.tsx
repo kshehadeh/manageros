@@ -12,7 +12,7 @@ interface AvatarEditorProps {
   currentAvatar?: string | null
   jiraAvatar?: string | null
   githubAvatar?: string | null
-  onAvatarChange?: (avatarUrl: string | null) => void
+  onAvatarChange?: (_avatarUrl: string | null) => void
 }
 
 export function AvatarEditor({
@@ -113,9 +113,7 @@ export function AvatarEditor({
     <div className='space-y-4'>
       <div className='flex items-center gap-4'>
         <Avatar className='h-20 w-20'>
-          {avatar ? (
-            <AvatarImage src={avatar} alt={personName} />
-          ) : null}
+          {avatar ? <AvatarImage src={avatar} alt={personName} /> : null}
           <AvatarFallback className='text-lg'>
             {getInitials(personName)}
           </AvatarFallback>

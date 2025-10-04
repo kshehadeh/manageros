@@ -606,6 +606,7 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
                 birthday: null,
                 email: null,
                 role: null,
+                avatar: null,
                 organizationId: '',
                 createdAt: new Date(),
                 updatedAt: new Date(),
