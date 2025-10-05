@@ -25,6 +25,7 @@ import {
   Calendar,
   Target,
   Flag,
+  ListTodo,
 } from 'lucide-react'
 import {
   Table,
@@ -571,7 +572,10 @@ export function TaskTable({
   if (optimisticTasks.length === 0) {
     return (
       <div className='text-muted-foreground text-sm text-center py-8'>
-        No tasks yet.
+        <div className='flex flex-col items-center justify-center py-8 text-center'>
+          <ListTodo className='h-8 w-8 text-muted-foreground mb-2' />
+          <p className='text-muted-foreground text-sm mb-4'>No tasks yet.</p>
+        </div>
       </div>
     )
   }

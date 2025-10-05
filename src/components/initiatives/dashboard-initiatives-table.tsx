@@ -59,7 +59,6 @@ export function DashboardInitiativesTable({
       people={people}
       teams={teams}
       hideFilters={true}
-      compact={true}
       hideOwner={true}
       hideActions={true}
     />

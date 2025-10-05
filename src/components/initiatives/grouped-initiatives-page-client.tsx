@@ -14,6 +14,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Users, Target } from 'lucide-react'
 import { useUserSettings } from '@/lib/hooks/use-user-settings'
+import { Rag } from '@/components/rag'
 
 interface InitiativeWithRelations {
   id: string
@@ -208,19 +209,6 @@ export function GroupedInitiativesPageClient({
     return 'neutral'
   }
 
-  const getRagColor = (rag: string) => {
-    switch (rag) {
-      case 'red':
-        return 'bg-red-500'
-      case 'amber':
-        return 'bg-amber-500'
-      case 'green':
-        return 'bg-green-500'
-      default:
-        return 'bg-gray-500'
-    }
-  }
-
   return (
     <div className='space-y-6'>
       {/* Filter and Grouping Controls */}
@@ -287,13 +275,11 @@ export function GroupedInitiativesPageClient({
           <div key={group.key} className='space-y-4'>
             <div className='flex items-center justify-between px-0'>
               <div className='flex items-center gap-3'>
-                {groupingOption === 'rag' && (
-                  <div
-                    className={`w-3 h-3 rounded-full ${getRagColor(group.key)}`}
-                  />
-                )}
+                {groupingOption === 'rag' && <Rag rag={group.key} />}
                 {groupingOption === 'team' && getGroupIcon(groupingOption)}
-                <h3 className='text-lg font-semibold'>{group.label}</h3>
+                {groupingOption === 'team' && (
+                  <h3 className='text-lg font-semibold'>{group.label}</h3>
+                )}
                 <Badge variant={getGroupBadgeVariant(group)}>
                   {group.count}
                 </Badge>

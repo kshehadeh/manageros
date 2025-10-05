@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { SectionHeader } from '@/components/ui/section-header'
 import { Textarea } from '@/components/ui/textarea'
@@ -42,7 +43,7 @@ import {
   ChevronUp,
 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
-import { getFileIcon, formatFileSize } from '@/lib/file-utils'
+import { getFileIcon, formatFileSize, isImageMimeType } from '@/lib/file-utils'
 
 interface NotesSectionProps {
   entityType: string
@@ -65,6 +66,10 @@ export function NotesSection({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [expandedNotes, setExpandedNotes] = useState<Set<string>>(new Set())
+  const [lightboxImage, setLightboxImage] = useState<{
+    src: string
+    alt: string
+  } | null>(null)
 
   const toggleNoteExpansion = (noteId: string) => {
     setExpandedNotes(prev => {
@@ -232,6 +237,14 @@ export function NotesSection({
     setEditingNote(null)
   }
 
+  const openLightbox = (src: string, alt: string) => {
+    setLightboxImage({ src, alt })
+  }
+
+  const closeLightbox = () => {
+    setLightboxImage(null)
+  }
+
   return (
     <div className='page-section'>
       <div className='space-y-4'>
@@ -346,9 +359,44 @@ export function NotesSection({
                               className='flex items-center justify-between p-2 border rounded-lg bg-muted/50'
                             >
                               <div className='flex items-center gap-2 flex-1 min-w-0'>
-                                <span className='text-lg'>
-                                  {getFileIcon(attachment.mimeType)}
-                                </span>
+                                {isImageMimeType(attachment.mimeType) ? (
+                                  <div className='relative w-12 h-12'>
+                                    <Image
+                                      src={attachment.r2Url}
+                                      alt={attachment.originalName}
+                                      width={48}
+                                      height={48}
+                                      className='object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity'
+                                      onClick={() =>
+                                        openLightbox(
+                                          attachment.r2Url,
+                                          attachment.originalName
+                                        )
+                                      }
+                                      onError={e => {
+                                        // Fallback to file icon if image fails to load
+                                        const target =
+                                          e.target as HTMLImageElement
+                                        target.style.display = 'none'
+                                        const fallback =
+                                          target.nextElementSibling as HTMLElement
+                                        if (fallback) {
+                                          fallback.style.display = 'block'
+                                        }
+                                      }}
+                                    />
+                                    <span
+                                      className='text-lg absolute inset-0 flex items-center justify-center bg-muted rounded border'
+                                      style={{ display: 'none' }}
+                                    >
+                                      {getFileIcon(attachment.mimeType)}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className='text-lg'>
+                                    {getFileIcon(attachment.mimeType)}
+                                  </span>
+                                )}
                                 <div className='min-w-0 flex-1'>
                                   <p className='text-sm font-medium truncate'>
                                     {attachment.originalName}
@@ -563,6 +611,32 @@ export function NotesSection({
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Image Lightbox */}
+      <Dialog open={!!lightboxImage} onOpenChange={closeLightbox}>
+        <DialogContent className='sm:max-w-[90vw] sm:max-h-[90vh] p-0 bg-transparent border-none'>
+          <div className='relative w-full h-full flex items-center justify-center'>
+            {lightboxImage && (
+              <Image
+                src={lightboxImage.src}
+                alt={lightboxImage.alt}
+                width={1200}
+                height={800}
+                className='max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl'
+                priority
+              />
+            )}
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={closeLightbox}
+              className='absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white h-8 w-8 p-0'
+            >
+              <X className='h-4 w-4' />
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

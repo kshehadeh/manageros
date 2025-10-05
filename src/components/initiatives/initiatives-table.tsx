@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { MoreHorizontal, Edit, Eye, Trash2, Search, Filter } from 'lucide-react'
+import { Edit, Eye, Trash2, Search, Filter } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -25,6 +25,7 @@ import { toast } from 'sonner'
 import { Person, Team } from '@prisma/client'
 import { calculateInitiativeCompletionPercentage } from '@/lib/completion-utils'
 import { DeleteModal } from '@/components/common/delete-modal'
+import { RagCircle } from '@/components/rag'
 
 interface FilterState {
   keyword: string
@@ -82,9 +83,8 @@ interface InitiativesTableProps {
   people: Person[]
   teams: Team[]
   hideFilters?: boolean
-  compact?: boolean // For dashboard view
-  hideOwner?: boolean // Hide owner column for compact view
-  hideActions?: boolean // Hide actions column for compact view
+  hideOwner?: boolean // Hide owner column
+  hideActions?: boolean // Hide actions column
 }
 
 interface ContextMenuState {
@@ -100,7 +100,6 @@ export function InitiativesTable({
   people,
   teams,
   hideFilters = false,
-  compact = false,
   hideOwner = false,
   hideActions = false,
 }: InitiativesTableProps) {
@@ -246,48 +245,10 @@ export function InitiativesTable({
     router.push(`/initiatives/${initiativeId}`)
   }
 
-  const handleRowRightClick = (e: React.MouseEvent, initiativeId: string) => {
-    e.preventDefault()
-    setContextMenu({
-      visible: true,
-      x: e.clientX,
-      y: e.clientY,
-      initiativeId,
-      triggerType: 'rightClick',
-    })
-  }
-
-  const handleButtonClick = (e: React.MouseEvent, initiativeId: string) => {
-    e.stopPropagation()
-    const rect = e.currentTarget.getBoundingClientRect()
-    setContextMenu({
-      visible: true,
-      x: rect.right - 160, // Position menu to the left of the button
-      y: rect.bottom + 4, // Position menu below the button
-      initiativeId,
-      triggerType: 'button',
-    })
-  }
-
-  const getRagColor = (rag: string) => {
-    switch (rag) {
-      case 'red':
-        return 'bg-red-500'
-      case 'amber':
-        return 'bg-amber-500'
-      case 'green':
-        return 'bg-green-500'
-      default:
-        return 'bg-gray-500'
-    }
-  }
-
   if (initiatives.length === 0) {
     return (
       <div className='text-center py-8'>
-        <p className='text-muted-foreground text-sm'>
-          {compact ? 'No open initiatives' : 'No initiatives yet.'}
-        </p>
+        <p className='text-muted-foreground text-sm'>No open initiatives</p>
       </div>
     )
   }
@@ -498,23 +459,17 @@ export function InitiativesTable({
       )}
 
       {/* Initiative Table */}
-      <div className={`rounded-md border ${compact ? '' : '-mx-3 md:mx-0'}`}>
+      <div className='rounded-md border'>
         <Table>
           <TableHeader>
             <TableRow className='hover:bg-accent/50'>
-              <TableHead
-                className={`text-muted-foreground ${compact ? 'w-8 p-2' : 'w-[60px]'}`}
-              >
+              <TableHead className='text-muted-foreground w-8 p-2'>
                 RAG
               </TableHead>
-              <TableHead
-                className={`text-muted-foreground ${compact ? 'p-2' : ''}`}
-              >
-                {compact ? 'Initiative' : 'Title'}
+              <TableHead className='text-muted-foreground p-2'>
+                Initiative
               </TableHead>
-              <TableHead
-                className={`text-muted-foreground hidden md:table-cell ${compact ? 'p-2' : ''}`}
-              >
+              <TableHead className='text-muted-foreground hidden md:table-cell p-2'>
                 Team
               </TableHead>
               {!hideOwner && (
@@ -523,10 +478,8 @@ export function InitiativesTable({
                 </TableHead>
               )}
               {!hideActions && (
-                <TableHead
-                  className={`text-muted-foreground ${compact ? 'text-right p-2' : 'w-[50px]'}`}
-                >
-                  {compact ? 'Progress' : 'Actions'}
+                <TableHead className='text-muted-foreground text-right p-2'>
+                  Progress
                 </TableHead>
               )}
             </TableRow>
@@ -536,56 +489,24 @@ export function InitiativesTable({
               <TableRow
                 key={initiative.id}
                 className='hover:bg-accent/50 cursor-pointer'
-                onClick={
-                  compact
-                    ? () => handleRowDoubleClick(initiative.id)
-                    : undefined
-                }
-                onDoubleClick={
-                  compact
-                    ? undefined
-                    : () => handleRowDoubleClick(initiative.id)
-                }
-                onContextMenu={
-                  compact
-                    ? undefined
-                    : e => handleRowRightClick(e, initiative.id)
-                }
+                onClick={() => handleRowDoubleClick(initiative.id)}
               >
-                <TableCell
-                  className={`text-muted-foreground ${compact ? 'p-2' : ''}`}
-                >
-                  <div className='flex items-center justify-center'>
-                    <div
-                      className={`w-3 h-3 rounded-full ${getRagColor(initiative.rag)}`}
-                    />
+                <TableCell className='text-muted-foreground p-2 align-top'>
+                  <div className='flex items-start justify-center pt-1'>
+                    <RagCircle rag={initiative.rag} />
                   </div>
                 </TableCell>
-                <TableCell
-                  className={`font-medium text-foreground ${compact ? 'p-2' : ''}`}
-                >
+                <TableCell className='font-medium text-foreground p-2'>
                   <div>
-                    <div className={compact ? 'font-medium' : ''}>
-                      {initiative.title}
-                    </div>
+                    <div className='font-medium'>{initiative.title}</div>
                     <div className='text-xs text-muted-foreground mt-1'>
                       {initiative.objectives.length} objectives •{' '}
                       {initiative._count.tasks} tasks •{' '}
                       {initiative._count.checkIns} check-ins
                     </div>
-                    {!compact && (
-                      <div className='mt-1'>
-                        <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
-                          {calculateInitiativeCompletionPercentage(initiative)}%
-                          complete
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </TableCell>
-                <TableCell
-                  className={`text-muted-foreground hidden md:table-cell ${compact ? 'p-2' : ''}`}
-                >
+                <TableCell className='text-muted-foreground hidden md:table-cell p-2'>
                   {initiative.team?.name || '—'}
                 </TableCell>
                 {!hideOwner && (
@@ -598,20 +519,10 @@ export function InitiativesTable({
                   </TableCell>
                 )}
                 {!hideActions && (
-                  <TableCell className={compact ? 'text-right p-2' : ''}>
-                    {compact ? (
-                      <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
-                        {calculateInitiativeCompletionPercentage(initiative)}%
-                      </span>
-                    ) : (
-                      <Button
-                        variant='ghost'
-                        className='h-8 w-8 p-0'
-                        onClick={e => handleButtonClick(e, initiative.id)}
-                      >
-                        <MoreHorizontal className='h-4 w-4' />
-                      </Button>
-                    )}
+                  <TableCell className='text-right p-2'>
+                    <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
+                      {calculateInitiativeCompletionPercentage(initiative)}%
+                    </span>
                   </TableCell>
                 )}
               </TableRow>

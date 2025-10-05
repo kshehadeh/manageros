@@ -30,6 +30,13 @@ export function getFileIcon(mimeType: string): string {
 }
 
 /**
+ * Check if a MIME type represents an image
+ */
+export function isImageMimeType(mimeType: string): boolean {
+  return mimeType.startsWith('image/')
+}
+
+/**
  * Validate file before upload
  */
 export function validateFile(
