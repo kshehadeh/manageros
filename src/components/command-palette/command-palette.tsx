@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Command as CommandPrimitive } from 'cmdk'
 import { Search } from 'lucide-react'
@@ -24,6 +24,7 @@ const sources: CommandSource[] = [coreCommandSource, searchCommandSource]
 export function CommandPalette() {
   const { isOpen, setOpen } = useCommandPalette()
   const router = useRouter()
+  const pathname = usePathname()
   const { data: session } = useSession()
   const [query, setQuery] = useState('')
   const [items, setItems] = useState<CommandItemDescriptor[]>([])
@@ -36,7 +37,7 @@ export function CommandPalette() {
       try {
         const userRole = session?.user?.role
         const all = await Promise.all(
-          sources.map(s => s.getItems(query, userRole))
+          sources.map(s => s.getItems(query, userRole, pathname))
         )
         if (isCancelled) return
         setItems(all.flat())
@@ -48,7 +49,7 @@ export function CommandPalette() {
     return () => {
       isCancelled = true
     }
-  }, [query, session?.user?.role])
+  }, [query, session?.user?.role, pathname])
 
   const grouped = useMemo<Record<string, CommandItemDescriptor[]>>(() => {
     const byGroup: Record<string, CommandItemDescriptor[]> = {}

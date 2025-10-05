@@ -13,7 +13,8 @@ import { type CommandItemDescriptor, type CommandSource } from '../types'
 
 function createStaticItems(
   query: string,
-  userRole?: string
+  userRole?: string,
+  pathname?: string
 ): CommandItemDescriptor[] {
   const q = query.toLowerCase()
   const items: CommandItemDescriptor[] = [
@@ -30,6 +31,27 @@ function createStaticItems(
         closePalette()
       },
     },
+    // Add initiative-specific task creation if we're on an initiative page
+    ...(pathname?.match(/^\/initiatives\/[^\/]+$/)
+      ? [
+          {
+            id: 'task.create.initiative',
+            title: 'Create Task for Initiative',
+            subtitle: 'Add task to this initiative',
+            icon: <Plus className='h-4 w-4' />,
+            keywords: ['task', 'new task', 'add task', 'initiative'],
+            group: 'Quick Actions',
+            perform: ({ closePalette }: { closePalette: () => void }) => {
+              const initiativeId = pathname.split('/')[2]
+              const ev = new CustomEvent('command:openCreateTaskModal', {
+                detail: { initiativeId },
+              })
+              window.dispatchEvent(ev)
+              closePalette()
+            },
+          },
+        ]
+      : []),
     {
       id: 'nav.tasks',
       title: 'View Tasks',
@@ -134,7 +156,7 @@ function createStaticItems(
 export const coreCommandSource: CommandSource = {
   id: 'core',
   label: 'Core',
-  getItems: async (query: string, userRole?: string) => {
-    return createStaticItems(query, userRole)
+  getItems: async (query: string, userRole?: string, pathname?: string) => {
+    return createStaticItems(query, userRole, pathname)
   },
 }

@@ -1,9 +1,22 @@
-import { InitiativeQuickTaskForm } from '@/components/initiatives/initiative-quick-task-form'
+'use client'
+
+import { useState, useRef } from 'react'
 import { TaskTable } from '@/components/tasks/task-table'
 import { SectionHeader } from '@/components/ui/section-header'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  QuickTaskForm,
+  type QuickTaskFormRef,
+} from '@/components/tasks/quick-task-form'
 import type { TaskListItem } from '@/lib/task-list-select'
 import type { Person } from '@prisma/client'
-import { ListTodo } from 'lucide-react'
+import { ListTodo, Plus } from 'lucide-react'
 
 interface InitiativeTasksProps {
   initiativeId: string
@@ -19,23 +32,34 @@ interface InitiativeTasksProps {
 
 export function InitiativeTasks({
   initiativeId,
-  objectives,
   allTasks,
   people,
 }: InitiativeTasksProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const quickTaskFormRef = useRef<QuickTaskFormRef>(null)
+
+  const handleTaskCreated = () => {
+    setIsModalOpen(false)
+    // The page will be revalidated by the server action
+  }
+
   return (
     <div className='page-section'>
-      <SectionHeader icon={ListTodo} title='Tasks' className='mb-4' />
-
-      <div className='mb-4'>
-        <InitiativeQuickTaskForm
-          initiativeId={initiativeId}
-          objectives={objectives.map(obj => ({
-            ...obj,
-            initiativeId,
-          }))}
-        />
-      </div>
+      <SectionHeader
+        icon={ListTodo}
+        title='Tasks'
+        className='mb-4'
+        action={
+          <Button
+            onClick={() => setIsModalOpen(true)}
+            variant='outline'
+            size='sm'
+          >
+            <Plus className='h-4 w-4 mr-2' />
+            Add Task
+          </Button>
+        }
+      />
 
       <TaskTable
         tasks={allTasks}
@@ -44,6 +68,20 @@ export function InitiativeTasks({
         showDueDate={true}
         hideFilters={true}
       />
+
+      {/* Add Task Dialog */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Task to Initiative</DialogTitle>
+          </DialogHeader>
+          <QuickTaskForm
+            ref={quickTaskFormRef}
+            onSuccess={handleTaskCreated}
+            initiativeId={initiativeId}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

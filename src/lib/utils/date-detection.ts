@@ -10,6 +10,7 @@ export interface DetectedDate {
   startIndex: number // Start position in the original text
   endIndex: number // End position in the original text
   dateOnly?: string // Date-only string (YYYY-MM-DD) for backward compatibility
+  accepted?: boolean // Whether the date has been accepted
 }
 
 export interface DateDetectionResult {
@@ -27,7 +28,10 @@ export interface DateDetectionResult {
  * - "next Monday", "this Friday"
  * - "a week from today", "in 3 days", "5 days from now"
  */
-export function detectDatesInText(text: string): DateDetectionResult {
+export function detectDatesInText(
+  text: string,
+  ignoreSections?: { startIndex: number; endIndex: number }[]
+): DateDetectionResult {
   const detectedDates: DetectedDate[] = []
   let cleanedText = text
 
@@ -40,7 +44,16 @@ export function detectDatesInText(text: string): DateDetectionResult {
 
     // Convert chrono results to our format
     parsedResults.forEach(result => {
-      if (result.start && result.text) {
+      if (
+        result.start &&
+        result.text &&
+        (!ignoreSections ||
+          !ignoreSections.some(
+            section =>
+              result.index >= section.startIndex &&
+              result.index + result.text.length <= section.endIndex
+          ))
+      ) {
         const dateObj = result.start.date()
         // Use the full ISO datetime string as the primary date field
         const fullDateTime = dateObj.toISOString()
@@ -57,6 +70,7 @@ export function detectDatesInText(text: string): DateDetectionResult {
           startIndex: result.index,
           endIndex: result.index + result.text.length,
           dateOnly: dateOnlyString, // Date-only for backward compatibility
+          accepted: false, // Initially set to false
         }
         detectedDates.push(detectedDate)
       }

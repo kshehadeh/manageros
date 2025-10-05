@@ -23,6 +23,7 @@ export interface CommandSource {
   label: string
   getItems: (
     _query: string,
-    _userRole?: string
+    _userRole?: string,
+    _pathname?: string
   ) => Promise<CommandItemDescriptor[]>
 }

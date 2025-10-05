@@ -16,6 +16,7 @@ import {
 import { taskPriorityUtils, DEFAULT_TASK_PRIORITY } from '@/lib/task-priority'
 import { AlertCircle } from 'lucide-react'
 import { HelpIcon } from '@/components/help-icon'
+import { type DetectedDate } from '@/lib/utils/date-detection'
 
 interface TaskFormProps {
   people: Person[]
@@ -120,10 +121,10 @@ export function TaskForm({
     }
   }
 
-  function handleDateDetected(date: string | null) {
+  function handleDateDetected(detectedDate: DetectedDate | null) {
     // Update the due date field if a date is detected
-    if (date) {
-      handleInputChange('dueDate', date)
+    if (detectedDate) {
+      handleInputChange('dueDate', detectedDate.date)
     }
   }
 
