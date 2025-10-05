@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { EnhancedTaskTextarea } from '@/components/tasks/enhanced-task-textarea'
+import { SlateTaskTextarea } from '@/components/tasks/slate-task-textarea'
 import { MarkdownEditor } from '@/components/markdown-editor'
 import { createTask, updateTask } from '@/lib/actions'
 import { type TaskFormData, taskSchema } from '@/lib/validations'
@@ -141,7 +141,7 @@ export function TaskForm({
           <label htmlFor='title' className='block text-sm font-medium mb-2'>
             Task Details *
           </label>
-          <EnhancedTaskTextarea
+          <SlateTaskTextarea
             value={formData.title}
             onChange={value => handleInputChange('title', value)}
             onDateDetected={handleDateDetected}

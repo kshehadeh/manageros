@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { EnhancedTaskTextarea } from '@/components/tasks/enhanced-task-textarea'
+import { SlateTaskTextarea } from '@/components/tasks/slate-task-textarea'
 import {
   Select,
   SelectContent,
@@ -57,7 +57,7 @@ export function InitiativeQuickTaskForm({
     <form onSubmit={handleSubmit} className='space-y-3'>
       <div className='flex gap-2'>
         <div className='flex-1'>
-          <EnhancedTaskTextarea
+          <SlateTaskTextarea
             value={title}
             onChange={setTitle}
             onDateDetected={setDetectedDate}
