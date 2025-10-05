@@ -23,6 +23,7 @@ import {
 import { deleteInitiative } from '@/lib/actions'
 import { toast } from 'sonner'
 import { Person, Team } from '@prisma/client'
+import { InitiativeWithRelations } from '@/types/initiative'
 import { calculateInitiativeCompletionPercentage } from '@/lib/completion-utils'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { RagCircle } from '@/components/rag'
@@ -35,47 +36,6 @@ interface FilterState {
   dateRange: string
   startDate: string
   endDate: string
-}
-
-interface InitiativeWithRelations {
-  id: string
-  title: string
-  summary: string | null
-  outcome: string | null
-  startDate: Date | null
-  targetDate: Date | null
-  status: string
-  rag: string
-  confidence: number
-  teamId: string | null
-  organizationId: string
-  createdAt: Date
-  updatedAt: Date
-  objectives: Array<{
-    id: string
-    title: string
-    keyResult: string | null
-    sortIndex: number
-  }>
-  team: {
-    id: string
-    name: string
-  } | null
-  owners: Array<{
-    personId: string
-    role: string
-    person: {
-      id: string
-      name: string
-    }
-  }>
-  _count: {
-    checkIns: number
-    tasks: number
-  }
-  tasks: Array<{
-    status: string
-  }>
 }
 
 interface InitiativesTableProps {

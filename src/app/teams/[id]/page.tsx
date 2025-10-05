@@ -1,17 +1,10 @@
 import { prisma } from '@/lib/db'
-import Link from 'next/link'
 import { TeamDetailClient } from '@/components/teams/team-detail-client'
+import { TeamDetailContent } from '@/components/teams/team-detail-content'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { TeamActionsDropdown } from '@/components/teams/team-actions-dropdown'
-import { TeamAvatar } from '@/components/teams/team-avatar'
-import { User, Rocket, Building2 } from 'lucide-react'
-import { PeopleTable } from '@/components/people/people-table'
-import { InitiativesTable } from '@/components/initiatives/initiatives-table'
-import { TeamChildTeamsTable } from '@/components/teams/team-child-teams-table'
 
 interface TeamDetailPageProps {
   params: Promise<{
@@ -104,96 +97,28 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
     notFound()
   }
 
-  // Compute level field for people (needed by PeopleTable component)
-  const peopleWithLevel = team.people.map(person => ({
-    ...person,
-    level: 0, // For team members, we'll use level 0 since they're all at the same level
-  }))
+  // Add level field to people to match Person type requirements
+  const teamWithLevels = {
+    ...team,
+    people: team.people.map(person => ({
+      ...person,
+      level: 0, // Default level, can be calculated based on hierarchy if needed
+    })),
+  }
 
   return (
-    <TeamDetailClient teamName={team.name} teamId={team.id}>
-      <div className='px-4 lg:px-6'>
-        <div className='page-header'>
-          <div className='flex items-center justify-between'>
-            <div>
-              <div className='flex items-center gap-3 mb-2'>
-                <TeamAvatar name={team.name} avatar={team.avatar} size='lg' />
-                <h1 className='page-title'>{team.name}</h1>
-              </div>
-              {team.description && (
-                <p className='page-section-subtitle'>{team.description}</p>
-              )}
-              {team.parent && (
-                <div className='text-sm text-muted-foreground mt-1'>
-                  Parent team:{' '}
-                  <Link
-                    href={`/teams/${team.parent.id}`}
-                    className='link-hover'
-                  >
-                    {team.parent.name}
-                  </Link>
-                </div>
-              )}
-            </div>
-            <div className='flex items-center gap-2'>
-              <TeamActionsDropdown teamId={team.id} />
-            </div>
-          </div>
-        </div>
-
-        <div className='space-y-6'>
-          {/* Team Members */}
-          <div className='page-section'>
-            <div className='flex items-center justify-between mb-4'>
-              <h3 className='section-header font-bold flex items-center gap-2'>
-                <User className='w-4 h-4' />
-                Team Members ({team.people.length})
-              </h3>
-              <Button asChild variant='outline' size='sm'>
-                <Link href={`/people/new?teamId=${team.id}`}>Add Member</Link>
-              </Button>
-            </div>
-            <PeopleTable people={peopleWithLevel} />
-          </div>
-
-          {/* Team Initiatives */}
-          <div className='page-section'>
-            <div className='flex items-center justify-between mb-4'>
-              <h3 className='section-header font-bold flex items-center gap-2'>
-                <Rocket className='w-4 h-4' />
-                Team Initiatives ({team.initiatives.length})
-              </h3>
-              <Button asChild variant='outline' size='sm'>
-                <Link href={`/initiatives/new?teamId=${team.id}`}>
-                  New Initiative
-                </Link>
-              </Button>
-            </div>
-            <InitiativesTable
-              initiatives={team.initiatives}
-              people={allPeople}
-              teams={allTeams}
-              hideFilters={true}
-            />
-          </div>
-
-          {/* Child Teams */}
-          <div className='page-section'>
-            <div className='flex items-center justify-between mb-4'>
-              <h3 className='section-header font-bold flex items-center gap-2'>
-                <Building2 className='w-4 h-4' />
-                Child Teams ({team.children.length})
-              </h3>
-              <Button asChild variant='outline' size='sm'>
-                <Link href={`/teams/new?parentId=${team.id}`}>
-                  Add Child Team
-                </Link>
-              </Button>
-            </div>
-            <TeamChildTeamsTable childTeams={team.children} />
-          </div>
-        </div>
-      </div>
+    <TeamDetailClient
+      teamName={team.name}
+      teamId={team.id}
+      teamAvatar={team.avatar}
+      isAdmin={session.user.role === 'ADMIN'}
+    >
+      <TeamDetailContent
+        team={teamWithLevels}
+        allPeople={allPeople}
+        allTeams={allTeams}
+        isAdmin={session.user.role === 'ADMIN'}
+      />
     </TeamDetailClient>
   )
 }

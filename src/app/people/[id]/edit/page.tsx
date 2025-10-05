@@ -4,7 +4,6 @@ import {
   getPeople,
   getPerson,
   getJobRolesForSelection,
-  getLinkedAccountAvatars,
 } from '@/lib/actions'
 import { prisma } from '@/lib/db'
 import { notFound } from 'next/navigation'
@@ -50,14 +49,6 @@ export default async function EditPersonPage({ params }: EditPersonPageProps) {
     notFound()
   }
 
-  // Get linked account avatars
-  let linkedAvatars: { jiraAvatar?: string; githubAvatar?: string } = {}
-  try {
-    linkedAvatars = await getLinkedAccountAvatars(id)
-  } catch (error) {
-    console.error('Error fetching linked account avatars:', error)
-  }
-
   return (
     <PersonDetailClient personName={person.name} personId={person.id}>
       <div className='space-y-6'>
@@ -70,7 +61,6 @@ export default async function EditPersonPage({ params }: EditPersonPageProps) {
           people={people}
           jobRoles={jobRoles}
           person={person}
-          linkedAvatars={linkedAvatars}
           jiraAccount={jiraAccount}
           githubAccount={githubAccount}
         />

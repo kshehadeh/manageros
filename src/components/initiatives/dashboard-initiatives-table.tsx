@@ -1,46 +1,6 @@
 import { InitiativesTable } from './initiatives-table'
 import { Person, Team } from '@prisma/client'
-
-interface InitiativeWithRelations {
-  id: string
-  title: string
-  summary: string | null
-  outcome: string | null
-  startDate: Date | null
-  targetDate: Date | null
-  status: string
-  rag: string
-  confidence: number
-  teamId: string | null
-  organizationId: string
-  createdAt: Date
-  updatedAt: Date
-  objectives: Array<{
-    id: string
-    title: string
-    keyResult: string | null
-    sortIndex: number
-  }>
-  team: {
-    id: string
-    name: string
-  } | null
-  owners: Array<{
-    personId: string
-    role: string
-    person: {
-      id: string
-      name: string
-    }
-  }>
-  _count: {
-    checkIns: number
-    tasks: number
-  }
-  tasks: Array<{
-    status: string
-  }>
-}
+import { InitiativeWithRelations } from '@/types/initiative'
 
 interface DashboardInitiativesTableProps {
   initiatives: InitiativeWithRelations[]

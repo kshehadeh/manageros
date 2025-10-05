@@ -12,48 +12,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Person, Team } from '@prisma/client'
+import { InitiativeWithRelations } from '@/types/initiative'
 import { useUserSettings } from '@/lib/hooks/use-user-settings'
-
-interface InitiativeWithRelations {
-  id: string
-  title: string
-  summary: string | null
-  outcome: string | null
-  startDate: Date | null
-  targetDate: Date | null
-  status: string
-  rag: string
-  confidence: number
-  teamId: string | null
-  organizationId: string
-  createdAt: Date
-  updatedAt: Date
-  objectives: Array<{
-    id: string
-    title: string
-    keyResult: string | null
-    sortIndex: number
-  }>
-  team: {
-    id: string
-    name: string
-  } | null
-  owners: Array<{
-    personId: string
-    role: string
-    person: {
-      id: string
-      name: string
-    }
-  }>
-  _count: {
-    checkIns: number
-    tasks: number
-  }
-  tasks: Array<{
-    status: string
-  }>
-}
 
 interface InitiativesFilterBarProps {
   initiatives: InitiativeWithRelations[]

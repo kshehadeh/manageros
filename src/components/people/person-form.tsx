@@ -22,7 +22,6 @@ import { useState } from 'react'
 import { createPerson, updatePerson } from '@/lib/actions'
 import { type PersonFormData, personSchema } from '@/lib/validations'
 import { UserLinkForm } from '@/components/user-link-form'
-import { AvatarEditor } from '@/components/people/avatar-editor'
 import { JiraAccountLinker } from '@/components/jira-account-linker'
 import { GithubAccountLinker } from '@/components/github-account-linker'
 import { AlertCircle } from 'lucide-react'
@@ -58,10 +57,6 @@ interface PersonFormProps {
       role: string
     } | null
   }
-  linkedAvatars?: {
-    jiraAvatar?: string
-    githubAvatar?: string
-  }
   jiraAccount?: {
     id: string
     personId: string
@@ -89,7 +84,6 @@ export function PersonForm({
   initialManagerId,
   initialTeamId,
   person,
-  linkedAvatars,
   jiraAccount,
   githubAccount,
 }: PersonFormProps) {
@@ -200,24 +194,6 @@ export function PersonForm({
               </CardDescription>
             </CardHeader>
             <CardContent className='space-y-4'>
-              {/* Avatar Editor */}
-              <div className='space-y-2'>
-                <Label htmlFor='avatar'>Avatar</Label>
-                <AvatarEditor
-                  personId={person?.id}
-                  personName={formData.name || 'New Person'}
-                  currentAvatar={formData.avatar || null}
-                  jiraAvatar={linkedAvatars?.jiraAvatar}
-                  githubAvatar={linkedAvatars?.githubAvatar}
-                  onAvatarChange={avatarUrl => {
-                    handleInputChange('avatar', avatarUrl || '')
-                  }}
-                />
-                {errors.avatar && (
-                  <p className='text-sm text-destructive'>{errors.avatar}</p>
-                )}
-              </div>
-
               <div className='space-y-2'>
                 <Label htmlFor='name'>
                   Name <span className='text-destructive'>*</span>

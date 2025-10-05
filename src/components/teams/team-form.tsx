@@ -1,7 +1,6 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { TeamAvatarEditor } from '@/components/teams/team-avatar-editor'
 
 import { useState, useEffect } from 'react'
 import { createTeam, updateTeam, getTeamsForSelection } from '@/lib/actions'
@@ -22,7 +21,6 @@ export function TeamForm({ team, parentId }: TeamFormProps) {
   const [formData, setFormData] = useState<TeamFormData>({
     name: team?.name || '',
     description: team?.description || '',
-    avatar: team?.avatar || '',
     parentId: team?.parentId || parentId || '',
   })
 
@@ -75,21 +73,6 @@ export function TeamForm({ team, parentId }: TeamFormProps) {
       <div className='card'>
         <h3 className='font-semibold mb-4'>Team Information</h3>
         <div className='space-y-4'>
-          {/* Avatar Editor */}
-          <div>
-            <label className='block text-sm font-medium mb-2'>
-              Team Avatar
-            </label>
-            <TeamAvatarEditor
-              teamId={team?.id}
-              teamName={formData.name || 'Team'}
-              currentAvatar={formData.avatar}
-              onAvatarChange={avatarUrl => {
-                setFormData({ ...formData, avatar: avatarUrl || '' })
-              }}
-            />
-          </div>
-
           <div>
             <label className='block text-sm font-medium mb-2'>
               Team Name *
