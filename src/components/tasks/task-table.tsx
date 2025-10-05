@@ -824,7 +824,7 @@ export function TaskTable({
         <Table>
           <TableHeader className='md:[&_tr]:border-b'>
             <TableRow className='hover:bg-accent/50 md:border-b'>
-              <TableHead className='w-[50px] text-muted-foreground text-center'>
+              <TableHead className='w-4 text-muted-foreground text-center'>
                 <Check className='h-4 w-4' />
               </TableHead>
               <TableHead
@@ -867,7 +867,7 @@ export function TaskTable({
                   onDoubleClick={() => handleRowDoubleClick(task.id)}
                   onContextMenu={e => handleRowRightClick(e, task.id)}
                 >
-                  <TableCell className='py-2 px-2 text-center'>
+                  <TableCell className='py-4 pl-3 text-left w-4 align-top'>
                     <Checkbox
                       checked={isCompleted}
                       onCheckedChange={() =>
@@ -877,7 +877,7 @@ export function TaskTable({
                       className='data-[state=checked]:bg-primary data-[state=checked]:border-primary'
                     />
                   </TableCell>
-                  <TableCell className='font-medium text-foreground py-2 px-3'>
+                  <TableCell className='font-medium text-foreground py-2 px-1'>
                     {editField === 'title' ? (
                       <div className='flex items-center gap-2'>
                         <Input
