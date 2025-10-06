@@ -618,6 +618,7 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
                 managerId: null,
                 jobRoleId: null,
                 startedAt: null,
+                employeeType: null,
               }}
               onSuccess={handleFeedbackSuccess}
               onCancel={handleFeedbackCancel}
