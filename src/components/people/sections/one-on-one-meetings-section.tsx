@@ -1,6 +1,4 @@
 import { prisma } from '@/lib/db'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { SectionHeader } from '@/components/ui/section-header'
 import { Button } from '@/components/ui/button'
 import { MessageCircle } from 'lucide-react'
@@ -8,14 +6,14 @@ import Link from 'next/link'
 
 interface OneOnOneMeetingsSectionProps {
   personId: string
+  organizationId: string
 }
 
 export async function OneOnOneMeetingsSection({
   personId,
+  organizationId,
 }: OneOnOneMeetingsSectionProps) {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user?.organizationId) {
+  if (!organizationId) {
     return null
   }
 
@@ -23,7 +21,7 @@ export async function OneOnOneMeetingsSection({
   const person = await prisma.person.findFirst({
     where: {
       id: personId,
-      organizationId: session.user.organizationId,
+      organizationId,
     },
     include: {
       reports: true,

@@ -1,20 +1,18 @@
 import { prisma } from '@/lib/db'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PersonListItem } from '@/components/people/person-list-item'
 import { Users } from 'lucide-react'
 
 interface DirectReportsSectionProps {
   personId: string
+  organizationId: string
 }
 
 export async function DirectReportsSection({
   personId,
+  organizationId,
 }: DirectReportsSectionProps) {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user?.organizationId) {
+  if (!organizationId) {
     return null
   }
 
@@ -22,7 +20,7 @@ export async function DirectReportsSection({
   const reports = await prisma.person.findMany({
     where: {
       managerId: personId,
-      organizationId: session.user.organizationId,
+      organizationId,
       status: 'active',
     },
     include: {

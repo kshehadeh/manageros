@@ -1,6 +1,4 @@
 import { prisma } from '@/lib/db'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { FeedbackList } from '@/components/feedback/feedback-list'
 import { SectionHeader } from '@/components/ui/section-header'
 import { Button } from '@/components/ui/button'
@@ -11,27 +9,14 @@ import type { Person } from '@prisma/client'
 interface FeedbackSectionProps {
   personId: string
   person: Person
+  currentPersonId?: string
 }
 
 export async function FeedbackSection({
   personId,
   person,
+  currentPersonId,
 }: FeedbackSectionProps) {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user?.organizationId) {
-    return null
-  }
-
-  // Get the current user's person record to determine relationships
-  const currentPerson = await prisma.person.findFirst({
-    where: {
-      user: {
-        id: session.user.id,
-      },
-    },
-  })
-
   // Get feedback for this person
   const feedback = await prisma.feedback.findMany({
     where: {
@@ -59,11 +44,11 @@ export async function FeedbackSection({
   // 1. Not private (public feedback)
   // 2. Private feedback written by the current user
   const visibleFeedback = feedback.filter(
-    feedback => !feedback.isPrivate || feedback.fromId === currentPerson?.id
+    feedback => !feedback.isPrivate || feedback.fromId === currentPersonId
   )
 
   // Only show if there's feedback or user can add feedback
-  if (visibleFeedback.length === 0 && !currentPerson?.id) {
+  if (visibleFeedback.length === 0 && !currentPersonId) {
     return null
   }
 
@@ -101,7 +86,7 @@ export async function FeedbackSection({
         <FeedbackList
           person={person}
           feedback={visibleFeedback}
-          currentUserId={currentPerson?.id}
+          currentUserId={currentPersonId}
         />
       </section>
     </div>

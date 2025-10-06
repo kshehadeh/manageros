@@ -1,21 +1,19 @@
 import { prisma } from '@/lib/db'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { InitiativesTable } from '@/components/initiatives/initiatives-table'
 import { SectionHeader } from '@/components/ui/section-header'
 import { Rocket } from 'lucide-react'
-import { getPeople } from '@/lib/actions/person'
+import { getActivePeopleForOrganization } from '@/lib/data/people'
 
 interface OwnedInitiativesSectionProps {
   personId: string
+  organizationId: string
 }
 
 export async function OwnedInitiativesSection({
   personId,
+  organizationId,
 }: OwnedInitiativesSectionProps) {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user?.organizationId) {
+  if (!organizationId) {
     return null
   }
 
@@ -68,12 +66,12 @@ export async function OwnedInitiativesSection({
   }
 
   // Get people data for InitiativesTable
-  const people = await getPeople()
+  const people = await getActivePeopleForOrganization(organizationId)
 
   // Get teams for the InitiativesTable component
   const teams = await prisma.team.findMany({
     where: {
-      organizationId: session.user.organizationId,
+      organizationId,
     },
     orderBy: { name: 'asc' },
   })

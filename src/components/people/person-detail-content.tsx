@@ -56,6 +56,8 @@ interface PersonDetailContentProps {
   } | null
   isAdmin: boolean
   currentPerson?: PersonWithDetailRelations
+  organizationId: string
+  currentUserId: string
 }
 
 export function PersonDetailContent({
@@ -63,6 +65,8 @@ export function PersonDetailContent({
   linkedAvatars,
   isAdmin,
   currentPerson,
+  organizationId,
+  currentUserId,
 }: PersonDetailContentProps) {
   return (
     <div className='page-container'>
@@ -168,28 +172,42 @@ export function PersonDetailContent({
               <FeedbackSection
                 personId={person.id}
                 person={person as unknown as PrismaPerson}
+                currentPersonId={currentPerson?.id}
               />
             </Suspense>
 
             {/* Feedback Campaigns Section */}
             <Suspense fallback={<FeedbackCampaignsSectionSkeleton />}>
-              <FeedbackCampaignsSection personId={person.id} />
+              <FeedbackCampaignsSection
+                personId={person.id}
+                organizationId={organizationId}
+                currentUserId={currentUserId}
+              />
             </Suspense>
           </div>
 
           {/* Owned Initiatives */}
           <Suspense fallback={<OwnedInitiativesSectionSkeleton />}>
-            <OwnedInitiativesSection personId={person.id} />
+            <OwnedInitiativesSection
+              personId={person.id}
+              organizationId={organizationId}
+            />
           </Suspense>
 
           {/* Active Tasks */}
           <Suspense fallback={<ActiveTasksSectionSkeleton />}>
-            <ActiveTasksSection personId={person.id} />
+            <ActiveTasksSection
+              personId={person.id}
+              organizationId={organizationId}
+            />
           </Suspense>
 
           {/* 1:1 Meetings */}
           <Suspense fallback={<OneOnOneMeetingsSectionSkeleton />}>
-            <OneOnOneMeetingsSection personId={person.id} />
+            <OneOnOneMeetingsSection
+              personId={person.id}
+              organizationId={organizationId}
+            />
           </Suspense>
 
           {/* Jira Work Activity - Show if person has Jira account */}
@@ -215,12 +233,18 @@ export function PersonDetailContent({
         <div className='w-full lg:w-80 space-y-6'>
           {/* Synopsis Section */}
           <Suspense fallback={<SynopsisSectionSkeleton />}>
-            <SynopsisSection personId={person.id} />
+            <SynopsisSection
+              personId={person.id}
+              organizationId={organizationId}
+            />
           </Suspense>
 
           {/* Direct Reports */}
           <Suspense fallback={<DirectReportsSectionSkeleton />}>
-            <DirectReportsSection personId={person.id} />
+            <DirectReportsSection
+              personId={person.id}
+              organizationId={organizationId}
+            />
           </Suspense>
 
           {/* User Account Link - Only show for admins */}

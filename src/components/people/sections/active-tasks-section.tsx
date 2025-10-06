@@ -1,22 +1,20 @@
 import { prisma } from '@/lib/db'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { TaskTable } from '@/components/tasks/task-table'
 import { SectionHeader } from '@/components/ui/section-header'
 import { ListTodo } from 'lucide-react'
-import { getPeople } from '@/lib/actions/person'
+import { getActivePeopleForOrganization } from '@/lib/data/people'
 import { TASK_LIST_SELECT } from '@/lib/task-list-select'
 
 interface ActiveTasksSectionProps {
   personId: string
+  organizationId: string
 }
 
 export async function ActiveTasksSection({
   personId,
+  organizationId,
 }: ActiveTasksSectionProps) {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user?.organizationId) {
+  if (!organizationId) {
     return null
   }
 
@@ -38,7 +36,7 @@ export async function ActiveTasksSection({
   }
 
   // Get people data for TaskTable
-  const people = await getPeople()
+  const people = await getActivePeopleForOrganization(organizationId)
 
   return (
     <section>
