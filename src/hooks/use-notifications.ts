@@ -6,6 +6,8 @@ import {
   getUnreadNotificationCount,
 } from '@/lib/actions/notification'
 import { NotificationWithResponse } from '@/lib/actions/notification'
+import { useNetworkStatus } from '@/hooks/use-network-status'
+import { networkAwareFetch } from '@/lib/network-aware-fetch'
 
 interface UseNotificationsOptions {
   limit?: number
@@ -25,18 +27,31 @@ export function useNotifications({
   const [isLoading, setIsLoading] = useState(true)
   const [_lastCheckTime, setLastCheckTime] = useState<Date>(new Date())
   const [hasNewNotifications, setHasNewNotifications] = useState(false)
+  const [isOffline, setIsOffline] = useState(false)
 
   // Refs for managing intervals and visibility
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const isVisibleRef = useRef(true)
   const lastNotificationCountRef = useRef(0)
 
+  // Network status
+  const { isOnline } = useNetworkStatus({
+    onOffline: () => setIsOffline(true),
+    onOnline: () => setIsOffline(false),
+  })
+
   const loadNotifications = useCallback(async () => {
-    if (!enabled) return
+    if (!enabled || !isOnline) return
 
     try {
-      // First check live count for efficiency
-      const liveResponse = await fetch('/api/notifications/live')
+      // First check live count for efficiency using network-aware fetch
+      const liveResponse = await networkAwareFetch('/api/notifications/live', {
+        retry: {
+          maxRetries: 2,
+          retryDelay: 1000,
+        },
+      })
+
       if (liveResponse.ok) {
         const liveData = await liveResponse.json()
         const newCount = liveData.count
@@ -75,25 +90,30 @@ export function useNotifications({
       setLastCheckTime(new Date())
     } catch (error) {
       console.error('Failed to load notifications:', error)
+      // Don't update state on network errors to preserve existing data
+      if (error instanceof Error && error.message.includes('Network')) {
+        console.log('Network error - preserving existing notification data')
+        return
+      }
     } finally {
       setIsLoading(false)
     }
-  }, [enabled, limit])
+  }, [enabled, limit, isOnline])
 
   // Start polling function
   const startPolling = useCallback(() => {
-    if (!enabled) return
+    if (!enabled || !isOnline) return
 
     if (intervalRef.current) {
       clearInterval(intervalRef.current)
     }
 
     intervalRef.current = setInterval(() => {
-      if (isVisibleRef.current && enabled) {
+      if (isVisibleRef.current && enabled && isOnline) {
         loadNotifications()
       }
     }, pollInterval)
-  }, [enabled, loadNotifications, pollInterval])
+  }, [enabled, loadNotifications, pollInterval, isOnline])
 
   // Stop polling function
   const stopPolling = useCallback(() => {
@@ -108,7 +128,7 @@ export function useNotifications({
     const handleVisibilityChange = () => {
       isVisibleRef.current = !document.hidden
 
-      if (isVisibleRef.current && enabled) {
+      if (isVisibleRef.current && enabled && isOnline) {
         // Resume polling when page becomes visible
         loadNotifications()
         startPolling()
@@ -122,11 +142,11 @@ export function useNotifications({
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [enabled, loadNotifications, startPolling, stopPolling])
+  }, [enabled, loadNotifications, startPolling, stopPolling, isOnline])
 
   // Initial load and start polling
   useEffect(() => {
-    if (enabled) {
+    if (enabled && isOnline) {
       loadNotifications()
       startPolling()
     }
@@ -134,7 +154,7 @@ export function useNotifications({
     return () => {
       stopPolling()
     }
-  }, [enabled, loadNotifications, startPolling, stopPolling])
+  }, [enabled, loadNotifications, startPolling, stopPolling, isOnline])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -153,6 +173,7 @@ export function useNotifications({
     unreadCount,
     isLoading,
     hasNewNotifications,
+    isOffline,
     refresh,
     startPolling,
     stopPolling,

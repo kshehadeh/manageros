@@ -8,6 +8,7 @@ import {
   AlertTriangle,
   XCircle,
   Info,
+  WifiOff,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -30,6 +31,7 @@ export function NotificationBell({ className }: NotificationBellProps) {
     unreadCount,
     isLoading,
     hasNewNotifications,
+    isOffline,
     refresh,
   } = useNotifications({ limit: 5, pollInterval: 30000 })
 
@@ -69,10 +71,20 @@ export function NotificationBell({ className }: NotificationBellProps) {
         variant='ghost'
         size='icon'
         onClick={() => setIsOpen(!isOpen)}
-        className={`${className} ${hasNewNotifications ? 'animate-pulse' : ''}`}
+        className={`${className} ${hasNewNotifications ? 'animate-pulse' : ''} ${
+          isOffline ? 'opacity-50' : ''
+        }`}
+        disabled={isOffline}
+        title={
+          isOffline ? 'Notifications unavailable offline' : 'Notifications'
+        }
       >
-        <Bell className='h-5 w-5' />
-        {unreadCount > 0 && (
+        {isOffline ? (
+          <WifiOff className='h-5 w-5 text-muted-foreground' />
+        ) : (
+          <Bell className='h-5 w-5' />
+        )}
+        {!isOffline && unreadCount > 0 && (
           <Badge
             variant='destructive'
             className='absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center'
@@ -80,7 +92,7 @@ export function NotificationBell({ className }: NotificationBellProps) {
             {unreadCount > 9 ? '9+' : unreadCount}
           </Badge>
         )}
-        {hasNewNotifications && unreadCount === 0 && (
+        {!isOffline && hasNewNotifications && unreadCount === 0 && (
           <div className='absolute -top-1 -right-1 h-2 w-2 bg-green-500 rounded-full animate-ping' />
         )}
       </Button>
@@ -113,7 +125,15 @@ export function NotificationBell({ className }: NotificationBellProps) {
 
             <CardContent className='p-0'>
               <ScrollArea className='h-80'>
-                {notifications.length === 0 ? (
+                {isOffline ? (
+                  <div className='p-4 text-center text-muted-foreground text-sm'>
+                    <WifiOff className='h-8 w-8 mx-auto mb-2 opacity-50' />
+                    <p>Notifications unavailable offline</p>
+                    <p className='text-xs mt-1'>
+                      Connect to the internet to see notifications
+                    </p>
+                  </div>
+                ) : notifications.length === 0 ? (
                   <div className='p-4 text-center text-muted-foreground text-sm'>
                     No unread notifications
                   </div>
@@ -163,7 +183,7 @@ export function NotificationBell({ className }: NotificationBellProps) {
                 )}
               </ScrollArea>
 
-              {notifications.length > 0 && (
+              {!isOffline && notifications.length > 0 && (
                 <>
                   <Separator />
                   <div className='p-3'>

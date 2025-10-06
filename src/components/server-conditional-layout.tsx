@@ -1,6 +1,6 @@
 import { headers } from 'next/headers'
 import { ReactNode } from 'react'
-import AuthSessionProvider from '@/components/session-provider'
+import NetworkAwareSessionProvider from '@/components/network-aware-session-provider'
 import { BreadcrumbProvider } from '@/components/breadcrumb-provider'
 import { DefaultBreadcrumbHandler } from '@/components/default-breadcrumb-handler'
 import { MobileMenuProvider } from '@/components/mobile-menu-provider'
@@ -11,6 +11,7 @@ import { Toaster } from 'sonner'
 import { CommandPaletteProvider } from '@/components/command-palette/provider'
 import { CommandPalette } from '@/components/command-palette/command-palette'
 import { CreateTaskModal } from '@/components/command-palette/create-task-modal'
+import { OfflineAwareLayout } from '@/components/offline-aware-layout'
 import { getFilteredNavigation } from '@/lib/auth-utils'
 
 interface ServerConditionalLayoutProps {
@@ -29,7 +30,7 @@ export default async function ServerConditionalLayout({
   if (isPublic) {
     // Render minimal layout for public routes
     return (
-      <AuthSessionProvider>
+      <NetworkAwareSessionProvider>
         <ThemeProvider
           attribute='class'
           defaultTheme='dark'
@@ -37,10 +38,10 @@ export default async function ServerConditionalLayout({
           storageKey='manageros-theme'
           disableTransitionOnChange
         >
-          {children}
+          <OfflineAwareLayout>{children}</OfflineAwareLayout>
           <Toaster theme='system' />
         </ThemeProvider>
-      </AuthSessionProvider>
+      </NetworkAwareSessionProvider>
     )
   }
 
@@ -61,7 +62,7 @@ export default async function ServerConditionalLayout({
 
   // Render full layout for authenticated routes
   return (
-    <AuthSessionProvider>
+    <NetworkAwareSessionProvider>
       <ThemeProvider
         attribute='class'
         defaultTheme='dark'
@@ -73,15 +74,17 @@ export default async function ServerConditionalLayout({
           <BreadcrumbProvider>
             <MobileMenuProvider>
               <DefaultBreadcrumbHandler />
-              <div className='flex min-h-screen'>
-                <Sidebar navigation={filteredNavigation} />
-                <div className='flex-1 flex flex-col overflow-hidden lg:ml-0'>
-                  <TopBar />
-                  <main className='flex-1 overflow-auto p-3 md:p-6'>
-                    <div className='w-full'>{children}</div>
-                  </main>
+              <OfflineAwareLayout>
+                <div className='flex min-h-screen'>
+                  <Sidebar navigation={filteredNavigation} />
+                  <div className='flex-1 flex flex-col overflow-hidden lg:ml-0'>
+                    <TopBar />
+                    <main className='flex-1 overflow-auto p-3 md:p-6'>
+                      <div className='w-full'>{children}</div>
+                    </main>
+                  </div>
                 </div>
-              </div>
+              </OfflineAwareLayout>
               <CommandPalette />
               <CreateTaskModal />
             </MobileMenuProvider>
@@ -89,6 +92,6 @@ export default async function ServerConditionalLayout({
         </CommandPaletteProvider>
         <Toaster theme='system' />
       </ThemeProvider>
-    </AuthSessionProvider>
+    </NetworkAwareSessionProvider>
   )
 }
