@@ -75,7 +75,8 @@ export function GithubPrsActivityTable({
     if (hasGithubAccount) {
       loadPullRequests()
     }
-  }, [personId, hasGithubAccount, daysBack, refreshTrigger])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [personId, hasGithubAccount, refreshTrigger])
 
   const getStateColor = (
     state: string,

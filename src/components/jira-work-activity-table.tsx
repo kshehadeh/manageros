@@ -79,7 +79,8 @@ export function JiraWorkActivityTable({
     if (hasJiraAccount) {
       loadAssignedTickets()
     }
-  }, [personId, hasJiraAccount, daysBack, refreshTrigger])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [personId, hasJiraAccount, refreshTrigger])
 
   const getStatusColor = (status: string): string => {
     const statusLower = status.toLowerCase()

@@ -58,7 +58,7 @@ export function JiraWorkActivitySection({
     }
 
     checkWorkActivity()
-  }, [personId, hasJiraAccount, daysBack])
+  }, [personId, hasJiraAccount])
 
   // Don't render anything while checking or if no work activity
   if (hasWorkActivity === null || !hasWorkActivity) {

@@ -58,7 +58,7 @@ export function GithubPrsActivitySection({
     }
 
     checkPrActivity()
-  }, [personId, hasGithubAccount, daysBack])
+  }, [personId, hasGithubAccount])
 
   // Don't render anything while checking or if no PR activity
   if (hasPrActivity === null || !hasPrActivity) {
