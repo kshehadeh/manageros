@@ -1,5 +1,7 @@
 import { PersonForm } from '@/components/people/person-form'
-import { getTeams, getPeople, getJobRolesForSelection } from '@/lib/actions'
+import { getTeams } from '@/lib/actions/team'
+import { getPeople } from '@/lib/actions/person'
+import { getJobRolesForSelection } from '@/lib/actions/job-roles'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
 import { redirect } from 'next/navigation'

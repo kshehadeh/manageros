@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { generatePersonSynopsis } from '@/lib/actions'
+import { generatePersonSynopsis } from '@/lib/actions/synopsis'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { CalendarDays, Loader2, X } from 'lucide-react'

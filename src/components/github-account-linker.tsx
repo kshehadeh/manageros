@@ -5,7 +5,7 @@ import { useState } from 'react'
 import {
   linkPersonToGithubAccount,
   unlinkPersonFromGithubAccount,
-} from '@/lib/actions'
+} from '@/lib/actions/github'
 
 interface GithubAccountLinkerProps {
   personId: string

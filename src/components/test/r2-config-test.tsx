@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { testR2Config } from '@/lib/actions'
+import { testR2Config } from '@/lib/actions/test-r2'
 import { toast } from 'sonner'
 
 interface TestResult {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { importTeamsFromCSV } from '@/lib/actions'
+import { importTeamsFromCSV } from '@/lib/actions/csv-import'
 import { Button } from '@/components/ui/button'
 
 interface ImportResult {

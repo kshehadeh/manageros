@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { getAllFeedbackCampaignsForOrganization } from '@/lib/actions'
+import { getAllFeedbackCampaignsForOrganization } from '@/lib/actions/feedback-campaign'
 import { FeedbackCampaignList } from '@/components/feedback/feedback-campaign-list'
 import { Button } from '@/components/ui/button'
 import {

@@ -2,12 +2,13 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+
 import {
+  type JobDomainFormData,
   createJobDomain,
   updateJobDomain,
   deleteJobDomain,
-} from '@/lib/actions'
-import { type JobDomainFormData } from '@/lib/actions/job-roles'
+} from '@/lib/actions/job-roles'
 import type { JobDomain } from '@/types/job-roles'
 import { Edit2, Trash2 } from 'lucide-react'
 

@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { getPeopleHierarchy } from '@/lib/actions'
+import { getPeopleHierarchy } from '@/lib/actions/person'
 import { PeopleChartClient } from '@/components/people/people-chart-client'
 import { getCurrentUser } from '@/lib/auth-utils'
 

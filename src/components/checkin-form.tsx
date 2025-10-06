@@ -2,7 +2,10 @@
 
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
-import { createCheckIn, updateCheckIn } from '@/lib/actions'
+import {
+  createCheckIn,
+  updateCheckIn,
+} from '@/lib/actions/checkin'
 import { Rag } from '@/components/rag'
 import type { CheckInFormData } from '@/lib/validations'
 

@@ -6,7 +6,7 @@ import {
   linkUserToPerson,
   unlinkUserFromPerson,
   getAvailableUsersForLinking,
-} from '@/lib/actions'
+} from '@/lib/actions/organization'
 
 interface User {
   id: string

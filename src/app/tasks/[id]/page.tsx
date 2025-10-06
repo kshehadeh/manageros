@@ -1,4 +1,4 @@
-import { getTask } from '@/lib/actions'
+import { getTask } from '@/lib/actions/task'
 import { prisma } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'

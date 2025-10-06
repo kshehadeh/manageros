@@ -1,5 +1,5 @@
 import { ActiveFeedbackCampaigns } from '@/components/feedback/active-feedback-campaigns'
-import { getActiveFeedbackCampaignsForUser } from '@/lib/actions'
+import { getActiveFeedbackCampaignsForUser } from '@/lib/actions/feedback-campaign'
 
 export async function DashboardFeedbackCampaignsSection() {
   const campaigns = await getActiveFeedbackCampaignsForUser()

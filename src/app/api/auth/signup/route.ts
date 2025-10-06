@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/db'
-import { checkPendingInvitation } from '@/lib/actions'
+import { checkPendingInvitation } from '@/lib/actions/organization'
 import { z } from 'zod'
 
 const signupSchema = z.object({

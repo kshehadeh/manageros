@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { getOrganizationInvitations } from '@/lib/actions'
+import { getOrganizationInvitations } from '@/lib/actions/organization'
 import InvitationForm from '@/components/invitation-form'
 import InvitationList from '@/components/invitation-list'
 

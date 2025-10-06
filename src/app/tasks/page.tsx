@@ -1,4 +1,5 @@
-import { getTasks, getInitiatives } from '@/lib/actions'
+import { getTasks } from '@/lib/actions/task'
+import { getInitiatives } from '@/lib/actions/initiative'
 import { prisma } from '@/lib/db'
 import { requireAuth } from '@/lib/auth-utils'
 import { GroupedTasksPageClient } from '@/components/tasks/grouped-tasks-page-client'

@@ -1,5 +1,5 @@
 import { requireAuth } from '@/lib/auth-utils'
-import { getPendingInvitationsForUser } from '@/lib/actions'
+import { getPendingInvitationsForUser } from '@/lib/actions/organization'
 import { OrganizationSetupCards } from '@/components/organization-setup-cards'
 import { Suspense } from 'react'
 import { DashboardAssignedTasksSection } from '@/components/dashboard-sections/assigned-tasks-section'

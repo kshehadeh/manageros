@@ -1,4 +1,6 @@
-import { getTeams, getInitiatives, getPeople } from '@/lib/actions'
+import { getTeams } from '@/lib/actions/team'
+import { getInitiatives } from '@/lib/actions/initiative'
+import { getPeople } from '@/lib/actions/person'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'

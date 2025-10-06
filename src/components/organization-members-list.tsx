@@ -28,7 +28,10 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { MoreHorizontal, Shield, User, Trash2 } from 'lucide-react'
-import { updateUserRole, removeUserFromOrganization } from '@/lib/actions'
+import {
+  updateUserRole,
+  removeUserFromOrganization,
+} from '@/lib/actions/organization'
 import { toast } from 'sonner'
 
 interface OrganizationMember {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { updateTaskStatus } from '@/lib/actions'
+import { updateTaskStatus } from '@/lib/actions/task'
 import { ChevronDown } from 'lucide-react'
 import {
   DropdownMenu,

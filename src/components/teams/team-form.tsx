@@ -3,7 +3,11 @@
 import { Button } from '@/components/ui/button'
 
 import { useState, useEffect } from 'react'
-import { createTeam, updateTeam, getTeamsForSelection } from '@/lib/actions'
+import {
+  createTeam,
+  updateTeam,
+  getTeamsForSelection,
+} from '@/lib/actions/team'
 import { type TeamFormData } from '@/lib/validations'
 
 interface TeamFormProps {

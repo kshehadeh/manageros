@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { fetchGithubPullRequests } from '@/lib/actions'
+import { fetchGithubPullRequests } from '@/lib/actions/github'
 
 interface GithubPrsActivityTableProps {
   personId: string

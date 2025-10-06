@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { deleteTeam } from '@/lib/actions'
+import { deleteTeam } from '@/lib/actions/team'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { toast } from 'sonner'
 

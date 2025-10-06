@@ -20,7 +20,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { AlertCircle } from 'lucide-react'
-import { getPeopleForFeedbackFilters } from '@/lib/actions'
+import { getPeopleForFeedbackFilters } from '@/lib/actions/person'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 

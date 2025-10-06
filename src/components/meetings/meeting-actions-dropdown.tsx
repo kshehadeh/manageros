@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Edit, Trash2, Building2, Target, User } from 'lucide-react'
-import { deleteMeeting } from '@/lib/actions'
+import { deleteMeeting } from '@/lib/actions/meeting'
 import { ActionDropdown } from '@/components/common/action-dropdown'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { toast } from 'sonner'

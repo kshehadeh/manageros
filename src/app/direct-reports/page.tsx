@@ -1,4 +1,4 @@
-import { getDirectReports } from '@/lib/actions'
+import { getDirectReports } from '@/lib/actions/person'
 import { PersonListItemCard } from '@/components/people/person-list-item-card'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'

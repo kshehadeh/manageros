@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { saveJiraCredentials, deleteJiraCredentials } from '@/lib/actions'
+import { saveJiraCredentials, deleteJiraCredentials } from '@/lib/actions/jira'
 import { Button } from './ui/button'
 import {
   Dialog,

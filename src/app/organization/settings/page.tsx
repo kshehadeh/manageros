@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import {
   getOrganizationInvitations,
   getOrganizationMembers,
-} from '@/lib/actions'
+} from '@/lib/actions/organization'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import {

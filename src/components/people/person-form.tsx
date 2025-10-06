@@ -19,7 +19,10 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { useState } from 'react'
-import { createPerson, updatePerson } from '@/lib/actions'
+import {
+  createPerson,
+  updatePerson,
+} from '@/lib/actions/person'
 import { type PersonFormData, personSchema } from '@/lib/validations'
 import { UserLinkForm } from '@/components/user-link-form'
 import { JiraAccountLinker } from '@/components/jira-account-linker'

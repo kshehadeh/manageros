@@ -1,4 +1,8 @@
-import { getJobRole, getJobLevels, getJobDomains } from '@/lib/actions'
+import {
+  getJobRole,
+  getJobLevels,
+  getJobDomains,
+} from '@/lib/actions/job-roles'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'

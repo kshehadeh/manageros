@@ -4,8 +4,11 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { MarkdownEditor } from '@/components/markdown-editor'
-import { updateJobRole } from '@/lib/actions'
-import { type JobRoleFormData } from '@/lib/actions/job-roles'
+
+import {
+  type JobRoleFormData,
+  updateJobRole,
+} from '@/lib/actions/job-roles'
 
 interface JobRole {
   id: string

@@ -13,7 +13,7 @@ import { NotesSection } from '@/components/notes/notes-section'
 import { Suspense } from 'react'
 import { Loading } from '@/components/ui/loading'
 import { calculateTaskCompletionPercentage } from '@/lib/completion-utils'
-import { getNotesForEntity } from '@/lib/actions'
+import { getNotesForEntity } from '@/lib/actions/notes'
 
 export default async function InitiativeDetail({
   params,

@@ -1,7 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { createOneOnOne, updateOneOnOne } from '@/lib/actions'
+import {
+  createOneOnOne,
+  updateOneOnOne,
+} from '@/lib/actions/oneonone'
 import { type OneOnOneFormData } from '@/lib/validations'
 import Link from 'next/link'
 import { MarkdownEditor } from './markdown-editor'

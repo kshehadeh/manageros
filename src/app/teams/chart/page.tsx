@@ -2,7 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { TeamsFlowChart } from '@/components/teams/teams-flow-chart'
-import { getTeamHierarchyOptimized } from '@/lib/actions'
+import { getTeamHierarchyOptimized } from '@/lib/actions/team'
 
 export default async function TeamsFlowPage() {
   const session = await getServerSession(authOptions)

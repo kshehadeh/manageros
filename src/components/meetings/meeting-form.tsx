@@ -13,7 +13,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { createMeeting, updateMeeting } from '@/lib/actions'
+import {
+  createMeeting,
+  updateMeeting,
+} from '@/lib/actions/meeting'
 import { type MeetingFormData, meetingSchema } from '@/lib/validations'
 import { Person, Team, Initiative } from '@prisma/client'
 import { AlertCircle, Plus, X } from 'lucide-react'

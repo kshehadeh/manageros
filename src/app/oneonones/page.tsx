@@ -1,4 +1,4 @@
-import { getOneOnOnes } from '@/lib/actions'
+import { getOneOnOnes } from '@/lib/actions/oneonone'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { getServerSession } from 'next-auth'

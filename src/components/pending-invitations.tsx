@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { acceptInvitationForUser } from '@/lib/actions'
+import { acceptInvitationForUser } from '@/lib/actions/organization'
 import { useSession } from 'next-auth/react'
 
 interface PendingInvitation {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { getAllFeedback } from '@/lib/actions'
+import { getAllFeedback } from '@/lib/actions/feedback'
 import { FeedbackTable } from './feedback-table'
 
 interface Person {

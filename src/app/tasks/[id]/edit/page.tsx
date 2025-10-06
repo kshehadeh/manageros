@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db'
-import { getTask } from '@/lib/actions'
+import { getTask } from '@/lib/actions/task'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'

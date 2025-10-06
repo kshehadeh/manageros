@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { fetchGithubPullRequests } from '@/lib/actions'
+import { fetchGithubPullRequests } from '@/lib/actions/github'
 
 interface GithubPrsActivityProps {
   personId: string

@@ -1,4 +1,4 @@
-import { getMeetingInstance } from '@/lib/actions'
+import { getMeetingInstance } from '@/lib/actions/meeting-instance'
 import { getEntityLinks } from '@/lib/actions/entity-links'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'

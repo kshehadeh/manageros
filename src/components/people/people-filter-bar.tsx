@@ -11,7 +11,8 @@ import {
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Search, Filter, X } from 'lucide-react'
-import { getTeams, getPeople } from '@/lib/actions'
+import { getTeams } from '@/lib/actions/team'
+import { getPeople } from '@/lib/actions/person'
 import { Person } from '@/types/person'
 
 interface PeopleFilterBarProps {

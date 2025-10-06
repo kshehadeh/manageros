@@ -1,4 +1,4 @@
-import { getReportInstance } from '@/lib/actions'
+import { getReportInstance } from '@/lib/actions/report'
 import { requireAuth } from '@/lib/auth-utils'
 import ReactMarkdown from 'react-markdown'
 import { ReportInstanceBreadcrumbClient } from '@/components/report-instance-breadcrumb-client'

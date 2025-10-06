@@ -1,7 +1,8 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { getAllFeedback, getPeopleForFeedbackFilters } from '@/lib/actions'
+import { getAllFeedback } from '@/lib/actions/feedback'
+import { getPeopleForFeedbackFilters } from '@/lib/actions/person'
 import FeedbackViewClient from '@/components/feedback/feedback-view-client'
 import { prisma } from '@/lib/db'
 

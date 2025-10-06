@@ -30,7 +30,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { deleteTeam } from '@/lib/actions'
+import { deleteTeam } from '@/lib/actions/team'
 import { toast } from 'sonner'
 import { TeamWithCounts } from '@/types/team'
 import { DeleteModal } from '@/components/common/delete-modal'

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { Edit, Trash2 } from 'lucide-react'
-import { deleteInitiative } from '@/lib/actions'
+import { deleteInitiative } from '@/lib/actions/initiative'
 import { ActionDropdown } from '@/components/common/action-dropdown'
 import { ConfirmAction } from '@/components/common/confirm-action'
 import { toast } from 'sonner'

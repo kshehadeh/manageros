@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { getOrganizationMembers } from '@/lib/actions'
+import { getOrganizationMembers } from '@/lib/actions/organization'
 import OrganizationMembersList from '@/components/organization-members-list'
 import { UserCheck } from 'lucide-react'
 

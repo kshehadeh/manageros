@@ -18,7 +18,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { useState } from 'react'
-import { updateInitiative } from '@/lib/actions'
+import { updateInitiative } from '@/lib/actions/initiative'
 import { type InitiativeFormData, initiativeSchema } from '@/lib/validations'
 import { Rag } from '@/components/rag'
 import { MarkdownEditor } from '@/components/markdown-editor'

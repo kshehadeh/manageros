@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { deleteInitiative } from '@/lib/actions'
+import { deleteInitiative } from '@/lib/actions/initiative'
 import { toast } from 'sonner'
 import { Person, Team } from '@prisma/client'
 import { InitiativeWithRelations } from '@/types/initiative'
