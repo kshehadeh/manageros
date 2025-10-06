@@ -130,6 +130,8 @@ export default async function PersonDetailPage({
         linkedAvatars={linkedAvatars}
         isAdmin={isAdmin(session.user)}
         currentPerson={currentPersonWithLevel}
+        organizationId={session.user.organizationId}
+        currentUserId={session.user.id}
       />
     </PersonDetailClient>
   )

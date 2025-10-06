@@ -1,5 +1,3 @@
-import { getServerSession } from 'next-auth'
-import { authOptions, isAdmin } from '@/lib/auth'
 import { GithubAccountLinker } from '@/components/github-account-linker'
 import { SectionHeader } from '@/components/ui/section-header'
 import { FaGithub } from 'react-icons/fa'
@@ -18,17 +16,11 @@ interface GithubLinkingSectionProps {
   } | null
 }
 
-export async function GithubLinkingSection({
+export function GithubLinkingSection({
   personId,
   personName,
   githubAccount,
 }: GithubLinkingSectionProps) {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user?.organizationId || !isAdmin(session.user)) {
-    return null
-  }
-
   return (
     <section>
       <SectionHeader icon={FaGithub} title='GitHub Linking' />

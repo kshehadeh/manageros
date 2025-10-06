@@ -1,6 +1,4 @@
 import { prisma } from '@/lib/db'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { PersonFeedbackCampaigns } from '@/components/people/person-feedback-campaigns'
 import { SectionHeader } from '@/components/ui/section-header'
 import { Button } from '@/components/ui/button'
@@ -9,14 +7,16 @@ import Link from 'next/link'
 
 interface FeedbackCampaignsSectionProps {
   personId: string
+  organizationId: string
+  currentUserId: string
 }
 
 export async function FeedbackCampaignsSection({
   personId,
+  organizationId,
+  currentUserId,
 }: FeedbackCampaignsSectionProps) {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user?.organizationId) {
+  if (!organizationId) {
     return null
   }
 
@@ -26,10 +26,10 @@ export async function FeedbackCampaignsSection({
       status: {
         in: ['active', 'draft'],
       },
-      userId: session.user.id,
+      userId: currentUserId,
       targetPersonId: personId,
       targetPerson: {
-        organizationId: session.user.organizationId,
+        organizationId,
       },
     },
     include: {

@@ -9,12 +9,16 @@ import Link from 'next/link'
 
 interface SynopsisSectionProps {
   personId: string
+  organizationId: string
 }
 
-export async function SynopsisSection({ personId }: SynopsisSectionProps) {
+export async function SynopsisSection({
+  personId,
+  organizationId,
+}: SynopsisSectionProps) {
   const session = await getServerSession(authOptions)
 
-  if (!session?.user?.organizationId) {
+  if (!session?.user?.organizationId || session.user.organizationId !== organizationId) {
     return null
   }
 
@@ -27,7 +31,7 @@ export async function SynopsisSection({ personId }: SynopsisSectionProps) {
 
   // Get person name for the modal
   const person = await prisma.person.findFirst({
-    where: { id: personId },
+    where: { id: personId, organizationId },
     select: { name: true },
   })
 
