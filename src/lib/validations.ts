@@ -64,6 +64,9 @@ export const personSchema = z.object({
   status: z.enum(['active', 'inactive', 'on_leave']).default('active'),
   birthday: z.string().optional(),
   avatar: z.string().url('Valid URL is required').optional().or(z.literal('')),
+  employeeType: z
+    .enum(['FULL_TIME', 'PART_TIME', 'INTERN', 'CONSULTANT'])
+    .optional(),
   teamId: z.string().optional(),
   managerId: z.string().optional(),
   jobRoleId: z.string().optional(),
@@ -87,6 +90,9 @@ export const personUpdateSchema = z.object({
   status: z.enum(['active', 'inactive', 'on_leave']).optional(),
   birthday: z.string().optional(),
   avatar: z.string().url('Valid URL is required').optional().or(z.literal('')),
+  employeeType: z
+    .enum(['FULL_TIME', 'PART_TIME', 'INTERN', 'CONSULTANT'])
+    .optional(),
   teamId: z.string().optional(),
   managerId: z.string().optional(),
   jobRoleId: z.string().optional(),

@@ -2,7 +2,12 @@ import Link from 'next/link'
 import { PersonAvatarWrapper } from './person-avatar-wrapper'
 import { PersonStatusBadge } from './person-status-badge'
 import { PersonActionsDropdown } from './person-actions-dropdown'
-import { CalendarDays, User as UserIcon, Building2 } from 'lucide-react'
+import {
+  CalendarDays,
+  User as UserIcon,
+  Building2,
+  Briefcase,
+} from 'lucide-react'
 import { Suspense } from 'react'
 import type { User, Person as PrismaPerson, Team } from '@prisma/client'
 import { Person } from '@/types/person'
@@ -103,6 +108,17 @@ export function PersonDetailContent({
                   >
                     {person.manager.name}
                   </Link>
+                </div>
+              )}
+              {person.employeeType && (
+                <div className='flex items-center gap-1'>
+                  <Briefcase className='w-4 h-4' />
+                  <span>
+                    {person.employeeType === 'FULL_TIME' && 'Full Time'}
+                    {person.employeeType === 'PART_TIME' && 'Part Time'}
+                    {person.employeeType === 'INTERN' && 'Intern'}
+                    {person.employeeType === 'CONSULTANT' && 'Consultant'}
+                  </span>
                 </div>
               )}
               {person.startedAt && (

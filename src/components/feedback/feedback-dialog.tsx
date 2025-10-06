@@ -113,6 +113,7 @@ export function FeedbackDialog({
     status: 'ACTIVE',
     birthday: null,
     avatar: null,
+    employeeType: null,
     organizationId: '', // This will be filled by the form
     teamId: null,
     managerId: null,

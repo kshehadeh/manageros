@@ -46,6 +46,7 @@ interface PersonFormProps {
     status: string
     birthday?: Date | null
     avatar?: string | null
+    employeeType?: 'FULL_TIME' | 'PART_TIME' | 'INTERN' | 'CONSULTANT' | null
     teamId?: string | null
     managerId?: string | null
     jobRoleId?: string | null
@@ -103,6 +104,7 @@ export function PersonForm({
     status: (person?.status as PersonFormData['status']) || 'active',
     birthday: formatDateForInput(person?.birthday || null),
     avatar: person?.avatar || '',
+    employeeType: person?.employeeType || undefined,
     teamId: person?.teamId || initialTeamId || '',
     managerId: person?.managerId || initialManagerId || '',
     jobRoleId: person?.jobRoleId || '',
@@ -316,7 +318,7 @@ export function PersonForm({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
                 <div className='space-y-2'>
                   <Label htmlFor='status'>Status</Label>
                   <Select
@@ -341,6 +343,36 @@ export function PersonForm({
                   </Select>
                   {errors.status && (
                     <p className='text-sm text-destructive'>{errors.status}</p>
+                  )}
+                </div>
+
+                <div className='space-y-2'>
+                  <Label htmlFor='employeeType'>Employee Type</Label>
+                  <Select
+                    value={getSelectValue(formData.employeeType)}
+                    onValueChange={value =>
+                      handleInputChange('employeeType', getFormValue(value))
+                    }
+                  >
+                    <SelectTrigger
+                      className={
+                        errors.employeeType ? 'border-destructive' : ''
+                      }
+                    >
+                      <SelectValue placeholder='Select employee type' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='none'>Not specified</SelectItem>
+                      <SelectItem value='FULL_TIME'>Full Time</SelectItem>
+                      <SelectItem value='PART_TIME'>Part Time</SelectItem>
+                      <SelectItem value='INTERN'>Intern</SelectItem>
+                      <SelectItem value='CONSULTANT'>Consultant</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.employeeType && (
+                    <p className='text-sm text-destructive'>
+                      {errors.employeeType}
+                    </p>
                   )}
                 </div>
 

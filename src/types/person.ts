@@ -6,6 +6,7 @@ export interface Person {
   status: string
   birthday: Date | null
   avatar: string | null
+  employeeType: 'FULL_TIME' | 'PART_TIME' | 'INTERN' | 'CONSULTANT' | null
   team: { id: string; name: string } | null
   jobRole: {
     id: string

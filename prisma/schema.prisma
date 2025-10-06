@@ -8,6 +8,13 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum EmployeeType {
+  FULL_TIME
+  PART_TIME
+  INTERN
+  CONSULTANT
+}
+
 model Organization {
   id          String   @id @default(cuid())
   name        String
@@ -93,6 +100,7 @@ model Person {
   status             String            @default("active")
   birthday           DateTime?
   avatar             String?           // Avatar URL (external URL or R2 storage URL)
+  employeeType       EmployeeType?     // Type of employee (Full Time, Part Time, Intern, Consultant)
   organizationId     String
   organization       Organization      @relation(fields: [organizationId], references: [id])
   teamId             String?
