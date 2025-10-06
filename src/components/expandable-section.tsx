@@ -43,6 +43,7 @@ interface ExpandableSectionProps {
   children: React.ReactNode
   initialLimit?: number
   className?: string
+  fullBleed?: boolean // Remove padding for full-bleed content like tables
 }
 
 export function ExpandableSection({
@@ -52,6 +53,7 @@ export function ExpandableSection({
   children,
   initialLimit = 5,
   className = '',
+  fullBleed = false,
 }: ExpandableSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const childrenArray = Array.isArray(children) ? children : [children]
@@ -63,26 +65,28 @@ export function ExpandableSection({
   const IconComponent = icon ? iconMap[icon] : null
 
   return (
-    <section className={`rounded-xl p-4 space-y-4 ${className}`}>
-      <SectionHeader
-        icon={IconComponent || User}
-        title={title}
-        action={
-          <Button asChild variant='outline' size='sm'>
-            <Link href={viewAllHref} className='flex items-center gap-2'>
-              <Eye className='w-4 h-4' />
-              View all
-            </Link>
-          </Button>
-        }
-      />
-      <div className='space-y-3'>
+    <section className={`rounded-xl ${fullBleed ? 'p-0' : 'p-4'} space-y-4 ${className}`}>
+      <div className={fullBleed ? 'px-4 pt-4' : ''}>
+        <SectionHeader
+          icon={IconComponent || User}
+          title={title}
+          action={
+            <Button asChild variant='outline' size='sm'>
+              <Link href={viewAllHref} className='flex items-center gap-2'>
+                <Eye className='w-4 h-4' />
+                View all
+              </Link>
+            </Button>
+          }
+        />
+      </div>
+      <div className={`space-y-3 ${fullBleed ? '' : ''}`}>
         {visibleItems}
         {childrenArray.length === 0 && (
-          <div className='text-neutral-400 text-sm'>No items yet.</div>
+          <div className={`text-neutral-400 text-sm ${fullBleed ? 'px-4' : ''}`}>No items yet.</div>
         )}
         {hasMoreItems && (
-          <div className='pt-2'>
+          <div className={`pt-2 ${fullBleed ? 'px-4 pb-4' : ''}`}>
             <Button
               variant='ghost'
               size='sm'
