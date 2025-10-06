@@ -13,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { VisuallyHidden } from '@/components/ui/visually-hidden'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -617,6 +618,9 @@ export function NotesSection({
       {/* Image Lightbox */}
       <Dialog open={!!lightboxImage} onOpenChange={closeLightbox}>
         <DialogContent className='sm:max-w-[90vw] sm:max-h-[90vh] p-0 bg-transparent border-none'>
+          <VisuallyHidden>
+            <DialogTitle>Image Preview</DialogTitle>
+          </VisuallyHidden>
           <div className='relative w-full h-full flex items-center justify-center'>
             {lightboxImage && (
               <Image
