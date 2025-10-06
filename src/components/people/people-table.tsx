@@ -14,6 +14,7 @@ import {
   User,
 } from 'lucide-react'
 import { PersonStatusBadge } from './person-status-badge'
+import { PersonAvatar } from './person-avatar'
 import {
   Table,
   TableBody,
@@ -212,7 +213,7 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
     })
   }
 
-  const handleRowDoubleClick = (personId: string) => {
+  const handleRowClick = (personId: string) => {
     router.push(`/people/${personId}`)
   }
 
@@ -461,25 +462,26 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
             <TableRow
               key={person.id}
               className='hover:bg-accent/50 cursor-pointer'
-              onDoubleClick={() => handleRowDoubleClick(person.id)}
+              onClick={() => handleRowClick(person.id)}
               onContextMenu={e => handleRowRightClick(e, person.id)}
             >
               <TableCell className='font-medium text-foreground'>
-                <div className='flex flex-col gap-1'>
-                  <div className='flex items-center gap-2'>
-                    {person.name}
-                    {person.user && (
-                      <div title='Linked to user account'>
-                        <User className='h-3 w-3 text-blue-500' />
-                      </div>
-                    )}
-                  </div>
-                  <div className='flex items-center gap-2'>
-                    <PersonStatusBadge status={person.status} size='sm' />
-                    <span className='text-xs text-muted-foreground'>
-                      {person.reports.length} report
-                      {person.reports.length !== 1 ? 's' : ''}
-                    </span>
+                <div className='flex items-center gap-3'>
+                  <PersonAvatar
+                    name={person.name}
+                    avatar={person.avatar || null}
+                    size='sm'
+                  />
+                  <div className='flex flex-col gap-1'>
+                    <div className='flex items-center gap-2'>
+                      {person.name}
+                      {person.user && (
+                        <div title='Linked to user account'>
+                          <User className='h-3 w-3 text-blue-500' />
+                        </div>
+                      )}
+                      <PersonStatusBadge status={person.status} size='sm' />
+                    </div>
                   </div>
                 </div>
               </TableCell>

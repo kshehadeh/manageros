@@ -15,6 +15,7 @@ export async function DashboardDirectReportsSection({
     where: {
       organizationId,
       manager: { user: { id: userId } },
+      status: 'active',
     },
     orderBy: { name: 'asc' },
     include: { team: true, reports: true },

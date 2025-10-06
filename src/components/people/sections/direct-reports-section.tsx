@@ -18,11 +18,12 @@ export async function DirectReportsSection({
     return null
   }
 
-  // Get direct reports for this person
+  // Get direct reports for this person (only active persons)
   const reports = await prisma.person.findMany({
     where: {
       managerId: personId,
       organizationId: session.user.organizationId,
+      status: 'active',
     },
     include: {
       team: true,

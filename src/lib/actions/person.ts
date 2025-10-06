@@ -577,6 +577,9 @@ export async function getDirectReports() {
       where: { id: user.personId },
       include: {
         reports: {
+          where: {
+            status: 'active',
+          },
           include: {
             team: {
               select: {
