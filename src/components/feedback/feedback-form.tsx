@@ -3,7 +3,10 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import { createFeedback, updateFeedback } from '@/lib/actions'
+import {
+  createFeedback,
+  updateFeedback,
+} from '@/lib/actions/feedback'
 import { type FeedbackFormData } from '@/lib/validations'
 import { type Person } from '@prisma/client'
 import { MarkdownEditor } from '@/components/markdown-editor'

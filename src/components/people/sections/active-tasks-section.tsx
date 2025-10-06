@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { TaskTable } from '@/components/tasks/task-table'
 import { SectionHeader } from '@/components/ui/section-header'
 import { ListTodo } from 'lucide-react'
-import { getPeople } from '@/lib/actions'
+import { getPeople } from '@/lib/actions/person'
 import { TASK_LIST_SELECT } from '@/lib/task-list-select'
 
 interface ActiveTasksSectionProps {

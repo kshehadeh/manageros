@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { revokeOrganizationInvitation } from '@/lib/actions'
+import { revokeOrganizationInvitation } from '@/lib/actions/organization'
 
 interface Invitation {
   id: string

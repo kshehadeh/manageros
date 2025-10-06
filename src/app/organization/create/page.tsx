@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import { createOrganization } from '@/lib/actions'
+import { createOrganization } from '@/lib/actions/organization'
 import { useSession } from 'next-auth/react'
 
 export default function CreateOrganizationPage() {

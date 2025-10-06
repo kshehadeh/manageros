@@ -35,9 +35,9 @@ import { Input } from '@/components/ui/input'
 import {
   updatePersonPartial,
   deletePerson,
-  getTeams,
   getPeople,
-} from '@/lib/actions'
+} from '@/lib/actions/person'
+import { getTeams } from '@/lib/actions/team'
 import { toast } from 'sonner'
 import { Person } from '@/types/person'
 import { FeedbackForm } from '@/components/feedback/feedback-form'

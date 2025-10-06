@@ -12,7 +12,10 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { updateCampaignStatus, deleteFeedbackCampaign } from '@/lib/actions'
+import {
+  updateCampaignStatus,
+  deleteFeedbackCampaign,
+} from '@/lib/actions/feedback-campaign'
 import { ActionDropdown } from '@/components/common/action-dropdown'
 import { ConfirmAction } from '@/components/common/confirm-action'
 import { toast } from 'sonner'

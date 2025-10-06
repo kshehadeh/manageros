@@ -1,4 +1,4 @@
-import { getPeopleHierarchy } from '@/lib/actions'
+import { getPeopleHierarchy } from '@/lib/actions/person'
 import { PeoplePageClient } from '@/components/people/people-page-client'
 import { requireAuth } from '@/lib/auth-utils'
 

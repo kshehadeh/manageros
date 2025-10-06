@@ -5,7 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { SlateTaskTextarea } from '@/components/tasks/slate-task-textarea'
 import { MarkdownEditor } from '@/components/markdown-editor'
-import { createTask, updateTask } from '@/lib/actions'
+import {
+  createTask,
+  updateTask,
+} from '@/lib/actions/task'
 import { type TaskFormData, taskSchema } from '@/lib/validations'
 import { Person, Initiative, Objective } from '@prisma/client'
 import {

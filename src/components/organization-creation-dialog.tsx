@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { createOrganization } from '@/lib/actions'
+import { createOrganization } from '@/lib/actions/organization'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { AlertCircle } from 'lucide-react'

@@ -1,7 +1,11 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { getJobRoles, getJobLevels, getJobDomains } from '@/lib/actions'
+import {
+  getJobRoles,
+  getJobLevels,
+  getJobDomains,
+} from '@/lib/actions/job-roles'
 import { JobRolesPageClient } from '@/components/jobs/job-roles-page-client'
 
 export default async function JobRoleManagementPage() {

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { requireAuth } from '@/lib/auth-utils'
 import { TeamsPageClient } from '@/components/teams/teams-page-client'
-import { getAllTeamsWithRelations } from '@/lib/actions'
+import { getAllTeamsWithRelations } from '@/lib/actions/team'
 import { Button } from '@/components/ui/button'
 import { Upload, Plus, Workflow, Users2 } from 'lucide-react'
 

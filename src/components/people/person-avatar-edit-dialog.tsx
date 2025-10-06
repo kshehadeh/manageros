@@ -12,7 +12,10 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Upload, X } from 'lucide-react'
 import { FaJira, FaGithub } from 'react-icons/fa'
-import { uploadAvatar, updatePersonAvatar } from '@/lib/actions'
+import {
+  uploadAvatar,
+  updatePersonAvatar,
+} from '@/lib/actions/avatar'
 import { useRef } from 'react'
 
 interface PersonAvatarEditDialogProps {

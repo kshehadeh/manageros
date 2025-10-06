@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Edit, Trash2 } from 'lucide-react'
 import { ActionDropdown } from '@/components/common/action-dropdown'
 import { ConfirmAction } from '@/components/common/confirm-action'
-import { deleteJobRole } from '@/lib/actions'
+import { deleteJobRole } from '@/lib/actions/job-roles'
 import { toast } from 'sonner'
 
 interface JobRoleActionsDropdownProps {

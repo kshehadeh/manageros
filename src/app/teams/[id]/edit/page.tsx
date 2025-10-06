@@ -1,5 +1,5 @@
 import { TeamForm } from '@/components/teams/team-form'
-import { getTeam } from '@/lib/actions'
+import { getTeam } from '@/lib/actions/team'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'

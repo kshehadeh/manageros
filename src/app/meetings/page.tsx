@@ -1,4 +1,4 @@
-import { getMeetings } from '@/lib/actions'
+import { getMeetings } from '@/lib/actions/meeting'
 import { MeetingsPageClient } from '@/components/meetings/meetings-page-client'
 import { requireAuth } from '@/lib/auth-utils'
 

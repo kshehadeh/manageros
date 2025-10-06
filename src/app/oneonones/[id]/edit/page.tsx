@@ -1,4 +1,5 @@
-import { getOneOnOneById, getPeopleForOneOnOne } from '@/lib/actions'
+import { getOneOnOneById } from '@/lib/actions/oneonone'
+import { getPeopleForOneOnOne } from '@/lib/actions/person'
 import { OneOnOneForm } from '@/components/oneonone-form'
 import { OneOnOneDetailClient } from '@/components/oneonone-detail-client'
 import { getServerSession } from 'next-auth'

@@ -1,10 +1,10 @@
 import { PersonForm } from '@/components/people/person-form'
+import { getTeams } from '@/lib/actions/team'
 import {
-  getTeams,
   getPeople,
   getPerson,
-  getJobRolesForSelection,
-} from '@/lib/actions'
+} from '@/lib/actions/person'
+import { getJobRolesForSelection } from '@/lib/actions/job-roles'
 import { prisma } from '@/lib/db'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'

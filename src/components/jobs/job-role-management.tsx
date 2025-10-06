@@ -10,8 +10,13 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { MarkdownEditor } from '@/components/markdown-editor'
-import { createJobRole, updateJobRole, deleteJobRole } from '@/lib/actions'
-import { type JobRoleFormData } from '@/lib/actions/job-roles'
+
+import {
+  type JobRoleFormData,
+  createJobRole,
+  updateJobRole,
+  deleteJobRole,
+} from '@/lib/actions/job-roles'
 import { Edit2, Trash2, Eye } from 'lucide-react'
 import Link from 'next/link'
 import styles from './job-role-management.module.css'

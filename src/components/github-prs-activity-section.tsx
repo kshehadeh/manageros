@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { GithubPrsActivityTable } from './github-prs-activity-table'
-import { fetchGithubPullRequests } from '@/lib/actions'
+import { fetchGithubPullRequests } from '@/lib/actions/github'
 import { SectionHeader } from '@/components/ui/section-header'
 import { Button } from '@/components/ui/button'
 import { FaGithub } from 'react-icons/fa'

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { getFeedbackCampaignResponses } from '@/lib/actions'
+import { getFeedbackCampaignResponses } from '@/lib/actions/feedback-campaign'
 import { FeedbackResponseDetail } from '@/components/feedback/feedback-response-detail'
 import { FeedbackCampaignResponsesBreadcrumbClient } from '@/components/feedback/feedback-campaign-responses-breadcrumb-client'
 import { Badge } from '@/components/ui/badge'

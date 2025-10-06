@@ -12,7 +12,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { createMeetingInstance, updateMeetingInstance } from '@/lib/actions'
+import {
+  createMeetingInstance,
+  updateMeetingInstance,
+} from '@/lib/actions/meeting-instance'
 import {
   type MeetingInstanceFormData,
   meetingInstanceSchema,

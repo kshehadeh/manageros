@@ -31,7 +31,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import Link from 'next/link'
-import { deleteFeedback } from '@/lib/actions'
+import { deleteFeedback } from '@/lib/actions/feedback'
 import { toast } from 'sonner'
 import { FeedbackDialog } from './feedback-dialog'
 import { DeleteModal } from '@/components/common/delete-modal'

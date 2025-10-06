@@ -19,13 +19,14 @@ import {
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Button } from '@/components/ui/button'
+
 import {
+  type JobLevelFormData,
   createJobLevel,
   updateJobLevel,
   updateJobLevelOrder,
   deleteJobLevel,
-} from '@/lib/actions'
-import { type JobLevelFormData } from '@/lib/actions/job-roles'
+} from '@/lib/actions/job-roles'
 import { GripVertical, Edit2, Trash2 } from 'lucide-react'
 
 interface JobLevel {

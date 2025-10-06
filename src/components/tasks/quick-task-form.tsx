@@ -6,7 +6,10 @@ import {
   SlateTaskTextarea,
   type SlateTaskTextareaRef,
 } from '@/components/tasks/slate-task-textarea'
-import { createQuickTask, createQuickTaskForInitiative } from '@/lib/actions'
+import {
+  createQuickTask,
+  createQuickTaskForInitiative,
+} from '@/lib/actions/task'
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { type DetectedDate } from '@/lib/utils/date-detection'

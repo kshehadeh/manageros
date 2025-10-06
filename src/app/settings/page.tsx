@@ -1,4 +1,5 @@
-import { getJiraCredentials, getGithubCredentials } from '@/lib/actions'
+import { getJiraCredentials } from '@/lib/actions/jira'
+import { getGithubCredentials } from '@/lib/actions/github'
 import { JiraCredentialsForm } from '@/components/jira-credentials-form'
 import { GithubCredentialsForm } from '@/components/github-credentials-form'
 import { PersonLinkForm } from '@/components/people/person-link-form'

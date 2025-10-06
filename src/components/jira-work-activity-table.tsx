@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { fetchJiraAssignedTickets, getJiraBaseUrl } from '@/lib/actions'
+import { fetchJiraAssignedTickets, getJiraBaseUrl } from '@/lib/actions/jira'
 
 interface JiraWorkActivityTableProps {
   personId: string

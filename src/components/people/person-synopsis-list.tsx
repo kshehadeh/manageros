@@ -1,7 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { listPersonSynopses, generatePersonSynopsis } from '@/lib/actions'
+import {
+  listPersonSynopses,
+  generatePersonSynopsis,
+} from '@/lib/actions/synopsis'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { CalendarDays, Plus, X, ChevronDown, ChevronUp } from 'lucide-react'

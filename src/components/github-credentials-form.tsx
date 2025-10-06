@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { saveGithubCredentials, deleteGithubCredentials } from '@/lib/actions'
+import { saveGithubCredentials, deleteGithubCredentials } from '@/lib/actions/github'
 import { Button } from './ui/button'
 import {
   Dialog,

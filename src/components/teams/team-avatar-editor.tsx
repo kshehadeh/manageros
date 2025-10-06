@@ -4,7 +4,10 @@ import { useState, useRef, useEffect } from 'react'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Upload, X, Image as ImageIcon } from 'lucide-react'
-import { uploadTeamAvatar, updateTeamAvatar } from '@/lib/actions'
+import {
+  uploadTeamAvatar,
+  updateTeamAvatar,
+} from '@/lib/actions/avatar'
 
 interface TeamAvatarEditorProps {
   teamId?: string

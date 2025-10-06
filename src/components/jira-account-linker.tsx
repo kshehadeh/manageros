@@ -5,7 +5,7 @@ import { useState } from 'react'
 import {
   linkPersonToJiraAccount,
   unlinkPersonFromJiraAccount,
-} from '@/lib/actions'
+} from '@/lib/actions/jira'
 
 interface JiraAccountLinkerProps {
   personId: string

@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { OrganizationCreationDialog } from '@/components/organization-creation-dialog'
-import { acceptInvitationForUser } from '@/lib/actions'
+import { acceptInvitationForUser } from '@/lib/actions/organization'
 import { useSession } from 'next-auth/react'
 import { Building2, Users, Mail, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'

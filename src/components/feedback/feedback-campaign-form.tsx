@@ -15,8 +15,8 @@ import { useRouter } from 'next/navigation'
 import {
   createFeedbackCampaign,
   updateFeedbackCampaign,
-  getFeedbackTemplates,
-} from '@/lib/actions'
+} from '@/lib/actions/feedback-campaign'
+import { getFeedbackTemplates } from '@/lib/actions/feedback-template'
 import { type FeedbackCampaignFormData } from '@/lib/validations'
 import { type Person } from '@prisma/client'
 import { X, Plus } from 'lucide-react'

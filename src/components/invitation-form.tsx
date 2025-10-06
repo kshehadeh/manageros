@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { createOrganizationInvitation } from '@/lib/actions'
+import { createOrganizationInvitation } from '@/lib/actions/organization'
 
 interface InvitationFormProps {
   onInvitationSent?: () => void

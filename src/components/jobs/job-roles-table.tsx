@@ -27,8 +27,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { createJobRole, updateJobRole, deleteJobRole } from '@/lib/actions'
-import { type JobRoleFormData } from '@/lib/actions/job-roles'
+
+import {
+  type JobRoleFormData,
+  createJobRole,
+  updateJobRole,
+  deleteJobRole,
+} from '@/lib/actions/job-roles'
 import {
   Edit2,
   Trash2,

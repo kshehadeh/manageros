@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { JiraWorkActivityTable } from './jira-work-activity-table'
-import { fetchJiraAssignedTickets } from '@/lib/actions'
+import { fetchJiraAssignedTickets } from '@/lib/actions/jira'
 import { SectionHeader } from '@/components/ui/section-header'
 import { Button } from '@/components/ui/button'
 import { FaJira } from 'react-icons/fa'

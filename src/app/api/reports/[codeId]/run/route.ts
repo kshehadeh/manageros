@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getReport } from '@/lib/reports/registry'
-import { runReport } from '@/lib/actions'
+import { runReport } from '@/lib/actions/report'
 import { requireAuth } from '@/lib/auth-utils'
 
 export async function POST(

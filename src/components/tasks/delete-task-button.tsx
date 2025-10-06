@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { deleteTask } from '@/lib/actions'
+import { deleteTask } from '@/lib/actions/task'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { toast } from 'sonner'
 

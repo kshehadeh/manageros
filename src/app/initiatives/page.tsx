@@ -1,4 +1,4 @@
-import { getInitiatives } from '@/lib/actions'
+import { getInitiatives } from '@/lib/actions/initiative'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { GroupedInitiativesPageClient } from '@/components/initiatives/grouped-initiatives-page-client'

@@ -26,7 +26,7 @@ import {
   updateNote,
   deleteNote,
   deleteFileAttachment,
-} from '@/lib/actions'
+} from '@/lib/actions/notes'
 import { NoteWithAttachments } from '@/types/notes'
 import { toast } from 'sonner'
 import {

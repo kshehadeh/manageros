@@ -5,7 +5,10 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Upload, X, Image as ImageIcon } from 'lucide-react'
 import { FaJira, FaGithub } from 'react-icons/fa'
-import { uploadAvatar, updatePersonAvatar } from '@/lib/actions'
+import {
+  uploadAvatar,
+  updatePersonAvatar,
+} from '@/lib/actions/avatar'
 
 interface AvatarEditorProps {
   personId?: string

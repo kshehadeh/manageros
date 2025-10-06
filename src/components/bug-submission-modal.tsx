@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { submitGitHubIssue } from '@/lib/actions'
+import { submitGitHubIssue } from '@/lib/actions/github'
 import { toast } from 'sonner'
 import { Bug, Loader2, X, Image as ImageIcon } from 'lucide-react'
 

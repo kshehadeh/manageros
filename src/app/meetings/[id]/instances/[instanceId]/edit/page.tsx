@@ -1,4 +1,5 @@
-import { getMeetingInstance, getPeople } from '@/lib/actions'
+import { getMeetingInstance } from '@/lib/actions/meeting-instance'
+import { getPeople } from '@/lib/actions/person'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
