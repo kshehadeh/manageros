@@ -7,6 +7,7 @@ import {
   ListTodo,
   Users,
   User as UserIcon,
+  Briefcase,
 } from 'lucide-react'
 import { FaGithub, FaJira } from 'react-icons/fa'
 
@@ -238,6 +239,21 @@ export function GithubLinkingSectionSkeleton() {
           <Skeleton className='h-10 w-full' />
           <Skeleton className='h-8 w-24' />
         </div>
+      </div>
+    </section>
+  )
+}
+
+export function JobRoleSectionSkeleton() {
+  return (
+    <section>
+      <SectionHeader
+        icon={Briefcase}
+        title='Job Role'
+        action={<Skeleton className='h-8 w-8' />}
+      />
+      <div className='space-y-2'>
+        <Skeleton className='h-16 w-full' />
       </div>
     </section>
   )

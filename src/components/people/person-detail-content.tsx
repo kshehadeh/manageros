@@ -32,6 +32,7 @@ import {
   UserLinkingSectionSkeleton,
   JiraLinkingSectionSkeleton,
   GithubLinkingSectionSkeleton,
+  JobRoleSectionSkeleton,
 } from './person-detail-skeletons'
 
 // Import section components
@@ -45,6 +46,7 @@ import { DirectReportsSection } from './sections/direct-reports-section'
 import { UserLinkingSection } from './sections/user-linking-section'
 import { JiraLinkingSection } from './sections/jira-linking-section'
 import { GithubLinkingSection } from './sections/github-linking-section'
+import { JobRoleSection } from './sections/job-role-section'
 import { GithubPrsActivitySection } from '@/components/github-prs-activity-section'
 import { JiraWorkActivitySection } from '@/components/jira-work-activity-section'
 
@@ -216,6 +218,11 @@ export function PersonDetailContent({
           {/* Synopsis Section */}
           <Suspense fallback={<SynopsisSectionSkeleton />}>
             <SynopsisSection personId={person.id} />
+          </Suspense>
+
+          {/* Job Role Section */}
+          <Suspense fallback={<JobRoleSectionSkeleton />}>
+            <JobRoleSection personId={person.id} />
           </Suspense>
 
           {/* Direct Reports */}
