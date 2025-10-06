@@ -27,6 +27,10 @@ export async function FeedbackCampaignsSection({
         in: ['active', 'draft'],
       },
       userId: session.user.id,
+      targetPersonId: personId,
+      targetPerson: {
+        organizationId: session.user.organizationId,
+      },
     },
     include: {
       user: {
