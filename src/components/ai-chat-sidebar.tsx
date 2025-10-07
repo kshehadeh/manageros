@@ -4,6 +4,7 @@ import { DefaultChatTransport } from 'ai'
 import { useChat, type UIMessage } from '@ai-sdk/react'
 import {
   useCallback,
+  useEffect,
   useMemo,
   useState,
   type ChangeEvent,
@@ -92,6 +93,21 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
     },
     [inputValue, sendMessage]
   )
+
+  // Handle Escape key to close the AI chat
+  useEffect(() => {
+    if (!isOpen) return
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        onClose()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
 
   const renderMessagePart = useCallback((part: MessagePart, index: number) => {
     const key = (() => {

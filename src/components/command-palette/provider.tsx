@@ -8,6 +8,7 @@ import {
   useMemo,
   useState,
 } from 'react'
+import { useAIChat } from '@/components/ai-chat-provider'
 
 interface CommandPaletteContextValue {
   isOpen: boolean
@@ -25,6 +26,7 @@ export function CommandPaletteProvider({
   children: React.ReactNode
 }) {
   const [isOpen, setIsOpen] = useState(false)
+  const { toggleAIChat } = useAIChat()
 
   const setOpen = useCallback((open: boolean) => setIsOpen(open), [])
   const toggle = useCallback(() => setIsOpen(prev => !prev), [])
@@ -38,6 +40,12 @@ export function CommandPaletteProvider({
       if (isMod && e.key.toLowerCase() === 'k') {
         e.preventDefault()
         setIsOpen(prev => !prev)
+      }
+
+      // Cmd/Ctrl + J: Open AI chat
+      if (isMod && e.key.toLowerCase() === 'j') {
+        e.preventDefault()
+        toggleAIChat()
       }
 
       // Q: Open task creation dialog (only when not in input/textarea)
@@ -57,7 +65,7 @@ export function CommandPaletteProvider({
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
+  }, [toggleAIChat])
 
   const value = useMemo<CommandPaletteContextValue>(
     () => ({ isOpen, setOpen, toggle }),

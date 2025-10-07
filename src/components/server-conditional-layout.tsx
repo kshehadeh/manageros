@@ -76,10 +76,10 @@ export default async function ServerConditionalLayout({
         storageKey='manageros-theme'
         disableTransitionOnChange
       >
-        <CommandPaletteProvider>
-          <BreadcrumbProvider>
-            <MobileMenuProvider>
-              <AIChatProvider>
+        <AIChatProvider>
+          <CommandPaletteProvider>
+            <BreadcrumbProvider>
+              <MobileMenuProvider>
                 <DefaultBreadcrumbHandler />
                 <OfflineAwareLayout>
                   <div className='flex min-h-screen'>
@@ -98,10 +98,10 @@ export default async function ServerConditionalLayout({
                 </OfflineAwareLayout>
                 <CommandPalette />
                 <CreateTaskModal />
-              </AIChatProvider>
-            </MobileMenuProvider>
-          </BreadcrumbProvider>
-        </CommandPaletteProvider>
+              </MobileMenuProvider>
+            </BreadcrumbProvider>
+          </CommandPaletteProvider>
+        </AIChatProvider>
         <Toaster theme='system' />
       </ThemeProvider>
     </NetworkAwareSessionProvider>

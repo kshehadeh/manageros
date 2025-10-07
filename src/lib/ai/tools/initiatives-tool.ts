@@ -85,7 +85,6 @@ export const initiativesTool = {
       orderBy: { updatedAt: 'desc' },
     })
 
-    console.log('Initiatives:', initiatives)
     return {
       initiatives: initiatives.map(initiative => ({
         id: initiative.id,

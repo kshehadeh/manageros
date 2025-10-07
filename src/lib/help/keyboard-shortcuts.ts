@@ -33,6 +33,13 @@ ManagerOS includes several keyboard shortcuts to help you navigate and work more
 - Type to search for pages, people, teams, initiatives, or tasks
 - Press Enter to navigate or Escape to close
 
+### AI Chat
+
+- **⌘J** (Mac) / **Ctrl+J** (Windows/Linux)
+- Opens the AI chat sidebar
+- Allows you to quickly access the AI assistant for questions about your organization
+- Press Escape to close the chat
+
 ### Quick Task Creation
 
 - **Q** (anywhere in the app)
@@ -43,6 +50,7 @@ ManagerOS includes several keyboard shortcuts to help you navigate and work more
 ## Navigation Tips
 
 - Use the command palette (⌘K) to quickly jump between different sections of the app
+- Use AI chat (⌘J) to quickly ask questions about your organization's data
 - The command palette remembers your recent searches and frequently accessed items
 - You can search for specific people, teams, or initiatives by typing their names
 - Use arrow keys to navigate through search results in the command palette
@@ -63,6 +71,7 @@ All keyboard shortcuts are designed to work with screen readers and other assist
 ## Tips
 
 - The command palette is your fastest way to navigate the app
+- Use AI chat (⌘J) to quickly get answers about your organization's data
 - Use Q to quickly capture tasks as they come up in meetings or conversations
 - Keyboard shortcuts work consistently across all pages in ManagerOS
 - You can always use the mouse if you prefer - keyboard shortcuts are optional
