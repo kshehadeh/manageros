@@ -4,6 +4,7 @@ import NetworkAwareSessionProvider from '@/components/network-aware-session-prov
 import { BreadcrumbProvider } from '@/components/breadcrumb-provider'
 import { DefaultBreadcrumbHandler } from '@/components/default-breadcrumb-handler'
 import { MobileMenuProvider } from '@/components/mobile-menu-provider'
+import { AIChatProvider } from '@/components/ai-chat-provider'
 import Sidebar from '@/components/sidebar'
 import TopBar from '@/components/top-bar'
 import { ThemeProvider } from '@/components/theme-provider'
@@ -12,6 +13,7 @@ import { CommandPaletteProvider } from '@/components/command-palette/provider'
 import { CommandPalette } from '@/components/command-palette/command-palette'
 import { CreateTaskModal } from '@/components/command-palette/create-task-modal'
 import { OfflineAwareLayout } from '@/components/offline-aware-layout'
+import { AIChatSidebarWrapper } from '@/components/ai-chat-sidebar-wrapper'
 import { getFilteredNavigation, getCurrentUser } from '@/lib/auth-utils'
 import type { User as NextAuthUser } from 'next-auth'
 
@@ -77,23 +79,26 @@ export default async function ServerConditionalLayout({
         <CommandPaletteProvider>
           <BreadcrumbProvider>
             <MobileMenuProvider>
-              <DefaultBreadcrumbHandler />
-              <OfflineAwareLayout>
-                <div className='flex min-h-screen'>
-                  <Sidebar
-                    navigation={filteredNavigation}
-                    serverSession={serverSession}
-                  />
-                  <div className='flex-1 flex flex-col overflow-hidden lg:ml-0'>
-                    <TopBar />
-                    <main className='flex-1 overflow-auto p-3 md:p-6'>
-                      <div className='w-full'>{children}</div>
-                    </main>
+              <AIChatProvider>
+                <DefaultBreadcrumbHandler />
+                <OfflineAwareLayout>
+                  <div className='flex min-h-screen'>
+                    <Sidebar
+                      navigation={filteredNavigation}
+                      serverSession={serverSession}
+                    />
+                    <div className='flex-1 flex flex-col overflow-hidden lg:ml-0'>
+                      <TopBar />
+                      <main className='flex-1 overflow-auto p-3 md:p-6'>
+                        <div className='w-full'>{children}</div>
+                      </main>
+                    </div>
+                    <AIChatSidebarWrapper />
                   </div>
-                </div>
-              </OfflineAwareLayout>
-              <CommandPalette />
-              <CreateTaskModal />
+                </OfflineAwareLayout>
+                <CommandPalette />
+                <CreateTaskModal />
+              </AIChatProvider>
             </MobileMenuProvider>
           </BreadcrumbProvider>
         </CommandPaletteProvider>

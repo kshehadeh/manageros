@@ -37,6 +37,11 @@ export interface UserSettings {
     endDate: string
   }
 
+  // AI Chat settings
+  chatWindowSettings: {
+    isFullscreen: boolean
+  }
+
   // Future expandable settings can be added here:
   // sidebarCollapsed: boolean
   // defaultPageSize: number
@@ -70,6 +75,9 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
     dateRangeFilter: 'all',
     startDate: '',
     endDate: '',
+  },
+  chatWindowSettings: {
+    isFullscreen: false,
   },
   // When adding new settings, add their defaults here:
   // sidebarCollapsed: false

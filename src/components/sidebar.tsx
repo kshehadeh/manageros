@@ -20,9 +20,11 @@ import {
   Keyboard,
   BarChart3,
   Command,
+  Bot,
 } from 'lucide-react'
 import { useState } from 'react'
 import { HelpDialog } from '@/components/shared'
+import { useAIChat } from '@/components/ai-chat-provider'
 
 interface NavItem {
   name: string
@@ -56,6 +58,7 @@ export default function Sidebar({
   const pathname = usePathname()
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useMobileMenu()
   const [isKeyboardShortcutsOpen, setIsKeyboardShortcutsOpen] = useState(false)
+  const { toggleAIChat } = useAIChat()
 
   // Use server session if available, otherwise fall back to client session
   const effectiveSession = serverSession || session
@@ -171,6 +174,18 @@ export default function Sidebar({
               </Link>
             )
           })}
+
+          {/* AI Chat Button */}
+          <button
+            onClick={() => {
+              setIsMobileMenuOpen(false)
+              toggleAIChat()
+            }}
+            className='flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors w-full'
+          >
+            <Bot className='h-5 w-5' />
+            <span>AI Chat</span>
+          </button>
         </nav>
 
         {/* Sign Out */}
