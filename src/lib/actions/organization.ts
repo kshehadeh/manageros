@@ -184,16 +184,55 @@ export async function createOrganizationInvitation(email: string) {
   }
 
   // Check if there's already a pending invitation for this email
-  const existingInvitation = await prisma.organizationInvitation.findFirst({
-    where: {
-      email: email.toLowerCase(),
-      organizationId: user.organizationId,
-      status: 'pending',
-    },
-  })
+  const existingPendingInvitation =
+    await prisma.organizationInvitation.findFirst({
+      where: {
+        email: email.toLowerCase(),
+        organizationId: user.organizationId,
+        status: 'pending',
+      },
+    })
 
-  if (existingInvitation) {
+  if (existingPendingInvitation) {
     throw new Error('An invitation has already been sent to this email address')
+  }
+
+  // Check if there's a revoked or expired invitation for this email
+  const existingRevokedOrExpiredInvitation =
+    await prisma.organizationInvitation.findFirst({
+      where: {
+        email: email.toLowerCase(),
+        organizationId: user.organizationId,
+        status: { in: ['revoked', 'expired'] },
+      },
+    })
+
+  if (existingRevokedOrExpiredInvitation) {
+    // Reactivate the existing invitation instead of creating a new one
+    const expiresAt = new Date()
+    expiresAt.setDate(expiresAt.getDate() + 7)
+
+    const reactivatedInvitation = await prisma.organizationInvitation.update({
+      where: { id: existingRevokedOrExpiredInvitation.id },
+      data: {
+        status: 'pending',
+        expiresAt,
+        invitedById: user.id,
+      },
+      include: {
+        organization: true,
+        invitedBy: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    })
+
+    revalidatePath('/organization/invitations')
+    revalidatePath('/organization/members')
+    return reactivatedInvitation
   }
 
   // Create invitation (expires in 7 days)
@@ -296,6 +335,68 @@ export async function revokeOrganizationInvitation(invitationId: string) {
   })
 
   revalidatePath('/organization/invitations')
+}
+
+export async function reactivateOrganizationInvitation(invitationId: string) {
+  const user = await getCurrentUser()
+
+  // Check if user is admin
+  if (user.role !== 'ADMIN') {
+    throw new Error('Only organization admins can reactivate invitations')
+  }
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to manage invitations')
+  }
+
+  // Verify invitation belongs to user's organization
+  const invitation = await prisma.organizationInvitation.findFirst({
+    where: {
+      id: invitationId,
+      organizationId: user.organizationId,
+    },
+  })
+
+  if (!invitation) {
+    throw new Error('Invitation not found or access denied')
+  }
+
+  if (invitation.status === 'pending') {
+    throw new Error('Invitation is already active')
+  }
+
+  if (invitation.status === 'accepted') {
+    throw new Error('Cannot reactivate an accepted invitation')
+  }
+
+  // Check if email is already a user in the organization
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      email: invitation.email.toLowerCase(),
+      organizationId: user.organizationId,
+    },
+  })
+
+  if (existingUser) {
+    throw new Error('User is already a member of this organization')
+  }
+
+  // Reactivate invitation with new expiration date (7 days from now)
+  const expiresAt = new Date()
+  expiresAt.setDate(expiresAt.getDate() + 7)
+
+  await prisma.organizationInvitation.update({
+    where: { id: invitationId },
+    data: {
+      status: 'pending',
+      expiresAt,
+      invitedById: user.id, // Update who reactivated it
+    },
+  })
+
+  revalidatePath('/organization/invitations')
+  revalidatePath('/organization/members')
 }
 
 export async function acceptOrganizationInvitation(email: string) {

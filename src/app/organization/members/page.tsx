@@ -1,8 +1,12 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { getOrganizationMembers } from '@/lib/actions/organization'
+import {
+  getOrganizationMembers,
+  getOrganizationInvitations,
+} from '@/lib/actions/organization'
 import OrganizationMembersList from '@/components/organization-members-list'
+import OrganizationInvitationsSection from '@/components/organization-invitations-section'
 import { UserCheck } from 'lucide-react'
 
 export default async function OrganizationMembersPage() {
@@ -23,6 +27,7 @@ export default async function OrganizationMembersPage() {
   }
 
   const members = await getOrganizationMembers()
+  const invitations = await getOrganizationInvitations()
 
   return (
     <div className='page-container'>
@@ -36,11 +41,21 @@ export default async function OrganizationMembersPage() {
         </p>
       </div>
 
-      <div className='page-section'>
-        <OrganizationMembersList
-          members={members}
-          currentUserId={session.user.id}
-        />
+      <div className='flex flex-col lg:flex-row gap-6'>
+        {/* Main Content */}
+        <div className='flex-1'>
+          <div className='page-section'>
+            <OrganizationMembersList
+              members={members}
+              currentUserId={session.user.id}
+            />
+          </div>
+        </div>
+
+        {/* Right Sidebar */}
+        <div className='w-full lg:w-80'>
+          <OrganizationInvitationsSection invitations={invitations} />
+        </div>
       </div>
     </div>
   )

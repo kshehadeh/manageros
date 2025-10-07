@@ -27,7 +27,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
-import { MoreHorizontal, Shield, User, Trash2 } from 'lucide-react'
+import { SectionHeader } from '@/components/ui/section-header'
+import { MoreHorizontal, Shield, User, Trash2, Users } from 'lucide-react'
 import {
   updateUserRole,
   removeUserFromOrganization,
@@ -159,106 +160,125 @@ export default function OrganizationMembersList({
 
   if (members.length === 0) {
     return (
-      <div className='text-center text-muted-foreground py-8'>
-        <p>No members found in your organization.</p>
+      <div className='page-section'>
+        <div className='space-y-4'>
+          <SectionHeader
+            icon={Users}
+            title={`Organization Members (${members.length})`}
+          />
+          <div className='flex flex-col items-center justify-center py-8 text-center'>
+            <Users className='h-8 w-8 text-muted-foreground mb-2' />
+            <p className='text-muted-foreground text-sm mb-4'>
+              No members found in your organization
+            </p>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
     <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Person Status</TableHead>
-            <TableHead>Team</TableHead>
-            <TableHead>Joined</TableHead>
-            <TableHead className='w-[50px]'>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {members.map(member => (
-            <TableRow key={member.id}>
-              <TableCell className='font-medium'>{member.name}</TableCell>
-              <TableCell className='text-muted-foreground'>
-                {member.email}
-              </TableCell>
-              <TableCell>{getRoleBadge(member.role)}</TableCell>
-              <TableCell>
-                {member.person ? (
-                  getPersonStatusBadge(member.person.status)
-                ) : (
-                  <Badge
-                    variant='outline'
-                    className='bg-gray-100 text-gray-600 border-gray-200'
-                  >
-                    Not Linked
-                  </Badge>
-                )}
-              </TableCell>
-              <TableCell className='text-muted-foreground'>
-                {member.person?.team?.name || '-'}
-              </TableCell>
-              <TableCell className='text-muted-foreground'>
-                {new Date(member.createdAt).toLocaleDateString()}
-              </TableCell>
-              <TableCell>
-                {hasActions(member) ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant='ghost'
-                        size='sm'
-                        disabled={isUpdating === member.id}
+      <div className='page-section'>
+        <div className='space-y-4'>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Person Status</TableHead>
+                <TableHead>Team</TableHead>
+                <TableHead>Joined</TableHead>
+                <TableHead className='w-[50px]'>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {members.map(member => (
+                <TableRow key={member.id}>
+                  <TableCell className='font-medium'>{member.name}</TableCell>
+                  <TableCell className='text-muted-foreground'>
+                    {member.email}
+                  </TableCell>
+                  <TableCell>{getRoleBadge(member.role)}</TableCell>
+                  <TableCell>
+                    {member.person ? (
+                      getPersonStatusBadge(member.person.status)
+                    ) : (
+                      <Badge
+                        variant='outline'
+                        className='bg-gray-100 text-gray-600 border-gray-200'
                       >
-                        <MoreHorizontal className='h-4 w-4' />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align='end'>
-                      {member.role === 'USER' ? (
-                        <DropdownMenuItem
-                          onClick={() => handleRoleChange(member.id, 'ADMIN')}
-                          disabled={isUpdating === member.id}
-                        >
-                          <Shield className='h-4 w-4 mr-2' />
-                          Make Admin
-                        </DropdownMenuItem>
-                      ) : (
-                        // Only show "Make User" option if it's not the current user
-                        member.id !== currentUserId && (
-                          <DropdownMenuItem
-                            onClick={() => handleRoleChange(member.id, 'USER')}
+                        Not Linked
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className='text-muted-foreground'>
+                    {member.person?.team?.name || '-'}
+                  </TableCell>
+                  <TableCell className='text-muted-foreground'>
+                    {new Date(member.createdAt).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    {hasActions(member) ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant='ghost'
+                            size='sm'
                             disabled={isUpdating === member.id}
                           >
-                            <User className='h-4 w-4 mr-2' />
-                            Make User
-                          </DropdownMenuItem>
-                        )
-                      )}
-                      {/* Only show remove option if it's not the current user */}
-                      {member.id !== currentUserId && (
-                        <DropdownMenuItem
-                          onClick={() => setUserToRemove(member)}
-                          className='text-red-600 focus:text-red-600'
-                          disabled={isUpdating === member.id}
-                        >
-                          <Trash2 className='h-4 w-4 mr-2' />
-                          Remove from Organization
-                        </DropdownMenuItem>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : (
-                  <div className='w-[50px]'></div>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                            <MoreHorizontal className='h-4 w-4' />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align='end'>
+                          {member.role === 'USER' ? (
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleRoleChange(member.id, 'ADMIN')
+                              }
+                              disabled={isUpdating === member.id}
+                            >
+                              <Shield className='h-4 w-4 mr-2' />
+                              Make Admin
+                            </DropdownMenuItem>
+                          ) : (
+                            // Only show "Make User" option if it's not the current user
+                            member.id !== currentUserId && (
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleRoleChange(member.id, 'USER')
+                                }
+                                disabled={isUpdating === member.id}
+                              >
+                                <User className='h-4 w-4 mr-2' />
+                                Make User
+                              </DropdownMenuItem>
+                            )
+                          )}
+                          {/* Only show remove option if it's not the current user */}
+                          {member.id !== currentUserId && (
+                            <DropdownMenuItem
+                              onClick={() => setUserToRemove(member)}
+                              className='text-red-600 focus:text-red-600'
+                              disabled={isUpdating === member.id}
+                            >
+                              <Trash2 className='h-4 w-4 mr-2' />
+                              Remove from Organization
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      <div className='w-[50px]'></div>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
 
       <AlertDialog
         open={!!userToRemove}
