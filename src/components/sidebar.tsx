@@ -7,6 +7,7 @@ import { signOutWithCleanup } from '@/lib/auth-utils'
 import { usePathname } from 'next/navigation'
 import { useMobileMenu } from '@/components/mobile-menu-provider'
 import { IndigoIcon } from '@/components/indigo-icon'
+import type { User as NextAuthUser } from 'next-auth'
 import {
   Home,
   Rocket,
@@ -32,6 +33,7 @@ interface NavItem {
 
 interface SidebarProps {
   navigation?: NavItem[]
+  serverSession?: NextAuthUser | null
 }
 
 const iconMap = {
@@ -46,13 +48,20 @@ const iconMap = {
   BarChart3,
 }
 
-export default function Sidebar({ navigation = [] }: SidebarProps) {
+export default function Sidebar({
+  navigation = [],
+  serverSession,
+}: SidebarProps) {
   const { data: session, status } = useSession()
   const pathname = usePathname()
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useMobileMenu()
   const [isKeyboardShortcutsOpen, setIsKeyboardShortcutsOpen] = useState(false)
 
-  if (status === 'loading') {
+  // Use server session if available, otherwise fall back to client session
+  const effectiveSession = serverSession || session
+
+  // Only show loading if we don't have a server session and client session is loading
+  if (status === 'loading' && !serverSession) {
     return (
       <div className='hidden lg:flex h-screen w-64 flex-col bg-card border-r'>
         <div className='flex h-16 items-center px-6'>
@@ -68,7 +77,7 @@ export default function Sidebar({ navigation = [] }: SidebarProps) {
     )
   }
 
-  if (!session) {
+  if (!effectiveSession) {
     return (
       <div className='hidden lg:flex h-screen w-64 flex-col bg-card border-r'>
         <div className='flex h-16 items-center px-6'>
@@ -123,15 +132,17 @@ export default function Sidebar({ navigation = [] }: SidebarProps) {
         {/* User Info */}
         <div className='px-6 py-4 border-b'>
           <div className='text-sm text-foreground font-medium'>
-            {session.user.name}
+            {serverSession?.name || session?.user?.name}
           </div>
-          {session.user.organizationName ? (
+          {serverSession?.organizationName ||
+          session?.user?.organizationName ? (
             <>
               <div className='text-xs text-muted-foreground'>
-                {session.user.organizationName}
+                {serverSession?.organizationName ||
+                  session?.user?.organizationName}
               </div>
               <div className='text-xs text-muted-foreground'>
-                {session.user.role}
+                {serverSession?.role || session?.user?.role}
               </div>
             </>
           ) : (

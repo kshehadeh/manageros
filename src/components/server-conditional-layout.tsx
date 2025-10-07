@@ -12,7 +12,8 @@ import { CommandPaletteProvider } from '@/components/command-palette/provider'
 import { CommandPalette } from '@/components/command-palette/command-palette'
 import { CreateTaskModal } from '@/components/command-palette/create-task-modal'
 import { OfflineAwareLayout } from '@/components/offline-aware-layout'
-import { getFilteredNavigation } from '@/lib/auth-utils'
+import { getFilteredNavigation, getCurrentUser } from '@/lib/auth-utils'
+import type { User as NextAuthUser } from 'next-auth'
 
 interface ServerConditionalLayoutProps {
   children: ReactNode
@@ -45,19 +46,22 @@ export default async function ServerConditionalLayout({
     )
   }
 
-  // Get filtered navigation for authenticated routes
+  // Get filtered navigation and server session for authenticated routes
   let filteredNavigation: Array<{
     name: string
     href: string
     icon: string
     adminOnly?: boolean
   }> = []
+  let serverSession: NextAuthUser | null = null
   try {
     filteredNavigation = await getFilteredNavigation()
+    serverSession = await getCurrentUser()
   } catch {
     // If user is not authenticated, getFilteredNavigation will throw
     // This should not happen due to middleware, but handle gracefully
     filteredNavigation = []
+    serverSession = null
   }
 
   // Render full layout for authenticated routes
@@ -76,7 +80,10 @@ export default async function ServerConditionalLayout({
               <DefaultBreadcrumbHandler />
               <OfflineAwareLayout>
                 <div className='flex min-h-screen'>
-                  <Sidebar navigation={filteredNavigation} />
+                  <Sidebar
+                    navigation={filteredNavigation}
+                    serverSession={serverSession}
+                  />
                   <div className='flex-1 flex flex-col overflow-hidden lg:ml-0'>
                     <TopBar />
                     <main className='flex-1 overflow-auto p-3 md:p-6'>
