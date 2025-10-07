@@ -33,6 +33,8 @@ import { cn } from '@/lib/utils'
 import { AiResponseText } from './ai-response-text'
 import { useUserSettings } from '@/lib/hooks/use-user-settings'
 import { useAIChat } from '@/components/ai-chat-provider'
+import { PersonAvatar } from '@/components/people/person-avatar'
+import { getCurrentUserWithPerson } from '@/lib/actions/organization'
 
 interface AIChatSidebarProps {
   isOpen: boolean
@@ -63,6 +65,10 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
   const { settings, updateSetting, isLoaded } = useUserSettings()
   const { openedViaKeyboard, setOpenedViaKeyboard } = useAIChat()
   const [inputValue, setInputValue] = useState('')
+  const [currentPerson, setCurrentPerson] = useState<{
+    name: string
+    avatar: string | null
+  } | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const transport = useMemo(
     () => new DefaultChatTransport({ api: '/api/chat' }),
@@ -73,6 +79,24 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
   })
 
   const isLoading = status === 'submitted' || status === 'streaming'
+
+  // Fetch current user's person data
+  useEffect(() => {
+    const loadCurrentPerson = async () => {
+      try {
+        const userWithPerson = await getCurrentUserWithPerson()
+        if (userWithPerson.person) {
+          setCurrentPerson({
+            name: userWithPerson.person.name,
+            avatar: userWithPerson.person.avatar,
+          })
+        }
+      } catch (error) {
+        console.error('Failed to load current person:', error)
+      }
+    }
+    loadCurrentPerson()
+  }, [])
 
   const handleInputChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -349,13 +373,20 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
                   </CardContent>
                 </Card>
 
-                {message.role === 'user' && (
-                  <Avatar className='h-8 w-8'>
-                    <AvatarFallback>
-                      <User className='h-4 w-4' />
-                    </AvatarFallback>
-                  </Avatar>
-                )}
+                {message.role === 'user' &&
+                  (currentPerson ? (
+                    <PersonAvatar
+                      name={currentPerson.name}
+                      avatar={currentPerson.avatar}
+                      size='sm'
+                    />
+                  ) : (
+                    <Avatar className='h-8 w-8'>
+                      <AvatarFallback>
+                        <User className='h-4 w-4' />
+                      </AvatarFallback>
+                    </Avatar>
+                  ))}
               </div>
             ))}
 

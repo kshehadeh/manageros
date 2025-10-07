@@ -830,6 +830,7 @@ export async function getCurrentUserWithPerson() {
           email: true,
           role: true,
           status: true,
+          avatar: true,
         },
       })
     : null
