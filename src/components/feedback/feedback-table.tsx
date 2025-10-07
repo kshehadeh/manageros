@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useTransition, useEffect, useMemo } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useMemo } from 'react'
 import {
   MoreHorizontal,
   Edit,
@@ -21,7 +20,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -35,6 +33,7 @@ import { deleteFeedback } from '@/lib/actions/feedback'
 import { toast } from 'sonner'
 import { FeedbackDialog } from './feedback-dialog'
 import { DeleteModal } from '@/components/common/delete-modal'
+import { getKindLabel } from '@/lib/utils/feedback'
 interface Person {
   id: string
   name: string
@@ -94,10 +93,6 @@ export function FeedbackTable({
   hideFilters = false,
   onRefresh,
 }: FeedbackTableProps) {
-  const [_isPending, startTransition] = useTransition()
-  const router = useRouter()
-  const searchParams = useSearchParams()
-
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({
     visible: false,
     x: 0,
@@ -126,21 +121,6 @@ export function FeedbackTable({
 
   const [filters, setFilters] = useState<FilterState>(initialFilters)
   const [showFilters, setShowFilters] = useState(false)
-
-  // Initialize filters from URL on component mount
-  useEffect(() => {
-    const urlFilters = {
-      keyword: searchParams.get('keyword') || '',
-      fromPersonId: searchParams.get('fromPersonId') || 'all',
-      aboutPersonId: searchParams.get('aboutPersonId') || 'all',
-      kind: searchParams.get('kind') || 'all',
-      isPrivate: searchParams.get('isPrivate') || 'all',
-      dateRange: searchParams.get('dateRange') || 'all',
-      startDate: searchParams.get('startDate') || '',
-      endDate: searchParams.get('endDate') || '',
-    }
-    setFilters(urlFilters)
-  }, [searchParams])
 
   // Filter feedback based on current filter state
   const filteredFeedback = useMemo(() => {
@@ -196,45 +176,10 @@ export function FeedbackTable({
   const updateFilters = (newFilters: Partial<FilterState>) => {
     const updatedFilters = { ...filters, ...newFilters }
     setFilters(updatedFilters)
-
-    // Update URL with new filters
-    const params = new URLSearchParams(searchParams.toString())
-
-    // Clear existing filter params
-    const filterKeys = [
-      'keyword',
-      'fromPersonId',
-      'aboutPersonId',
-      'kind',
-      'isPrivate',
-      'dateRange',
-      'startDate',
-      'endDate',
-    ]
-    filterKeys.forEach(key => params.delete(key))
-
-    // Add new filter params
-    Object.entries(updatedFilters).forEach(([key, value]) => {
-      if (value !== undefined && value !== '' && value !== 'all') {
-        params.set(key, value.toString())
-      }
-    })
-
-    startTransition(() => {
-      const path = params.toString()
-        ? `/feedback?${params.toString()}`
-        : '/feedback'
-      router.push(path)
-    })
   }
 
   const clearFilters = () => {
-    // Clear all filters including aboutPersonId
     setFilters(initialFilters)
-
-    startTransition(() => {
-      router.push('/feedback')
-    })
   }
 
   const handleDelete = async (feedbackId: string) => {
@@ -258,43 +203,6 @@ export function FeedbackTable({
     setShowFeedbackDialog(true)
   }
 
-  const getKindVariant = (
-    kind: string
-  ):
-    | 'default'
-    | 'secondary'
-    | 'destructive'
-    | 'outline'
-    | 'success'
-    | 'warning'
-    | 'error'
-    | 'info'
-    | 'neutral' => {
-    switch (kind) {
-      case 'praise':
-        return 'success'
-      case 'concern':
-        return 'error'
-      case 'note':
-        return 'info'
-      default:
-        return 'neutral'
-    }
-  }
-
-  const getKindLabel = (kind: string) => {
-    switch (kind) {
-      case 'praise':
-        return 'Praise'
-      case 'concern':
-        return 'Concern'
-      case 'note':
-        return 'Note'
-      default:
-        return 'Note'
-    }
-  }
-
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('en-US', {
       month: 'short',
@@ -310,14 +218,10 @@ export function FeedbackTable({
   }
 
   const hasActiveFilters = useMemo(() => {
-    // Check if aboutPersonId is coming from URL (not user-applied filter)
-    const aboutPersonIdFromUrl = searchParams.get('aboutPersonId')
-
     const hasActive =
       filters.keyword !== '' ||
       filters.fromPersonId !== 'all' ||
-      // Only consider aboutPersonId as active if it's not from URL
-      (filters.aboutPersonId !== 'all' && !aboutPersonIdFromUrl) ||
+      filters.aboutPersonId !== 'all' ||
       filters.kind !== 'all' ||
       filters.isPrivate !== 'all' ||
       filters.dateRange !== 'all' ||
@@ -325,7 +229,7 @@ export function FeedbackTable({
       filters.endDate !== ''
 
     return hasActive
-  }, [filters, searchParams])
+  }, [filters])
 
   const canEdit = (feedbackItem: FeedbackWithRelations) =>
     feedbackItem.fromId === currentUserId ||
@@ -381,15 +285,6 @@ export function FeedbackTable({
                     )}
                   </div>
 
-                  {/* Show locked person filter notice */}
-                  {searchParams.get('aboutPersonId') && (
-                    <div className='text-xs text-muted-foreground bg-muted/50 p-2 rounded border'>
-                      <strong>Person filter locked:</strong> Currently viewing
-                      feedback about a specific person. Use the &quot;View All
-                      Feedback&quot; button to see all organization feedback.
-                    </div>
-                  )}
-
                   <div className='space-y-4'>
                     {/* From Person Filter */}
                     <div>
@@ -416,33 +311,31 @@ export function FeedbackTable({
                       </Select>
                     </div>
 
-                    {/* About Person Filter - Only show if not filtering by URL */}
-                    {!searchParams.get('aboutPersonId') && (
-                      <div>
-                        <label className='text-sm font-medium mb-2 block'>
-                          About
-                        </label>
-                        <Select
-                          value={filters.aboutPersonId}
-                          onValueChange={value =>
-                            updateFilters({ aboutPersonId: value })
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder='All people' />
-                          </SelectTrigger>
+                    {/* About Person Filter */}
+                    <div>
+                      <label className='text-sm font-medium mb-2 block'>
+                        About
+                      </label>
+                      <Select
+                        value={filters.aboutPersonId}
+                        onValueChange={value =>
+                          updateFilters({ aboutPersonId: value })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder='All people' />
+                        </SelectTrigger>
 
-                          <SelectContent>
-                            <SelectItem value='all'>All people</SelectItem>
-                            {people.map(person => (
-                              <SelectItem key={person.id} value={person.id}>
-                                {person.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
+                        <SelectContent>
+                          <SelectItem value='all'>All people</SelectItem>
+                          {people.map(person => (
+                            <SelectItem key={person.id} value={person.id}>
+                              {person.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
                     {/* Kind Filter */}
                     <div>
@@ -575,9 +468,9 @@ export function FeedbackTable({
                         </LinkSelector>
                       </div>
                       <div className='flex items-center gap-2'>
-                        <Badge variant={getKindVariant(feedbackItem.kind)}>
+                        <span className='text-xs text-muted-foreground'>
                           {getKindLabel(feedbackItem.kind)}
-                        </Badge>
+                        </span>
                         {feedbackItem.isPrivate && (
                           <span className='text-xs text-muted-foreground'>
                             Private

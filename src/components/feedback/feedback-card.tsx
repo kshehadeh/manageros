@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { useState } from 'react'
 import { FeedbackDialog } from './feedback-dialog'
+import { getKindLabel, getKindVariant } from '@/lib/utils/feedback'
 
 type FeedbackWithRelations = {
   id: string
@@ -35,43 +36,6 @@ export function FeedbackCard({
   onRefresh,
 }: FeedbackCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-
-  const getKindVariant = (
-    kind: string
-  ):
-    | 'default'
-    | 'secondary'
-    | 'destructive'
-    | 'outline'
-    | 'success'
-    | 'warning'
-    | 'error'
-    | 'info'
-    | 'neutral' => {
-    switch (kind) {
-      case 'praise':
-        return 'success'
-      case 'concern':
-        return 'error'
-      case 'note':
-        return 'info'
-      default:
-        return 'neutral'
-    }
-  }
-
-  const getKindLabel = (kind: string) => {
-    switch (kind) {
-      case 'praise':
-        return 'Praise'
-      case 'concern':
-        return 'Concern'
-      case 'note':
-        return 'Note'
-      default:
-        return 'Note'
-    }
-  }
 
   const formatDate = (date: Date | string) => {
     const dateObj = typeof date === 'string' ? new Date(date) : date

@@ -13,6 +13,7 @@ import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { FeedbackForm } from '@/components/feedback/feedback-form'
 import { Edit, Eye, Calendar, User, Lock } from 'lucide-react'
 import { type Person } from '@prisma/client'
+import { getKindLabel, getKindVariant } from '@/lib/utils/feedback'
 
 type FeedbackWithRelations = {
   id: string
@@ -47,43 +48,6 @@ export function FeedbackDialog({
   onRefresh,
 }: FeedbackDialogProps) {
   const [isEditing, setIsEditing] = useState(false)
-
-  const getKindVariant = (
-    kind: string
-  ):
-    | 'default'
-    | 'secondary'
-    | 'destructive'
-    | 'outline'
-    | 'success'
-    | 'warning'
-    | 'error'
-    | 'info'
-    | 'neutral' => {
-    switch (kind) {
-      case 'praise':
-        return 'success'
-      case 'concern':
-        return 'error'
-      case 'note':
-        return 'info'
-      default:
-        return 'neutral'
-    }
-  }
-
-  const getKindLabel = (kind: string) => {
-    switch (kind) {
-      case 'praise':
-        return 'Praise'
-      case 'concern':
-        return 'Concern'
-      case 'note':
-        return 'Note'
-      default:
-        return 'Note'
-    }
-  }
 
   const formatDate = (date: Date | string) => {
     const dateObj = typeof date === 'string' ? new Date(date) : date

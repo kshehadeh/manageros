@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import Link from 'next/link'
 import { useState, useRef, useEffect } from 'react'
+import { getKindLabel } from '@/lib/utils/feedback'
 
 type FeedbackWithRelations = {
   id: string
@@ -43,43 +44,6 @@ export function FeedbackListItem({
 }: FeedbackListItemProps) {
   const [openDropdown, setOpenDropdown] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-
-  const getKindVariant = (
-    kind: string
-  ):
-    | 'default'
-    | 'secondary'
-    | 'destructive'
-    | 'outline'
-    | 'success'
-    | 'warning'
-    | 'error'
-    | 'info'
-    | 'neutral' => {
-    switch (kind) {
-      case 'praise':
-        return 'success'
-      case 'concern':
-        return 'error'
-      case 'note':
-        return 'info'
-      default:
-        return 'neutral'
-    }
-  }
-
-  const getKindLabel = (kind: string) => {
-    switch (kind) {
-      case 'praise':
-        return 'Praise'
-      case 'concern':
-        return 'Concern'
-      case 'note':
-        return 'Note'
-      default:
-        return 'Note'
-    }
-  }
 
   const formatDate = (date: Date | string) => {
     const dateObj = typeof date === 'string' ? new Date(date) : date
@@ -127,9 +91,9 @@ export function FeedbackListItem({
     <div className='border border-border rounded-xl p-4 bg-card'>
       <div className='flex items-start justify-between mb-3'>
         <div className='flex items-center gap-2'>
-          <Badge variant={getKindVariant(feedback.kind)}>
+          <span className='text-sm text-muted-foreground'>
             {getKindLabel(feedback.kind)}
-          </Badge>
+          </span>
           {feedback.isPrivate && <Badge variant='neutral'>Private</Badge>}
         </div>
         <div className='flex items-center gap-2'>

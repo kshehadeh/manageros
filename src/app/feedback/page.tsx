@@ -5,21 +5,9 @@ import { getAllFeedback } from '@/lib/actions/feedback'
 import { getPeopleForFeedbackFilters } from '@/lib/actions/person'
 import FeedbackViewClient from '@/components/feedback/feedback-view-client'
 import { prisma } from '@/lib/db'
+import { MessageCircle } from 'lucide-react'
 
-interface FeedbackPageProps {
-  searchParams: Promise<{
-    fromPersonId?: string
-    aboutPersonId?: string
-    kind?: string
-    isPrivate?: string
-    startDate?: string
-    endDate?: string
-  }>
-}
-
-export default async function FeedbackPage({
-  searchParams,
-}: FeedbackPageProps) {
+export default async function FeedbackPage() {
   const session = await getServerSession(authOptions)
 
   if (!session?.user) {
@@ -30,47 +18,8 @@ export default async function FeedbackPage({
     redirect('/organization/create')
   }
 
-  const params = await searchParams
-
-  // Parse filters from search params
-  const filters = {
-    fromPersonId: params.fromPersonId,
-    aboutPersonId: params.aboutPersonId,
-    kind: params.kind,
-    isPrivate:
-      params.isPrivate === 'true'
-        ? true
-        : params.isPrivate === 'false'
-          ? false
-          : undefined,
-    startDate: params.startDate,
-    endDate: params.endDate,
-  }
-
-  // Remove undefined values
-  const cleanFilters = Object.fromEntries(
-    Object.entries(filters).filter(([_, value]) => value !== undefined)
-  )
-
-  // Get the person name if aboutPersonId is provided
-  const aboutPerson = params.aboutPersonId
-    ? await prisma.person.findFirst({
-        where: {
-          id: params.aboutPersonId,
-          organizationId: session.user.organizationId,
-        },
-        select: {
-          id: true,
-          name: true,
-        },
-      })
-    : null
-
-  // If aboutPersonId was provided but person not found, show generic title
-  const personName = aboutPerson?.name || 'Unknown Person'
-
   const [feedback, people, currentPerson] = await Promise.all([
-    getAllFeedback(cleanFilters),
+    getAllFeedback(),
     getPeopleForFeedbackFilters(),
     prisma.person.findFirst({
       where: {
@@ -84,22 +33,19 @@ export default async function FeedbackPage({
   return (
     <div className='page-container'>
       <div className='page-header'>
-        <h1 className='page-title'>
-          {params.aboutPersonId
-            ? `Feedback Involving ${personName}`
-            : 'Feedback'}
-        </h1>
+        <div className='flex items-center gap-3 mb-2'>
+          <MessageCircle className='h-6 w-6 text-muted-foreground' />
+          <h1 className='page-title'>Feedback</h1>
+        </div>
         <p className='page-subtitle'>
-          {params.aboutPersonId
-            ? `View feedback about ${personName}. You can see all public feedback and any private feedback you've written.`
-            : "View and filter feedback across your organization. You can see all public feedback and any private feedback you've written."}
+          View and filter feedback across your organization. You can see all
+          public feedback and any private feedback you&apos;ve written.
         </p>
       </div>
 
       <FeedbackViewClient
         initialFeedback={feedback}
         people={people}
-        currentFilters={cleanFilters}
         currentUserId={currentPerson?.id}
       />
     </div>

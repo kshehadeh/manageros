@@ -64,7 +64,7 @@ export async function FeedbackSection({
                 asChild
                 title='View All Feedback'
               >
-                <Link href={`/feedback?aboutPersonId=${person.id}`}>
+                <Link href='/feedback'>
                   <Eye className='w-4 h-4' />
                 </Link>
               </Button>
