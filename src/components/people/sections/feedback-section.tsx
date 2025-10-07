@@ -4,23 +4,21 @@ import { SectionHeader } from '@/components/ui/section-header'
 import { Button } from '@/components/ui/button'
 import { MessageCircle, Eye, Plus } from 'lucide-react'
 import Link from 'next/link'
-import type { Person } from '@prisma/client'
+import type { Person } from '@/types/person'
 
 interface FeedbackSectionProps {
-  personId: string
   person: Person
   currentPersonId?: string
 }
 
 export async function FeedbackSection({
-  personId,
   person,
   currentPersonId,
 }: FeedbackSectionProps) {
   // Get feedback for this person
   const feedback = await prisma.feedback.findMany({
     where: {
-      aboutId: personId,
+      aboutId: person.id,
     },
     include: {
       about: {
@@ -66,7 +64,7 @@ export async function FeedbackSection({
                 asChild
                 title='View All Feedback'
               >
-                <Link href={`/feedback?aboutPersonId=${personId}`}>
+                <Link href={`/feedback?aboutPersonId=${person.id}`}>
                   <Eye className='w-4 h-4' />
                 </Link>
               </Button>
@@ -76,7 +74,7 @@ export async function FeedbackSection({
                 asChild
                 title='Add New Feedback'
               >
-                <Link href={`/people/${personId}/feedback/new`}>
+                <Link href={`/people/${person.id}/feedback/new`}>
                   <Plus className='w-4 h-4' />
                 </Link>
               </Button>
@@ -84,7 +82,7 @@ export async function FeedbackSection({
           }
         />
         <FeedbackList
-          person={person}
+          person={{ id: person.id, name: person.name }}
           feedback={visibleFeedback}
           currentUserId={currentPersonId}
         />

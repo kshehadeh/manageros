@@ -172,8 +172,7 @@ export function PersonDetailContent({
             {/* Feedback Section */}
             <Suspense fallback={<FeedbackSectionSkeleton />}>
               <FeedbackSection
-                personId={person.id}
-                person={person as unknown as PrismaPerson}
+                person={person}
                 currentPersonId={currentPerson?.id}
               />
             </Suspense>

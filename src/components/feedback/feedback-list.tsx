@@ -1,6 +1,5 @@
 'use client'
 
-import { type Person } from '@prisma/client'
 import { FeedbackCard } from './feedback-card'
 
 type FeedbackWithRelations = {
@@ -20,7 +19,7 @@ type FeedbackWithRelations = {
 }
 
 interface FeedbackListProps {
-  person: Person
+  person: { id: string; name: string }
   feedback: FeedbackWithRelations[]
   currentUserId?: string
   onRefresh?: () => void

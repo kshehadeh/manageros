@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db'
 import { FeedbackForm } from '@/components/feedback/feedback-form'
+import { EditFeedbackBreadcrumbClient } from '@/components/feedback/edit-feedback-breadcrumb-client'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -80,28 +81,34 @@ export default async function FeedbackEditPage({
   }
 
   return (
-    <div className='space-y-6'>
-      <div className='flex items-center justify-between'>
-        <div>
-          <h2 className='text-lg font-semibold'>Edit Feedback</h2>
-          <div className='text-sm text-neutral-400'>
-            Editing feedback for {person.name}
+    <EditFeedbackBreadcrumbClient
+      personName={person.name}
+      personId={person.id}
+      feedbackId={feedback.id}
+    >
+      <div className='space-y-6'>
+        <div className='flex items-center justify-between'>
+          <div>
+            <h2 className='text-lg font-semibold'>Edit Feedback</h2>
+            <div className='text-sm text-neutral-400'>
+              Editing feedback for {person.name}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className='card'>
-        <FeedbackForm
-          person={person}
-          feedback={{
-            id: feedback.id,
-            kind: feedback.kind as 'praise' | 'concern' | 'note',
-            isPrivate: feedback.isPrivate,
-            body: feedback.body,
-          }}
-          redirectTo={`/people/${id}`}
-        />
+        <div className='card'>
+          <FeedbackForm
+            person={person}
+            feedback={{
+              id: feedback.id,
+              kind: feedback.kind as 'praise' | 'concern' | 'note',
+              isPrivate: feedback.isPrivate,
+              body: feedback.body,
+            }}
+            redirectTo={`/people/${id}`}
+          />
+        </div>
       </div>
-    </div>
+    </EditFeedbackBreadcrumbClient>
   )
 }

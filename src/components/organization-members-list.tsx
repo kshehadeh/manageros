@@ -28,7 +28,14 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { SectionHeader } from '@/components/ui/section-header'
-import { MoreHorizontal, Shield, User, Trash2, Users } from 'lucide-react'
+import {
+  MoreHorizontal,
+  Shield,
+  User,
+  Trash2,
+  Users,
+  Calendar,
+} from 'lucide-react'
 import {
   updateUserRole,
   removeUserFromOrganization,
@@ -135,10 +142,10 @@ export default function OrganizationMembersList({
     return (
       <Badge
         variant='outline'
-        className={
+        className={`whitespace-nowrap ${
           statusColors[status as keyof typeof statusColors] ||
           statusColors.inactive
-        }
+        }`}
       >
         {status
           .replace('_', ' ')
@@ -187,38 +194,46 @@ export default function OrganizationMembersList({
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
-                <TableHead>Person Status</TableHead>
-                <TableHead>Team</TableHead>
-                <TableHead>Joined</TableHead>
                 <TableHead className='w-[50px]'>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {members.map(member => (
                 <TableRow key={member.id}>
-                  <TableCell className='font-medium'>{member.name}</TableCell>
+                  <TableCell className='font-medium'>
+                    <div className='flex flex-col gap-1'>
+                      <div>{member.name}</div>
+                      <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+                        {member.person ? (
+                          getPersonStatusBadge(member.person.status)
+                        ) : (
+                          <Badge
+                            variant='outline'
+                            className='bg-gray-100 text-gray-600 border-gray-200 text-xs whitespace-nowrap'
+                          >
+                            Not Linked
+                          </Badge>
+                        )}
+                        {member.person?.team?.name && (
+                          <>
+                            <span>•</span>
+                            <span>{member.person.team.name}</span>
+                          </>
+                        )}
+                        <span>•</span>
+                        <div className='flex items-center gap-1 text-xs'>
+                          <Calendar className='h-3 w-3' />
+                          <span>
+                            {new Date(member.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </TableCell>
                   <TableCell className='text-muted-foreground'>
                     {member.email}
                   </TableCell>
                   <TableCell>{getRoleBadge(member.role)}</TableCell>
-                  <TableCell>
-                    {member.person ? (
-                      getPersonStatusBadge(member.person.status)
-                    ) : (
-                      <Badge
-                        variant='outline'
-                        className='bg-gray-100 text-gray-600 border-gray-200'
-                      >
-                        Not Linked
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className='text-muted-foreground'>
-                    {member.person?.team?.name || '-'}
-                  </TableCell>
-                  <TableCell className='text-muted-foreground'>
-                    {new Date(member.createdAt).toLocaleDateString()}
-                  </TableCell>
                   <TableCell>
                     {hasActions(member) ? (
                       <DropdownMenu>
