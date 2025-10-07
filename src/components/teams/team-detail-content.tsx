@@ -121,14 +121,7 @@ export function TeamDetailContent({
                 <Link href={`/people/new?teamId=${team.id}`}>Add Member</Link>
               </Button>
             </div>
-            <PeopleTable
-              people={peopleWithLevel}
-              teams={allTeams.map(team => ({ id: team.id, name: team.name }))}
-              allPeople={allPeople.map(person => ({
-                id: person.id,
-                name: person.name,
-              }))}
-            />
+            <PeopleTable people={peopleWithLevel} />
           </div>
 
           {/* Team Initiatives */}

@@ -214,12 +214,7 @@ export function GroupedPeoplePageClient({
                 </Badge>
               </div>
             </div>
-            <PeopleTable
-              people={people}
-              filteredPeople={group.people}
-              teams={teams}
-              allPeople={allPeople}
-            />
+            <PeopleTable people={people} filteredPeople={group.people} />
           </div>
         ))}
       </div>
