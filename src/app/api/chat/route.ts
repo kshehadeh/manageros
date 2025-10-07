@@ -1,6 +1,11 @@
 import { openai } from '@ai-sdk/openai'
 import { streamText, convertToModelMessages, stepCountIs } from 'ai'
-import { aiTools } from '@/lib/ai/tools'
+import { peopleTool } from '@/lib/ai/tools/people-tool'
+import { initiativesTool } from '@/lib/ai/tools/initiatives-tool'
+import { tasksTool } from '@/lib/ai/tools/tasks-tool'
+import { meetingsTool } from '@/lib/ai/tools/meetings-tool'
+import { teamsTool } from '@/lib/ai/tools/teams-tool'
+import { currentUserTool } from '@/lib/ai/tools/current-user-tool'
 
 export async function POST(req: Request) {
   try {
@@ -13,29 +18,34 @@ export async function POST(req: Request) {
       messages: convertedMessages,
       tools: {
         people: {
-          description: aiTools.people.description,
-          inputSchema: aiTools.people.parameters,
-          execute: aiTools.people.execute,
+          description: peopleTool.description,
+          inputSchema: peopleTool.parameters,
+          execute: peopleTool.execute,
         },
         initiatives: {
-          description: aiTools.initiatives.description,
-          inputSchema: aiTools.initiatives.parameters,
-          execute: aiTools.initiatives.execute,
+          description: initiativesTool.description,
+          inputSchema: initiativesTool.parameters,
+          execute: initiativesTool.execute,
         },
         tasks: {
-          description: aiTools.tasks.description,
-          inputSchema: aiTools.tasks.parameters,
-          execute: aiTools.tasks.execute,
+          description: tasksTool.description,
+          inputSchema: tasksTool.parameters,
+          execute: tasksTool.execute,
         },
         meetings: {
-          description: aiTools.meetings.description,
-          inputSchema: aiTools.meetings.parameters,
-          execute: aiTools.meetings.execute,
+          description: meetingsTool.description,
+          inputSchema: meetingsTool.parameters,
+          execute: meetingsTool.execute,
         },
         teams: {
-          description: aiTools.teams.description,
-          inputSchema: aiTools.teams.parameters,
-          execute: aiTools.teams.execute,
+          description: teamsTool.description,
+          inputSchema: teamsTool.parameters,
+          execute: teamsTool.execute,
+        },
+        currentUser: {
+          description: currentUserTool.description,
+          inputSchema: currentUserTool.parameters,
+          execute: currentUserTool.execute,
         },
       },
       stopWhen: stepCountIs(5),
