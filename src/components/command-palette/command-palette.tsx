@@ -14,10 +14,12 @@ import {
 } from '@/components/ui/command'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { VisuallyHidden } from '@/components/ui/visually-hidden'
+import { Loading } from '@/components/ui/loading'
 import { useCommandPalette } from './provider'
 import { type CommandItemDescriptor, type CommandSource } from './types'
 import { coreCommandSource } from './sources/core'
 import { searchCommandSource } from './sources/search'
+import { useDebounce } from '@/hooks/use-debounce'
 
 const sources: CommandSource[] = [coreCommandSource, searchCommandSource]
 
@@ -30,6 +32,9 @@ export function CommandPalette() {
   const [items, setItems] = useState<CommandItemDescriptor[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
+  // Debounce the search query to avoid frequent API calls
+  const debouncedQuery = useDebounce(query, 300)
+
   useEffect(() => {
     let isCancelled = false
     async function run() {
@@ -37,7 +42,7 @@ export function CommandPalette() {
       try {
         const userRole = session?.user?.role
         const all = await Promise.all(
-          sources.map(s => s.getItems(query, userRole, pathname))
+          sources.map(s => s.getItems(debouncedQuery, userRole, pathname))
         )
         if (isCancelled) return
         setItems(all.flat())
@@ -49,7 +54,7 @@ export function CommandPalette() {
     return () => {
       isCancelled = true
     }
-  }, [query, session?.user?.role, pathname])
+  }, [debouncedQuery, session?.user?.role, pathname])
 
   const grouped = useMemo<Record<string, CommandItemDescriptor[]>>(() => {
     const byGroup: Record<string, CommandItemDescriptor[]> = {}
@@ -83,6 +88,9 @@ export function CommandPalette() {
               onValueChange={setQuery}
               className='flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50'
             />
+            {isLoading && (
+              <Loading size='sm' className='ml-2 text-muted-foreground' />
+            )}
           </div>
           <CommandList>
             <CommandEmpty>
