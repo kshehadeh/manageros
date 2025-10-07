@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db'
 
 export const currentUserTool = {
   description:
-    'Get information about the current user to help interpret pronouns like "me" or "I" in chat inputs',
+    'Get information about the current user to help interpret pronouns like "me" or "I" or "my" in chat inputs',
   parameters: z.object({}),
   execute: async () => {
     const user = await getCurrentUser()

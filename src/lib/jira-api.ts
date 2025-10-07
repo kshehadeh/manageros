@@ -225,6 +225,193 @@ export class JiraApiService {
   }
 
   /**
+   * Search for tickets based on project, status, assignee, or any combination
+   */
+  async searchTickets(
+    query: string,
+    project?: string,
+    status?: string,
+    assignee?: string,
+    limit: number = 50
+  ): Promise<{
+    totalCount: number
+    results: Array<{
+      id: string
+      key: string
+      summary: string
+      description?: string
+      issueType: {
+        name: string
+        iconUrl?: string
+      }
+      status: {
+        name: string
+        color?: string
+      }
+      priority?: {
+        name: string
+        iconUrl?: string
+      }
+      project: {
+        key: string
+        name: string
+      }
+      assignee?: {
+        accountId: string
+        displayName: string
+        emailAddress: string
+        avatarUrl?: string
+      }
+      reporter?: {
+        accountId: string
+        displayName: string
+        emailAddress: string
+        avatarUrl?: string
+      }
+      created: string
+      updated: string
+      labels: string[]
+      fixVersions: Array<{
+        name: string
+        released: boolean
+      }>
+      components: Array<{
+        name: string
+        description?: string
+      }>
+      webUrl: string
+    }>
+    jqlQuery: string
+    project: string
+    status: string
+    assignee: string
+  }> {
+    // Build JQL query
+    let jqlQuery = query
+
+    // Add project filter if specified
+    if (project) {
+      jqlQuery += ` AND project = "${project}"`
+    }
+
+    // Add status filter if specified
+    if (status) {
+      jqlQuery += ` AND status = "${status}"`
+    }
+
+    // Add assignee filter if specified
+    if (assignee) {
+      // Check if it's an email address or account ID
+      if (assignee.includes('@')) {
+        jqlQuery += ` AND assignee in (${assignee})`
+      } else {
+        jqlQuery += ` AND assignee = "${assignee}"`
+      }
+    }
+
+    const response = await this.makeRequest<{
+      total: number
+      issues: Array<{
+        id: string
+        key: string
+        fields: {
+          summary: string
+          description?: string
+          issuetype?: { name: string; iconUrl?: string }
+          status?: { name: string; statusCategory?: { colorName: string } }
+          priority?: { name: string; iconUrl?: string }
+          project?: { key: string; name: string }
+          assignee?: {
+            accountId: string
+            displayName: string
+            emailAddress: string
+            avatarUrls?: { '48x48': string }
+          }
+          reporter?: {
+            accountId: string
+            displayName: string
+            emailAddress: string
+            avatarUrls?: { '48x48': string }
+          }
+          created: string
+          updated: string
+          labels?: string[]
+          fixVersions?: Array<{ name: string; released: boolean }>
+          components?: Array<{ name: string; description?: string }>
+        }
+      }>
+    }>('search/jql', {
+      jql: jqlQuery,
+      fields: '*all',
+      maxResults: limit.toString(),
+    })
+
+    const results = response.issues.map(issue => ({
+      id: issue.id,
+      key: issue.key,
+      summary: issue.fields.summary,
+      description: issue.fields.description,
+      issueType: {
+        name: issue.fields.issuetype?.name || 'Unknown',
+        iconUrl: issue.fields.issuetype?.iconUrl,
+      },
+      status: {
+        name: issue.fields.status?.name || 'Unknown',
+        color: issue.fields.status?.statusCategory?.colorName,
+      },
+      priority: issue.fields.priority
+        ? {
+            name: issue.fields.priority.name,
+            iconUrl: issue.fields.priority.iconUrl,
+          }
+        : undefined,
+      project: {
+        key: issue.fields.project?.key || 'Unknown',
+        name: issue.fields.project?.name || 'Unknown',
+      },
+      assignee: issue.fields.assignee
+        ? {
+            accountId: issue.fields.assignee.accountId,
+            displayName: issue.fields.assignee.displayName,
+            emailAddress: issue.fields.assignee.emailAddress,
+            avatarUrl: issue.fields.assignee.avatarUrls?.['48x48'],
+          }
+        : undefined,
+      reporter: issue.fields.reporter
+        ? {
+            accountId: issue.fields.reporter.accountId,
+            displayName: issue.fields.reporter.displayName,
+            emailAddress: issue.fields.reporter.emailAddress,
+            avatarUrl: issue.fields.reporter.avatarUrls?.['48x48'],
+          }
+        : undefined,
+      created: issue.fields.created,
+      updated: issue.fields.updated,
+      labels: issue.fields.labels || [],
+      fixVersions:
+        issue.fields.fixVersions?.map(version => ({
+          name: version.name,
+          released: version.released,
+        })) || [],
+      components:
+        issue.fields.components?.map(component => ({
+          name: component.name,
+          description: component.description,
+        })) || [],
+      webUrl: `${this.credentials.baseUrl}/browse/${issue.key}`,
+    }))
+
+    return {
+      totalCount: response.total,
+      results,
+      jqlQuery,
+      project: project || 'All projects',
+      status: status || 'All statuses',
+      assignee: assignee || 'All assignees',
+    }
+  }
+
+  /**
    * Get assigned tickets for multiple users within a date range
    */
   async getMultipleUsersAssignedTickets(

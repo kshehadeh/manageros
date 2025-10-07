@@ -171,6 +171,7 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
         >
           <div className='flex items-center gap-1'>
             <IconComponent className='h-3 w-3 text-primary' />
+            Calling {toolName}...
           </div>
         </div>
       )

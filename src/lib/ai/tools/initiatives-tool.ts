@@ -4,7 +4,8 @@ import { prisma } from '@/lib/db'
 import type { Prisma } from '@prisma/client'
 
 export const initiativesTool = {
-  description: 'Get information about initiatives in the organization',
+  description:
+    'Get information about initiatives in the organization and when the user is interested in his own initiatives, lookup who he is and use that person ID to associate with one of the owners of the initiative.',
   parameters: z.object({
     status: z
       .enum(['planned', 'in_progress', 'paused', 'done', 'canceled'])
@@ -84,6 +85,7 @@ export const initiativesTool = {
       orderBy: { updatedAt: 'desc' },
     })
 
+    console.log('Initiatives:', initiatives)
     return {
       initiatives: initiatives.map(initiative => ({
         id: initiative.id,

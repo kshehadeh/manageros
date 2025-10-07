@@ -6,6 +6,8 @@ import { tasksTool } from '@/lib/ai/tools/tasks-tool'
 import { meetingsTool } from '@/lib/ai/tools/meetings-tool'
 import { teamsTool } from '@/lib/ai/tools/teams-tool'
 import { currentUserTool } from '@/lib/ai/tools/current-user-tool'
+import { githubTool } from '@/lib/ai/tools/github-tool'
+import { jiraTool } from '@/lib/ai/tools/jira-tool'
 
 export async function POST(req: Request) {
   try {
@@ -47,8 +49,18 @@ export async function POST(req: Request) {
           inputSchema: currentUserTool.parameters,
           execute: currentUserTool.execute,
         },
+        github: {
+          description: githubTool.description,
+          inputSchema: githubTool.parameters,
+          execute: githubTool.execute,
+        },
+        jira: {
+          description: jiraTool.description,
+          inputSchema: jiraTool.parameters,
+          execute: jiraTool.execute,
+        },
       },
-      stopWhen: stepCountIs(5),
+      stopWhen: stepCountIs(10),
       system: `You are an AI assistant for ManagerOS, a management platform for engineering managers. You help users understand and interact with their organizational data including people, initiatives, tasks, meetings, and teams.
 
 Key guidelines:

@@ -5,6 +5,8 @@ export { tasksTool } from './tools/tasks-tool'
 export { meetingsTool } from './tools/meetings-tool'
 export { teamsTool } from './tools/teams-tool'
 export { currentUserTool } from './tools/current-user-tool'
+export { githubTool } from './tools/github-tool'
+export { jiraTool } from './tools/jira-tool'
 
 // Import tools for the aiTools object
 import { peopleTool } from './tools/people-tool'
@@ -13,6 +15,8 @@ import { tasksTool } from './tools/tasks-tool'
 import { meetingsTool } from './tools/meetings-tool'
 import { teamsTool } from './tools/teams-tool'
 import { currentUserTool } from './tools/current-user-tool'
+import { githubTool } from './tools/github-tool'
+import { jiraTool } from './tools/jira-tool'
 
 // Export all tools as a single object for easy access
 export const aiTools = {
@@ -22,4 +26,6 @@ export const aiTools = {
   meetings: meetingsTool,
   teams: teamsTool,
   currentUser: currentUserTool,
+  github: githubTool,
+  jira: jiraTool,
 }
