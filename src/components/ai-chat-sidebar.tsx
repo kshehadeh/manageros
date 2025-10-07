@@ -6,6 +6,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ChangeEvent,
   type FormEvent,
@@ -31,6 +32,7 @@ import {
 import { cn } from '@/lib/utils'
 import { AiResponseText } from './ai-response-text'
 import { useUserSettings } from '@/lib/hooks/use-user-settings'
+import { useAIChat } from '@/components/ai-chat-provider'
 
 interface AIChatSidebarProps {
   isOpen: boolean
@@ -59,7 +61,9 @@ const getToolIcon = (toolName: string) => {
 
 export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
   const { settings, updateSetting, isLoaded } = useUserSettings()
+  const { openedViaKeyboard, setOpenedViaKeyboard } = useAIChat()
   const [inputValue, setInputValue] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
   const transport = useMemo(
     () => new DefaultChatTransport({ api: '/api/chat' }),
     []
@@ -93,6 +97,19 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
     },
     [inputValue, sendMessage]
   )
+
+  // Focus input when opened via keyboard
+  useEffect(() => {
+    if (isOpen && openedViaKeyboard && inputRef.current) {
+      // Small delay to ensure the sidebar is fully rendered
+      const timeoutId = setTimeout(() => {
+        inputRef.current?.focus()
+        setOpenedViaKeyboard(false) // Reset the flag
+      }, 100)
+
+      return () => clearTimeout(timeoutId)
+    }
+  }, [isOpen, openedViaKeyboard, setOpenedViaKeyboard])
 
   // Handle Escape key to close the AI chat
   useEffect(() => {
@@ -365,6 +382,7 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
         <div className='p-4 border-t'>
           <form onSubmit={handleFormSubmit} className='flex gap-2'>
             <Input
+              ref={inputRef}
               value={inputValue}
               onChange={handleInputChange}
               placeholder='Ask about your organization...'

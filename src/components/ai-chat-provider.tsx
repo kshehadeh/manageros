@@ -6,12 +6,15 @@ interface AIChatContextType {
   isAIChatOpen: boolean
   setIsAIChatOpen: (_open: boolean) => void
   toggleAIChat: () => void
+  openedViaKeyboard: boolean
+  setOpenedViaKeyboard: (_opened: boolean) => void
 }
 
 const AIChatContext = createContext<AIChatContextType | undefined>(undefined)
 
 export function AIChatProvider({ children }: { children: ReactNode }) {
   const [isAIChatOpen, setIsAIChatOpen] = useState(false)
+  const [openedViaKeyboard, setOpenedViaKeyboard] = useState(false)
 
   const toggleAIChat = () => {
     setIsAIChatOpen(!isAIChatOpen)
@@ -23,6 +26,8 @@ export function AIChatProvider({ children }: { children: ReactNode }) {
         isAIChatOpen,
         setIsAIChatOpen,
         toggleAIChat,
+        openedViaKeyboard,
+        setOpenedViaKeyboard,
       }}
     >
       {children}

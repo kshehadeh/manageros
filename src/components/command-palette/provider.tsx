@@ -26,7 +26,7 @@ export function CommandPaletteProvider({
   children: React.ReactNode
 }) {
   const [isOpen, setIsOpen] = useState(false)
-  const { toggleAIChat } = useAIChat()
+  const { toggleAIChat, setOpenedViaKeyboard } = useAIChat()
 
   const setOpen = useCallback((open: boolean) => setIsOpen(open), [])
   const toggle = useCallback(() => setIsOpen(prev => !prev), [])
@@ -45,6 +45,7 @@ export function CommandPaletteProvider({
       // Cmd/Ctrl + J: Open AI chat
       if (isMod && e.key.toLowerCase() === 'j') {
         e.preventDefault()
+        setOpenedViaKeyboard(true)
         toggleAIChat()
       }
 
@@ -65,7 +66,7 @@ export function CommandPaletteProvider({
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [toggleAIChat])
+  }, [toggleAIChat, setOpenedViaKeyboard])
 
   const value = useMemo<CommandPaletteContextValue>(
     () => ({ isOpen, setOpen, toggle }),
