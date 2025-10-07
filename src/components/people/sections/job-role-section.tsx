@@ -5,33 +5,58 @@ import { JobRoleSectionClient } from './job-role-section-client'
 
 interface JobRoleSectionProps {
   personId: string
+  personName: string
+  currentJobRole?: {
+    id: string
+    title: string
+    level: {
+      id: string
+      name: string
+    }
+    domain: {
+      id: string
+      name: string
+    }
+  } | null
 }
 
-export async function JobRoleSection({ personId }: JobRoleSectionProps) {
+export async function JobRoleSection({
+  personId,
+  personName,
+  currentJobRole,
+}: JobRoleSectionProps) {
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.organizationId) {
     return null
   }
 
-  // Get person with job role information
-  const person = await prisma.person.findFirst({
-    where: {
-      id: personId,
-      organizationId: session.user.organizationId,
-    },
-    include: {
-      jobRole: {
-        include: {
-          level: true,
-          domain: true,
+  // Use provided currentJobRole or fetch person data if not provided (for backward compatibility)
+  let personJobRole = currentJobRole
+  let personNameToUse = personName
+
+  if (!personJobRole || !personNameToUse) {
+    const person = await prisma.person.findFirst({
+      where: {
+        id: personId,
+        organizationId: session.user.organizationId,
+      },
+      include: {
+        jobRole: {
+          include: {
+            level: true,
+            domain: true,
+          },
         },
       },
-    },
-  })
+    })
 
-  if (!person) {
-    return null
+    if (!person) {
+      return null
+    }
+
+    personJobRole = personJobRole || person.jobRole
+    personNameToUse = personNameToUse || person.name
   }
 
   // Get all available job roles for the organization
@@ -54,8 +79,8 @@ export async function JobRoleSection({ personId }: JobRoleSectionProps) {
     <section>
       <JobRoleSectionClient
         personId={personId}
-        personName={person.name}
-        currentJobRole={person.jobRole}
+        personName={personNameToUse}
+        currentJobRole={personJobRole}
         availableJobRoles={jobRoles}
       />
     </section>

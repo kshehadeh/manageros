@@ -1,6 +1,6 @@
 import { Person } from '@/types/person'
 
-export type GroupingOption = 'manager' | 'team' | 'status' | 'jobRole'
+export type GroupingOption = 'manager' | 'team' | 'status' | 'jobRole' | 'none'
 
 export interface PeopleGroup {
   key: string
@@ -34,6 +34,8 @@ export function groupPeople(
       return groupByStatus(people)
     case 'jobRole':
       return groupByJobRole(people)
+    case 'none':
+      return groupByNone(people)
     default:
       return groups
   }
@@ -212,4 +214,22 @@ function groupByJobRole(people: Person[]): PeopleGroup[] {
   })
 
   return groups
+}
+
+/**
+ * Returns all people in a single group (no grouping)
+ */
+function groupByNone(people: Person[]): PeopleGroup[] {
+  if (people.length === 0) {
+    return []
+  }
+
+  return [
+    {
+      key: 'all',
+      label: 'All People',
+      people: people.sort((a, b) => a.name.localeCompare(b.name)),
+      count: people.length,
+    },
+  ]
 }

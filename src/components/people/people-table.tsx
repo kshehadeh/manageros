@@ -47,6 +47,8 @@ import { DeleteModal } from '@/components/common/delete-modal'
 interface PeopleTableProps {
   people: Person[]
   filteredPeople?: Person[]
+  teams?: Array<{ id: string; name: string }>
+  allPeople?: Array<{ id: string; name: string }>
 }
 
 interface EditingState {
@@ -76,7 +78,12 @@ interface OneOnOneModalState {
   personName: string
 }
 
-export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
+export function PeopleTable({
+  people,
+  filteredPeople,
+  teams: propTeams,
+  allPeople: propAllPeople,
+}: PeopleTableProps) {
   const displayPeople = filteredPeople || people
   const [editing, setEditing] = useState<EditingState>({})
   const [teams, setTeams] = useState<Array<{ id: string; name: string }>>([])
@@ -105,22 +112,29 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
     personName: '',
   })
 
-  // Load teams and people for dropdowns
+  // Load teams and people for dropdowns (only if not provided as props)
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [teamsData, peopleData] = await Promise.all([
-          getTeams(),
-          getPeople(),
-        ])
-        setTeams(teamsData)
-        setAllPeople(peopleData)
-      } catch (error) {
-        console.error('Failed to load data:', error)
+    if (propTeams && propAllPeople) {
+      // Use props if provided
+      setTeams(propTeams)
+      setAllPeople(propAllPeople)
+    } else {
+      // Fallback to fetching data (for backward compatibility)
+      const loadData = async () => {
+        try {
+          const [teamsData, peopleData] = await Promise.all([
+            getTeams(),
+            getPeople(),
+          ])
+          setTeams(teamsData)
+          setAllPeople(peopleData)
+        } catch (error) {
+          console.error('Failed to load data:', error)
+        }
       }
+      loadData()
     }
-    loadData()
-  }, [])
+  }, [propTeams, propAllPeople])
 
   // Handle clicking outside context menu to close it
   useEffect(() => {

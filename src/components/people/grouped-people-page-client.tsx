@@ -13,13 +13,15 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Users, Building, UserCheck, Briefcase } from 'lucide-react'
+import { Users, Building, UserCheck, Briefcase, List } from 'lucide-react'
 import { useUserSettings } from '@/lib/hooks/use-user-settings'
 import {
   groupPeople,
   type GroupingOption,
   type PeopleGroup,
 } from '@/lib/utils/people-utils'
+import { getTeams } from '@/lib/actions/team'
+import { getPeople } from '@/lib/actions/person'
 
 interface GroupedPeoplePageClientProps {
   people: Person[]
@@ -31,6 +33,27 @@ export function GroupedPeoplePageClient({
   const { getSetting, updateSetting, isLoaded } = useUserSettings()
   const [filteredPeople, setFilteredPeople] = useState<Person[]>(people)
   const [groupingOption, setGroupingOption] = useState<GroupingOption>('team')
+  const [teams, setTeams] = useState<Array<{ id: string; name: string }>>([])
+  const [allPeople, setAllPeople] = useState<
+    Array<{ id: string; name: string }>
+  >([])
+
+  // Load teams and people data once for all PeopleTable instances
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [teamsData, peopleData] = await Promise.all([
+          getTeams(),
+          getPeople(),
+        ])
+        setTeams(teamsData)
+        setAllPeople(peopleData.map(p => ({ id: p.id, name: p.name })))
+      } catch (error) {
+        console.error('Failed to load teams and people data:', error)
+      }
+    }
+    loadData()
+  }, [])
 
   // Load grouping option from user settings
   useEffect(() => {
@@ -67,6 +90,8 @@ export function GroupedPeoplePageClient({
         return <UserCheck className='h-4 w-4' />
       case 'jobRole':
         return <Briefcase className='h-4 w-4' />
+      case 'none':
+        return <List className='h-4 w-4' />
     }
   }
 
@@ -99,6 +124,8 @@ export function GroupedPeoplePageClient({
             <PeopleFilterBar
               people={people}
               onFilteredPeopleChange={handleFilteredPeopleChange}
+              teams={teams}
+              allPeople={allPeople}
             />
           </div>
 
@@ -122,6 +149,12 @@ export function GroupedPeoplePageClient({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value='none'>
+                    <div className='flex items-center gap-2'>
+                      <List className='h-4 w-4' />
+                      No Grouping
+                    </div>
+                  </SelectItem>
                   <SelectItem value='manager'>
                     <div className='flex items-center gap-2'>
                       <Users className='h-4 w-4' />
@@ -181,7 +214,12 @@ export function GroupedPeoplePageClient({
                 </Badge>
               </div>
             </div>
-            <PeopleTable people={people} filteredPeople={group.people} />
+            <PeopleTable
+              people={people}
+              filteredPeople={group.people}
+              teams={teams}
+              allPeople={allPeople}
+            />
           </div>
         ))}
       </div>

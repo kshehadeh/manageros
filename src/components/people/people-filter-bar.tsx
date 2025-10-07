@@ -18,11 +18,15 @@ import { Person } from '@/types/person'
 interface PeopleFilterBarProps {
   people: Person[]
   onFilteredPeopleChange: (_filteredPeople: Person[]) => void
+  teams?: Array<{ id: string; name: string }>
+  allPeople?: Array<{ id: string; name: string }>
 }
 
 export function PeopleFilterBar({
   people,
   onFilteredPeopleChange,
+  teams: propTeams,
+  allPeople: propAllPeople,
 }: PeopleFilterBarProps) {
   const [textFilter, setTextFilter] = useState('')
   const [teamFilter, setTeamFilter] = useState<string>('all')
@@ -34,26 +38,33 @@ export function PeopleFilterBar({
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const filterRef = useRef<HTMLDivElement>(null)
 
-  // Load teams and managers for filter dropdowns
+  // Load teams and managers for filter dropdowns (only if not provided as props)
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [teamsData, peopleData] = await Promise.all([
-          getTeams(),
-          getPeople(),
-        ])
-        setTeams(teamsData)
-        // Get unique managers from people data
-        const uniqueManagers = peopleData
-          .filter(person => person.name) // Only include people with names
-          .map(person => ({ id: person.id, name: person.name }))
-        setManagers(uniqueManagers)
-      } catch (error) {
-        console.error('Failed to load filter data:', error)
+    if (propTeams && propAllPeople) {
+      // Use props if provided
+      setTeams(propTeams)
+      setManagers(propAllPeople)
+    } else {
+      // Fallback to fetching data (for backward compatibility)
+      const loadData = async () => {
+        try {
+          const [teamsData, peopleData] = await Promise.all([
+            getTeams(),
+            getPeople(),
+          ])
+          setTeams(teamsData)
+          // Get unique managers from people data
+          const uniqueManagers = peopleData
+            .filter(person => person.name) // Only include people with names
+            .map(person => ({ id: person.id, name: person.name }))
+          setManagers(uniqueManagers)
+        } catch (error) {
+          console.error('Failed to load filter data:', error)
+        }
       }
+      loadData()
     }
-    loadData()
-  }, [])
+  }, [propTeams, propAllPeople])
 
   // Handle clicking outside to close filter popup
   useEffect(() => {

@@ -6,7 +6,7 @@
 export interface UserSettings {
   // People page settings
   peopleViewMode: 'list' | 'chart'
-  peopleGrouping: 'manager' | 'team' | 'status' | 'jobRole'
+  peopleGrouping: 'manager' | 'team' | 'status' | 'jobRole' | 'none'
 
   // Theme settings
   theme: 'light' | 'dark'

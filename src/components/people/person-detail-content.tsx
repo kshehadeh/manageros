@@ -242,7 +242,11 @@ export function PersonDetailContent({
 
           {/* Job Role Section */}
           <Suspense fallback={<JobRoleSectionSkeleton />}>
-            <JobRoleSection personId={person.id} />
+            <JobRoleSection
+              personId={person.id}
+              personName={person.name}
+              currentJobRole={person.jobRole}
+            />
           </Suspense>
 
           {/* Direct Reports */}
