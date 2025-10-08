@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db'
-import { DashboardInitiativesTable } from '@/components/initiatives/dashboard-initiatives-table'
+import { InitiativesTable } from '@/components/initiatives/initiatives-table'
 import { ExpandableSection } from '@/components/expandable-section'
 
 interface DashboardOpenInitiativesSectionProps {
@@ -68,10 +68,13 @@ export async function DashboardOpenInitiativesSection({
       icon='Rocket'
       viewAllHref='/initiatives'
     >
-      <DashboardInitiativesTable
+      <InitiativesTable
         initiatives={openInitiatives}
         people={people}
         teams={teams}
+        hideFilters={true}
+        hideOwner={true}
+        hideActions={true}
       />
     </ExpandableSection>
   )
