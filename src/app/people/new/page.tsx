@@ -1,6 +1,4 @@
 import { PersonForm } from '@/components/people/person-form'
-import { getTeams } from '@/lib/actions/team'
-import { getPeople } from '@/lib/actions/person'
 import { getJobRolesForSelection } from '@/lib/actions/job-roles'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
@@ -31,11 +29,7 @@ export default async function NewPersonPage({
   const managerId = params.managerId
   const teamId = params.teamId
 
-  const [teams, people, jobRoles] = await Promise.all([
-    getTeams(),
-    getPeople(),
-    getJobRolesForSelection(),
-  ])
+  const [jobRoles] = await Promise.all([getJobRolesForSelection()])
 
   return (
     <div className='space-y-6'>
@@ -44,8 +38,6 @@ export default async function NewPersonPage({
       </div>
 
       <PersonForm
-        teams={teams}
-        people={people}
         jobRoles={jobRoles}
         initialManagerId={managerId}
         initialTeamId={teamId}

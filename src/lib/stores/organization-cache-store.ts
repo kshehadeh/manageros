@@ -3,6 +3,7 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { getPeople as fetchPeopleFromServer } from '@/lib/actions/person'
+import { getTeams as fetchTeamsFromServer } from '@/lib/actions/team'
 
 // Types for cached data
 export interface CachedPerson {
@@ -46,6 +47,23 @@ export interface CachedPerson {
   } | null
 }
 
+export interface CachedTeam {
+  id: string
+  name: string
+  description?: string | null
+  avatar?: string | null
+  organizationId: string
+  parentId?: string | null
+  parent?: {
+    id: string
+    name: string
+  } | null
+  children?: Array<{
+    id: string
+    name: string
+  }>
+}
+
 interface CacheMetadata {
   lastFetched: Date | null
   isFetching: boolean
@@ -57,6 +75,10 @@ interface OrganizationCacheState {
   people: CachedPerson[]
   peopleMetadata: CacheMetadata
 
+  // Teams cache
+  teams: CachedTeam[]
+  teamsMetadata: CacheMetadata
+
   // Actions
   fetchPeople: () => Promise<void>
   invalidatePeople: () => void
@@ -65,10 +87,17 @@ interface OrganizationCacheState {
   isPeopleLoading: () => boolean
   getPeopleError: () => string | null
 
-  // Future: teams, initiatives, etc.
-  // teams: CachedTeam[]
-  // teamsMetadata: CacheMetadata
-  // fetchTeams: () => Promise<void>
+  fetchTeams: () => Promise<void>
+  invalidateTeams: () => void
+  getTeams: () => CachedTeam[]
+  isTeamsStale: () => boolean
+  isTeamsLoading: () => boolean
+  getTeamsError: () => string | null
+
+  // Future: initiatives, etc.
+  // initiatives: CachedInitiative[]
+  // initiativesMetadata: CacheMetadata
+  // fetchInitiatives: () => Promise<void>
   // ...
 }
 
@@ -81,6 +110,13 @@ export const useOrganizationCacheStore = create<OrganizationCacheState>()(
       // Initial state
       people: [],
       peopleMetadata: {
+        lastFetched: null,
+        isFetching: false,
+        error: null,
+      },
+
+      teams: [],
+      teamsMetadata: {
         lastFetched: null,
         isFetching: false,
         error: null,
@@ -165,6 +201,86 @@ export const useOrganizationCacheStore = create<OrganizationCacheState>()(
       getPeopleError: () => {
         return get().peopleMetadata.error
       },
+
+      // Teams cache actions
+      fetchTeams: async () => {
+        const state = get()
+
+        // Don't fetch if already fetching
+        if (state.teamsMetadata.isFetching) {
+          return
+        }
+
+        set(state => ({
+          teamsMetadata: {
+            ...state.teamsMetadata,
+            isFetching: true,
+            error: null,
+          },
+        }))
+
+        try {
+          const teamsData = await fetchTeamsFromServer()
+
+          set({
+            teams: teamsData,
+            teamsMetadata: {
+              lastFetched: new Date(),
+              isFetching: false,
+              error: null,
+            },
+          })
+        } catch (error) {
+          console.error('Error fetching teams:', error)
+
+          set(state => ({
+            teamsMetadata: {
+              ...state.teamsMetadata,
+              isFetching: false,
+              error:
+                error instanceof Error
+                  ? error.message
+                  : 'Failed to fetch teams',
+            },
+          }))
+        }
+      },
+
+      invalidateTeams: () => {
+        set({
+          teamsMetadata: {
+            lastFetched: null,
+            isFetching: false,
+            error: null,
+          },
+        })
+      },
+
+      getTeams: () => {
+        return get().teams
+      },
+
+      isTeamsStale: () => {
+        const { teamsMetadata } = get()
+
+        if (!teamsMetadata.lastFetched) {
+          return true // Never fetched
+        }
+
+        const now = new Date()
+        const timeSinceLastFetch =
+          now.getTime() - teamsMetadata.lastFetched.getTime()
+
+        return timeSinceLastFetch > STALE_THRESHOLD_MS
+      },
+
+      isTeamsLoading: () => {
+        return get().teamsMetadata.isFetching
+      },
+
+      getTeamsError: () => {
+        return get().teamsMetadata.error
+      },
     }),
     {
       name: 'organization-cache-store',
@@ -180,4 +296,10 @@ export const {
   isPeopleStale,
   isPeopleLoading,
   getPeopleError,
+  fetchTeams,
+  invalidateTeams,
+  getTeams: getCachedTeams,
+  isTeamsStale,
+  isTeamsLoading,
+  getTeamsError,
 } = useOrganizationCacheStore.getState()

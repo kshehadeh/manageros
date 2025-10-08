@@ -15,7 +15,7 @@ import { useOrganizationCacheStore } from '@/lib/stores/organization-cache-store
  * 3. Use a more aggressive staleness threshold for better UX
  */
 export function CacheProvider({ children }: { children: React.ReactNode }) {
-  const { invalidatePeople } = useOrganizationCacheStore()
+  const { invalidatePeople, invalidateTeams } = useOrganizationCacheStore()
 
   useEffect(() => {
     // Invalidate cache when navigating to people-related pages
@@ -23,15 +23,17 @@ export function CacheProvider({ children }: { children: React.ReactNode }) {
     const handleRouteChange = () => {
       const currentPath = window.location.pathname
 
-      // Invalidate cache when navigating to people pages
+      // Invalidate cache when navigating to people/teams pages
       if (
         currentPath.includes('/people') ||
         currentPath.includes('/meetings') ||
-        currentPath.includes('/initiatives')
+        currentPath.includes('/initiatives') ||
+        currentPath.includes('/teams')
       ) {
         // Use a small delay to ensure the page has loaded
         setTimeout(() => {
           invalidatePeople()
+          invalidateTeams()
         }, 100)
       }
     }
@@ -58,7 +60,7 @@ export function CacheProvider({ children }: { children: React.ReactNode }) {
       history.pushState = originalPushState
       history.replaceState = originalReplaceState
     }
-  }, [invalidatePeople])
+  }, [invalidatePeople, invalidateTeams])
 
   return <>{children}</>
 }

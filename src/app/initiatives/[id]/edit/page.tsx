@@ -45,12 +45,7 @@ export default async function EditInitiative({
   }
 
   // Get teams and people for the form
-  const [teams] = await Promise.all([
-    prisma.team.findMany({
-      where: { organizationId: session.user.organizationId },
-      orderBy: { name: 'asc' },
-    }),
-  ])
+  // Teams are now fetched via cache in the component
 
   return (
     <InitiativeDetailClient
@@ -66,7 +61,7 @@ export default async function EditInitiative({
             </div>
           </div>
 
-          <InitiativeEditForm initiative={initiative} teams={teams} />
+          <InitiativeEditForm initiative={initiative} />
         </div>
       </div>
     </InitiativeDetailClient>

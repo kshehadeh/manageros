@@ -9,15 +9,18 @@ ManagerOS implements a sophisticated client-side caching system using Zustand to
 ### Core Components
 
 1. **Zustand Store** (`src/lib/stores/organization-cache-store.ts`)
-   - Centralized cache for organization data
+   - Centralized cache for organization data (people, teams)
    - Metadata tracking (lastFetched, isStale, isFetching)
-   - Automatic staleness detection (5-minute threshold)
+   - Automatic staleness detection (2-minute threshold)
    - Extensible structure for multiple entity types
 
 2. **Custom Hooks** (`src/hooks/use-organization-cache.ts`)
    - `usePeopleCache()` - Full-featured hook with stale-while-revalidate
    - `usePeople()` - Simple hook for basic usage
    - `usePeopleForSelect()` - Optimized for select components
+   - `useTeamsCache()` - Full-featured hook for teams with stale-while-revalidate
+   - `useTeams()` - Simple hook for basic teams usage
+   - `useTeamsForSelect()` - Optimized for team select components
 
 3. **Cache Provider** (`src/components/cache-provider.tsx`)
    - Registers cache invalidation functions with server actions
@@ -94,6 +97,52 @@ function MyForm() {
 ```
 
 **Note**: PersonSelect now always uses cached people data and no longer accepts a `people` prop. Email addresses are never displayed to keep the interface clean and consistent with a maximum of two lines per person entry.
+
+### Teams Usage
+
+```tsx
+import { useTeamsCache } from '@/hooks/use-organization-cache'
+
+function MyComponent() {
+  const { teams, isLoading, error } = useTeamsCache()
+
+  if (isLoading) return <div>Loading teams...</div>
+  if (error) return <div>Error loading teams: {error}</div>
+
+  return (
+    <div>
+      <h1>Teams in Organization</h1>
+      <ul>
+        {teams.map(team => (
+          <li key={team.id}>{team.name}</li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+```
+
+### Team Select Component Usage
+
+```tsx
+import { TeamSelect } from '@/components/ui/team-select'
+
+function MyForm() {
+  const [selectedTeamId, setSelectedTeamId] = useState<string | undefined>(
+    undefined
+  )
+  return (
+    <TeamSelect
+      value={selectedTeamId}
+      onValueChange={setSelectedTeamId}
+      placeholder='Select a team...'
+      includeNone={true}
+    />
+  )
+}
+```
+
+**Note**: TeamSelect now always uses cached teams data and no longer accepts a `teams` prop. This ensures consistent caching behavior across all components.
 
 ### Advanced Usage with Controls
 

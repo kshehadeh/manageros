@@ -1,5 +1,4 @@
 import { InitiativeForm } from '@/components/initiatives/initiative-form'
-import { getTeams } from '@/lib/actions/team'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -24,8 +23,6 @@ export default async function NewInitiativePage({
 
   const { ownerId, teamId } = await searchParams
 
-  const [teams] = await Promise.all([getTeams()])
-
   return (
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
@@ -36,11 +33,7 @@ export default async function NewInitiativePage({
         </div>
       </div>
 
-      <InitiativeForm
-        teams={teams}
-        preselectedOwnerId={ownerId}
-        preselectedTeamId={teamId}
-      />
+      <InitiativeForm preselectedOwnerId={ownerId} preselectedTeamId={teamId} />
     </div>
   )
 }

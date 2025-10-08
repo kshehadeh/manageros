@@ -113,3 +113,111 @@ export function usePeopleForSelect() {
     error,
   }
 }
+
+/**
+ * Hook for accessing teams data with automatic caching and stale-while-revalidate pattern
+ *
+ * Features:
+ * - Returns cached data immediately if available
+ * - Triggers background refresh if stale
+ * - Auto-fetches on first mount if empty
+ * - Network-aware (doesn't fetch when offline)
+ * - Stale-while-revalidate: shows old data while refreshing
+ */
+export function useTeamsCache() {
+  const {
+    teams,
+    teamsMetadata,
+    fetchTeams,
+    invalidateTeams,
+    isTeamsStale,
+    isTeamsLoading,
+    getTeamsError,
+  } = useOrganizationCacheStore()
+
+  const { isOnline } = useNetworkStatus()
+
+  // Auto-fetch on mount if no data or stale data
+  useEffect(() => {
+    const shouldFetch =
+      isOnline && // Only fetch when online
+      !isTeamsLoading() && // Not already fetching
+      (teams.length === 0 || isTeamsStale()) // No data or stale data
+
+    if (shouldFetch) {
+      fetchTeams()
+    }
+  }, [isOnline, teams.length, isTeamsStale, isTeamsLoading, fetchTeams])
+
+  // Manual refresh function
+  const refresh = useCallback(() => {
+    if (isOnline && !isTeamsLoading()) {
+      fetchTeams()
+    }
+  }, [isOnline, isTeamsLoading, fetchTeams])
+
+  // Manual invalidation function
+  const invalidate = useCallback(() => {
+    invalidateTeams()
+    // Auto-refresh after invalidation if online
+    if (isOnline) {
+      fetchTeams()
+    }
+  }, [invalidateTeams, isOnline, fetchTeams])
+
+  return {
+    // Data
+    teams,
+
+    // Loading states
+    isLoading: isTeamsLoading(),
+    isInitialLoading: teams.length === 0 && isTeamsLoading(),
+    isRefreshing: teams.length > 0 && isTeamsLoading(),
+
+    // Error state
+    error: getTeamsError(),
+
+    // Actions
+    refresh,
+    invalidate,
+
+    // Metadata
+    lastFetched: teamsMetadata.lastFetched,
+    isStale: isTeamsStale(),
+    isOnline,
+  }
+}
+
+/**
+ * Hook for accessing teams data with a simpler API
+ * Returns just the teams array and loading state
+ */
+export function useTeams() {
+  const { teams, isLoading, error } = useTeamsCache()
+
+  return {
+    teams,
+    isLoading,
+    error,
+  }
+}
+
+/**
+ * Hook for accessing teams data optimized for select components
+ * Returns simplified team objects with just id, name, parentId
+ */
+export function useTeamsForSelect() {
+  const { teams, isLoading, error } = useTeamsCache()
+
+  const selectTeams = teams.map(team => ({
+    id: team.id,
+    name: team.name,
+    parentId: team.parentId,
+  }))
+
+  return {
+    teams: selectTeams,
+    isLoading,
+    error,
+  }
+}

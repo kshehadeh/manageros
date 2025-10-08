@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { PersonSelect } from '@/components/ui/person-select'
+import { TeamSelect } from '@/components/ui/team-select'
 import {
   Card,
   CardContent,
@@ -51,13 +52,9 @@ interface InitiativeEditFormProps {
       }
     }>
   }
-  teams: Array<{ id: string; name: string }>
 }
 
-export function InitiativeEditForm({
-  initiative,
-  teams,
-}: InitiativeEditFormProps) {
+export function InitiativeEditForm({ initiative }: InitiativeEditFormProps) {
   // Format dates for input fields
   const formatDate = (date: Date | null) => {
     if (!date) return ''
@@ -422,26 +419,15 @@ export function InitiativeEditForm({
             <CardContent className='space-y-4'>
               <div className='space-y-2'>
                 <Label htmlFor='team'>Team</Label>
-                <Select
+                <TeamSelect
                   value={getSelectValue(formData.teamId)}
                   onValueChange={value =>
                     handleInputChange('teamId', getFormValue(value))
                   }
-                >
-                  <SelectTrigger
-                    className={errors.teamId ? 'border-destructive' : ''}
-                  >
-                    <SelectValue placeholder='Select a team' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='none'>No team</SelectItem>
-                    {teams.map(team => (
-                      <SelectItem key={team.id} value={team.id}>
-                        {team.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder='Select a team'
+                  includeNone={true}
+                  className={errors.teamId ? 'border-destructive' : ''}
+                />
                 {errors.teamId && (
                   <p className='text-sm text-destructive'>{errors.teamId}</p>
                 )}

@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { PersonSelect } from '@/components/ui/person-select'
+import { TeamSelect } from '@/components/ui/team-select'
 import {
   Card,
   CardContent,
@@ -26,13 +27,11 @@ import { MarkdownEditor } from '@/components/markdown-editor'
 import { AlertCircle, Trash2 } from 'lucide-react'
 
 interface InitiativeFormProps {
-  teams: Array<{ id: string; name: string }>
   preselectedOwnerId?: string
   preselectedTeamId?: string
 }
 
 export function InitiativeForm({
-  teams,
   preselectedOwnerId,
   preselectedTeamId,
 }: InitiativeFormProps) {
@@ -285,26 +284,15 @@ export function InitiativeForm({
             <CardContent className='space-y-4'>
               <div className='space-y-2'>
                 <Label htmlFor='team'>Team</Label>
-                <Select
+                <TeamSelect
                   value={getSelectValue(formData.teamId)}
                   onValueChange={value =>
                     handleInputChange('teamId', getFormValue(value))
                   }
-                >
-                  <SelectTrigger
-                    className={errors.teamId ? 'border-destructive' : ''}
-                  >
-                    <SelectValue placeholder='Select a team' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='none'>No team</SelectItem>
-                    {teams.map(team => (
-                      <SelectItem key={team.id} value={team.id}>
-                        {team.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder='Select a team'
+                  includeNone={true}
+                  className={errors.teamId ? 'border-destructive' : ''}
+                />
                 {errors.teamId && (
                   <p className='text-sm text-destructive'>{errors.teamId}</p>
                 )}

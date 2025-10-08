@@ -1,9 +1,5 @@
 import { PersonForm } from '@/components/people/person-form'
-import { getTeams } from '@/lib/actions/team'
-import {
-  getPeople,
-  getPerson,
-} from '@/lib/actions/person'
+import { getPerson } from '@/lib/actions/person'
 import { getJobRolesForSelection } from '@/lib/actions/job-roles'
 import { prisma } from '@/lib/db'
 import { notFound } from 'next/navigation'
@@ -31,19 +27,16 @@ export default async function EditPersonPage({ params }: EditPersonPageProps) {
   }
 
   const { id } = await params
-  const [teams, people, jobRoles, person, jiraAccount, githubAccount] =
-    await Promise.all([
-      getTeams(),
-      getPeople(),
-      getJobRolesForSelection(),
-      getPerson(id),
-      prisma.personJiraAccount.findFirst({
-        where: { personId: id },
-      }),
-      prisma.personGithubAccount.findFirst({
-        where: { personId: id },
-      }),
-    ])
+  const [jobRoles, person, jiraAccount, githubAccount] = await Promise.all([
+    getJobRolesForSelection(),
+    getPerson(id),
+    prisma.personJiraAccount.findFirst({
+      where: { personId: id },
+    }),
+    prisma.personGithubAccount.findFirst({
+      where: { personId: id },
+    }),
+  ])
 
   if (!person) {
     notFound()
@@ -57,8 +50,6 @@ export default async function EditPersonPage({ params }: EditPersonPageProps) {
         </div>
 
         <PersonForm
-          teams={teams}
-          people={people}
           jobRoles={jobRoles}
           person={person}
           jiraAccount={jiraAccount}

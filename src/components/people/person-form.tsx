@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { PersonSelect } from '@/components/ui/person-select'
+import { TeamSelect } from '@/components/ui/team-select'
 import {
   Card,
   CardContent,
@@ -29,13 +30,6 @@ import { AlertCircle } from 'lucide-react'
 import { FaJira, FaGithub } from 'react-icons/fa'
 
 interface PersonFormProps {
-  teams: Array<{ id: string; name: string }>
-  people: Array<{
-    id: string
-    name: string
-    email: string | null
-    avatar?: string | null
-  }>
   jobRoles: Array<{
     id: string
     title: string
@@ -85,7 +79,6 @@ interface PersonFormProps {
 }
 
 export function PersonForm({
-  teams,
   jobRoles,
   initialManagerId,
   initialTeamId,
@@ -259,26 +252,15 @@ export function PersonForm({
             <CardContent className='space-y-4'>
               <div className='space-y-2'>
                 <Label htmlFor='team'>Team</Label>
-                <Select
+                <TeamSelect
                   value={getSelectValue(formData.teamId)}
                   onValueChange={value =>
                     handleInputChange('teamId', getFormValue(value))
                   }
-                >
-                  <SelectTrigger
-                    className={errors.teamId ? 'border-destructive' : ''}
-                  >
-                    <SelectValue placeholder='Select a team' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='none'>No team</SelectItem>
-                    {teams.map(team => (
-                      <SelectItem key={team.id} value={team.id}>
-                        {team.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder='Select a team'
+                  includeNone={true}
+                  className={errors.teamId ? 'border-destructive' : ''}
+                />
                 {errors.teamId && (
                   <p className='text-sm text-destructive'>{errors.teamId}</p>
                 )}
