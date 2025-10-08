@@ -20,6 +20,7 @@ import { type CommandItemDescriptor, type CommandSource } from './types'
 import { coreCommandSource } from './sources/core'
 import { searchCommandSource } from './sources/search'
 import { useDebounce } from '@/hooks/use-debounce'
+import { getCurrentUserWithPerson } from '@/lib/actions/organization'
 
 const sources: CommandSource[] = [coreCommandSource, searchCommandSource]
 
@@ -31,9 +32,29 @@ export function CommandPalette() {
   const [query, setQuery] = useState('')
   const [items, setItems] = useState<CommandItemDescriptor[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [currentUserPersonId, setCurrentUserPersonId] = useState<
+    string | undefined
+  >()
 
   // Debounce the search query to avoid frequent API calls
   const debouncedQuery = useDebounce(query, 300)
+
+  // Fetch current user's person ID when session is available
+  useEffect(() => {
+    if (!session?.user) return
+
+    const fetchCurrentUserPerson = async () => {
+      try {
+        const { person } = await getCurrentUserWithPerson()
+        setCurrentUserPersonId(person?.id)
+      } catch (error) {
+        console.error('Failed to fetch current user person:', error)
+        setCurrentUserPersonId(undefined)
+      }
+    }
+
+    fetchCurrentUserPerson()
+  }, [session?.user])
 
   useEffect(() => {
     let isCancelled = false
@@ -42,7 +63,9 @@ export function CommandPalette() {
       try {
         const userRole = session?.user?.role
         const all = await Promise.all(
-          sources.map(s => s.getItems(debouncedQuery, userRole, pathname))
+          sources.map(s =>
+            s.getItems(debouncedQuery, userRole, pathname, currentUserPersonId)
+          )
         )
         if (isCancelled) return
         setItems(all.flat())
@@ -54,7 +77,7 @@ export function CommandPalette() {
     return () => {
       isCancelled = true
     }
-  }, [debouncedQuery, session?.user?.role, pathname])
+  }, [debouncedQuery, session?.user?.role, pathname, currentUserPersonId])
 
   const grouped = useMemo<Record<string, CommandItemDescriptor[]>>(() => {
     const byGroup: Record<string, CommandItemDescriptor[]> = {}

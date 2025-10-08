@@ -21,7 +21,12 @@ async function searchAll(query: string): Promise<SearchResultBase[]> {
 export const searchCommandSource: CommandSource = {
   id: 'search',
   label: 'Search',
-  getItems: async (query: string, _userRole?: string, _pathname?: string) => {
+  getItems: async (
+    query: string,
+    _userRole?: string,
+    _pathname?: string,
+    _currentUserPersonId?: string
+  ) => {
     const results = await searchAll(query)
     const items: CommandItemDescriptor[] = results.map(r => {
       const base = {

@@ -15,7 +15,8 @@ import { type CommandItemDescriptor, type CommandSource } from '../types'
 function createStaticItems(
   query: string,
   userRole?: string,
-  pathname?: string
+  pathname?: string,
+  currentUserPersonId?: string
 ): CommandItemDescriptor[] {
   const q = query.toLowerCase()
   const items: CommandItemDescriptor[] = [
@@ -40,7 +41,10 @@ function createStaticItems(
       keywords: ['1:1', 'one on one', 'meeting', 'schedule', 'calendar'],
       group: 'Quick Actions',
       perform: ({ closePalette, router }) => {
-        router.push('/oneonones/new')
+        const url = currentUserPersonId
+          ? `/oneonones/new?participant1Id=${currentUserPersonId}`
+          : '/oneonones/new'
+        router.push(url)
         closePalette()
       },
     },
@@ -194,7 +198,12 @@ function createStaticItems(
 export const coreCommandSource: CommandSource = {
   id: 'core',
   label: 'Core',
-  getItems: async (query: string, userRole?: string, pathname?: string) => {
-    return createStaticItems(query, userRole, pathname)
+  getItems: async (
+    query: string,
+    userRole?: string,
+    pathname?: string,
+    currentUserPersonId?: string
+  ) => {
+    return createStaticItems(query, userRole, pathname, currentUserPersonId)
   },
 }

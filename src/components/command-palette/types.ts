@@ -24,6 +24,7 @@ export interface CommandSource {
   getItems: (
     _query: string,
     _userRole?: string,
-    _pathname?: string
+    _pathname?: string,
+    _currentUserPersonId?: string
   ) => Promise<CommandItemDescriptor[]>
 }

@@ -208,6 +208,46 @@ input[type='time']::-webkit-calendar-picker-indicator {
   cursor: pointer;
 }
 
+/* MDEditor Theme Integration */
+.w-md-editor {
+  background-color: hsl(var(--background)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: calc(var(--radius) - 2px) !important;
+}
+
+.w-md-editor .w-md-editor-bar {
+  background-color: hsl(var(--muted)) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+}
+
+.w-md-editor .w-md-editor-text {
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.w-md-editor .w-md-editor-text textarea {
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.w-md-editor .w-md-editor-text textarea::placeholder {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.w-md-editor .w-md-editor-bar .w-md-editor-bar-item button {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.w-md-editor .w-md-editor-bar .w-md-editor-bar-item button:hover {
+  background-color: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+}
+
+.w-md-editor .w-md-editor-bar .w-md-editor-bar-item button.active {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+
 /* Page Layout Standardization */
 .page-container {
   @apply space-y-6;

@@ -682,6 +682,7 @@ export async function getPeopleForOneOnOne() {
       name: true,
       email: true,
       role: true,
+      avatar: true,
       birthday: true,
       manager: {
         select: {

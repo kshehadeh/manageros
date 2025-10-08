@@ -1,15 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import {
-  createOneOnOne,
-  updateOneOnOne,
-} from '@/lib/actions/oneonone'
+import { createOneOnOne, updateOneOnOne } from '@/lib/actions/oneonone'
 import { type OneOnOneFormData } from '@/lib/validations'
 import Link from 'next/link'
 import { MarkdownEditor } from './markdown-editor'
 import { Button } from '@/components/ui/button'
-import { Handshake } from 'lucide-react'
+import { Handshake, Calendar, FileText } from 'lucide-react'
+import { SectionHeader } from '@/components/ui/section-header'
+import { PersonSelect } from '@/components/ui/person-select'
 import {
   utcToLocalDateTimeString,
   getCurrentLocalDateTimeString,
@@ -20,6 +19,7 @@ interface Person {
   name: string
   email: string | null
   role?: string | null
+  avatar?: string | null
   manager?: { id: string; name: string } | null
   reports: Array<{ id: string; name: string }>
 }
@@ -100,9 +100,9 @@ export function OneOnOneForm({
   return (
     <form onSubmit={handleSubmit} className='space-y-6'>
       {/* Meeting Details */}
-      <div className='card'>
-        <h3 className='font-semibold mb-4'>Meeting Details</h3>
-        <p className='text-sm text-muted-foreground mb-4'>
+      <div className='space-y-4'>
+        <SectionHeader icon={Calendar} title='Meeting Details' />
+        <p className='text-sm text-muted-foreground'>
           These meetings will only be visible to the participants.
         </p>
         <div className='space-y-4'>
@@ -111,44 +111,34 @@ export function OneOnOneForm({
               <label className='block text-sm font-medium mb-2'>
                 Participant 1 *
               </label>
-              <select
+              <PersonSelect
                 value={formData.participant1Id}
-                onChange={e =>
-                  setFormData({ ...formData, participant1Id: e.target.value })
+                onValueChange={value =>
+                  setFormData({ ...formData, participant1Id: value })
                 }
-                className='input'
-                required
-              >
-                <option value=''>Select participant 1</option>
-                {managerOptions.map(person => (
-                  <option key={person.id} value={person.id}>
-                    {person.name}
-                    {person.email ? ` (${person.email})` : ''}
-                  </option>
-                ))}
-              </select>
+                placeholder='Select participant 1'
+                people={managerOptions}
+                showAvatar={true}
+                showRole={true}
+                showEmail={false}
+              />
             </div>
 
             <div>
               <label className='block text-sm font-medium mb-2'>
                 Participant 2 *
               </label>
-              <select
+              <PersonSelect
                 value={formData.participant2Id}
-                onChange={e =>
-                  setFormData({ ...formData, participant2Id: e.target.value })
+                onValueChange={value =>
+                  setFormData({ ...formData, participant2Id: value })
                 }
-                className='input'
-                required
-              >
-                <option value=''>Select participant 2</option>
-                {reportOptions.map(person => (
-                  <option key={person.id} value={person.id}>
-                    {person.name}
-                    {person.email ? ` (${person.email})` : ''}
-                  </option>
-                ))}
-              </select>
+                placeholder='Select participant 2'
+                people={reportOptions}
+                showAvatar={true}
+                showRole={true}
+                showEmail={false}
+              />
             </div>
           </div>
 
@@ -168,15 +158,13 @@ export function OneOnOneForm({
       </div>
 
       {/* Notes */}
-      <div className='card'>
-        <div>
-          <label className='block text-sm font-medium mb-2'>Notes</label>
-          <MarkdownEditor
-            value={formData.notes || ''}
-            onChange={value => setFormData({ ...formData, notes: value })}
-            placeholder='Enter meeting notes... Use Markdown for formatting!'
-          />
-        </div>
+      <div className='space-y-4'>
+        <SectionHeader icon={FileText} title='Notes' />
+        <MarkdownEditor
+          value={formData.notes || ''}
+          onChange={value => setFormData({ ...formData, notes: value })}
+          placeholder='Enter meeting notes... Use Markdown for formatting!'
+        />
       </div>
 
       {/* Submit Button */}

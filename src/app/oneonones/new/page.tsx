@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/db'
+import { Handshake } from 'lucide-react'
 
 interface NewOneOnOnePageProps {
   searchParams: Promise<{
@@ -76,12 +77,10 @@ export default async function NewOneOnOnePage({
   return (
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
-        <div>
-          <h1 className='text-2xl font-bold'>New 1:1 Meeting</h1>
-          <p className='text-neutral-600 mt-1'>
-            Schedule a new one-on-one meeting
-          </p>
-        </div>
+        <h2 className='text-lg font-semibold flex items-center gap-2'>
+          <Handshake className='w-5 h-5' />
+          New 1:1 Meeting
+        </h2>
       </div>
 
       <OneOnOneForm
