@@ -16,7 +16,6 @@ export function DashboardUpcomingMeetings({
   return (
     <SharedMeetingsTable
       meetings={meetings as (MeetingWithRelations | UpcomingMeeting)[]}
-      variant='dashboard'
       emptyStateMessage='No upcoming meetings'
     />
   )

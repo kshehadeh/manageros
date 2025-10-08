@@ -78,7 +78,6 @@ export function MeetingsPageClient({ meetings }: MeetingsPageClientProps) {
         <SharedMeetingsTable
           meetings={meetings}
           filteredMeetings={filteredMeetings}
-          variant='full'
         />
       </div>
     </div>

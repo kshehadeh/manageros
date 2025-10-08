@@ -583,6 +583,36 @@ export async function getDirectReports() {
             status: 'active',
           },
           include: {
+            manager: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                status: true,
+                birthday: true,
+                reports: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    role: true,
+                    status: true,
+                    birthday: true,
+                  },
+                },
+              },
+            },
+            reports: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                status: true,
+                birthday: true,
+              },
+            },
             team: {
               select: {
                 id: true,
@@ -594,6 +624,15 @@ export async function getDirectReports() {
                 id: true,
                 name: true,
                 email: true,
+                role: true,
+              },
+            },
+            jobRole: {
+              select: {
+                id: true,
+                title: true,
+                level: true,
+                domain: true,
               },
             },
             _count: {
@@ -614,7 +653,11 @@ export async function getDirectReports() {
       return []
     }
 
-    return currentPerson.reports
+    // Add level field to each report (direct reports are at level 1)
+    return currentPerson.reports.map(report => ({
+      ...report,
+      level: 1,
+    }))
   } catch (error) {
     console.error('Error fetching direct reports:', error)
     return []

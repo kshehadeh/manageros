@@ -1,7 +1,5 @@
 'use client'
 
-import { useTransition } from 'react'
-import { useRouter } from 'next/navigation'
 import { SharedMeetingsTable } from '@/components/meetings/shared-meetings-table'
 import { SectionHeader } from '@/components/ui/section-header'
 import { CreateMeetingModal } from './create-meeting-modal'
@@ -40,15 +38,6 @@ export function InitiativeMeetings({
   teams,
   currentTeam,
 }: InitiativeMeetingsProps) {
-  const router = useRouter()
-  const [, startTransition] = useTransition()
-
-  const handleCreateMeeting = () => {
-    startTransition(() => {
-      router.push(`/meetings/new?initiativeId=${initiativeId}`)
-    })
-  }
-
   return (
     <div className='page-section'>
       <SectionHeader
@@ -66,10 +55,6 @@ export function InitiativeMeetings({
       />
       <SharedMeetingsTable
         meetings={meetings}
-        variant='initiative'
-        initiativeId={initiativeId}
-        showCreateButton={false}
-        onCreateMeeting={handleCreateMeeting}
         emptyStateMessage='No meetings for this initiative'
       />
     </div>
