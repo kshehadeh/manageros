@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
+import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import {
   MeetingInstance,
   Person,
@@ -79,9 +80,13 @@ export function MeetingInstanceCard({ instance }: MeetingInstanceCardProps) {
         </div>
 
         {instance.notes && (
-          <p className='text-sm text-muted-foreground line-clamp-2'>
-            {instance.notes}
-          </p>
+          <div className='line-clamp-2'>
+            <ReadonlyNotesField
+              content={instance.notes}
+              variant='compact'
+              showEmptyState={false}
+            />
+          </div>
         )}
 
         {instance.participants.length > 0 && (

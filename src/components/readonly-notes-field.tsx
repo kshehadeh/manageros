@@ -10,25 +10,6 @@ interface ReadonlyNotesFieldProps {
   emptyStateText?: string
 }
 
-// Simple URL detection regex
-const urlRegex =
-  /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g
-
-// Function to detect and wrap URLs in text
-const linkifyText = (text: string) => {
-  return text.replace(urlRegex, url => {
-    let href = url
-    if (!url.startsWith('http')) {
-      if (url.includes('@')) {
-        href = `mailto:${url}`
-      } else {
-        href = `https://${url}`
-      }
-    }
-    return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="text-primary hover:text-primary/90 underline decoration-primary/30 hover:decoration-primary/60 transition-colors">${url}</a>`
-  })
-}
-
 export function ReadonlyNotesField({
   content,
   className = '',
@@ -58,9 +39,6 @@ export function ReadonlyNotesField({
         return 'prose prose-sm max-w-none'
     }
   }
-
-  // Process content to add links
-  const processedContent = linkifyText(content)
 
   return (
     <div className={`${getVariantClasses()} text-foreground ${className}`}>
@@ -172,7 +150,7 @@ export function ReadonlyNotesField({
           ),
         }}
       >
-        {processedContent}
+        {content}
       </ReactMarkdown>
     </div>
   )

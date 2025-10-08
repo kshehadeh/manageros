@@ -5,8 +5,9 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
+import { SectionHeader } from '@/components/ui/section-header'
 import { notFound } from 'next/navigation'
-import { Calendar, Users } from 'lucide-react'
+import { Calendar, Users, StickyNote } from 'lucide-react'
 import { MeetingInstanceDetailBreadcrumbClient } from '@/components/meetings/meeting-instance-detail-breadcrumb-client'
 import { MeetingInstanceActionsDropdown } from '@/components/meetings/meeting-instance-actions-dropdown'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
@@ -43,10 +44,9 @@ export default async function MeetingInstanceDetailPage({
 
   const formatDateTime = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
+      month: 'short',
       day: 'numeric',
+      year: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,
@@ -97,13 +97,10 @@ export default async function MeetingInstanceDetailPage({
                   <Calendar className='h-3 w-3' />
                   <span>{formatDateTime(scheduledDate)}</span>
                 </div>
-              </div>
-
-              <div className='flex items-center gap-3 mt-2'>
-                {isPast && <Badge variant='secondary'>Past Instance</Badge>}
-                <Badge variant='outline'>
+                {isPast && <span>Past Instance</span>}
+                <span>
                   {attendedCount}/{totalParticipants} attended
-                </Badge>
+                </span>
               </div>
             </div>
             <MeetingInstanceActionsDropdown
@@ -113,53 +110,62 @@ export default async function MeetingInstanceDetailPage({
           </div>
         </div>
 
-        {/* Notes section */}
-        <div className='page-section'>
-          <ReadonlyNotesField
-            content={meetingInstance.notes || ''}
-            variant='default'
-            emptyStateText='No notes for this meeting instance'
-          />
-        </div>
+        {/* Main Content and Sidebar */}
+        <div className='flex flex-col lg:flex-row gap-6'>
+          {/* Main Content */}
+          <div className='flex-1 min-w-0'>
+            <div className='space-y-6'>
+              {/* Notes section */}
+              <div className='page-section'>
+                <SectionHeader icon={StickyNote} title='Notes' />
+                <ReadonlyNotesField
+                  content={meetingInstance.notes || ''}
+                  variant='default'
+                  emptyStateText='No notes for this meeting instance'
+                />
+              </div>
 
-        {/* Links */}
-        <div className='page-section'>
-          <LinkManager
-            entityType='MeetingInstance'
-            entityId={meetingInstance.id}
-            links={entityLinks}
-          />
-        </div>
-
-        {meetingInstance.participants.length > 0 && (
-          <div className='page-section'>
-            <h2 className='text-lg font-semibold mb-4 flex items-center gap-2'>
-              <Users className='h-5 w-5' />
-              Participants
-            </h2>
-            <div className='space-y-3'>
-              {meetingInstance.participants.map(participant => (
-                <div
-                  key={participant.id}
-                  className='flex items-center justify-between'
-                >
-                  <div className='flex items-center gap-3'>
-                    <Link
-                      href={`/people/${participant.person.id}`}
-                      className='text-blue-600 hover:text-blue-800 font-medium'
-                    >
-                      {participant.person.name}
-                    </Link>
+              {/* Participants */}
+              {meetingInstance.participants.length > 0 && (
+                <div className='page-section'>
+                  <SectionHeader icon={Users} title='Participants' />
+                  <div className='space-y-3'>
+                    {meetingInstance.participants.map(participant => (
+                      <div
+                        key={participant.id}
+                        className='flex items-center justify-between'
+                      >
+                        <div className='flex items-center gap-3'>
+                          <Link
+                            href={`/people/${participant.person.id}`}
+                            className='hover:text-primary transition-colors'
+                          >
+                            {participant.person.name}
+                          </Link>
+                        </div>
+                        <Badge className={getStatusColor(participant.status)}>
+                          {participant.status.charAt(0).toUpperCase() +
+                            participant.status.slice(1)}
+                        </Badge>
+                      </div>
+                    ))}
                   </div>
-                  <Badge className={getStatusColor(participant.status)}>
-                    {participant.status.charAt(0).toUpperCase() +
-                      participant.status.slice(1)}
-                  </Badge>
                 </div>
-              ))}
+              )}
             </div>
           </div>
-        )}
+
+          {/* Right Sidebar - Full width on mobile, fixed width on desktop */}
+          <div className='w-full lg:w-80 lg:flex-shrink-0'>
+            <div className='page-section'>
+              <LinkManager
+                entityType='MeetingInstance'
+                entityId={meetingInstance.id}
+                links={entityLinks}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </MeetingInstanceDetailBreadcrumbClient>
   )
