@@ -8,6 +8,7 @@ import {
   MessageCircle,
   Settings,
   BarChart3,
+  Handshake,
 } from 'lucide-react'
 import { type CommandItemDescriptor, type CommandSource } from '../types'
 
@@ -27,6 +28,43 @@ function createStaticItems(
       group: 'Quick Actions',
       perform: ({ closePalette }) => {
         const ev = new CustomEvent('command:openCreateTaskModal')
+        window.dispatchEvent(ev)
+        closePalette()
+      },
+    },
+    {
+      id: 'oneonone.create',
+      title: 'Create 1:1 Meeting',
+      subtitle: 'Schedule a new one-on-one meeting',
+      icon: <Handshake className='h-4 w-4' />,
+      keywords: ['1:1', 'one on one', 'meeting', 'schedule', 'calendar'],
+      group: 'Quick Actions',
+      perform: ({ closePalette, router }) => {
+        router.push('/oneonones/new')
+        closePalette()
+      },
+    },
+    {
+      id: 'initiative.create',
+      title: 'Create Initiative',
+      subtitle: 'Start a new initiative or OKR',
+      icon: <Rocket className='h-4 w-4' />,
+      keywords: ['initiative', 'okr', 'objective', 'goal', 'project'],
+      group: 'Quick Actions',
+      perform: ({ closePalette, router }) => {
+        router.push('/initiatives/new')
+        closePalette()
+      },
+    },
+    {
+      id: 'feedback.create',
+      title: 'Create Feedback',
+      subtitle: 'Give feedback to a team member',
+      icon: <MessageCircle className='h-4 w-4' />,
+      keywords: ['feedback', 'review', 'comment', 'praise', 'criticism'],
+      group: 'Quick Actions',
+      perform: ({ closePalette }) => {
+        const ev = new CustomEvent('command:openPersonSelectorModal')
         window.dispatchEvent(ev)
         closePalette()
       },

@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { PersonSelect } from '@/components/ui/person-select'
 import {
   Card,
   CardContent,
@@ -26,7 +27,12 @@ import { AlertCircle, Trash2 } from 'lucide-react'
 
 interface InitiativeFormProps {
   teams: Array<{ id: string; name: string }>
-  people: Array<{ id: string; name: string; email: string | null }>
+  people: Array<{
+    id: string
+    name: string
+    email: string | null
+    avatar?: string | null
+  }>
   preselectedOwnerId?: string
   preselectedTeamId?: string
 }
@@ -516,7 +522,7 @@ export function InitiativeForm({
                           <Label htmlFor={`owner-person-${index}`}>
                             Person
                           </Label>
-                          <Select
+                          <PersonSelect
                             value={getSelectValue(owner.personId)}
                             onValueChange={value =>
                               updateOwner(
@@ -525,20 +531,14 @@ export function InitiativeForm({
                                 getFormValue(value)
                               )
                             }
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder='Select person' />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value='none'>No person</SelectItem>
-                              {people.map(person => (
-                                <SelectItem key={person.id} value={person.id}>
-                                  {person.name}
-                                  {person.email ? ` (${person.email})` : ''}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            placeholder='Select person'
+                            people={people}
+                            includeNone={true}
+                            noneLabel='No person'
+                            showAvatar={true}
+                            showRole={true}
+                            showEmail={true}
+                          />
                         </div>
                         <div className='space-y-2'>
                           <Label htmlFor={`owner-role-${index}`}>Role</Label>

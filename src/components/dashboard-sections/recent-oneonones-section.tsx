@@ -26,39 +26,53 @@ export async function DashboardRecentOneOnOnesSection({
   if (!recentOneOnOnes || recentOneOnOnes.length === 0) return null
 
   return (
-    <ExpandableSection title='Recent 1:1s' viewAllHref='/oneonones'>
+    <ExpandableSection
+      title='Recent 1:1s'
+      icon='Handshake'
+      viewAllHref='/oneonones'
+    >
       {recentOneOnOnes.map(oneOnOne => (
         <Link
           key={oneOnOne.id}
           href={`/oneonones/${oneOnOne.id}`}
-          className='block card hover:bg-neutral-800/60'
+          className='block card hover:bg-accent/50 transition-colors'
         >
-          <div className='flex items-center justify-between'>
-            <div>
-              <div className='font-medium'>
-                {oneOnOne.manager?.user?.id === userId ? (
-                  <span>
-                    With{' '}
-                    <span className='hover:text-blue-400'>
-                      {oneOnOne.report.name}
-                    </span>
+          <div className='space-y-1'>
+            <div className='font-medium text-foreground'>
+              {oneOnOne.manager?.user?.id === userId ? (
+                <span>
+                  With{' '}
+                  <span className='hover:text-primary transition-colors'>
+                    {oneOnOne.report.name}
                   </span>
-                ) : (
-                  <span>
-                    With{' '}
-                    <span className='hover:text-blue-400'>
-                      {oneOnOne.manager.name}
-                    </span>
+                </span>
+              ) : (
+                <span>
+                  With{' '}
+                  <span className='hover:text-primary transition-colors'>
+                    {oneOnOne.manager.name}
                   </span>
-                )}
-              </div>
-              <div className='text-xs text-neutral-500 mt-1'>
-                {oneOnOne.scheduledAt
-                  ? new Date(oneOnOne.scheduledAt).toLocaleDateString()
-                  : 'TBD'}
-              </div>
+                </span>
+              )}
             </div>
-            <div className='text-xs text-neutral-500'>Participant</div>
+            <div className='text-xs text-muted-foreground'>
+              {oneOnOne.scheduledAt
+                ? new Date(oneOnOne.scheduledAt).toLocaleDateString()
+                : 'TBD'}
+            </div>
+            {oneOnOne.notes && (
+              <div
+                className='text-sm text-muted-foreground break-words'
+                style={{
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                }}
+              >
+                {oneOnOne.notes}
+              </div>
+            )}
           </div>
         </Link>
       ))}

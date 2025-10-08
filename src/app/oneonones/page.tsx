@@ -5,7 +5,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
-import { Eye, UserCheck } from 'lucide-react'
+import { Eye, Handshake } from 'lucide-react'
 import { EditIconButton } from '@/components/edit-icon-button'
 
 export default async function OneOnOnesPage() {
@@ -23,7 +23,7 @@ export default async function OneOnOnesPage() {
         <div className='flex items-center justify-between'>
           <div>
             <div className='flex items-baseline gap-2'>
-              <UserCheck className='h-6 w-6 text-muted-foreground' />
+              <Handshake className='h-6 w-6 text-muted-foreground' />
               <h1 className='page-title'>1:1s</h1>
             </div>
             <p className='page-section-subtitle'>

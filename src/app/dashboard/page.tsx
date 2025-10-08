@@ -56,11 +56,9 @@ export default async function Home() {
             />
           </Suspense>
 
-          <div className='grid gap-6 md:grid-cols-2'>
-            <Suspense fallback={<RecentOneOnOnesSectionFallback />}>
-              <DashboardRecentOneOnOnesSection userId={user.id} />
-            </Suspense>
-          </div>
+          <Suspense fallback={<RecentOneOnOnesSectionFallback />}>
+            <DashboardRecentOneOnOnesSection userId={user.id} />
+          </Suspense>
 
           <Suspense fallback={<UpcomingMeetingsSectionFallback />}>
             <DashboardUpcomingMeetingsSection

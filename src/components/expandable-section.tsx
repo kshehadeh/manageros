@@ -17,12 +17,16 @@ import {
   Rocket,
   Users2,
   User,
+  UserCheck,
+  Handshake,
 } from 'lucide-react'
 import Link from 'next/link'
 
 // Icon mapping for commonly used icons
 const iconMap = {
   User,
+  UserCheck,
+  Handshake,
   ListTodo,
   Calendar,
   FileText,

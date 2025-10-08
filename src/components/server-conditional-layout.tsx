@@ -12,6 +12,7 @@ import { Toaster } from 'sonner'
 import { CommandPaletteProvider } from '@/components/command-palette/provider'
 import { CommandPalette } from '@/components/command-palette/command-palette'
 import { CreateTaskModal } from '@/components/command-palette/create-task-modal'
+import { PersonSelectorModal } from '@/components/command-palette/person-selector-modal'
 import { OfflineAwareLayout } from '@/components/offline-aware-layout'
 import { AIChatSidebarWrapper } from '@/components/ai-chat-sidebar-wrapper'
 import { getFilteredNavigation, getCurrentUser } from '@/lib/auth-utils'
@@ -98,6 +99,7 @@ export default async function ServerConditionalLayout({
                 </OfflineAwareLayout>
                 <CommandPalette />
                 <CreateTaskModal />
+                <PersonSelectorModal />
               </MobileMenuProvider>
             </BreadcrumbProvider>
           </CommandPaletteProvider>

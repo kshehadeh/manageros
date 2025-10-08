@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/db'
 import { SectionHeader } from '@/components/ui/section-header'
 import { Button } from '@/components/ui/button'
-import { MessageCircle } from 'lucide-react'
+import { Handshake } from 'lucide-react'
 import Link from 'next/link'
 
 interface OneOnOneMeetingsSectionProps {
@@ -65,7 +65,7 @@ export async function OneOnOneMeetingsSection({
 
   return (
     <section>
-      <SectionHeader icon={MessageCircle} title='1:1 Meetings' />
+      <SectionHeader icon={Handshake} title='1:1 Meetings' />
       <div className='space-y-3'>
         {/* As Manager */}
         {oneOnOnesAsManager.length > 0 && (

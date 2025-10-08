@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { PersonSelect } from '@/components/ui/person-select'
 import {
   Card,
   CardContent,
@@ -19,10 +20,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { useState } from 'react'
-import {
-  createPerson,
-  updatePerson,
-} from '@/lib/actions/person'
+import { createPerson, updatePerson } from '@/lib/actions/person'
 import { type PersonFormData, personSchema } from '@/lib/validations'
 import { UserLinkForm } from '@/components/user-link-form'
 import { JiraAccountLinker } from '@/components/jira-account-linker'
@@ -32,7 +30,12 @@ import { FaJira, FaGithub } from 'react-icons/fa'
 
 interface PersonFormProps {
   teams: Array<{ id: string; name: string }>
-  people: Array<{ id: string; name: string; email: string | null }>
+  people: Array<{
+    id: string
+    name: string
+    email: string | null
+    avatar?: string | null
+  }>
   jobRoles: Array<{
     id: string
     title: string
@@ -287,27 +290,20 @@ export function PersonForm({
 
               <div className='space-y-2'>
                 <Label htmlFor='manager'>Manager</Label>
-                <Select
+                <PersonSelect
                   value={getSelectValue(formData.managerId)}
                   onValueChange={value =>
                     handleInputChange('managerId', getFormValue(value))
                   }
-                >
-                  <SelectTrigger
-                    className={errors.managerId ? 'border-destructive' : ''}
-                  >
-                    <SelectValue placeholder='Select a manager' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='none'>No manager</SelectItem>
-                    {managerOptions.map(person => (
-                      <SelectItem key={person.id} value={person.id}>
-                        {person.name}
-                        {person.email ? ` (${person.email})` : ''}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder='Select a manager'
+                  people={managerOptions}
+                  includeNone={true}
+                  noneLabel='No manager'
+                  showAvatar={true}
+                  showRole={true}
+                  showEmail={true}
+                  className={errors.managerId ? 'border-destructive' : ''}
+                />
               </div>
             </CardContent>
           </Card>

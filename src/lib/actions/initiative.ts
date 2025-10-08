@@ -289,6 +289,80 @@ export async function getInitiatives() {
   return initiatives
 }
 
+export async function getInitiativesForCurrentUser() {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to view initiatives')
+  }
+
+  // Check if user is linked to a person
+  if (!user.personId) {
+    return []
+  }
+
+  const initiatives = await prisma.initiative.findMany({
+    where: {
+      organizationId: user.organizationId,
+      status: { notIn: ['done', 'canceled'] },
+      OR: [
+        {
+          // Initiatives where the user is an owner
+          owners: {
+            some: {
+              personId: user.personId,
+            },
+          },
+        },
+        {
+          // Initiatives where the user has assigned tasks
+          tasks: {
+            some: {
+              assigneeId: user.personId,
+            },
+          },
+        },
+      ],
+    },
+    include: {
+      objectives: {
+        select: {
+          id: true,
+          title: true,
+          keyResult: true,
+          sortIndex: true,
+        },
+      },
+      team: true,
+      owners: {
+        include: {
+          person: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+      tasks: {
+        select: {
+          status: true,
+        },
+      },
+      _count: {
+        select: {
+          checkIns: true,
+          tasks: true,
+        },
+      },
+    },
+    orderBy: { updatedAt: 'desc' },
+  })
+
+  return initiatives
+}
+
 export async function createObjective(
   initiativeId: string,
   title: string,

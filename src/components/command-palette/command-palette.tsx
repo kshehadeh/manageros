@@ -103,16 +103,19 @@ export function CommandPalette() {
                     key={item.id}
                     value={[item.title, item.subtitle, ...(item.keywords || [])]
                       .filter(Boolean)
-                      .join(' ')}
+                      .join(' ')
+                      .toLowerCase()}
                     onSelect={() => item.perform({ closePalette, router })}
                   >
                     {item.icon}
-                    <span className='ml-2'>{item.title}</span>
-                    {item.subtitle && (
-                      <span className='ml-2 text-xs text-muted-foreground truncate'>
-                        {item.subtitle}
-                      </span>
-                    )}
+                    <div className='ml-2 flex flex-col'>
+                      <span>{item.title}</span>
+                      {item.subtitle && (
+                        <span className='text-xs text-muted-foreground truncate'>
+                          {item.subtitle}
+                        </span>
+                      )}
+                    </div>
                   </CommandItem>
                 ))}
               </CommandGroup>

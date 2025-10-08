@@ -720,6 +720,7 @@ export async function getPeopleForFeedbackFilters() {
       email: true,
       role: true,
       birthday: true,
+      avatar: true,
     },
     orderBy: { name: 'asc' },
   })

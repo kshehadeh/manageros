@@ -5,13 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { PersonSelect } from '@/components/ui/person-select'
 import {
   Card,
   CardContent,
@@ -51,7 +45,12 @@ export function DynamicReportForm({
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [people, setPeople] = useState<
-    Array<{ id: string; name: string; email: string | null }>
+    Array<{
+      id: string
+      name: string
+      email: string | null
+      avatar?: string | null
+    }>
   >([])
   const router = useRouter()
 
@@ -146,22 +145,16 @@ export function DynamicReportForm({
             {field.name === 'personId' ? 'Person' : field.name}
             {field.required && <span className='text-red-500 ml-1'>*</span>}
           </Label>
-          <Select
+          <PersonSelect
             value={value}
             onValueChange={val => handleInputChange(field.name, val)}
-            required={field.required}
-          >
-            <SelectTrigger className={hasError ? 'border-red-500' : ''}>
-              <SelectValue placeholder='Select a person...' />
-            </SelectTrigger>
-            <SelectContent>
-              {people.map(person => (
-                <SelectItem key={person.id} value={person.id}>
-                  {person.name} ({person.email})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            placeholder='Select a person...'
+            people={people}
+            showAvatar={true}
+            showRole={true}
+            showEmail={true}
+            className={hasError ? 'border-red-500' : ''}
+          />
           {hasError && (
             <p className='text-sm text-red-500'>{errors[field.name]}</p>
           )}

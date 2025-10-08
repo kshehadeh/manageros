@@ -2,6 +2,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { SectionHeader } from '@/components/ui/section-header'
 import {
   FileText,
+  Handshake,
   MessageCircle,
   Rocket,
   ListTodo,
@@ -146,7 +147,7 @@ export function ActiveTasksSectionSkeleton() {
 export function OneOnOneMeetingsSectionSkeleton() {
   return (
     <section>
-      <SectionHeader icon={MessageCircle} title='1:1 Meetings' />
+      <SectionHeader icon={Handshake} title='1:1 Meetings' />
       <div className='space-y-3'>
         <div>
           <Skeleton className='h-4 w-24 mb-2' />
