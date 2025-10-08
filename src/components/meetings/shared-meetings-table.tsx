@@ -110,13 +110,6 @@ export interface SharedMeetingsTableProps {
   meetings: (MeetingWithRelations | UpcomingMeeting)[]
   filteredMeetings?: MeetingWithRelations[]
   columns?: MeetingColumnConfig[]
-  // Legacy props for backward compatibility
-  variant?: 'full' | 'initiative' | 'dashboard'
-  initiativeId?: string
-  showCreateButton?: boolean
-  onCreateMeeting?: () => void
-  enableRowClick?: boolean
-  enableDoubleClick?: boolean
   enableRightClick?: boolean
   rowClickHandler?: (_meetingId: string, _isInstance?: boolean) => void
   emptyStateMessage?: string
@@ -393,12 +386,6 @@ export function SharedMeetingsTable({
   meetings,
   filteredMeetings,
   columns,
-  variant,
-  initiativeId: _initiativeId,
-  showCreateButton: _showCreateButton,
-  onCreateMeeting: _onCreateMeeting,
-  enableRowClick = false,
-  enableDoubleClick = false,
   enableRightClick = false,
   rowClickHandler,
   emptyStateMessage,
@@ -425,14 +412,14 @@ export function SharedMeetingsTable({
   }
 
   const handleRowClick = (meetingId: string, isInstance = false) => {
-    if (effectiveRowClickHandler) {
-      effectiveRowClickHandler(meetingId, isInstance)
-    }
-  }
-
-  const handleRowDoubleClick = (meetingId: string) => {
-    if (enableDoubleClick) {
-      router.push(`/meetings/${meetingId}`)
+    if (rowClickHandler) {
+      rowClickHandler(meetingId, isInstance)
+    } else {
+      // Default behavior: navigate to meeting detail page
+      const href = isInstance
+        ? `/meetings/${meetingId.split('-')[0]}/instances/${meetingId.split('-')[1]}`
+        : `/meetings/${meetingId}`
+      router.push(href)
     }
   }
 
@@ -461,86 +448,15 @@ export function SharedMeetingsTable({
     })
   }
 
-  // Convert variant to column configuration for backward compatibility
-  const getColumnsFromVariant = (variant?: string): MeetingColumnConfig[] => {
-    if (columns) return columns
-
-    switch (variant) {
-      case 'dashboard':
-        return [
-          { type: 'title', header: 'Title' },
-          { type: 'dateTime', header: 'Date/Time' },
-          { type: 'duration', header: 'Duration' },
-        ]
-      case 'initiative':
-        return [
-          { type: 'title', header: 'Title' },
-          { type: 'time', header: 'Date & Time' },
-          { type: 'team', header: 'Team' },
-          { type: 'actions', header: '', width: '50px' },
-        ]
-      case 'full':
-      default:
-        return [
-          { type: 'title', header: 'Title' },
-          { type: 'scheduled', header: 'Scheduled' },
-          { type: 'duration', header: 'Duration' },
-          { type: 'team', header: 'Team' },
-          { type: 'initiative', header: 'Initiative' },
-          { type: 'actions', header: 'Actions', width: '50px' },
-        ]
-    }
-  }
-
-  const finalColumns = getColumnsFromVariant(variant)
-
-  // Set interaction behavior based on variant
-  const handleVariantBehavior = (variant?: string) => {
-    switch (variant) {
-      case 'dashboard':
-        return {
-          enableRowClick: true,
-          enableDoubleClick: false,
-          enableRightClick: false,
-          rowClickHandler: (meetingId: string, isInstance?: boolean) => {
-            const href = isInstance
-              ? `/meetings/${meetingId.split('-')[0]}/instances/${meetingId.split('-')[1]}`
-              : `/meetings/${meetingId}`
-            window.location.href = href
-          },
-        }
-      case 'initiative':
-        return {
-          enableRowClick: true,
-          enableDoubleClick: false,
-          enableRightClick: false,
-          rowClickHandler: (meetingId: string) => {
-            startTransition(() => {
-              router.push(`/meetings/${meetingId}`)
-            })
-          },
-        }
-      case 'full':
-      default:
-        return {
-          enableRowClick: enableRowClick,
-          enableDoubleClick: enableDoubleClick || true,
-          enableRightClick: enableRightClick || true,
-          rowClickHandler: rowClickHandler,
-        }
-    }
-  }
-
-  const behaviorConfig = handleVariantBehavior(variant)
-  const finalEnableRowClick = behaviorConfig.enableRowClick || enableRowClick
-  const finalEnableDoubleClick =
-    behaviorConfig.enableDoubleClick || enableDoubleClick
-  const finalEnableRightClick =
-    behaviorConfig.enableRightClick || enableRightClick
-
-  // Override rowClickHandler if variant provides one
-  const effectiveRowClickHandler =
-    behaviorConfig.rowClickHandler || rowClickHandler
+  // Use the provided columns or default configuration
+  const finalColumns = columns || [
+    { type: 'title', header: 'Title' },
+    { type: 'scheduled', header: 'Scheduled' },
+    { type: 'duration', header: 'Duration' },
+    { type: 'team', header: 'Team' },
+    { type: 'initiative', header: 'Initiative' },
+    { type: 'actions', header: 'Actions', width: '50px' },
+  ]
 
   // Determine which meetings to display
   const displayMeetings = filteredMeetings || meetings
@@ -612,7 +528,7 @@ export function SharedMeetingsTable({
             {finalColumns.map(column => (
               <TableHead
                 key={column.type}
-                className={column.width ? `w-[${column.width}]` : undefined}
+                className={`px-4 ${column.width ? `w-[${column.width}]` : ''}`}
               >
                 {column.header}
               </TableHead>
@@ -629,15 +545,10 @@ export function SharedMeetingsTable({
             return (
               <TableRow
                 key={isInstance ? `${meeting.type}-${meeting.id}` : meeting.id}
-                className={`hover:bg-accent/50 ${finalEnableRowClick ? 'cursor-pointer' : ''}`}
-                onClick={() =>
-                  finalEnableRowClick && handleRowClick(meetingId, isInstance)
-                }
-                onDoubleClick={() =>
-                  finalEnableDoubleClick && handleRowDoubleClick(meetingId)
-                }
+                className='hover:bg-accent/50 cursor-pointer'
+                onClick={() => handleRowClick(meetingId, isInstance)}
                 onContextMenu={e =>
-                  finalEnableRightClick && handleRowRightClick(e, meetingId)
+                  enableRightClick && handleRowRightClick(e, meetingId)
                 }
               >
                 {finalColumns.map(column => (
