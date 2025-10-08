@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { PersonAvatar } from '@/components/people/person-avatar'
-import { getPeople } from '@/lib/actions/person'
+import { usePeopleForSelect } from '@/hooks/use-organization-cache'
 
 interface Person {
   id: string
@@ -24,10 +24,8 @@ interface PersonSelectProps {
   onValueChange?: (_value: string) => void
   placeholder?: string
   disabled?: boolean
-  people?: Person[] // Optional: if provided, use this list instead of loading
   showAvatar?: boolean // Optional: whether to show avatars (default: true)
   showRole?: boolean // Optional: whether to show role (default: true)
-  showEmail?: boolean // Optional: whether to show email (default: false)
   includeNone?: boolean // Optional: whether to include "None" option (default: false)
   noneLabel?: string // Optional: label for "None" option (default: "No person")
   className?: string
@@ -39,27 +37,15 @@ export function PersonSelect({
   onValueChange,
   placeholder = 'Select a person...',
   disabled = false,
-  people: providedPeople,
   showAvatar = true,
   showRole = true,
-  showEmail = false,
   includeNone = false,
   noneLabel = 'No person',
   className,
   autoFocus = false,
 }: PersonSelectProps) {
-  const [people, setPeople] = useState<Person[]>(providedPeople || [])
-  const [isLoading, setIsLoading] = useState(false)
+  const { people, isLoading } = usePeopleForSelect()
   const [selectOpen, setSelectOpen] = useState(false)
-
-  // Load people if not provided
-  useEffect(() => {
-    if (!providedPeople) {
-      loadPeople()
-    } else {
-      setPeople(providedPeople)
-    }
-  }, [providedPeople])
 
   // Auto-open dropdown if requested
   useEffect(() => {
@@ -71,26 +57,6 @@ export function PersonSelect({
     }
   }, [autoFocus, isLoading, people.length])
 
-  const loadPeople = async () => {
-    setIsLoading(true)
-    try {
-      const peopleData = await getPeople()
-      setPeople(
-        peopleData.map(person => ({
-          id: person.id,
-          name: person.name,
-          email: person.email,
-          role: person.role,
-          avatar: person.avatar,
-        }))
-      )
-    } catch (error) {
-      console.error('Error loading people:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   const renderPersonItem = (person: Person) => (
     <div className='flex items-center gap-2'>
       {showAvatar && (
@@ -101,19 +67,12 @@ export function PersonSelect({
         {showRole && person.role && (
           <div className='text-xs text-muted-foreground'>{person.role}</div>
         )}
-        {showEmail && person.email && (
-          <div className='text-xs text-muted-foreground'>{person.email}</div>
-        )}
       </div>
     </div>
   )
 
   const renderPersonText = (person: Person) => {
-    let text = person.name
-    if (showEmail && person.email) {
-      text += ` (${person.email})`
-    }
-    return text
+    return person.name
   }
 
   return (

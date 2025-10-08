@@ -15,6 +15,7 @@ import { CreateTaskModal } from '@/components/command-palette/create-task-modal'
 import { PersonSelectorModal } from '@/components/command-palette/person-selector-modal'
 import { OfflineAwareLayout } from '@/components/offline-aware-layout'
 import { AIChatSidebarWrapper } from '@/components/ai-chat-sidebar-wrapper'
+import { CacheProvider } from '@/components/cache-provider'
 import { getFilteredNavigation, getCurrentUser } from '@/lib/auth-utils'
 import type { User as NextAuthUser } from 'next-auth'
 
@@ -81,25 +82,27 @@ export default async function ServerConditionalLayout({
           <CommandPaletteProvider>
             <BreadcrumbProvider>
               <MobileMenuProvider>
-                <DefaultBreadcrumbHandler />
-                <OfflineAwareLayout>
-                  <div className='flex min-h-screen'>
-                    <Sidebar
-                      navigation={filteredNavigation}
-                      serverSession={serverSession}
-                    />
-                    <div className='flex-1 flex flex-col overflow-hidden lg:ml-0'>
-                      <TopBar />
-                      <main className='flex-1 overflow-auto p-3 md:p-6'>
-                        <div className='w-full'>{children}</div>
-                      </main>
+                <CacheProvider>
+                  <DefaultBreadcrumbHandler />
+                  <OfflineAwareLayout>
+                    <div className='flex min-h-screen'>
+                      <Sidebar
+                        navigation={filteredNavigation}
+                        serverSession={serverSession}
+                      />
+                      <div className='flex-1 flex flex-col overflow-hidden lg:ml-0'>
+                        <TopBar />
+                        <main className='flex-1 overflow-auto p-3 md:p-6'>
+                          <div className='w-full'>{children}</div>
+                        </main>
+                      </div>
+                      <AIChatSidebarWrapper />
                     </div>
-                    <AIChatSidebarWrapper />
-                  </div>
-                </OfflineAwareLayout>
-                <CommandPalette />
-                <CreateTaskModal />
-                <PersonSelectorModal />
+                  </OfflineAwareLayout>
+                  <CommandPalette />
+                  <CreateTaskModal />
+                  <PersonSelectorModal />
+                </CacheProvider>
               </MobileMenuProvider>
             </BreadcrumbProvider>
           </CommandPaletteProvider>

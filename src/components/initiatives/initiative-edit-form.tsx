@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { PersonSelect } from '@/components/ui/person-select'
 import {
   Card,
   CardContent,
@@ -51,13 +52,11 @@ interface InitiativeEditFormProps {
     }>
   }
   teams: Array<{ id: string; name: string }>
-  people: Array<{ id: string; name: string; email: string | null }>
 }
 
 export function InitiativeEditForm({
   initiative,
   teams,
-  people,
 }: InitiativeEditFormProps) {
   // Format dates for input fields
   const formatDate = (date: Date | null) => {
@@ -555,7 +554,7 @@ export function InitiativeEditForm({
                     <div className='flex items-end gap-2'>
                       <div className='flex-1 grid grid-cols-1 md:grid-cols-2 gap-2'>
                         <div className='space-y-2'>
-                          <Select
+                          <PersonSelect
                             value={getSelectValue(owner.personId)}
                             onValueChange={value =>
                               updateOwner(
@@ -564,20 +563,12 @@ export function InitiativeEditForm({
                                 getFormValue(value)
                               )
                             }
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder='Select person' />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value='none'>No person</SelectItem>
-                              {people.map(person => (
-                                <SelectItem key={person.id} value={person.id}>
-                                  {person.name}
-                                  {person.email ? ` (${person.email})` : ''}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            placeholder='Select person'
+                            includeNone={true}
+                            noneLabel='No person'
+                            showAvatar={true}
+                            showRole={true}
+                          />
                         </div>
                         <div className='space-y-2'>
                           <Select

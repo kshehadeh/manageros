@@ -77,11 +77,6 @@ export function OneOnOneForm({
     }
   }
 
-  // Since the people list is already filtered to only include people the current user can have meetings with,
-  // we can use the same list for both host and guest options
-  const managerOptions = people
-  const reportOptions = people
-
   if (people.length === 0) {
     return (
       <div className='card text-center py-8'>
@@ -117,10 +112,8 @@ export function OneOnOneForm({
                   setFormData({ ...formData, participant1Id: value })
                 }
                 placeholder='Select participant 1'
-                people={managerOptions}
                 showAvatar={true}
                 showRole={true}
-                showEmail={false}
               />
             </div>
 
@@ -134,10 +127,8 @@ export function OneOnOneForm({
                   setFormData({ ...formData, participant2Id: value })
                 }
                 placeholder='Select participant 2'
-                people={reportOptions}
                 showAvatar={true}
                 showRole={true}
-                showEmail={false}
               />
             </div>
           </div>

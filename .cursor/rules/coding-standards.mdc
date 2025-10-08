@@ -12,6 +12,7 @@ alwaysApply: true
 * Always look for existing components that are similar to the one you are creating before creating a new one.
 * Do not create new server actions if there are ones that exist already that can be used - even if they require slight modification.
 * Do not make unnecessary calls to the server from the client.  Look for ways to use data that has already been fetched and can be used in multiple components.
+* When you notice that there are several places where the same data is being fetched, consider using the cache system that was created.  For example, the usePeopleCache hook is used to fetch people data and can be used in multiple components.
 
 ## Introduction
 

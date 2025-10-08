@@ -14,8 +14,6 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { AlertCircle } from 'lucide-react'
-import { getPeopleForFeedbackFilters } from '@/lib/actions/person'
-import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface FormField {
@@ -44,30 +42,9 @@ export function DynamicReportForm({
   const [formData, setFormData] = useState<Record<string, unknown>>(initialData)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [people, setPeople] = useState<
-    Array<{
-      id: string
-      name: string
-      email: string | null
-      avatar?: string | null
-    }>
-  >([])
   const router = useRouter()
 
   const fields = schemaFields
-
-  useEffect(() => {
-    // Load people for personId fields
-    const loadPeople = async () => {
-      try {
-        const peopleData = await getPeopleForFeedbackFilters()
-        setPeople(peopleData)
-      } catch (error) {
-        console.error('Error loading people:', error)
-      }
-    }
-    loadPeople()
-  }, [])
 
   const handleInputChange = (fieldName: string, value: unknown) => {
     setFormData(prev => ({
@@ -149,10 +126,8 @@ export function DynamicReportForm({
             value={value}
             onValueChange={val => handleInputChange(field.name, val)}
             placeholder='Select a person...'
-            people={people}
             showAvatar={true}
             showRole={true}
-            showEmail={true}
             className={hasError ? 'border-red-500' : ''}
           />
           {hasError && (

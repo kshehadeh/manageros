@@ -21,6 +21,8 @@ ManagerOS is a Next.js-based management platform designed specifically for engin
 - **Runtime**: Bun for fast package management and execution
 - **Type Safety**: TypeScript throughout the application
 - **Validation**: Zod for runtime type validation
+- **State Management**: Zustand for client-side caching and global state
+- **Caching**: Client-side cache with stale-while-revalidate pattern
 
 ## 📋 Prerequisites
 
@@ -108,6 +110,15 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - Track progress with status updates
 - Priority and due date management
 
+### Performance Optimization
+
+- **Client-Side Caching**: Zustand-based cache with stale-while-revalidate pattern
+- **Network Awareness**: Respects offline state and handles connectivity issues
+- **Automatic Cache Invalidation**: Server actions trigger cache refresh
+- **Reduced API Calls**: Shared cache eliminates redundant data fetching
+
+### UI Standards
+
 - Standardized UI components:
   - Buttons use the shared shadcn `Button` at `src/components/ui/button.tsx`
   - Default button style is `variant='outline'`
@@ -128,6 +139,40 @@ The application uses a comprehensive Prisma schema with the following key models
 - **Feedback**: Peer and manager feedback
 - **Metric**: Performance measurements
 - **Event**: Audit trail for all activities
+
+## 🚀 Client-Side Caching System
+
+ManagerOS includes a sophisticated client-side caching system built with Zustand that optimizes data fetching and improves user experience:
+
+### Key Features
+
+- **Stale-While-Revalidate**: Shows cached data immediately while refreshing in background
+- **Network Awareness**: Respects offline state and handles connectivity issues gracefully
+- **Automatic Cache Invalidation**: Server actions trigger cache refresh after mutations
+- **Extensible Architecture**: Easy to add caching for teams, initiatives, and other entities
+
+### Usage
+
+```tsx
+import { usePeopleCache } from '@/hooks/use-organization-cache'
+
+function MyComponent() {
+  const { people, isLoading, error } = usePeopleCache()
+
+  if (isLoading) return <div>Loading...</div>
+  if (error) return <div>Error: {error}</div>
+
+  return (
+    <div>
+      {people.map(person => (
+        <div key={person.id}>{person.name}</div>
+      ))}
+    </div>
+  )
+}
+```
+
+For detailed documentation, see [Client-Side Caching Guide](docs/client-side-caching.md).
 
 ## 🔧 Available Scripts
 

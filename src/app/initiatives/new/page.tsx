@@ -1,6 +1,5 @@
 import { InitiativeForm } from '@/components/initiatives/initiative-form'
 import { getTeams } from '@/lib/actions/team'
-import { getPeople } from '@/lib/actions/person'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -25,7 +24,7 @@ export default async function NewInitiativePage({
 
   const { ownerId, teamId } = await searchParams
 
-  const [teams, people] = await Promise.all([getTeams(), getPeople()])
+  const [teams] = await Promise.all([getTeams()])
 
   return (
     <div className='space-y-6'>
@@ -39,7 +38,6 @@ export default async function NewInitiativePage({
 
       <InitiativeForm
         teams={teams}
-        people={people}
         preselectedOwnerId={ownerId}
         preselectedTeamId={teamId}
       />

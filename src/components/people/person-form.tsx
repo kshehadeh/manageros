@@ -86,7 +86,6 @@ interface PersonFormProps {
 
 export function PersonForm({
   teams,
-  people,
   jobRoles,
   initialManagerId,
   initialTeamId,
@@ -172,9 +171,6 @@ export function PersonForm({
       setErrors(prev => ({ ...prev, [field]: '' }))
     }
   }
-
-  // Filter out the current person from the manager options (can't be their own manager)
-  const managerOptions = people.filter(p => p.id !== person?.id)
 
   // Helper functions to convert between empty strings and "none" for Select components
   const getSelectValue = (value: string | undefined) => value || 'none'
@@ -296,12 +292,10 @@ export function PersonForm({
                     handleInputChange('managerId', getFormValue(value))
                   }
                   placeholder='Select a manager'
-                  people={managerOptions}
                   includeNone={true}
                   noneLabel='No manager'
                   showAvatar={true}
                   showRole={true}
-                  showEmail={true}
                   className={errors.managerId ? 'border-destructive' : ''}
                 />
               </div>

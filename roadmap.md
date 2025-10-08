@@ -84,6 +84,7 @@
 - **Report System** - Extensible reporting framework with markdown output (January 2025)
 - **AI Synopsis Report** - AI-generated work summaries combining tasks, initiatives, GitHub, Jira, and feedback data (January 2025)
 - **Cron Job System** (October 1, 2025) - Extensible automated task system with job registry, execution tracking, and two initial jobs: birthday notifications and activity monitoring
+- **Client-Side Caching System** (January 2025) - Zustand-based cache with stale-while-revalidate pattern, network awareness, and navigation-based cache invalidation for optimized data fetching
 
 ### Security & Access Control
 
@@ -349,3 +350,20 @@ _Next Review: February 2025_
   - Integrated avatar display in team cards and teams table
   - Implemented proper access control (admin-only) and organization isolation
   - Added database migration: `20251004124451_add_avatar_to_team`
+
+### Updates on 2025-01-30
+
+- **Client-Side Caching System** (Completed):
+  - Implemented sophisticated Zustand-based caching system for organization data
+  - Created `organization-cache-store.ts` with metadata tracking and automatic staleness detection (5-minute threshold)
+  - Built custom hooks: `usePeopleCache()`, `usePeople()`, `usePeopleForSelect()` with stale-while-revalidate pattern
+  - Added network awareness using existing `useNetworkStatus()` hook for offline handling
+  - Implemented automatic cache invalidation through server actions after data mutations
+  - Created `CacheProvider` component for registering cache invalidation functions
+  - Updated `PersonSelect` and `DynamicReportForm` components to use cached data instead of local state
+  - Added cache invalidation calls to all person create/update/delete server actions
+  - Integrated cache provider into app layout for global cache management
+  - Created comprehensive documentation in `docs/client-side-caching.md` with usage examples and best practices
+  - Added debug component `CacheTestComponent` for testing and monitoring cache behavior
+  - System provides instant data display with background refresh, eliminates redundant API calls, and improves overall performance
+  - Extensible architecture ready for adding teams, initiatives, and other entity caching

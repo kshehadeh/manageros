@@ -27,19 +27,12 @@ import { AlertCircle, Trash2 } from 'lucide-react'
 
 interface InitiativeFormProps {
   teams: Array<{ id: string; name: string }>
-  people: Array<{
-    id: string
-    name: string
-    email: string | null
-    avatar?: string | null
-  }>
   preselectedOwnerId?: string
   preselectedTeamId?: string
 }
 
 export function InitiativeForm({
   teams,
-  people,
   preselectedOwnerId,
   preselectedTeamId,
 }: InitiativeFormProps) {
@@ -532,12 +525,10 @@ export function InitiativeForm({
                               )
                             }
                             placeholder='Select person'
-                            people={people}
                             includeNone={true}
                             noneLabel='No person'
                             showAvatar={true}
                             showRole={true}
-                            showEmail={true}
                           />
                         </div>
                         <div className='space-y-2'>

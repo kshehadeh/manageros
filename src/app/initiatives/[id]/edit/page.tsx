@@ -45,16 +45,9 @@ export default async function EditInitiative({
   }
 
   // Get teams and people for the form
-  const [teams, people] = await Promise.all([
+  const [teams] = await Promise.all([
     prisma.team.findMany({
       where: { organizationId: session.user.organizationId },
-      orderBy: { name: 'asc' },
-    }),
-    prisma.person.findMany({
-      where: {
-        status: 'active',
-        organizationId: session.user.organizationId,
-      },
       orderBy: { name: 'asc' },
     }),
   ])
@@ -73,11 +66,7 @@ export default async function EditInitiative({
             </div>
           </div>
 
-          <InitiativeEditForm
-            initiative={initiative}
-            teams={teams}
-            people={people}
-          />
+          <InitiativeEditForm initiative={initiative} teams={teams} />
         </div>
       </div>
     </InitiativeDetailClient>
