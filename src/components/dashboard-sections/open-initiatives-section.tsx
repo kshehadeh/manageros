@@ -67,6 +67,7 @@ export async function DashboardOpenInitiativesSection({
       title='Open Initiatives'
       icon='Rocket'
       viewAllHref='/initiatives'
+      fullBleed
     >
       <DashboardInitiativesTable
         initiatives={openInitiatives}

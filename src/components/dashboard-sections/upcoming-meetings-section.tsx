@@ -158,7 +158,7 @@ export async function DashboardUpcomingMeetingsSection({
   if (!allUpcomingMeetings || allUpcomingMeetings.length === 0) return null
 
   return (
-    <ExpandableSection title='Upcoming Meetings' viewAllHref='/meetings'>
+    <ExpandableSection title='Upcoming Meetings' viewAllHref='/meetings' fullBleed>
       <DashboardUpcomingMeetings meetings={allUpcomingMeetings} />
     </ExpandableSection>
   )

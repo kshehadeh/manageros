@@ -21,7 +21,7 @@ export async function DashboardAssignedTasksSection({
   if (!assignedTasks || assignedTasks.length === 0) return null
 
   return (
-    <ExpandableSection title='My Tasks' icon='ListTodo' viewAllHref='/tasks'>
+    <ExpandableSection title='My Tasks' icon='ListTodo' viewAllHref='/tasks' fullBleed>
       <AssignedTasks assignedTasks={assignedTasks} people={people} />
     </ExpandableSection>
   )
