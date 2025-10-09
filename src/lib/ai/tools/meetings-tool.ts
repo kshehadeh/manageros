@@ -36,6 +36,7 @@ export const meetingsTool = {
       whereClause.OR = [
         { title: { contains: query, mode: 'insensitive' } },
         { description: { contains: query, mode: 'insensitive' } },
+        { notes: { contains: query, mode: 'insensitive' } },
       ]
     }
 
@@ -64,6 +65,7 @@ export const meetingsTool = {
           select: {
             id: true,
             scheduledAt: true,
+            notes: true,
           },
           orderBy: { scheduledAt: 'desc' },
           take: 1,
@@ -91,6 +93,7 @@ export const meetingsTool = {
         id: meeting.id,
         title: meeting.title,
         description: meeting.description,
+        notes: meeting.notes,
         owner: meeting.owner?.name,
         participants: meeting.participants.map(p => p.person.name),
         instancesCount: meeting._count.instances,
@@ -98,6 +101,7 @@ export const meetingsTool = {
         lastInstance: meeting.instances[0]
           ? {
               scheduledAt: meeting.instances[0].scheduledAt,
+              notes: meeting.instances[0].notes,
             }
           : null,
       })),
