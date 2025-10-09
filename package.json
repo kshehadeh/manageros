@@ -28,6 +28,9 @@
     "cron:run": "bun scripts/run-cron-jobs.ts",
     "cron:birthdays": "bun scripts/run-cron-jobs.ts --job birthday-notification",
     "cron:activity": "bun scripts/run-cron-jobs.ts --job activity-monitoring",
+    "version:patch": "bun scripts/bump-version.ts patch",
+    "version:minor": "bun scripts/bump-version.ts minor",
+    "version:major": "bun scripts/bump-version.ts major",
     "postinstall": "bunx prisma generate && bun run help:generate",
     "prepare": "husky"
   },

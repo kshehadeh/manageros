@@ -25,6 +25,7 @@ import {
 import { useState } from 'react'
 import { HelpDialog } from '@/components/shared'
 import { useAIChat } from '@/components/ai-chat-provider'
+import { APP_VERSION } from '@/lib/version'
 
 interface NavItem {
   name: string
@@ -76,6 +77,12 @@ export default function Sidebar({
         <div className='flex-1 px-6 py-4'>
           <div className='text-sm text-muted-foreground'>Loading...</div>
         </div>
+        {/* Version Footer */}
+        <div className='px-3 py-2 border-t'>
+          <div className='text-xs text-muted-foreground text-center'>
+            v{APP_VERSION}
+          </div>
+        </div>
       </div>
     )
   }
@@ -98,6 +105,12 @@ export default function Sidebar({
               <Link href='/auth/signup'>Sign Up</Link>
             </Button>
           </nav>
+        </div>
+        {/* Version Footer */}
+        <div className='px-3 py-2 border-t'>
+          <div className='text-xs text-muted-foreground text-center'>
+            v{APP_VERSION}
+          </div>
         </div>
       </div>
     )
@@ -223,6 +236,13 @@ export default function Sidebar({
             </svg>
             Sign Out
           </button>
+        </div>
+
+        {/* Version Footer */}
+        <div className='px-3 py-2 border-t'>
+          <div className='text-xs text-muted-foreground text-center'>
+            v{APP_VERSION}
+          </div>
         </div>
       </div>
 
