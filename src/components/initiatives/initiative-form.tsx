@@ -12,53 +12,106 @@ import {
 } from '@/components/ui/select'
 import { PersonSelect } from '@/components/ui/person-select'
 import { TeamSelect } from '@/components/ui/team-select'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { SectionHeader } from '@/components/ui/section-header'
 import { useState } from 'react'
-import { createInitiative } from '@/lib/actions/initiative'
+import { updateInitiative, createInitiative } from '@/lib/actions/initiative'
 import { type InitiativeFormData, initiativeSchema } from '@/lib/validations'
 import { Rag } from '@/components/rag'
 import { MarkdownEditor } from '@/components/markdown-editor'
-import { AlertCircle, Trash2 } from 'lucide-react'
+import {
+  AlertCircle,
+  Trash2,
+  Rocket,
+  Calendar,
+  Target,
+  Users,
+  Settings,
+} from 'lucide-react'
 
 interface InitiativeFormProps {
+  initiative?: {
+    id: string
+    title: string
+    summary: string | null
+    outcome: string | null
+    startDate: Date | null
+    targetDate: Date | null
+    status: string
+    rag: string
+    confidence: number
+    teamId: string | null
+    objectives: Array<{
+      id: string
+      title: string
+      keyResult: string | null
+    }>
+    owners: Array<{
+      personId: string
+      role: string
+      person: {
+        id: string
+        name: string
+      }
+    }>
+  }
   preselectedOwnerId?: string
   preselectedTeamId?: string
 }
 
 export function InitiativeForm({
+  initiative,
   preselectedOwnerId,
   preselectedTeamId,
 }: InitiativeFormProps) {
-  // Get today's date in YYYY-MM-DD format
+  // Format dates for input fields
+  const formatDate = (date: Date | null) => {
+    if (!date) return ''
+    return new Date(date).toISOString().split('T')[0]
+  }
+
+  // Get today's date for new initiatives
   const today = new Date().toISOString().split('T')[0]
 
   const [formData, setFormData] = useState<InitiativeFormData>({
-    title: '',
-    summary: '',
-    outcome: '',
-    startDate: today,
-    targetDate: '',
-    status: 'planned',
-    rag: 'green',
-    confidence: 80,
-    teamId: preselectedTeamId || '',
-    objectives: [],
-    owners: [],
+    title: initiative?.title || '',
+    summary: initiative?.summary || '',
+    outcome: initiative?.outcome || '',
+    startDate: initiative ? formatDate(initiative.startDate) : today,
+    targetDate: initiative ? formatDate(initiative.targetDate) : '',
+    status: (initiative?.status as InitiativeFormData['status']) || 'planned',
+    rag: (initiative?.rag as InitiativeFormData['rag']) || 'green',
+    confidence: initiative?.confidence || 80,
+    teamId: initiative?.teamId || preselectedTeamId || '',
+    objectives:
+      initiative?.objectives.map(obj => ({
+        title: obj.title,
+        keyResult: obj.keyResult || '',
+      })) || [],
+    owners:
+      initiative?.owners.map(owner => ({
+        personId: owner.personId,
+        role: owner.role as 'owner' | 'sponsor' | 'collaborator',
+      })) || [],
   })
 
-  const [objectives, setObjectives] = useState([{ title: '', keyResult: '' }])
-  const [owners, setOwners] = useState([
-    {
-      personId: preselectedOwnerId || '',
-      role: 'owner' as const,
-    },
-  ])
+  const [objectives, setObjectives] = useState(
+    initiative?.objectives && initiative.objectives.length > 0
+      ? initiative.objectives.map(obj => ({
+          title: obj.title,
+          keyResult: obj.keyResult || '',
+        }))
+      : [{ title: '', keyResult: '' }]
+  )
+
+  const [owners, setOwners] = useState(
+    initiative?.owners && initiative.owners.length > 0
+      ? initiative.owners.map(owner => ({
+          personId: owner.personId,
+          role: owner.role as 'owner' | 'sponsor' | 'collaborator',
+        }))
+      : [{ personId: preselectedOwnerId || '', role: 'owner' as const }]
+  )
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -76,9 +129,17 @@ export function InitiativeForm({
 
       // Validate the form data using Zod schema
       const validatedData = initiativeSchema.parse(submitData)
-      await createInitiative(validatedData)
+
+      if (initiative) {
+        await updateInitiative(initiative.id, validatedData)
+      } else {
+        await createInitiative(validatedData)
+      }
     } catch (error: unknown) {
-      console.error('Error creating initiative:', error)
+      console.error(
+        `Error ${initiative ? 'updating' : 'creating'} initiative:`,
+        error
+      )
 
       if (error && typeof error === 'object' && 'issues' in error) {
         // Handle Zod validation errors
@@ -97,11 +158,22 @@ export function InitiativeForm({
         const errorMessage =
           error instanceof Error
             ? error.message
-            : 'Error creating initiative. Please try again.'
+            : `Error ${initiative ? 'updating' : 'creating'} initiative. Please try again.`
         setErrors({ general: errorMessage })
       }
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleInputChange = (
+    field: keyof InitiativeFormData,
+    value: string | number | undefined
+  ) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    // Clear field error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }))
     }
   }
 
@@ -143,17 +215,6 @@ export function InitiativeForm({
     setOwners(updated)
   }
 
-  const handleInputChange = (
-    field: keyof InitiativeFormData,
-    value: string | number | undefined
-  ) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }))
-    }
-  }
-
   // Helper functions to convert between empty strings and "none" for Select components
   const getSelectValue = (value: string | undefined) => value || 'none'
   const getFormValue = (value: string) => (value === 'none' ? '' : value)
@@ -172,14 +233,9 @@ export function InitiativeForm({
         {/* Main Form Content */}
         <div className='flex-1 space-y-6'>
           {/* Basic Information */}
-          <Card>
-            <CardHeader className='pb-3'>
-              <CardTitle className='text-lg'>Basic Information</CardTitle>
-              <CardDescription className='text-sm'>
-                Essential details about the initiative
-              </CardDescription>
-            </CardHeader>
-            <CardContent className='space-y-4'>
+          <div className='space-y-4'>
+            <SectionHeader icon={Rocket} title='Basic Information' />
+            <div className='space-y-4'>
               <div className='space-y-2'>
                 <Label htmlFor='title'>
                   Title <span className='text-destructive'>*</span>
@@ -221,67 +277,136 @@ export function InitiativeForm({
                   <p className='text-sm text-destructive'>{errors.outcome}</p>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Timeline */}
-          <Card>
-            <CardHeader className='pb-3'>
-              <CardTitle className='text-lg'>Timeline</CardTitle>
-              <CardDescription className='text-sm'>
-                Important dates for the initiative
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <div className='space-y-2'>
-                  <Label htmlFor='startDate'>Start Date</Label>
-                  <Input
-                    id='startDate'
-                    type='date'
-                    value={formData.startDate}
-                    onChange={e =>
-                      handleInputChange('startDate', e.target.value)
-                    }
-                    className={errors.startDate ? 'border-destructive' : ''}
-                  />
-                  {errors.startDate && (
-                    <p className='text-sm text-destructive'>
-                      {errors.startDate}
-                    </p>
-                  )}
-                </div>
-
-                <div className='space-y-2'>
-                  <Label htmlFor='targetDate'>Target Date</Label>
-                  <Input
-                    id='targetDate'
-                    type='date'
-                    value={formData.targetDate}
-                    onChange={e =>
-                      handleInputChange('targetDate', e.target.value)
-                    }
-                    className={errors.targetDate ? 'border-destructive' : ''}
-                  />
-                  {errors.targetDate && (
-                    <p className='text-sm text-destructive'>
-                      {errors.targetDate}
-                    </p>
-                  )}
-                </div>
+          <div className='space-y-4'>
+            <SectionHeader icon={Calendar} title='Timeline' />
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <div className='space-y-2'>
+                <Label htmlFor='startDate'>Start Date</Label>
+                <Input
+                  id='startDate'
+                  type='date'
+                  value={formData.startDate}
+                  onChange={e => handleInputChange('startDate', e.target.value)}
+                  className={errors.startDate ? 'border-destructive' : ''}
+                />
+                {errors.startDate && (
+                  <p className='text-sm text-destructive'>{errors.startDate}</p>
+                )}
               </div>
-            </CardContent>
-          </Card>
+
+              <div className='space-y-2'>
+                <Label htmlFor='targetDate'>Target Date</Label>
+                <Input
+                  id='targetDate'
+                  type='date'
+                  value={formData.targetDate}
+                  onChange={e =>
+                    handleInputChange('targetDate', e.target.value)
+                  }
+                  className={errors.targetDate ? 'border-destructive' : ''}
+                />
+                {errors.targetDate && (
+                  <p className='text-sm text-destructive'>
+                    {errors.targetDate}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Status & Tracking */}
+          <div className='space-y-4'>
+            <SectionHeader icon={Settings} title='Status & Tracking' />
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+              <div className='space-y-2'>
+                <Label htmlFor='status'>Status</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={value =>
+                    handleInputChange(
+                      'status',
+                      value as InitiativeFormData['status']
+                    )
+                  }
+                >
+                  <SelectTrigger
+                    className={errors.status ? 'border-destructive' : ''}
+                  >
+                    <SelectValue placeholder='Select status' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='planned'>Planned</SelectItem>
+                    <SelectItem value='in_progress'>In Progress</SelectItem>
+                    <SelectItem value='paused'>Paused</SelectItem>
+                    <SelectItem value='done'>Done</SelectItem>
+                    <SelectItem value='canceled'>Canceled</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.status && (
+                  <p className='text-sm text-destructive'>{errors.status}</p>
+                )}
+              </div>
+
+              <div className='space-y-2'>
+                <Label htmlFor='rag'>RAG Status</Label>
+                <Select
+                  value={formData.rag}
+                  onValueChange={value =>
+                    handleInputChange('rag', value as InitiativeFormData['rag'])
+                  }
+                >
+                  <SelectTrigger
+                    className={errors.rag ? 'border-destructive' : ''}
+                  >
+                    <SelectValue placeholder='Select RAG status' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='green'>Green</SelectItem>
+                    <SelectItem value='amber'>Amber</SelectItem>
+                    <SelectItem value='red'>Red</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className='mt-2'>
+                  <Rag rag={formData.rag} />
+                </div>
+                {errors.rag && (
+                  <p className='text-sm text-destructive'>{errors.rag}</p>
+                )}
+              </div>
+
+              <div className='space-y-2'>
+                <Label htmlFor='confidence'>Confidence (%)</Label>
+                <Input
+                  id='confidence'
+                  type='number'
+                  min='0'
+                  max='100'
+                  value={formData.confidence}
+                  onChange={e =>
+                    handleInputChange(
+                      'confidence',
+                      parseInt(e.target.value) || 0
+                    )
+                  }
+                  className={errors.confidence ? 'border-destructive' : ''}
+                />
+                {errors.confidence && (
+                  <p className='text-sm text-destructive'>
+                    {errors.confidence}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
 
           {/* Team Assignment */}
-          <Card>
-            <CardHeader className='pb-3'>
-              <CardTitle className='text-lg'>Team Assignment</CardTitle>
-              <CardDescription className='text-sm'>
-                Assign the initiative to a team
-              </CardDescription>
-            </CardHeader>
-            <CardContent className='space-y-4'>
+          <div className='space-y-4'>
+            <SectionHeader icon={Users} title='Team Assignment' />
+            <div className='space-y-4'>
               <div className='space-y-2'>
                 <Label htmlFor='team'>Team</Label>
                 <TeamSelect
@@ -297,114 +422,15 @@ export function InitiativeForm({
                   <p className='text-sm text-destructive'>{errors.teamId}</p>
                 )}
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Status & Tracking */}
-          <Card>
-            <CardHeader className='pb-3'>
-              <CardTitle className='text-lg'>Status & Tracking</CardTitle>
-              <CardDescription className='text-sm'>
-                Current status and progress tracking
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-                <div className='space-y-2'>
-                  <Label htmlFor='status'>Status</Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={value =>
-                      handleInputChange(
-                        'status',
-                        value as InitiativeFormData['status']
-                      )
-                    }
-                  >
-                    <SelectTrigger
-                      className={errors.status ? 'border-destructive' : ''}
-                    >
-                      <SelectValue placeholder='Select status' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='planned'>Planned</SelectItem>
-                      <SelectItem value='in_progress'>In Progress</SelectItem>
-                      <SelectItem value='paused'>Paused</SelectItem>
-                      <SelectItem value='done'>Done</SelectItem>
-                      <SelectItem value='canceled'>Canceled</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.status && (
-                    <p className='text-sm text-destructive'>{errors.status}</p>
-                  )}
-                </div>
-
-                <div className='space-y-2'>
-                  <Label htmlFor='rag'>RAG Status</Label>
-                  <Select
-                    value={formData.rag}
-                    onValueChange={value =>
-                      handleInputChange(
-                        'rag',
-                        value as InitiativeFormData['rag']
-                      )
-                    }
-                  >
-                    <SelectTrigger
-                      className={errors.rag ? 'border-destructive' : ''}
-                    >
-                      <SelectValue placeholder='Select RAG status' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='green'>Green</SelectItem>
-                      <SelectItem value='amber'>Amber</SelectItem>
-                      <SelectItem value='red'>Red</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <div className='mt-2'>
-                    <Rag rag={formData.rag} />
-                  </div>
-                  {errors.rag && (
-                    <p className='text-sm text-destructive'>{errors.rag}</p>
-                  )}
-                </div>
-
-                <div className='space-y-2'>
-                  <Label htmlFor='confidence'>Confidence (%)</Label>
-                  <Input
-                    id='confidence'
-                    type='number'
-                    min='0'
-                    max='100'
-                    value={formData.confidence}
-                    onChange={e =>
-                      handleInputChange(
-                        'confidence',
-                        parseInt(e.target.value) || 0
-                      )
-                    }
-                    className={errors.confidence ? 'border-destructive' : ''}
-                  />
-                  {errors.confidence && (
-                    <p className='text-sm text-destructive'>
-                      {errors.confidence}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Objectives */}
-          <Card>
-            <CardHeader className='pb-3'>
-              <div className='flex items-center justify-between'>
-                <div>
-                  <CardTitle className='text-lg'>Objectives</CardTitle>
-                  <CardDescription className='text-sm'>
-                    Define the goals and key results for this initiative
-                  </CardDescription>
-                </div>
+          <div className='space-y-4'>
+            <SectionHeader
+              icon={Target}
+              title='Objectives'
+              action={
                 <Button
                   type='button'
                   onClick={addObjective}
@@ -413,73 +439,59 @@ export function InitiativeForm({
                 >
                   Add Objective
                 </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className='space-y-3'>
-                {objectives.map((objective, index) => (
-                  <div key={index} className='border rounded-xl p-3'>
-                    <div className='flex items-center justify-between mb-2'>
-                      <span className='text-sm font-medium'>
-                        Objective {index + 1}
-                      </span>
+              }
+            />
+            <div className='space-y-4'>
+              {objectives.map((objective, index) => (
+                <div key={index}>
+                  <div className='space-y-2'>
+                    <div className='flex items-center gap-2'>
+                      <Input
+                        id={`objective-title-${index}`}
+                        type='text'
+                        value={objective.title}
+                        onChange={e =>
+                          updateObjective(index, 'title', e.target.value)
+                        }
+                        placeholder='Objective title'
+                        className='flex-1'
+                      />
                       {objectives.length > 1 && (
                         <Button
                           type='button'
                           onClick={() => removeObjective(index)}
                           variant='outline'
                           size='sm'
+                          className='h-10 w-10 p-0 text-destructive hover:text-destructive hover:bg-destructive/10'
                         >
-                          Remove
+                          <Trash2 className='h-4 w-4' />
                         </Button>
                       )}
                     </div>
-                    <div className='space-y-2'>
-                      <div className='space-y-2'>
-                        <Label htmlFor={`objective-title-${index}`}>
-                          Title
-                        </Label>
-                        <Input
-                          id={`objective-title-${index}`}
-                          type='text'
-                          value={objective.title}
-                          onChange={e =>
-                            updateObjective(index, 'title', e.target.value)
-                          }
-                          placeholder='Objective title'
-                        />
-                      </div>
-                      <div className='space-y-2'>
-                        <Label htmlFor={`objective-keyresult-${index}`}>
-                          Key Result
-                        </Label>
-                        <Input
-                          id={`objective-keyresult-${index}`}
-                          type='text'
-                          value={objective.keyResult}
-                          onChange={e =>
-                            updateObjective(index, 'keyResult', e.target.value)
-                          }
-                          placeholder='Key result (optional)'
-                        />
-                      </div>
-                    </div>
+                    <Input
+                      id={`objective-keyresult-${index}`}
+                      type='text'
+                      value={objective.keyResult}
+                      onChange={e =>
+                        updateObjective(index, 'keyResult', e.target.value)
+                      }
+                      placeholder='Key result (optional)'
+                    />
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  {index < objectives.length - 1 && (
+                    <div className='border-b border-muted mt-4' />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
 
           {/* People */}
-          <Card>
-            <CardHeader className='pb-3'>
-              <div className='flex items-center justify-between'>
-                <div>
-                  <CardTitle className='text-lg'>People</CardTitle>
-                  <CardDescription className='text-sm'>
-                    Assign people responsible for this initiative
-                  </CardDescription>
-                </div>
+          <div className='space-y-4'>
+            <SectionHeader
+              icon={Users}
+              title='People'
+              action={
                 <Button
                   type='button'
                   onClick={addOwner}
@@ -488,75 +500,65 @@ export function InitiativeForm({
                 >
                   Add Person
                 </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className='space-y-0'>
-                {owners.map((owner, index) => (
-                  <div
-                    key={index}
-                    className={`p-3 ${index < owners.length - 1 ? 'border-b' : ''}`}
-                  >
-                    <div className='flex items-end gap-2'>
-                      <div className='flex-1 grid grid-cols-1 md:grid-cols-2 gap-2'>
-                        <div className='space-y-2'>
-                          <Label htmlFor={`owner-person-${index}`}>
-                            Person
-                          </Label>
-                          <PersonSelect
-                            value={getSelectValue(owner.personId)}
-                            onValueChange={value =>
-                              updateOwner(
-                                index,
-                                'personId',
-                                getFormValue(value)
-                              )
-                            }
-                            placeholder='Select person'
-                            includeNone={true}
-                            noneLabel='No person'
-                            showAvatar={true}
-                            showRole={true}
-                          />
-                        </div>
-                        <div className='space-y-2'>
-                          <Label htmlFor={`owner-role-${index}`}>Role</Label>
-                          <Select
-                            value={owner.role}
-                            onValueChange={value =>
-                              updateOwner(index, 'role', value)
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder='Select role' />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value='owner'>Owner</SelectItem>
-                              <SelectItem value='sponsor'>Sponsor</SelectItem>
-                              <SelectItem value='collaborator'>
-                                Collaborator
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+              }
+            />
+            <div className='space-y-0'>
+              {owners.map((owner, index) => (
+                <div
+                  key={index}
+                  className={`p-3 ${index < owners.length - 1 ? 'border-b' : ''}`}
+                >
+                  <div className='flex items-end gap-2'>
+                    <div className='flex-1 grid grid-cols-1 md:grid-cols-2 gap-2'>
+                      <div className='space-y-2'>
+                        <PersonSelect
+                          value={getSelectValue(owner.personId)}
+                          onValueChange={value =>
+                            updateOwner(index, 'personId', getFormValue(value))
+                          }
+                          placeholder='Select person'
+                          includeNone={true}
+                          noneLabel='No person'
+                          showAvatar={true}
+                          showRole={true}
+                        />
                       </div>
-                      {owners.length > 1 && (
-                        <Button
-                          type='button'
-                          onClick={() => removeOwner(index)}
-                          variant='outline'
-                          size='sm'
-                          className='h-10 w-10 p-0'
+                      <div className='space-y-2'>
+                        <Select
+                          value={owner.role}
+                          onValueChange={value =>
+                            updateOwner(index, 'role', value)
+                          }
                         >
-                          <Trash2 className='h-4 w-4' />
-                        </Button>
-                      )}
+                          <SelectTrigger>
+                            <SelectValue placeholder='Select role' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value='owner'>Owner</SelectItem>
+                            <SelectItem value='sponsor'>Sponsor</SelectItem>
+                            <SelectItem value='collaborator'>
+                              Collaborator
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
+                    {owners.length > 1 && (
+                      <Button
+                        type='button'
+                        onClick={() => removeOwner(index)}
+                        variant='outline'
+                        size='sm'
+                        className='h-10 w-10 p-0'
+                      >
+                        <Trash2 className='h-4 w-4' />
+                      </Button>
+                    )}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+              ))}
+            </div>
+          </div>
 
           {/* Submit Button */}
           <div className='flex justify-end gap-2'>
@@ -565,7 +567,13 @@ export function InitiativeForm({
               disabled={isSubmitting || !formData.title.trim()}
               className='min-w-[120px]'
             >
-              {isSubmitting ? 'Creating...' : 'Create Initiative'}
+              {isSubmitting
+                ? initiative
+                  ? 'Updating...'
+                  : 'Creating...'
+                : initiative
+                  ? 'Update Initiative'
+                  : 'Create Initiative'}
             </Button>
           </div>
         </div>

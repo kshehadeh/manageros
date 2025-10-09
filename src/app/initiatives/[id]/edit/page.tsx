@@ -2,7 +2,7 @@ import { prisma } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { InitiativeEditForm } from '@/components/initiatives/initiative-edit-form'
+import { InitiativeForm } from '@/components/initiatives/initiative-form'
 import { InitiativeDetailClient } from '@/components/initiatives/initiative-detail-client'
 import { Rocket } from 'lucide-react'
 
@@ -61,7 +61,7 @@ export default async function EditInitiative({
             </div>
           </div>
 
-          <InitiativeEditForm initiative={initiative} />
+          <InitiativeForm initiative={initiative} />
         </div>
       </div>
     </InitiativeDetailClient>
