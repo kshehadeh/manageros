@@ -4,14 +4,17 @@ import { prisma } from '@/lib/db'
 import type { Prisma } from '@prisma/client'
 
 export const meetingsTool = {
-  description: 'Get information about meetings in the organization',
+  description:
+    'Get information about meetings in the organization.  Use the most recent instance notes to get the notes of the meeting if it has instances otherwise use the notes in the main meeting record',
   parameters: z.object({
     ownerId: z.string().optional().describe('Filter by meeting owner ID'),
     participantId: z.string().optional().describe('Filter by participant ID'),
     query: z
       .string()
       .optional()
-      .describe('Search query to filter meetings by title or description'),
+      .describe(
+        'Search query to filter meetings by title or description or notes'
+      ),
   }),
   execute: async ({
     ownerId,
