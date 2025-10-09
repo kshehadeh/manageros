@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { TaskTable } from '@/components/tasks/task-table'
-import { TasksFilterBar } from '@/components/tasks/tasks-filter-bar'
+import { LegacyTasksFilterBar } from '@/components/tasks/tasks-filter-bar'
 import type { TaskListItem } from '@/lib/task-list-select'
 import type { Person, Initiative } from '@prisma/client'
 import {
@@ -76,7 +76,7 @@ export function SplitTasksPageClient({
 
   return (
     <div className='space-y-6'>
-      <TasksFilterBar
+      <LegacyTasksFilterBar
         tasks={tasks}
         people={people}
         initiatives={initiatives}

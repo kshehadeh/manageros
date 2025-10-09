@@ -8,45 +8,7 @@ import { getCurrentUser } from '@/lib/auth-utils'
 import { type TaskStatus } from '@/lib/task-status'
 import { taskPriorityUtils, DEFAULT_TASK_PRIORITY } from '@/lib/task-priority'
 import { TASK_LIST_SELECT, type TaskListItem } from '@/lib/task-list-select'
-
-/**
- * Get the organization-scoped where clause for task access control.
- * Tasks are accessible if they are:
- * 1. Created by the current user within their organization, OR
- * 2. Assigned to the current user AND associated with an initiative in the same organization, OR
- * 3. Associated with objectives of initiatives in the same organization
- */
-function getTaskAccessWhereClause(
-  organizationId: string,
-  userId: string,
-  personId?: string
-) {
-  const conditions: Array<Record<string, unknown>> = [
-    // Tasks created by the current user in their organization
-    {
-      createdBy: {
-        organizationId,
-        id: userId,
-      },
-    },
-    // Tasks associated with initiatives in the same organization
-    { initiative: { organizationId } },
-    // Tasks associated with objectives of initiatives in the same organization
-    { objective: { initiative: { organizationId } } },
-  ]
-
-  // Add condition for tasks assigned to the current user AND associated with initiatives
-  if (personId) {
-    conditions.push({
-      assigneeId: personId,
-      initiative: { organizationId },
-    })
-  }
-
-  return {
-    OR: conditions,
-  }
-}
+import { getTaskAccessWhereClause } from '@/lib/task-access-utils'
 
 export async function createTask(formData: TaskFormData) {
   const user = await getCurrentUser()
@@ -127,6 +89,7 @@ export async function createTask(formData: TaskFormData) {
 
   // Revalidate the tasks page
   revalidatePath('/tasks')
+  revalidatePath('/my-tasks')
 
   // Redirect to the new task
   redirect(`/tasks/${task.id}`)
@@ -228,6 +191,7 @@ export async function updateTask(taskId: string, formData: TaskFormData) {
 
   // Revalidate the tasks page and task detail page
   revalidatePath('/tasks')
+  revalidatePath('/my-tasks')
   revalidatePath(`/tasks/${taskId}`)
 
   // Redirect to the updated task
@@ -265,6 +229,7 @@ export async function deleteTask(taskId: string) {
 
   // Revalidate the tasks page
   revalidatePath('/tasks')
+  revalidatePath('/my-tasks')
 }
 
 export async function getTasks(): Promise<TaskListItem[]> {
@@ -368,6 +333,7 @@ export async function createQuickTask(title: string, dueDate?: string) {
 
   // Revalidate the tasks page
   revalidatePath('/tasks')
+  revalidatePath('/my-tasks')
 
   return task
 }
@@ -457,6 +423,7 @@ export async function createQuickTaskForInitiative(
 
   // Revalidate the tasks page and initiative page
   revalidatePath('/tasks')
+  revalidatePath('/my-tasks')
   revalidatePath(`/initiatives/${initiativeId}`)
 
   return task
@@ -503,6 +470,7 @@ export async function updateTaskStatus(taskId: string, status: TaskStatus) {
 
   // Revalidate the tasks page and task detail page
   revalidatePath('/tasks')
+  revalidatePath('/my-tasks')
   revalidatePath(`/tasks/${taskId}`)
 
   return task
@@ -557,6 +525,7 @@ export async function updateTaskTitle(taskId: string, title: string) {
 
   // Revalidate the tasks page and task detail page
   revalidatePath('/tasks')
+  revalidatePath('/my-tasks')
   revalidatePath(`/tasks/${taskId}`)
 
   return task
@@ -618,6 +587,7 @@ export async function updateTaskAssignee(
 
   // Revalidate the tasks page and task detail page
   revalidatePath('/tasks')
+  revalidatePath('/my-tasks')
   revalidatePath(`/tasks/${taskId}`)
 
   return task
@@ -668,6 +638,7 @@ export async function updateTaskPriority(taskId: string, priority: number) {
 
   // Revalidate the tasks page and task detail page
   revalidatePath('/tasks')
+  revalidatePath('/my-tasks')
   revalidatePath(`/tasks/${taskId}`)
 
   return task
@@ -752,6 +723,7 @@ export async function updateTaskQuickEdit(
 
   // Revalidate the tasks page and task detail page
   revalidatePath('/tasks')
+  revalidatePath('/my-tasks')
   revalidatePath(`/tasks/${taskId}`)
 
   return task

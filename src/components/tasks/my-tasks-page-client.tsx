@@ -1,22 +1,21 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import type { TaskListItem } from '@/lib/task-list-select'
 import type { Person, Initiative } from '@prisma/client'
-import { useTasks } from '@/hooks/use-tasks'
+import { useUserSettings } from '@/lib/hooks/use-user-settings'
+import { useMyTasks } from '@/hooks/use-my-tasks'
 import { GroupedTasksShared } from './grouped-tasks-shared'
 
-interface GroupedTasksPageClientProps {
+interface MyTasksPageClientProps {
   people: Person[]
   initiatives: Initiative[]
-  initialTasks?: TaskListItem[]
 }
 
-export function GroupedTasksPageClient({
+export function MyTasksPageClient({
   people,
   initiatives,
-  initialTasks,
-}: GroupedTasksPageClientProps) {
+}: MyTasksPageClientProps) {
+  const { getSetting, updateSetting, isLoaded } = useUserSettings()
   const [currentPage, setCurrentPage] = useState(1)
   const [filters, setFilters] = useState({
     search: '',
@@ -26,6 +25,7 @@ export function GroupedTasksPageClient({
     priority: '',
     dueDateFrom: '',
     dueDateTo: '',
+    excludeCompleted: false,
   })
 
   // Debounced search state
@@ -41,22 +41,27 @@ export function GroupedTasksPageClient({
     [filters, debouncedSearch]
   )
 
+  // Load completed tasks visibility setting for My Tasks
+  useEffect(() => {
+    if (isLoaded) {
+      const hideCompleted = getSetting('myTasksHideCompleted')
+      setFilters(prev => ({ ...prev, excludeCompleted: hideCompleted }))
+    }
+  }, [isLoaded, getSetting])
+
   const {
     data: tasksData,
     loading,
     error,
     refetch,
-  } = useTasks({
+  } = useMyTasks({
     page: currentPage,
     limit: 20,
     filters: memoizedFilters,
+    enabled: isLoaded,
   })
 
-  // Use initial tasks if provided and not loading from API
-  const tasks = useMemo(() => {
-    return initialTasks ? initialTasks : tasksData?.tasks || []
-  }, [initialTasks, tasksData?.tasks])
-
+  const tasks = tasksData?.tasks || []
   const pagination = tasksData?.pagination
 
   // Debounce search input
@@ -81,19 +86,16 @@ export function GroupedTasksPageClient({
     setCurrentPage(1)
   }, [filters, debouncedSearch])
 
-  const handleFiltersChange = useCallback(
-    (newFilters: {
-      search: string
-      status: string
-      assigneeId: string
-      initiativeId: string
-      priority: string
-      dueDateFrom: string
-      dueDateTo: string
-    }) => {
-      setFilters(prev => ({ ...prev, ...newFilters }))
+  const handleSearchChange = useCallback((search: string) => {
+    setFilters(prev => ({ ...prev, search }))
+  }, [])
+
+  const handleExcludeCompletedChange = useCallback(
+    (excludeCompleted: boolean) => {
+      setFilters(prev => ({ ...prev, excludeCompleted }))
+      updateSetting('myTasksHideCompleted', excludeCompleted)
     },
-    []
+    [updateSetting]
   )
 
   const handlePageChange = useCallback((page: number) => {
@@ -110,8 +112,11 @@ export function GroupedTasksPageClient({
       onRefetch={refetch}
       pagination={pagination}
       onPageChange={handlePageChange}
-      showOnlyMyTasks={false}
-      onFiltersChange={handleFiltersChange}
+      showOnlyMyTasks={true}
+      onSearchChange={handleSearchChange}
+      searchValue={filters.search}
+      excludeCompleted={filters.excludeCompleted}
+      onExcludeCompletedChange={handleExcludeCompletedChange}
     />
   )
 }

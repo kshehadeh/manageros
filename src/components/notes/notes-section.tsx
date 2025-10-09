@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { VisuallyHidden } from '@/components/ui/visually-hidden'
+import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -122,6 +123,15 @@ export function NotesSection({
       setSelectedFiles([])
     } catch (error) {
       console.error('Error creating note:', error)
+
+      // Don't handle redirect errors - let them bubble up
+      if (error && typeof error === 'object' && 'digest' in error) {
+        const digest = (error as { digest?: string }).digest
+        if (digest?.startsWith('NEXT_REDIRECT')) {
+          throw error // Re-throw redirect errors
+        }
+      }
+
       toast.error(
         error instanceof Error ? error.message : 'Failed to create note'
       )
@@ -152,6 +162,15 @@ export function NotesSection({
       setEditingNote(null)
     } catch (error) {
       console.error('Error updating note:', error)
+
+      // Don't handle redirect errors - let them bubble up
+      if (error && typeof error === 'object' && 'digest' in error) {
+        const digest = (error as { digest?: string }).digest
+        if (digest?.startsWith('NEXT_REDIRECT')) {
+          throw error // Re-throw redirect errors
+        }
+      }
+
       toast.error(
         error instanceof Error ? error.message : 'Failed to update note'
       )
@@ -319,31 +338,33 @@ export function NotesSection({
                   </div>
                 </div>
                 <div className='px-4 pb-4'>
-                  <div className='prose prose-sm max-w-none'>
-                    <p className='whitespace-pre-wrap'>
-                      {expandedNotes.has(note.id)
+                  <ReadonlyNotesField
+                    content={
+                      expandedNotes.has(note.id)
                         ? note.content
-                        : getTruncatedContent(note.content)}
-                    </p>
-                    {note.content.length > 200 && (
-                      <button
-                        onClick={() => toggleNoteExpansion(note.id)}
-                        className='mt-2 text-sm text-primary hover:text-primary/80 flex items-center gap-1'
-                      >
-                        {expandedNotes.has(note.id) ? (
-                          <>
-                            <ChevronUp className='h-3 w-3' />
-                            Show less
-                          </>
-                        ) : (
-                          <>
-                            <ChevronDown className='h-3 w-3' />
-                            Show more
-                          </>
-                        )}
-                      </button>
-                    )}
-                  </div>
+                        : getTruncatedContent(note.content)
+                    }
+                    variant='compact'
+                    showEmptyState={false}
+                  />
+                  {note.content.length > 200 && (
+                    <button
+                      onClick={() => toggleNoteExpansion(note.id)}
+                      className='mt-2 text-sm text-primary hover:text-primary/80 flex items-center gap-1'
+                    >
+                      {expandedNotes.has(note.id) ? (
+                        <>
+                          <ChevronUp className='h-3 w-3' />
+                          Show less
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className='h-3 w-3' />
+                          Show more
+                        </>
+                      )}
+                    </button>
+                  )}
 
                   {note.attachments.length > 0 && (
                     <div className='mt-4 space-y-2'>

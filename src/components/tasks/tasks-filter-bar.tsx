@@ -17,59 +17,86 @@ import { taskStatusUtils, ALL_TASK_STATUSES } from '@/lib/task-status'
 import { taskPriorityUtils, ALL_TASK_PRIORITIES } from '@/lib/task-priority'
 import { useUserSettings } from '@/lib/hooks/use-user-settings'
 
+interface TaskFilters {
+  search: string
+  status: string
+  assigneeId: string
+  initiativeId: string
+  priority: string
+  dueDateFrom: string
+  dueDateTo: string
+}
+
 interface TasksFilterBarProps {
   tasks: TaskListItem[]
   people: Person[]
   initiatives: Initiative[]
-  onFilteredTasksChange: (_filteredTasks: TaskListItem[]) => void
+  onFilteredTasksChange: (_filters: TaskFilters) => void
 }
 
 export function TasksFilterBar({
-  tasks,
   people,
   initiatives,
   onFilteredTasksChange,
 }: TasksFilterBarProps) {
   const { getSetting, updateSetting, isLoaded } = useUserSettings()
-  const [textFilter, setTextFilter] = useState('')
-  const [assigneeFilter, setAssigneeFilter] = useState('all')
-  const [initiativeFilter, setInitiativeFilter] = useState('all')
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [priorityFilter, setPriorityFilter] = useState('all')
-  const [dateRangeFilter, setDateRangeFilter] = useState('all')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
+  const [filters, setFilters] = useState<TaskFilters>({
+    search: '',
+    status: 'all',
+    assigneeId: 'all',
+    initiativeId: 'all',
+    priority: 'all',
+    dueDateFrom: '',
+    dueDateTo: '',
+  })
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const filterRef = useRef<HTMLDivElement>(null)
 
   // Load filter values from user settings
   useEffect(() => {
     if (isLoaded) {
-      const savedFilters = getSetting('taskFilters')
-      setTextFilter(savedFilters.textFilter)
-      setAssigneeFilter(savedFilters.assigneeFilter)
-      setInitiativeFilter(savedFilters.initiativeFilter)
-      setStatusFilter(savedFilters.statusFilter)
-      setPriorityFilter(savedFilters.priorityFilter)
-      setDateRangeFilter(savedFilters.dateRangeFilter)
-      setStartDate(savedFilters.startDate)
-      setEndDate(savedFilters.endDate)
+      const savedFilters = getSetting('taskFilters') as Partial<
+        TaskFilters & {
+          textFilter?: string
+          statusFilter?: string
+          assigneeFilter?: string
+          initiativeFilter?: string
+          priorityFilter?: string
+          startDate?: string
+          endDate?: string
+        }
+      >
+      if (savedFilters) {
+        // Handle both old and new filter formats
+        setFilters({
+          search: savedFilters.search || savedFilters.textFilter || '',
+          status: savedFilters.status || savedFilters.statusFilter || 'all',
+          assigneeId:
+            savedFilters.assigneeId || savedFilters.assigneeFilter || 'all',
+          initiativeId:
+            savedFilters.initiativeId || savedFilters.initiativeFilter || 'all',
+          priority:
+            savedFilters.priority || savedFilters.priorityFilter || 'all',
+          dueDateFrom: savedFilters.dueDateFrom || savedFilters.startDate || '',
+          dueDateTo: savedFilters.dueDateTo || savedFilters.endDate || '',
+        })
+      }
     }
   }, [isLoaded, getSetting])
 
   // Helper function to save filter values to user settings
   const saveFilters = useCallback(
-    (filters: {
-      textFilter: string
-      assigneeFilter: string
-      initiativeFilter: string
-      statusFilter: string
-      priorityFilter: string
-      dateRangeFilter: string
-      startDate: string
-      endDate: string
-    }) => {
-      updateSetting('taskFilters', filters)
+    (newFilters: TaskFilters) => {
+      updateSetting('taskFilters', {
+        textFilter: newFilters.search,
+        assigneeFilter: newFilters.assigneeId,
+        initiativeFilter: newFilters.initiativeId,
+        statusFilter: newFilters.status,
+        priorityFilter: newFilters.priority,
+        dateRangeFilter: 'all',
+        startDate: newFilters.dueDateFrom,
+        endDate: newFilters.dueDateTo,
+      })
     },
     [updateSetting]
   )
@@ -106,197 +133,37 @@ export function TasksFilterBar({
       return
     }
 
-    let filtered = tasks
+    onFilteredTasksChange(filters)
+    saveFilters(filters)
+  }, [filters, isLoaded, onFilteredTasksChange, saveFilters])
 
-    // Text filter - search in title and description
-    if (textFilter.trim()) {
-      const searchTerm = textFilter.toLowerCase().trim()
-      filtered = filtered.filter(task => {
-        const title = task.title?.toLowerCase() || ''
-        const description = task.description?.toLowerCase() || ''
-        const assigneeName = task.assignee?.name?.toLowerCase() || ''
-        const initiativeTitle = task.initiative?.title?.toLowerCase() || ''
-
-        return (
-          title.includes(searchTerm) ||
-          description.includes(searchTerm) ||
-          assigneeName.includes(searchTerm) ||
-          initiativeTitle.includes(searchTerm)
-        )
-      })
-    }
-
-    // Assignee filter
-    if (assigneeFilter !== 'all') {
-      if (assigneeFilter === 'unassigned') {
-        filtered = filtered.filter(task => !task.assigneeId)
-      } else {
-        filtered = filtered.filter(task => task.assigneeId === assigneeFilter)
-      }
-    }
-
-    // Initiative filter
-    if (initiativeFilter !== 'all') {
-      if (initiativeFilter === 'no-initiative') {
-        filtered = filtered.filter(task => !task.initiativeId)
-      } else {
-        filtered = filtered.filter(
-          task => task.initiativeId === initiativeFilter
-        )
-      }
-    }
-
-    // Status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(task => task.status === statusFilter)
-    }
-
-    // Priority filter
-    if (priorityFilter !== 'all') {
-      filtered = filtered.filter(
-        task => task.priority.toString() === priorityFilter
-      )
-    }
-
-    // Date range filter
-    if (dateRangeFilter !== 'all') {
-      const now = new Date()
-
-      switch (dateRangeFilter) {
-        case 'today':
-          const today = new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate()
-          )
-          const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000)
-          filtered = filtered.filter(task => {
-            const taskCreatedAt = new Date(task.createdAt)
-            return taskCreatedAt >= today && taskCreatedAt < tomorrow
-          })
-          break
-        case 'this-week':
-          const startOfWeek = new Date(now)
-          startOfWeek.setDate(now.getDate() - now.getDay())
-          startOfWeek.setHours(0, 0, 0, 0)
-          filtered = filtered.filter(task => {
-            const taskCreatedAt = new Date(task.createdAt)
-            return taskCreatedAt >= startOfWeek
-          })
-          break
-        case 'this-month':
-          const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-          filtered = filtered.filter(task => {
-            const taskCreatedAt = new Date(task.createdAt)
-            return taskCreatedAt >= startOfMonth
-          })
-          break
-        case 'last-30-days':
-          const thirtyDaysAgo = new Date(
-            now.getTime() - 30 * 24 * 60 * 60 * 1000
-          )
-          filtered = filtered.filter(task => {
-            const taskCreatedAt = new Date(task.createdAt)
-            return taskCreatedAt >= thirtyDaysAgo
-          })
-          break
-        case 'custom':
-          if (startDate) {
-            const startDateObj = new Date(startDate)
-            startDateObj.setHours(0, 0, 0, 0)
-            filtered = filtered.filter(task => {
-              const taskCreatedAt = new Date(task.createdAt)
-              return taskCreatedAt >= startDateObj
-            })
-          }
-          if (endDate) {
-            const endDateObj = new Date(endDate)
-            endDateObj.setHours(23, 59, 59, 999)
-            filtered = filtered.filter(task => {
-              const taskCreatedAt = new Date(task.createdAt)
-              return taskCreatedAt <= endDateObj
-            })
-          }
-          break
-      }
-    }
-
-    onFilteredTasksChange(filtered)
-  }, [
-    tasks,
-    textFilter,
-    assigneeFilter,
-    initiativeFilter,
-    statusFilter,
-    priorityFilter,
-    dateRangeFilter,
-    startDate,
-    endDate,
-    isLoaded,
-    onFilteredTasksChange,
-  ])
-
-  // Separate effect to save filter values to user settings
-  useEffect(() => {
-    if (!isLoaded) {
-      return
-    }
-
-    saveFilters({
-      textFilter,
-      assigneeFilter,
-      initiativeFilter,
-      statusFilter,
-      priorityFilter,
-      dateRangeFilter,
-      startDate,
-      endDate,
-    })
-  }, [
-    textFilter,
-    assigneeFilter,
-    initiativeFilter,
-    statusFilter,
-    priorityFilter,
-    dateRangeFilter,
-    startDate,
-    endDate,
-    isLoaded,
-    saveFilters,
-  ])
+  const updateFilter = (key: keyof TaskFilters, value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }))
+  }
 
   const clearFilters = () => {
-    const defaultFilters = {
-      textFilter: '',
-      assigneeFilter: 'all',
-      initiativeFilter: 'all',
-      statusFilter: 'all',
-      priorityFilter: 'all',
-      dateRangeFilter: 'all',
-      startDate: '',
-      endDate: '',
+    const defaultFilters: TaskFilters = {
+      search: '',
+      status: 'all',
+      assigneeId: 'all',
+      initiativeId: 'all',
+      priority: 'all',
+      dueDateFrom: '',
+      dueDateTo: '',
     }
 
-    setTextFilter(defaultFilters.textFilter)
-    setAssigneeFilter(defaultFilters.assigneeFilter)
-    setInitiativeFilter(defaultFilters.initiativeFilter)
-    setStatusFilter(defaultFilters.statusFilter)
-    setPriorityFilter(defaultFilters.priorityFilter)
-    setDateRangeFilter(defaultFilters.dateRangeFilter)
-    setStartDate(defaultFilters.startDate)
-    setEndDate(defaultFilters.endDate)
-
-    // Save cleared filters to user settings
+    setFilters(defaultFilters)
     saveFilters(defaultFilters)
   }
 
   const hasActiveFilters =
-    textFilter.trim() ||
-    assigneeFilter !== 'all' ||
-    initiativeFilter !== 'all' ||
-    statusFilter !== 'all' ||
-    priorityFilter !== 'all' ||
-    dateRangeFilter !== 'all'
+    filters.search.trim() ||
+    (filters.status && filters.status !== 'all') ||
+    (filters.assigneeId && filters.assigneeId !== 'all') ||
+    (filters.initiativeId && filters.initiativeId !== 'all') ||
+    (filters.priority && filters.priority !== 'all') ||
+    filters.dueDateFrom ||
+    filters.dueDateTo
 
   return (
     <div className='space-y-4 px-0'>
@@ -306,8 +173,8 @@ export function TasksFilterBar({
           <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4' />
           <Input
             placeholder='Search tasks...'
-            value={textFilter}
-            onChange={e => setTextFilter(e.target.value)}
+            value={filters.search}
+            onChange={e => updateFilter('search', e.target.value)}
             className='pl-10'
           />
         </div>
@@ -333,8 +200,8 @@ export function TasksFilterBar({
                 <div className='space-y-2'>
                   <label className='text-sm font-medium'>Assignee</label>
                   <Select
-                    value={assigneeFilter}
-                    onValueChange={setAssigneeFilter}
+                    value={filters.assigneeId}
+                    onValueChange={value => updateFilter('assigneeId', value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder='All assignees' />
@@ -354,8 +221,8 @@ export function TasksFilterBar({
                 <div className='space-y-2'>
                   <label className='text-sm font-medium'>Initiative</label>
                   <Select
-                    value={initiativeFilter}
-                    onValueChange={setInitiativeFilter}
+                    value={filters.initiativeId}
+                    onValueChange={value => updateFilter('initiativeId', value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder='All initiatives' />
@@ -376,7 +243,10 @@ export function TasksFilterBar({
 
                 <div className='space-y-2'>
                   <label className='text-sm font-medium'>Status</label>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <Select
+                    value={filters.status}
+                    onValueChange={value => updateFilter('status', value)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder='All statuses' />
                     </SelectTrigger>
@@ -394,8 +264,8 @@ export function TasksFilterBar({
                 <div className='space-y-2'>
                   <label className='text-sm font-medium'>Priority</label>
                   <Select
-                    value={priorityFilter}
-                    onValueChange={setPriorityFilter}
+                    value={filters.priority}
+                    onValueChange={value => updateFilter('priority', value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder='All priorities' />
@@ -412,47 +282,23 @@ export function TasksFilterBar({
                 </div>
 
                 <div className='space-y-2'>
-                  <label className='text-sm font-medium'>Date Range</label>
-                  <Select
-                    value={dateRangeFilter}
-                    onValueChange={setDateRangeFilter}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder='All dates' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='all'>All dates</SelectItem>
-                      <SelectItem value='today'>Today</SelectItem>
-                      <SelectItem value='this-week'>This week</SelectItem>
-                      <SelectItem value='this-month'>This month</SelectItem>
-                      <SelectItem value='last-30-days'>Last 30 days</SelectItem>
-                      <SelectItem value='custom'>Custom range</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <label className='text-sm font-medium'>Due Date From</label>
+                  <Input
+                    type='date'
+                    value={filters.dueDateFrom}
+                    onChange={e => updateFilter('dueDateFrom', e.target.value)}
+                  />
+                </div>
+
+                <div className='space-y-2'>
+                  <label className='text-sm font-medium'>Due Date To</label>
+                  <Input
+                    type='date'
+                    value={filters.dueDateTo}
+                    onChange={e => updateFilter('dueDateTo', e.target.value)}
+                  />
                 </div>
               </div>
-
-              {/* Custom Date Range Inputs */}
-              {dateRangeFilter === 'custom' && (
-                <div className='grid grid-cols-2 gap-4 mt-4'>
-                  <div className='space-y-2'>
-                    <label className='text-sm font-medium'>Start Date</label>
-                    <Input
-                      type='date'
-                      value={startDate}
-                      onChange={e => setStartDate(e.target.value)}
-                    />
-                  </div>
-                  <div className='space-y-2'>
-                    <label className='text-sm font-medium'>End Date</label>
-                    <Input
-                      type='date'
-                      value={endDate}
-                      onChange={e => setEndDate(e.target.value)}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>
@@ -465,5 +311,119 @@ export function TasksFilterBar({
         )}
       </div>
     </div>
+  )
+}
+
+// Legacy wrapper for backward compatibility
+interface LegacyTasksFilterBarProps {
+  tasks: TaskListItem[]
+  people: Person[]
+  initiatives: Initiative[]
+  onFilteredTasksChange: (_filteredTasks: TaskListItem[]) => void
+}
+
+export function LegacyTasksFilterBar({
+  tasks,
+  people,
+  initiatives,
+  onFilteredTasksChange,
+}: LegacyTasksFilterBarProps) {
+  const [, setFilteredTasks] = useState<TaskListItem[]>(tasks)
+
+  // Update filtered tasks when tasks prop changes
+  useEffect(() => {
+    setFilteredTasks(tasks)
+  }, [tasks])
+
+  const handleFiltersChange = useCallback(
+    (filters: TaskFilters) => {
+      let filtered = tasks
+
+      // Text filter - search in title and description
+      if (filters.search.trim()) {
+        const searchTerm = filters.search.toLowerCase().trim()
+        filtered = filtered.filter(task => {
+          const title = task.title?.toLowerCase() || ''
+          const description = task.description?.toLowerCase() || ''
+          const assigneeName = task.assignee?.name?.toLowerCase() || ''
+          const initiativeTitle = task.initiative?.title?.toLowerCase() || ''
+
+          return (
+            title.includes(searchTerm) ||
+            description.includes(searchTerm) ||
+            assigneeName.includes(searchTerm) ||
+            initiativeTitle.includes(searchTerm)
+          )
+        })
+      }
+
+      // Assignee filter
+      if (filters.assigneeId) {
+        if (filters.assigneeId === 'unassigned') {
+          filtered = filtered.filter(task => !task.assigneeId)
+        } else {
+          filtered = filtered.filter(
+            task => task.assigneeId === filters.assigneeId
+          )
+        }
+      }
+
+      // Initiative filter
+      if (filters.initiativeId) {
+        if (filters.initiativeId === 'no-initiative') {
+          filtered = filtered.filter(task => !task.initiativeId)
+        } else {
+          filtered = filtered.filter(
+            task => task.initiativeId === filters.initiativeId
+          )
+        }
+      }
+
+      // Status filter
+      if (filters.status) {
+        filtered = filtered.filter(task => task.status === filters.status)
+      }
+
+      // Priority filter
+      if (filters.priority) {
+        filtered = filtered.filter(
+          task => task.priority.toString() === filters.priority
+        )
+      }
+
+      // Due date filters
+      if (filters.dueDateFrom) {
+        const fromDate = new Date(filters.dueDateFrom)
+        fromDate.setHours(0, 0, 0, 0)
+        filtered = filtered.filter(task => {
+          if (!task.dueDate) return false
+          const taskDueDate = new Date(task.dueDate)
+          return taskDueDate >= fromDate
+        })
+      }
+
+      if (filters.dueDateTo) {
+        const toDate = new Date(filters.dueDateTo)
+        toDate.setHours(23, 59, 59, 999)
+        filtered = filtered.filter(task => {
+          if (!task.dueDate) return false
+          const taskDueDate = new Date(task.dueDate)
+          return taskDueDate <= toDate
+        })
+      }
+
+      setFilteredTasks(filtered)
+      onFilteredTasksChange(filtered)
+    },
+    [tasks, onFilteredTasksChange]
+  )
+
+  return (
+    <TasksFilterBar
+      tasks={tasks}
+      people={people}
+      initiatives={initiatives}
+      onFilteredTasksChange={handleFiltersChange}
+    />
   )
 }

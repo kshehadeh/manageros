@@ -12,7 +12,7 @@ export interface UserSettings {
   theme: 'light' | 'dark'
 
   // Task view settings
-  taskGrouping: 'status' | 'initiative' | 'assignee'
+  taskGrouping: 'status' | 'initiative' | 'assignee' | 'none'
   taskFilters: {
     textFilter: string
     assigneeFilter: string
@@ -23,6 +23,7 @@ export interface UserSettings {
     startDate: string
     endDate: string
   }
+  myTasksHideCompleted: boolean
 
   // Initiative view settings
   initiativeGrouping: 'team' | 'rag'
@@ -65,6 +66,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
     startDate: '',
     endDate: '',
   },
+  myTasksHideCompleted: true,
   initiativeGrouping: 'rag',
   initiativeFilters: {
     textFilter: '',

@@ -9,6 +9,7 @@ import {
   Settings,
   BarChart3,
   Handshake,
+  CheckSquare,
 } from 'lucide-react'
 import { type CommandItemDescriptor, type CommandSource } from '../types'
 
@@ -103,6 +104,18 @@ function createStaticItems(
       group: 'Navigation',
       perform: ({ closePalette, router }) => {
         router.push('/tasks')
+        closePalette()
+      },
+    },
+    {
+      id: 'nav.my-tasks',
+      title: 'View My Tasks',
+      subtitle: 'Go to my assigned tasks',
+      icon: <CheckSquare className='h-4 w-4' />,
+      keywords: ['my tasks', 'assigned', 'personal', 'todo'],
+      group: 'Navigation',
+      perform: ({ closePalette, router }) => {
+        router.push('/my-tasks')
         closePalette()
       },
     },

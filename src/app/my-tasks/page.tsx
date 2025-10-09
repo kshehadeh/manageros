@@ -1,11 +1,11 @@
 import { getInitiatives } from '@/lib/actions/initiative'
 import { prisma } from '@/lib/db'
 import { requireAuth } from '@/lib/auth-utils'
-import { GroupedTasksPageClient } from '@/components/tasks/grouped-tasks-page-client'
+import { MyTasksPageClient } from '@/components/tasks/my-tasks-page-client'
 import { CreateTaskButton } from '@/components/tasks/create-task-button'
-import { ListTodo } from 'lucide-react'
+import { CheckSquare } from 'lucide-react'
 
-export default async function TasksPage() {
+export default async function MyTasksPage() {
   const user = await requireAuth({ requireOrganization: true })
 
   const [people, initiatives] = await Promise.all([
@@ -24,11 +24,11 @@ export default async function TasksPage() {
         <div className='flex items-center justify-between'>
           <div>
             <div className='flex items-center gap-2'>
-              <ListTodo className='h-6 w-6 text-muted-foreground' />
-              <h1 className='page-title'>Tasks</h1>
+              <CheckSquare className='h-6 w-6 text-muted-foreground' />
+              <h1 className='page-title'>My Tasks</h1>
             </div>
             <p className='page-subtitle'>
-              Manage and track all tasks across your organization
+              Track and manage tasks assigned to you
             </p>
           </div>
           <CreateTaskButton />
@@ -36,7 +36,7 @@ export default async function TasksPage() {
       </div>
 
       <div className='page-section -mx-3 md:mx-0'>
-        <GroupedTasksPageClient people={people} initiatives={initiatives} />
+        <MyTasksPageClient people={people} initiatives={initiatives} />
       </div>
     </div>
   )

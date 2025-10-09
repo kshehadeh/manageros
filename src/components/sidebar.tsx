@@ -21,6 +21,7 @@ import {
   BarChart3,
   Command,
   Bot,
+  CheckSquare,
 } from 'lucide-react'
 import { useState } from 'react'
 import { HelpDialog } from '@/components/shared'
@@ -49,6 +50,7 @@ const iconMap = {
   Calendar,
   Building,
   BarChart3,
+  CheckSquare,
 }
 
 export default function Sidebar({
