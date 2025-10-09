@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 import {
   linkUserToPerson,
   unlinkUserFromPerson,
@@ -29,7 +30,6 @@ export function UserLinkForm({
   const [availableUsers, setAvailableUsers] = useState<User[]>([])
   const [selectedUserId, setSelectedUserId] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
 
   useEffect(() => {
     const loadUsers = async () => {
@@ -47,14 +47,32 @@ export function UserLinkForm({
     if (!selectedUserId) return
 
     setIsLoading(true)
-    setError('')
 
     try {
       await linkUserToPerson(selectedUserId, personId)
       setSelectedUserId('')
+      toast.success('User account linked successfully')
       if (onLinkChange) onLinkChange()
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'An error occurred')
+      const errorMessage =
+        error instanceof Error ? error.message : 'An error occurred'
+
+      // Provide more user-friendly error messages
+      if (errorMessage.includes('Only organization admins')) {
+        toast.error(
+          'Only organization administrators can link users to persons.'
+        )
+      } else if (errorMessage.includes('Person not found')) {
+        toast.error(
+          'Person not found or you do not have permission to link this account.'
+        )
+      } else if (errorMessage.includes('already linked')) {
+        toast.error('This person is already linked to a user account.')
+      } else if (errorMessage.includes('organization')) {
+        toast.error('You must belong to an organization to link user accounts.')
+      } else {
+        toast.error(`Failed to link user account: ${errorMessage}`)
+      }
     } finally {
       setIsLoading(false)
     }
@@ -64,13 +82,31 @@ export function UserLinkForm({
     if (!linkedUser) return
 
     setIsLoading(true)
-    setError('')
 
     try {
       await unlinkUserFromPerson(linkedUser.id)
+      toast.success('User account unlinked successfully')
       if (onLinkChange) onLinkChange()
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'An error occurred')
+      const errorMessage =
+        error instanceof Error ? error.message : 'An error occurred'
+
+      // Provide more user-friendly error messages
+      if (errorMessage.includes('Only organization admins')) {
+        toast.error(
+          'Only organization administrators can unlink users from persons.'
+        )
+      } else if (errorMessage.includes('Person not found')) {
+        toast.error(
+          'Person not found or you do not have permission to unlink this account.'
+        )
+      } else if (errorMessage.includes('organization')) {
+        toast.error(
+          'You must belong to an organization to unlink user accounts.'
+        )
+      } else {
+        toast.error(`Failed to unlink user account: ${errorMessage}`)
+      }
     } finally {
       setIsLoading(false)
     }
@@ -78,12 +114,6 @@ export function UserLinkForm({
 
   return (
     <div className='space-y-4'>
-      {error && (
-        <div className='bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded'>
-          {error}
-        </div>
-      )}
-
       {linkedUser ? (
         <div className='bg-secondary/30 border rounded-lg p-4'>
           <div className='space-y-3'>

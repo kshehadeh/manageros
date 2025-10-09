@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import {
   linkPersonToJiraAccount,
   unlinkPersonFromJiraAccount,
@@ -29,20 +30,41 @@ export function JiraAccountLinker({
     jiraAccount?.jiraEmail || personEmail || ''
   )
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const handleLink = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    setError(null)
 
     try {
       await linkPersonToJiraAccount(personId, jiraEmail)
+      toast.success('Jira account linked successfully')
       onSuccess?.()
     } catch (err) {
-      setError(
+      const errorMessage =
         err instanceof Error ? err.message : 'Failed to link Jira account'
-      )
+
+      // Provide more user-friendly error messages
+      if (errorMessage.includes('credentials not configured')) {
+        toast.error(
+          'Jira integration is not configured. Please set up Jira credentials in Settings first.'
+        )
+      } else if (errorMessage.includes('No active Jira user found')) {
+        toast.error(
+          `No Jira user found with email "${jiraEmail}". Please check the email address and try again.`
+        )
+      } else if (errorMessage.includes('Multiple Jira users found')) {
+        toast.error(
+          `Multiple Jira users found with email "${jiraEmail}". Please contact your administrator.`
+        )
+      } else if (errorMessage.includes('Person not found')) {
+        toast.error(
+          'Person not found or you do not have permission to link this account.'
+        )
+      } else if (errorMessage.includes('organization')) {
+        toast.error('You must belong to an organization to link Jira accounts.')
+      } else {
+        toast.error(`Failed to link Jira account: ${errorMessage}`)
+      }
     } finally {
       setIsLoading(false)
     }
@@ -58,15 +80,27 @@ export function JiraAccountLinker({
     }
 
     setIsLoading(true)
-    setError(null)
 
     try {
       await unlinkPersonFromJiraAccount(personId)
+      toast.success('Jira account unlinked successfully')
       onSuccess?.()
     } catch (err) {
-      setError(
+      const errorMessage =
         err instanceof Error ? err.message : 'Failed to unlink Jira account'
-      )
+
+      // Provide more user-friendly error messages
+      if (errorMessage.includes('Person not found')) {
+        toast.error(
+          'Person not found or you do not have permission to unlink this account.'
+        )
+      } else if (errorMessage.includes('organization')) {
+        toast.error(
+          'You must belong to an organization to unlink Jira accounts.'
+        )
+      } else {
+        toast.error(`Failed to unlink Jira account: ${errorMessage}`)
+      }
     } finally {
       setIsLoading(false)
     }
@@ -97,12 +131,6 @@ export function JiraAccountLinker({
             </Button>
           </div>
         </div>
-
-        {error && (
-          <div className='rounded-md bg-red-900/20 border border-red-800 p-3'>
-            <div className='text-sm text-red-400'>{error}</div>
-          </div>
-        )}
       </div>
     )
   }
@@ -120,12 +148,6 @@ export function JiraAccountLinker({
             required
           />
         </div>
-
-        {error && (
-          <div className='rounded-md bg-red-900/20 border border-red-800 p-3'>
-            <div className='text-sm text-red-400'>{error}</div>
-          </div>
-        )}
 
         <Button type='submit' disabled={isLoading} variant='outline'>
           {isLoading ? 'Linking...' : 'Link Account'}

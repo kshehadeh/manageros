@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import {
   linkPersonToGithubAccount,
   unlinkPersonFromGithubAccount,
@@ -28,20 +29,39 @@ export function GithubAccountLinker({
     githubAccount?.githubUsername || ''
   )
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const handleLink = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    setError(null)
 
     try {
       await linkPersonToGithubAccount(personId, githubUsername)
+      toast.success('GitHub account linked successfully')
       onSuccess?.()
     } catch (err) {
-      setError(
+      const errorMessage =
         err instanceof Error ? err.message : 'Failed to link GitHub account'
-      )
+
+      // Provide more user-friendly error messages
+      if (errorMessage.includes('credentials not configured')) {
+        toast.error(
+          'GitHub integration is not configured. Please set up GitHub credentials in Settings first.'
+        )
+      } else if (errorMessage.includes('No GitHub user found')) {
+        toast.error(
+          `No GitHub user found with username "${githubUsername}". Please check the username and try again.`
+        )
+      } else if (errorMessage.includes('Person not found')) {
+        toast.error(
+          'Person not found or you do not have permission to link this account.'
+        )
+      } else if (errorMessage.includes('organization')) {
+        toast.error(
+          'You must belong to an organization to link GitHub accounts.'
+        )
+      } else {
+        toast.error(`Failed to link GitHub account: ${errorMessage}`)
+      }
     } finally {
       setIsLoading(false)
     }
@@ -57,15 +77,27 @@ export function GithubAccountLinker({
     }
 
     setIsLoading(true)
-    setError(null)
 
     try {
       await unlinkPersonFromGithubAccount(personId)
+      toast.success('GitHub account unlinked successfully')
       onSuccess?.()
     } catch (err) {
-      setError(
+      const errorMessage =
         err instanceof Error ? err.message : 'Failed to unlink GitHub account'
-      )
+
+      // Provide more user-friendly error messages
+      if (errorMessage.includes('Person not found')) {
+        toast.error(
+          'Person not found or you do not have permission to unlink this account.'
+        )
+      } else if (errorMessage.includes('organization')) {
+        toast.error(
+          'You must belong to an organization to unlink GitHub accounts.'
+        )
+      } else {
+        toast.error(`Failed to unlink GitHub account: ${errorMessage}`)
+      }
     } finally {
       setIsLoading(false)
     }
@@ -102,12 +134,6 @@ export function GithubAccountLinker({
             </Button>
           </div>
         </div>
-
-        {error && (
-          <div className='rounded-md bg-red-900/20 border border-red-800 p-3'>
-            <div className='text-sm text-red-400'>{error}</div>
-          </div>
-        )}
       </div>
     )
   }
@@ -125,12 +151,6 @@ export function GithubAccountLinker({
             required
           />
         </div>
-
-        {error && (
-          <div className='rounded-md bg-red-900/20 border border-red-800 p-3'>
-            <div className='text-sm text-red-400'>{error}</div>
-          </div>
-        )}
 
         <Button type='submit' disabled={isLoading} variant='outline'>
           {isLoading ? 'Linking...' : 'Link Account'}
