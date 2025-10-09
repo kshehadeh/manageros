@@ -1,13 +1,20 @@
 'use client'
 
 import { type CommandItemDescriptor, type CommandSource } from '../types'
-import { ListTodo, Rocket, User, MessageCircle, Handshake } from 'lucide-react'
+import {
+  Calendar,
+  ListTodo,
+  Rocket,
+  User,
+  MessageCircle,
+  Handshake,
+} from 'lucide-react'
 
 interface SearchResultBase {
   id: string
   title: string
   subtitle?: string
-  type: 'task' | 'initiative' | 'person' | 'feedback' | 'oneOnOne'
+  type: 'task' | 'initiative' | 'person' | 'feedback' | 'oneOnOne' | 'meeting'
 }
 
 async function searchAll(query: string): Promise<SearchResultBase[]> {
@@ -71,6 +78,16 @@ export const searchCommandSource: CommandSource = {
           icon: <Handshake className='h-4 w-4' />,
           perform: ({ closePalette, router }) => {
             router.push(`/oneonones/${r.id}`)
+            closePalette()
+          },
+        }
+      }
+      if (r.type === 'meeting') {
+        return {
+          ...base,
+          icon: <Calendar className='h-4 w-4' />,
+          perform: ({ closePalette, router }) => {
+            router.push(`/meetings/${r.id}`)
             closePalette()
           },
         }

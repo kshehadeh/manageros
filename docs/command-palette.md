@@ -16,7 +16,7 @@ The Command Palette provides fast access to actions and data via keyboard search
 - `src/components/command-palette/command-palette.tsx` – palette dialog and results rendering
 - `src/components/command-palette/sources/` – extensible sources that supply commands
   - `core.tsx` – quick actions (e.g., Create Task) and navigation
-  - `search.ts` – server-backed search across tasks, initiatives, people
+  - `search.ts` – server-backed search across tasks, initiatives, people, meetings, feedback, one-on-ones
 - `src/app/api/search/route.ts` – unified search endpoint
 - `src/components/command-palette/create-task-modal.tsx` – modal used by Create Task action
 
