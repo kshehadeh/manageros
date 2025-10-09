@@ -13,20 +13,14 @@ import {
 } from '@/components/ui/select'
 import { PersonSelect } from '@/components/ui/person-select'
 import { TeamSelect } from '@/components/ui/team-select'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { SectionHeader } from '@/components/ui/section-header'
 import { useState } from 'react'
 import { createPerson, updatePerson } from '@/lib/actions/person'
 import { type PersonFormData, personSchema } from '@/lib/validations'
 import { UserLinkForm } from '@/components/user-link-form'
 import { JiraAccountLinker } from '@/components/jira-account-linker'
 import { GithubAccountLinker } from '@/components/github-account-linker'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, User, Users, Calendar } from 'lucide-react'
 import { FaJira, FaGithub } from 'react-icons/fa'
 
 interface PersonFormProps {
@@ -129,6 +123,14 @@ export function PersonForm({
     } catch (error: unknown) {
       console.error('Error submitting form:', error)
 
+      // Don't handle redirect errors - let them bubble up
+      if (error && typeof error === 'object' && 'digest' in error) {
+        const digest = (error as { digest?: string }).digest
+        if (digest?.startsWith('NEXT_REDIRECT')) {
+          throw error // Re-throw redirect errors
+        }
+      }
+
       if (error && typeof error === 'object' && 'issues' in error) {
         // Handle Zod validation errors
         const fieldErrors: Record<string, string> = {}
@@ -183,14 +185,9 @@ export function PersonForm({
         {/* Main Form Content */}
         <div className='flex-1 space-y-6'>
           {/* Basic Information */}
-          <Card>
-            <CardHeader className='pb-3'>
-              <CardTitle className='text-lg'>Basic Information</CardTitle>
-              <CardDescription className='text-sm'>
-                Essential details about the person
-              </CardDescription>
-            </CardHeader>
-            <CardContent className='space-y-4'>
+          <div className='space-y-4'>
+            <SectionHeader icon={User} title='Basic Information' />
+            <div className='space-y-4'>
               <div className='space-y-2'>
                 <Label htmlFor='name'>
                   Name <span className='text-destructive'>*</span>
@@ -238,18 +235,41 @@ export function PersonForm({
                   <p className='text-sm text-destructive'>{errors.role}</p>
                 )}
               </div>
-            </CardContent>
-          </Card>
+
+              <div className='space-y-2'>
+                <Label htmlFor='jobRole'>Job Role</Label>
+                <Select
+                  value={getSelectValue(formData.jobRoleId)}
+                  onValueChange={value =>
+                    handleInputChange('jobRoleId', getFormValue(value))
+                  }
+                >
+                  <SelectTrigger
+                    className={errors.jobRoleId ? 'border-destructive' : ''}
+                  >
+                    <SelectValue placeholder='Select a job role' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='none'>No job role</SelectItem>
+                    {jobRoles.map(jobRole => (
+                      <SelectItem key={jobRole.id} value={jobRole.id}>
+                        {jobRole.title} - {jobRole.level.name} (
+                        {jobRole.domain.name})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.jobRoleId && (
+                  <p className='text-sm text-destructive'>{errors.jobRoleId}</p>
+                )}
+              </div>
+            </div>
+          </div>
 
           {/* Team & Reporting */}
-          <Card>
-            <CardHeader className='pb-3'>
-              <CardTitle className='text-lg'>Team & Reporting</CardTitle>
-              <CardDescription className='text-sm'>
-                Organizational structure and reporting relationships
-              </CardDescription>
-            </CardHeader>
-            <CardContent className='space-y-4'>
+          <div className='space-y-4'>
+            <SectionHeader icon={Users} title='Team & Reporting' />
+            <div className='space-y-4'>
               <div className='space-y-2'>
                 <Label htmlFor='team'>Team</Label>
                 <TeamSelect
@@ -281,153 +301,97 @@ export function PersonForm({
                   className={errors.managerId ? 'border-destructive' : ''}
                 />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Status & Dates */}
-          <Card>
-            <CardHeader className='pb-3'>
-              <CardTitle className='text-lg'>Status & Dates</CardTitle>
-              <CardDescription className='text-sm'>
-                Employment status and important dates
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
-                <div className='space-y-2'>
-                  <Label htmlFor='status'>Status</Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={value =>
-                      handleInputChange(
-                        'status',
-                        value as PersonFormData['status']
-                      )
-                    }
-                  >
-                    <SelectTrigger
-                      className={errors.status ? 'border-destructive' : ''}
-                    >
-                      <SelectValue placeholder='Select status' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='active'>Active</SelectItem>
-                      <SelectItem value='inactive'>Inactive</SelectItem>
-                      <SelectItem value='on_leave'>On Leave</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.status && (
-                    <p className='text-sm text-destructive'>{errors.status}</p>
-                  )}
-                </div>
-
-                <div className='space-y-2'>
-                  <Label htmlFor='employeeType'>Employee Type</Label>
-                  <Select
-                    value={getSelectValue(formData.employeeType)}
-                    onValueChange={value =>
-                      handleInputChange('employeeType', getFormValue(value))
-                    }
-                  >
-                    <SelectTrigger
-                      className={
-                        errors.employeeType ? 'border-destructive' : ''
-                      }
-                    >
-                      <SelectValue placeholder='Select employee type' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='none'>Not specified</SelectItem>
-                      <SelectItem value='FULL_TIME'>Full Time</SelectItem>
-                      <SelectItem value='PART_TIME'>Part Time</SelectItem>
-                      <SelectItem value='INTERN'>Intern</SelectItem>
-                      <SelectItem value='CONSULTANT'>Consultant</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.employeeType && (
-                    <p className='text-sm text-destructive'>
-                      {errors.employeeType}
-                    </p>
-                  )}
-                </div>
-
-                <div className='space-y-2'>
-                  <Label htmlFor='birthday'>Birthday</Label>
-                  <Input
-                    id='birthday'
-                    type='date'
-                    value={formData.birthday}
-                    onChange={e =>
-                      handleInputChange('birthday', e.target.value)
-                    }
-                    className={errors.birthday ? 'border-destructive' : ''}
-                  />
-                  {errors.birthday && (
-                    <p className='text-sm text-destructive'>
-                      {errors.birthday}
-                    </p>
-                  )}
-                </div>
-
-                <div className='space-y-2'>
-                  <Label htmlFor='startedAt'>Start Date</Label>
-                  <Input
-                    id='startedAt'
-                    type='date'
-                    value={formData.startedAt}
-                    onChange={e =>
-                      handleInputChange('startedAt', e.target.value)
-                    }
-                    className={errors.startedAt ? 'border-destructive' : ''}
-                  />
-                  {errors.startedAt && (
-                    <p className='text-sm text-destructive'>
-                      {errors.startedAt}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Job Role */}
-          <Card>
-            <CardHeader className='pb-3'>
-              <CardTitle className='text-lg'>Job Role</CardTitle>
-              <CardDescription className='text-sm'>
-                Professional role and responsibilities
-              </CardDescription>
-            </CardHeader>
-            <CardContent className='space-y-4'>
+          <div className='space-y-4'>
+            <SectionHeader icon={Calendar} title='Status & Dates' />
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
               <div className='space-y-2'>
-                <Label htmlFor='jobRole'>Job Role</Label>
+                <Label htmlFor='status'>Status</Label>
                 <Select
-                  value={getSelectValue(formData.jobRoleId)}
+                  value={formData.status}
                   onValueChange={value =>
-                    handleInputChange('jobRoleId', getFormValue(value))
+                    handleInputChange(
+                      'status',
+                      value as PersonFormData['status']
+                    )
                   }
                 >
                   <SelectTrigger
-                    className={errors.jobRoleId ? 'border-destructive' : ''}
+                    className={errors.status ? 'border-destructive' : ''}
                   >
-                    <SelectValue placeholder='Select a job role' />
+                    <SelectValue placeholder='Select status' />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value='none'>No job role</SelectItem>
-                    {jobRoles.map(jobRole => (
-                      <SelectItem key={jobRole.id} value={jobRole.id}>
-                        {jobRole.title} - {jobRole.level.name} (
-                        {jobRole.domain.name})
-                      </SelectItem>
-                    ))}
+                    <SelectItem value='active'>Active</SelectItem>
+                    <SelectItem value='inactive'>Inactive</SelectItem>
+                    <SelectItem value='on_leave'>On Leave</SelectItem>
                   </SelectContent>
                 </Select>
-                {errors.jobRoleId && (
-                  <p className='text-sm text-destructive'>{errors.jobRoleId}</p>
+                {errors.status && (
+                  <p className='text-sm text-destructive'>{errors.status}</p>
                 )}
               </div>
-            </CardContent>
-          </Card>
+
+              <div className='space-y-2'>
+                <Label htmlFor='employeeType'>Employee Type</Label>
+                <Select
+                  value={getSelectValue(formData.employeeType)}
+                  onValueChange={value =>
+                    handleInputChange('employeeType', getFormValue(value))
+                  }
+                >
+                  <SelectTrigger
+                    className={errors.employeeType ? 'border-destructive' : ''}
+                  >
+                    <SelectValue placeholder='Select employee type' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='none'>Not specified</SelectItem>
+                    <SelectItem value='FULL_TIME'>Full Time</SelectItem>
+                    <SelectItem value='PART_TIME'>Part Time</SelectItem>
+                    <SelectItem value='INTERN'>Intern</SelectItem>
+                    <SelectItem value='CONSULTANT'>Consultant</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.employeeType && (
+                  <p className='text-sm text-destructive'>
+                    {errors.employeeType}
+                  </p>
+                )}
+              </div>
+
+              <div className='space-y-2'>
+                <Label htmlFor='birthday'>Birthday</Label>
+                <Input
+                  id='birthday'
+                  type='date'
+                  value={formData.birthday}
+                  onChange={e => handleInputChange('birthday', e.target.value)}
+                  className={errors.birthday ? 'border-destructive' : ''}
+                />
+                {errors.birthday && (
+                  <p className='text-sm text-destructive'>{errors.birthday}</p>
+                )}
+              </div>
+
+              <div className='space-y-2'>
+                <Label htmlFor='startedAt'>Start Date</Label>
+                <Input
+                  id='startedAt'
+                  type='date'
+                  value={formData.startedAt}
+                  onChange={e => handleInputChange('startedAt', e.target.value)}
+                  className={errors.startedAt ? 'border-destructive' : ''}
+                />
+                {errors.startedAt && (
+                  <p className='text-sm text-destructive'>{errors.startedAt}</p>
+                )}
+              </div>
+            </div>
+          </div>
 
           {/* Submit Button */}
           <div className='flex justify-end gap-2'>

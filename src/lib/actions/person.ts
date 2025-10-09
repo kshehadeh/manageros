@@ -356,11 +356,12 @@ export async function updatePerson(id: string, formData: PersonFormData) {
     },
   })
 
-  // Revalidate the people page
+  // Revalidate the people page and person detail page
   revalidatePath('/people')
+  revalidatePath(`/people/${id}`)
 
-  // Redirect to the people page
-  redirect('/people')
+  // Redirect to the person detail page
+  redirect(`/people/${id}`)
 }
 
 export async function updatePersonPartial(

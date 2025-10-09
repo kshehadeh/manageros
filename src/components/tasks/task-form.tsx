@@ -5,10 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { SlateTaskTextarea } from '@/components/tasks/slate-task-textarea'
 import { MarkdownEditor } from '@/components/markdown-editor'
-import {
-  createTask,
-  updateTask,
-} from '@/lib/actions/task'
+import { createTask, updateTask } from '@/lib/actions/task'
 import { type TaskFormData, taskSchema } from '@/lib/validations'
 import { Person, Initiative, Objective } from '@prisma/client'
 import {
@@ -85,6 +82,14 @@ export function TaskForm({
       }
     } catch (error: unknown) {
       console.error('Error submitting task:', error)
+
+      // Don't handle redirect errors - let them bubble up
+      if (error && typeof error === 'object' && 'digest' in error) {
+        const digest = (error as { digest?: string }).digest
+        if (digest?.startsWith('NEXT_REDIRECT')) {
+          throw error // Re-throw redirect errors
+        }
+      }
 
       if (error && typeof error === 'object' && 'errors' in error) {
         // Handle Zod validation errors

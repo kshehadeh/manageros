@@ -63,6 +63,21 @@ export function CommandPaletteProvider({
           window.dispatchEvent(ev)
         }
       }
+
+      // E: Open edit form for current detail page (only when not in input/textarea)
+      if (e.key.toLowerCase() === 'e' && !isMod) {
+        const target = e.target as HTMLElement
+        const isInput =
+          target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.contentEditable === 'true'
+
+        if (!isInput) {
+          e.preventDefault()
+          const ev = new CustomEvent('command:openEditForm')
+          window.dispatchEvent(ev)
+        }
+      }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)

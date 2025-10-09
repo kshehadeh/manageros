@@ -7,6 +7,7 @@ The Command Palette provides fast access to actions and data via keyboard search
 - **Ctrl/⌘ + K**: Open command palette
 - **Ctrl/⌘ + J**: Open AI chat sidebar
 - **Q**: Open task creation dialog directly (when not focused on input fields)
+- **E**: Open edit form for current detail page (when not focused on input fields)
 
 ### Files
 

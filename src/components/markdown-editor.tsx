@@ -2,6 +2,7 @@
 'use client'
 
 import MDEditor from '@uiw/react-md-editor'
+import '@uiw/react-md-editor/markdown-editor.css'
 import { useTheme } from '@/lib/hooks/use-theme'
 
 interface MarkdownEditorProps {
@@ -30,23 +31,24 @@ export function MarkdownEditor({
 
   return (
     <div className={className}>
-      <MDEditor
-        value={value}
-        onChange={handleChange}
-        data-color-mode={theme === 'dark' ? 'dark' : 'light'}
-        preview='edit'
-        hideToolbar={false}
-        visibleDragbar={false}
-        height={300}
-        textareaProps={{
-          placeholder: placeholder,
-          style: {
-            fontSize: 14,
-            fontFamily:
-              'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
-          },
-        }}
-      />
+      <div data-color-mode={theme === 'dark' ? 'dark' : 'light'}>
+        <MDEditor
+          value={value}
+          onChange={handleChange}
+          preview='edit'
+          hideToolbar={false}
+          visibleDragbar={false}
+          height={300}
+          textareaProps={{
+            placeholder: placeholder,
+            style: {
+              fontSize: 14,
+              fontFamily:
+                'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
+            },
+          }}
+        />
+      </div>
 
       {/* Character count */}
       <div className='px-4 py-2 border-t text-xs text-muted-foreground bg-accent'>

@@ -31,6 +31,13 @@ ManagerOS includes several keyboard shortcuts to help you navigate and work more
 - Allows you to quickly create a new task without navigating to the tasks page
 - Press Escape to cancel
 
+### Quick Edit
+
+- **E** (on detail pages)
+- Opens the edit form for the current detail page
+- Works on people, initiatives, meetings, tasks, one-on-ones, feedback, and teams detail pages
+- Press Escape to cancel editing
+
 ## Navigation Tips
 
 - Use the command palette (⌘K) to quickly jump between different sections of the app

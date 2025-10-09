@@ -13,6 +13,7 @@ import { CommandPaletteProvider } from '@/components/command-palette/provider'
 import { CommandPalette } from '@/components/command-palette/command-palette'
 import { CreateTaskModal } from '@/components/command-palette/create-task-modal'
 import { PersonSelectorModal } from '@/components/command-palette/person-selector-modal'
+import { EditFormNavigator } from '@/components/edit-form-navigator'
 import { OfflineAwareLayout } from '@/components/offline-aware-layout'
 import { AIChatSidebarWrapper } from '@/components/ai-chat-sidebar-wrapper'
 import { CacheProvider } from '@/components/cache-provider'
@@ -102,6 +103,7 @@ export default async function ServerConditionalLayout({
                   <CommandPalette />
                   <CreateTaskModal />
                   <PersonSelectorModal />
+                  <EditFormNavigator />
                 </CacheProvider>
               </MobileMenuProvider>
             </BreadcrumbProvider>
