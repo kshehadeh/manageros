@@ -1,28 +1,33 @@
-import { prisma } from '@/lib/db'
-import { AssignedTasks } from '@/components/tasks/dashboard-assigned-tasks'
-import { ExpandableSection } from '@/components/expandable-section'
-import { getTasksAssignedToCurrentUser } from '@/lib/actions/task'
+'use client'
+
+import { TASK_STATUS } from '../../lib/task-status'
+import { ExpandableSection } from '../expandable-section'
+import { TaskDataTable } from '../tasks/data-table'
 
 interface DashboardAssignedTasksSectionProps {
-  organizationId: string
+  personId: string
 }
 
-export async function DashboardAssignedTasksSection({
-  organizationId,
+export function DashboardAssignedTasksSection({
+  personId,
 }: DashboardAssignedTasksSectionProps) {
-  const [assignedTasks, people] = await Promise.all([
-    getTasksAssignedToCurrentUser(),
-    prisma.person.findMany({
-      where: { organizationId },
-      orderBy: { name: 'asc' },
-    }),
-  ])
-
-  if (!assignedTasks || assignedTasks.length === 0) return null
-
   return (
-    <ExpandableSection title='Your Tasks' icon='ListTodo' viewAllHref='/tasks'>
-      <AssignedTasks assignedTasks={assignedTasks} people={people} />
+    <ExpandableSection
+      title='Assigned Tasks'
+      viewAllHref='/my-tasks'
+      icon='ListTodo'
+    >
+      <TaskDataTable
+        hideFilters={true}
+        immutableFilters={{
+          assigneeId: personId,
+          status: [
+            TASK_STATUS.TODO,
+            TASK_STATUS.DOING,
+            TASK_STATUS.BLOCKED,
+          ].join(','),
+        }}
+      />
     </ExpandableSection>
   )
 }

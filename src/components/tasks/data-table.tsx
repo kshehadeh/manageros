@@ -79,6 +79,16 @@ interface TaskDataTableProps {
   page?: number
   limit?: number
   enablePagination?: boolean
+  // Immutable filters that cannot be changed by user interaction
+  immutableFilters?: {
+    search?: string
+    status?: string
+    assigneeId?: string
+    initiativeId?: string
+    priority?: string // Priority as string (1=Critical, 2=High, 3=Medium, 4=Low, 5=Very Low)
+    dueDateFrom?: string
+    dueDateTo?: string
+  }
   // Legacy props for backward compatibility (now ignored)
   tasks?: TaskListItem[]
   people?: Person[]
@@ -106,15 +116,10 @@ const globalFilterFn = (
 export function TaskDataTable({
   onTaskUpdate,
   hideFilters = false,
-  showOnlyMyTasks = false,
   settingsId,
-  page: _page = 1,
   limit = 20,
   enablePagination = false,
-  // Legacy props (ignored)
-  tasks: _tasks,
-  people: _people,
-  initiatives: _initiatives,
+  immutableFilters,
 }: TaskDataTableProps) {
   const router = useRouter()
   const [_updatingTasks, setUpdatingTasks] = useState<Set<string>>(new Set()) // Only used for delete operations
@@ -153,16 +158,10 @@ export function TaskDataTable({
   }, [effectiveGrouping, settings.sorting.length, updateSorting])
 
   // Get current user's personId for my tasks filtering
-  const { data: session, status: sessionStatus } = useSession()
-  const personId = session?.user?.personId
+  const { status: sessionStatus } = useSession()
 
-  // Determine immutable filters based on showOnlyMyTasks
-  const immutableFilters = useMemo(() => {
-    return showOnlyMyTasks && personId ? { assigneeId: personId } : {}
-  }, [showOnlyMyTasks, personId])
-
-  // Don't fetch data if we're waiting for session and need personId for my tasks
-  const shouldFetch = !(showOnlyMyTasks && sessionStatus === 'loading')
+  // Don't fetch data if we're waiting for session
+  const shouldFetch = sessionStatus !== 'loading'
 
   // Debounce search input to prevent excessive API calls
   useEffect(() => {

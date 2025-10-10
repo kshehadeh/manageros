@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { TaskTable } from '@/components/tasks/task-table'
+import { TaskDataTable } from '@/components/tasks/data-table'
 import { LegacyTasksFilterBar } from '@/components/tasks/tasks-filter-bar'
 import type { TaskListItem } from '@/lib/task-list-select'
 import type { Person, Initiative } from '@prisma/client'
@@ -40,7 +40,7 @@ export function TasksPageClient({
         onFilteredTasksChange={handleFilteredTasksChange}
       />
 
-      <TaskTable
+      <TaskDataTable
         tasks={filteredTasks}
         people={people}
         initiatives={initiatives}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { TaskTable } from '@/components/tasks/task-table'
+import { TaskDataTable } from '@/components/tasks/data-table'
 import { SectionHeader } from '@/components/ui/section-header'
 import { Button } from '@/components/ui/button'
 import {
@@ -61,13 +61,7 @@ export function InitiativeTasks({
         }
       />
 
-      <TaskTable
-        tasks={allTasks}
-        people={people}
-        showInitiative={false}
-        showDueDate={true}
-        hideFilters={true}
-      />
+      <TaskDataTable tasks={allTasks} people={people} hideFilters={true} />
 
       {/* Add Task Dialog */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>

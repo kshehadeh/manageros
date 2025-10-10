@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db'
-import { TaskTable } from '@/components/tasks/task-table'
+import { TaskDataTable } from '@/components/tasks/data-table'
 import { SectionHeader } from '@/components/ui/section-header'
 import { ListTodo } from 'lucide-react'
 import { getActivePeopleForOrganization } from '@/lib/data/people'
@@ -41,13 +41,7 @@ export async function ActiveTasksSection({
   return (
     <section>
       <SectionHeader icon={ListTodo} title={`Active Tasks (${tasks.length})`} />
-      <TaskTable
-        tasks={tasks}
-        people={people}
-        showInitiative={true}
-        showDueDate={true}
-        hideFilters={true}
-      />
+      <TaskDataTable tasks={tasks} people={people} hideFilters={true} />
     </section>
   )
 }

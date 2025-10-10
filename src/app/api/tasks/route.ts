@@ -4,6 +4,38 @@ import { prisma } from '@/lib/db'
 import { Prisma } from '@prisma/client'
 import { getTaskAccessWhereClause } from '@/lib/task-access-utils'
 
+// Helper function to parse comma-separated status values
+function parseStatusValues(statusParam: string): string[] {
+  return statusParam
+    ? statusParam
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s)
+    : []
+}
+
+// Helper function to create status filter for Prisma
+function createStatusFilter(statusValues: string[]) {
+  if (statusValues.length === 0 || statusValues.includes('all')) {
+    return undefined
+  }
+  if (statusValues.length === 1) {
+    return statusValues[0]
+  }
+  return { in: statusValues }
+}
+
+// Helper function to create status SQL condition
+function createStatusSqlCondition(statusValues: string[]) {
+  if (statusValues.length === 0 || statusValues.includes('all')) {
+    return Prisma.empty
+  }
+  if (statusValues.length === 1) {
+    return Prisma.sql`AND t.status = ${statusValues[0]}`
+  }
+  return Prisma.sql`AND t.status IN (${Prisma.join(statusValues)})`
+}
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser()
@@ -20,7 +52,8 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
     const search = searchParams.get('search') || ''
-    const status = searchParams.get('status') || ''
+    const statusParam = searchParams.get('status') || ''
+    const statusValues = parseStatusValues(statusParam)
     const assigneeId = searchParams.get('assigneeId') || ''
     const initiativeId = searchParams.get('initiativeId') || ''
     const priority = searchParams.get('priority') || ''
@@ -52,7 +85,48 @@ export async function GET(request: NextRequest) {
     // Start with base access control and immutable filters
     const filters: Record<string, unknown> = {
       ...whereClause,
-      ...immutableFilters, // Immutable filters take precedence
+    }
+
+    // Apply immutable filters with proper type conversion
+    if (immutableFilters.priority) {
+      filters.priority = parseInt(immutableFilters.priority as string)
+    }
+    if (immutableFilters.status) {
+      const immutableStatusValues = parseStatusValues(
+        immutableFilters.status as string
+      )
+      const statusFilter = createStatusFilter(immutableStatusValues)
+      if (statusFilter !== undefined) {
+        filters.status = statusFilter
+      }
+    }
+    if (immutableFilters.assigneeId) {
+      filters.assigneeId =
+        immutableFilters.assigneeId === 'unassigned'
+          ? null
+          : immutableFilters.assigneeId
+    }
+    if (immutableFilters.initiativeId) {
+      filters.initiativeId =
+        immutableFilters.initiativeId === 'no-initiative'
+          ? null
+          : immutableFilters.initiativeId
+    }
+    if (immutableFilters.search) {
+      filters.title = {
+        contains: immutableFilters.search as string,
+        mode: 'insensitive',
+      }
+    }
+    if (immutableFilters.dueDateFrom || immutableFilters.dueDateTo) {
+      const dueDateFilter: Record<string, Date> = {}
+      if (immutableFilters.dueDateFrom) {
+        dueDateFilter.gte = new Date(immutableFilters.dueDateFrom as string)
+      }
+      if (immutableFilters.dueDateTo) {
+        dueDateFilter.lte = new Date(immutableFilters.dueDateTo as string)
+      }
+      filters.dueDate = dueDateFilter
     }
 
     // Add user filters (can be overridden by immutable filters)
@@ -63,8 +137,11 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (status && status !== 'all' && !immutableFilters.status) {
-      filters.status = status
+    if (!immutableFilters.status) {
+      const statusFilter = createStatusFilter(statusValues)
+      if (statusFilter !== undefined) {
+        filters.status = statusFilter
+      }
     }
 
     if (assigneeId && assigneeId !== 'all' && !immutableFilters.assigneeId) {
@@ -168,7 +245,7 @@ export async function GET(request: NextRequest) {
         )
       )
       ${search && !immutableFilters.search ? Prisma.sql`AND t.title ILIKE ${`%${search}%`}` : Prisma.empty}
-      ${status && status !== 'all' && !immutableFilters.status ? Prisma.sql`AND t.status = ${status}` : Prisma.empty}
+      ${!immutableFilters.status ? createStatusSqlCondition(statusValues) : Prisma.empty}
       ${
         assigneeId && assigneeId !== 'all' && !immutableFilters.assigneeId
           ? assigneeId === 'unassigned'
@@ -187,7 +264,13 @@ export async function GET(request: NextRequest) {
       ${dueDateFrom && !immutableFilters.dueDate ? Prisma.sql`AND t."dueDate" >= ${new Date(dueDateFrom)}` : Prisma.empty}
       ${dueDateTo && !immutableFilters.dueDate ? Prisma.sql`AND t."dueDate" <= ${new Date(dueDateTo)}` : Prisma.empty}
       ${immutableFilters.search ? Prisma.sql`AND t.title ILIKE ${`%${immutableFilters.search}%`}` : Prisma.empty}
-      ${immutableFilters.status ? Prisma.sql`AND t.status = ${immutableFilters.status}` : Prisma.empty}
+      ${
+        immutableFilters.status
+          ? createStatusSqlCondition(
+              parseStatusValues(immutableFilters.status as string)
+            )
+          : Prisma.empty
+      }
       ${
         immutableFilters.assigneeId
           ? immutableFilters.assigneeId === 'unassigned'
