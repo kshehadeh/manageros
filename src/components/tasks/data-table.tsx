@@ -11,7 +11,6 @@ import {
   getExpandedRowModel,
   getPaginationRowModel,
   useReactTable,
-  GroupingState,
   SortingState,
   ColumnFiltersState,
   ExpandedState,
@@ -55,7 +54,6 @@ import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
 import { toast } from 'sonner'
 import type { Person, Initiative } from '@prisma/client'
 import type { TaskListItem } from '@/lib/task-list-select'
-import type { CachedPerson } from '@/lib/stores/organization-cache-store'
 import { TaskQuickEditDialog } from '@/components/tasks/task-quick-edit-dialog'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { createTaskColumns } from './columns'
@@ -72,7 +70,6 @@ interface ContextMenuState {
 }
 
 interface TaskDataTableProps {
-  grouping?: GroupingState
   onTaskUpdate?: () => void
   hideFilters?: boolean
   showOnlyMyTasks?: boolean
@@ -105,7 +102,6 @@ const globalFilterFn = (
 }
 
 export function TaskDataTable({
-  grouping = [],
   onTaskUpdate,
   hideFilters = false,
   showOnlyMyTasks = false,
@@ -124,6 +120,7 @@ export function TaskDataTable({
   const [expanded, setExpanded] = useState<ExpandedState>({})
   const [globalFilter, setGlobalFilter] = useState('')
   const [showFilters, setShowFilters] = useState(false)
+  const [groupingOption, setGroupingOption] = useState<string>('none')
 
   // Internal filter state - managed by the component
   const [internalFilters, setInternalFilters] = useState({
@@ -141,12 +138,17 @@ export function TaskDataTable({
     pageSize: limit,
   })
 
+  // Convert grouping option to Tanstack Table grouping state
+  const effectiveGrouping = useMemo(() => {
+    return groupingOption === 'none' ? [] : [groupingOption]
+  }, [groupingOption])
+
   // Set initial sorting for status grouping
   useEffect(() => {
-    if (grouping.includes('status') && sorting.length === 0) {
+    if (effectiveGrouping.includes('status') && sorting.length === 0) {
       setSorting([{ id: 'status', desc: false }])
     }
-  }, [grouping, sorting.length])
+  }, [effectiveGrouping, sorting.length])
 
   // Get current user's personId for my tasks filtering
   const { data: session } = useSession()
@@ -282,10 +284,10 @@ export function TaskDataTable({
       case 'status':
         return taskStatusUtils.getLabel(groupValue as TaskStatus)
       case 'assignee':
-        const person = people?.find((p: CachedPerson) => p.id === groupValue)
-        return person?.name || 'Unassigned'
+        // groupValue is now the assignee name from accessorFn
+        return groupValue || 'Unassigned'
       case 'initiative':
-        // For now, just return the group value since we don't have initiatives cache
+        // groupValue is now the initiative title from accessorFn
         return groupValue || 'No Initiative'
       default:
         return groupValue
@@ -296,14 +298,14 @@ export function TaskDataTable({
     onTaskComplete: handleTaskComplete,
     onButtonClick: handleButtonClick,
     enableSizing: true,
-    grouping,
+    grouping: effectiveGrouping,
   })
 
   const table = useReactTable({
     data: tasks,
     columns,
     state: {
-      grouping,
+      grouping: effectiveGrouping,
       sorting,
       columnFilters,
       expanded,
@@ -334,7 +336,7 @@ export function TaskDataTable({
 
   // Expand all groups by default when table is ready
   useEffect(() => {
-    if (grouping.length > 0 && !hasExpandedGroups.current) {
+    if (effectiveGrouping.length > 0 && !hasExpandedGroups.current) {
       const rowModel = table.getRowModel()
       if (rowModel.rows.length > 0) {
         // Find all group rows and expand them
@@ -349,7 +351,7 @@ export function TaskDataTable({
         }
       }
     }
-  }, [grouping.length, table])
+  }, [effectiveGrouping.length, table])
 
   // Handle clicking outside context menu to close it
   const _handleClickOutside = useCallback(() => {
@@ -393,6 +395,27 @@ export function TaskDataTable({
                   }
                   className='pl-8'
                 />
+              </div>
+
+              {/* Grouping Dropdown */}
+              <div className='flex items-center gap-2'>
+                <label className='text-sm font-medium whitespace-nowrap'>
+                  Group by:
+                </label>
+                <Select
+                  value={groupingOption}
+                  onValueChange={setGroupingOption}
+                >
+                  <SelectTrigger className='w-32'>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='none'>None</SelectItem>
+                    <SelectItem value='status'>Status</SelectItem>
+                    <SelectItem value='assignee'>Assignee</SelectItem>
+                    <SelectItem value='initiative'>Initiative</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Additional Filters Button */}

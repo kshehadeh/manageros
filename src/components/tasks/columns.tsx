@@ -85,15 +85,15 @@ export function createTaskColumns({
               {task.title}
             </div>
             <div className='text-xs text-muted-foreground mt-1.5 flex items-center gap-2 flex-wrap'>
-              {task.assignee && (
+              {(task as any).assigneeName && (
                 <div className='flex items-center gap-1'>
                   <UserIcon className='h-3 w-3' />
                   <Link
-                    href={`/people/${task.assignee.id}`}
+                    href={`/people/${(task as any).assigneeId}`}
                     className='text-primary hover:text-primary/80 transition-colors'
                     onClick={e => e.stopPropagation()}
                   >
-                    {task.assignee.name}
+                    {(task as any).assigneeName}
                   </Link>
                 </div>
               )}
@@ -112,15 +112,15 @@ export function createTaskColumns({
                   <span>{new Date(task.dueDate).toLocaleDateString()}</span>
                 </div>
               )}
-              {task.initiative && (
+              {(task as any).initiativeTitle && (
                 <div className='flex items-center gap-1'>
                   <Target className='h-3 w-3' />
                   <Link
-                    href={`/initiatives/${task.initiative.id}`}
+                    href={`/initiatives/${(task as any).initiativeId}`}
                     className='text-primary hover:text-primary/80 transition-colors'
                     onClick={e => e.stopPropagation()}
                   >
-                    {task.initiative.title}
+                    {(task as any).initiativeTitle}
                   </Link>
                 </div>
               )}
@@ -182,6 +182,35 @@ export function createTaskColumns({
       },
       enableGrouping: false,
       ...(enableSizing && { size: 50 }),
+    },
+    // Hidden columns for grouping
+    {
+      id: 'assignee',
+      header: 'Assignee',
+      accessorFn: row => (row as any).assigneeName || 'Unassigned',
+      cell: ({ row }) => {
+        const task = row.original as any
+        return task.assigneeName || 'Unassigned'
+      },
+      // Always hidden - only used for grouping
+      meta: {
+        hidden: true,
+      } as { hidden: boolean },
+      enableGrouping: true,
+    },
+    {
+      id: 'initiative',
+      header: 'Initiative',
+      accessorFn: row => (row as any).initiativeTitle || 'No Initiative',
+      cell: ({ row }) => {
+        const task = row.original as any
+        return task.initiativeTitle || 'No Initiative'
+      },
+      // Always hidden - only used for grouping
+      meta: {
+        hidden: true,
+      } as { hidden: boolean },
+      enableGrouping: true,
     },
   ]
 }
