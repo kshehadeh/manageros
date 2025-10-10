@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
-import { TASK_LIST_SELECT } from '@/lib/task-list-select'
+import { Prisma } from '@prisma/client'
 import { getTaskAccessWhereClause } from '@/lib/task-access-utils'
 
 export async function GET(request: NextRequest) {
@@ -89,14 +89,95 @@ export async function GET(request: NextRequest) {
       where: filters,
     })
 
-    // Get tasks with pagination
-    const tasks = await prisma.task.findMany({
-      where: filters,
-      select: TASK_LIST_SELECT,
-      orderBy: { updatedAt: 'desc' },
-      skip,
-      take: limit,
-    })
+    // Get tasks with pagination using custom status ordering
+    const tasks = await prisma.$queryRaw<
+      Array<{
+        id: string
+        title: string
+        description: string | null
+        status: string
+        priority: number
+        dueDate: Date | null
+        createdAt: Date
+        updatedAt: Date
+        objectiveId: string | null
+        initiativeId: string | null
+        assigneeId: string | null
+        createdById: string
+        createdByName: string | null
+        createdByEmail: string | null
+        assigneeName: string | null
+        assigneeEmail: string | null
+        initiativeTitle: string | null
+      }>
+    >`
+      SELECT 
+        t.id,
+        t.title,
+        t.description,
+        t.status,
+        t.priority,
+        t."dueDate",
+        t."createdAt",
+        t."updatedAt",
+        t."objectiveId",
+        t."initiativeId",
+        t."assigneeId",
+        t."createdById",
+        cb.name as "createdByName",
+        cb.email as "createdByEmail",
+        a.name as "assigneeName",
+        a.email as "assigneeEmail",
+        i.title as "initiativeTitle"
+      FROM "Task" t
+      LEFT JOIN "User" cb ON t."createdById" = cb.id
+      LEFT JOIN "Person" a ON t."assigneeId" = a.id
+      LEFT JOIN "Initiative" i ON t."initiativeId" = i.id
+      WHERE (
+        t."createdById" IN (
+          SELECT id FROM "User" WHERE "organizationId" = ${user.organizationId}
+        )
+        OR t."initiativeId" IN (
+          SELECT id FROM "Initiative" WHERE "organizationId" = ${user.organizationId}
+        )
+        OR t."objectiveId" IN (
+          SELECT o.id FROM "Objective" o
+          JOIN "Initiative" i ON o."initiativeId" = i.id
+          WHERE i."organizationId" = ${user.organizationId}
+        )
+      )
+      ${search ? Prisma.sql`AND t.title ILIKE ${`%${search}%`}` : Prisma.empty}
+      ${status && status !== 'all' ? Prisma.sql`AND t.status = ${status}` : Prisma.empty}
+      ${
+        assigneeId && assigneeId !== 'all'
+          ? assigneeId === 'unassigned'
+            ? Prisma.sql`AND t."assigneeId" IS NULL`
+            : Prisma.sql`AND t."assigneeId" = ${assigneeId}`
+          : Prisma.empty
+      }
+      ${
+        initiativeId && initiativeId !== 'all'
+          ? initiativeId === 'no-initiative'
+            ? Prisma.sql`AND t."initiativeId" IS NULL`
+            : Prisma.sql`AND t."initiativeId" = ${initiativeId}`
+          : Prisma.empty
+      }
+      ${priority && priority !== 'all' ? Prisma.sql`AND t.priority = ${parseInt(priority)}` : Prisma.empty}
+      ${dueDateFrom ? Prisma.sql`AND t."dueDate" >= ${new Date(dueDateFrom)}` : Prisma.empty}
+      ${dueDateTo ? Prisma.sql`AND t."dueDate" <= ${new Date(dueDateTo)}` : Prisma.empty}
+      ORDER BY
+        CASE t.status
+          WHEN 'todo' THEN 1
+          WHEN 'doing' THEN 2
+          WHEN 'blocked' THEN 3
+          WHEN 'done' THEN 4
+          WHEN 'dropped' THEN 5
+          ELSE 6
+        END,
+        t."dueDate" ASC NULLS LAST,
+        t."createdAt" ASC
+      LIMIT ${limit} OFFSET ${skip}
+    `
 
     // Calculate pagination metadata
     const totalPages = Math.ceil(totalCount / limit)

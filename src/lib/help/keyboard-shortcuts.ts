@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-10-07T09:35:07.217Z
+ * Generated on: 2025-10-10T08:37:56.049Z
  */
 
 export interface HelpContent {
@@ -80,7 +80,6 @@ All keyboard shortcuts are designed to work with screen readers and other assist
 - The command palette is your fastest way to navigate the app
 - Use AI chat (⌘J) to quickly get answers about your organization's data
 - Use Q to quickly capture tasks as they come up in meetings or conversations
-- Use E to quickly edit any detail page you're viewing
 - Keyboard shortcuts work consistently across all pages in ManagerOS
 - You can always use the mouse if you prefer - keyboard shortcuts are optional
 `,

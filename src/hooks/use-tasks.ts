@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import type { TaskListItem } from '@/lib/task-list-select'
 
 interface TaskFilters {
@@ -40,6 +40,20 @@ export function useTasks({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Memoize filters to prevent infinite re-renders
+  const memoizedFilters = useMemo(
+    () => filters,
+    [
+      filters.search,
+      filters.status,
+      filters.assigneeId,
+      filters.initiativeId,
+      filters.priority,
+      filters.dueDateFrom,
+      filters.dueDateTo,
+    ]
+  )
+
   const fetchTasks = useCallback(async () => {
     try {
       setLoading(true)
@@ -49,7 +63,7 @@ export function useTasks({
         page: page.toString(),
         limit: limit.toString(),
         ...Object.fromEntries(
-          Object.entries(filters).filter(
+          Object.entries(memoizedFilters).filter(
             ([_, value]) => value !== undefined && value !== ''
           )
         ),
@@ -70,7 +84,7 @@ export function useTasks({
     } finally {
       setLoading(false)
     }
-  }, [page, limit, filters])
+  }, [page, limit, memoizedFilters])
 
   useEffect(() => {
     fetchTasks()
@@ -80,10 +94,26 @@ export function useTasks({
     fetchTasks()
   }, [fetchTasks])
 
+  const updateTask = useCallback(
+    (taskId: string, updates: Partial<TaskListItem>) => {
+      setData(prevData => {
+        if (!prevData) return prevData
+
+        const updatedTasks = prevData.tasks.map(task =>
+          task.id === taskId ? { ...task, ...updates } : task
+        )
+
+        return { ...prevData, tasks: updatedTasks }
+      })
+    },
+    []
+  )
+
   return {
     data,
     loading,
     error,
     refetch,
+    updateTask,
   }
 }

@@ -1,7 +1,7 @@
 {
   "name": "manageros-starter",
   "private": true,
-  "version": "0.1.4",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "next dev --turbo",
@@ -72,6 +72,7 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-visually-hidden": "^1.2.3",
     "@tailwindcss/typography": "^0.5.19",
+    "@tanstack/react-table": "^8.21.3",
     "@types/dagre": "^0.7.53",
     "@types/nodemailer": "^7.0.1",
     "@uiw/react-md-editor": "^4.0.8",

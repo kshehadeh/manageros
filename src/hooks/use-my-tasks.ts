@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import type { TaskListItem } from '@/lib/task-list-select'
 
 interface TaskFilters {
@@ -42,6 +42,20 @@ export function useMyTasks({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Memoize filters to prevent infinite re-renders
+  const memoizedFilters = useMemo(
+    () => filters,
+    [
+      filters.search,
+      filters.status,
+      filters.initiativeId,
+      filters.priority,
+      filters.dueDateFrom,
+      filters.dueDateTo,
+      filters.excludeCompleted,
+    ]
+  )
+
   const fetchTasks = useCallback(async () => {
     if (!enabled) {
       setLoading(false)
@@ -56,7 +70,7 @@ export function useMyTasks({
         page: page.toString(),
         limit: limit.toString(),
         ...Object.fromEntries(
-          Object.entries(filters).filter(
+          Object.entries(memoizedFilters).filter(
             ([_, value]) =>
               value !== undefined && value !== '' && value !== false
           )
@@ -78,7 +92,7 @@ export function useMyTasks({
     } finally {
       setLoading(false)
     }
-  }, [page, limit, filters, enabled])
+  }, [page, limit, memoizedFilters, enabled])
 
   useEffect(() => {
     fetchTasks()

@@ -240,15 +240,55 @@ export async function getTasks(): Promise<TaskListItem[]> {
     throw new Error('User must belong to an organization to view tasks')
   }
 
-  const tasks = await prisma.task.findMany({
-    where: getTaskAccessWhereClause(
-      user.organizationId,
-      user.id,
-      user.personId || undefined
-    ),
-    select: TASK_LIST_SELECT,
-    orderBy: { updatedAt: 'desc' },
-  })
+  // Use raw SQL for custom status ordering
+  const tasks = await prisma.$queryRaw<TaskListItem[]>`
+    SELECT 
+      t.id,
+      t.title,
+      t.description,
+      t.status,
+      t.priority,
+      t."dueDate",
+      t."createdAt",
+      t."updatedAt",
+      t."objectiveId",
+      t."initiativeId",
+      t."assigneeId",
+      t."createdById",
+      cb.name as "createdByName",
+      cb.email as "createdByEmail",
+      a.name as "assigneeName",
+      a.email as "assigneeEmail",
+      i.title as "initiativeTitle"
+    FROM "Task" t
+    LEFT JOIN "User" cb ON t."createdById" = cb.id
+    LEFT JOIN "Person" a ON t."assigneeId" = a.id
+    LEFT JOIN "Initiative" i ON t."initiativeId" = i.id
+    WHERE (
+      t."createdById" IN (
+        SELECT id FROM "User" WHERE "organizationId" = ${user.organizationId}
+      )
+      OR t."initiativeId" IN (
+        SELECT id FROM "Initiative" WHERE "organizationId" = ${user.organizationId}
+      )
+      OR t."objectiveId" IN (
+        SELECT o.id FROM "Objective" o
+        JOIN "Initiative" i ON o."initiativeId" = i.id
+        WHERE i."organizationId" = ${user.organizationId}
+      )
+    )
+    ORDER BY
+      CASE t.status
+        WHEN 'todo' THEN 1
+        WHEN 'doing' THEN 2
+        WHEN 'blocked' THEN 3
+        WHEN 'done' THEN 4
+        WHEN 'dropped' THEN 5
+        ELSE 6
+      END,
+      t."dueDate" ASC NULLS LAST,
+      t."createdAt" ASC
+  `
 
   return tasks
 }

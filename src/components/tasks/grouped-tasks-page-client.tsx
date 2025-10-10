@@ -1,9 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import type { TaskListItem } from '@/lib/task-list-select'
 import type { Person, Initiative } from '@prisma/client'
-import { useTasks } from '@/hooks/use-tasks'
 import { GroupedTasksShared } from './grouped-tasks-shared'
 
 interface GroupedTasksPageClientProps {
@@ -15,103 +13,12 @@ interface GroupedTasksPageClientProps {
 export function GroupedTasksPageClient({
   people,
   initiatives,
-  initialTasks,
 }: GroupedTasksPageClientProps) {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [filters, setFilters] = useState({
-    search: '',
-    status: '',
-    assigneeId: '',
-    initiativeId: '',
-    priority: '',
-    dueDateFrom: '',
-    dueDateTo: '',
-  })
-
-  // Debounced search state
-  const [debouncedSearch, setDebouncedSearch] = useState('')
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Memoize the filters object to prevent unnecessary re-renders
-  const memoizedFilters = useMemo(
-    () => ({
-      ...filters,
-      search: debouncedSearch,
-    }),
-    [filters, debouncedSearch]
-  )
-
-  const {
-    data: tasksData,
-    loading,
-    error,
-    refetch,
-  } = useTasks({
-    page: currentPage,
-    limit: 20,
-    filters: memoizedFilters,
-  })
-
-  // Use initial tasks if provided and not loading from API
-  const tasks = useMemo(() => {
-    return initialTasks ? initialTasks : tasksData?.tasks || []
-  }, [initialTasks, tasksData?.tasks])
-
-  const pagination = tasksData?.pagination
-
-  // Debounce search input
-  useEffect(() => {
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current)
-    }
-
-    searchTimeoutRef.current = setTimeout(() => {
-      setDebouncedSearch(filters.search)
-    }, 300)
-
-    return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current)
-      }
-    }
-  }, [filters.search])
-
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [filters, debouncedSearch])
-
-  const handleFiltersChange = useCallback(
-    (newFilters: {
-      search: string
-      status: string
-      assigneeId: string
-      initiativeId: string
-      priority: string
-      dueDateFrom: string
-      dueDateTo: string
-    }) => {
-      setFilters(prev => ({ ...prev, ...newFilters }))
-    },
-    []
-  )
-
-  const handlePageChange = useCallback((page: number) => {
-    setCurrentPage(page)
-  }, [])
-
   return (
     <GroupedTasksShared
-      tasks={tasks}
       people={people}
       initiatives={initiatives}
-      loading={loading}
-      error={error}
-      onRefetch={refetch}
-      pagination={pagination}
-      onPageChange={handlePageChange}
       showOnlyMyTasks={false}
-      onFiltersChange={handleFiltersChange}
     />
   )
 }
