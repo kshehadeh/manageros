@@ -53,7 +53,12 @@ import {
 import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
 import { toast } from 'sonner'
 import type { Person, Initiative } from '@prisma/client'
-import type { TaskListItem } from '@/lib/task-list-select'
+import type { ExtendedTaskListItem, TaskListItem } from '@/lib/task-list-select'
+
+// Type for column meta
+interface ColumnMeta {
+  hidden?: boolean
+}
 import { TaskQuickEditDialog } from '@/components/tasks/task-quick-edit-dialog'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { createTaskColumns } from './columns'
@@ -90,7 +95,7 @@ interface TaskDataTableProps {
     dueDateTo?: string
   }
   // Legacy props for backward compatibility (now ignored)
-  tasks?: TaskListItem[]
+  tasks?: ExtendedTaskListItem[]
   people?: Person[]
   initiatives?: Initiative[]
 }
@@ -640,7 +645,8 @@ export function TaskDataTable({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers
                   .filter(
-                    header => !(header.column.columnDef.meta as any)?.hidden
+                    header =>
+                      !(header.column.columnDef.meta as ColumnMeta)?.hidden
                   )
                   .map(header => {
                     return (
@@ -665,7 +671,8 @@ export function TaskDataTable({
               <TableRow>
                 <TableCell
                   colSpan={
-                    columns.filter(col => !(col.meta as any)?.hidden).length
+                    columns.filter(col => !(col.meta as ColumnMeta)?.hidden)
+                      .length
                   }
                   className='h-24 text-center'
                 >
@@ -683,8 +690,9 @@ export function TaskDataTable({
                     <TableRow key={row.id} className='bg-muted/50'>
                       <TableCell
                         colSpan={
-                          columns.filter(col => !(col.meta as any)?.hidden)
-                            .length
+                          columns.filter(
+                            col => !(col.meta as ColumnMeta)?.hidden
+                          ).length
                         }
                       >
                         <div className='flex items-center gap-2'>
@@ -726,7 +734,8 @@ export function TaskDataTable({
                     {row
                       .getVisibleCells()
                       .filter(
-                        cell => !(cell.column.columnDef.meta as any)?.hidden
+                        cell =>
+                          !(cell.column.columnDef.meta as ColumnMeta)?.hidden
                       )
                       .map(cell => (
                         <TableCell
@@ -746,7 +755,8 @@ export function TaskDataTable({
               <TableRow>
                 <TableCell
                   colSpan={
-                    columns.filter(col => !(col.meta as any)?.hidden).length
+                    columns.filter(col => !(col.meta as ColumnMeta)?.hidden)
+                      .length
                   }
                   className='h-24 text-center'
                 >

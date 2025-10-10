@@ -11,8 +11,7 @@ interface FeedbackQuestion {
   question: string
   type: string
   required: boolean
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  options: any
+  options: JsonValue
   sortOrder: number
 }
 

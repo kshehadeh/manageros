@@ -43,3 +43,12 @@ export const TASK_LIST_SELECT = {
 export type TaskListItem = Prisma.TaskGetPayload<{
   select: typeof TASK_LIST_SELECT
 }>
+
+// Extended task type that includes additional fields from raw SQL queries
+export interface ExtendedTaskListItem extends TaskListItem {
+  assigneeName?: string
+  assigneeEmail?: string
+  initiativeTitle?: string
+  createdByName?: string
+  createdByEmail?: string
+}

@@ -14,8 +14,6 @@ import {
   QuickTaskForm,
   type QuickTaskFormRef,
 } from '@/components/tasks/quick-task-form'
-import type { TaskListItem } from '@/lib/task-list-select'
-import type { Person } from '@prisma/client'
 import { ListTodo, Plus } from 'lucide-react'
 
 interface InitiativeTasksProps {
@@ -26,15 +24,9 @@ interface InitiativeTasksProps {
     keyResult: string | null
     sortIndex: number
   }>
-  allTasks: TaskListItem[]
-  people: Person[]
 }
 
-export function InitiativeTasks({
-  initiativeId,
-  allTasks,
-  people,
-}: InitiativeTasksProps) {
+export function InitiativeTasks({ initiativeId }: InitiativeTasksProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const quickTaskFormRef = useRef<QuickTaskFormRef>(null)
 
@@ -61,7 +53,7 @@ export function InitiativeTasks({
         }
       />
 
-      <TaskDataTable tasks={allTasks} people={people} hideFilters={true} />
+      <TaskDataTable immutableFilters={{ initiativeId }} hideFilters={true} />
 
       {/* Add Task Dialog */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>

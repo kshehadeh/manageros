@@ -327,8 +327,15 @@ export async function getAllFeedback(filters?: {
   }
 
   // Build the where clause
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const whereClause: any = {
+  const whereClause: {
+    OR: Array<{ isPrivate: boolean } | { fromId: string }>
+    about: { organizationId: string }
+    fromId?: string
+    aboutId?: string
+    kind?: string
+    isPrivate?: boolean
+    createdAt?: { gte?: Date; lte?: Date }
+  } = {
     OR: [
       { isPrivate: false }, // Public feedback
       { fromId: currentPerson.id }, // Private feedback written by current user

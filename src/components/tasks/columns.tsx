@@ -18,7 +18,7 @@ import {
   TASK_STATUS,
 } from '@/lib/task-status'
 import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
-import type { TaskListItem } from '@/lib/task-list-select'
+import type { ExtendedTaskListItem } from '@/lib/task-list-select'
 
 interface CreateColumnsProps {
   onTaskComplete: (_taskId: string, _currentStatus: TaskStatus) => void
@@ -32,7 +32,7 @@ export function createTaskColumns({
   onButtonClick,
   enableSizing = false,
   grouping = [],
-}: CreateColumnsProps): ColumnDef<TaskListItem>[] {
+}: CreateColumnsProps): ColumnDef<ExtendedTaskListItem>[] {
   const getPriorityVariant = (priority: number) => {
     return taskPriorityUtils.getVariant(priority as TaskPriority)
   }
@@ -85,15 +85,15 @@ export function createTaskColumns({
               {task.title}
             </div>
             <div className='text-xs text-muted-foreground mt-1.5 flex items-center gap-2 flex-wrap'>
-              {(task as any).assigneeName && (
+              {task.assigneeName && (
                 <div className='flex items-center gap-1'>
                   <UserIcon className='h-3 w-3' />
                   <Link
-                    href={`/people/${(task as any).assigneeId}`}
+                    href={`/people/${task.assigneeId}`}
                     className='text-primary hover:text-primary/80 transition-colors'
                     onClick={e => e.stopPropagation()}
                   >
-                    {(task as any).assigneeName}
+                    {task.assigneeName}
                   </Link>
                 </div>
               )}
@@ -112,15 +112,15 @@ export function createTaskColumns({
                   <span>{new Date(task.dueDate).toLocaleDateString()}</span>
                 </div>
               )}
-              {(task as any).initiativeTitle && (
+              {task.initiativeTitle && (
                 <div className='flex items-center gap-1'>
                   <Target className='h-3 w-3' />
                   <Link
-                    href={`/initiatives/${(task as any).initiativeId}`}
+                    href={`/initiatives/${task.initiativeId}`}
                     className='text-primary hover:text-primary/80 transition-colors'
                     onClick={e => e.stopPropagation()}
                   >
-                    {(task as any).initiativeTitle}
+                    {task.initiativeTitle}
                   </Link>
                 </div>
               )}
@@ -187,9 +187,9 @@ export function createTaskColumns({
     {
       id: 'assignee',
       header: 'Assignee',
-      accessorFn: row => (row as any).assigneeName || 'Unassigned',
+      accessorFn: row => row.assigneeName || 'Unassigned',
       cell: ({ row }) => {
-        const task = row.original as any
+        const task = row.original
         return task.assigneeName || 'Unassigned'
       },
       // Always hidden - only used for grouping
@@ -201,9 +201,9 @@ export function createTaskColumns({
     {
       id: 'initiative',
       header: 'Initiative',
-      accessorFn: row => (row as any).initiativeTitle || 'No Initiative',
+      accessorFn: row => row.initiativeTitle || 'No Initiative',
       cell: ({ row }) => {
-        const task = row.original as any
+        const task = row.original
         return task.initiativeTitle || 'No Initiative'
       },
       // Always hidden - only used for grouping

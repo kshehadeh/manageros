@@ -7,7 +7,11 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { type TaskStatus } from '@/lib/task-status'
 import { taskPriorityUtils, DEFAULT_TASK_PRIORITY } from '@/lib/task-priority'
-import { TASK_LIST_SELECT, type TaskListItem } from '@/lib/task-list-select'
+import {
+  TASK_LIST_SELECT,
+  type TaskListItem,
+  type ExtendedTaskListItem,
+} from '@/lib/task-list-select'
 import { getTaskAccessWhereClause } from '@/lib/task-access-utils'
 
 export async function createTask(formData: TaskFormData) {
@@ -232,7 +236,7 @@ export async function deleteTask(taskId: string) {
   revalidatePath('/my-tasks')
 }
 
-export async function getTasks(): Promise<TaskListItem[]> {
+export async function getTasks(): Promise<ExtendedTaskListItem[]> {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
@@ -241,7 +245,7 @@ export async function getTasks(): Promise<TaskListItem[]> {
   }
 
   // Use raw SQL for custom status ordering
-  const tasks = await prisma.$queryRaw<TaskListItem[]>`
+  const tasks = await prisma.$queryRaw<ExtendedTaskListItem[]>`
     SELECT 
       t.id,
       t.title,
