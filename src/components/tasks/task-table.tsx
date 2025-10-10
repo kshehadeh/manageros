@@ -30,6 +30,7 @@ import { type TaskStatus, TASK_STATUS } from '@/lib/task-status'
 import { toast } from 'sonner'
 import type { TaskListItem } from '@/lib/task-list-select'
 import { createTaskColumns } from './columns'
+import { useSession } from 'next-auth/react'
 import { useTasks } from '@/hooks/use-tasks'
 import { usePeopleCache } from '@/hooks/use-organization-cache'
 
@@ -37,19 +38,10 @@ interface TaskTableProps {
   grouping?: GroupingState
   hideFilters?: boolean
   onTaskUpdate?: () => void
+  showOnlyMyTasks?: boolean
   // Legacy props for backward compatibility
   showInitiative?: boolean
   showDueDate?: boolean
-  // Filter options
-  filters?: {
-    search?: string
-    status?: string
-    assigneeId?: string
-    initiativeId?: string
-    priority?: string
-    dueDateFrom?: string
-    dueDateTo?: string
-  }
   // Pagination options
   page?: number
   limit?: number
@@ -65,7 +57,7 @@ export function TaskTable({
   onTaskUpdate,
   showInitiative: _showInitiative,
   showDueDate: _showDueDate,
-  filters = {},
+  showOnlyMyTasks = false,
   page = 1,
   limit = 20,
   enablePagination = false,
@@ -78,16 +70,38 @@ export function TaskTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [expanded, setExpanded] = useState<ExpandedState>({})
 
+  // Internal filter state - managed by the component
+  const [internalFilters, _setInternalFilters] = useState({
+    search: '',
+    status: '',
+    assigneeId: '',
+    initiativeId: '',
+    priority: '',
+    dueDateFrom: '',
+    dueDateTo: '',
+  })
+
+  // Get current user's personId for my tasks filtering
+  const { data: session } = useSession()
+  const personId = session?.user?.personId
+
+  // Determine immutable filters based on showOnlyMyTasks
+  const immutableFilters = useMemo(() => {
+    return showOnlyMyTasks && personId ? { assigneeId: personId } : {}
+  }, [showOnlyMyTasks, personId])
+
   // Fetch data
   const {
     data: tasksData,
     loading,
     error,
+    refetch: _refetch,
     updateTask,
   } = useTasks({
     page: enablePagination ? page : 1,
     limit: enablePagination ? limit : 1000, // Large limit for non-paginated
-    filters,
+    filters: internalFilters,
+    immutableFilters,
   })
 
   const { people: _peopleData } = usePeopleCache()

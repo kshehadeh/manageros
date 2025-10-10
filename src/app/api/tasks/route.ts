@@ -27,6 +27,21 @@ export async function GET(request: NextRequest) {
     const dueDateFrom = searchParams.get('dueDateFrom') || ''
     const dueDateTo = searchParams.get('dueDateTo') || ''
 
+    // Parse immutable filters from query parameter
+    let immutableFilters: Record<string, unknown> = {}
+    const immutableFiltersParam = searchParams.get('immutableFilters')
+    if (immutableFiltersParam) {
+      try {
+        immutableFilters = JSON.parse(immutableFiltersParam)
+      } catch (error) {
+        console.error('Error parsing immutableFilters:', error)
+        return NextResponse.json(
+          { error: 'Invalid immutableFilters parameter' },
+          { status: 400 }
+        )
+      }
+    }
+
     // Build where clause
     const whereClause = getTaskAccessWhereClause(
       user.organizationId,
@@ -34,23 +49,25 @@ export async function GET(request: NextRequest) {
       user.personId || undefined
     )
 
-    // Add filters
+    // Start with base access control and immutable filters
     const filters: Record<string, unknown> = {
       ...whereClause,
+      ...immutableFilters, // Immutable filters take precedence
     }
 
-    if (search) {
+    // Add user filters (can be overridden by immutable filters)
+    if (search && !immutableFilters.search) {
       filters.title = {
         contains: search,
         mode: 'insensitive',
       }
     }
 
-    if (status && status !== 'all') {
+    if (status && status !== 'all' && !immutableFilters.status) {
       filters.status = status
     }
 
-    if (assigneeId && assigneeId !== 'all') {
+    if (assigneeId && assigneeId !== 'all' && !immutableFilters.assigneeId) {
       if (assigneeId === 'unassigned') {
         filters.assigneeId = null
       } else {
@@ -58,7 +75,11 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (initiativeId && initiativeId !== 'all') {
+    if (
+      initiativeId &&
+      initiativeId !== 'all' &&
+      !immutableFilters.initiativeId
+    ) {
       if (initiativeId === 'no-initiative') {
         filters.initiativeId = null
       } else {
@@ -66,11 +87,11 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (priority && priority !== 'all') {
+    if (priority && priority !== 'all' && !immutableFilters.priority) {
       filters.priority = parseInt(priority)
     }
 
-    if (dueDateFrom || dueDateTo) {
+    if ((dueDateFrom || dueDateTo) && !immutableFilters.dueDate) {
       const dueDateFilter: Record<string, Date> = {}
       if (dueDateFrom) {
         dueDateFilter.gte = new Date(dueDateFrom)
@@ -146,25 +167,58 @@ export async function GET(request: NextRequest) {
           WHERE i."organizationId" = ${user.organizationId}
         )
       )
-      ${search ? Prisma.sql`AND t.title ILIKE ${`%${search}%`}` : Prisma.empty}
-      ${status && status !== 'all' ? Prisma.sql`AND t.status = ${status}` : Prisma.empty}
+      ${search && !immutableFilters.search ? Prisma.sql`AND t.title ILIKE ${`%${search}%`}` : Prisma.empty}
+      ${status && status !== 'all' && !immutableFilters.status ? Prisma.sql`AND t.status = ${status}` : Prisma.empty}
       ${
-        assigneeId && assigneeId !== 'all'
+        assigneeId && assigneeId !== 'all' && !immutableFilters.assigneeId
           ? assigneeId === 'unassigned'
             ? Prisma.sql`AND t."assigneeId" IS NULL`
             : Prisma.sql`AND t."assigneeId" = ${assigneeId}`
           : Prisma.empty
       }
       ${
-        initiativeId && initiativeId !== 'all'
+        initiativeId && initiativeId !== 'all' && !immutableFilters.initiativeId
           ? initiativeId === 'no-initiative'
             ? Prisma.sql`AND t."initiativeId" IS NULL`
             : Prisma.sql`AND t."initiativeId" = ${initiativeId}`
           : Prisma.empty
       }
-      ${priority && priority !== 'all' ? Prisma.sql`AND t.priority = ${parseInt(priority)}` : Prisma.empty}
-      ${dueDateFrom ? Prisma.sql`AND t."dueDate" >= ${new Date(dueDateFrom)}` : Prisma.empty}
-      ${dueDateTo ? Prisma.sql`AND t."dueDate" <= ${new Date(dueDateTo)}` : Prisma.empty}
+      ${priority && priority !== 'all' && !immutableFilters.priority ? Prisma.sql`AND t.priority = ${parseInt(priority)}` : Prisma.empty}
+      ${dueDateFrom && !immutableFilters.dueDate ? Prisma.sql`AND t."dueDate" >= ${new Date(dueDateFrom)}` : Prisma.empty}
+      ${dueDateTo && !immutableFilters.dueDate ? Prisma.sql`AND t."dueDate" <= ${new Date(dueDateTo)}` : Prisma.empty}
+      ${immutableFilters.search ? Prisma.sql`AND t.title ILIKE ${`%${immutableFilters.search}%`}` : Prisma.empty}
+      ${immutableFilters.status ? Prisma.sql`AND t.status = ${immutableFilters.status}` : Prisma.empty}
+      ${
+        immutableFilters.assigneeId
+          ? immutableFilters.assigneeId === 'unassigned'
+            ? Prisma.sql`AND t."assigneeId" IS NULL`
+            : Prisma.sql`AND t."assigneeId" = ${immutableFilters.assigneeId}`
+          : Prisma.empty
+      }
+      ${
+        immutableFilters.initiativeId
+          ? immutableFilters.initiativeId === 'no-initiative'
+            ? Prisma.sql`AND t."initiativeId" IS NULL`
+            : Prisma.sql`AND t."initiativeId" = ${immutableFilters.initiativeId}`
+          : Prisma.empty
+      }
+      ${immutableFilters.priority ? Prisma.sql`AND t.priority = ${parseInt(immutableFilters.priority as string)}` : Prisma.empty}
+      ${
+        immutableFilters.dueDate
+          ? (() => {
+              const dueDateFilter = immutableFilters.dueDate as Record<
+                string,
+                Date
+              >
+              let sql = Prisma.empty
+              if (dueDateFilter.gte)
+                sql = Prisma.sql`AND t."dueDate" >= ${dueDateFilter.gte}`
+              if (dueDateFilter.lte)
+                sql = Prisma.sql`${sql} AND t."dueDate" <= ${dueDateFilter.lte}`
+              return sql
+            })()
+          : Prisma.empty
+      }
       ORDER BY
         CASE t.status
           WHEN 'todo' THEN 1

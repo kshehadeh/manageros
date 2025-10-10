@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { TaskDataTable } from '@/components/tasks/data-table'
 import type { TaskListItem } from '@/lib/task-list-select'
 import type { Person, Initiative } from '@prisma/client'
@@ -35,8 +35,9 @@ export function GroupedTasksShared({
   }, [isLoaded, getSetting])
 
   // Convert grouping option to Tanstack Table grouping state
-  const grouping: GroupingState =
-    groupingOption === 'none' ? [] : [groupingOption]
+  const grouping: GroupingState = useMemo(() => {
+    return groupingOption === 'none' ? [] : [groupingOption]
+  }, [groupingOption])
 
   return (
     <div className='space-y-6'>
@@ -46,6 +47,7 @@ export function GroupedTasksShared({
         initiatives={initiatives}
         grouping={grouping}
         hideFilters={showOnlyMyTasks}
+        showOnlyMyTasks={showOnlyMyTasks}
         enablePagination={true}
         limit={50}
       />

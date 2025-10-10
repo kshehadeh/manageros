@@ -59,6 +59,7 @@ import type { CachedPerson } from '@/lib/stores/organization-cache-store'
 import { TaskQuickEditDialog } from '@/components/tasks/task-quick-edit-dialog'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { createTaskColumns } from './columns'
+import { useSession } from 'next-auth/react'
 import { useTasks } from '@/hooks/use-tasks'
 import { usePeopleCache } from '@/hooks/use-organization-cache'
 
@@ -74,16 +75,7 @@ interface TaskDataTableProps {
   grouping?: GroupingState
   onTaskUpdate?: () => void
   hideFilters?: boolean
-  // Filter options
-  filters?: {
-    search?: string
-    status?: string
-    assigneeId?: string
-    initiativeId?: string
-    priority?: string
-    dueDateFrom?: string
-    dueDateTo?: string
-  }
+  showOnlyMyTasks?: boolean
   // Pagination options
   page?: number
   limit?: number
@@ -116,7 +108,7 @@ export function TaskDataTable({
   grouping = [],
   onTaskUpdate,
   hideFilters = false,
-  filters = {},
+  showOnlyMyTasks = false,
   page: _page = 1,
   limit = 20,
   enablePagination = false,
@@ -132,6 +124,17 @@ export function TaskDataTable({
   const [expanded, setExpanded] = useState<ExpandedState>({})
   const [globalFilter, setGlobalFilter] = useState('')
   const [showFilters, setShowFilters] = useState(false)
+
+  // Internal filter state - managed by the component
+  const [internalFilters, setInternalFilters] = useState({
+    search: '',
+    status: '',
+    assigneeId: '',
+    initiativeId: '',
+    priority: '',
+    dueDateFrom: '',
+    dueDateTo: '',
+  })
   const hasExpandedGroups = useRef(false)
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -145,7 +148,16 @@ export function TaskDataTable({
     }
   }, [grouping, sorting.length])
 
-  // Fetch data
+  // Get current user's personId for my tasks filtering
+  const { data: session } = useSession()
+  const personId = session?.user?.personId
+
+  // Determine immutable filters based on showOnlyMyTasks
+  const immutableFilters = useMemo(() => {
+    return showOnlyMyTasks && personId ? { assigneeId: personId } : {}
+  }, [showOnlyMyTasks, personId])
+
+  // Fetch data using single useTasks hook with internal filters
   const {
     data: tasksData,
     loading,
@@ -154,8 +166,9 @@ export function TaskDataTable({
     updateTask,
   } = useTasks({
     page: enablePagination ? pagination.pageIndex + 1 : 1,
-    limit: enablePagination ? pagination.pageSize : 1000, // Large limit for non-paginated
-    filters,
+    limit: enablePagination ? pagination.pageSize : 1000,
+    filters: internalFilters,
+    immutableFilters,
   })
 
   const { people } = usePeopleCache()
@@ -359,16 +372,6 @@ export function TaskDataTable({
     )
   }
 
-  if (tasks.length === 0) {
-    return (
-      <div className='text-muted-foreground text-sm text-center py-8'>
-        <div className='flex flex-col items-center justify-center py-8 text-center'>
-          <p className='text-muted-foreground text-sm mb-4'>No tasks yet.</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className='space-y-4'>
       {/* Filter Controls */}
@@ -381,8 +384,13 @@ export function TaskDataTable({
                 <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
                 <Input
                   placeholder='Search tasks...'
-                  value={globalFilter}
-                  onChange={e => setGlobalFilter(e.target.value)}
+                  value={internalFilters.search}
+                  onChange={e =>
+                    setInternalFilters(prev => ({
+                      ...prev,
+                      search: e.target.value,
+                    }))
+                  }
                   className='pl-8'
                 />
               </div>
@@ -437,15 +445,12 @@ export function TaskDataTable({
                   <div className='space-y-2'>
                     <label className='text-sm font-medium'>Status</label>
                     <Select
-                      value={
-                        (table
-                          .getColumn('status')
-                          ?.getFilterValue() as string) || 'all'
-                      }
+                      value={internalFilters.status || 'all'}
                       onValueChange={value =>
-                        table
-                          .getColumn('status')
-                          ?.setFilterValue(value === 'all' ? undefined : value)
+                        setInternalFilters(prev => ({
+                          ...prev,
+                          status: value === 'all' ? '' : value,
+                        }))
                       }
                     >
                       <SelectTrigger>
@@ -466,15 +471,12 @@ export function TaskDataTable({
                   <div className='space-y-2'>
                     <label className='text-sm font-medium'>Priority</label>
                     <Select
-                      value={
-                        (table
-                          .getColumn('priority')
-                          ?.getFilterValue() as string) || 'all'
-                      }
+                      value={internalFilters.priority || 'all'}
                       onValueChange={value =>
-                        table
-                          .getColumn('priority')
-                          ?.setFilterValue(value === 'all' ? undefined : value)
+                        setInternalFilters(prev => ({
+                          ...prev,
+                          priority: value === 'all' ? '' : value,
+                        }))
                       }
                     >
                       <SelectTrigger>
@@ -505,6 +507,15 @@ export function TaskDataTable({
                     onClick={() => {
                       setGlobalFilter('')
                       setColumnFilters([])
+                      setInternalFilters({
+                        search: '',
+                        status: '',
+                        assigneeId: '',
+                        initiativeId: '',
+                        priority: '',
+                        dueDateFrom: '',
+                        dueDateTo: '',
+                      })
                     }}
                   >
                     Clear All Filters

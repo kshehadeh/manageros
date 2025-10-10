@@ -39,15 +39,13 @@ export function ExampleSelfContainedUsage() {
       </div>
 
       <div>
-        <h2 className='text-2xl font-bold mb-4'>Filtered Task Table</h2>
+        <h2 className='text-2xl font-bold mb-4'>
+          Task Table with Internal Filters
+        </h2>
         <p className='text-muted-foreground mb-4'>
-          This table shows only tasks with specific filters applied.
+          This table manages its own filter state internally.
         </p>
         <TaskTable
-          filters={{
-            status: 'todo',
-            priority: '3',
-          }}
           onTaskUpdate={() => {
             console.log('Task updated!')
           }}

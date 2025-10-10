@@ -29,29 +29,25 @@ interface UseTasksOptions {
   page?: number
   limit?: number
   filters?: TaskFilters
+  immutableFilters?: TaskFilters
 }
 
 export function useTasks({
   page = 1,
   limit = 20,
   filters = {},
+  immutableFilters = {},
 }: UseTasksOptions = {}) {
   const [data, setData] = useState<TasksResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   // Memoize filters to prevent infinite re-renders
-  const memoizedFilters = useMemo(
-    () => filters,
-    [
-      filters.search,
-      filters.status,
-      filters.assigneeId,
-      filters.initiativeId,
-      filters.priority,
-      filters.dueDateFrom,
-      filters.dueDateTo,
-    ]
+  const memoizedFilters = useMemo(() => filters, [filters])
+
+  const memoizedImmutableFilters = useMemo(
+    () => immutableFilters,
+    [immutableFilters]
   )
 
   const fetchTasks = useCallback(async () => {
@@ -69,6 +65,14 @@ export function useTasks({
         ),
       })
 
+      // Add immutable filters as JSON-encoded parameter
+      if (Object.keys(memoizedImmutableFilters).length > 0) {
+        searchParams.set(
+          'immutableFilters',
+          JSON.stringify(memoizedImmutableFilters)
+        )
+      }
+
       const response = await fetch(`/api/tasks?${searchParams}`)
 
       if (!response.ok) {
@@ -84,7 +88,7 @@ export function useTasks({
     } finally {
       setLoading(false)
     }
-  }, [page, limit, memoizedFilters])
+  }, [page, limit, memoizedFilters, memoizedImmutableFilters])
 
   useEffect(() => {
     fetchTasks()
