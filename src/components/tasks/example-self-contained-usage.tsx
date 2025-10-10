@@ -32,6 +32,7 @@ export function ExampleSelfContainedUsage() {
         </p>
         <TaskDataTable
           hideFilters={false}
+          settingsId='example-advanced'
           onTaskUpdate={() => {
             console.log('Task updated!')
           }}
@@ -61,6 +62,7 @@ export function ExampleSelfContainedUsage() {
           enablePagination={true}
           page={1}
           limit={10}
+          settingsId='example-paginated'
           onTaskUpdate={() => {
             console.log('Task updated!')
           }}

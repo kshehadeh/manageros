@@ -39,6 +39,7 @@ interface TaskTableProps {
   hideFilters?: boolean
   onTaskUpdate?: () => void
   showOnlyMyTasks?: boolean
+  settingsId?: string // Unique identifier for saving per-view settings
   // Legacy props for backward compatibility
   showInitiative?: boolean
   showDueDate?: boolean

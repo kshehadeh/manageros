@@ -47,6 +47,7 @@ export function MyTasksPageClient({
       people={people}
       initiatives={initiatives}
       showOnlyMyTasks={true}
+      settingsId='my-tasks'
       excludeCompleted={filters.excludeCompleted}
       onExcludeCompletedChange={handleExcludeCompletedChange}
     />

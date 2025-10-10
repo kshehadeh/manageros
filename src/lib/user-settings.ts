@@ -43,6 +43,24 @@ export interface UserSettings {
     isFullscreen: boolean
   }
 
+  // Per-view task table settings
+  taskTableSettings: Record<
+    string,
+    {
+      sorting: Array<{ id: string; desc: boolean }>
+      grouping: string
+      filters: {
+        search: string
+        status: string
+        assigneeId: string
+        initiativeId: string
+        priority: string
+        dueDateFrom: string
+        dueDateTo: string
+      }
+    }
+  >
+
   // Future expandable settings can be added here:
   // sidebarCollapsed: boolean
   // defaultPageSize: number
@@ -81,6 +99,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   chatWindowSettings: {
     isFullscreen: false,
   },
+  taskTableSettings: {},
   // When adding new settings, add their defaults here:
   // sidebarCollapsed: false
   // defaultPageSize: 25
@@ -168,4 +187,70 @@ export function clearUserSettings(userId: string): void {
   } catch (error) {
     console.warn('Failed to clear user settings:', error)
   }
+}
+
+/**
+ * Get task table settings for a specific view
+ */
+export function getTaskTableSettings(
+  userId: string,
+  settingsId: string
+): UserSettings['taskTableSettings'][string] {
+  const settings = loadUserSettings(userId)
+  return (
+    settings.taskTableSettings[settingsId] || {
+      sorting: [],
+      grouping: 'none',
+      filters: {
+        search: '',
+        status: '',
+        assigneeId: '',
+        initiativeId: '',
+        priority: '',
+        dueDateFrom: '',
+        dueDateTo: '',
+      },
+    }
+  )
+}
+
+/**
+ * Update task table settings for a specific view
+ */
+export function updateTaskTableSettings(
+  userId: string,
+  settingsId: string,
+  tableSettings: Partial<UserSettings['taskTableSettings'][string]>
+): void {
+  const currentSettings = loadUserSettings(userId)
+  const currentTableSettings = currentSettings.taskTableSettings[
+    settingsId
+  ] || {
+    sorting: [],
+    grouping: 'none',
+    filters: {
+      search: '',
+      status: '',
+      assigneeId: '',
+      initiativeId: '',
+      priority: '',
+      dueDateFrom: '',
+      dueDateTo: '',
+    },
+  }
+
+  const updatedTableSettings = {
+    ...currentTableSettings,
+    ...tableSettings,
+  }
+
+  const updatedSettings = {
+    ...currentSettings,
+    taskTableSettings: {
+      ...currentSettings.taskTableSettings,
+      [settingsId]: updatedTableSettings,
+    },
+  }
+
+  saveUserSettings(userId, updatedSettings)
 }

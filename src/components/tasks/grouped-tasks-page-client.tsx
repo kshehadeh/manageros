@@ -19,6 +19,7 @@ export function GroupedTasksPageClient({
       people={people}
       initiatives={initiatives}
       showOnlyMyTasks={false}
+      settingsId='all-tasks'
     />
   )
 }

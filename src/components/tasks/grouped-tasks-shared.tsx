@@ -11,12 +11,14 @@ interface GroupedTasksSharedProps {
   excludeCompleted?: boolean
   onExcludeCompletedChange?: (_exclude: boolean) => void
   fetchTasks?: () => Promise<TaskListItem[]>
+  settingsId?: string
 }
 
 export function GroupedTasksShared({
   people,
   initiatives,
   showOnlyMyTasks = false,
+  settingsId,
 }: GroupedTasksSharedProps) {
   return (
     <div className='space-y-6'>
@@ -26,6 +28,7 @@ export function GroupedTasksShared({
         initiatives={initiatives}
         hideFilters={false}
         showOnlyMyTasks={showOnlyMyTasks}
+        settingsId={settingsId}
         enablePagination={true}
         limit={50}
       />
