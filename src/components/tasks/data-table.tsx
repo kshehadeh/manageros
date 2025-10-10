@@ -132,6 +132,10 @@ export function TaskDataTable({
     dueDateFrom: '',
     dueDateTo: '',
   })
+
+  // Debounced search state - separate from internal filters to prevent immediate API calls
+  const [searchInput, setSearchInput] = useState('')
+  const [isSearching, setIsSearching] = useState(false)
   const hasExpandedGroups = useRef(false)
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -151,13 +155,31 @@ export function TaskDataTable({
   }, [effectiveGrouping, sorting.length])
 
   // Get current user's personId for my tasks filtering
-  const { data: session } = useSession()
+  const { data: session, status: sessionStatus } = useSession()
   const personId = session?.user?.personId
 
   // Determine immutable filters based on showOnlyMyTasks
   const immutableFilters = useMemo(() => {
     return showOnlyMyTasks && personId ? { assigneeId: personId } : {}
   }, [showOnlyMyTasks, personId])
+
+  // Don't fetch data if we're waiting for session and need personId for my tasks
+  const shouldFetch = !(showOnlyMyTasks && sessionStatus === 'loading')
+
+  // Debounce search input to prevent excessive API calls
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchInput !== internalFilters.search) {
+        setIsSearching(true)
+        setInternalFilters(prev => ({
+          ...prev,
+          search: searchInput,
+        }))
+      }
+    }, 300) // 300ms debounce
+
+    return () => clearTimeout(timeoutId)
+  }, [searchInput, internalFilters.search])
 
   // Fetch data using single useTasks hook with internal filters
   const {
@@ -171,7 +193,15 @@ export function TaskDataTable({
     limit: enablePagination ? pagination.pageSize : 1000,
     filters: internalFilters,
     immutableFilters,
+    enabled: shouldFetch,
   })
+
+  // Reset searching state when API call completes
+  useEffect(() => {
+    if (!loading && isSearching) {
+      setIsSearching(false)
+    }
+  }, [loading, isSearching])
 
   const { people } = usePeopleCache()
 
@@ -358,13 +388,7 @@ export function TaskDataTable({
     setContextMenu(prev => ({ ...prev, visible: false }))
   }, [])
 
-  if (loading) {
-    return (
-      <div className='flex items-center justify-center py-8'>
-        <div className='text-muted-foreground'>Loading tasks...</div>
-      </div>
-    )
-  }
+  // Don't show loading screen - keep current results visible while searching
 
   if (error) {
     return (
@@ -386,15 +410,15 @@ export function TaskDataTable({
                 <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
                 <Input
                   placeholder='Search tasks...'
-                  value={internalFilters.search}
-                  onChange={e =>
-                    setInternalFilters(prev => ({
-                      ...prev,
-                      search: e.target.value,
-                    }))
-                  }
+                  value={searchInput}
+                  onChange={e => setSearchInput(e.target.value)}
                   className='pl-8'
                 />
+                {isSearching && (
+                  <div className='absolute right-2 top-2.5'>
+                    <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent' />
+                  </div>
+                )}
               </div>
 
               {/* Grouping Dropdown */}
@@ -530,6 +554,7 @@ export function TaskDataTable({
                     onClick={() => {
                       setGlobalFilter('')
                       setColumnFilters([])
+                      setSearchInput('')
                       setInternalFilters({
                         search: '',
                         status: '',

@@ -30,6 +30,7 @@ interface UseTasksOptions {
   limit?: number
   filters?: TaskFilters
   immutableFilters?: TaskFilters
+  enabled?: boolean
 }
 
 export function useTasks({
@@ -37,6 +38,7 @@ export function useTasks({
   limit = 20,
   filters = {},
   immutableFilters = {},
+  enabled = true,
 }: UseTasksOptions = {}) {
   const [data, setData] = useState<TasksResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -51,6 +53,11 @@ export function useTasks({
   )
 
   const fetchTasks = useCallback(async () => {
+    if (!enabled) {
+      setLoading(false)
+      return
+    }
+
     try {
       setLoading(true)
       setError(null)
@@ -88,7 +95,7 @@ export function useTasks({
     } finally {
       setLoading(false)
     }
-  }, [page, limit, memoizedFilters, memoizedImmutableFilters])
+  }, [page, limit, memoizedFilters, memoizedImmutableFilters, enabled])
 
   useEffect(() => {
     fetchTasks()

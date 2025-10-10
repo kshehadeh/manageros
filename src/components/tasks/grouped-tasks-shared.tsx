@@ -24,7 +24,7 @@ export function GroupedTasksShared({
       <TaskDataTable
         people={people}
         initiatives={initiatives}
-        hideFilters={showOnlyMyTasks}
+        hideFilters={false}
         showOnlyMyTasks={showOnlyMyTasks}
         enablePagination={true}
         limit={50}
