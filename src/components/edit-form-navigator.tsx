@@ -9,6 +9,11 @@ export function EditFormNavigator() {
 
   useEffect(() => {
     function handleOpenEditForm() {
+      // Don't handle the shortcut if we're on a creation page (/new) or already on an edit page (/edit)
+      if (pathname.endsWith('/new') || pathname.endsWith('/edit')) {
+        return
+      }
+
       // Determine the edit URL based on the current pathname
       let editUrl: string | null = null
 
