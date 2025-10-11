@@ -23,14 +23,12 @@ import type { ExtendedTaskListItem } from '@/lib/task-list-select'
 interface CreateColumnsProps {
   onTaskComplete: (_taskId: string, _currentStatus: TaskStatus) => void
   onButtonClick?: (_e: React.MouseEvent, _taskId: string) => void
-  enableSizing?: boolean
   grouping?: string[]
 }
 
 export function createTaskColumns({
   onTaskComplete,
   onButtonClick,
-  enableSizing = false,
   grouping = [],
 }: CreateColumnsProps): ColumnDef<ExtendedTaskListItem>[] {
   const getPriorityVariant = (priority: number) => {
@@ -43,92 +41,77 @@ export function createTaskColumns({
 
   return [
     {
-      id: 'select',
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
-          aria-label='Select all'
-        />
-      ),
-      cell: ({ row }) => {
-        const task = row.original
-        const isCompleted = task.status === TASK_STATUS.DONE
-
-        return (
-          <Checkbox
-            checked={isCompleted}
-            onCheckedChange={() =>
-              onTaskComplete(task.id, task.status as TaskStatus)
-            }
-            className='data-[state=checked]:bg-primary data-[state=checked]:border-primary'
-          />
-        )
-      },
-      enableGrouping: false,
-      ...(enableSizing && { size: 40 }),
-    },
-    {
       accessorKey: 'title',
       header: 'Summary',
+      size: 500, // Default size for summary column - increased to fill more space
+      minSize: 300, // Minimum size
+      maxSize: 1000, // Maximum size
       cell: ({ row }) => {
         const task = row.original
         const isCompleted = task.status === TASK_STATUS.DONE
 
         return (
-          <div className='space-y-0.5'>
-            <div
-              className={`${
-                isCompleted ? 'line-through text-muted-foreground' : ''
-              }`}
-            >
-              {task.title}
-            </div>
-            <div className='text-xs text-muted-foreground mt-1.5 flex items-center gap-2 flex-wrap'>
-              {task.assigneeName && (
-                <div className='flex items-center gap-1'>
-                  <UserIcon className='h-3 w-3' />
-                  <Link
-                    href={`/people/${task.assigneeId}`}
-                    className='text-primary hover:text-primary/80 transition-colors'
-                    onClick={e => e.stopPropagation()}
-                  >
-                    {task.assigneeName}
-                  </Link>
-                </div>
-              )}
-              <div className='flex items-center gap-1'>
-                <Flag className='h-3 w-3' />
-                <Badge
-                  variant={getPriorityVariant(task.priority) as BadgeVariant}
-                  className='text-xs px-1 py-0'
-                >
-                  {getPriorityLabel(task.priority)}
-                </Badge>
+          <div className='flex items-start gap-3'>
+            <Checkbox
+              checked={isCompleted}
+              onCheckedChange={() =>
+                onTaskComplete(task.id, task.status as TaskStatus)
+              }
+              className='data-[state=checked]:bg-primary data-[state=checked]:border-primary mt-0.5'
+            />
+            <div className='space-y-0.5 flex-1'>
+              <div
+                className={`${
+                  isCompleted ? 'line-through text-muted-foreground' : ''
+                }`}
+              >
+                {task.title}
               </div>
-              {task.dueDate && (
+              <div className='text-xs text-muted-foreground mt-1.5 flex items-center gap-2 flex-wrap'>
+                {task.assigneeName && (
+                  <div className='flex items-center gap-1'>
+                    <UserIcon className='h-3 w-3' />
+                    <Link
+                      href={`/people/${task.assigneeId}`}
+                      className='text-primary hover:text-primary/80 transition-colors'
+                      onClick={e => e.stopPropagation()}
+                    >
+                      {task.assigneeName}
+                    </Link>
+                  </div>
+                )}
                 <div className='flex items-center gap-1'>
-                  <Calendar className='h-3 w-3' />
-                  <span>{new Date(task.dueDate).toLocaleDateString()}</span>
-                </div>
-              )}
-              {task.initiativeTitle && (
-                <div className='flex items-center gap-1'>
-                  <Target className='h-3 w-3' />
-                  <Link
-                    href={`/initiatives/${task.initiativeId}`}
-                    className='text-primary hover:text-primary/80 transition-colors'
-                    onClick={e => e.stopPropagation()}
+                  <Flag className='h-3 w-3' />
+                  <Badge
+                    variant={getPriorityVariant(task.priority) as BadgeVariant}
+                    className='text-xs px-1 py-0'
                   >
-                    {task.initiativeTitle}
-                  </Link>
+                    {getPriorityLabel(task.priority)}
+                  </Badge>
                 </div>
-              )}
+                {task.dueDate && (
+                  <div className='flex items-center gap-1'>
+                    <Calendar className='h-3 w-3' />
+                    <span>{new Date(task.dueDate).toLocaleDateString()}</span>
+                  </div>
+                )}
+                {task.initiativeTitle && (
+                  <div className='flex items-center gap-1'>
+                    <Target className='h-3 w-3' />
+                    <Link
+                      href={`/initiatives/${task.initiativeId}`}
+                      className='text-primary hover:text-primary/80 transition-colors'
+                      onClick={e => e.stopPropagation()}
+                    >
+                      {task.initiativeTitle}
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )
       },
-      ...(enableSizing && { size: 300 }),
     },
     {
       accessorKey: 'status',
@@ -158,7 +141,9 @@ export function createTaskColumns({
           hidden: true,
         } as { hidden: boolean },
       }),
-      ...(enableSizing && { size: 120 }),
+      size: 120, // Default size for status column
+      minSize: 80, // Minimum size
+      maxSize: 200, // Maximum size
     },
     {
       id: 'actions',
@@ -181,7 +166,9 @@ export function createTaskColumns({
         )
       },
       enableGrouping: false,
-      ...(enableSizing && { size: 50 }),
+      size: 60, // Default size for actions column
+      minSize: 50, // Minimum size
+      maxSize: 100, // Maximum size
     },
     // Hidden columns for grouping
     {

@@ -58,6 +58,7 @@ import type { ExtendedTaskListItem, TaskListItem } from '@/lib/task-list-select'
 // Type for column meta
 interface ColumnMeta {
   hidden?: boolean
+  className?: string
 }
 import { TaskQuickEditDialog } from '@/components/tasks/task-quick-edit-dialog'
 import { DeleteModal } from '@/components/common/delete-modal'
@@ -339,7 +340,6 @@ export function TaskDataTable({
   const columns = createTaskColumns({
     onTaskComplete: handleTaskComplete,
     onButtonClick: handleButtonClick,
-    enableSizing: true,
     grouping: effectiveGrouping,
   })
 
@@ -378,6 +378,7 @@ export function TaskDataTable({
       ? getPaginationRowModel()
       : undefined,
     enableGrouping: true,
+    enableColumnResizing: false,
     globalFilterFn,
     manualPagination: enablePagination, // Use server-side pagination when enabled
   })
@@ -639,7 +640,7 @@ export function TaskDataTable({
 
       {/* Task Table */}
       <div className='rounded-md border'>
-        <Table>
+        <Table className='table-fixed'>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
@@ -653,6 +654,10 @@ export function TaskDataTable({
                       <TableHead
                         key={header.id}
                         style={{ width: header.getSize() }}
+                        className={
+                          (header.column.columnDef.meta as ColumnMeta)
+                            ?.className || ''
+                        }
                       >
                         {header.isPlaceholder
                           ? null
@@ -727,7 +732,6 @@ export function TaskDataTable({
                 return (
                   <TableRow
                     key={row.id}
-                    data-state={row.getIsSelected() && 'selected'}
                     className='hover:bg-accent/50 cursor-pointer'
                     onDoubleClick={() => handleRowDoubleClick(row.original.id)}
                   >
@@ -741,6 +745,10 @@ export function TaskDataTable({
                         <TableCell
                           key={cell.id}
                           style={{ width: cell.column.getSize() }}
+                          className={
+                            (cell.column.columnDef.meta as ColumnMeta)
+                              ?.className || ''
+                          }
                         >
                           {flexRender(
                             cell.column.columnDef.cell,

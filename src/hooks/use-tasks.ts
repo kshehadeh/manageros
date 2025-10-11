@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type { TaskListItem } from '@/lib/task-list-select'
 
 interface TaskFilters {
@@ -36,21 +36,13 @@ interface UseTasksOptions {
 export function useTasks({
   page = 1,
   limit = 20,
-  filters = {},
-  immutableFilters = {},
+  filters,
+  immutableFilters,
   enabled = true,
 }: UseTasksOptions = {}) {
   const [data, setData] = useState<TasksResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  // Memoize filters to prevent infinite re-renders
-  const memoizedFilters = useMemo(() => filters, [filters])
-
-  const memoizedImmutableFilters = useMemo(
-    () => immutableFilters,
-    [immutableFilters]
-  )
 
   const fetchTasks = useCallback(async () => {
     if (!enabled) {
@@ -66,18 +58,15 @@ export function useTasks({
         page: page.toString(),
         limit: limit.toString(),
         ...Object.fromEntries(
-          Object.entries(memoizedFilters).filter(
+          Object.entries(filters || {}).filter(
             ([_, value]) => value !== undefined && value !== ''
           )
         ),
       })
 
       // Add immutable filters as JSON-encoded parameter
-      if (Object.keys(memoizedImmutableFilters).length > 0) {
-        searchParams.set(
-          'immutableFilters',
-          JSON.stringify(memoizedImmutableFilters)
-        )
+      if (Object.keys(immutableFilters || {}).length > 0) {
+        searchParams.set('immutableFilters', JSON.stringify(immutableFilters))
       }
 
       const response = await fetch(`/api/tasks?${searchParams}`)
@@ -95,7 +84,7 @@ export function useTasks({
     } finally {
       setLoading(false)
     }
-  }, [page, limit, memoizedFilters, memoizedImmutableFilters, enabled])
+  }, [page, limit, filters, immutableFilters, enabled])
 
   useEffect(() => {
     fetchTasks()

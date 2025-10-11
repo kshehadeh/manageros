@@ -1,55 +1,27 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import type { Person, Initiative } from '@prisma/client'
-import { useUserSettings } from '@/lib/hooks/use-user-settings'
-import { GroupedTasksShared } from './grouped-tasks-shared'
+import type { Initiative } from '@prisma/client'
+import { TaskDataTable } from './data-table'
 
 interface MyTasksPageClientProps {
-  people: Person[]
+  personId: string
   initiatives: Initiative[]
 }
 
 export function MyTasksPageClient({
-  people,
+  personId,
   initiatives,
 }: MyTasksPageClientProps) {
-  const { getSetting, updateSetting, isLoaded } = useUserSettings()
-  const [filters, setFilters] = useState({
-    search: '',
-    status: '',
-    assigneeId: '',
-    initiativeId: '',
-    priority: '',
-    dueDateFrom: '',
-    dueDateTo: '',
-    excludeCompleted: false,
-  })
-
-  // Load completed tasks visibility setting for My Tasks
-  useEffect(() => {
-    if (isLoaded) {
-      const hideCompleted = getSetting('myTasksHideCompleted')
-      setFilters(prev => ({ ...prev, excludeCompleted: hideCompleted }))
-    }
-  }, [isLoaded, getSetting])
-
-  const handleExcludeCompletedChange = useCallback(
-    (excludeCompleted: boolean) => {
-      setFilters(prev => ({ ...prev, excludeCompleted }))
-      updateSetting('myTasksHideCompleted', excludeCompleted)
-    },
-    [updateSetting]
-  )
-
   return (
-    <GroupedTasksShared
-      people={people}
+    <TaskDataTable
       initiatives={initiatives}
-      showOnlyMyTasks={true}
-      settingsId='my-tasks'
-      excludeCompleted={filters.excludeCompleted}
-      onExcludeCompletedChange={handleExcludeCompletedChange}
+      hideFilters={false}
+      settingsId={'my-tasks'}
+      immutableFilters={{
+        assigneeId: personId,
+      }}
+      enablePagination={true}
+      limit={50}
     />
   )
 }
