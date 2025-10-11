@@ -4,7 +4,8 @@ import { prisma } from '@/lib/db'
 import type { Prisma } from '@prisma/client'
 
 export const tasksTool = {
-  description: 'Get information about tasks in the organization',
+  description:
+    'Get information about tasks in the organization. Use this to find what tasks someone is working on or has worked on.',
   parameters: z.object({
     status: z
       .enum(['todo', 'doing', 'blocked', 'done', 'dropped'])
@@ -17,6 +18,14 @@ export const tasksTool = {
       .string()
       .optional()
       .describe('Search query to filter tasks by title or description'),
+    updatedAfter: z
+      .string()
+      .optional()
+      .describe('ISO date string - only show tasks updated after this date'),
+    updatedBefore: z
+      .string()
+      .optional()
+      .describe('ISO date string - only show tasks updated before this date'),
   }),
   execute: async ({
     status,
@@ -24,12 +33,16 @@ export const tasksTool = {
     assigneeId,
     initiativeId,
     query,
+    updatedAfter,
+    updatedBefore,
   }: {
     status?: string
     priority?: number
     assigneeId?: string
     initiativeId?: string
     query?: string
+    updatedAfter?: string
+    updatedBefore?: string
   }) => {
     const user = await getCurrentUser()
     if (!user.organizationId) {
@@ -53,6 +66,18 @@ export const tasksTool = {
     if (priority) whereClause.priority = priority
     if (assigneeId) whereClause.assigneeId = assigneeId
     if (initiativeId) whereClause.initiativeId = initiativeId
+
+    // Date filters
+    if (updatedAfter || updatedBefore) {
+      whereClause.updatedAt = {}
+      if (updatedAfter) {
+        whereClause.updatedAt.gte = new Date(updatedAfter)
+      }
+      if (updatedBefore) {
+        whereClause.updatedAt.lte = new Date(updatedBefore)
+      }
+    }
+
     if (query) {
       whereClause.OR = [
         ...(whereClause.OR || []),

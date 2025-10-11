@@ -28,14 +28,8 @@ export const peopleTool = {
     includeManager?: boolean
     includeReports?: boolean
   }) => {
-    console.log('People tool called with:', {
-      query,
-      includeManager,
-      includeReports,
-    })
     try {
       const user = await getCurrentUser()
-      console.log('Current user:', user?.id, user?.organizationId)
       if (!user.organizationId) {
         throw new Error('User must belong to an organization')
       }
@@ -87,12 +81,6 @@ export const peopleTool = {
         orderBy: { name: 'asc' },
       })
 
-      console.log('Found people:', people.length)
-      console.log(
-        'People data:',
-        people.map(p => ({ id: p.id, name: p.name, manager: p.manager?.name }))
-      )
-
       const result = {
         people: people.map(person => ({
           id: person.id,
@@ -108,7 +96,6 @@ export const peopleTool = {
         })),
       }
 
-      console.log('People tool returning:', JSON.stringify(result, null, 2))
       return result
     } catch (error) {
       console.error('Error in people tool:', error)

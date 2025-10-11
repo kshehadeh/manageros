@@ -1,28 +1,15 @@
-import { prisma } from '@/lib/db'
-import { InitiativesTable } from '@/components/initiatives/initiatives-table'
+import { InitiativeDataTable } from '@/components/initiatives/data-table'
 import { ExpandableSection } from '@/components/expandable-section'
-import { getInitiativesForCurrentUser } from '@/lib/actions/initiative'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 interface DashboardOpenInitiativesSectionProps {
   organizationId: string
 }
 
 export async function DashboardOpenInitiativesSection({
-  organizationId,
+  organizationId: _organizationId,
 }: DashboardOpenInitiativesSectionProps) {
-  const openInitiatives = await getInitiativesForCurrentUser()
-
-  // Get people and teams for the table
-  const [people, teams] = await Promise.all([
-    prisma.person.findMany({
-      where: { organizationId },
-    }),
-    prisma.team.findMany({
-      where: { organizationId },
-    }),
-  ])
-
-  if (!openInitiatives || openInitiatives.length === 0) return null
+  const user = await getCurrentUser()
 
   return (
     <ExpandableSection
@@ -30,13 +17,15 @@ export async function DashboardOpenInitiativesSection({
       icon='Rocket'
       viewAllHref='/initiatives'
     >
-      <InitiativesTable
-        initiatives={openInitiatives}
-        people={people}
-        teams={teams}
+      <InitiativeDataTable
         hideFilters={true}
-        hideOwner={true}
-        hideActions={true}
+        enablePagination={false}
+        limit={10}
+        immutableFilters={{
+          status: 'planned,active',
+          ownerId: user.personId || '',
+        }}
+        settingsId='dashboard-initiatives'
       />
     </ExpandableSection>
   )

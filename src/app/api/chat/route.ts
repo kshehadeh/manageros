@@ -8,6 +8,7 @@ import { teamsTool } from '@/lib/ai/tools/teams-tool'
 import { currentUserTool } from '@/lib/ai/tools/current-user-tool'
 import { githubTool } from '@/lib/ai/tools/github-tool'
 import { jiraTool } from '@/lib/ai/tools/jira-tool'
+import { dateTimeTool } from '@/lib/ai/tools/date-time-tool'
 
 export async function POST(req: Request) {
   try {
@@ -59,12 +60,18 @@ export async function POST(req: Request) {
           inputSchema: jiraTool.parameters,
           execute: jiraTool.execute,
         },
+        dateTime: {
+          description: dateTimeTool.description,
+          inputSchema: dateTimeTool.parameters,
+          execute: dateTimeTool.execute,
+        },
       },
       stopWhen: stepCountIs(10),
       system: `You are an AI assistant for ManagerOS, a management platform for engineering managers. You help users understand and interact with their organizational data including people, initiatives, tasks, meetings, and teams.
 
 Key guidelines:
 - Always use the available tools to fetch current data from the database
+- When asked about relative time periods (like "last week", "this month", "yesterday"), FIRST call the dateTime tool to get the current date and helpful date ranges
 - After using tools, ALWAYS provide a clear, helpful response to the user based on the tool results
 - Provide clear, concise responses with relevant details
 - When listing entities, include key information like status, dates, and relationships

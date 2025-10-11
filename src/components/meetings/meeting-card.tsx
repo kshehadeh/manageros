@@ -5,7 +5,6 @@ import {
   Meeting,
   Person,
   Team,
-  Initiative,
   User,
   MeetingParticipant,
   MeetingInstance,
@@ -14,7 +13,7 @@ import { Calendar, Clock, MapPin, Users, Repeat } from 'lucide-react'
 
 type MeetingWithRelations = Meeting & {
   team: Team | null
-  initiative: Initiative | null
+  initiative: { id: string; title: string } | null
   owner: Person | null
   createdBy: User
   participants: (MeetingParticipant & {

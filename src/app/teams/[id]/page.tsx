@@ -56,42 +56,8 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
         },
         orderBy: { name: 'asc' },
       },
-      initiatives: {
-        include: {
-          objectives: true,
-          team: true,
-          owners: {
-            include: {
-              person: true,
-            },
-          },
-          tasks: {
-            select: {
-              status: true,
-            },
-          },
-          _count: { select: { checkIns: true, tasks: true } },
-        },
-        orderBy: { updatedAt: 'desc' },
-      },
     },
   })
-
-  // Get all people and teams for the InitiativesTable component
-  const [allPeople, allTeams] = await Promise.all([
-    prisma.person.findMany({
-      where: {
-        organizationId: session.user.organizationId,
-      },
-      orderBy: { name: 'asc' },
-    }),
-    prisma.team.findMany({
-      where: {
-        organizationId: session.user.organizationId,
-      },
-      orderBy: { name: 'asc' },
-    }),
-  ])
 
   if (!team) {
     notFound()
@@ -115,8 +81,6 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
     >
       <TeamDetailContent
         team={teamWithLevels}
-        allPeople={allPeople}
-        allTeams={allTeams}
         isAdmin={session.user.role === 'ADMIN'}
       />
     </TeamDetailClient>

@@ -5,25 +5,65 @@ import type { Prisma } from '@prisma/client'
 
 export const meetingsTool = {
   description:
-    'Get information about meetings in the organization.  Use the most recent instance notes to get the notes of the meeting if it has instances otherwise use the notes in the main meeting record',
+    'Get information about meetings in the organization. Use the most recent instance notes to get the notes of the meeting if it has instances otherwise use the notes in the main meeting record. Use this to find what meetings someone attended or organized.',
   parameters: z.object({
-    ownerId: z.string().optional().describe('Filter by meeting owner ID'),
-    participantId: z.string().optional().describe('Filter by participant ID'),
+    ownerId: z
+      .string()
+      .optional()
+      .describe(
+        'Filter by meeting owner ID but do not use this unless the prompt is asking for specifically meetings where the user was the owner. Owner is tied to the person ID of the user'
+      ),
+    participantId: z
+      .string()
+      .optional()
+      .describe(
+        'Filter by participant ID but do not use this unless the prompt is asking for specifically meetings where the user was a participant. Participant is tied to the person ID of the user'
+      ),
     query: z
       .string()
       .optional()
       .describe(
         'Search query to filter meetings by title or description or notes'
       ),
+    scheduledAfter: z
+      .string()
+      .optional()
+      .describe(
+        'ISO date string - only show meetings scheduled after this date'
+      ),
+    scheduledBefore: z
+      .string()
+      .optional()
+      .describe(
+        'ISO date string - only show meetings scheduled before this date'
+      ),
+    createdAfter: z
+      .string()
+      .optional()
+      .describe('ISO date string - only show meetings created after this date'),
+    createdBefore: z
+      .string()
+      .optional()
+      .describe(
+        'ISO date string - only show meetings created before this date'
+      ),
   }),
   execute: async ({
     ownerId,
     participantId,
     query,
+    scheduledAfter,
+    scheduledBefore,
+    createdAfter,
+    createdBefore,
   }: {
     ownerId?: string
     participantId?: string
     query?: string
+    scheduledAfter?: string
+    scheduledBefore?: string
+    createdAfter?: string
+    createdBefore?: string
   }) => {
     const user = await getCurrentUser()
     if (!user.organizationId) {
@@ -35,6 +75,29 @@ export const meetingsTool = {
     }
 
     if (ownerId) whereClause.ownerId = ownerId
+
+    // Date filters for scheduled meetings
+    if (scheduledAfter || scheduledBefore) {
+      whereClause.scheduledAt = {}
+      if (scheduledAfter) {
+        whereClause.scheduledAt.gte = new Date(scheduledAfter)
+      }
+      if (scheduledBefore) {
+        whereClause.scheduledAt.lte = new Date(scheduledBefore)
+      }
+    }
+
+    // Date filters for created meetings
+    if (createdAfter || createdBefore) {
+      whereClause.createdAt = {}
+      if (createdAfter) {
+        whereClause.createdAt.gte = new Date(createdAfter)
+      }
+      if (createdBefore) {
+        whereClause.createdAt.lte = new Date(createdBefore)
+      }
+    }
+
     if (query) {
       whereClause.OR = [
         { title: { contains: query, mode: 'insensitive' } },

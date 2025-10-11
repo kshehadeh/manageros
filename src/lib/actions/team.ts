@@ -176,15 +176,6 @@ export async function getTeamHierarchyOptimized(): Promise<
 export async function createTeam(formData: TeamFormData) {
   const user = await getCurrentUser()
 
-  // Debug logging
-  console.log('Creating team for user:', {
-    id: user.id,
-    email: user.email,
-    organizationId: user.organizationId,
-    role: user.role,
-    organizationName: user.organizationName,
-  })
-
   // Additional validation
   if (!user.organizationId) {
     console.error('❌ User has no organizationId!', user)
@@ -203,12 +194,8 @@ export async function createTeam(formData: TeamFormData) {
     throw new Error('Organization not found')
   }
 
-  console.log('✅ Organization found:', organization.name)
-
   // Validate the form data
   const validatedData = teamSchema.parse(formData)
-
-  console.log('Validated form data:', validatedData)
 
   // Validate parent team if provided
   if (validatedData.parentId) {
