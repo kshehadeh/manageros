@@ -52,13 +52,15 @@ export function createTaskColumns({
 
         return (
           <div className='flex items-start gap-3'>
-            <Checkbox
-              checked={isCompleted}
-              onCheckedChange={() =>
-                onTaskComplete(task.id, task.status as TaskStatus)
-              }
-              className='data-[state=checked]:bg-primary data-[state=checked]:border-primary mt-0.5'
-            />
+            <div onClick={e => e.stopPropagation()}>
+              <Checkbox
+                checked={isCompleted}
+                onCheckedChange={() =>
+                  onTaskComplete(task.id, task.status as TaskStatus)
+                }
+                className='data-[state=checked]:bg-primary data-[state=checked]:border-primary mt-0.5'
+              />
+            </div>
             <div className='space-y-0.5 flex-1'>
               <div
                 className={`${

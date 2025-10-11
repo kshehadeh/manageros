@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   flexRender,
@@ -34,6 +34,11 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import {
   Eye,
   Edit,
   Trash2,
@@ -41,7 +46,6 @@ import {
   ChevronDown,
   Search,
   Filter,
-  X,
 } from 'lucide-react'
 import { updateTaskStatus, deleteTask } from '@/lib/actions/task'
 import {
@@ -120,7 +124,7 @@ const globalFilterFn = (
 }
 
 export function TaskDataTable({
-  onTaskUpdate,
+  onTaskUpdate: _onTaskUpdate,
   hideFilters = false,
   settingsId,
   limit = 20,
@@ -132,14 +136,12 @@ export function TaskDataTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [expanded, setExpanded] = useState<ExpandedState>({})
   const [globalFilter, setGlobalFilter] = useState('')
-  const [showFilters, setShowFilters] = useState(false)
-  const filterRef = useRef<HTMLDivElement>(null)
 
   // Use settings hook for persistent state
   const { settings, updateSorting, updateGrouping, updateFilters } =
     useTaskTableSettings({
       settingsId: settingsId || 'default',
-      enabled: !!settingsId,
+      enabled: true,
     })
 
   // Debounced search state - separate from internal filters to prevent immediate API calls
@@ -181,6 +183,19 @@ export function TaskDataTable({
     return () => clearTimeout(timeoutId)
   }, [searchInput, settings.filters.search, updateFilters])
 
+  // Memoize filters to prevent unnecessary refetches
+  const memoizedFilters = useMemo(
+    () => settings.filters,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(settings.filters)]
+  )
+
+  const memoizedImmutableFilters = useMemo(
+    () => immutableFilters || {},
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(immutableFilters)]
+  )
+
   // Fetch data using single useTasks hook with internal filters
   const {
     data: tasksData,
@@ -191,8 +206,8 @@ export function TaskDataTable({
   } = useTasks({
     page: enablePagination ? pagination.pageIndex + 1 : 1,
     limit: enablePagination ? pagination.pageSize : 1000,
-    filters: settings.filters,
-    immutableFilters,
+    filters: memoizedFilters,
+    immutableFilters: memoizedImmutableFilters,
     enabled: shouldFetch,
   })
 
@@ -257,7 +272,7 @@ export function TaskDataTable({
           ? 'Task marked as complete'
           : 'Task marked as incomplete'
       )
-      onTaskUpdate?.()
+      // Don't call onTaskUpdate?.() here as it triggers a full refresh
     } catch (error) {
       console.error('Failed to update task status:', error)
 
@@ -283,7 +298,7 @@ export function TaskDataTable({
       await deleteTask(taskId)
       toast.success('Task deleted successfully')
       await refetch()
-      onTaskUpdate?.()
+      // Don't call onTaskUpdate?.() as refetch already updates the list
     } catch (error) {
       console.error('Failed to delete task:', error)
       toast.error(
@@ -298,8 +313,8 @@ export function TaskDataTable({
     }
   }
 
-  const handleRowDoubleClick = (taskId: string) => {
-    router.push(`/tasks/${taskId}`)
+  const handleRowClick = (taskId: string) => {
+    handleQuickEdit(taskId)
   }
 
   const handleButtonClick = (e: React.MouseEvent, taskId: string) => {
@@ -402,47 +417,6 @@ export function TaskDataTable({
     }
   }, [effectiveGrouping.length, table])
 
-  // Handle clicking outside context menu to close it
-  const _handleClickOutside = useCallback(() => {
-    setContextMenu(prev => ({ ...prev, visible: false }))
-  }, [])
-
-  // Handle clicking outside filter popup to close it
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node
-
-      // Don't close if clicking inside the filter popup
-      if (filterRef.current && filterRef.current.contains(target)) {
-        return
-      }
-
-      // Don't close if clicking on Radix Select elements (they use portals)
-      const isRadixSelectElement =
-        target instanceof Element &&
-        (target.closest('[data-radix-select-content]') ||
-          target.closest('[data-radix-select-trigger]') ||
-          target.closest('[data-radix-select-item]') ||
-          target.closest('[data-radix-select-viewport]') ||
-          target.closest('[data-radix-select-scroll-up-button]') ||
-          target.closest('[data-radix-select-scroll-down-button]'))
-
-      if (isRadixSelectElement) {
-        return
-      }
-
-      setShowFilters(false)
-    }
-
-    if (showFilters) {
-      // Use mousedown but with proper Radix Select detection
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [showFilters])
-
-  // Don't show loading screen - keep current results visible while searching
-
   if (error) {
     return (
       <div className='flex items-center justify-center py-8'>
@@ -496,122 +470,106 @@ export function TaskDataTable({
               </div>
 
               {/* Additional Filters Button */}
-              <div className='relative' ref={filterRef}>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center gap-2 ${
-                    hasActiveFilters ? 'border-primary bg-primary/5' : ''
-                  }`}
-                >
-                  <Filter className='h-4 w-4' />
-                  Filters
-                  {hasActiveFilters && (
-                    <div className='h-2 w-2 bg-primary rounded-full' />
-                  )}
-                </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    className={`flex items-center gap-2 ${
+                      hasActiveFilters ? 'border-primary bg-primary/5' : ''
+                    }`}
+                  >
+                    <Filter className='h-4 w-4' />
+                    Filters
+                    {hasActiveFilters && (
+                      <div className='h-2 w-2 bg-primary rounded-full' />
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className='w-80' align='end'>
+                  <div className='space-y-4'>
+                    <div className='flex items-center justify-between'>
+                      <h3 className='font-medium'>Filter Tasks</h3>
+                      <button
+                        onClick={() => {
+                          setGlobalFilter('')
+                          setColumnFilters([])
+                          setSearchInput('')
+                          updateFilters({
+                            search: '',
+                            status: '',
+                            assigneeId: '',
+                            initiativeId: '',
+                            priority: '',
+                            dueDateFrom: '',
+                            dueDateTo: '',
+                          })
+                        }}
+                        className='text-sm text-muted-foreground hover:text-foreground'
+                      >
+                        Clear all
+                      </button>
+                    </div>
 
-                {/* Filter Popup */}
-                {showFilters && (
-                  <div className='absolute right-0 top-full mt-2 w-80 bg-background border rounded-lg shadow-lg p-4 z-50'>
                     <div className='space-y-4'>
-                      <div className='flex items-center justify-between'>
-                        <h3 className='font-medium'>Filter Tasks</h3>
-                        <div className='flex items-center gap-2'>
-                          <button
-                            onClick={() => {
-                              setGlobalFilter('')
-                              setColumnFilters([])
-                              setSearchInput('')
-                              updateFilters({
-                                search: '',
-                                status: '',
-                                assigneeId: '',
-                                initiativeId: '',
-                                priority: '',
-                                dueDateFrom: '',
-                                dueDateTo: '',
-                              })
-                            }}
-                            className='text-sm text-muted-foreground hover:text-foreground'
-                          >
-                            Clear all
-                          </button>
-                          <Button
-                            variant='ghost'
-                            size='sm'
-                            onClick={() => setShowFilters(false)}
-                          >
-                            <X className='h-4 w-4' />
-                          </Button>
-                        </div>
+                      {/* Status Filter */}
+                      <div className='space-y-2'>
+                        <label className='text-sm font-medium'>Status</label>
+                        <Select
+                          value={settings.filters.status || 'all'}
+                          onValueChange={value =>
+                            updateFilters({
+                              status: value === 'all' ? '' : value,
+                            })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder='All statuses' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value='all'>All statuses</SelectItem>
+                            {ALL_TASK_STATUSES.map(status => (
+                              <SelectItem key={status} value={status}>
+                                {taskStatusUtils.getLabel(status)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
 
-                      <div className='space-y-4'>
-                        {/* Status Filter */}
-                        <div className='space-y-2'>
-                          <label className='text-sm font-medium'>Status</label>
-                          <Select
-                            value={settings.filters.status || 'all'}
-                            onValueChange={value =>
-                              updateFilters({
-                                status: value === 'all' ? '' : value,
-                              })
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder='All statuses' />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value='all'>All statuses</SelectItem>
-                              {ALL_TASK_STATUSES.map(status => (
-                                <SelectItem key={status} value={status}>
-                                  {taskStatusUtils.getLabel(status)}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        {/* Priority Filter */}
-                        <div className='space-y-2'>
-                          <label className='text-sm font-medium'>
-                            Priority
-                          </label>
-                          <Select
-                            value={settings.filters.priority || 'all'}
-                            onValueChange={value =>
-                              updateFilters({
-                                priority: value === 'all' ? '' : value,
-                              })
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder='All priorities' />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value='all'>
-                                All priorities
+                      {/* Priority Filter */}
+                      <div className='space-y-2'>
+                        <label className='text-sm font-medium'>Priority</label>
+                        <Select
+                          value={settings.filters.priority || 'all'}
+                          onValueChange={value =>
+                            updateFilters({
+                              priority: value === 'all' ? '' : value,
+                            })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder='All priorities' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value='all'>All priorities</SelectItem>
+                            {[1, 2, 3, 4, 5].map(priority => (
+                              <SelectItem
+                                key={priority}
+                                value={priority.toString()}
+                              >
+                                {taskPriorityUtils.getLabel(
+                                  priority as TaskPriority
+                                )}
                               </SelectItem>
-                              {[1, 2, 3, 4, 5].map(priority => (
-                                <SelectItem
-                                  key={priority}
-                                  value={priority.toString()}
-                                >
-                                  {taskPriorityUtils.getLabel(
-                                    priority as TaskPriority
-                                  )}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                   </div>
-                )}
-              </div>
+                </PopoverContent>
+              </Popover>
             </div>
             <div className='text-sm text-muted-foreground'>
               {enablePagination && tasksData?.pagination ? (
@@ -639,7 +597,13 @@ export function TaskDataTable({
       )}
 
       {/* Task Table */}
-      <div className='rounded-md border'>
+      <div className='rounded-md border relative'>
+        {/* Loading Spinner in top right corner */}
+        {loading && (
+          <div className='absolute top-2 right-2 z-10 bg-background/80 rounded-full p-2'>
+            <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent' />
+          </div>
+        )}
         <Table className='table-fixed'>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
@@ -672,22 +636,7 @@ export function TaskDataTable({
             ))}
           </TableHeader>
           <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell
-                  colSpan={
-                    columns.filter(col => !(col.meta as ColumnMeta)?.hidden)
-                      .length
-                  }
-                  className='h-24 text-center'
-                >
-                  <div className='flex items-center justify-center gap-2'>
-                    <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent' />
-                    Loading tasks...
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : table.getRowModel().rows?.length ? (
+            {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map(row => {
                 if (row.getIsGrouped()) {
                   // Group header row
@@ -733,7 +682,7 @@ export function TaskDataTable({
                   <TableRow
                     key={row.id}
                     className='hover:bg-accent/50 cursor-pointer'
-                    onDoubleClick={() => handleRowDoubleClick(row.original.id)}
+                    onClick={() => handleRowClick(row.original.id)}
                   >
                     {row
                       .getVisibleCells()
@@ -896,9 +845,19 @@ export function TaskDataTable({
                   startedAt: null,
                 })) as Person[]
               }
-              onTaskUpdate={async () => {
-                await refetch()
-                onTaskUpdate?.()
+              onTaskUpdate={updatedTaskData => {
+                // Optimistically update the task in the local state
+                // Convert dueDate string to Date if needed
+                const taskUpdates = {
+                  ...updatedTaskData,
+                  dueDate: updatedTaskData.dueDate
+                    ? typeof updatedTaskData.dueDate === 'string'
+                      ? new Date(updatedTaskData.dueDate)
+                      : updatedTaskData.dueDate
+                    : null,
+                }
+                updateTask(task.id, taskUpdates)
+                // Don't call onTaskUpdate?.() here as it triggers a full refresh
               }}
             />
           )

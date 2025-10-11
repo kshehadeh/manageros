@@ -1,9 +1,9 @@
 import { getInitiatives } from '@/lib/actions/initiative'
 import { prisma } from '@/lib/db'
 import { requireAuth } from '@/lib/auth-utils'
-import { GroupedTasksPageClient } from '@/components/tasks/grouped-tasks-page-client'
 import { CreateTaskButton } from '@/components/tasks/create-task-button'
 import { ListTodo } from 'lucide-react'
+import { TaskDataTable } from '../../components/tasks/data-table'
 
 export default async function TasksPage() {
   const user = await requireAuth({ requireOrganization: true })
@@ -36,7 +36,7 @@ export default async function TasksPage() {
       </div>
 
       <div className='page-section -mx-3 md:mx-0'>
-        <GroupedTasksPageClient people={people} initiatives={initiatives} />
+        <TaskDataTable people={people} initiatives={initiatives} />
       </div>
     </div>
   )

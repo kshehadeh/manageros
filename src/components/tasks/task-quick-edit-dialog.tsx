@@ -39,7 +39,16 @@ interface TaskQuickEditDialogProps {
     status: TaskStatus
   }
   people: Person[]
-  onTaskUpdate?: () => void
+  onTaskUpdate?: (
+    _updatedTask: Partial<{
+      title: string
+      description: string | null
+      assigneeId: string | null
+      assigneeName: string | null
+      dueDate: Date | string | null
+      priority: number
+    }>
+  ) => void
 }
 
 export function TaskQuickEditDialog({
@@ -95,7 +104,24 @@ export function TaskQuickEditDialog({
       await updateTaskQuickEdit(task.id, updateData)
 
       toast.success('Task updated successfully')
-      onTaskUpdate?.()
+
+      // Get the assignee name for the optimistic update
+      const assigneeName =
+        formData.assigneeId === 'unassigned'
+          ? null
+          : people.find(p => p.id === formData.assigneeId)?.name || null
+
+      // Pass the updated task data back for optimistic update
+      onTaskUpdate?.({
+        title: formData.title,
+        description: formData.description || null,
+        assigneeId:
+          formData.assigneeId === 'unassigned' ? null : formData.assigneeId,
+        assigneeName,
+        dueDate: formData.dueDate || null,
+        priority: formData.priority,
+      })
+
       onOpenChange(false)
     } catch (error) {
       console.error('Error updating task:', error)
