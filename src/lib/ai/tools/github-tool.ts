@@ -68,13 +68,6 @@ export const githubTool = {
     state?: 'open' | 'closed' | 'all'
     limit?: number
   }) => {
-    console.log('GitHub tool called with:', {
-      query,
-      repository,
-      state,
-      limit,
-    })
-
     try {
       const user = await getCurrentUser()
       if (!user.organizationId) {
@@ -197,7 +190,6 @@ export const githubTool = {
           : null,
       }))
 
-      console.log('GitHub tool returning:', results.length, 'results')
       return {
         totalCount: data.total_count,
         results,

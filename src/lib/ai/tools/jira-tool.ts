@@ -85,11 +85,6 @@ export const jiraTool = {
         limit
       )
 
-      console.log(
-        'Jira tool returning:',
-        searchResult.results.length,
-        'results'
-      )
       return searchResult
     } catch (error) {
       console.error('Error in Jira tool:', error)

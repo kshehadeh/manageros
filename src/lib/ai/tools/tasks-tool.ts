@@ -1,6 +1,5 @@
 import { z } from 'zod'
 import { getCurrentUser } from '@/lib/auth-utils'
-import { getCurrentUserWithPerson } from '@/lib/actions/organization'
 import { prisma } from '@/lib/db'
 import type { Prisma } from '@prisma/client'
 
@@ -50,23 +49,6 @@ export const tasksTool = {
       throw new Error('User must belong to an organization')
     }
 
-    // Get the person linked to the current user
-    const { person } = await getCurrentUserWithPerson()
-
-    console.log('🔍 Tasks Tool Called with:', {
-      status,
-      priority,
-      assigneeId,
-      initiativeId,
-      query,
-      updatedAfter,
-      updatedBefore,
-      userId: user.id,
-      organizationId: user.organizationId,
-      linkedPersonId: person?.id,
-      linkedPersonName: person?.name,
-    })
-
     const whereClause: Prisma.TaskWhereInput = {
       OR: [
         {
@@ -103,8 +85,6 @@ export const tasksTool = {
         { description: { contains: query, mode: 'insensitive' } },
       ]
     }
-
-    console.log('🔍 Where Clause:', JSON.stringify(whereClause, null, 2))
 
     const tasks = await prisma.task.findMany({
       where: whereClause,
@@ -143,18 +123,6 @@ export const tasksTool = {
       },
       orderBy: { updatedAt: 'desc' },
     })
-
-    console.log(`🔍 Found ${tasks.length} tasks`)
-    if (tasks.length > 0) {
-      console.log('📋 Sample task:', {
-        id: tasks[0].id,
-        title: tasks[0].title,
-        status: tasks[0].status,
-        assigneeId: tasks[0].assigneeId,
-        updatedAt: tasks[0].updatedAt,
-        createdAt: tasks[0].createdAt,
-      })
-    }
 
     return {
       tasks: tasks.map(task => ({

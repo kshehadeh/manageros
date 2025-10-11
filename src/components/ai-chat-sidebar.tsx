@@ -28,6 +28,7 @@ import {
   Building2,
   Expand,
   Shrink,
+  Plus,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AiResponseText } from './ai-response-text'
@@ -74,11 +75,17 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
     () => new DefaultChatTransport({ api: '/api/chat' }),
     []
   )
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status, setMessages } = useChat({
     transport: transport,
   })
 
   const isLoading = status === 'submitted' || status === 'streaming'
+
+  // Handler to start a new chat
+  const handleNewChat = useCallback(() => {
+    setMessages([])
+    setInputValue('')
+  }, [setMessages])
 
   // Fetch current user's person data
   useEffect(() => {
@@ -290,6 +297,16 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
           <h2 className='font-semibold'>AI Chat</h2>
         </div>
         <div className='flex items-center gap-1'>
+          {/* New Chat button */}
+          <Button
+            variant='ghost'
+            size='sm'
+            onClick={handleNewChat}
+            disabled={isLoading || messages.length === 0}
+            title='Start a new chat'
+          >
+            <Plus className='h-4 w-4' />
+          </Button>
           {/* Desktop fullscreen toggle - hidden on mobile */}
           <Button
             variant='ghost'
@@ -302,6 +319,11 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
             }
             className='hidden md:flex'
             disabled={!isLoaded}
+            title={
+              settings.chatWindowSettings.isFullscreen
+                ? 'Exit fullscreen'
+                : 'Enter fullscreen'
+            }
           >
             {settings.chatWindowSettings.isFullscreen ? (
               <Shrink className='h-4 w-4' />
@@ -309,7 +331,12 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
               <Expand className='h-4 w-4' />
             )}
           </Button>
-          <Button variant='ghost' size='sm' onClick={onClose}>
+          <Button
+            variant='ghost'
+            size='sm'
+            onClick={onClose}
+            title='Close chat'
+          >
             <X className='h-4 w-4' />
           </Button>
         </div>

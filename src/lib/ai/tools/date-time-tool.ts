@@ -26,9 +26,6 @@ export const dateTimeTool = {
     const lastMonthEnd = new Date(thisMonthStart)
     lastMonthEnd.setMilliseconds(-1)
 
-    console.log('📅 Date/Time Tool Called')
-    console.log('Current Date:', now.toISOString())
-
     return {
       currentDateTime: now.toISOString(),
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,

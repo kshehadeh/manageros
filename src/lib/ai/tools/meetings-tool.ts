@@ -106,8 +106,6 @@ export const meetingsTool = {
       ]
     }
 
-    console.log('📅 Where Clause:', JSON.stringify(whereClause, null, 2))
-
     const meetings = await prisma.meeting.findMany({
       where: whereClause,
       include: {
@@ -154,21 +152,6 @@ export const meetingsTool = {
       filteredMeetings = meetings.filter(meeting =>
         meeting.participants.some(p => p.personId === participantId)
       )
-    }
-
-    console.log(`📅 Found ${filteredMeetings.length} meetings`)
-    if (filteredMeetings.length > 0) {
-      console.log('📋 Sample meeting:', {
-        id: filteredMeetings[0].id,
-        title: filteredMeetings[0].title,
-        scheduledAt: filteredMeetings[0].scheduledAt,
-        ownerId: filteredMeetings[0].ownerId,
-        owner: filteredMeetings[0].owner?.name,
-        participantsCount: filteredMeetings[0]._count.participants,
-        instancesCount: filteredMeetings[0]._count.instances,
-        createdAt: filteredMeetings[0].createdAt,
-        updatedAt: filteredMeetings[0].updatedAt,
-      })
     }
 
     return {
