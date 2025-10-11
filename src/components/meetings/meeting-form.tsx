@@ -13,17 +13,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  createMeeting,
-  updateMeeting,
-} from '@/lib/actions/meeting'
+import { createMeeting, updateMeeting } from '@/lib/actions/meeting'
 import { type MeetingFormData, meetingSchema } from '@/lib/validations'
-import { Person, Team, Initiative } from '@prisma/client'
-import { AlertCircle, Plus, X } from 'lucide-react'
+import { Team, Initiative } from '@prisma/client'
+import {
+  AlertCircle,
+  Plus,
+  X,
+  Calendar,
+  MapPin,
+  Users,
+  FileText,
+  Clock,
+  CalendarDays,
+} from 'lucide-react'
 import { MarkdownEditor } from '@/components/markdown-editor'
+import { SectionHeader } from '@/components/ui/section-header'
+import { PersonSelect } from '@/components/ui/person-select'
 
 interface MeetingFormProps {
-  people: Person[]
   teams: Team[]
   initiatives: Initiative[]
   preselectedTeamId?: string
@@ -35,7 +43,6 @@ interface MeetingFormProps {
 }
 
 export function MeetingForm({
-  people,
   teams,
   initiatives,
   preselectedTeamId,
@@ -76,15 +83,23 @@ export function MeetingForm({
     setErrors({})
 
     try {
-      // Convert 'none' values to undefined for validation
+      // Convert 'none' and empty string values to undefined for validation
       const processedFormData = {
         ...formData,
-        teamId: formData.teamId === 'none' ? undefined : formData.teamId,
+        teamId:
+          formData.teamId === 'none' || !formData.teamId
+            ? undefined
+            : formData.teamId,
         initiativeId:
-          formData.initiativeId === 'none' ? undefined : formData.initiativeId,
-        ownerId: formData.ownerId === 'none' ? undefined : formData.ownerId,
+          formData.initiativeId === 'none' || !formData.initiativeId
+            ? undefined
+            : formData.initiativeId,
+        ownerId:
+          formData.ownerId === 'none' || !formData.ownerId
+            ? undefined
+            : formData.ownerId,
         recurrenceType:
-          formData.recurrenceType === 'none'
+          formData.recurrenceType === 'none' || !formData.recurrenceType
             ? undefined
             : formData.recurrenceType,
       }
@@ -156,278 +171,330 @@ export function MeetingForm({
     }))
   }
 
+  const getSelectValue = (value: string | undefined) => value || 'none'
+  const getFormValue = (value: string) => (value === 'none' ? '' : value)
+
   return (
     <form onSubmit={handleSubmit} className='space-y-6'>
+      {/* General Error Message */}
       {errors.general && (
-        <div className='flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-md'>
+        <div className='bg-destructive/10 border border-destructive/20 rounded-lg p-3 text-destructive text-sm flex items-center gap-2'>
           <AlertCircle className='h-4 w-4' />
-          <span className='text-sm'>{errors.general}</span>
+          {errors.general}
         </div>
       )}
 
-      <div className='space-y-4'>
-        <div>
-          <Label htmlFor='title'>Meeting Title *</Label>
-          <Input
-            id='title'
-            value={formData.title}
-            onChange={e => handleInputChange('title', e.target.value)}
-            placeholder='Enter meeting title'
-            className={errors.title ? 'border-red-500' : ''}
-          />
-          {errors.title && (
-            <p className='text-red-500 text-sm mt-1'>{errors.title}</p>
-          )}
-        </div>
+      <div className='flex flex-col lg:flex-row gap-6'>
+        {/* Main Form Content */}
+        <div className='flex-1 space-y-6'>
+          {/* Basic Information */}
+          <div className='space-y-4'>
+            <SectionHeader icon={CalendarDays} title='Basic Information' />
+            <div className='space-y-4'>
+              <div className='space-y-2'>
+                <Label htmlFor='title'>
+                  Meeting Title <span className='text-destructive'>*</span>
+                </Label>
+                <Input
+                  id='title'
+                  type='text'
+                  value={formData.title}
+                  onChange={e => handleInputChange('title', e.target.value)}
+                  placeholder='Enter meeting title'
+                  className={errors.title ? 'border-destructive' : ''}
+                  required
+                />
+                {errors.title && (
+                  <p className='text-sm text-destructive'>{errors.title}</p>
+                )}
+              </div>
 
-        <div>
-          <Label htmlFor='description'>Description</Label>
-          <MarkdownEditor
-            value={formData.description}
-            onChange={value => handleInputChange('description', value)}
-            placeholder='Enter meeting description... Use Markdown for formatting!'
-          />
-        </div>
-
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div>
-            <Label htmlFor='scheduledAt'>Date & Time *</Label>
-            <Input
-              id='scheduledAt'
-              type='datetime-local'
-              value={formData.scheduledAt}
-              onChange={e => handleInputChange('scheduledAt', e.target.value)}
-              className={errors.scheduledAt ? 'border-red-500' : ''}
-            />
-            {errors.scheduledAt && (
-              <p className='text-red-500 text-sm mt-1'>{errors.scheduledAt}</p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor='duration'>Duration (minutes)</Label>
-            <Input
-              id='duration'
-              type='number'
-              min='1'
-              max='480'
-              value={formData.duration || ''}
-              onChange={e =>
-                handleInputChange(
-                  'duration',
-                  e.target.value ? parseInt(e.target.value) : undefined
-                )
-              }
-              placeholder='60'
-            />
-          </div>
-        </div>
-
-        <div>
-          <Label htmlFor='location'>Location</Label>
-          <Input
-            id='location'
-            value={formData.location}
-            onChange={e => handleInputChange('location', e.target.value)}
-            placeholder='Physical location or meeting link'
-          />
-        </div>
-
-        <div className='space-y-4'>
-          <div className='flex items-center space-x-2'>
-            <Checkbox
-              id='isRecurring'
-              checked={formData.isRecurring}
-              onCheckedChange={checked =>
-                handleInputChange('isRecurring', checked)
-              }
-            />
-            <Label htmlFor='isRecurring'>This is a recurring meeting</Label>
-          </div>
-
-          {formData.isRecurring && (
-            <div>
-              <Label htmlFor='recurrenceType'>Recurrence</Label>
-              <Select
-                value={formData.recurrenceType}
-                onValueChange={value =>
-                  handleInputChange('recurrenceType', value)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder='Select recurrence type' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='daily'>Daily</SelectItem>
-                  <SelectItem value='weekly'>Weekly</SelectItem>
-                  <SelectItem value='monthly'>Monthly</SelectItem>
-                  <SelectItem value='bi_monthly'>Bi-monthly</SelectItem>
-                  <SelectItem value='semi_annually'>Semi-annually</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.recurrenceType && (
-                <p className='text-red-500 text-sm mt-1'>
-                  {errors.recurrenceType}
-                </p>
-              )}
+              <div className='space-y-2'>
+                <Label htmlFor='description'>Description</Label>
+                <MarkdownEditor
+                  value={formData.description}
+                  onChange={value => handleInputChange('description', value)}
+                  placeholder='Enter meeting description... Use Markdown for formatting!'
+                />
+              </div>
             </div>
-          )}
-
-          <div className='flex items-center space-x-2'>
-            <Checkbox
-              id='isPrivate'
-              checked={formData.isPrivate}
-              onCheckedChange={checked =>
-                handleInputChange('isPrivate', checked)
-              }
-            />
-            <Label htmlFor='isPrivate'>
-              Private meeting (only visible to participants)
-            </Label>
-          </div>
-        </div>
-
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div>
-            <Label htmlFor='teamId'>Team</Label>
-            <Select
-              value={formData.teamId}
-              onValueChange={value => handleInputChange('teamId', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder='Select a team' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='none'>No team</SelectItem>
-                {teams.map(team => (
-                  <SelectItem key={team.id} value={team.id}>
-                    {team.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
-          <div>
-            <Label htmlFor='initiativeId'>Initiative</Label>
-            <Select
-              value={formData.initiativeId}
-              onValueChange={value => handleInputChange('initiativeId', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder='Select an initiative' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='none'>No initiative</SelectItem>
-                {initiatives.map(initiative => (
-                  <SelectItem key={initiative.id} value={initiative.id}>
-                    {initiative.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Schedule */}
+          <div className='space-y-4'>
+            <SectionHeader icon={Clock} title='Schedule' />
+            <div className='space-y-4'>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                <div className='space-y-2'>
+                  <Label htmlFor='scheduledAt'>
+                    Date & Time <span className='text-destructive'>*</span>
+                  </Label>
+                  <Input
+                    id='scheduledAt'
+                    type='datetime-local'
+                    value={formData.scheduledAt}
+                    onChange={e =>
+                      handleInputChange('scheduledAt', e.target.value)
+                    }
+                    className={errors.scheduledAt ? 'border-destructive' : ''}
+                  />
+                  {errors.scheduledAt && (
+                    <p className='text-sm text-destructive'>
+                      {errors.scheduledAt}
+                    </p>
+                  )}
+                </div>
+
+                <div className='space-y-2'>
+                  <Label htmlFor='duration'>Duration (minutes)</Label>
+                  <Input
+                    id='duration'
+                    type='number'
+                    min='1'
+                    max='480'
+                    value={formData.duration || ''}
+                    onChange={e =>
+                      handleInputChange(
+                        'duration',
+                        e.target.value ? parseInt(e.target.value) : undefined
+                      )
+                    }
+                    placeholder='60'
+                  />
+                </div>
+              </div>
+
+              <div className='space-y-4'>
+                <div className='flex items-center space-x-2'>
+                  <Checkbox
+                    id='isRecurring'
+                    checked={formData.isRecurring}
+                    onCheckedChange={checked =>
+                      handleInputChange('isRecurring', checked)
+                    }
+                  />
+                  <Label htmlFor='isRecurring'>
+                    This is a recurring meeting
+                  </Label>
+                </div>
+
+                {formData.isRecurring && (
+                  <div className='space-y-2'>
+                    <Label htmlFor='recurrenceType'>Recurrence</Label>
+                    <Select
+                      value={formData.recurrenceType}
+                      onValueChange={value =>
+                        handleInputChange('recurrenceType', value)
+                      }
+                    >
+                      <SelectTrigger
+                        className={
+                          errors.recurrenceType ? 'border-destructive' : ''
+                        }
+                      >
+                        <SelectValue placeholder='Select recurrence type' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='daily'>Daily</SelectItem>
+                        <SelectItem value='weekly'>Weekly</SelectItem>
+                        <SelectItem value='monthly'>Monthly</SelectItem>
+                        <SelectItem value='bi_monthly'>Bi-monthly</SelectItem>
+                        <SelectItem value='semi_annually'>
+                          Semi-annually
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {errors.recurrenceType && (
+                      <p className='text-sm text-destructive'>
+                        {errors.recurrenceType}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div>
-          <Label htmlFor='ownerId'>Meeting Owner</Label>
-          <Select
-            value={formData.ownerId}
-            onValueChange={value => handleInputChange('ownerId', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder='Select meeting owner' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='none'>No owner</SelectItem>
-              {people.map(person => (
-                <SelectItem key={person.id} value={person.id}>
-                  {person.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <div className='flex items-center justify-between mb-2'>
-            <Label>Participants</Label>
-            <Button
-              type='button'
-              variant='outline'
-              size='sm'
-              onClick={addParticipant}
-              className='flex items-center gap-2'
-            >
-              <Plus className='h-4 w-4' />
-              Add Participant
-            </Button>
+          {/* Location */}
+          <div className='space-y-4'>
+            <SectionHeader icon={MapPin} title='Location' />
+            <div className='space-y-2'>
+              <Label htmlFor='location'>Location</Label>
+              <Input
+                id='location'
+                value={formData.location}
+                onChange={e => handleInputChange('location', e.target.value)}
+                placeholder='Physical location or meeting link'
+              />
+            </div>
           </div>
 
-          <div className='space-y-2'>
-            {formData.participants.map((participant, index) => (
-              <div key={index} className='flex items-center gap-2'>
-                <Select
-                  value={participant.personId}
-                  onValueChange={value =>
-                    updateParticipant(index, 'personId', value)
-                  }
-                >
-                  <SelectTrigger className='flex-1'>
-                    <SelectValue placeholder='Select participant' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {people.map(person => (
-                      <SelectItem key={person.id} value={person.id}>
-                        {person.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={participant.status}
-                  onValueChange={value =>
-                    updateParticipant(index, 'status', value)
-                  }
-                >
-                  <SelectTrigger className='w-32'>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='invited'>Invited</SelectItem>
-                    <SelectItem value='accepted'>Accepted</SelectItem>
-                    <SelectItem value='declined'>Declined</SelectItem>
-                    <SelectItem value='tentative'>Tentative</SelectItem>
-                  </SelectContent>
-                </Select>
-
+          {/* Participants */}
+          <div className='space-y-4'>
+            <SectionHeader
+              icon={Users}
+              title='Participants'
+              action={
                 <Button
                   type='button'
                   variant='outline'
                   size='sm'
-                  onClick={() => removeParticipant(index)}
-                  className='px-2'
+                  onClick={addParticipant}
                 >
-                  <X className='h-4 w-4' />
+                  <Plus className='h-4 w-4' />
+                  Add Participant
                 </Button>
+              }
+            />
+            <div className='space-y-4'>
+              <div className='space-y-2'>
+                <Label htmlFor='ownerId'>Meeting Owner</Label>
+                <PersonSelect
+                  value={getSelectValue(formData.ownerId)}
+                  onValueChange={value =>
+                    handleInputChange('ownerId', getFormValue(value))
+                  }
+                  placeholder='Select meeting owner'
+                  includeNone={true}
+                  noneLabel='No owner'
+                  showAvatar={true}
+                  showRole={true}
+                />
               </div>
-            ))}
-          </div>
-        </div>
 
-        <div>
-          <Label htmlFor='notes'>Notes</Label>
-          <MarkdownEditor
-            value={formData.notes}
-            onChange={value => handleInputChange('notes', value)}
-            placeholder='Meeting notes and agenda items... Use Markdown for formatting!'
-          />
+              {formData.participants.length > 0 && (
+                <div className='space-y-2'>
+                  <Label>Additional Participants</Label>
+                  <div className='space-y-2'>
+                    {formData.participants.map((participant, index) => (
+                      <div key={index} className='flex items-center gap-2'>
+                        <PersonSelect
+                          value={participant.personId}
+                          onValueChange={value =>
+                            updateParticipant(index, 'personId', value)
+                          }
+                          placeholder='Select participant'
+                          showAvatar={true}
+                          showRole={true}
+                          className='flex-1'
+                        />
+
+                        <Select
+                          value={participant.status}
+                          onValueChange={value =>
+                            updateParticipant(index, 'status', value)
+                          }
+                        >
+                          <SelectTrigger className='w-32'>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value='invited'>Invited</SelectItem>
+                            <SelectItem value='accepted'>Accepted</SelectItem>
+                            <SelectItem value='declined'>Declined</SelectItem>
+                            <SelectItem value='tentative'>Tentative</SelectItem>
+                          </SelectContent>
+                        </Select>
+
+                        <Button
+                          type='button'
+                          variant='outline'
+                          size='sm'
+                          onClick={() => removeParticipant(index)}
+                          className='px-2'
+                        >
+                          <X className='h-4 w-4' />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Team & Initiative */}
+          <div className='space-y-4'>
+            <SectionHeader icon={Calendar} title='Team & Initiative' />
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <div className='space-y-2'>
+                <Label htmlFor='teamId'>Team</Label>
+                <Select
+                  value={formData.teamId}
+                  onValueChange={value => handleInputChange('teamId', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder='Select a team' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='none'>No team</SelectItem>
+                    {teams.map(team => (
+                      <SelectItem key={team.id} value={team.id}>
+                        {team.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className='space-y-2'>
+                <Label htmlFor='initiativeId'>Initiative</Label>
+                <Select
+                  value={formData.initiativeId}
+                  onValueChange={value =>
+                    handleInputChange('initiativeId', value)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder='Select an initiative' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='none'>No initiative</SelectItem>
+                    {initiatives.map(initiative => (
+                      <SelectItem key={initiative.id} value={initiative.id}>
+                        {initiative.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div className='space-y-4'>
+            <SectionHeader icon={FileText} title='Notes' />
+            <div className='space-y-2'>
+              <MarkdownEditor
+                value={formData.notes}
+                onChange={value => handleInputChange('notes', value)}
+                placeholder='Meeting notes and agenda items... Use Markdown for formatting!'
+              />
+            </div>
+          </div>
+
+          {/* Privacy Settings */}
+          <div className='space-y-4'>
+            <div className='flex items-center space-x-2'>
+              <Checkbox
+                id='isPrivate'
+                checked={formData.isPrivate}
+                onCheckedChange={checked =>
+                  handleInputChange('isPrivate', checked)
+                }
+              />
+              <Label htmlFor='isPrivate'>
+                Private meeting (only visible to participants)
+              </Label>
+            </div>
+          </div>
         </div>
       </div>
 
+      {/* Submit Button */}
       <div className='flex justify-end gap-3'>
-        <Button type='submit' disabled={isSubmitting}>
+        <Button type='submit' variant='outline' disabled={isSubmitting}>
+          <CalendarDays className='w-4 h-4 mr-2' />
           {isSubmitting
             ? 'Saving...'
             : isEditing

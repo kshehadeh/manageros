@@ -1,6 +1,5 @@
 import { getTeams } from '@/lib/actions/team'
 import { getInitiatives } from '@/lib/actions/initiative'
-import { getPeople } from '@/lib/actions/person'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -17,11 +16,7 @@ export default async function NewMeetingPage() {
     redirect('/organization/create')
   }
 
-  const [teams, initiatives, people] = await Promise.all([
-    getTeams(),
-    getInitiatives(),
-    getPeople(),
-  ])
+  const [teams, initiatives] = await Promise.all([getTeams(), getInitiatives()])
 
   return (
     <div className='space-y-6'>
@@ -32,9 +27,7 @@ export default async function NewMeetingPage() {
         </p>
       </div>
 
-      <div className='max-w-2xl'>
-        <MeetingForm people={people} teams={teams} initiatives={initiatives} />
-      </div>
+      <MeetingForm teams={teams} initiatives={initiatives} />
     </div>
   )
 }
