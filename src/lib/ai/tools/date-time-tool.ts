@@ -26,6 +26,7 @@ export const dateTimeTool = {
         const lastMonthEnd = new Date(thisMonthStart)
         lastMonthEnd.setMilliseconds(-1)
 
+<<<<<<< HEAD
         console.log('📅 Date/Time Tool Called')
         console.log('Current Date:', now.toISOString())
 
@@ -81,4 +82,58 @@ export const dateTimeTool = {
             },
         }
     },
+=======
+    return {
+      currentDateTime: now.toISOString(),
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timestamps: {
+        now: now.getTime(),
+        today: today.getTime(),
+        tomorrow: tomorrow.getTime(),
+      },
+      helpers: {
+        today: {
+          start: today.toISOString(),
+          end: tomorrow.toISOString(),
+        },
+        thisWeek: {
+          start: thisWeekStart.toISOString(),
+          end: now.toISOString(),
+        },
+        lastWeek: {
+          start: lastWeekStart.toISOString(),
+          end: lastWeekEnd.toISOString(),
+        },
+        thisMonth: {
+          start: thisMonthStart.toISOString(),
+          end: now.toISOString(),
+        },
+        lastMonth: {
+          start: lastMonthStart.toISOString(),
+          end: lastMonthEnd.toISOString(),
+        },
+        last7Days: {
+          start: new Date(
+            now.getTime() - 7 * 24 * 60 * 60 * 1000
+          ).toISOString(),
+          end: now.toISOString(),
+        },
+        last30Days: {
+          start: new Date(
+            now.getTime() - 30 * 24 * 60 * 60 * 1000
+          ).toISOString(),
+          end: now.toISOString(),
+        },
+        nextWeek: {
+          start: now.toISOString(),
+          end: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        },
+        nextMonth: {
+          start: now.toISOString(),
+          end: nextMonthStart.toISOString(),
+        },
+      },
+    }
+  },
+>>>>>>> dadc90b (Improved AI chat by giving it a better understanding of the current date.)
 }
