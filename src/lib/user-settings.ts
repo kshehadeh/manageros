@@ -49,6 +49,10 @@ export interface UserSettings {
     {
       sorting: Array<{ id: string; desc: boolean }>
       grouping: string
+      sort: {
+        field: string
+        direction: 'asc' | 'desc'
+      }
       filters: {
         search: string
         status: string
@@ -201,6 +205,10 @@ export function getTaskTableSettings(
     settings.taskTableSettings[settingsId] || {
       sorting: [],
       grouping: 'none',
+      sort: {
+        field: '',
+        direction: 'asc',
+      },
       filters: {
         search: '',
         status: '',
@@ -228,6 +236,10 @@ export function updateTaskTableSettings(
   ] || {
     sorting: [],
     grouping: 'none',
+    sort: {
+      field: '',
+      direction: 'asc' as const,
+    },
     filters: {
       search: '',
       status: '',

@@ -39,6 +39,12 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import {
   Eye,
   Edit,
   Trash2,
@@ -46,6 +52,8 @@ import {
   ChevronDown,
   Search,
   Filter,
+  Group,
+  ArrowUpDown,
 } from 'lucide-react'
 import { updateTaskStatus, deleteTask } from '@/lib/actions/task'
 import {
@@ -138,7 +146,7 @@ export function TaskDataTable({
   const [globalFilter, setGlobalFilter] = useState('')
 
   // Use settings hook for persistent state
-  const { settings, updateSorting, updateGrouping, updateFilters } =
+  const { settings, updateSorting, updateGrouping, updateSort, updateFilters } =
     useTaskTableSettings({
       settingsId: settingsId || 'default',
       enabled: true,
@@ -196,7 +204,14 @@ export function TaskDataTable({
     [JSON.stringify(immutableFilters)]
   )
 
+  // Convert sort settings to API format (field:direction)
+  const sortParam = useMemo(() => {
+    if (!settings.sort || !settings.sort.field) return ''
+    return `${settings.sort.field}:${settings.sort.direction}`
+  }, [settings.sort])
+
   // Fetch data using single useTasks hook with internal filters
+  // For server-side pagination, we pass the current page/size from TanStack Table state
   const {
     data: tasksData,
     loading,
@@ -208,6 +223,7 @@ export function TaskDataTable({
     limit: enablePagination ? pagination.pageSize : 1000,
     filters: memoizedFilters,
     immutableFilters: memoizedImmutableFilters,
+    sort: sortParam,
     enabled: shouldFetch,
   })
 
@@ -395,7 +411,11 @@ export function TaskDataTable({
     enableGrouping: true,
     enableColumnResizing: false,
     globalFilterFn,
-    manualPagination: enablePagination, // Use server-side pagination when enabled
+    manualPagination: enablePagination, // Use server-side pagination - TanStack manages state, we fetch data
+    pageCount:
+      enablePagination && tasksData?.pagination
+        ? tasksData.pagination.totalPages
+        : undefined, // Tell TanStack how many pages exist
   })
 
   // Expand all groups by default when table is ready
@@ -446,27 +466,6 @@ export function TaskDataTable({
                     <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent' />
                   </div>
                 )}
-              </div>
-
-              {/* Grouping Dropdown */}
-              <div className='flex items-center gap-2'>
-                <label className='text-sm font-medium whitespace-nowrap'>
-                  Group by:
-                </label>
-                <Select
-                  value={settings.grouping}
-                  onValueChange={updateGrouping}
-                >
-                  <SelectTrigger className='w-32'>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='none'>None</SelectItem>
-                    <SelectItem value='status'>Status</SelectItem>
-                    <SelectItem value='assignee'>Assignee</SelectItem>
-                    <SelectItem value='initiative'>Initiative</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
 
               {/* Additional Filters Button */}
@@ -570,20 +569,136 @@ export function TaskDataTable({
                   </div>
                 </PopoverContent>
               </Popover>
+              {/* Grouping Dropdown */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className='flex items-center gap-2'>
+                      <Select
+                        value={settings.grouping}
+                        onValueChange={updateGrouping}
+                      >
+                        <SelectTrigger className='w-32'>
+                          <Group className='h-4 w-4' />
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value='none'>None</SelectItem>
+                          <SelectItem value='status'>Status</SelectItem>
+                          <SelectItem value='assignee'>Assignee</SelectItem>
+                          <SelectItem value='initiative'>Initiative</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Group tasks by status, assignee, or initiative</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              {/* Sort Control */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    className={`flex items-center gap-2 ${
+                      settings.sort?.field ? 'border-primary bg-primary/5' : ''
+                    }`}
+                  >
+                    <ArrowUpDown className='h-4 w-4' />
+                    Sort
+                    {settings.sort?.field && (
+                      <div className='h-2 w-2 bg-primary rounded-full' />
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className='w-80' align='end'>
+                  <div className='space-y-4'>
+                    <div className='flex items-center justify-between'>
+                      <h3 className='font-medium'>Sort Tasks</h3>
+                      <button
+                        onClick={() => {
+                          updateSort({ field: '', direction: 'asc' })
+                        }}
+                        className='text-sm text-muted-foreground hover:text-foreground'
+                      >
+                        Clear
+                      </button>
+                    </div>
+
+                    <div className='space-y-4'>
+                      {/* Sort Field */}
+                      <div className='space-y-2'>
+                        <label className='text-sm font-medium'>Sort By</label>
+                        <Select
+                          value={settings.sort?.field || 'none'}
+                          onValueChange={value =>
+                            updateSort({
+                              field: value === 'none' ? '' : value,
+                              direction: settings.sort?.direction || 'asc',
+                            })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder='Select field' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value='none'>None</SelectItem>
+                            <SelectItem value='duedate'>Due Date</SelectItem>
+                            <SelectItem value='priority'>Priority</SelectItem>
+                            <SelectItem value='assignee'>Assignee</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Sort Direction */}
+                      <div className='space-y-2'>
+                        <label className='text-sm font-medium'>Direction</label>
+                        <Select
+                          value={settings.sort?.direction || 'asc'}
+                          onValueChange={value =>
+                            updateSort({
+                              field: settings.sort?.field || '',
+                              direction: value as 'asc' | 'desc',
+                            })
+                          }
+                          disabled={!settings.sort?.field}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value='asc'>Ascending</SelectItem>
+                            <SelectItem value='desc'>Descending</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
             <div className='text-sm text-muted-foreground'>
               {enablePagination && tasksData?.pagination ? (
                 <>
-                  Showing{' '}
-                  {(tasksData.pagination.page - 1) *
-                    tasksData.pagination.limit +
-                    1}{' '}
-                  to{' '}
-                  {Math.min(
-                    tasksData.pagination.page * tasksData.pagination.limit,
-                    tasksData.pagination.totalCount
-                  )}{' '}
-                  of {tasksData.pagination.totalCount} tasks
+                  {tasksData.pagination.totalCount > 0 ? (
+                    <>
+                      Showing{' '}
+                      {(tasksData.pagination.page - 1) *
+                        tasksData.pagination.limit +
+                        1}{' '}
+                      to{' '}
+                      {Math.min(
+                        tasksData.pagination.page * tasksData.pagination.limit,
+                        tasksData.pagination.totalCount
+                      )}{' '}
+                      of {tasksData.pagination.totalCount} tasks
+                    </>
+                  ) : (
+                    <>No tasks found</>
+                  )}
                 </>
               ) : (
                 <>
@@ -726,36 +841,50 @@ export function TaskDataTable({
       </div>
 
       {/* Pagination Controls */}
-      {enablePagination && tasksData?.pagination && (
+      {enablePagination && (
         <div className='flex items-center justify-between px-2'>
-          <div className='flex-1 text-sm text-muted-foreground'>
-            Page {tasksData.pagination.page} of{' '}
-            {tasksData.pagination.totalPages}
+          <div className='flex items-center gap-4'>
+            <div className='text-sm text-muted-foreground'>
+              Page {table.getState().pagination.pageIndex + 1} of{' '}
+              {table.getPageCount()}
+            </div>
+            <div className='flex items-center gap-2'>
+              <span className='text-sm text-muted-foreground'>
+                Rows per page:
+              </span>
+              <Select
+                value={table.getState().pagination.pageSize.toString()}
+                onValueChange={value => {
+                  table.setPageSize(Number(value))
+                }}
+              >
+                <SelectTrigger className='h-8 w-[70px]'>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[10, 20, 30, 50, 100].map(pageSize => (
+                    <SelectItem key={pageSize} value={pageSize.toString()}>
+                      {pageSize}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <div className='flex items-center space-x-2'>
             <Button
               variant='outline'
               size='sm'
-              onClick={() => {
-                setPagination(prev => ({
-                  ...prev,
-                  pageIndex: prev.pageIndex - 1,
-                }))
-              }}
-              disabled={!tasksData.pagination.hasPreviousPage}
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
             >
               Previous
             </Button>
             <Button
               variant='outline'
               size='sm'
-              onClick={() => {
-                setPagination(prev => ({
-                  ...prev,
-                  pageIndex: prev.pageIndex + 1,
-                }))
-              }}
-              disabled={!tasksData.pagination.hasNextPage}
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
             >
               Next
             </Button>

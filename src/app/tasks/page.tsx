@@ -36,7 +36,11 @@ export default async function TasksPage() {
       </div>
 
       <div className='page-section -mx-3 md:mx-0'>
-        <TaskDataTable people={people} initiatives={initiatives} />
+        <TaskDataTable
+          people={people}
+          initiatives={initiatives}
+          enablePagination={true}
+        />
       </div>
     </div>
   )

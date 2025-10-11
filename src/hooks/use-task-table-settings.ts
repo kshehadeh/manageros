@@ -11,6 +11,10 @@ import {
 interface TaskTableSettings {
   sorting: SortingState
   grouping: string
+  sort: {
+    field: string
+    direction: 'asc' | 'desc'
+  }
   filters: {
     search: string
     status: string
@@ -39,6 +43,10 @@ export function useTaskTableSettings({
   const [settings, setSettings] = useState<TaskTableSettings>({
     sorting: [],
     grouping: 'none',
+    sort: {
+      field: '',
+      direction: 'asc',
+    },
     filters: {
       search: '',
       status: '',
@@ -86,6 +94,17 @@ export function useTaskTableSettings({
     [userId, settingsId, enabled]
   )
 
+  // Update sort
+  const updateSort = useCallback(
+    (sort: { field: string; direction: 'asc' | 'desc' }) => {
+      if (!userId || !enabled) return
+
+      setSettings(prev => ({ ...prev, sort }))
+      updateTaskTableSettings(userId, settingsId, { sort })
+    },
+    [userId, settingsId, enabled]
+  )
+
   // Update filters
   const updateFilters = useCallback(
     (filters: Partial<TaskTableSettings['filters']>) => {
@@ -115,6 +134,10 @@ export function useTaskTableSettings({
     const defaultSettings: TaskTableSettings = {
       sorting: [],
       grouping: 'none',
+      sort: {
+        field: '',
+        direction: 'asc',
+      },
       filters: {
         search: '',
         status: '',
@@ -135,6 +158,7 @@ export function useTaskTableSettings({
     isLoaded,
     updateSorting,
     updateGrouping,
+    updateSort,
     updateFilters,
     resetSettings,
   }

@@ -30,6 +30,7 @@ interface UseTasksOptions {
   limit?: number
   filters?: TaskFilters
   immutableFilters?: TaskFilters
+  sort?: string
   enabled?: boolean
 }
 
@@ -38,6 +39,7 @@ export function useTasks({
   limit = 20,
   filters,
   immutableFilters,
+  sort,
   enabled = true,
 }: UseTasksOptions = {}) {
   const [data, setData] = useState<TasksResponse | null>(null)
@@ -64,6 +66,11 @@ export function useTasks({
         ),
       })
 
+      // Add sort parameter if provided
+      if (sort) {
+        searchParams.set('sort', sort)
+      }
+
       // Add immutable filters as JSON-encoded parameter
       if (Object.keys(immutableFilters || {}).length > 0) {
         searchParams.set('immutableFilters', JSON.stringify(immutableFilters))
@@ -84,7 +91,7 @@ export function useTasks({
     } finally {
       setLoading(false)
     }
-  }, [page, limit, filters, immutableFilters, enabled])
+  }, [page, limit, filters, immutableFilters, sort, enabled])
 
   useEffect(() => {
     fetchTasks()

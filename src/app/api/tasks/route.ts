@@ -36,6 +36,113 @@ function createStatusSqlCondition(statusValues: string[]) {
   return Prisma.sql`AND t.status IN (${Prisma.join(statusValues)})`
 }
 
+// Helper function to parse sort parameter and build ORDER BY clause
+function buildOrderByClause(sortParam: string) {
+  if (!sortParam) {
+    // Default sorting
+    return Prisma.sql`
+      ORDER BY
+        CASE t.status
+          WHEN 'todo' THEN 1
+          WHEN 'doing' THEN 2
+          WHEN 'blocked' THEN 3
+          WHEN 'done' THEN 4
+          WHEN 'dropped' THEN 5
+          ELSE 6
+        END,
+        t."dueDate" ASC NULLS LAST,
+        t."createdAt" ASC
+    `
+  }
+
+  // Parse comma-separated sort fields
+  // Format: "field:direction,field:direction" or just "field,field" (defaults to asc)
+  const sortFields = sortParam
+    .split(',')
+    .map(s => s.trim())
+    .filter(s => s)
+    .map(field => {
+      const [name, direction = 'asc'] = field.split(':')
+      return { name: name.trim(), direction: direction.trim().toLowerCase() }
+    })
+
+  if (sortFields.length === 0) {
+    // If parsing failed, use default
+    return Prisma.sql`
+      ORDER BY
+        CASE t.status
+          WHEN 'todo' THEN 1
+          WHEN 'doing' THEN 2
+          WHEN 'blocked' THEN 3
+          WHEN 'done' THEN 4
+          WHEN 'dropped' THEN 5
+          ELSE 6
+        END,
+        t."dueDate" ASC NULLS LAST,
+        t."createdAt" ASC
+    `
+  }
+
+  // Build ORDER BY clause from parsed fields
+  const orderByClauses = sortFields
+    .map(({ name, direction }) => {
+      const dir = direction === 'desc' ? 'DESC' : 'ASC'
+
+      switch (name.toLowerCase()) {
+        case 'status':
+          return Prisma.sql`
+          CASE t.status
+            WHEN 'todo' THEN 1
+            WHEN 'doing' THEN 2
+            WHEN 'blocked' THEN 3
+            WHEN 'done' THEN 4
+            WHEN 'dropped' THEN 5
+            ELSE 6
+          END ${Prisma.raw(dir)}
+        `
+        case 'duedate':
+        case 'due_date':
+          return direction === 'desc'
+            ? Prisma.sql`t."dueDate" DESC NULLS LAST`
+            : Prisma.sql`t."dueDate" ASC NULLS LAST`
+        case 'priority':
+          return Prisma.sql`t.priority ${Prisma.raw(dir)}`
+        case 'assignee':
+          return direction === 'desc'
+            ? Prisma.sql`a.name DESC NULLS LAST`
+            : Prisma.sql`a.name ASC NULLS LAST`
+        case 'title':
+          return Prisma.sql`t.title ${Prisma.raw(dir)}`
+        case 'createdat':
+        case 'created_at':
+          return Prisma.sql`t."createdAt" ${Prisma.raw(dir)}`
+        default:
+          // If unknown field, skip it
+          return null
+      }
+    })
+    .filter((clause): clause is Prisma.Sql => clause !== null)
+
+  if (orderByClauses.length === 0) {
+    // If no valid fields, use default
+    return Prisma.sql`
+      ORDER BY
+        CASE t.status
+          WHEN 'todo' THEN 1
+          WHEN 'doing' THEN 2
+          WHEN 'blocked' THEN 3
+          WHEN 'done' THEN 4
+          WHEN 'dropped' THEN 5
+          ELSE 6
+        END,
+        t."dueDate" ASC NULLS LAST,
+        t."createdAt" ASC
+    `
+  }
+
+  return Prisma.sql`ORDER BY ${Prisma.join(orderByClauses, ', ')}`
+}
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser()
@@ -59,6 +166,7 @@ export async function GET(request: NextRequest) {
     const priority = searchParams.get('priority') || ''
     const dueDateFrom = searchParams.get('dueDateFrom') || ''
     const dueDateTo = searchParams.get('dueDateTo') || ''
+    const sort = searchParams.get('sort') || ''
 
     // Parse immutable filters from query parameter
     let immutableFilters: Record<string, unknown> = {}
@@ -302,17 +410,7 @@ export async function GET(request: NextRequest) {
             })()
           : Prisma.empty
       }
-      ORDER BY
-        CASE t.status
-          WHEN 'todo' THEN 1
-          WHEN 'doing' THEN 2
-          WHEN 'blocked' THEN 3
-          WHEN 'done' THEN 4
-          WHEN 'dropped' THEN 5
-          ELSE 6
-        END,
-        t."dueDate" ASC NULLS LAST,
-        t."createdAt" ASC
+      ${buildOrderByClause(sort)}
       LIMIT ${limit} OFFSET ${skip}
     `
 
