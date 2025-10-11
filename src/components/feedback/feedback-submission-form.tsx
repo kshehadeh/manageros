@@ -8,14 +8,14 @@ import { Textarea } from '@/components/ui/textarea'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { submitFeedbackResponseByInviteLink } from '@/lib/actions/feedback-campaign'
 import { CheckCircle, AlertCircle } from 'lucide-react'
+import { JsonValue } from '@prisma/client/runtime/library'
 
 interface FeedbackQuestion {
   id: string
   question: string
   type: string
   required: boolean
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  options: any
+  options: JsonValue
   sortOrder: number
 }
 
@@ -135,17 +135,24 @@ export function FeedbackSubmissionForm({
           >
             {question.options &&
               Array.isArray(question.options) &&
-              question.options.map((option, index) => (
-                <div key={index} className='flex items-center space-x-2'>
-                  <RadioGroupItem
-                    value={option}
-                    id={`${questionId}-${index}`}
-                  />
-                  <Label htmlFor={`${questionId}-${index}`} className='text-sm'>
-                    {option}
-                  </Label>
-                </div>
-              ))}
+              question.options.map((option, index) => {
+                const optionValue =
+                  typeof option === 'string' ? option : String(option)
+                return (
+                  <div key={index} className='flex items-center space-x-2'>
+                    <RadioGroupItem
+                      value={optionValue}
+                      id={`${questionId}-${index}`}
+                    />
+                    <Label
+                      htmlFor={`${questionId}-${index}`}
+                      className='text-sm'
+                    >
+                      {optionValue}
+                    </Label>
+                  </div>
+                )
+              })}
           </RadioGroup>
         )
 

@@ -7,8 +7,13 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { type TaskStatus } from '@/lib/task-status'
 import { taskPriorityUtils, DEFAULT_TASK_PRIORITY } from '@/lib/task-priority'
-import { TASK_LIST_SELECT, type TaskListItem } from '@/lib/task-list-select'
+import {
+  TASK_LIST_SELECT,
+  type TaskListItem,
+  type ExtendedTaskListItem,
+} from '@/lib/task-list-select'
 import { getTaskAccessWhereClause } from '@/lib/task-access-utils'
+import { Prisma } from '@prisma/client'
 
 export async function createTask(formData: TaskFormData) {
   const user = await getCurrentUser()
@@ -232,7 +237,7 @@ export async function deleteTask(taskId: string) {
   revalidatePath('/my-tasks')
 }
 
-export async function getTasks(): Promise<TaskListItem[]> {
+export async function getTasks(): Promise<ExtendedTaskListItem[]> {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
@@ -240,15 +245,65 @@ export async function getTasks(): Promise<TaskListItem[]> {
     throw new Error('User must belong to an organization to view tasks')
   }
 
-  const tasks = await prisma.task.findMany({
-    where: getTaskAccessWhereClause(
-      user.organizationId,
-      user.id,
-      user.personId || undefined
-    ),
-    select: TASK_LIST_SELECT,
-    orderBy: { updatedAt: 'desc' },
-  })
+  // Use raw SQL for custom status ordering
+  const tasks = await prisma.$queryRaw<ExtendedTaskListItem[]>`
+    SELECT 
+      t.id,
+      t.title,
+      t.description,
+      t.status,
+      t.priority,
+      t."dueDate",
+      t."createdAt",
+      t."updatedAt",
+      t."objectiveId",
+      t."initiativeId",
+      t."assigneeId",
+      t."createdById",
+      cb.name as "createdByName",
+      cb.email as "createdByEmail",
+      a.name as "assigneeName",
+      a.email as "assigneeEmail",
+      i.title as "initiativeTitle"
+    FROM "Task" t
+    LEFT JOIN "User" cb ON t."createdById" = cb.id
+    LEFT JOIN "Person" a ON t."assigneeId" = a.id
+    LEFT JOIN "Initiative" i ON t."initiativeId" = i.id
+    WHERE (
+      -- Tasks created by the current user
+      t."createdById" = ${user.id}
+      -- Tasks associated with initiatives in the same organization
+      OR t."initiativeId" IN (
+        SELECT id FROM "Initiative" WHERE "organizationId" = ${user.organizationId}
+      )
+      -- Tasks associated with objectives of initiatives in the same organization
+      OR t."objectiveId" IN (
+        SELECT o.id FROM "Objective" o
+        JOIN "Initiative" i ON o."initiativeId" = i.id
+        WHERE i."organizationId" = ${user.organizationId}
+      )
+      ${
+        user.personId
+          ? Prisma.sql`
+      -- Tasks assigned to the current user AND associated with initiatives
+      OR (t."assigneeId" = ${user.personId} AND t."initiativeId" IN (
+        SELECT id FROM "Initiative" WHERE "organizationId" = ${user.organizationId}
+      ))`
+          : Prisma.empty
+      }
+    )
+    ORDER BY
+      CASE t.status
+        WHEN 'todo' THEN 1
+        WHEN 'doing' THEN 2
+        WHEN 'blocked' THEN 3
+        WHEN 'done' THEN 4
+        WHEN 'dropped' THEN 5
+        ELSE 6
+      END,
+      t."dueDate" ASC NULLS LAST,
+      t."createdAt" ASC
+  `
 
   return tasks
 }

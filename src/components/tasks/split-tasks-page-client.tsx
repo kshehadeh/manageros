@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { TaskTable } from '@/components/tasks/task-table'
+import { TaskDataTable } from '@/components/tasks/data-table'
 import { LegacyTasksFilterBar } from '@/components/tasks/tasks-filter-bar'
 import type { TaskListItem } from '@/lib/task-list-select'
 import type { Person, Initiative } from '@prisma/client'
@@ -90,7 +90,7 @@ export function SplitTasksPageClient({
             Incomplete Tasks ({incompleteTasks.length})
           </h3>
         </div>
-        <TaskTable
+        <TaskDataTable
           tasks={incompleteTasks}
           people={people}
           initiatives={initiatives}
@@ -106,7 +106,7 @@ export function SplitTasksPageClient({
               Recently Completed ({completedTasks.length})
             </h3>
           </div>
-          <TaskTable
+          <TaskDataTable
             tasks={completedTasks}
             people={people}
             initiatives={initiatives}

@@ -71,9 +71,16 @@ export function useNetworkStatus({
   // Detect connection type if available
   useEffect(() => {
     if (typeof navigator !== 'undefined' && 'connection' in navigator) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const connection = (navigator as Navigator & { connection?: any })
-        .connection
+      const connection = (
+        navigator as Navigator & {
+          connection?: {
+            effectiveType?: string
+            type?: string
+            addEventListener: (_type: string, _listener: () => void) => void
+            removeEventListener: (_type: string, _listener: () => void) => void
+          }
+        }
+      ).connection
       if (connection) {
         setNetworkStatus(prev => ({
           ...prev,
