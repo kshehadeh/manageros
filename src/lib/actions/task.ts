@@ -13,6 +13,7 @@ import {
   type ExtendedTaskListItem,
 } from '@/lib/task-list-select'
 import { getTaskAccessWhereClause } from '@/lib/task-access-utils'
+import { Prisma } from '@prisma/client'
 
 export async function createTask(formData: TaskFormData) {
   const user = await getCurrentUser()
@@ -269,17 +270,27 @@ export async function getTasks(): Promise<ExtendedTaskListItem[]> {
     LEFT JOIN "Person" a ON t."assigneeId" = a.id
     LEFT JOIN "Initiative" i ON t."initiativeId" = i.id
     WHERE (
-      t."createdById" IN (
-        SELECT id FROM "User" WHERE "organizationId" = ${user.organizationId}
-      )
+      -- Tasks created by the current user
+      t."createdById" = ${user.id}
+      -- Tasks associated with initiatives in the same organization
       OR t."initiativeId" IN (
         SELECT id FROM "Initiative" WHERE "organizationId" = ${user.organizationId}
       )
+      -- Tasks associated with objectives of initiatives in the same organization
       OR t."objectiveId" IN (
         SELECT o.id FROM "Objective" o
         JOIN "Initiative" i ON o."initiativeId" = i.id
         WHERE i."organizationId" = ${user.organizationId}
       )
+      ${
+        user.personId
+          ? Prisma.sql`
+      -- Tasks assigned to the current user AND associated with initiatives
+      OR (t."assigneeId" = ${user.personId} AND t."initiativeId" IN (
+        SELECT id FROM "Initiative" WHERE "organizationId" = ${user.organizationId}
+      ))`
+          : Prisma.empty
+      }
     )
     ORDER BY
       CASE t.status
