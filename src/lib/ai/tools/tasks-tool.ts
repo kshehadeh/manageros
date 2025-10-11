@@ -1,10 +1,12 @@
 import { z } from 'zod'
 import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUserWithPerson } from '@/lib/actions/organization'
 import { prisma } from '@/lib/db'
 import type { Prisma } from '@prisma/client'
 
 export const tasksTool = {
-  description: 'Get information about tasks in the organization',
+  description:
+    'Get information about tasks in the organization. Use this to find what tasks someone is working on or has worked on.',
   parameters: z.object({
     status: z
       .enum(['todo', 'doing', 'blocked', 'done', 'dropped'])
@@ -17,6 +19,14 @@ export const tasksTool = {
       .string()
       .optional()
       .describe('Search query to filter tasks by title or description'),
+    updatedAfter: z
+      .string()
+      .optional()
+      .describe('ISO date string - only show tasks updated after this date'),
+    updatedBefore: z
+      .string()
+      .optional()
+      .describe('ISO date string - only show tasks updated before this date'),
   }),
   execute: async ({
     status,
@@ -24,17 +34,38 @@ export const tasksTool = {
     assigneeId,
     initiativeId,
     query,
+    updatedAfter,
+    updatedBefore,
   }: {
     status?: string
     priority?: number
     assigneeId?: string
     initiativeId?: string
     query?: string
+    updatedAfter?: string
+    updatedBefore?: string
   }) => {
     const user = await getCurrentUser()
     if (!user.organizationId) {
       throw new Error('User must belong to an organization')
     }
+
+    // Get the person linked to the current user
+    const { person } = await getCurrentUserWithPerson()
+
+    console.log('🔍 Tasks Tool Called with:', {
+      status,
+      priority,
+      assigneeId,
+      initiativeId,
+      query,
+      updatedAfter,
+      updatedBefore,
+      userId: user.id,
+      organizationId: user.organizationId,
+      linkedPersonId: person?.id,
+      linkedPersonName: person?.name,
+    })
 
     const whereClause: Prisma.TaskWhereInput = {
       OR: [
@@ -53,6 +84,18 @@ export const tasksTool = {
     if (priority) whereClause.priority = priority
     if (assigneeId) whereClause.assigneeId = assigneeId
     if (initiativeId) whereClause.initiativeId = initiativeId
+
+    // Date filters
+    if (updatedAfter || updatedBefore) {
+      whereClause.updatedAt = {}
+      if (updatedAfter) {
+        whereClause.updatedAt.gte = new Date(updatedAfter)
+      }
+      if (updatedBefore) {
+        whereClause.updatedAt.lte = new Date(updatedBefore)
+      }
+    }
+
     if (query) {
       whereClause.OR = [
         ...(whereClause.OR || []),
@@ -60,6 +103,8 @@ export const tasksTool = {
         { description: { contains: query, mode: 'insensitive' } },
       ]
     }
+
+    console.log('🔍 Where Clause:', JSON.stringify(whereClause, null, 2))
 
     const tasks = await prisma.task.findMany({
       where: whereClause,
@@ -98,6 +143,18 @@ export const tasksTool = {
       },
       orderBy: { updatedAt: 'desc' },
     })
+
+    console.log(`🔍 Found ${tasks.length} tasks`)
+    if (tasks.length > 0) {
+      console.log('📋 Sample task:', {
+        id: tasks[0].id,
+        title: tasks[0].title,
+        status: tasks[0].status,
+        assigneeId: tasks[0].assigneeId,
+        updatedAt: tasks[0].updatedAt,
+        createdAt: tasks[0].createdAt,
+      })
+    }
 
     return {
       tasks: tasks.map(task => ({
