@@ -8,11 +8,10 @@ import { ClickableTeamAvatar } from './clickable-team-avatar'
 import { TeamAvatarEditDialog } from './team-avatar-edit-dialog'
 import { User, Rocket, Building2 } from 'lucide-react'
 import { PeopleTable } from '@/components/people/people-table'
-import { InitiativesTable } from '@/components/initiatives/initiatives-table'
+import { InitiativeDataTable } from '@/components/initiatives/data-table'
 import { TeamChildTeamsTable } from './team-child-teams-table'
-import { Person, Team } from '@prisma/client'
+import { Team } from '@prisma/client'
 import { Person as PersonWithRelations } from '@/types/person'
-import { InitiativeWithRelations } from '@/types/initiative'
 
 // Type for child team with relations needed by TeamChildTeamsTable
 type ChildTeamWithRelations = Team & {
@@ -37,20 +36,12 @@ interface TeamDetailContentProps {
       name: string
     } | null
     people: PersonWithRelations[]
-    initiatives: InitiativeWithRelations[]
     children: ChildTeamWithRelations[]
   }
-  allPeople: Person[]
-  allTeams: Team[]
   isAdmin: boolean
 }
 
-export function TeamDetailContent({
-  team,
-  allPeople,
-  allTeams,
-  isAdmin,
-}: TeamDetailContentProps) {
+export function TeamDetailContent({ team, isAdmin }: TeamDetailContentProps) {
   const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false)
   const [currentAvatar, setCurrentAvatar] = useState<string | null>(
     team.avatar || null
@@ -129,7 +120,7 @@ export function TeamDetailContent({
             <div className='flex items-center justify-between mb-4'>
               <h3 className='section-header font-bold flex items-center gap-2'>
                 <Rocket className='w-4 h-4' />
-                Team Initiatives ({team.initiatives.length})
+                Team Initiatives
               </h3>
               <Button asChild variant='outline' size='sm'>
                 <Link href={`/initiatives/new?teamId=${team.id}`}>
@@ -137,11 +128,14 @@ export function TeamDetailContent({
                 </Link>
               </Button>
             </div>
-            <InitiativesTable
-              initiatives={team.initiatives}
-              people={allPeople}
-              teams={allTeams}
+            <InitiativeDataTable
               hideFilters={true}
+              enablePagination={false}
+              limit={100}
+              immutableFilters={{
+                teamId: team.id,
+              }}
+              settingsId={`team-${team.id}-initiatives`}
             />
           </div>
 

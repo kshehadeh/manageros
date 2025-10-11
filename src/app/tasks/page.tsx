@@ -1,4 +1,3 @@
-import { getInitiatives } from '@/lib/actions/initiative'
 import { prisma } from '@/lib/db'
 import { requireAuth } from '@/lib/auth-utils'
 import { CreateTaskButton } from '@/components/tasks/create-task-button'
@@ -8,15 +7,12 @@ import { TaskDataTable } from '../../components/tasks/data-table'
 export default async function TasksPage() {
   const user = await requireAuth({ requireOrganization: true })
 
-  const [people, initiatives] = await Promise.all([
-    prisma.person.findMany({
-      where: {
-        organizationId: user.organizationId!,
-      },
-      orderBy: { name: 'asc' },
-    }),
-    getInitiatives(),
-  ])
+  const people = await prisma.person.findMany({
+    where: {
+      organizationId: user.organizationId!,
+    },
+    orderBy: { name: 'asc' },
+  })
 
   return (
     <div className='page-container px-3 md:px-0'>
@@ -36,11 +32,7 @@ export default async function TasksPage() {
       </div>
 
       <div className='page-section -mx-3 md:mx-0'>
-        <TaskDataTable
-          people={people}
-          initiatives={initiatives}
-          enablePagination={true}
-        />
+        <TaskDataTable people={people} enablePagination={true} />
       </div>
     </div>
   )

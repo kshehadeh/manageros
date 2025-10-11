@@ -1,6 +1,5 @@
 import { getMeeting } from '@/lib/actions/meeting'
 import { getTeams } from '@/lib/actions/team'
-import { getInitiatives } from '@/lib/actions/initiative'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -24,11 +23,7 @@ export default async function EditMeetingPage({
   }
 
   const { id } = await params
-  const [meeting, teams, initiatives] = await Promise.all([
-    getMeeting(id),
-    getTeams(),
-    getInitiatives(),
-  ])
+  const [meeting, teams] = await Promise.all([getMeeting(id), getTeams()])
 
   if (!meeting) {
     notFound()
@@ -70,7 +65,6 @@ export default async function EditMeetingPage({
 
       <MeetingForm
         teams={teams}
-        initiatives={initiatives}
         initialData={initialData}
         isEditing={true}
         meetingId={meeting.id}

@@ -15,19 +15,13 @@ export default async function NewTaskPage() {
     redirect('/organization/create')
   }
 
-  // Get all people, initiatives, and objectives for the form
-  const [people, initiatives, objectives] = await Promise.all([
+  // Get all people and objectives for the form
+  const [people, objectives] = await Promise.all([
     prisma.person.findMany({
       where: {
         organizationId: session.user.organizationId,
       },
       orderBy: { name: 'asc' },
-    }),
-    prisma.initiative.findMany({
-      where: {
-        organizationId: session.user.organizationId,
-      },
-      orderBy: { title: 'asc' },
     }),
     prisma.objective.findMany({
       where: {
@@ -52,11 +46,7 @@ export default async function NewTaskPage() {
 
       <div className='page-section'>
         <div className='card'>
-          <TaskForm
-            people={people}
-            initiatives={initiatives}
-            objectives={objectives}
-          />
+          <TaskForm people={people} objectives={objectives} />
         </div>
       </div>
     </div>

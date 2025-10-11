@@ -12,10 +12,11 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import type { TaskListItem } from '@/lib/task-list-select'
-import type { Person, Initiative } from '@prisma/client'
+import type { Person } from '@prisma/client'
 import { taskStatusUtils, ALL_TASK_STATUSES } from '@/lib/task-status'
 import { taskPriorityUtils, ALL_TASK_PRIORITIES } from '@/lib/task-priority'
 import { useUserSettings } from '@/lib/hooks/use-user-settings'
+import { InitiativeSelect } from '@/components/ui/initiative-select'
 
 interface TaskFilters {
   search: string
@@ -30,13 +31,11 @@ interface TaskFilters {
 interface TasksFilterBarProps {
   tasks: TaskListItem[]
   people: Person[]
-  initiatives: Initiative[]
   onFilteredTasksChange: (_filters: TaskFilters) => void
 }
 
 export function TasksFilterBar({
   people,
-  initiatives,
   onFilteredTasksChange,
 }: TasksFilterBarProps) {
   const { getSetting, updateSetting, isLoaded } = useUserSettings()
@@ -220,25 +219,27 @@ export function TasksFilterBar({
 
                 <div className='space-y-2'>
                   <label className='text-sm font-medium'>Initiative</label>
-                  <Select
-                    value={filters.initiativeId}
-                    onValueChange={value => updateFilter('initiativeId', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder='All initiatives' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='all'>All initiatives</SelectItem>
-                      <SelectItem value='no-initiative'>
-                        No initiative
-                      </SelectItem>
-                      {initiatives.map(initiative => (
-                        <SelectItem key={initiative.id} value={initiative.id}>
-                          {initiative.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <InitiativeSelect
+                    value={
+                      filters.initiativeId === 'all' ||
+                      filters.initiativeId === 'no-initiative'
+                        ? 'none'
+                        : filters.initiativeId
+                    }
+                    onValueChange={value => {
+                      // Map the select value back to filter value
+                      if (value === 'none') {
+                        updateFilter('initiativeId', 'all')
+                      } else {
+                        updateFilter('initiativeId', value)
+                      }
+                    }}
+                    placeholder='All initiatives'
+                    includeNone={true}
+                    noneLabel='All initiatives'
+                    showStatus={true}
+                    showTeam={false}
+                  />
                 </div>
 
                 <div className='space-y-2'>
@@ -318,14 +319,12 @@ export function TasksFilterBar({
 interface LegacyTasksFilterBarProps {
   tasks: TaskListItem[]
   people: Person[]
-  initiatives: Initiative[]
   onFilteredTasksChange: (_filteredTasks: TaskListItem[]) => void
 }
 
 export function LegacyTasksFilterBar({
   tasks,
   people,
-  initiatives,
   onFilteredTasksChange,
 }: LegacyTasksFilterBarProps) {
   const [, setFilteredTasks] = useState<TaskListItem[]>(tasks)
@@ -422,7 +421,6 @@ export function LegacyTasksFilterBar({
     <TasksFilterBar
       tasks={tasks}
       people={people}
-      initiatives={initiatives}
       onFilteredTasksChange={handleFiltersChange}
     />
   )

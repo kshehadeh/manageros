@@ -30,19 +30,13 @@ export default async function EditTaskPage({
     notFound()
   }
 
-  // Get all people, initiatives, and objectives for the form
-  const [people, initiatives, objectives] = await Promise.all([
+  // Get all people and objectives for the form
+  const [people, objectives] = await Promise.all([
     prisma.person.findMany({
       where: {
         organizationId: session.user.organizationId,
       },
       orderBy: { name: 'asc' },
-    }),
-    prisma.initiative.findMany({
-      where: {
-        organizationId: session.user.organizationId,
-      },
-      orderBy: { title: 'asc' },
     }),
     prisma.objective.findMany({
       where: {
@@ -81,7 +75,6 @@ export default async function EditTaskPage({
         <div className='page-section'>
           <TaskForm
             people={people}
-            initiatives={initiatives}
             objectives={objectives}
             initialData={initialData}
             isEditing={true}

@@ -18,6 +18,7 @@ export function DashboardAssignedTasksSection({
       icon='ListTodo'
     >
       <TaskDataTable
+        settingsId='dashboard-assigned-tasks'
         hideFilters={true}
         immutableFilters={{
           assigneeId: personId,

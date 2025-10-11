@@ -65,6 +65,28 @@ export interface UserSettings {
     }
   >
 
+  // Per-view initiative table settings
+  initiativeTableSettings: Record<
+    string,
+    {
+      sorting: Array<{ id: string; desc: boolean }>
+      grouping: string
+      sort: {
+        field: string
+        direction: 'asc' | 'desc'
+      }
+      filters: {
+        search: string
+        teamId: string
+        ownerId: string
+        rag: string
+        status: string
+        dateFrom: string
+        dateTo: string
+      }
+    }
+  >
+
   // Future expandable settings can be added here:
   // sidebarCollapsed: boolean
   // defaultPageSize: number
@@ -104,6 +126,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
     isFullscreen: false,
   },
   taskTableSettings: {},
+  initiativeTableSettings: {},
   // When adding new settings, add their defaults here:
   // sidebarCollapsed: false
   // defaultPageSize: 25
@@ -260,6 +283,80 @@ export function updateTaskTableSettings(
     ...currentSettings,
     taskTableSettings: {
       ...currentSettings.taskTableSettings,
+      [settingsId]: updatedTableSettings,
+    },
+  }
+
+  saveUserSettings(userId, updatedSettings)
+}
+
+/**
+ * Get initiative table settings for a specific view
+ */
+export function getInitiativeTableSettings(
+  userId: string,
+  settingsId: string
+): UserSettings['initiativeTableSettings'][string] {
+  const settings = loadUserSettings(userId)
+  return (
+    settings.initiativeTableSettings[settingsId] || {
+      sorting: [],
+      grouping: 'none',
+      sort: {
+        field: '',
+        direction: 'asc',
+      },
+      filters: {
+        search: '',
+        teamId: '',
+        ownerId: '',
+        rag: '',
+        status: '',
+        dateFrom: '',
+        dateTo: '',
+      },
+    }
+  )
+}
+
+/**
+ * Update initiative table settings for a specific view
+ */
+export function updateInitiativeTableSettings(
+  userId: string,
+  settingsId: string,
+  tableSettings: Partial<UserSettings['initiativeTableSettings'][string]>
+): void {
+  const currentSettings = loadUserSettings(userId)
+  const currentTableSettings = currentSettings.initiativeTableSettings[
+    settingsId
+  ] || {
+    sorting: [],
+    grouping: 'none',
+    sort: {
+      field: '',
+      direction: 'asc' as const,
+    },
+    filters: {
+      search: '',
+      teamId: '',
+      ownerId: '',
+      rag: '',
+      status: '',
+      dateFrom: '',
+      dateTo: '',
+    },
+  }
+
+  const updatedTableSettings = {
+    ...currentTableSettings,
+    ...tableSettings,
+  }
+
+  const updatedSettings = {
+    ...currentSettings,
+    initiativeTableSettings: {
+      ...currentSettings.initiativeTableSettings,
       [settingsId]: updatedTableSettings,
     },
   }

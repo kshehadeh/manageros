@@ -7,7 +7,7 @@ import { SlateTaskTextarea } from '@/components/tasks/slate-task-textarea'
 import { MarkdownEditor } from '@/components/markdown-editor'
 import { createTask, updateTask } from '@/lib/actions/task'
 import { type TaskFormData, taskSchema } from '@/lib/validations'
-import { Person, Initiative, Objective } from '@prisma/client'
+import { Person, Objective } from '@prisma/client'
 import {
   type TaskStatus,
   taskStatusUtils,
@@ -17,10 +17,10 @@ import { taskPriorityUtils, DEFAULT_TASK_PRIORITY } from '@/lib/task-priority'
 import { AlertCircle } from 'lucide-react'
 import { HelpIcon } from '@/components/help-icon'
 import { type DetectedDate } from '@/lib/utils/date-detection'
+import { InitiativeSelect } from '@/components/ui/initiative-select'
 
 interface TaskFormProps {
   people: Person[]
-  initiatives: Initiative[]
   objectives: Objective[]
   preselectedAssigneeId?: string
   preselectedInitiativeId?: string
@@ -32,7 +32,6 @@ interface TaskFormProps {
 
 export function TaskForm({
   people,
-  initiatives,
   objectives,
   preselectedAssigneeId,
   preselectedInitiativeId,
@@ -295,26 +294,22 @@ export function TaskForm({
             >
               Initiative
             </label>
-            <select
-              id='initiativeId'
-              name='initiativeId'
+            <InitiativeSelect
               value={selectedInitiativeId}
-              onChange={e => {
-                const value = e.target.value
-                setSelectedInitiativeId(value)
-                handleInputChange('initiativeId', value)
+              onValueChange={value => {
+                const actualValue = value === 'none' ? '' : value
+                setSelectedInitiativeId(actualValue)
+                handleInputChange('initiativeId', actualValue)
                 // Clear objective when initiative changes
                 handleInputChange('objectiveId', '')
               }}
-              className={`input ${errors.initiativeId ? 'border-red-500' : ''}`}
-            >
-              <option value=''>Select initiative (optional)</option>
-              {initiatives.map(initiative => (
-                <option key={initiative.id} value={initiative.id}>
-                  {initiative.title}
-                </option>
-              ))}
-            </select>
+              placeholder='Select initiative (optional)'
+              includeNone={true}
+              noneLabel='No initiative'
+              showStatus={true}
+              showTeam={false}
+              className={errors.initiativeId ? 'border-red-500' : ''}
+            />
             {errors.initiativeId && (
               <p className='text-sm text-red-500 mt-1'>{errors.initiativeId}</p>
             )}

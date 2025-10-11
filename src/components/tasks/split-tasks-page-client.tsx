@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { TaskDataTable } from '@/components/tasks/data-table'
 import { LegacyTasksFilterBar } from '@/components/tasks/tasks-filter-bar'
 import type { TaskListItem } from '@/lib/task-list-select'
-import type { Person, Initiative } from '@prisma/client'
+import type { Person } from '@prisma/client'
 import {
   ACTIVE_STATUSES,
   COMPLETED_STATUSES,
@@ -14,13 +14,11 @@ import {
 interface SplitTasksPageClientProps {
   tasks: TaskListItem[]
   people: Person[]
-  initiatives: Initiative[]
 }
 
 export function SplitTasksPageClient({
   tasks,
   people,
-  initiatives,
 }: SplitTasksPageClientProps) {
   const [filteredTasks, setFilteredTasks] = useState<TaskListItem[]>(tasks)
 
@@ -79,7 +77,6 @@ export function SplitTasksPageClient({
       <LegacyTasksFilterBar
         tasks={tasks}
         people={people}
-        initiatives={initiatives}
         onFilteredTasksChange={handleFilteredTasksChange}
       />
 
@@ -93,7 +90,6 @@ export function SplitTasksPageClient({
         <TaskDataTable
           tasks={incompleteTasks}
           people={people}
-          initiatives={initiatives}
           hideFilters={true}
         />
       </div>
@@ -109,7 +105,6 @@ export function SplitTasksPageClient({
           <TaskDataTable
             tasks={completedTasks}
             people={people}
-            initiatives={initiatives}
             hideFilters={true}
           />
         </div>

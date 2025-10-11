@@ -1,30 +1,12 @@
-import { getInitiatives } from '@/lib/actions/initiative'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { GroupedInitiativesPageClient } from '@/components/initiatives/grouped-initiatives-page-client'
+import { InitiativeDataTable } from '@/components/initiatives/data-table'
 import { requireAuth } from '@/lib/auth-utils'
-import { prisma } from '@/lib/db'
 import { Rocket } from 'lucide-react'
 import { HelpIcon } from '../../components/help-icon'
 
 export default async function InitiativesPage() {
-  const user = await requireAuth({ requireOrganization: true })
-
-  const [initiatives, people, teams] = await Promise.all([
-    getInitiatives(),
-    prisma.person.findMany({
-      where: {
-        organizationId: user.organizationId!,
-      },
-      orderBy: { name: 'asc' },
-    }),
-    prisma.team.findMany({
-      where: {
-        organizationId: user.organizationId!,
-      },
-      orderBy: { name: 'asc' },
-    }),
-  ])
+  await requireAuth({ requireOrganization: true })
 
   return (
     <div className='page-container px-3 md:px-0'>
@@ -43,11 +25,7 @@ export default async function InitiativesPage() {
         </div>
       </div>
       <div className='page-section -mx-3 md:mx-0'>
-        <GroupedInitiativesPageClient
-          initiatives={initiatives}
-          people={people}
-          teams={teams}
-        />
+        <InitiativeDataTable enablePagination={true} />
       </div>
     </div>
   )

@@ -11,17 +11,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  Meeting,
-  Team,
-  Initiative,
-  Person,
-  User as PrismaUser,
-} from '@prisma/client'
+import { InitiativeSelect } from '@/components/ui/initiative-select'
+import { Meeting, Team, Person, User as PrismaUser } from '@prisma/client'
 
 type MeetingWithRelations = Meeting & {
   team: Team | null
-  initiative: Initiative | null
+  initiative: { id: string; title: string } | null
   owner: Person | null
   createdBy: PrismaUser | null
   participants: Array<{
@@ -53,17 +48,6 @@ export function MeetingsFilterBar({
         .map(meeting => [
           meeting.team!.id,
           { id: meeting.team!.id, name: meeting.team!.name },
-        ])
-    ).values()
-  )
-
-  const initiatives = Array.from(
-    new Map(
-      meetings
-        .filter(meeting => meeting.initiative)
-        .map(meeting => [
-          meeting.initiative!.id,
-          { id: meeting.initiative!.id, title: meeting.initiative!.title },
         ])
     ).values()
   )
@@ -201,22 +185,19 @@ export function MeetingsFilterBar({
 
                 <div className='space-y-2'>
                   <label className='text-sm font-medium'>Initiative</label>
-                  <Select
-                    value={initiativeFilter}
-                    onValueChange={setInitiativeFilter}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder='All initiatives' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='all'>All initiatives</SelectItem>
-                      {initiatives.map(initiative => (
-                        <SelectItem key={initiative.id} value={initiative.id}>
-                          {initiative.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <InitiativeSelect
+                    value={
+                      initiativeFilter === 'all' ? 'none' : initiativeFilter
+                    }
+                    onValueChange={value => {
+                      setInitiativeFilter(value === 'none' ? 'all' : value)
+                    }}
+                    placeholder='All initiatives'
+                    includeNone={true}
+                    noneLabel='All initiatives'
+                    showStatus={true}
+                    showTeam={false}
+                  />
                 </div>
               </div>
             </div>

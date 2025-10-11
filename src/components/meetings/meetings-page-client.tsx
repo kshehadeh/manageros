@@ -6,18 +6,12 @@ import { SharedMeetingsTable } from '@/components/meetings/shared-meetings-table
 import { MeetingsFilterBar } from '@/components/meetings/meetings-filter-bar'
 import { Button } from '@/components/ui/button'
 import { Plus, Calendar } from 'lucide-react'
-import {
-  Meeting,
-  Team,
-  Initiative,
-  Person,
-  User as PrismaUser,
-} from '@prisma/client'
+import { Meeting, Team, Person, User as PrismaUser } from '@prisma/client'
 import { HelpIcon } from '@/components/help-icon'
 
 type MeetingWithRelations = Meeting & {
   team: Team | null
-  initiative: Initiative | null
+  initiative: { id: string; title: string } | null
   owner: Person | null
   createdBy: PrismaUser | null
   participants: Array<{

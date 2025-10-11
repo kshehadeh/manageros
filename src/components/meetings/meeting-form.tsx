@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/select'
 import { createMeeting, updateMeeting } from '@/lib/actions/meeting'
 import { type MeetingFormData, meetingSchema } from '@/lib/validations'
-import { Team, Initiative } from '@prisma/client'
+import { Team } from '@prisma/client'
 import {
   AlertCircle,
   Plus,
@@ -30,10 +30,10 @@ import {
 import { MarkdownEditor } from '@/components/markdown-editor'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PersonSelect } from '@/components/ui/person-select'
+import { InitiativeSelect } from '@/components/ui/initiative-select'
 
 interface MeetingFormProps {
   teams: Team[]
-  initiatives: Initiative[]
   preselectedTeamId?: string
   preselectedInitiativeId?: string
   preselectedOwnerId?: string
@@ -44,7 +44,6 @@ interface MeetingFormProps {
 
 export function MeetingForm({
   teams,
-  initiatives,
   preselectedTeamId,
   preselectedInitiativeId,
   preselectedOwnerId,
@@ -439,24 +438,17 @@ export function MeetingForm({
 
               <div className='space-y-2'>
                 <Label htmlFor='initiativeId'>Initiative</Label>
-                <Select
-                  value={formData.initiativeId}
+                <InitiativeSelect
+                  value={getSelectValue(formData.initiativeId)}
                   onValueChange={value =>
-                    handleInputChange('initiativeId', value)
+                    handleInputChange('initiativeId', getFormValue(value))
                   }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder='Select an initiative' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='none'>No initiative</SelectItem>
-                    {initiatives.map(initiative => (
-                      <SelectItem key={initiative.id} value={initiative.id}>
-                        {initiative.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder='Select an initiative'
+                  includeNone={true}
+                  noneLabel='No initiative'
+                  showStatus={true}
+                  showTeam={false}
+                />
               </div>
             </div>
           </div>

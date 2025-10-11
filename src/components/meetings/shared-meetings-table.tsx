@@ -27,17 +27,11 @@ import { Badge } from '@/components/ui/badge'
 import { deleteMeeting } from '@/lib/actions/meeting'
 import { toast } from 'sonner'
 import { DeleteModal } from '@/components/common/delete-modal'
-import {
-  Meeting,
-  Team,
-  Initiative,
-  Person,
-  User as PrismaUser,
-} from '@prisma/client'
+import { Meeting, Team, Person, User as PrismaUser } from '@prisma/client'
 
 export type MeetingWithRelations = Meeting & {
   team: Team | null
-  initiative: Initiative | null
+  initiative: { id: string; title: string } | null
   owner: Person | null
   createdBy: PrismaUser | null
   participants: Array<{
