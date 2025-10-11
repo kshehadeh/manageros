@@ -83,15 +83,23 @@ export function MeetingForm({
     setErrors({})
 
     try {
-      // Convert 'none' values to undefined for validation
+      // Convert 'none' and empty string values to undefined for validation
       const processedFormData = {
         ...formData,
-        teamId: formData.teamId === 'none' ? undefined : formData.teamId,
+        teamId:
+          formData.teamId === 'none' || !formData.teamId
+            ? undefined
+            : formData.teamId,
         initiativeId:
-          formData.initiativeId === 'none' ? undefined : formData.initiativeId,
-        ownerId: formData.ownerId === 'none' ? undefined : formData.ownerId,
+          formData.initiativeId === 'none' || !formData.initiativeId
+            ? undefined
+            : formData.initiativeId,
+        ownerId:
+          formData.ownerId === 'none' || !formData.ownerId
+            ? undefined
+            : formData.ownerId,
         recurrenceType:
-          formData.recurrenceType === 'none'
+          formData.recurrenceType === 'none' || !formData.recurrenceType
             ? undefined
             : formData.recurrenceType,
       }
