@@ -205,6 +205,19 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Apply owner filter (immutable takes precedence) - must be in WHERE clause for correct pagination
+    const ownerFilter = (immutableFilters.ownerId as string) || ownerId
+    const hasOwnerFilter = ownerFilter && ownerFilter !== 'all'
+    if (hasOwnerFilter) {
+      whereConditions.push(
+        Prisma.sql`EXISTS (
+          SELECT 1 FROM "InitiativeOwner" io 
+          WHERE io."initiativeId" = i.id 
+          AND io."personId" = ${ownerFilter}
+        )`
+      )
+    }
+
     // Build WHERE clause
     const whereClause =
       whereConditions.length > 0
@@ -334,20 +347,8 @@ export async function GET(request: NextRequest) {
       `
     }
 
-    // Apply owner filter if needed (done after fetching to simplify SQL)
-    let filteredInitiatives = initiatives
-    const ownerFilter = (immutableFilters.ownerId as string) || ownerId
-    if (ownerFilter && ownerFilter !== 'all') {
-      const initiativesWithOwner = new Set(
-        owners.filter(o => o.personId === ownerFilter).map(o => o.initiativeId)
-      )
-      filteredInitiatives = initiatives.filter(i =>
-        initiativesWithOwner.has(i.id)
-      )
-    }
-
-    // Build the response with all relations
-    const enrichedInitiatives = filteredInitiatives.map(initiative => {
+    // Build the response with all relations (owner filter already applied in SQL)
+    const enrichedInitiatives = initiatives.map(initiative => {
       const initiativeObjectives = objectives.filter(
         o => o.initiativeId === initiative.id
       )
@@ -382,12 +383,8 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Calculate pagination metadata (adjusted for owner filter if applied)
-    const adjustedTotalCount =
-      ownerFilter && ownerFilter !== 'all'
-        ? enrichedInitiatives.length
-        : totalCount
-    const totalPages = Math.ceil(adjustedTotalCount / limit)
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(totalCount / limit)
     const hasNextPage = page < totalPages
     const hasPreviousPage = page > 1
 
@@ -396,7 +393,7 @@ export async function GET(request: NextRequest) {
       pagination: {
         page,
         limit,
-        totalCount: adjustedTotalCount,
+        totalCount,
         totalPages,
         hasNextPage,
         hasPreviousPage,
