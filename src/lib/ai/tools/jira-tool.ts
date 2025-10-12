@@ -5,7 +5,7 @@ import { JiraApiService } from '@/lib/jira-api'
 
 export const jiraTool = {
   description:
-    "Search Jira issues and tickets using Jira API. Use JQL (Jira Query Language) to search for issues and when the user is interested in his own tickets, lookup who he is and use that email.  If the user is looking for another person's tickets, use the personId parameter to automatically find their Jira account link, or use the assignee parameter to filter by email/account ID directly.",
+    "Search Jira issues and tickets using Jira API. IMPORTANT: When the user asks about 'my tickets', 'my issues', or anything related to their own work, DO NOT provide a personId - the tool will automatically use the current user's linked Jira account. Only provide personId when searching for another specific person's tickets.",
   parameters: z.object({
     project: z
       .string()
@@ -21,13 +21,13 @@ export const jiraTool = {
       .string()
       .optional()
       .describe(
-        'Person ID to automatically lookup their linked Jira account. Use this instead of assignee when you have a person ID from the person lookup tool.'
+        "Person ID to lookup their linked Jira account. ONLY use this when searching for ANOTHER person's tickets (not the current user). If omitted, automatically uses the current user's linked Jira account."
       ),
     assignee: z
       .string()
       .optional()
       .describe(
-        'Filter by assignee (email address or account ID). Use personId instead if you have a person ID.'
+        'Filter by assignee (email address or account ID). Use this only for direct assignee filtering. If you want to search by person, use personId instead.'
       ),
     limit: z
       .number()
@@ -68,12 +68,22 @@ export const jiraTool = {
         )
       }
 
-      // If personId is provided, look up their Jira account
+      // Determine which person to search for
       let effectiveAssignee = assignee
-      if (personId) {
+      let targetPersonId = personId
+
+      // If no personId provided, try to use current user's linked person
+      if (!targetPersonId && !assignee) {
+        if (user.personId) {
+          targetPersonId = user.personId
+        }
+      }
+
+      // If we have a personId (either provided or from current user), look up their Jira account
+      if (targetPersonId) {
         const personJiraAccount = await prisma.personJiraAccount.findUnique({
           where: {
-            personId,
+            personId: targetPersonId,
           },
           include: {
             person: {
@@ -86,8 +96,10 @@ export const jiraTool = {
         })
 
         if (!personJiraAccount) {
+          const personName =
+            targetPersonId === user.personId ? 'You' : 'This person'
           throw new Error(
-            `No Jira account linked for person ID: ${personId}. Please link their Jira account first.`
+            `${personName} do not have a Jira account linked. Please link a Jira account first in Settings.`
           )
         }
 

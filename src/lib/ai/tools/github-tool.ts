@@ -36,18 +36,18 @@ interface GitHubIssue {
 
 export const githubTool = {
   description:
-    "Search GitHub pull requests and issues using GitHub API. Can search for a specific person's GitHub activity if personId is provided.",
+    "Search GitHub pull requests and issues using GitHub API. IMPORTANT: When the user asks about 'my PRs', 'my pull requests', 'my issues', or anything related to their own work, DO NOT provide a personId - the tool will automatically use the current user's linked GitHub account. Only provide personId when searching for another specific person's GitHub activity.",
   parameters: z.object({
     query: z
       .string()
       .describe(
-        'Search query for GitHub PRs/issues. Must include "is:pr" (for pull requests) or "is:issue" (for issues). If not specified, defaults to "is:pr". Additional search terms can be added (e.g., "is:pr merged", "is:issue label:bug"). IMPORTANT: If personId is provided, do NOT include author:, involves:, or other username qualifiers - the tool will automatically add the correct GitHub username.'
+        'Search query for GitHub PRs/issues. Must include "is:pr" (for pull requests) or "is:issue" (for issues). If not specified, defaults to "is:pr". Additional search terms can be added (e.g., "is:pr merged", "is:issue label:bug"). IMPORTANT: Do NOT include author:, involves:, or other username qualifiers - the tool will automatically add the correct GitHub username based on the person being searched.'
       ),
     personId: z
       .string()
       .optional()
       .describe(
-        'Person ID to lookup their GitHub account and search for their activity'
+        "Person ID to lookup their GitHub account and search for their activity. ONLY use this when searching for ANOTHER person's activity (not the current user). If omitted, automatically uses the current user's linked GitHub account."
       ),
     repository: z
       .string()
@@ -110,13 +110,23 @@ export const githubTool = {
         )
       }
 
-      // If personId is provided, lookup their GitHub account
+      // Determine which person to search for
+      let targetPersonId = personId
+
+      // If no personId provided, try to use current user's linked person
+      if (!targetPersonId) {
+        if (user.personId) {
+          targetPersonId = user.personId
+        }
+      }
+
+      // If we have a personId (either provided or from current user), lookup their GitHub account
       let githubUsername: string | null = null
-      if (personId) {
+      if (targetPersonId) {
         // Verify person belongs to user's organization and get their GitHub account
         const person = await prisma.person.findFirst({
           where: {
-            id: personId,
+            id: targetPersonId,
             organizationId: user.organizationId,
           },
           include: {
@@ -129,8 +139,10 @@ export const githubTool = {
         }
 
         if (!person.githubAccount) {
+          const personName =
+            targetPersonId === user.personId ? 'You' : person.name
           throw new Error(
-            `No GitHub account linked for ${person.name}. Please link a GitHub account first.`
+            `${personName} do not have a GitHub account linked. Please link a GitHub account first in Settings.`
           )
         }
 
