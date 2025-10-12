@@ -1,5 +1,4 @@
 import { getMeeting } from '@/lib/actions/meeting'
-import { getPeople } from '@/lib/actions/person'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -22,7 +21,7 @@ export default async function NewMeetingInstancePage({
   }
 
   const { id } = await params
-  const [meeting, people] = await Promise.all([getMeeting(id), getPeople()])
+  const meeting = await getMeeting(id)
 
   if (!meeting) {
     notFound()
@@ -42,7 +41,7 @@ export default async function NewMeetingInstancePage({
       </div>
 
       <div className='max-w-2xl'>
-        <MeetingInstanceForm meetingId={meeting.id} people={people} />
+        <MeetingInstanceForm meetingId={meeting.id} />
       </div>
     </div>
   )

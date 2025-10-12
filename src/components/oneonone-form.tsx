@@ -6,23 +6,14 @@ import { type OneOnOneFormData } from '@/lib/validations'
 import Link from 'next/link'
 import { MarkdownEditor } from './markdown-editor'
 import { Button } from '@/components/ui/button'
-import { Handshake, Calendar, FileText } from 'lucide-react'
+import { Handshake, Calendar, FileText, Loader2 } from 'lucide-react'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PersonSelect } from '@/components/ui/person-select'
 import {
   utcToLocalDateTimeString,
   getCurrentLocalDateTimeString,
 } from '@/lib/timezone-utils'
-
-interface Person {
-  id: string
-  name: string
-  email: string | null
-  role?: string | null
-  avatar?: string | null
-  manager?: { id: string; name: string } | null
-  reports: Array<{ id: string; name: string }>
-}
+import { usePeopleCache } from '@/hooks/use-organization-cache'
 
 interface OneOnOneData {
   id: string
@@ -33,7 +24,6 @@ interface OneOnOneData {
 }
 
 interface OneOnOneFormProps {
-  people: Person[]
   preFilledManagerId?: string
   preFilledReportId?: string
   existingOneOnOne?: OneOnOneData
@@ -41,12 +31,14 @@ interface OneOnOneFormProps {
 }
 
 export function OneOnOneForm({
-  people,
   preFilledManagerId,
   preFilledReportId,
   existingOneOnOne,
   onCancel,
 }: OneOnOneFormProps) {
+  // Use the people cache to get people data
+  const { people, isLoading, error } = usePeopleCache()
+
   // Get current date and time in the format required by datetime-local input
   // Use utility functions for proper timezone handling
 
@@ -77,6 +69,32 @@ export function OneOnOneForm({
     }
   }
 
+  // Show loading state while fetching people
+  if (isLoading && people.length === 0) {
+    return (
+      <div className='card text-center py-8'>
+        <Loader2 className='w-8 h-8 animate-spin mx-auto mb-4 text-muted-foreground' />
+        <p className='text-sm text-muted-foreground'>Loading people...</p>
+      </div>
+    )
+  }
+
+  // Show error state if there was an error fetching people
+  if (error) {
+    return (
+      <div className='card text-center py-8'>
+        <h3 className='font-semibold mb-2 text-destructive'>
+          Error Loading People
+        </h3>
+        <p className='text-sm text-muted-foreground mb-4'>{error}</p>
+        <Button asChild variant='outline'>
+          <Link href='/people'>Manage People</Link>
+        </Button>
+      </div>
+    )
+  }
+
+  // Show empty state if no people are available
   if (people.length === 0) {
     return (
       <div className='card text-center py-8'>

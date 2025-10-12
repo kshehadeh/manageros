@@ -1,5 +1,4 @@
 import { getOneOnOneById } from '@/lib/actions/oneonone'
-import { getPeopleForOneOnOne } from '@/lib/actions/person'
 import { OneOnOneForm } from '@/components/oneonone-form'
 import { OneOnOneDetailClient } from '@/components/oneonone-detail-client'
 import { getServerSession } from 'next-auth'
@@ -26,10 +25,7 @@ export default async function EditOneOnOnePage({
   }
 
   try {
-    const [oneOnOne, people] = await Promise.all([
-      getOneOnOneById(id),
-      getPeopleForOneOnOne(),
-    ])
+    const oneOnOne = await getOneOnOneById(id)
 
     return (
       <OneOnOneDetailClient
@@ -50,7 +46,7 @@ export default async function EditOneOnOnePage({
             </div>
           </div>
 
-          <OneOnOneForm people={people} existingOneOnOne={oneOnOne} />
+          <OneOnOneForm existingOneOnOne={oneOnOne} />
         </div>
       </OneOnOneDetailClient>
     )

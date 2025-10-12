@@ -34,12 +34,7 @@ import { toast } from 'sonner'
 import { FeedbackDialog } from './feedback-dialog'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { getKindLabel } from '@/lib/utils/feedback'
-interface Person {
-  id: string
-  name: string
-  email: string | null
-  role: string | null
-}
+import { usePeopleCache } from '@/hooks/use-organization-cache'
 
 interface FilterState {
   keyword: string
@@ -72,7 +67,6 @@ interface FeedbackWithRelations {
 
 interface FeedbackTableProps {
   feedback: FeedbackWithRelations[]
-  people: Person[]
   currentUserId?: string
   hideFilters?: boolean
   onRefresh?: () => void
@@ -88,11 +82,12 @@ interface ContextMenuState {
 
 export function FeedbackTable({
   feedback,
-  people,
   currentUserId,
   hideFilters = false,
   onRefresh,
 }: FeedbackTableProps) {
+  // Use the people cache for filter dropdowns
+  const { people } = usePeopleCache()
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({
     visible: false,
     x: 0,

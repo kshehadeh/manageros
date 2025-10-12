@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
 import { Prisma } from '@prisma/client'
+import type { PersonListItem, PeopleResponse } from '@/types/api'
 
 // Helper function to parse comma-separated values
 function parseValues(param: string): string[] {
@@ -266,7 +267,7 @@ export async function GET(request: NextRequest) {
     `
 
     // Convert bigint to number for reportCount and map field names
-    const people = peopleRaw.map(person => ({
+    const people: PersonListItem[] = peopleRaw.map(person => ({
       id: person.id,
       name: person.name,
       email: person.email,
@@ -288,7 +289,7 @@ export async function GET(request: NextRequest) {
       reportCount: Number(person.reportCount),
     }))
 
-    return NextResponse.json({
+    const response: PeopleResponse = {
       people,
       pagination: {
         page,
@@ -297,7 +298,9 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(totalCount / limit),
         hasMore: page * limit < totalCount,
       },
-    })
+    }
+
+    return NextResponse.json(response)
   } catch (error) {
     console.error('Error fetching people:', error)
     return NextResponse.json(

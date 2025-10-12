@@ -1,26 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-
-export interface PersonListItem {
-  id: string
-  name: string
-  email: string | null
-  role: string | null
-  status: string
-  avatarUrl: string | null
-  startDate: Date | null
-  endDate: Date | null
-  teamId: string | null
-  managerId: string | null
-  jobRoleId: string | null
-  organizationId: string
-  userId: string | null
-  createdAt: Date
-  updatedAt: Date
-  teamName: string | null
-  managerName: string | null
-  jobRoleTitle: string | null
-  reportCount: number
-}
+import type { PersonListItem, PeopleResponse } from '@/types/api'
 
 interface PeopleFilters {
   search?: string
@@ -28,19 +7,6 @@ interface PeopleFilters {
   managerId?: string
   jobRoleId?: string
   status?: string
-}
-
-interface PaginationInfo {
-  page: number
-  limit: number
-  totalCount: number
-  totalPages: number
-  hasMore: boolean
-}
-
-interface PeopleResponse {
-  people: PersonListItem[]
-  pagination: PaginationInfo
 }
 
 interface UsePeopleOptions {

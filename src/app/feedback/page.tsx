@@ -2,7 +2,6 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { getAllFeedback } from '@/lib/actions/feedback'
-import { getPeopleForFeedbackFilters } from '@/lib/actions/person'
 import FeedbackViewClient from '@/components/feedback/feedback-view-client'
 import { prisma } from '@/lib/db'
 import { MessageCircle } from 'lucide-react'
@@ -18,9 +17,8 @@ export default async function FeedbackPage() {
     redirect('/organization/create')
   }
 
-  const [feedback, people, currentPerson] = await Promise.all([
+  const [feedback, currentPerson] = await Promise.all([
     getAllFeedback(),
-    getPeopleForFeedbackFilters(),
     prisma.person.findFirst({
       where: {
         user: {
@@ -45,7 +43,6 @@ export default async function FeedbackPage() {
 
       <FeedbackViewClient
         initialFeedback={feedback}
-        people={people}
         currentUserId={currentPerson?.id}
       />
     </div>

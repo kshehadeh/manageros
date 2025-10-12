@@ -25,13 +25,11 @@ interface Feedback {
 
 interface FeedbackViewClientProps {
   initialFeedback: Feedback[]
-  people: Person[]
   currentUserId?: string
 }
 
 export default function FeedbackViewClient({
   initialFeedback,
-  people,
   currentUserId,
 }: FeedbackViewClientProps) {
   const [feedback, setFeedback] = useState(initialFeedback)
@@ -48,7 +46,6 @@ export default function FeedbackViewClient({
   return (
     <FeedbackTable
       feedback={feedback}
-      people={people}
       currentUserId={currentUserId}
       onRefresh={handleRefresh}
     />

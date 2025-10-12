@@ -5,7 +5,7 @@ import { ColumnDef } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { MoreHorizontal, Users, Building, Briefcase } from 'lucide-react'
-import type { PersonListItem } from '@/hooks/use-people'
+import type { PersonListItem } from '@/types/api'
 import { PersonAvatar } from '@/components/people/person-avatar'
 
 interface CreateColumnsProps {

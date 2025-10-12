@@ -20,13 +20,12 @@ import {
   type MeetingInstanceFormData,
   meetingInstanceSchema,
 } from '@/lib/validations'
-import { Person } from '@prisma/client'
 import { AlertCircle, Plus, X } from 'lucide-react'
 import { MarkdownEditor } from '@/components/markdown-editor'
+import { PersonSelect } from '@/components/ui/person-select'
 
 interface MeetingInstanceFormProps {
   meetingId: string
-  people: Person[]
   initialData?: Partial<MeetingInstanceFormData>
   isEditing?: boolean
   instanceId?: string
@@ -35,7 +34,6 @@ interface MeetingInstanceFormProps {
 
 export function MeetingInstanceForm({
   meetingId,
-  people,
   initialData,
   isEditing = false,
   instanceId,
@@ -179,23 +177,17 @@ export function MeetingInstanceForm({
           <div className='space-y-2'>
             {formData.participants.map((participant, index) => (
               <div key={index} className='flex items-center gap-2'>
-                <Select
-                  value={participant.personId}
-                  onValueChange={value =>
-                    updateParticipant(index, 'personId', value)
-                  }
-                >
-                  <SelectTrigger className='flex-1'>
-                    <SelectValue placeholder='Select participant' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {people.map(person => (
-                      <SelectItem key={person.id} value={person.id}>
-                        {person.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className='flex-1'>
+                  <PersonSelect
+                    value={participant.personId}
+                    onValueChange={value =>
+                      updateParticipant(index, 'personId', value)
+                    }
+                    placeholder='Select participant'
+                    showAvatar={true}
+                    showRole={true}
+                  />
+                </div>
 
                 <Select
                   value={participant.status}

@@ -12,37 +12,6 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { Prisma } from '@prisma/client'
 
-export async function getPeople() {
-  try {
-    const user = await getCurrentUser()
-    if (!user.organizationId) {
-      return []
-    }
-    return await prisma.person.findMany({
-      where: {
-        status: 'active',
-        organizationId: user.organizationId,
-      },
-      include: {
-        jobRole: {
-          include: {
-            level: true,
-            domain: true,
-          },
-        },
-        team: true,
-        manager: true,
-        reports: true,
-        user: true,
-      },
-      orderBy: { name: 'asc' },
-    })
-  } catch (error) {
-    console.error('Error fetching people:', error)
-    return []
-  }
-}
-
 export async function getPeopleHierarchy() {
   try {
     const user = await getCurrentUser()
@@ -663,69 +632,4 @@ export async function getDirectReports() {
     console.error('Error fetching direct reports:', error)
     return []
   }
-}
-
-export async function getPeopleForOneOnOne() {
-  const user = await getCurrentUser()
-
-  if (!user.organizationId) {
-    throw new Error('User must belong to an organization')
-  }
-
-  // Get all people in the organization for one-on-one meetings
-  const people = await prisma.person.findMany({
-    where: {
-      organizationId: user.organizationId,
-      status: 'active',
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      avatar: true,
-      birthday: true,
-      manager: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      reports: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-    },
-    orderBy: { name: 'asc' },
-  })
-
-  return people
-}
-
-export async function getPeopleForFeedbackFilters() {
-  const user = await getCurrentUser()
-
-  if (!user.organizationId) {
-    throw new Error('User must belong to an organization to view people')
-  }
-
-  // Get all people in the organization for filter dropdowns
-  const people = await prisma.person.findMany({
-    where: {
-      organizationId: user.organizationId,
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      birthday: true,
-      avatar: true,
-    },
-    orderBy: { name: 'asc' },
-  })
-
-  return people
 }

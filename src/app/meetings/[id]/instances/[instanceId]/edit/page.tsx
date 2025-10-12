@@ -1,5 +1,4 @@
 import { getMeetingInstance } from '@/lib/actions/meeting-instance'
-import { getPeople } from '@/lib/actions/person'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -23,10 +22,7 @@ export default async function EditMeetingInstancePage({
   }
 
   const { id, instanceId } = await params
-  const [meetingInstance, people] = await Promise.all([
-    getMeetingInstance(instanceId),
-    getPeople(),
-  ])
+  const meetingInstance = await getMeetingInstance(instanceId)
 
   if (!meetingInstance) {
     notFound()
@@ -54,7 +50,6 @@ export default async function EditMeetingInstancePage({
       meetingId={id}
       instanceId={instanceId}
       meetingTitle={meetingInstance.meeting.title}
-      people={people}
       initialData={initialData}
       meetingInstanceId={meetingInstance.id}
     />
