@@ -11,9 +11,9 @@ jobs:
     release:
         # Only run if the PR was actually merged (not just closed)
         # and not from the release bot itself
-        if: |
-            github.event.pull_request.merged == true &&
-            !contains(github.event.pull_request.title, 'chore: release')
+        # if: |
+        #     github.event.pull_request.merged == true &&
+        #     !contains(github.event.pull_request.title, 'chore: release')
         runs-on: ubuntu-latest
         permissions:
             contents: write
