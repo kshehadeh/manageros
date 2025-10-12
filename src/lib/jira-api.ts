@@ -43,6 +43,7 @@ export interface JiraIssue {
       name: string
     }
     assignee?: JiraUser
+    statusCategory?: string[]
   }
 }
 
@@ -228,8 +229,9 @@ export class JiraApiService {
    * Search for tickets based on project, status, assignee, or any combination
    */
   async searchTickets(
-    query: string,
+    query?: string,
     project?: string,
+    statusCategory?: string[],
     status?: string,
     assignee?: string,
     limit: number = 50
@@ -248,6 +250,7 @@ export class JiraApiService {
         name: string
         color?: string
       }
+      statusCategory?: string[]
       priority?: {
         name: string
         iconUrl?: string
@@ -284,30 +287,46 @@ export class JiraApiService {
     jqlQuery: string
     project: string
     status: string
+    statusCategory: string[] | string
     assignee: string
   }> {
-    // Build JQL query
-    let jqlQuery = query
+    // Build JQL query by collecting all WHERE clauses
+    const whereClauses: string[] = []
+
+    // Add base query if specified
+    if (query) {
+      whereClauses.push(query)
+    }
 
     // Add project filter if specified
     if (project) {
-      jqlQuery += ` AND project = "${project}"`
+      whereClauses.push(`project = "${project}"`)
     }
 
     // Add status filter if specified
     if (status) {
-      jqlQuery += ` AND status = "${status}"`
+      whereClauses.push(`status = "${status}"`)
+    }
+
+    // Add status category filter if specified
+    if (statusCategory && statusCategory.length > 0) {
+      whereClauses.push(
+        `statusCategory in (${statusCategory.map(status => `"${status}"`).join(',')})`
+      )
     }
 
     // Add assignee filter if specified
     if (assignee) {
       // Check if it's an email address or account ID
       if (assignee.includes('@')) {
-        jqlQuery += ` AND assignee in (${assignee})`
+        whereClauses.push(`assignee in (${assignee})`)
       } else {
-        jqlQuery += ` AND assignee = "${assignee}"`
+        whereClauses.push(`assignee = "${assignee}"`)
       }
     }
+
+    // Join all clauses with AND
+    const jqlQuery = whereClauses.join(' AND ')
 
     const response = await this.makeRequest<{
       total: number
@@ -319,6 +338,7 @@ export class JiraApiService {
           description?: string
           issuetype?: { name: string; iconUrl?: string }
           status?: { name: string; statusCategory?: { colorName: string } }
+          statusCategory?: string[]
           priority?: { name: string; iconUrl?: string }
           project?: { key: string; name: string }
           assignee?: {
@@ -359,6 +379,7 @@ export class JiraApiService {
         name: issue.fields.status?.name || 'Unknown',
         color: issue.fields.status?.statusCategory?.colorName,
       },
+      statusCategory: issue.fields.statusCategory,
       priority: issue.fields.priority
         ? {
             name: issue.fields.priority.name,
@@ -407,6 +428,7 @@ export class JiraApiService {
       jqlQuery,
       project: project || 'All projects',
       status: status || 'All statuses',
+      statusCategory: statusCategory || 'All statuses',
       assignee: assignee || 'All assignees',
     }
   }

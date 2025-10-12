@@ -8,6 +8,7 @@ export { currentUserTool } from './tools/current-user-tool'
 export { githubTool } from './tools/github-tool'
 export { jiraTool } from './tools/jira-tool'
 export { dateTimeTool } from './tools/date-time-tool'
+export { personLookupTool } from './tools/person-lookup-tool'
 
 // Import tools for the aiTools object
 import { peopleTool } from './tools/people-tool'
@@ -19,6 +20,7 @@ import { currentUserTool } from './tools/current-user-tool'
 import { githubTool } from './tools/github-tool'
 import { jiraTool } from './tools/jira-tool'
 import { dateTimeTool } from './tools/date-time-tool'
+import { personLookupTool } from './tools/person-lookup-tool'
 
 // Export all tools as a single object for easy access
 export const aiTools = {
@@ -31,4 +33,5 @@ export const aiTools = {
   github: githubTool,
   jira: jiraTool,
   dateTime: dateTimeTool,
+  personLookup: personLookupTool,
 }

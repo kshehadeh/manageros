@@ -9,6 +9,7 @@ import { currentUserTool } from '@/lib/ai/tools/current-user-tool'
 import { githubTool } from '@/lib/ai/tools/github-tool'
 import { jiraTool } from '@/lib/ai/tools/jira-tool'
 import { dateTimeTool } from '@/lib/ai/tools/date-time-tool'
+import { personLookupTool } from '@/lib/ai/tools/person-lookup-tool'
 
 export async function POST(req: Request) {
   try {
@@ -65,6 +66,11 @@ export async function POST(req: Request) {
           inputSchema: dateTimeTool.parameters,
           execute: dateTimeTool.execute,
         },
+        personLookup: {
+          description: personLookupTool.description,
+          inputSchema: personLookupTool.parameters,
+          execute: personLookupTool.execute,
+        },
       },
       stopWhen: stepCountIs(10),
       system: `You are an AI assistant for ManagerOS, a management platform for engineering managers. You help users understand and interact with their organizational data including people, initiatives, tasks, meetings, and teams.
@@ -72,6 +78,9 @@ export async function POST(req: Request) {
 Key guidelines:
 - Always use the available tools to fetch current data from the database
 - When asked about relative time periods (like "last week", "this month", "yesterday"), FIRST call the dateTime tool to get the current date and helpful date ranges
+- When asked about a specific person by name (e.g., "John", "Sarah Smith"), use the personLookup tool to find their person ID. If multiple matches are found, ask the user to clarify which person they mean.
+- When asked about a person's GitHub activity (e.g., "John's pull requests", "GitHub contributions for Sarah"), FIRST use personLookup to get their person ID, then use the github tool with that personId parameter. Do NOT include author:, involves:, or other username qualifiers in the query when using personId - the tool will automatically add the correct GitHub username.
+- When asked about a person's Jira activity, FIRST use personLookup to get their person ID if searching by name.
 - After using tools, ALWAYS provide a clear, helpful response to the user based on the tool results
 - Provide clear, concise responses with relevant details
 - When listing entities, include key information like status, dates, and relationships

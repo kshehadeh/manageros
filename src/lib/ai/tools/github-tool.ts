@@ -35,12 +35,19 @@ interface GitHubIssue {
 }
 
 export const githubTool = {
-  description: 'Search GitHub pull requests and issues using GitHub API',
+  description:
+    "Search GitHub pull requests and issues using GitHub API. Can search for a specific person's GitHub activity if personId is provided.",
   parameters: z.object({
     query: z
       .string()
       .describe(
-        'Search query for GitHub PRs/issues (e.g., "is:pr author:username", "is:issue assignee:username")'
+        'Search query for GitHub PRs/issues. Must include "is:pr" (for pull requests) or "is:issue" (for issues). If not specified, defaults to "is:pr". Additional search terms can be added (e.g., "is:pr merged", "is:issue label:bug"). IMPORTANT: If personId is provided, do NOT include author:, involves:, or other username qualifiers - the tool will automatically add the correct GitHub username.'
+      ),
+    personId: z
+      .string()
+      .optional()
+      .describe(
+        'Person ID to lookup their GitHub account and search for their activity'
       ),
     repository: z
       .string()
@@ -59,11 +66,13 @@ export const githubTool = {
   }),
   execute: async ({
     query,
+    personId,
     repository,
     state = 'all',
     limit = 20,
   }: {
     query: string
+    personId?: string
     repository?: string
     state?: 'open' | 'closed' | 'all'
     limit?: number
@@ -101,8 +110,68 @@ export const githubTool = {
         )
       }
 
+      // If personId is provided, lookup their GitHub account
+      let githubUsername: string | null = null
+      if (personId) {
+        // Verify person belongs to user's organization and get their GitHub account
+        const person = await prisma.person.findFirst({
+          where: {
+            id: personId,
+            organizationId: user.organizationId,
+          },
+          include: {
+            githubAccount: true,
+          },
+        })
+
+        if (!person) {
+          throw new Error('Person not found or access denied')
+        }
+
+        if (!person.githubAccount) {
+          throw new Error(
+            `No GitHub account linked for ${person.name}. Please link a GitHub account first.`
+          )
+        }
+
+        githubUsername = person.githubAccount.githubUsername
+
+        console.log('githubUsername', githubUsername, person.name)
+        // Validate GitHub username format (alphanumeric and hyphens only)
+        if (!/^[a-zA-Z0-9-]+$/.test(githubUsername)) {
+          throw new Error(
+            `Invalid GitHub username "${githubUsername}" for ${person.name}. GitHub usernames can only contain letters, numbers, and hyphens. Please update the linked GitHub account.`
+          )
+        }
+      }
+
       // Build search query
-      let searchQuery = query
+      let searchQuery = query.trim()
+
+      // If personId is provided, remove any user-related qualifiers from the query
+      // since we'll add the correct username ourselves
+      if (githubUsername) {
+        // Remove any author:, involves:, assignee:, mentions:, commenter: qualifiers
+        searchQuery = searchQuery
+          .replace(
+            /\b(author|involves|assignee|mentions|commenter):[^\s]+/g,
+            ''
+          )
+          .trim()
+      }
+
+      // Ensure query has a type specifier (is:pr or is:issue)
+      // If not specified, default to pull requests
+      if (!searchQuery.includes('is:pr') && !searchQuery.includes('is:issue')) {
+        searchQuery = `is:pr ${searchQuery}`
+      }
+
+      // Add GitHub username filter if personId was provided
+      if (githubUsername) {
+        // Use 'author:' for PRs/issues created by the user
+        // Username is already validated to only contain alphanumeric chars and hyphens
+        searchQuery += ` author:${githubUsername}`
+      }
 
       // Add repository filter if specified
       if (repository) {
@@ -111,7 +180,7 @@ export const githubTool = {
 
       // Add state filter
       if (state !== 'all') {
-        searchQuery += ` state:${state}`
+        searchQuery += ` is:${state}`
       }
 
       // Decrypt the PAT
@@ -130,6 +199,9 @@ export const githubTool = {
       )
 
       if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        const errorMessage = errorData.message || response.statusText
+
         if (response.status === 401) {
           throw new Error('Invalid GitHub credentials')
         }
@@ -138,8 +210,13 @@ export const githubTool = {
             'GitHub API rate limit exceeded or insufficient permissions'
           )
         }
+        if (response.status === 422) {
+          throw new Error(
+            `GitHub search query is invalid: ${errorMessage}. Query used: "${searchQuery}"`
+          )
+        }
         throw new Error(
-          `GitHub API error: ${response.status} ${response.statusText}`
+          `GitHub API error: ${response.status} ${response.statusText}. ${errorMessage}`
         )
       }
 
@@ -194,6 +271,7 @@ export const githubTool = {
         totalCount: data.total_count,
         results,
         searchQuery,
+        githubUsername: githubUsername || undefined,
         repository: repository || 'All repositories',
         state,
       }
