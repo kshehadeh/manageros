@@ -16,7 +16,7 @@ import {
 import {
   createMeeting,
   updateMeeting,
-  matchAttendeesToPeople,
+  importMeetingFromICS,
 } from '@/lib/actions/meeting'
 import { type MeetingFormData, meetingSchema } from '@/lib/validations'
 import { Team } from '@prisma/client'
@@ -37,7 +37,6 @@ import { MarkdownEditor } from '@/components/markdown-editor'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PersonSelect } from '@/components/ui/person-select'
 import { InitiativeSelect } from '@/components/ui/initiative-select'
-import { parseICSFile, validateICSFile } from '@/lib/utils/ics-parser'
 import { toast } from 'sonner'
 
 interface MeetingFormProps {
@@ -185,44 +184,39 @@ export function MeetingForm({
     setErrors({})
 
     try {
-      // Validate file
-      const validationError = validateICSFile(file)
-      if (validationError) {
-        toast.error(validationError)
+      // Validate file extension
+      if (!file.name.toLowerCase().endsWith('.ics')) {
+        toast.error('Please select a valid ICS calendar file (.ics)')
+        return
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024
+      if (file.size > maxSize) {
+        toast.error('ICS file is too large. Maximum size is 5MB')
         return
       }
 
       // Read file content
       const fileContent = await file.text()
 
-      // Parse ICS file
-      const parsedData = await parseICSFile(fileContent)
+      // Call server action to parse and match attendees
+      const importedData = await importMeetingFromICS(fileContent)
 
-      // Match attendees to people in the organization
-      const matchedAttendees = await matchAttendeesToPeople(
-        parsedData.attendeeEmails,
-        parsedData.organizerEmail
-      )
-
-      // Format scheduledAt for datetime-local input
-      const scheduledAtFormatted = parsedData.scheduledAt
-        ? new Date(parsedData.scheduledAt).toISOString().slice(0, 16)
-        : ''
-
-      // Populate form with parsed data
+      // Populate form with imported data
       setFormData(prev => ({
         ...prev,
-        title: parsedData.title,
-        description: parsedData.description || '',
-        scheduledAt: scheduledAtFormatted,
-        duration: parsedData.duration || 60,
-        location: parsedData.location || '',
-        ownerId: matchedAttendees.ownerId || prev.ownerId,
-        participants: matchedAttendees.participants,
+        title: importedData.title,
+        description: importedData.description || '',
+        scheduledAt: importedData.scheduledAt,
+        duration: importedData.duration || 60,
+        location: importedData.location || '',
+        ownerId: importedData.ownerId || prev.ownerId,
+        participants: importedData.participants,
       }))
 
       toast.success(
-        `Meeting imported successfully! ${matchedAttendees.participants.length} participant(s) matched.`
+        `Meeting imported successfully! ${importedData.participants.length} participant(s) matched.`
       )
     } catch (error) {
       console.error('Error importing ICS file:', error)

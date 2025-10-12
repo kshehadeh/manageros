@@ -575,6 +575,57 @@ export interface MatchedAttendees {
   ownerId?: string
 }
 
+export interface ImportedMeetingData {
+  title: string
+  description?: string
+  scheduledAt: string // ISO 8601 format for datetime-local input
+  duration?: number
+  location?: string
+  participants: Array<{ personId: string; status: 'invited' }>
+  ownerId?: string
+}
+
+/**
+ * Import and parse an ICS file, then match attendees to people
+ * This must be a server action because node-ical uses Node.js APIs
+ */
+export async function importMeetingFromICS(
+  fileContent: string
+): Promise<ImportedMeetingData> {
+  const user = await getCurrentUser()
+
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to import meetings')
+  }
+
+  // Import parseICSFile dynamically only on server
+  const { parseICSFile } = await import('@/lib/utils/ics-parser')
+
+  // Parse the ICS file
+  const parsedData = await parseICSFile(fileContent)
+
+  // Match attendees to people in the organization
+  const matchedAttendees = await matchAttendeesToPeople(
+    parsedData.attendeeEmails,
+    parsedData.organizerEmail
+  )
+
+  // Format scheduledAt for datetime-local input
+  const scheduledAtFormatted = parsedData.scheduledAt
+    ? new Date(parsedData.scheduledAt).toISOString().slice(0, 16)
+    : ''
+
+  return {
+    title: parsedData.title,
+    description: parsedData.description,
+    scheduledAt: scheduledAtFormatted,
+    duration: parsedData.duration,
+    location: parsedData.location,
+    participants: matchedAttendees.participants,
+    ownerId: matchedAttendees.ownerId,
+  }
+}
+
 /**
  * Match attendee emails and organizer email to people in the organization
  * Uses email matching first, then falls back to name matching
