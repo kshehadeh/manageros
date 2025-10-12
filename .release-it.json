@@ -6,7 +6,6 @@
     "requireCleanWorkingDir": false,
     "requireUpstream": false,
     "push": true,
-    "requireBranch": "main",
     "pushArgs": ["--follow-tags"],
     "pushRepo": "origin",
     "sign": true
