@@ -1,5 +1,4 @@
 import { getMeeting } from '@/lib/actions/meeting'
-import { getPeople } from '@/lib/actions/person'
 import { getEntityLinks } from '@/lib/actions/entity-links'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -40,9 +39,8 @@ export default async function MeetingDetailPage({
   }
 
   const { id } = await params
-  const [meeting, people, entityLinks] = await Promise.all([
+  const [meeting, entityLinks] = await Promise.all([
     getMeeting(id),
-    getPeople(),
     getEntityLinks('Meeting', id),
   ])
 
@@ -209,7 +207,6 @@ export default async function MeetingDetailPage({
                   <MeetingInstanceList
                     instances={meeting.instances}
                     meetingId={meeting.id}
-                    people={people}
                   />
                 </div>
               )}

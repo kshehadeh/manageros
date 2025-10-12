@@ -31,13 +31,11 @@ type MeetingInstanceWithRelations = MeetingInstance & {
 interface MeetingInstanceListProps {
   instances: MeetingInstanceWithRelations[]
   meetingId: string
-  people: Person[]
 }
 
 export function MeetingInstanceList({
   instances,
   meetingId,
-  people,
 }: MeetingInstanceListProps) {
   const [open, setOpen] = useState(false)
   const router = useRouter()
@@ -66,7 +64,6 @@ export function MeetingInstanceList({
               </DialogHeader>
               <MeetingInstanceForm
                 meetingId={meetingId}
-                people={people}
                 onSuccess={handleSuccess}
               />
             </DialogContent>
@@ -93,7 +90,6 @@ export function MeetingInstanceList({
               </DialogHeader>
               <MeetingInstanceForm
                 meetingId={meetingId}
-                people={people}
                 onSuccess={handleSuccess}
               />
             </DialogContent>

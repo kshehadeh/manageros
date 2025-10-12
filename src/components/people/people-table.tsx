@@ -360,13 +360,6 @@ export function PeopleTable({ people, filteredPeople }: PeopleTableProps) {
               Add 1:1 with {oneOnOneModal.personName}
             </h4>
             <OneOnOneForm
-              people={displayPeople.map(p => ({
-                id: p.id,
-                name: p.name,
-                email: null,
-                role: null,
-                reports: [],
-              }))}
               preFilledReportId={oneOnOneModal.personId}
               onCancel={handleOneOnOneCancel}
             />

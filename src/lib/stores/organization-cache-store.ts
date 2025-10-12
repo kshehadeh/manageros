@@ -2,8 +2,18 @@
 
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
-import { getPeople as fetchPeopleFromServer } from '@/lib/actions/person'
 import { getTeams as fetchTeamsFromServer } from '@/lib/actions/team'
+import type { PeopleResponse } from '@/types/api'
+
+// Fetch all people from the API (used for cache)
+async function fetchPeopleFromAPI() {
+  const response = await fetch('/api/people?limit=10000&status=active')
+  if (!response.ok) {
+    throw new Error('Failed to fetch people')
+  }
+  const data = (await response.json()) as PeopleResponse
+  return data.people
+}
 
 // Types for cached data
 export interface CachedPerson {
@@ -140,10 +150,40 @@ export const useOrganizationCacheStore = create<OrganizationCacheState>()(
         }))
 
         try {
-          const peopleData = await fetchPeopleFromServer()
+          const peopleData = await fetchPeopleFromAPI()
+
+          // Transform API response to match CachedPerson format
+          const transformedPeople = peopleData.map(person => ({
+            id: person.id,
+            name: person.name,
+            email: person.email,
+            role: person.role,
+            avatar: person.avatarUrl,
+            status: person.status,
+            organizationId: person.organizationId,
+            jobRole: person.jobRoleId
+              ? {
+                  id: person.jobRoleId,
+                  title: person.jobRoleTitle || '',
+                }
+              : null,
+            team: person.teamId
+              ? {
+                  id: person.teamId,
+                  name: person.teamName || '',
+                }
+              : null,
+            manager: person.managerId
+              ? {
+                  id: person.managerId,
+                  name: person.managerName || '',
+                }
+              : null,
+            reports: [],
+          }))
 
           set({
-            people: peopleData,
+            people: transformedPeople,
             peopleMetadata: {
               lastFetched: new Date(),
               isFetching: false,
