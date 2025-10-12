@@ -1,0 +1,45 @@
+name: Release
+
+on:
+    pull_request:
+        types: [closed]
+        branches:
+            - main
+
+jobs:
+    release:
+        # Only run if the PR was actually merged (not just closed)
+        # and not from the release bot itself
+        if: |
+            github.event.pull_request.merged == true &&
+            !contains(github.event.pull_request.title, 'chore: release')
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+            issues: write
+            pull-requests: write
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Setup Bun
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Install dependencies
+              run: bun install
+
+            - name: Configure Git
+              run: |
+                  git config --global user.name "github-actions[bot]"
+                  git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+            - name: Run release-it
+              run: bun run release
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

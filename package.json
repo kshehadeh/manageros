@@ -33,7 +33,7 @@
     "version:major": "bun scripts/bump-version.ts major",
     "postinstall": "bunx prisma generate && bun run help:generate",
     "prepare": "husky",
-    "release": "release-it"
+    "release": "release-it --ci"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

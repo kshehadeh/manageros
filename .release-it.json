@@ -1,0 +1,25 @@
+{
+  "git": {
+    "commitMessage": "chore: release v${version}",
+    "tagName": "v${version}",
+    "requireBranch": "main",
+    "requireCleanWorkingDir": false,
+    "requireUpstream": false,
+    "push": true,
+    "pushArgs": ["--follow-tags"],
+    "pushRepo": "origin"
+  },
+  "github": {
+    "release": true,
+    "releaseName": "Release v${version}",
+    "releaseNotes": "npx auto-changelog --stdout --commit-limit false -u --template https://raw.githubusercontent.com/release-it/release-it/master/templates/changelog-compact.hbs"
+  },
+  "npm": {
+    "publish": false
+  },
+  "hooks": {
+    "after:bump": "bunx prisma generate"
+  },
+  "plugins": {},
+  "increment": "patch"
+}
