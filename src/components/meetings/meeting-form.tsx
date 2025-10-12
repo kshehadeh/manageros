@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,7 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { createMeeting, updateMeeting } from '@/lib/actions/meeting'
+import {
+  createMeeting,
+  updateMeeting,
+  matchAttendeesToPeople,
+} from '@/lib/actions/meeting'
 import { type MeetingFormData, meetingSchema } from '@/lib/validations'
 import { Team } from '@prisma/client'
 import {
@@ -26,11 +30,15 @@ import {
   FileText,
   Clock,
   CalendarDays,
+  Upload,
+  Loader2,
 } from 'lucide-react'
 import { MarkdownEditor } from '@/components/markdown-editor'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PersonSelect } from '@/components/ui/person-select'
 import { InitiativeSelect } from '@/components/ui/initiative-select'
+import { parseICSFile, validateICSFile } from '@/lib/utils/ics-parser'
+import { toast } from 'sonner'
 
 interface MeetingFormProps {
   teams: Team[]
@@ -53,6 +61,8 @@ export function MeetingForm({
 }: MeetingFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isImportingICS, setIsImportingICS] = useState(false)
+  const icsFileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
   // Form state to prevent clearing on errors
@@ -170,6 +180,71 @@ export function MeetingForm({
     }))
   }
 
+  const handleICSImport = async (file: File) => {
+    setIsImportingICS(true)
+    setErrors({})
+
+    try {
+      // Validate file
+      const validationError = validateICSFile(file)
+      if (validationError) {
+        toast.error(validationError)
+        return
+      }
+
+      // Read file content
+      const fileContent = await file.text()
+
+      // Parse ICS file
+      const parsedData = await parseICSFile(fileContent)
+
+      // Match attendees to people in the organization
+      const matchedAttendees = await matchAttendeesToPeople(
+        parsedData.attendeeEmails,
+        parsedData.organizerEmail
+      )
+
+      // Format scheduledAt for datetime-local input
+      const scheduledAtFormatted = parsedData.scheduledAt
+        ? new Date(parsedData.scheduledAt).toISOString().slice(0, 16)
+        : ''
+
+      // Populate form with parsed data
+      setFormData(prev => ({
+        ...prev,
+        title: parsedData.title,
+        description: parsedData.description || '',
+        scheduledAt: scheduledAtFormatted,
+        duration: parsedData.duration || 60,
+        location: parsedData.location || '',
+        ownerId: matchedAttendees.ownerId || prev.ownerId,
+        participants: matchedAttendees.participants,
+      }))
+
+      toast.success(
+        `Meeting imported successfully! ${matchedAttendees.participants.length} participant(s) matched.`
+      )
+    } catch (error) {
+      console.error('Error importing ICS file:', error)
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to import ICS file. Please check the file format.'
+      )
+    } finally {
+      setIsImportingICS(false)
+      // Reset file input
+      if (icsFileInputRef.current) {
+        icsFileInputRef.current.value = ''
+      }
+    }
+  }
+
+  const handleICSFileSelect = (files: FileList | null) => {
+    if (!files || files.length === 0) return
+    handleICSImport(files[0])
+  }
+
   const getSelectValue = (value: string | undefined) => value || 'none'
   const getFormValue = (value: string) => (value === 'none' ? '' : value)
 
@@ -180,6 +255,38 @@ export function MeetingForm({
         <div className='bg-destructive/10 border border-destructive/20 rounded-lg p-3 text-destructive text-sm flex items-center gap-2'>
           <AlertCircle className='h-4 w-4' />
           {errors.general}
+        </div>
+      )}
+
+      {/* ICS Import Button */}
+      {!isEditing && (
+        <div className='flex justify-end'>
+          <Button
+            type='button'
+            variant='outline'
+            onClick={() => icsFileInputRef.current?.click()}
+            disabled={isImportingICS || isSubmitting}
+          >
+            {isImportingICS ? (
+              <>
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                Importing...
+              </>
+            ) : (
+              <>
+                <Upload className='mr-2 h-4 w-4' />
+                Import from ICS
+              </>
+            )}
+          </Button>
+          <input
+            ref={icsFileInputRef}
+            type='file'
+            accept='.ics'
+            onChange={e => handleICSFileSelect(e.target.files)}
+            className='hidden'
+            disabled={isImportingICS || isSubmitting}
+          />
         </div>
       )}
 

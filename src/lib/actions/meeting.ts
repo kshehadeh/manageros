@@ -569,3 +569,96 @@ export async function removeMeetingParticipant(
   revalidatePath('/meetings')
   revalidatePath(`/meetings/${meetingId}`)
 }
+
+export interface MatchedAttendees {
+  participants: Array<{ personId: string; status: 'invited' }>
+  ownerId?: string
+}
+
+/**
+ * Match attendee emails and organizer email to people in the organization
+ * Uses email matching first, then falls back to name matching
+ */
+export async function matchAttendeesToPeople(
+  attendeeEmails: string[],
+  organizerEmail?: string
+): Promise<MatchedAttendees> {
+  const user = await getCurrentUser()
+
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to match attendees')
+  }
+
+  // Get all active people in the organization
+  const people = await prisma.person.findMany({
+    where: {
+      organizationId: user.organizationId,
+      status: 'active',
+    },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+    },
+  })
+
+  const matchedParticipants: Array<{ personId: string; status: 'invited' }> = []
+  let matchedOwnerId: string | undefined
+
+  // Helper function to match a single email
+  const matchEmail = (email: string): string | null => {
+    // Try exact email match first
+    const exactMatch = people.find(
+      p => p.email && p.email.toLowerCase() === email.toLowerCase()
+    )
+    if (exactMatch) {
+      return exactMatch.id
+    }
+
+    // Extract name from email local part (before @)
+    const emailLocalPart = email.split('@')[0]
+    // Replace common separators with spaces for better matching
+    const nameFromEmail = emailLocalPart
+      .replace(/[._-]/g, ' ')
+      .toLowerCase()
+      .trim()
+
+    // Try fuzzy name matching
+    const nameMatch = people.find(p => {
+      const personName = p.name.toLowerCase().trim()
+      // Check if names match (simple case-insensitive comparison)
+      return (
+        personName === nameFromEmail ||
+        personName.includes(nameFromEmail) ||
+        nameFromEmail.includes(personName)
+      )
+    })
+
+    return nameMatch ? nameMatch.id : null
+  }
+
+  // Match organizer first
+  if (organizerEmail) {
+    const organizerId = matchEmail(organizerEmail)
+    if (organizerId) {
+      matchedOwnerId = organizerId
+    }
+  }
+
+  // Match attendees
+  const uniqueAttendeeEmails = [...new Set(attendeeEmails)]
+  for (const email of uniqueAttendeeEmails) {
+    const personId = matchEmail(email)
+    if (personId) {
+      // Don't add duplicates
+      if (!matchedParticipants.find(p => p.personId === personId)) {
+        matchedParticipants.push({ personId, status: 'invited' })
+      }
+    }
+  }
+
+  return {
+    participants: matchedParticipants,
+    ownerId: matchedOwnerId,
+  }
+}
