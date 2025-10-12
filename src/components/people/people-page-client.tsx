@@ -2,23 +2,18 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { GroupedPeoplePageClient } from '@/components/people/grouped-people-page-client'
+import { PeopleDataTable } from '@/components/people/data-table'
 import { useSession } from 'next-auth/react'
 import { isAdmin } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
 import { Upload, UserPlus, Workflow, User } from 'lucide-react'
-import { Person } from '@/types/person'
 import { HelpIcon } from '@/components/help-icon'
 
-interface PeoplePageClientProps {
-  people: Person[]
-}
-
-export function PeoplePageClient({ people }: PeoplePageClientProps) {
+export function PeoplePageClient() {
   const { data: session } = useSession()
 
   return (
-    <div className='page-container'>
+    <div className='page-container px-3 md:px-0'>
       <div className='page-header'>
         <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
           <div>
@@ -59,8 +54,8 @@ export function PeoplePageClient({ people }: PeoplePageClientProps) {
         </div>
       </div>
 
-      <div className='page-section'>
-        <GroupedPeoplePageClient people={people} />
+      <div className='page-section -mx-3 md:mx-0'>
+        <PeopleDataTable enablePagination={true} limit={100} />
       </div>
     </div>
   )

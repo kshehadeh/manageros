@@ -87,6 +87,26 @@ export interface UserSettings {
     }
   >
 
+  // Per-view people table settings
+  peopleTableSettings: Record<
+    string,
+    {
+      sorting: Array<{ id: string; desc: boolean }>
+      grouping: string
+      sort: {
+        field: string
+        direction: 'asc' | 'desc'
+      }
+      filters: {
+        search: string
+        teamId: string
+        managerId: string
+        jobRoleId: string
+        status: string
+      }
+    }
+  >
+
   // Future expandable settings can be added here:
   // sidebarCollapsed: boolean
   // defaultPageSize: number
@@ -127,6 +147,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   },
   taskTableSettings: {},
   initiativeTableSettings: {},
+  peopleTableSettings: {},
   // When adding new settings, add their defaults here:
   // sidebarCollapsed: false
   // defaultPageSize: 25
@@ -357,6 +378,76 @@ export function updateInitiativeTableSettings(
     ...currentSettings,
     initiativeTableSettings: {
       ...currentSettings.initiativeTableSettings,
+      [settingsId]: updatedTableSettings,
+    },
+  }
+
+  saveUserSettings(userId, updatedSettings)
+}
+
+/**
+ * Get people table settings for a specific view
+ */
+export function getPeopleTableSettings(
+  userId: string,
+  settingsId: string
+): UserSettings['peopleTableSettings'][string] {
+  const settings = loadUserSettings(userId)
+  return (
+    settings.peopleTableSettings[settingsId] || {
+      sorting: [],
+      grouping: 'team',
+      sort: {
+        field: '',
+        direction: 'asc',
+      },
+      filters: {
+        search: '',
+        teamId: '',
+        managerId: '',
+        jobRoleId: '',
+        status: '',
+      },
+    }
+  )
+}
+
+/**
+ * Update people table settings for a specific view
+ */
+export function updatePeopleTableSettings(
+  userId: string,
+  settingsId: string,
+  tableSettings: Partial<UserSettings['peopleTableSettings'][string]>
+): void {
+  const currentSettings = loadUserSettings(userId)
+  const currentTableSettings = currentSettings.peopleTableSettings[
+    settingsId
+  ] || {
+    sorting: [],
+    grouping: 'team',
+    sort: {
+      field: '',
+      direction: 'asc' as const,
+    },
+    filters: {
+      search: '',
+      teamId: '',
+      managerId: '',
+      jobRoleId: '',
+      status: '',
+    },
+  }
+
+  const updatedTableSettings = {
+    ...currentTableSettings,
+    ...tableSettings,
+  }
+
+  const updatedSettings = {
+    ...currentSettings,
+    peopleTableSettings: {
+      ...currentSettings.peopleTableSettings,
       [settingsId]: updatedTableSettings,
     },
   }
