@@ -387,7 +387,7 @@ export const PersonAiSynopsisReport: ReportDefinition<
       campaignSummaries,
     }
 
-    const prompt = `Create a concise synopsis of ${person.name}'s work between ${input.fromDate} and ${input.toDate}. Default to tasks and include GitHub/Jira if present${input.includeFeedback ? ' and include feedback highlights' : ''}. Use bullet points. Data:\n\n${JSON.stringify(payload, null, 2)}`
+    const prompt = `Create a concise synopsis of ${person.name}'s work between ${input.fromDate} and ${input.toDate}. Include initiatives when found, then detail tasks, and include GitHub/Jira if present${input.includeFeedback ? ' and include feedback highlights' : ''}. Use bullet points for clarity. Data:\n\n${JSON.stringify(payload, null, 2)}`
 
     const synopsis = await generateText({
       system,
