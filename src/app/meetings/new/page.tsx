@@ -19,14 +19,7 @@ export default async function NewMeetingPage() {
 
   return (
     <div className='space-y-6'>
-      <div>
-        <h1 className='text-2xl font-bold'>Create New Meeting</h1>
-        <p className='text-muted-foreground'>
-          Schedule a new meeting for your organization
-        </p>
-      </div>
-
-      <MeetingForm teams={teams} />
+      <MeetingForm teams={teams} showHeader />
     </div>
   )
 }
