@@ -9,6 +9,7 @@ import {
 } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth-utils'
+import { utcToLocalDateTimeString } from '@/lib/timezone-utils'
 
 export async function createMeeting(formData: MeetingFormData) {
   const user = await getCurrentUser()
@@ -578,7 +579,7 @@ export interface MatchedAttendees {
 export interface ImportedMeetingData {
   title: string
   description?: string
-  scheduledAt: string // ISO 8601 format for datetime-local input
+  scheduledAt: string // YYYY-MM-DDTHH:mm format in local time for datetime-local input
   duration?: number
   location?: string
   participants: Array<{ personId: string; status: 'invited' }>
@@ -611,8 +612,9 @@ export async function importMeetingFromICS(
   )
 
   // Format scheduledAt for datetime-local input
+  // Convert from UTC to local time for proper display in datetime-local input
   const scheduledAtFormatted = parsedData.scheduledAt
-    ? new Date(parsedData.scheduledAt).toISOString().slice(0, 16)
+    ? utcToLocalDateTimeString(new Date(parsedData.scheduledAt))
     : ''
 
   return {
