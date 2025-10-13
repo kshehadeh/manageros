@@ -329,6 +329,16 @@ export const meetingUpdateSchema = z
     teamId: z.string().optional(),
     initiativeId: z.string().optional(),
     ownerId: z.string().optional(),
+    participants: z
+      .array(
+        z.object({
+          personId: z.string().min(1, 'Person ID is required'),
+          status: z
+            .enum(['invited', 'accepted', 'declined', 'tentative'])
+            .default('invited'),
+        })
+      )
+      .optional(),
   })
   .refine(
     data => {

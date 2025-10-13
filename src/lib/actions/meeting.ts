@@ -199,6 +199,20 @@ export async function updateMeeting(id: string, formData: MeetingUpdateData) {
     }
   }
 
+  // Verify all participants belong to user's organization if participants are being updated
+  if (validatedData.participants && validatedData.participants.length > 0) {
+    const participantIds = validatedData.participants.map(p => p.personId)
+    const participants = await prisma.person.findMany({
+      where: {
+        id: { in: participantIds },
+        organizationId: user.organizationId,
+      },
+    })
+    if (participants.length !== participantIds.length) {
+      throw new Error('One or more participants not found or access denied')
+    }
+  }
+
   // Update the meeting
   const meeting = await prisma.meeting.update({
     where: { id },
@@ -215,6 +229,16 @@ export async function updateMeeting(id: string, formData: MeetingUpdateData) {
       teamId: validatedData.teamId,
       initiativeId: validatedData.initiativeId,
       ownerId: validatedData.ownerId,
+      // Update participants if provided
+      ...(validatedData.participants && {
+        participants: {
+          deleteMany: {}, // Remove all existing participants
+          create: validatedData.participants.map(participant => ({
+            personId: participant.personId,
+            status: participant.status,
+          })),
+        },
+      }),
     },
     include: {
       organization: true,

@@ -112,6 +112,10 @@ export function MeetingForm({
           formData.recurrenceType === 'none' || !formData.recurrenceType
             ? undefined
             : formData.recurrenceType,
+        // Filter out participants with empty personId
+        participants: formData.participants.filter(
+          p => p.personId && p.personId.trim() !== ''
+        ),
       }
 
       // Validate the form data
