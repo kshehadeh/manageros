@@ -7,6 +7,10 @@ import { MoreHorizontal } from 'lucide-react'
 import { RagCircle } from '@/components/rag'
 import type { InitiativeWithRelations } from '@/types/initiative'
 import { calculateInitiativeCompletionPercentage } from '@/lib/completion-utils'
+import {
+  initiativeStatusUtils,
+  type InitiativeStatus,
+} from '@/lib/initiative-status'
 
 interface CreateColumnsProps {
   onButtonClick?: (_e: React.MouseEvent, _initiativeId: string) => void
@@ -17,40 +21,6 @@ export function createInitiativeColumns({
   onButtonClick,
   grouping: _grouping = [],
 }: CreateColumnsProps): ColumnDef<InitiativeWithRelations>[] {
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case 'planned':
-        return 'secondary'
-      case 'active':
-        return 'default'
-      case 'completed':
-        return 'default'
-      case 'on-hold':
-        return 'secondary'
-      case 'canceled':
-        return 'destructive'
-      default:
-        return 'secondary'
-    }
-  }
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'planned':
-        return 'Planned'
-      case 'active':
-        return 'Active'
-      case 'completed':
-        return 'Completed'
-      case 'on-hold':
-        return 'On Hold'
-      case 'canceled':
-        return 'Canceled'
-      default:
-        return status
-    }
-  }
-
   return [
     {
       id: 'rag',
@@ -109,16 +79,23 @@ export function createInitiativeColumns({
       id: 'owners',
       header: 'Owner',
       accessorFn: row =>
-        row.owners.length > 0
-          ? row.owners.map(owner => owner.person.name).join(', ')
-          : '—',
+        row.owners.length > 0 ? row.owners[0].person.name : '—',
       cell: ({ row }) => {
         const initiative = row.original
+        if (initiative.owners.length === 0) {
+          return <span className='text-muted-foreground'>—</span>
+        }
+        const firstName = initiative.owners[0].person.name
+        const additionalCount = initiative.owners.length - 1
         return (
           <span className='text-muted-foreground'>
-            {initiative.owners.length > 0
-              ? initiative.owners.map(owner => owner.person.name).join(', ')
-              : '—'}
+            {firstName}
+            {additionalCount > 0 && (
+              <span className='text-xs'>
+                {' '}
+                and {additionalCount} other{additionalCount > 1 ? 's' : ''}
+              </span>
+            )}
           </span>
         )
       },
@@ -133,8 +110,14 @@ export function createInitiativeColumns({
       cell: ({ row }) => {
         const initiative = row.original
         return (
-          <Badge variant={getStatusBadgeVariant(initiative.status)}>
-            {getStatusLabel(initiative.status)}
+          <Badge
+            variant={initiativeStatusUtils.getVariant(
+              initiative.status as InitiativeStatus
+            )}
+          >
+            {initiativeStatusUtils.getLabel(
+              initiative.status as InitiativeStatus
+            )}
           </Badge>
         )
       },
@@ -220,10 +203,13 @@ export function createInitiativeColumns({
     {
       id: 'status',
       header: 'Status',
-      accessorFn: row => getStatusLabel(row.status),
+      accessorFn: row =>
+        initiativeStatusUtils.getLabel(row.status as InitiativeStatus),
       cell: ({ row }) => {
         const initiative = row.original
-        return getStatusLabel(initiative.status)
+        return initiativeStatusUtils.getLabel(
+          initiative.status as InitiativeStatus
+        )
       },
       meta: {
         hidden: true,

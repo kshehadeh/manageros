@@ -9,6 +9,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useInitiatives } from '@/hooks/use-initiatives'
+import {
+  initiativeStatusUtils,
+  type InitiativeStatus,
+} from '@/lib/initiative-status'
 
 interface Initiative {
   id: string
@@ -71,7 +75,10 @@ export function InitiativeSelect({
         <div className='font-medium truncate'>{initiative.title}</div>
         {(showStatus || showTeam) && (
           <div className='text-xs text-muted-foreground truncate'>
-            {showStatus && initiative.status}
+            {showStatus &&
+              initiativeStatusUtils.getLabel(
+                initiative.status as InitiativeStatus
+              )}
             {showStatus && showTeam && initiative.team && ' • '}
             {showTeam && initiative.team?.name}
           </div>
