@@ -31,6 +31,12 @@ export default async function NewMeetingInstancePage({
     redirect(`/meetings/${id}`)
   }
 
+  // Transform parent meeting participants to initial data format
+  const initialParticipants = meeting.participants.map(p => ({
+    personId: p.personId,
+    status: 'invited' as const, // Reset status to invited for new instance
+  }))
+
   return (
     <div className='space-y-6'>
       <div>
@@ -41,7 +47,10 @@ export default async function NewMeetingInstancePage({
       </div>
 
       <div className='max-w-2xl'>
-        <MeetingInstanceForm meetingId={meeting.id} />
+        <MeetingInstanceForm
+          meetingId={meeting.id}
+          initialData={{ participants: initialParticipants }}
+        />
       </div>
     </div>
   )

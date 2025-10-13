@@ -31,11 +31,16 @@ type MeetingInstanceWithRelations = MeetingInstance & {
 interface MeetingInstanceListProps {
   instances: MeetingInstanceWithRelations[]
   meetingId: string
+  parentParticipants?: Array<{
+    personId: string
+    status: string
+  }>
 }
 
 export function MeetingInstanceList({
   instances,
   meetingId,
+  parentParticipants = [],
 }: MeetingInstanceListProps) {
   const [open, setOpen] = useState(false)
   const router = useRouter()
@@ -44,6 +49,12 @@ export function MeetingInstanceList({
     setOpen(false)
     router.refresh() // Refresh the page data
   }
+
+  // Transform parent participants to initial data format (reset status to invited)
+  const initialParticipants = parentParticipants.map(p => ({
+    personId: p.personId,
+    status: 'invited' as const,
+  }))
 
   return (
     <div className='space-y-6'>
@@ -64,6 +75,7 @@ export function MeetingInstanceList({
               </DialogHeader>
               <MeetingInstanceForm
                 meetingId={meetingId}
+                initialData={{ participants: initialParticipants }}
                 onSuccess={handleSuccess}
               />
             </DialogContent>
@@ -90,6 +102,7 @@ export function MeetingInstanceList({
               </DialogHeader>
               <MeetingInstanceForm
                 meetingId={meetingId}
+                initialData={{ participants: initialParticipants }}
                 onSuccess={handleSuccess}
               />
             </DialogContent>

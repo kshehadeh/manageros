@@ -207,6 +207,10 @@ export default async function MeetingDetailPage({
                   <MeetingInstanceList
                     instances={meeting.instances}
                     meetingId={meeting.id}
+                    parentParticipants={meeting.participants.map(p => ({
+                      personId: p.personId,
+                      status: p.status,
+                    }))}
                   />
                 </div>
               )}
