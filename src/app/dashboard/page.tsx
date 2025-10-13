@@ -33,7 +33,7 @@ export default async function Home() {
     )
   }
 
-  // Sections render below using independent Suspense-wrapped server components
+  // Sections now fetch their own data via API routes on the client side
 
   return (
     <div className='page-container'>
@@ -55,31 +55,22 @@ export default async function Home() {
           </Suspense>
 
           <Suspense fallback={<RecentOneOnOnesSectionFallback />}>
-            <DashboardRecentOneOnOnesSection userId={user.id} />
+            <DashboardRecentOneOnOnesSection />
           </Suspense>
 
           <Suspense fallback={<UpcomingMeetingsSectionFallback />}>
-            <DashboardUpcomingMeetingsSection
-              userId={user.id}
-              organizationId={user.organizationId!}
-            />
+            <DashboardUpcomingMeetingsSection />
           </Suspense>
         </div>
 
         {/* Right Sidebar */}
         <div className='w-full lg:w-80 space-y-6'>
           <Suspense fallback={<RelatedTeamsSectionFallback />}>
-            <DashboardRelatedTeamsSection
-              userId={user.id}
-              organizationId={user.organizationId!}
-            />
+            <DashboardRelatedTeamsSection />
           </Suspense>
 
           <Suspense fallback={<DirectReportsSectionFallback />}>
-            <DashboardDirectReportsSection
-              userId={user.id}
-              organizationId={user.organizationId!}
-            />
+            <DashboardDirectReportsSection />
           </Suspense>
         </div>
       </div>

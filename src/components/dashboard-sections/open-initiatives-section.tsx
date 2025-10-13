@@ -1,15 +1,28 @@
+'use client'
+
+import { useMemo } from 'react'
 import { InitiativeDataTable } from '@/components/initiatives/data-table'
 import { ExpandableSection } from '@/components/expandable-section'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { useSession } from 'next-auth/react'
 
 interface DashboardOpenInitiativesSectionProps {
   organizationId: string
 }
 
-export async function DashboardOpenInitiativesSection({
+export function DashboardOpenInitiativesSection({
   organizationId: _organizationId,
 }: DashboardOpenInitiativesSectionProps) {
-  const user = await getCurrentUser()
+  const { data: session } = useSession()
+  const personId = (session?.user as { personId?: string })?.personId
+
+  // Memoize immutableFilters to prevent infinite loop
+  const immutableFilters = useMemo(
+    () => ({
+      status: 'planned,active',
+      ownerId: personId || '',
+    }),
+    [personId]
+  )
 
   return (
     <ExpandableSection
@@ -21,10 +34,7 @@ export async function DashboardOpenInitiativesSection({
         hideFilters={true}
         enablePagination={false}
         limit={10}
-        immutableFilters={{
-          status: 'planned,active',
-          ownerId: user.personId || '',
-        }}
+        immutableFilters={immutableFilters}
         settingsId='dashboard-initiatives'
       />
     </ExpandableSection>
