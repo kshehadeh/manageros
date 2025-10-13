@@ -65,29 +65,6 @@ export function SynopsisSectionSkeleton() {
   )
 }
 
-export function FeedbackSectionSkeleton() {
-  return (
-    <div className='flex-1 min-w-[300px] max-w-[500px]'>
-      <section id='feedback'>
-        <SectionHeader
-          icon={MessageCircle}
-          title='Feedback (0)'
-          action={
-            <div className='flex items-center gap-2'>
-              <Skeleton className='h-8 w-8' />
-              <Skeleton className='h-8 w-8' />
-            </div>
-          }
-        />
-        <div className='space-y-3'>
-          <Skeleton className='h-16 w-full' />
-          <Skeleton className='h-16 w-full' />
-        </div>
-      </section>
-    </div>
-  )
-}
-
 export function FeedbackCampaignsSectionSkeleton() {
   return (
     <div className='flex-1 min-w-[300px] max-w-[500px]'>
