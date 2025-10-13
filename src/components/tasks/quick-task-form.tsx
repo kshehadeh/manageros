@@ -76,6 +76,9 @@ const QuickTaskForm = forwardRef<QuickTaskFormRef, QuickTaskFormProps>(
           description: `"${taskTitle}" has been added to your tasks.`,
         })
 
+        // Dispatch custom event to notify task lists to refresh
+        window.dispatchEvent(new CustomEvent('task:created'))
+
         // Clear the form after successful submission
         setTitle('')
         setDetectedDate(null)

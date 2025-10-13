@@ -234,6 +234,16 @@ export function TaskDataTable({
     }
   }, [loading, isSearching])
 
+  // Listen for task creation events to refresh the list
+  useEffect(() => {
+    const handleTaskCreated = () => {
+      refetch()
+    }
+
+    window.addEventListener('task:created', handleTaskCreated)
+    return () => window.removeEventListener('task:created', handleTaskCreated)
+  }, [refetch])
+
   const { people } = usePeopleCache()
 
   const tasks = useMemo(() => tasksData?.tasks || [], [tasksData?.tasks])
