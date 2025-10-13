@@ -2,12 +2,7 @@
 
 import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import { useBreadcrumb } from './breadcrumb-provider'
-
-interface BreadcrumbItem {
-  name: string
-  href: string
-}
+import { useBreadcrumb, type BreadcrumbItem } from './breadcrumb-provider'
 
 const routeMap: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -53,13 +48,18 @@ export function DefaultBreadcrumbHandler() {
         currentPath += `/${segment}`
 
         // Handle dynamic routes (like [id])
-        if (segment.match(/^[a-f0-9]{24}$/)) {
-          // This looks like a MongoDB ObjectId, treat as dynamic
+        // Match MongoDB ObjectIds (24 hex chars) or CUIDs (starts with 'c' and is 25 chars)
+        const isMongoId = segment.match(/^[a-f0-9]{24}$/)
+        const isCuid = segment.match(/^c[a-z0-9]{24}$/)
+
+        if (isMongoId || isCuid) {
+          // This looks like an ID, treat as dynamic
           const parentPath = currentPath.replace(`/${segment}`, '')
           const parentName = routeMap[parentPath] || segment
           breadcrumbs.push({
             name: `${parentName} Details`,
             href: currentPath,
+            isLoading: true, // Mark ID segments as loading
           })
         } else {
           const name =

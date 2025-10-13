@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { useBreadcrumb } from '@/components/breadcrumb-provider'
+import {
+  useBreadcrumb,
+  type BreadcrumbItem,
+} from '@/components/breadcrumb-provider'
 
-interface BreadcrumbItem {
-  name: string
-  href: string
-}
+// Re-export BreadcrumbItem type for convenience
+export type { BreadcrumbItem }
 
 /**
  * Hook to set breadcrumbs for a page

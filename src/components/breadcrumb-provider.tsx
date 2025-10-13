@@ -2,9 +2,10 @@
 
 import { createContext, useContext, useState, ReactNode } from 'react'
 
-interface BreadcrumbItem {
+export interface BreadcrumbItem {
   name: string
   href: string
+  isLoading?: boolean
 }
 
 interface BreadcrumbContextType {
