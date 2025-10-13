@@ -2,8 +2,6 @@ import { prisma } from '@/lib/db'
 import { TaskDataTable } from '@/components/tasks/data-table'
 import { SectionHeader } from '@/components/ui/section-header'
 import { ListTodo } from 'lucide-react'
-import { getActivePeopleForOrganization } from '@/lib/data/people'
-import { TASK_LIST_SELECT } from '@/lib/task-list-select'
 
 interface ActiveTasksSectionProps {
   personId: string
@@ -18,30 +16,31 @@ export async function ActiveTasksSection({
     return null
   }
 
-  // Get active tasks for this person
-  const tasks = await prisma.task.findMany({
+  // Get active task count for this person
+  const taskCount = await prisma.task.count({
     where: {
       assigneeId: personId,
       status: {
         in: ['todo', 'in_progress'],
       },
     },
-    select: TASK_LIST_SELECT,
-    orderBy: { updatedAt: 'desc' },
   })
 
   // Only show if person has active tasks
-  if (tasks.length === 0) {
+  if (taskCount === 0) {
     return null
   }
 
-  // Get people data for TaskTable
-  const people = await getActivePeopleForOrganization(organizationId)
-
   return (
     <section>
-      <SectionHeader icon={ListTodo} title={`Active Tasks (${tasks.length})`} />
-      <TaskDataTable tasks={tasks} people={people} hideFilters={true} />
+      <SectionHeader icon={ListTodo} title={`Active Tasks (${taskCount})`} />
+      <TaskDataTable
+        hideFilters={true}
+        immutableFilters={{
+          assigneeId: personId,
+          status: 'todo,in_progress',
+        }}
+      />
     </section>
   )
 }
