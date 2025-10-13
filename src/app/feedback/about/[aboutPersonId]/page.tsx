@@ -12,14 +12,20 @@ interface PersonFeedbackPageProps {
 export default async function PersonFeedbackPage({
   params,
 }: PersonFeedbackPageProps) {
-  await requireAuth({ requireOrganization: true })
+  const user = await requireAuth({ requireOrganization: true })
+
+  // requireAuth with requireOrganization ensures organizationId exists
+  if (!user.organizationId) {
+    notFound()
+  }
 
   const { aboutPersonId } = await params
 
-  // Get the person to verify they exist and show their name
-  const person = await prisma.person.findUnique({
+  // Get the person and verify they belong to the current user's organization
+  const person = await prisma.person.findFirst({
     where: {
       id: aboutPersonId,
+      organizationId: user.organizationId, // Ensure same organization
     },
     select: {
       id: true,
@@ -28,6 +34,7 @@ export default async function PersonFeedbackPage({
     },
   })
 
+  // Return 404 if person not found or belongs to different organization
   if (!person) {
     notFound()
   }
