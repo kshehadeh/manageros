@@ -7,7 +7,7 @@ import { TeamActionsDropdown } from './team-actions-dropdown'
 import { ClickableTeamAvatar } from './clickable-team-avatar'
 import { TeamAvatarEditDialog } from './team-avatar-edit-dialog'
 import { User, Rocket, Building2 } from 'lucide-react'
-import { PeopleTable } from '@/components/people/people-table'
+import { PeopleDataTable } from '@/components/people/data-table'
 import { InitiativeDataTable } from '@/components/initiatives/data-table'
 import { TeamChildTeamsTable } from './team-child-teams-table'
 import { Team } from '@prisma/client'
@@ -56,12 +56,6 @@ export function TeamDetailContent({ team, isAdmin }: TeamDetailContentProps) {
   const handleAvatarChange = (avatarUrl: string | null) => {
     setCurrentAvatar(avatarUrl)
   }
-
-  // Compute level field for people (needed by PeopleTable component)
-  const peopleWithLevel = team.people.map(person => ({
-    ...person,
-    level: 0, // For team members, we'll use level 0 since they're all at the same level
-  }))
 
   return (
     <>
@@ -112,7 +106,15 @@ export function TeamDetailContent({ team, isAdmin }: TeamDetailContentProps) {
                 <Link href={`/people/new?teamId=${team.id}`}>Add Member</Link>
               </Button>
             </div>
-            <PeopleTable people={peopleWithLevel} />
+            <PeopleDataTable
+              hideFilters={true}
+              enablePagination={false}
+              limit={100}
+              immutableFilters={{
+                teamId: team.id,
+              }}
+              settingsId={`team-${team.id}-members`}
+            />
           </div>
 
           {/* Team Initiatives */}
