@@ -1,6 +1,5 @@
 import { requireAuth } from '@/lib/auth-utils'
-import { getPendingInvitationsForUser } from '@/lib/actions/organization'
-import { OrganizationSetupCards } from '@/components/organization-setup-cards'
+import { DashboardOrganizationSetup } from '@/components/dashboard-organization-setup'
 import { Suspense } from 'react'
 import { DashboardAssignedTasksSection } from '@/components/dashboard-sections/assigned-tasks-section'
 import { DashboardOpenInitiativesSection } from '@/components/dashboard-sections/open-initiatives-section'
@@ -24,13 +23,7 @@ export default async function Home() {
 
   // If user doesn't have an organization, show organization setup cards
   if (!user.organizationId) {
-    const pendingInvitations = await getPendingInvitationsForUser()
-
-    return (
-      <div className='page-container'>
-        <OrganizationSetupCards pendingInvitations={pendingInvitations} />
-      </div>
-    )
+    return <DashboardOrganizationSetup />
   }
 
   // Sections now fetch their own data via API routes on the client side

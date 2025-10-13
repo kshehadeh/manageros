@@ -6,10 +6,10 @@ export interface FeedbackCampaignListItem {
   targetPersonId: string
   templateId: string | null
   status: 'draft' | 'active' | 'completed' | 'cancelled'
-  startDate: Date
-  endDate: Date
-  createdAt: Date
-  updatedAt: Date
+  startDate: string // ISO string from API, parse to Date before using with date-fns
+  endDate: string // ISO string from API, parse to Date before using with date-fns
+  createdAt: string // ISO string from API
+  updatedAt: string // ISO string from API
   targetPerson: {
     id: string
     name: string

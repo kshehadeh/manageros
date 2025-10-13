@@ -45,8 +45,9 @@ export function DashboardFeedbackCampaignsSection() {
   const formattedCampaigns = campaigns.map(campaign => ({
     ...campaign,
     name: null,
-    startDate: campaign.startDate,
-    endDate: campaign.endDate,
+    // Parse ISO strings back to Date objects for date-fns formatting
+    startDate: new Date(campaign.startDate),
+    endDate: new Date(campaign.endDate),
     inviteEmails: [],
     responses: Array.from({ length: campaign._count.completedResponses }).map(
       (_, i) => ({
