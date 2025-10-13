@@ -38,3 +38,43 @@ export interface PeopleResponse {
     hasMore: boolean
   }
 }
+
+/**
+ * Feedback item as returned by the /api/feedback endpoint
+ */
+export interface FeedbackListItem {
+  id: string
+  aboutId: string
+  fromId: string
+  kind: string
+  isPrivate: boolean
+  body: string
+  createdAt: string
+  about: {
+    id: string
+    name: string
+    email: string | null
+    role: string | null
+  }
+  from: {
+    id: string
+    name: string
+    email: string | null
+    role: string | null
+  }
+}
+
+/**
+ * Response from the /api/feedback endpoint
+ */
+export interface FeedbackResponse {
+  feedback: FeedbackListItem[]
+  currentPersonId: string
+  pagination: {
+    page: number
+    limit: number
+    totalCount: number
+    totalPages: number
+    hasMore: boolean
+  }
+}

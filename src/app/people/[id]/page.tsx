@@ -112,6 +112,17 @@ export default async function PersonDetailPage({
       }
     : undefined
 
+  // Get feedback count for this person (respecting privacy rules)
+  const feedbackCount = await prisma.feedback.count({
+    where: {
+      aboutId: id,
+      OR: [
+        { isPrivate: false },
+        ...(currentPerson ? [{ fromId: currentPerson.id }] : []),
+      ],
+    },
+  })
+
   // Get linked account avatars
   let linkedAvatars: { jiraAvatar?: string; githubAvatar?: string } = {}
   try {
@@ -132,6 +143,7 @@ export default async function PersonDetailPage({
         currentPerson={currentPersonWithLevel}
         organizationId={session.user.organizationId}
         currentUserId={session.user.id}
+        feedbackCount={feedbackCount}
       />
     </PersonDetailClient>
   )

@@ -7,6 +7,7 @@ import {
   User as UserIcon,
   Building2,
   Briefcase,
+  MessageCircle,
 } from 'lucide-react'
 import { Suspense } from 'react'
 import type { User, Person as PrismaPerson, Team } from '@prisma/client'
@@ -23,7 +24,6 @@ type PersonWithDetailRelations = Person & {
 // Import skeleton components
 import {
   SynopsisSectionSkeleton,
-  FeedbackSectionSkeleton,
   FeedbackCampaignsSectionSkeleton,
   OwnedInitiativesSectionSkeleton,
   ActiveTasksSectionSkeleton,
@@ -37,7 +37,6 @@ import {
 
 // Import section components
 import { SynopsisSection } from './sections/synopsis-section'
-import { FeedbackSection } from './sections/feedback-section'
 import { FeedbackCampaignsSection } from './sections/feedback-campaigns-section'
 import { OwnedInitiativesSection } from './sections/owned-initiatives-section'
 import { ActiveTasksSection } from './sections/active-tasks-section'
@@ -60,6 +59,7 @@ interface PersonDetailContentProps {
   currentPerson?: PersonWithDetailRelations
   organizationId: string
   currentUserId: string
+  feedbackCount: number
 }
 
 export function PersonDetailContent({
@@ -69,6 +69,7 @@ export function PersonDetailContent({
   currentPerson,
   organizationId,
   currentUserId,
+  feedbackCount,
 }: PersonDetailContentProps) {
   return (
     <div className='page-container'>
@@ -148,6 +149,16 @@ export function PersonDetailContent({
                   </span>
                 </div>
               )}
+              <div className='flex items-center gap-1'>
+                <MessageCircle className='w-4 h-4' />
+                <Link
+                  href={`/feedback/about/${person.id}`}
+                  className='hover:text-primary transition-colors'
+                >
+                  {feedbackCount}{' '}
+                  {feedbackCount === 1 ? 'Feedback' : 'Feedbacks'}
+                </Link>
+              </div>
             </div>
           </div>
           <PersonActionsDropdown
@@ -167,25 +178,14 @@ export function PersonDetailContent({
       <div className='flex flex-col lg:flex-row gap-6'>
         {/* Main Content */}
         <div className='flex-1 space-y-6'>
-          {/* Feedback and Feedback Campaigns Side by Side */}
-          <div className='flex flex-wrap gap-6'>
-            {/* Feedback Section */}
-            <Suspense fallback={<FeedbackSectionSkeleton />}>
-              <FeedbackSection
-                person={person}
-                currentPersonId={currentPerson?.id}
-              />
-            </Suspense>
-
-            {/* Feedback Campaigns Section */}
-            <Suspense fallback={<FeedbackCampaignsSectionSkeleton />}>
-              <FeedbackCampaignsSection
-                personId={person.id}
-                organizationId={organizationId}
-                currentUserId={currentUserId}
-              />
-            </Suspense>
-          </div>
+          {/* Feedback Campaigns Section */}
+          <Suspense fallback={<FeedbackCampaignsSectionSkeleton />}>
+            <FeedbackCampaignsSection
+              personId={person.id}
+              organizationId={organizationId}
+              currentUserId={currentUserId}
+            />
+          </Suspense>
 
           {/* Owned Initiatives */}
           <Suspense fallback={<OwnedInitiativesSectionSkeleton />}>
