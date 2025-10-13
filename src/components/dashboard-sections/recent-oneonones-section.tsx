@@ -1,27 +1,40 @@
+'use client'
+
 import Link from 'next/link'
-import { prisma } from '@/lib/db'
 import { ExpandableSection } from '@/components/expandable-section'
+import { useOneOnOnes } from '@/hooks/use-oneonones'
+import { useSession } from 'next-auth/react'
 
-interface DashboardRecentOneOnOnesSectionProps {
-  userId: string
-}
+export function DashboardRecentOneOnOnesSection() {
+  const { data: session, status } = useSession()
+  const currentUserId = session?.user?.id
 
-export async function DashboardRecentOneOnOnesSection({
-  userId,
-}: DashboardRecentOneOnOnesSectionProps) {
-  const recentOneOnOnes = await prisma.oneOnOne.findMany({
-    where: {
-      OR: [
-        { manager: { user: { id: userId } } },
-        { report: { user: { id: userId } } },
-      ],
-    },
-    orderBy: { scheduledAt: 'desc' },
-    include: {
-      manager: { include: { user: true } },
-      report: { include: { user: true } },
-    },
+  const { data, loading, error } = useOneOnOnes({
+    sort: 'scheduledAt:desc',
+    limit: 10,
+    enabled: status !== 'loading',
   })
+
+  if (loading || status === 'loading') {
+    return (
+      <ExpandableSection
+        title='Recent 1:1s'
+        icon='Handshake'
+        viewAllHref='/oneonones'
+      >
+        <div className='flex items-center justify-center py-8'>
+          <div className='text-muted-foreground'>Loading...</div>
+        </div>
+      </ExpandableSection>
+    )
+  }
+
+  if (error) {
+    console.error('Error loading recent one-on-ones:', error)
+    return null
+  }
+
+  const recentOneOnOnes = data?.oneOnOnes || []
 
   if (!recentOneOnOnes || recentOneOnOnes.length === 0) return null
 
@@ -39,7 +52,7 @@ export async function DashboardRecentOneOnOnesSection({
         >
           <div className='space-y-1'>
             <div className='font-medium text-foreground'>
-              {oneOnOne.manager?.user?.id === userId ? (
+              {oneOnOne.manager?.user?.id === currentUserId ? (
                 <span>
                   With{' '}
                   <span className='hover:text-primary transition-colors'>

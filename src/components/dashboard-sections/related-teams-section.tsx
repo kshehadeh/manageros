@@ -1,61 +1,76 @@
-import { prisma } from '@/lib/db'
+'use client'
+
+import { useMemo } from 'react'
 import { ExpandableSection } from '@/components/expandable-section'
 import { TeamListItem } from '@/components/teams/team-list-item'
+import { useTeams } from '@/hooks/use-teams'
+import { useSession } from 'next-auth/react'
 
-interface DashboardRelatedTeamsSectionProps {
-  userId: string
-  organizationId: string
-}
+export function DashboardRelatedTeamsSection() {
+  const { status } = useSession()
 
-async function getAllManagedPeople(userId: string) {
-  const managedPersonIds: string[] = []
+  // Memoize immutableFilters to prevent infinite loop
+  const immutableFilters = useMemo(
+    () => ({
+      relatedToUser: 'true',
+    }),
+    []
+  )
 
-  const currentUserPerson = await prisma.person.findFirst({
-    where: { user: { id: userId } },
-    select: { id: true },
+  const { data, loading, error } = useTeams({
+    immutableFilters,
+    sort: 'name:asc',
+    limit: 100,
+    enabled: status !== 'loading',
   })
 
-  if (!currentUserPerson) return managedPersonIds
-
-  const findReports = async (managerId: string) => {
-    const directReports = await prisma.person.findMany({
-      where: { managerId },
-      select: { id: true },
-    })
-
-    for (const report of directReports) {
-      managedPersonIds.push(report.id)
-      await findReports(report.id)
-    }
+  if (loading || status === 'loading') {
+    return (
+      <ExpandableSection
+        title='Related Teams'
+        icon='Users2'
+        viewAllHref='/teams'
+      >
+        <div className='flex items-center justify-center py-8'>
+          <div className='text-muted-foreground'>Loading...</div>
+        </div>
+      </ExpandableSection>
+    )
   }
 
-  await findReports(currentUserPerson.id)
-  return managedPersonIds
-}
+  if (error) {
+    console.error('Error loading related teams:', error)
+    return null
+  }
 
-export async function DashboardRelatedTeamsSection({
-  userId,
-  organizationId,
-}: DashboardRelatedTeamsSectionProps) {
-  const managedPersonIds = await getAllManagedPeople(userId)
-
-  const teams = await prisma.team.findMany({
-    where: {
-      organizationId,
-      OR: [
-        { people: { some: { user: { id: userId } } } },
-        { people: { some: { id: { in: managedPersonIds } } } },
-      ],
-    },
-    orderBy: { name: 'asc' },
-    include: { people: true, initiatives: true, parent: true },
-  })
+  const teams = data?.teams || []
 
   if (!teams || teams.length === 0) return null
 
+  // Transform the data to match the expected format
+  const formattedTeams = teams.map(team => ({
+    ...team,
+    avatar: null,
+    people: [], // Not needed for list item display
+    initiatives: [], // Not needed for list item display
+    parent: team.parent
+      ? {
+          id: team.parent.id,
+          name: team.parent.name || '',
+          description: null,
+          organizationId: team.organizationId,
+          createdAt: team.createdAt,
+          updatedAt: team.updatedAt,
+          avatar: null,
+          parentId: null,
+        }
+      : null,
+    _count: team._count,
+  }))
+
   return (
     <ExpandableSection title='Related Teams' icon='Users2' viewAllHref='/teams'>
-      {teams.map(team => (
+      {formattedTeams.map(team => (
         <TeamListItem key={team.id} team={team} />
       ))}
     </ExpandableSection>
