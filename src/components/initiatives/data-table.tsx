@@ -193,6 +193,7 @@ export function InitiativeDataTable({
   const {
     data: initiativesData,
     loading,
+    isInitialLoad,
     error,
     refetch,
   } = useInitiatives({
@@ -506,12 +507,7 @@ export function InitiativeDataTable({
                     <Filter className='h-4 w-4' />
                     Filters
                     {hasActiveFilters && (
-                      <Badge
-                        variant='default'
-                        className='h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs'
-                      >
-                        •
-                      </Badge>
+                      <div className='h-2 w-2 bg-primary rounded-full' />
                     )}
                   </Button>
                 </PopoverTrigger>
@@ -657,7 +653,7 @@ export function InitiativeDataTable({
 
           {/* Results Count */}
           <div className='text-sm text-muted-foreground'>
-            {loading
+            {isInitialLoad && loading
               ? 'Loading...'
               : `Showing ${initiatives.length} ${
                   initiatives.length === 1 ? 'initiative' : 'initiatives'
@@ -671,7 +667,13 @@ export function InitiativeDataTable({
       )}
 
       {/* Table */}
-      <div className='rounded-md border'>
+      <div className='rounded-md border relative'>
+        {/* Loading Spinner in top right corner */}
+        {loading && (
+          <div className='absolute top-2 right-2 z-10 bg-background/80 rounded-full p-2'>
+            <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent' />
+          </div>
+        )}
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
@@ -703,7 +705,7 @@ export function InitiativeDataTable({
             ))}
           </TableHeader>
           <TableBody>
-            {loading ? (
+            {isInitialLoad && loading ? (
               <TableRow>
                 <TableCell
                   colSpan={
@@ -829,7 +831,10 @@ export function InitiativeDataTable({
               variant='outline'
               size='sm'
               onClick={() => table.previousPage()}
-              disabled={!initiativesData.pagination.hasPreviousPage || loading}
+              disabled={
+                !initiativesData.pagination.hasPreviousPage ||
+                (isInitialLoad && loading)
+              }
             >
               <ChevronLeft className='h-4 w-4' />
               Previous
@@ -838,7 +843,10 @@ export function InitiativeDataTable({
               variant='outline'
               size='sm'
               onClick={() => table.nextPage()}
-              disabled={!initiativesData.pagination.hasNextPage || loading}
+              disabled={
+                !initiativesData.pagination.hasNextPage ||
+                (isInitialLoad && loading)
+              }
             >
               Next
               <ChevronRight className='h-4 w-4' />

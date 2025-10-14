@@ -34,6 +34,7 @@ export function useInitiatives({
 }: UseInitiativesOptions = {}) {
   const [data, setData] = useState<InitiativesResponse | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const fetchInitiatives = useCallback(async () => {
@@ -80,6 +81,7 @@ export function useInitiatives({
       setData(null)
     } finally {
       setLoading(false)
+      setIsInitialLoad(false)
     }
   }, [page, limit, filters, immutableFilters, sort, enabled])
 
@@ -111,6 +113,7 @@ export function useInitiatives({
   return {
     data,
     loading,
+    isInitialLoad,
     error,
     refetch,
     updateInitiative,

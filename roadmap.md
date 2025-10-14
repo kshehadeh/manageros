@@ -351,6 +351,15 @@ _Next Review: February 2025_
   - Implemented proper access control (admin-only) and organization isolation
   - Added database migration: `20251004124451_add_avatar_to_team`
 
+### Updates on 2025-10-14
+
+- **Teams Page Data Table Migration** (Completed):
+  - Replaced bespoke teams table with unified TanStack-based data table
+  - Uses `/api/teams` with server-side search, parent filtering, and pagination
+  - Added persistent table settings (`useTeamTableSettings`) for grouping/sorting/filters
+  - Default grouping by parent team; consistent actions and UI with People/Tasks tables
+  - Updated docs `docs/api/teams.md` to reflect query params and response pagination
+
 ### Updates on 2025-01-30
 
 - **Client-Side Caching System** (Completed):
