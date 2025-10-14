@@ -9,11 +9,13 @@ import { OneOnOneListItem } from '@/hooks/use-oneonones'
 interface CreateColumnsProps {
   onButtonClick?: (_e: React.MouseEvent, _oneOnOneId: string) => void
   currentUserId?: string
+  grouping?: string[]
 }
 
 export function createOneOnOneColumns({
   onButtonClick,
   currentUserId,
+  grouping: _grouping = [],
 }: CreateColumnsProps): ColumnDef<OneOnOneListItem>[] {
   return [
     {

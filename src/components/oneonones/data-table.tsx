@@ -271,7 +271,13 @@ export function OneOnOneDataTable({
       }),
     },
     onColumnFiltersChange: setColumnFilters,
-    onSortingChange: updateSorting,
+    onSortingChange: updaterOrValue => {
+      const newSorting =
+        typeof updaterOrValue === 'function'
+          ? updaterOrValue(settings.sorting)
+          : updaterOrValue
+      updateSorting(newSorting)
+    },
     onExpandedChange: setExpanded,
     onGlobalFilterChange: setGlobalFilter,
     onPaginationChange: setPagination,
@@ -280,7 +286,7 @@ export function OneOnOneDataTable({
     getSortedRowModel: getSortedRowModel(),
     getGroupedRowModel: getGroupedRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    ...(enablePagination && { getPaginationRowModel: getPaginationRowModel() }),
     manualPagination: enablePagination,
     pageCount: enablePagination
       ? Math.ceil(
