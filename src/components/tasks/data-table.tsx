@@ -79,6 +79,8 @@ import { useSession } from 'next-auth/react'
 import { useTasks } from '@/hooks/use-tasks'
 import { usePeopleCache } from '@/hooks/use-organization-cache'
 import { useTaskTableSettings } from '@/hooks/use-task-table-settings'
+import { MultiSelect } from '@/components/ui/multi-select'
+import { InitiativeMultiSelect } from '@/components/ui/initiative-multi-select'
 
 interface ContextMenuState {
   visible: boolean
@@ -250,12 +252,25 @@ export function TaskDataTable({
 
   // Check if there are active filters
   const hasActiveFilters = useMemo(() => {
+    const statusArray = Array.isArray(settings.filters.status)
+      ? settings.filters.status
+      : []
+    const assigneeArray = Array.isArray(settings.filters.assigneeId)
+      ? settings.filters.assigneeId
+      : []
+    const initiativeArray = Array.isArray(settings.filters.initiativeId)
+      ? settings.filters.initiativeId
+      : []
+    const priorityArray = Array.isArray(settings.filters.priority)
+      ? settings.filters.priority
+      : []
+
     return (
       settings.filters.search !== '' ||
-      settings.filters.status !== '' ||
-      settings.filters.priority !== '' ||
-      settings.filters.assigneeId !== '' ||
-      settings.filters.initiativeId !== '' ||
+      statusArray.length > 0 ||
+      priorityArray.length > 0 ||
+      assigneeArray.length > 0 ||
+      initiativeArray.length > 0 ||
       settings.filters.dueDateFrom !== '' ||
       settings.filters.dueDateTo !== ''
     )
@@ -462,21 +477,23 @@ export function TaskDataTable({
         <div>
           <div className='flex items-center justify-between gap-4'>
             <div className='flex items-center gap-2 flex-1'>
-              {/* Search Input - Always visible */}
-              <div className='relative flex-1 max-w-sm'>
-                <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
-                <Input
-                  placeholder='Search tasks...'
-                  value={searchInput}
-                  onChange={e => setSearchInput(e.target.value)}
-                  className='pl-8'
-                />
-                {isSearching && (
-                  <div className='absolute right-2 top-2.5'>
-                    <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent' />
-                  </div>
-                )}
-              </div>
+              {/* Search Input - Hidden if immutable */}
+              {!immutableFilters?.search && (
+                <div className='relative flex-1 max-w-sm'>
+                  <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
+                  <Input
+                    placeholder='Search tasks...'
+                    value={searchInput}
+                    onChange={e => setSearchInput(e.target.value)}
+                    className='pl-8'
+                  />
+                  {isSearching && (
+                    <div className='absolute right-2 top-2.5'>
+                      <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent' />
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Additional Filters Button */}
               <Popover>
@@ -506,10 +523,10 @@ export function TaskDataTable({
                           setSearchInput('')
                           updateFilters({
                             search: '',
-                            status: '',
-                            assigneeId: '',
-                            initiativeId: '',
-                            priority: '',
+                            status: [],
+                            assigneeId: [],
+                            initiativeId: [],
+                            priority: [],
                             dueDateFrom: '',
                             dueDateTo: '',
                           })
@@ -521,60 +538,98 @@ export function TaskDataTable({
                     </div>
 
                     <div className='space-y-4'>
-                      {/* Status Filter */}
-                      <div className='space-y-2'>
-                        <label className='text-sm font-medium'>Status</label>
-                        <Select
-                          value={settings.filters.status || 'all'}
-                          onValueChange={value =>
-                            updateFilters({
-                              status: value === 'all' ? '' : value,
-                            })
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder='All statuses' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value='all'>All statuses</SelectItem>
-                            {ALL_TASK_STATUSES.map(status => (
-                              <SelectItem key={status} value={status}>
-                                {taskStatusUtils.getLabel(status)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      {/* Status Filter - Hidden if immutable */}
+                      {!immutableFilters?.status && (
+                        <div className='space-y-2'>
+                          <label className='text-sm font-medium'>Status</label>
+                          <MultiSelect
+                            options={ALL_TASK_STATUSES.map(status => ({
+                              label: taskStatusUtils.getLabel(status),
+                              value: status,
+                            }))}
+                            selected={
+                              Array.isArray(settings.filters.status)
+                                ? settings.filters.status
+                                : []
+                            }
+                            onChange={value => updateFilters({ status: value })}
+                            placeholder='All statuses'
+                          />
+                        </div>
+                      )}
 
-                      {/* Priority Filter */}
-                      <div className='space-y-2'>
-                        <label className='text-sm font-medium'>Priority</label>
-                        <Select
-                          value={settings.filters.priority || 'all'}
-                          onValueChange={value =>
-                            updateFilters({
-                              priority: value === 'all' ? '' : value,
-                            })
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder='All priorities' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value='all'>All priorities</SelectItem>
-                            {[1, 2, 3, 4, 5].map(priority => (
-                              <SelectItem
-                                key={priority}
-                                value={priority.toString()}
-                              >
-                                {taskPriorityUtils.getLabel(
-                                  priority as TaskPriority
-                                )}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      {/* Priority Filter - Hidden if immutable */}
+                      {!immutableFilters?.priority && (
+                        <div className='space-y-2'>
+                          <label className='text-sm font-medium'>
+                            Priority
+                          </label>
+                          <MultiSelect
+                            options={[1, 2, 3, 4, 5].map(priority => ({
+                              label: taskPriorityUtils.getLabel(
+                                priority as TaskPriority
+                              ),
+                              value: priority.toString(),
+                            }))}
+                            selected={
+                              Array.isArray(settings.filters.priority)
+                                ? settings.filters.priority
+                                : []
+                            }
+                            onChange={value =>
+                              updateFilters({ priority: value })
+                            }
+                            placeholder='All priorities'
+                          />
+                        </div>
+                      )}
+
+                      {/* Assignee Filter - Hidden if immutable */}
+                      {!immutableFilters?.assigneeId && (
+                        <div className='space-y-2'>
+                          <label className='text-sm font-medium'>
+                            Assignee
+                          </label>
+                          <MultiSelect
+                            options={[
+                              { label: 'Unassigned', value: 'unassigned' },
+                              ...people.map(person => ({
+                                label: person.name,
+                                value: person.id,
+                              })),
+                            ]}
+                            selected={
+                              Array.isArray(settings.filters.assigneeId)
+                                ? settings.filters.assigneeId
+                                : []
+                            }
+                            onChange={value =>
+                              updateFilters({ assigneeId: value })
+                            }
+                            placeholder='All assignees'
+                          />
+                        </div>
+                      )}
+
+                      {/* Initiative Filter - Hidden if immutable */}
+                      {!immutableFilters?.initiativeId && (
+                        <div className='space-y-2'>
+                          <label className='text-sm font-medium'>
+                            Initiative
+                          </label>
+                          <InitiativeMultiSelect
+                            selected={
+                              Array.isArray(settings.filters.initiativeId)
+                                ? settings.filters.initiativeId
+                                : []
+                            }
+                            onChange={value =>
+                              updateFilters({ initiativeId: value })
+                            }
+                            placeholder='All initiatives'
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </PopoverContent>

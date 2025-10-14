@@ -4,25 +4,35 @@ import { prisma } from '@/lib/db'
 import { Prisma } from '@prisma/client'
 import { getTaskAccessWhereClause } from '@/lib/task-access-utils'
 
-// Helper function to parse comma-separated status values
-function parseStatusValues(statusParam: string): string[] {
-  return statusParam
-    ? statusParam
+// Helper function to parse comma-separated values
+function parseValues(param: string): string[] {
+  return param
+    ? param
         .split(',')
         .map(s => s.trim())
         .filter(s => s)
     : []
 }
 
-// Helper function to create status filter for Prisma
-function createStatusFilter(statusValues: string[]) {
-  if (statusValues.length === 0 || statusValues.includes('all')) {
+// Helper function to parse comma-separated status values (backward compatibility)
+function parseStatusValues(statusParam: string): string[] {
+  return parseValues(statusParam)
+}
+
+// Helper function to create filter for Prisma (supports single or multiple values)
+function createFilter(values: string[]) {
+  if (values.length === 0 || values.includes('all')) {
     return undefined
   }
-  if (statusValues.length === 1) {
-    return statusValues[0]
+  if (values.length === 1) {
+    return values[0]
   }
-  return { in: statusValues }
+  return { in: values }
+}
+
+// Helper function to create status filter for Prisma (backward compatibility)
+function createStatusFilter(statusValues: string[]) {
+  return createFilter(statusValues)
 }
 
 // Helper function to create status SQL condition
@@ -34,6 +44,57 @@ function createStatusSqlCondition(statusValues: string[]) {
     return Prisma.sql`AND t.status = ${statusValues[0]}`
   }
   return Prisma.sql`AND t.status IN (${Prisma.join(statusValues)})`
+}
+
+// Helper function to create assignee SQL condition
+function createAssigneeSqlCondition(assigneeValues: string[]) {
+  if (assigneeValues.length === 0) {
+    return Prisma.empty
+  }
+  if (assigneeValues.includes('unassigned')) {
+    if (assigneeValues.length === 1) {
+      return Prisma.sql`AND t."assigneeId" IS NULL`
+    }
+    const assigneeIds = assigneeValues.filter(id => id !== 'unassigned')
+    return Prisma.sql`AND (t."assigneeId" IS NULL OR t."assigneeId" IN (${Prisma.join(assigneeIds)}))`
+  }
+  if (assigneeValues.length === 1) {
+    return Prisma.sql`AND t."assigneeId" = ${assigneeValues[0]}`
+  }
+  return Prisma.sql`AND t."assigneeId" IN (${Prisma.join(assigneeValues)})`
+}
+
+// Helper function to create initiative SQL condition
+function createInitiativeSqlCondition(initiativeValues: string[]) {
+  if (initiativeValues.length === 0) {
+    return Prisma.empty
+  }
+  if (initiativeValues.includes('no-initiative')) {
+    if (initiativeValues.length === 1) {
+      return Prisma.sql`AND t."initiativeId" IS NULL`
+    }
+    const initiativeIds = initiativeValues.filter(id => id !== 'no-initiative')
+    return Prisma.sql`AND (t."initiativeId" IS NULL OR t."initiativeId" IN (${Prisma.join(initiativeIds)}))`
+  }
+  if (initiativeValues.length === 1) {
+    return Prisma.sql`AND t."initiativeId" = ${initiativeValues[0]}`
+  }
+  return Prisma.sql`AND t."initiativeId" IN (${Prisma.join(initiativeValues)})`
+}
+
+// Helper function to create priority SQL condition
+function createPrioritySqlCondition(priorityValues: string[]) {
+  if (priorityValues.length === 0) {
+    return Prisma.empty
+  }
+  const priorities = priorityValues.map(p => parseInt(p)).filter(p => !isNaN(p))
+  if (priorities.length === 0) {
+    return Prisma.empty
+  }
+  if (priorities.length === 1) {
+    return Prisma.sql`AND t.priority = ${priorities[0]}`
+  }
+  return Prisma.sql`AND t.priority IN (${Prisma.join(priorities.map(p => Prisma.sql`${p}`))})`
 }
 
 // Helper function to parse sort parameter and build ORDER BY clause
@@ -161,9 +222,12 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search') || ''
     const statusParam = searchParams.get('status') || ''
     const statusValues = parseStatusValues(statusParam)
-    const assigneeId = searchParams.get('assigneeId') || ''
-    const initiativeId = searchParams.get('initiativeId') || ''
-    const priority = searchParams.get('priority') || ''
+    const assigneeIdParam = searchParams.get('assigneeId') || ''
+    const assigneeIdValues = parseValues(assigneeIdParam)
+    const initiativeIdParam = searchParams.get('initiativeId') || ''
+    const initiativeIdValues = parseValues(initiativeIdParam)
+    const priorityParam = searchParams.get('priority') || ''
+    const priorityValues = parseValues(priorityParam)
     const dueDateFrom = searchParams.get('dueDateFrom') || ''
     const dueDateTo = searchParams.get('dueDateTo') || ''
     const sort = searchParams.get('sort') || ''
@@ -252,28 +316,84 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (assigneeId && assigneeId !== 'all' && !immutableFilters.assigneeId) {
-      if (assigneeId === 'unassigned') {
-        filters.assigneeId = null
+    // Build filter conditions for assignee and initiative
+    let assigneeCondition: Record<string, unknown> | undefined
+    let initiativeCondition: Record<string, unknown> | undefined
+
+    if (assigneeIdValues.length > 0 && !immutableFilters.assigneeId) {
+      if (assigneeIdValues.includes('unassigned')) {
+        // If "unassigned" is one of the selected values
+        if (assigneeIdValues.length === 1) {
+          // Only unassigned selected
+          assigneeCondition = { assigneeId: null }
+        } else {
+          // Mix of unassigned and specific assignees - use OR condition
+          const assigneeIds = assigneeIdValues.filter(id => id !== 'unassigned')
+          assigneeCondition = {
+            OR: [{ assigneeId: null }, { assigneeId: { in: assigneeIds } }],
+          }
+        }
       } else {
-        filters.assigneeId = assigneeId
+        // No "unassigned", just specific assignees
+        const assigneeFilter = createFilter(assigneeIdValues)
+        if (assigneeFilter !== undefined) {
+          assigneeCondition = { assigneeId: assigneeFilter }
+        }
       }
     }
 
-    if (
-      initiativeId &&
-      initiativeId !== 'all' &&
-      !immutableFilters.initiativeId
-    ) {
-      if (initiativeId === 'no-initiative') {
-        filters.initiativeId = null
+    if (initiativeIdValues.length > 0 && !immutableFilters.initiativeId) {
+      if (initiativeIdValues.includes('no-initiative')) {
+        // If "no-initiative" is one of the selected values
+        if (initiativeIdValues.length === 1) {
+          // Only no-initiative selected
+          initiativeCondition = { initiativeId: null }
+        } else {
+          // Mix of no-initiative and specific initiatives - use OR condition
+          const initiativeIds = initiativeIdValues.filter(
+            id => id !== 'no-initiative'
+          )
+          initiativeCondition = {
+            OR: [
+              { initiativeId: null },
+              { initiativeId: { in: initiativeIds } },
+            ],
+          }
+        }
       } else {
-        filters.initiativeId = initiativeId
+        // No "no-initiative", just specific initiatives
+        const initiativeFilter = createFilter(initiativeIdValues)
+        if (initiativeFilter !== undefined) {
+          initiativeCondition = { initiativeId: initiativeFilter }
+        }
       }
     }
 
-    if (priority && priority !== 'all' && !immutableFilters.priority) {
-      filters.priority = parseInt(priority)
+    // Combine assignee and initiative conditions with AND logic
+    if (assigneeCondition && initiativeCondition) {
+      // Both filters are active - combine with AND
+      filters.AND = [
+        ...((filters.AND as Array<unknown>) || []),
+        assigneeCondition,
+        initiativeCondition,
+      ]
+    } else if (assigneeCondition) {
+      // Only assignee filter is active
+      Object.assign(filters, assigneeCondition)
+    } else if (initiativeCondition) {
+      // Only initiative filter is active
+      Object.assign(filters, initiativeCondition)
+    }
+
+    if (priorityValues.length > 0 && !immutableFilters.priority) {
+      const priorities = priorityValues
+        .map(p => parseInt(p))
+        .filter(p => !isNaN(p))
+      if (priorities.length === 1) {
+        filters.priority = priorities[0]
+      } else if (priorities.length > 1) {
+        filters.priority = { in: priorities }
+      }
     }
 
     if ((dueDateFrom || dueDateTo) && !immutableFilters.dueDate) {
@@ -364,21 +484,9 @@ export async function GET(request: NextRequest) {
       )
       ${search && !immutableFilters.search ? Prisma.sql`AND t.title ILIKE ${`%${search}%`}` : Prisma.empty}
       ${!immutableFilters.status ? createStatusSqlCondition(statusValues) : Prisma.empty}
-      ${
-        assigneeId && assigneeId !== 'all' && !immutableFilters.assigneeId
-          ? assigneeId === 'unassigned'
-            ? Prisma.sql`AND t."assigneeId" IS NULL`
-            : Prisma.sql`AND t."assigneeId" = ${assigneeId}`
-          : Prisma.empty
-      }
-      ${
-        initiativeId && initiativeId !== 'all' && !immutableFilters.initiativeId
-          ? initiativeId === 'no-initiative'
-            ? Prisma.sql`AND t."initiativeId" IS NULL`
-            : Prisma.sql`AND t."initiativeId" = ${initiativeId}`
-          : Prisma.empty
-      }
-      ${priority && priority !== 'all' && !immutableFilters.priority ? Prisma.sql`AND t.priority = ${parseInt(priority)}` : Prisma.empty}
+      ${!immutableFilters.assigneeId ? createAssigneeSqlCondition(assigneeIdValues) : Prisma.empty}
+      ${!immutableFilters.initiativeId ? createInitiativeSqlCondition(initiativeIdValues) : Prisma.empty}
+      ${!immutableFilters.priority ? createPrioritySqlCondition(priorityValues) : Prisma.empty}
       ${dueDateFrom && !immutableFilters.dueDate ? Prisma.sql`AND t."dueDate" >= ${new Date(dueDateFrom)}` : Prisma.empty}
       ${dueDateTo && !immutableFilters.dueDate ? Prisma.sql`AND t."dueDate" <= ${new Date(dueDateTo)}` : Prisma.empty}
       ${immutableFilters.search ? Prisma.sql`AND t.title ILIKE ${`%${immutableFilters.search}%`}` : Prisma.empty}

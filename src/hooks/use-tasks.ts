@@ -3,10 +3,10 @@ import type { TaskListItem } from '@/lib/task-list-select'
 
 interface TaskFilters {
   search?: string
-  status?: string
-  assigneeId?: string
-  initiativeId?: string
-  priority?: string
+  status?: string | string[]
+  assigneeId?: string | string[]
+  initiativeId?: string | string[]
+  priority?: string | string[]
   dueDateFrom?: string
   dueDateTo?: string
 }
@@ -56,14 +56,21 @@ export function useTasks({
       setLoading(true)
       setError(null)
 
+      // Convert filters to search params, handling arrays
+      const filterEntries = Object.entries(filters || {})
+        .map(([key, value]) => {
+          if (Array.isArray(value)) {
+            // Convert array to comma-separated string
+            return [key, value.join(',')]
+          }
+          return [key, value]
+        })
+        .filter(([_, value]) => value !== undefined && value !== '')
+
       const searchParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
-        ...Object.fromEntries(
-          Object.entries(filters || {}).filter(
-            ([_, value]) => value !== undefined && value !== ''
-          )
-        ),
+        ...Object.fromEntries(filterEntries),
       })
 
       // Add sort parameter if provided
