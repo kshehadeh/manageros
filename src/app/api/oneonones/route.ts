@@ -90,6 +90,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const scheduledFrom = searchParams.get('scheduledFrom') || ''
     const scheduledTo = searchParams.get('scheduledTo') || ''
+    const search = searchParams.get('search') || ''
     const sort = searchParams.get('sort') || ''
 
     // Parse immutable filters from query parameter
@@ -112,6 +113,19 @@ export async function GET(request: NextRequest) {
       // Only show one-on-ones where current user is manager or report
       Prisma.sql`(o."managerId" = ${currentPerson.id} OR o."reportId" = ${currentPerson.id})`,
     ]
+
+    // Apply search filter (immutable takes precedence)
+    const searchFilter = (immutableFilters.search as string) || search
+    if (searchFilter) {
+      const searchTerm = `%${searchFilter.toLowerCase()}%`
+      whereConditions.push(
+        Prisma.sql`(
+          LOWER(manager.name) LIKE ${searchTerm} OR
+          LOWER(report.name) LIKE ${searchTerm} OR
+          LOWER(o.notes) LIKE ${searchTerm}
+        )`
+      )
+    }
 
     // Apply date range filter (immutable takes precedence)
     const scheduledFromFilter =
@@ -140,9 +154,12 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit
 
     // Get total count for pagination
+    // Include JOINs to support search filters that reference manager/report tables
     const countResult = await prisma.$queryRaw<Array<{ count: bigint }>>`
       SELECT COUNT(*)::int as count
       FROM "OneOnOne" o
+      INNER JOIN "Person" manager ON o."managerId" = manager.id
+      INNER JOIN "Person" report ON o."reportId" = report.id
       ${whereClause}
     `
     const totalCount = Number(countResult[0]?.count || 0)

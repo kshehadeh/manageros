@@ -107,6 +107,24 @@ export interface UserSettings {
     }
   >
 
+  // Per-view one-on-one table settings
+  oneOnOneTableSettings: Record<
+    string,
+    {
+      sorting: Array<{ id: string; desc: boolean }>
+      grouping: string
+      sort: {
+        field: string
+        direction: 'asc' | 'desc'
+      }
+      filters: {
+        search: string
+        scheduledFrom: string
+        scheduledTo: string
+      }
+    }
+  >
+
   // Future expandable settings can be added here:
   // sidebarCollapsed: boolean
   // defaultPageSize: number
@@ -148,6 +166,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   taskTableSettings: {},
   initiativeTableSettings: {},
   peopleTableSettings: {},
+  oneOnOneTableSettings: {},
   // When adding new settings, add their defaults here:
   // sidebarCollapsed: false
   // defaultPageSize: 25
@@ -448,6 +467,72 @@ export function updatePeopleTableSettings(
     ...currentSettings,
     peopleTableSettings: {
       ...currentSettings.peopleTableSettings,
+      [settingsId]: updatedTableSettings,
+    },
+  }
+
+  saveUserSettings(userId, updatedSettings)
+}
+
+/**
+ * Get one-on-one table settings for a specific view
+ */
+export function getOneOnOneTableSettings(
+  userId: string,
+  settingsId: string
+): UserSettings['oneOnOneTableSettings'][string] {
+  const settings = loadUserSettings(userId)
+  return (
+    settings.oneOnOneTableSettings[settingsId] || {
+      sorting: [],
+      grouping: 'none',
+      sort: {
+        field: '',
+        direction: 'asc',
+      },
+      filters: {
+        search: '',
+        scheduledFrom: '',
+        scheduledTo: '',
+      },
+    }
+  )
+}
+
+/**
+ * Update one-on-one table settings for a specific view
+ */
+export function updateOneOnOneTableSettings(
+  userId: string,
+  settingsId: string,
+  tableSettings: Partial<UserSettings['oneOnOneTableSettings'][string]>
+): void {
+  const currentSettings = loadUserSettings(userId)
+  const currentTableSettings = currentSettings.oneOnOneTableSettings[
+    settingsId
+  ] || {
+    sorting: [],
+    grouping: 'none',
+    sort: {
+      field: '',
+      direction: 'asc' as const,
+    },
+    filters: {
+      search: '',
+      scheduledFrom: '',
+      scheduledTo: '',
+    },
+  }
+
+  const updatedTableSettings = {
+    ...currentTableSettings,
+    ...tableSettings,
+  }
+
+  const updatedSettings = {
+    ...currentSettings,
+    oneOnOneTableSettings: {
+      ...currentSettings.oneOnOneTableSettings,
       [settingsId]: updatedTableSettings,
     },
   }

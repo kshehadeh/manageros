@@ -15,13 +15,15 @@ import {
 interface CreateColumnsProps {
   onButtonClick?: (_e: React.MouseEvent, _initiativeId: string) => void
   grouping?: string[]
+  visibleColumns?: string[] // Array of column IDs to show (if not provided, all columns are shown)
 }
 
 export function createInitiativeColumns({
   onButtonClick,
   grouping: _grouping = [],
+  visibleColumns,
 }: CreateColumnsProps): ColumnDef<InitiativeWithRelations>[] {
-  return [
+  const allColumns: ColumnDef<InitiativeWithRelations>[] = [
     {
       id: 'rag',
       header: 'RAG',
@@ -217,4 +219,20 @@ export function createInitiativeColumns({
       enableGrouping: true,
     },
   ]
+
+  // Filter columns based on visibleColumns if provided
+  if (visibleColumns && visibleColumns.length > 0) {
+    return allColumns.filter(column => {
+      const columnId =
+        column.id ||
+        (
+          column as ColumnDef<InitiativeWithRelations> & {
+            accessorKey?: string
+          }
+        ).accessorKey
+      return visibleColumns.includes(columnId as string)
+    })
+  }
+
+  return allColumns
 }

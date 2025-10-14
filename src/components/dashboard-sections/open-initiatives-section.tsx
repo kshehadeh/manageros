@@ -34,6 +34,7 @@ export function DashboardOpenInitiativesSection({
         hideFilters={true}
         enablePagination={false}
         limit={10}
+        visibleColumns={['rag', 'title', 'teamName', 'statusBadge']}
         immutableFilters={immutableFilters}
         settingsId='dashboard-initiatives'
       />
