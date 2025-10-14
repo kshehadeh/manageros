@@ -4,26 +4,20 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { Search, Filter, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import type { TaskListItem } from '@/lib/task-list-select'
 import type { Person } from '@prisma/client'
 import { taskStatusUtils, ALL_TASK_STATUSES } from '@/lib/task-status'
 import { taskPriorityUtils, ALL_TASK_PRIORITIES } from '@/lib/task-priority'
 import { useUserSettings } from '@/lib/hooks/use-user-settings'
-import { InitiativeSelect } from '@/components/ui/initiative-select'
+import { MultiSelect } from '@/components/ui/multi-select'
+import { InitiativeMultiSelect } from '@/components/ui/initiative-multi-select'
 
 interface TaskFilters {
   search: string
-  status: string
-  assigneeId: string
-  initiativeId: string
-  priority: string
+  status: string[]
+  assigneeId: string[]
+  initiativeId: string[]
+  priority: string[]
   dueDateFrom: string
   dueDateTo: string
 }
@@ -32,19 +26,29 @@ interface TasksFilterBarProps {
   tasks: TaskListItem[]
   people: Person[]
   onFilteredTasksChange: (_filters: TaskFilters) => void
+  immutableFilters?: {
+    search?: string
+    status?: string | string[]
+    assigneeId?: string | string[]
+    initiativeId?: string | string[]
+    priority?: string | string[]
+    dueDateFrom?: string
+    dueDateTo?: string
+  }
 }
 
 export function TasksFilterBar({
   people,
   onFilteredTasksChange,
+  immutableFilters,
 }: TasksFilterBarProps) {
   const { getSetting, updateSetting, isLoaded } = useUserSettings()
   const [filters, setFilters] = useState<TaskFilters>({
     search: '',
-    status: 'all',
-    assigneeId: 'all',
-    initiativeId: 'all',
-    priority: 'all',
+    status: [],
+    assigneeId: [],
+    initiativeId: [],
+    priority: [],
     dueDateFrom: '',
     dueDateTo: '',
   })
@@ -57,25 +61,44 @@ export function TasksFilterBar({
       const savedFilters = getSetting('taskFilters') as Partial<
         TaskFilters & {
           textFilter?: string
-          statusFilter?: string
-          assigneeFilter?: string
-          initiativeFilter?: string
-          priorityFilter?: string
+          statusFilter?: string | string[]
+          assigneeFilter?: string | string[]
+          initiativeFilter?: string | string[]
+          priorityFilter?: string | string[]
           startDate?: string
           endDate?: string
         }
       >
       if (savedFilters) {
+        // Helper function to convert old single value to array
+        const toArray = (
+          value: string | string[] | undefined,
+          oldValue: string | string[] | undefined
+        ): string[] => {
+          // Check new format first
+          if (Array.isArray(value)) return value
+          if (value && value !== 'all') return [value]
+
+          // Check old format
+          if (Array.isArray(oldValue)) return oldValue
+          if (oldValue && oldValue !== 'all') return [oldValue]
+
+          return []
+        }
+
         // Handle both old and new filter formats
         setFilters({
           search: savedFilters.search || savedFilters.textFilter || '',
-          status: savedFilters.status || savedFilters.statusFilter || 'all',
-          assigneeId:
-            savedFilters.assigneeId || savedFilters.assigneeFilter || 'all',
-          initiativeId:
-            savedFilters.initiativeId || savedFilters.initiativeFilter || 'all',
-          priority:
-            savedFilters.priority || savedFilters.priorityFilter || 'all',
+          status: toArray(savedFilters.status, savedFilters.statusFilter),
+          assigneeId: toArray(
+            savedFilters.assigneeId,
+            savedFilters.assigneeFilter
+          ),
+          initiativeId: toArray(
+            savedFilters.initiativeId,
+            savedFilters.initiativeFilter
+          ),
+          priority: toArray(savedFilters.priority, savedFilters.priorityFilter),
           dueDateFrom: savedFilters.dueDateFrom || savedFilters.startDate || '',
           dueDateTo: savedFilters.dueDateTo || savedFilters.endDate || '',
         })
@@ -88,10 +111,10 @@ export function TasksFilterBar({
     (newFilters: TaskFilters) => {
       updateSetting('taskFilters', {
         textFilter: newFilters.search,
-        assigneeFilter: newFilters.assigneeId,
-        initiativeFilter: newFilters.initiativeId,
-        statusFilter: newFilters.status,
-        priorityFilter: newFilters.priority,
+        assigneeFilter: newFilters.assigneeId as string | string[],
+        initiativeFilter: newFilters.initiativeId as string | string[],
+        statusFilter: newFilters.status as string | string[],
+        priorityFilter: newFilters.priority as string | string[],
         dateRangeFilter: 'all',
         startDate: newFilters.dueDateFrom,
         endDate: newFilters.dueDateTo,
@@ -136,17 +159,17 @@ export function TasksFilterBar({
     saveFilters(filters)
   }, [filters, isLoaded, onFilteredTasksChange, saveFilters])
 
-  const updateFilter = (key: keyof TaskFilters, value: string) => {
+  const updateFilter = (key: keyof TaskFilters, value: string | string[]) => {
     setFilters(prev => ({ ...prev, [key]: value }))
   }
 
   const clearFilters = () => {
     const defaultFilters: TaskFilters = {
       search: '',
-      status: 'all',
-      assigneeId: 'all',
-      initiativeId: 'all',
-      priority: 'all',
+      status: [],
+      assigneeId: [],
+      initiativeId: [],
+      priority: [],
       dueDateFrom: '',
       dueDateTo: '',
     }
@@ -157,10 +180,10 @@ export function TasksFilterBar({
 
   const hasActiveFilters =
     filters.search.trim() ||
-    (filters.status && filters.status !== 'all') ||
-    (filters.assigneeId && filters.assigneeId !== 'all') ||
-    (filters.initiativeId && filters.initiativeId !== 'all') ||
-    (filters.priority && filters.priority !== 'all') ||
+    filters.status.length > 0 ||
+    filters.assigneeId.length > 0 ||
+    filters.initiativeId.length > 0 ||
+    filters.priority.length > 0 ||
     filters.dueDateFrom ||
     filters.dueDateTo
 
@@ -168,15 +191,18 @@ export function TasksFilterBar({
     <div className='space-y-4 px-0'>
       {/* Search and Filter Bar */}
       <div className='flex items-center gap-4'>
-        <div className='relative flex-1 max-w-sm'>
-          <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4' />
-          <Input
-            placeholder='Search tasks...'
-            value={filters.search}
-            onChange={e => updateFilter('search', e.target.value)}
-            className='pl-10'
-          />
-        </div>
+        {/* Search Input - Hidden if immutable */}
+        {!immutableFilters?.search && (
+          <div className='relative flex-1 max-w-sm'>
+            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4' />
+            <Input
+              placeholder='Search tasks...'
+              value={filters.search}
+              onChange={e => updateFilter('search', e.target.value)}
+              className='pl-10'
+            />
+          </div>
+        )}
 
         <div className='relative' ref={filterRef}>
           <Button
@@ -196,109 +222,94 @@ export function TasksFilterBar({
           {showAdvancedFilters && (
             <div className='absolute top-full left-0 mt-1 w-96 bg-background border rounded-lg shadow-lg p-4 z-50'>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <div className='space-y-2'>
-                  <label className='text-sm font-medium'>Assignee</label>
-                  <Select
-                    value={filters.assigneeId}
-                    onValueChange={value => updateFilter('assigneeId', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder='All assignees' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='all'>All assignees</SelectItem>
-                      <SelectItem value='unassigned'>Unassigned</SelectItem>
-                      {people.map(person => (
-                        <SelectItem key={person.id} value={person.id}>
-                          {person.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* Assignee Filter - Hidden if immutable */}
+                {!immutableFilters?.assigneeId && (
+                  <div className='space-y-2'>
+                    <label className='text-sm font-medium'>Assignee</label>
+                    <MultiSelect
+                      options={[
+                        { label: 'Unassigned', value: 'unassigned' },
+                        ...people.map(person => ({
+                          label: person.name,
+                          value: person.id,
+                        })),
+                      ]}
+                      selected={filters.assigneeId}
+                      onChange={value => updateFilter('assigneeId', value)}
+                      placeholder='All assignees'
+                    />
+                  </div>
+                )}
 
-                <div className='space-y-2'>
-                  <label className='text-sm font-medium'>Initiative</label>
-                  <InitiativeSelect
-                    value={
-                      filters.initiativeId === 'all' ||
-                      filters.initiativeId === 'no-initiative'
-                        ? 'none'
-                        : filters.initiativeId
-                    }
-                    onValueChange={value => {
-                      // Map the select value back to filter value
-                      if (value === 'none') {
-                        updateFilter('initiativeId', 'all')
-                      } else {
-                        updateFilter('initiativeId', value)
+                {/* Status Filter - Hidden if immutable */}
+                {!immutableFilters?.status && (
+                  <div className='space-y-2'>
+                    <label className='text-sm font-medium'>Status</label>
+                    <MultiSelect
+                      options={ALL_TASK_STATUSES.map(status => ({
+                        label: taskStatusUtils.getLabel(status),
+                        value: status,
+                      }))}
+                      selected={filters.status}
+                      onChange={value => updateFilter('status', value)}
+                      placeholder='All statuses'
+                    />
+                  </div>
+                )}
+
+                {/* Priority Filter - Hidden if immutable */}
+                {!immutableFilters?.priority && (
+                  <div className='space-y-2'>
+                    <label className='text-sm font-medium'>Priority</label>
+                    <MultiSelect
+                      options={ALL_TASK_PRIORITIES.map(priority => ({
+                        label: taskPriorityUtils.getLabel(priority),
+                        value: priority.toString(),
+                      }))}
+                      selected={filters.priority}
+                      onChange={value => updateFilter('priority', value)}
+                      placeholder='All priorities'
+                    />
+                  </div>
+                )}
+
+                {/* Initiative Filter - Hidden if immutable */}
+                {!immutableFilters?.initiativeId && (
+                  <div className='space-y-2'>
+                    <label className='text-sm font-medium'>Initiative</label>
+                    <InitiativeMultiSelect
+                      selected={filters.initiativeId}
+                      onChange={value => updateFilter('initiativeId', value)}
+                      placeholder='All initiatives'
+                    />
+                  </div>
+                )}
+
+                {/* Due Date From Filter - Hidden if immutable */}
+                {!immutableFilters?.dueDateFrom && (
+                  <div className='space-y-2'>
+                    <label className='text-sm font-medium'>Due Date From</label>
+                    <Input
+                      type='date'
+                      value={filters.dueDateFrom}
+                      onChange={e =>
+                        updateFilter('dueDateFrom', e.target.value)
                       }
-                    }}
-                    placeholder='All initiatives'
-                    includeNone={true}
-                    noneLabel='All initiatives'
-                    showStatus={true}
-                    showTeam={false}
-                  />
-                </div>
+                    />
+                  </div>
+                )}
 
-                <div className='space-y-2'>
-                  <label className='text-sm font-medium'>Status</label>
-                  <Select
-                    value={filters.status}
-                    onValueChange={value => updateFilter('status', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder='All statuses' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='all'>All statuses</SelectItem>
-                      {ALL_TASK_STATUSES.map(status => (
-                        <SelectItem key={status} value={status}>
-                          {taskStatusUtils.getLabel(status)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className='space-y-2'>
-                  <label className='text-sm font-medium'>Priority</label>
-                  <Select
-                    value={filters.priority}
-                    onValueChange={value => updateFilter('priority', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder='All priorities' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='all'>All priorities</SelectItem>
-                      {ALL_TASK_PRIORITIES.map(priority => (
-                        <SelectItem key={priority} value={priority.toString()}>
-                          {taskPriorityUtils.getLabel(priority)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className='space-y-2'>
-                  <label className='text-sm font-medium'>Due Date From</label>
-                  <Input
-                    type='date'
-                    value={filters.dueDateFrom}
-                    onChange={e => updateFilter('dueDateFrom', e.target.value)}
-                  />
-                </div>
-
-                <div className='space-y-2'>
-                  <label className='text-sm font-medium'>Due Date To</label>
-                  <Input
-                    type='date'
-                    value={filters.dueDateTo}
-                    onChange={e => updateFilter('dueDateTo', e.target.value)}
-                  />
-                </div>
+                {/* Due Date To Filter - Hidden if immutable */}
+                {!immutableFilters?.dueDateTo && (
+                  <div className='space-y-2'>
+                    <label className='text-sm font-medium'>Due Date To</label>
+                    <Input
+                      type='date'
+                      value={filters.dueDateTo}
+                      onChange={e => updateFilter('dueDateTo', e.target.value)}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -320,12 +331,22 @@ interface LegacyTasksFilterBarProps {
   tasks: TaskListItem[]
   people: Person[]
   onFilteredTasksChange: (_filteredTasks: TaskListItem[]) => void
+  immutableFilters?: {
+    search?: string
+    status?: string | string[]
+    assigneeId?: string | string[]
+    initiativeId?: string | string[]
+    priority?: string | string[]
+    dueDateFrom?: string
+    dueDateTo?: string
+  }
 }
 
 export function LegacyTasksFilterBar({
   tasks,
   people,
   onFilteredTasksChange,
+  immutableFilters,
 }: LegacyTasksFilterBarProps) {
   const [, setFilteredTasks] = useState<TaskListItem[]>(tasks)
 
@@ -357,36 +378,41 @@ export function LegacyTasksFilterBar({
       }
 
       // Assignee filter
-      if (filters.assigneeId) {
-        if (filters.assigneeId === 'unassigned') {
-          filtered = filtered.filter(task => !task.assigneeId)
-        } else {
-          filtered = filtered.filter(
-            task => task.assigneeId === filters.assigneeId
-          )
-        }
+      if (filters.assigneeId.length > 0) {
+        filtered = filtered.filter(task => {
+          if (filters.assigneeId.includes('unassigned')) {
+            // Include unassigned tasks if 'unassigned' is selected
+            if (!task.assigneeId) return true
+          }
+          // Include tasks with matching assignee
+          return task.assigneeId && filters.assigneeId.includes(task.assigneeId)
+        })
       }
 
       // Initiative filter
-      if (filters.initiativeId) {
-        if (filters.initiativeId === 'no-initiative') {
-          filtered = filtered.filter(task => !task.initiativeId)
-        } else {
-          filtered = filtered.filter(
-            task => task.initiativeId === filters.initiativeId
+      if (filters.initiativeId.length > 0) {
+        filtered = filtered.filter(task => {
+          if (filters.initiativeId.includes('no-initiative')) {
+            // Include tasks without initiative if 'no-initiative' is selected
+            if (!task.initiativeId) return true
+          }
+          // Include tasks with matching initiative
+          return (
+            task.initiativeId &&
+            filters.initiativeId.includes(task.initiativeId)
           )
-        }
+        })
       }
 
       // Status filter
-      if (filters.status) {
-        filtered = filtered.filter(task => task.status === filters.status)
+      if (filters.status.length > 0) {
+        filtered = filtered.filter(task => filters.status.includes(task.status))
       }
 
       // Priority filter
-      if (filters.priority) {
-        filtered = filtered.filter(
-          task => task.priority.toString() === filters.priority
+      if (filters.priority.length > 0) {
+        filtered = filtered.filter(task =>
+          filters.priority.includes(task.priority.toString())
         )
       }
 
@@ -422,6 +448,7 @@ export function LegacyTasksFilterBar({
       tasks={tasks}
       people={people}
       onFilteredTasksChange={handleFiltersChange}
+      immutableFilters={immutableFilters}
     />
   )
 }

@@ -15,10 +15,10 @@ export interface UserSettings {
   taskGrouping: 'status' | 'initiative' | 'assignee' | 'none'
   taskFilters: {
     textFilter: string
-    assigneeFilter: string
-    initiativeFilter: string
-    statusFilter: string
-    priorityFilter: string
+    assigneeFilter: string | string[]
+    initiativeFilter: string | string[]
+    statusFilter: string | string[]
+    priorityFilter: string | string[]
     dateRangeFilter: string
     startDate: string
     endDate: string
@@ -55,10 +55,10 @@ export interface UserSettings {
       }
       filters: {
         search: string
-        status: string
-        assigneeId: string
-        initiativeId: string
-        priority: string
+        status: string | string[]
+        assigneeId: string | string[]
+        initiativeId: string | string[]
+        priority: string | string[]
         dueDateFrom: string
         dueDateTo: string
       }

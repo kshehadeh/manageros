@@ -17,10 +17,10 @@ interface TaskTableSettings {
   }
   filters: {
     search: string
-    status: string
-    assigneeId: string
-    initiativeId: string
-    priority: string
+    status: string | string[]
+    assigneeId: string | string[]
+    initiativeId: string | string[]
+    priority: string | string[]
     dueDateFrom: string
     dueDateTo: string
   }
@@ -49,10 +49,10 @@ export function useTaskTableSettings({
     },
     filters: {
       search: '',
-      status: '',
-      assigneeId: '',
-      initiativeId: '',
-      priority: '',
+      status: [],
+      assigneeId: [],
+      initiativeId: [],
+      priority: [],
       dueDateFrom: '',
       dueDateTo: '',
     },
@@ -140,10 +140,10 @@ export function useTaskTableSettings({
       },
       filters: {
         search: '',
-        status: '',
-        assigneeId: '',
-        initiativeId: '',
-        priority: '',
+        status: [],
+        assigneeId: [],
+        initiativeId: [],
+        priority: [],
         dueDateFrom: '',
         dueDateTo: '',
       },
