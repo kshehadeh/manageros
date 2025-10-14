@@ -4,7 +4,6 @@ export interface TeamListItem {
   id: string
   name: string
   description: string | null
-  avatar: string | null
   parentId: string | null
   organizationId: string
   createdAt: Date
@@ -76,7 +75,7 @@ export function useTeams({
         limit: limit.toString(),
         ...Object.fromEntries(
           Object.entries(filters || {}).filter(
-            ([_, value]) => value !== undefined
+            ([_, value]) => value !== undefined && value !== ''
           )
         ),
       })
