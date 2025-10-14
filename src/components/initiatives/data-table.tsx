@@ -87,6 +87,8 @@ interface InitiativeDataTableProps {
   page?: number
   limit?: number
   enablePagination?: boolean
+  // Column visibility options
+  visibleColumns?: string[] // Array of column IDs to show (if not provided, all columns are shown)
   // Immutable filters that cannot be changed by user interaction
   immutableFilters?: {
     search?: string
@@ -105,6 +107,7 @@ export function InitiativeDataTable({
   settingsId,
   limit = 20,
   enablePagination = false,
+  visibleColumns,
   immutableFilters,
 }: InitiativeDataTableProps) {
   const router = useRouter()
@@ -290,8 +293,9 @@ export function InitiativeDataTable({
       createInitiativeColumns({
         onButtonClick: handleContextMenuButtonClick,
         grouping: effectiveGrouping,
+        visibleColumns,
       }),
-    [effectiveGrouping]
+    [effectiveGrouping, visibleColumns]
   )
 
   const table = useReactTable({

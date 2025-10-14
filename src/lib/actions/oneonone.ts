@@ -216,3 +216,46 @@ export async function updateOneOnOne(id: string, formData: OneOnOneFormData) {
   // Redirect to the one-on-ones page
   redirect('/oneonones')
 }
+
+export async function deleteOneOnOne(id: string) {
+  const user = await getCurrentUser()
+
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization')
+  }
+
+  // Get the current user's person record
+  const currentPerson = await prisma.person.findFirst({
+    where: { user: { id: user.id } },
+  })
+
+  if (!currentPerson) {
+    throw new Error('No person record found for current user')
+  }
+
+  // Verify the one-on-one exists and user has access to it
+  const existingOneOnOne = await prisma.oneOnOne.findFirst({
+    where: {
+      id,
+      OR: [{ managerId: currentPerson.id }, { reportId: currentPerson.id }],
+    },
+    include: {
+      manager: true,
+      report: true,
+    },
+  })
+
+  if (!existingOneOnOne) {
+    throw new Error('One-on-one not found or you do not have access to it')
+  }
+
+  // Delete the one-on-one
+  await prisma.oneOnOne.delete({
+    where: { id },
+  })
+
+  // Revalidate relevant pages
+  revalidatePath('/oneonones')
+  revalidatePath(`/people/${existingOneOnOne.manager.id}`)
+  revalidatePath(`/people/${existingOneOnOne.report.id}`)
+}

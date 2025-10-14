@@ -6,7 +6,13 @@ import { type OneOnOneFormData } from '@/lib/validations'
 import Link from 'next/link'
 import { MarkdownEditor } from './markdown-editor'
 import { Button } from '@/components/ui/button'
-import { Handshake, Calendar, FileText, Loader2 } from 'lucide-react'
+import {
+  Handshake,
+  Calendar,
+  FileText,
+  Loader2,
+  ArrowLeftRight,
+} from 'lucide-react'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PersonSelect } from '@/components/ui/person-select'
 import {
@@ -52,6 +58,14 @@ export function OneOnOneForm({
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSwapParticipants = () => {
+    setFormData({
+      ...formData,
+      participant1Id: formData.participant2Id,
+      participant2Id: formData.participant1Id,
+    })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -119,8 +133,8 @@ export function OneOnOneForm({
           These meetings will only be visible to the participants.
         </p>
         <div className='space-y-4'>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            <div>
+          <div className='flex items-end gap-4'>
+            <div className='flex-1'>
               <label className='block text-sm font-medium mb-2'>
                 Participant 1 *
               </label>
@@ -135,7 +149,20 @@ export function OneOnOneForm({
               />
             </div>
 
-            <div>
+            <div className='flex items-end'>
+              <Button
+                type='button'
+                variant='outline'
+                size='sm'
+                onClick={handleSwapParticipants}
+                className='h-10 px-3'
+                title='Swap participants'
+              >
+                <ArrowLeftRight className='w-4 h-4' />
+              </Button>
+            </div>
+
+            <div className='flex-1'>
               <label className='block text-sm font-medium mb-2'>
                 Participant 2 *
               </label>
