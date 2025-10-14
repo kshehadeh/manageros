@@ -1,0 +1,12 @@
+---
+description: When creating a new API, updating an existing API, or using an API
+alwaysApply: false
+---
+
+# APIs
+
+## General Rules
+
+* When creating or updating an API, update the documentation in the docs/api directory.
+* Prefer API routes over server actions especially when just reading data.
+* Use server actions in cases where you need to perform a mutation or write data to the database especially in cases where the work is being done in a React Server Component in some cases.

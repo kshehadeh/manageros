@@ -14,6 +14,8 @@ alwaysApply: true
 * Do not make unnecessary calls to the server from the client.  Look for ways to use data that has already been fetched and can be used in multiple components.
 * When you notice that there are several places where the same data is being fetched, consider using the cache system that was created.  For example, the usePeopleCache hook is used to fetch people data and can be used in multiple components.
 * Whenever a major feature is added, increase the version of the package.json file.
+* Prefer using existing APIs and hooks before server actions.
+* When more functionality is necessary in an API, prefer using the existing APIs and making slight modifications to them rather than creating a new API.
 
 ## Introduction
 
