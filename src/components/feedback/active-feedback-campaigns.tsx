@@ -31,10 +31,12 @@ interface FeedbackCampaign {
 
 interface ActiveFeedbackCampaignsProps {
   campaigns: FeedbackCampaign[]
+  skeleton?: React.ReactNode | null
 }
 
 export function ActiveFeedbackCampaigns({
   campaigns,
+  skeleton,
 }: ActiveFeedbackCampaignsProps) {
   if (campaigns.length === 0) {
     return null
@@ -45,48 +47,49 @@ export function ActiveFeedbackCampaigns({
       title='Feedback Campaigns'
       viewAllHref='/feedback-campaigns'
     >
-      {campaigns.map(campaign => (
-        <div
-          key={campaign.id}
-          className='flex items-start justify-between py-3'
-        >
-          <div className='flex-1 space-y-1'>
-            {/* Campaign Title */}
-            <Link
-              href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`}
-              className='font-medium hover:text-primary transition-colors block'
-            >
-              {campaign.name || 'Feedback Campaign'}
-            </Link>
+      {skeleton ||
+        campaigns.map(campaign => (
+          <div
+            key={campaign.id}
+            className='flex items-start justify-between py-3'
+          >
+            <div className='flex-1 space-y-1'>
+              {/* Campaign Title */}
+              <Link
+                href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`}
+                className='font-medium hover:text-primary transition-colors block'
+              >
+                {campaign.name || 'Feedback Campaign'}
+              </Link>
 
-            {/* Person Name */}
-            <div className='text-sm text-muted-foreground'>
-              <span>{campaign.targetPerson.name}</span>
-            </div>
+              {/* Person Name */}
+              <div className='text-sm text-muted-foreground'>
+                <span>{campaign.targetPerson.name}</span>
+              </div>
 
-            {/* Campaign Details */}
-            <div className='flex items-center gap-4 text-xs text-muted-foreground'>
-              <span>
-                {campaign.responses.length} / {campaign.inviteEmails.length}{' '}
-                responses
-              </span>
-              <div className='flex items-center gap-1'>
-                <Calendar className='h-3 w-3' />
+              {/* Campaign Details */}
+              <div className='flex items-center gap-4 text-xs text-muted-foreground'>
                 <span>
-                  {campaign.status === 'active'
-                    ? `Ends ${format(campaign.endDate, 'MMM d, yyyy')}`
-                    : `Started ${format(campaign.startDate, 'MMM d, yyyy')}`}
+                  {campaign.responses.length} / {campaign.inviteEmails.length}{' '}
+                  responses
                 </span>
+                <div className='flex items-center gap-1'>
+                  <Calendar className='h-3 w-3' />
+                  <span>
+                    {campaign.status === 'active'
+                      ? `Ends ${format(campaign.endDate, 'MMM d, yyyy')}`
+                      : `Started ${format(campaign.startDate, 'MMM d, yyyy')}`}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Status Badge - Pinned to Right */}
-          <div className='ml-4 flex-shrink-0'>
-            <FeedbackCampaignStatusBadge status={campaign.status} />
+            {/* Status Badge - Pinned to Right */}
+            <div className='ml-4 flex-shrink-0'>
+              <FeedbackCampaignStatusBadge status={campaign.status} />
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
     </ExpandableSection>
   )
 }
