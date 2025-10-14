@@ -316,25 +316,28 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Build filter conditions for assignee and initiative
+    let assigneeCondition: Record<string, unknown> | undefined
+    let initiativeCondition: Record<string, unknown> | undefined
+
     if (assigneeIdValues.length > 0 && !immutableFilters.assigneeId) {
       if (assigneeIdValues.includes('unassigned')) {
         // If "unassigned" is one of the selected values
         if (assigneeIdValues.length === 1) {
           // Only unassigned selected
-          filters.assigneeId = null
+          assigneeCondition = { assigneeId: null }
         } else {
           // Mix of unassigned and specific assignees - use OR condition
           const assigneeIds = assigneeIdValues.filter(id => id !== 'unassigned')
-          filters.OR = [
-            { assigneeId: null },
-            { assigneeId: { in: assigneeIds } },
-          ]
+          assigneeCondition = {
+            OR: [{ assigneeId: null }, { assigneeId: { in: assigneeIds } }],
+          }
         }
       } else {
         // No "unassigned", just specific assignees
         const assigneeFilter = createFilter(assigneeIdValues)
         if (assigneeFilter !== undefined) {
-          filters.assigneeId = assigneeFilter
+          assigneeCondition = { assigneeId: assigneeFilter }
         }
       }
     }
@@ -344,26 +347,42 @@ export async function GET(request: NextRequest) {
         // If "no-initiative" is one of the selected values
         if (initiativeIdValues.length === 1) {
           // Only no-initiative selected
-          filters.initiativeId = null
+          initiativeCondition = { initiativeId: null }
         } else {
           // Mix of no-initiative and specific initiatives - use OR condition
           const initiativeIds = initiativeIdValues.filter(
             id => id !== 'no-initiative'
           )
-          const existingOr = (filters.OR as Array<unknown>) || []
-          filters.OR = [
-            ...existingOr,
-            { initiativeId: null },
-            { initiativeId: { in: initiativeIds } },
-          ]
+          initiativeCondition = {
+            OR: [
+              { initiativeId: null },
+              { initiativeId: { in: initiativeIds } },
+            ],
+          }
         }
       } else {
         // No "no-initiative", just specific initiatives
         const initiativeFilter = createFilter(initiativeIdValues)
         if (initiativeFilter !== undefined) {
-          filters.initiativeId = initiativeFilter
+          initiativeCondition = { initiativeId: initiativeFilter }
         }
       }
+    }
+
+    // Combine assignee and initiative conditions with AND logic
+    if (assigneeCondition && initiativeCondition) {
+      // Both filters are active - combine with AND
+      filters.AND = [
+        ...((filters.AND as Array<unknown>) || []),
+        assigneeCondition,
+        initiativeCondition,
+      ]
+    } else if (assigneeCondition) {
+      // Only assignee filter is active
+      Object.assign(filters, assigneeCondition)
+    } else if (initiativeCondition) {
+      // Only initiative filter is active
+      Object.assign(filters, initiativeCondition)
     }
 
     if (priorityValues.length > 0 && !immutableFilters.priority) {
