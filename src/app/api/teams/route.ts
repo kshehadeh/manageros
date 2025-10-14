@@ -178,6 +178,7 @@ export async function GET(request: NextRequest) {
         id: string
         name: string
         description: string | null
+        avatar: string | null
         parentId: string | null
         organizationId: string
         createdAt: Date
@@ -189,6 +190,7 @@ export async function GET(request: NextRequest) {
         t.id,
         t.name,
         t.description,
+        t.avatar,
         t."parentId",
         t."organizationId",
         t."createdAt",

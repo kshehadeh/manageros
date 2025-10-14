@@ -107,6 +107,23 @@ export interface UserSettings {
     }
   >
 
+  // Per-view team table settings
+  teamTableSettings: Record<
+    string,
+    {
+      sorting: Array<{ id: string; desc: boolean }>
+      grouping: string
+      sort: {
+        field: string
+        direction: 'asc' | 'desc'
+      }
+      filters: {
+        search: string
+        parentId: string
+      }
+    }
+  >
+
   // Per-view one-on-one table settings
   oneOnOneTableSettings: Record<
     string,
@@ -166,6 +183,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   taskTableSettings: {},
   initiativeTableSettings: {},
   peopleTableSettings: {},
+  teamTableSettings: {},
   oneOnOneTableSettings: {},
   // When adding new settings, add their defaults here:
   // sidebarCollapsed: false
@@ -432,6 +450,30 @@ export function getPeopleTableSettings(
 }
 
 /**
+ * Get team table settings for a specific view
+ */
+export function getTeamTableSettings(
+  userId: string,
+  settingsId: string
+): UserSettings['teamTableSettings'][string] {
+  const settings = loadUserSettings(userId)
+  return (
+    settings.teamTableSettings[settingsId] || {
+      sorting: [],
+      grouping: 'parent',
+      sort: {
+        field: '',
+        direction: 'asc',
+      },
+      filters: {
+        search: '',
+        parentId: '',
+      },
+    }
+  )
+}
+
+/**
  * Update people table settings for a specific view
  */
 export function updatePeopleTableSettings(
@@ -467,6 +509,46 @@ export function updatePeopleTableSettings(
     ...currentSettings,
     peopleTableSettings: {
       ...currentSettings.peopleTableSettings,
+      [settingsId]: updatedTableSettings,
+    },
+  }
+
+  saveUserSettings(userId, updatedSettings)
+}
+
+/**
+ * Update team table settings for a specific view
+ */
+export function updateTeamTableSettings(
+  userId: string,
+  settingsId: string,
+  tableSettings: Partial<UserSettings['teamTableSettings'][string]>
+): void {
+  const currentSettings = loadUserSettings(userId)
+  const currentTableSettings = currentSettings.teamTableSettings[
+    settingsId
+  ] || {
+    sorting: [],
+    grouping: 'parent',
+    sort: {
+      field: '',
+      direction: 'asc' as const,
+    },
+    filters: {
+      search: '',
+      parentId: '',
+    },
+  }
+
+  const updatedTableSettings = {
+    ...currentTableSettings,
+    ...tableSettings,
+  }
+
+  const updatedSettings = {
+    ...currentSettings,
+    teamTableSettings: {
+      ...currentSettings.teamTableSettings,
       [settingsId]: updatedTableSettings,
     },
   }

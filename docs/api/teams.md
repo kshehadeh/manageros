@@ -16,16 +16,20 @@ The Teams API provides functionality for managing organizational teams. Teams ca
 
 ### GET /api/teams
 
-Retrieves all teams in the current user's organization.
+Retrieves paginated teams in the current user's organization with optional search and parent filtering.
 
 **Authentication:** Required
 
 **Query Parameters:**
 
-| Parameter          | Type    | Required | Description                         |
-| ------------------ | ------- | -------- | ----------------------------------- |
-| `includeHierarchy` | boolean | No       | Include full hierarchical structure |
-| `parentId`         | string  | No       | Filter by parent team ID            |
+| Parameter          | Type   | Required | Description                                                       |
+| ------------------ | ------ | -------- | ----------------------------------------------------------------- | ----------------------- |
+| `page`             | number | No       | Page number (default: 1)                                          |
+| `limit`            | number | No       | Items per page (default: 20)                                      |
+| `search`           | string | No       | Search by team name                                               |
+| `parentId`         | string | No       | Filter by parent team ID or `no-parent`                           |
+| `sort`             | string | No       | Comma list of fields: `name`, `createdAt`, `updatedAt` with `:asc | :desc`(e.g.,`name:asc`) |
+| `immutableFilters` | string | No       | JSON-encoded filters (internal use)                               |
 
 **Response:**
 
@@ -38,16 +42,24 @@ Retrieves all teams in the current user's organization.
       "description": "Product engineering team",
       "avatar": "https://...",
       "parentId": null,
+      "organizationId": "org_123",
       "createdAt": "2025-10-01T12:00:00.000Z",
       "updatedAt": "2025-10-14T12:00:00.000Z",
       "parent": null,
       "_count": {
         "people": 15,
-        "initiatives": 3,
-        "children": 2
+        "initiatives": 3
       }
     }
-  ]
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "totalCount": 42,
+    "totalPages": 3,
+    "hasNextPage": true,
+    "hasPreviousPage": false
+  }
 }
 ```
 

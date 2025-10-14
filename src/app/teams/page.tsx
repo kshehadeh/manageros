@@ -1,14 +1,11 @@
 import Link from 'next/link'
 import { requireAuth } from '@/lib/auth-utils'
-import { TeamsPageClient } from '@/components/teams/teams-page-client'
-import { getAllTeamsWithRelations } from '@/lib/actions/team'
 import { Button } from '@/components/ui/button'
 import { Upload, Plus, Workflow, Users2 } from 'lucide-react'
+import { TeamsDataTable } from '@/components/teams/data-table'
 
 export default async function TeamsPage() {
   await requireAuth({ requireOrganization: true })
-
-  const teams = await getAllTeamsWithRelations()
 
   return (
     <div className='page-container'>
@@ -45,7 +42,9 @@ export default async function TeamsPage() {
           </div>
         </div>
       </div>
-      <TeamsPageClient teams={teams} />
+      <div className='page-section -mx-3 md:mx-0'>
+        <TeamsDataTable enablePagination={true} limit={100} />
+      </div>
     </div>
   )
 }
