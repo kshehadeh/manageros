@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import {
   MoreHorizontal,
   Calendar,
+  CalendarCheck,
   Target,
   Building2,
   Clock,
@@ -95,14 +96,33 @@ export function createMeetingColumns({
             )
           : (meeting as MeetingWithRelations).participants.length
 
+        const MeetingIcon = isInstance ? CalendarCheck : Calendar
+
         return (
           <div className='flex items-start gap-3'>
             <div className='space-y-0.5 flex-1'>
               <div className='flex items-center gap-2'>
-                <Calendar className='h-4 w-4 text-muted-foreground flex-shrink-0' />
-                <span>{meetingData.title}</span>
+                <MeetingIcon className='h-4 w-4 text-muted-foreground flex-shrink-0' />
+                <span>
+                  {meetingData.title}
+                  {isInstance && (
+                    <span className='text-muted-foreground'> (instance)</span>
+                  )}
+                </span>
               </div>
               <div className='text-xs text-muted-foreground mt-1.5 flex items-center gap-2 flex-wrap ml-6'>
+                {isInstance && (
+                  <div className='flex items-center gap-1'>
+                    <Calendar className='h-3 w-3' />
+                    <Link
+                      href={`/meetings/${meetingData.id}`}
+                      className='text-primary hover:text-primary/80 transition-colors'
+                      onClick={e => e.stopPropagation()}
+                    >
+                      View parent meeting
+                    </Link>
+                  </div>
+                )}
                 <div className='flex items-center gap-1'>
                   <Clock className='h-3 w-3' />
                   {formatTime(meeting.scheduledAt)}

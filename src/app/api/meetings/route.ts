@@ -102,6 +102,7 @@ export async function GET(request: NextRequest) {
     const teamId = searchParams.get('teamId') || ''
     const initiativeId = searchParams.get('initiativeId') || ''
     const sortParam = searchParams.get('sort') || ''
+    const meetingType = searchParams.get('meetingType') || ''
 
     // Parse immutable filters from query parameter
     let immutableFilters: Record<string, unknown> = {}
@@ -127,6 +128,8 @@ export async function GET(request: NextRequest) {
     const teamIdFilter = (immutableFilters.teamId as string) || teamId
     const initiativeIdFilter =
       (immutableFilters.initiativeId as string) || initiativeId
+    const meetingTypeFilter =
+      (immutableFilters.meetingType as string) || meetingType
 
     // Build where clause for meeting instances
     const buildInstanceWhereClause = (): Prisma.MeetingInstanceWhereInput => {
@@ -226,7 +229,16 @@ export async function GET(request: NextRequest) {
     const buildMeetingWhereClause = (): Prisma.MeetingWhereInput => {
       const baseWhere: Prisma.MeetingWhereInput = {
         organizationId: user.organizationId!,
-        isRecurring: false,
+      }
+
+      // Apply meeting type filter
+      if (meetingTypeFilter === 'recurring') {
+        baseWhere.isRecurring = true
+      } else if (meetingTypeFilter === 'non-recurring') {
+        baseWhere.isRecurring = false
+      } else if (!meetingTypeFilter) {
+        // Default behavior: only show non-recurring meetings (when no filter is specified)
+        baseWhere.isRecurring = false
       }
 
       // Only apply date filters if explicitly provided
@@ -294,63 +306,77 @@ export async function GET(request: NextRequest) {
     // Get order by clause
     const orderBy = buildOrderByClause(sortParam)
 
-    // Fetch upcoming meeting instances (for recurring meetings)
-    const upcomingMeetingInstances = await prisma.meetingInstance.findMany({
-      where: buildInstanceWhereClause(),
-      include: {
-        meeting: {
-          include: {
-            team: true,
-            initiative: true,
-            owner: true,
-            participants: {
-              include: {
-                person: true,
+    // Fetch data based on meeting type filter
+    let upcomingMeetingInstances: MeetingInstanceWithRelations[] = []
+    let upcomingMeetings: MeetingWithRelations[] = []
+
+    // Fetch meeting instances if filter is 'instances' or not set
+    if (meetingTypeFilter === 'instances' || !meetingTypeFilter) {
+      const instances = await prisma.meetingInstance.findMany({
+        where: buildInstanceWhereClause(),
+        include: {
+          meeting: {
+            include: {
+              team: true,
+              initiative: true,
+              owner: true,
+              participants: {
+                include: {
+                  person: true,
+                },
               },
             },
           },
-        },
-        participants: {
-          include: {
-            person: true,
+          participants: {
+            include: {
+              person: true,
+            },
           },
         },
-      },
-      orderBy:
-        orderBy.scheduledAt !== undefined
-          ? ({
-              scheduledAt: orderBy.scheduledAt,
-            } as Prisma.MeetingInstanceOrderByWithRelationInput)
-          : undefined,
-    })
+        orderBy:
+          orderBy.scheduledAt !== undefined
+            ? ({
+                scheduledAt: orderBy.scheduledAt,
+              } as Prisma.MeetingInstanceOrderByWithRelationInput)
+            : undefined,
+      })
+      upcomingMeetingInstances = instances.map(instance => ({
+        ...instance,
+        type: 'instance' as const,
+      })) as MeetingInstanceWithRelations[]
+    }
 
-    // Fetch upcoming non-recurring meetings
-    const upcomingMeetings = await prisma.meeting.findMany({
-      where: buildMeetingWhereClause(),
-      include: {
-        team: true,
-        initiative: true,
-        owner: true,
-        createdBy: true,
-        participants: {
-          include: {
-            person: true,
+    // Fetch meetings if filter is 'recurring', 'non-recurring', or not set
+    if (
+      meetingTypeFilter === 'recurring' ||
+      meetingTypeFilter === 'non-recurring' ||
+      !meetingTypeFilter
+    ) {
+      const meetings = await prisma.meeting.findMany({
+        where: buildMeetingWhereClause(),
+        include: {
+          team: true,
+          initiative: true,
+          owner: true,
+          createdBy: true,
+          participants: {
+            include: {
+              person: true,
+            },
           },
         },
-      },
-      orderBy,
-    })
+        orderBy,
+      })
+      upcomingMeetings = meetings.map(meeting => ({
+        ...meeting,
+        type: 'meeting' as const,
+      })) as MeetingWithRelations[]
+    }
 
     // Combine and sort all meetings
     const allMeetings: CombinedMeeting[] = [
-      ...(upcomingMeetings.map(meeting => ({
-        ...meeting,
-        type: 'meeting' as const,
-      })) as MeetingWithRelations[]),
-      ...(upcomingMeetingInstances.map(instance => ({
-        ...instance,
-        type: 'instance' as const,
-      })) as MeetingInstanceWithRelations[]),
+      ...upcomingMeetings,
+      ...upcomingMeetingInstances,
     ]
 
     // Sort based on the orderBy parameter

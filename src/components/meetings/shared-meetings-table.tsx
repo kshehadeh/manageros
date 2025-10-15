@@ -9,6 +9,7 @@ import {
   Trash2,
   Target,
   Calendar,
+  CalendarCheck,
   Building2,
   Clock,
   Users,
@@ -204,11 +205,13 @@ function renderTitleCell(
     ? (meeting as MeetingInstanceWithRelations).meeting
     : (meeting as MeetingWithRelations)
 
+  const MeetingIcon = isInstance ? CalendarCheck : Calendar
+
   return (
     <TableCell className='font-medium text-foreground'>
       <div className='space-y-1'>
         <div className='flex items-center gap-2'>
-          <Calendar className='h-4 w-4 text-muted-foreground flex-shrink-0' />
+          <MeetingIcon className='h-4 w-4 text-muted-foreground flex-shrink-0' />
           <button
             onClick={e => {
               e.stopPropagation()
@@ -219,10 +222,29 @@ function renderTitleCell(
             className='text-left hover:text-blue-600 hover:underline transition-colors'
           >
             {meetingData.title}
+            {isInstance && (
+              <span className='text-muted-foreground'> (instance)</span>
+            )}
           </button>
         </div>
         {showBadge && (
           <div className='flex items-center gap-3 text-xs text-muted-foreground ml-6'>
+            {isInstance && (
+              <div className='flex items-center gap-1'>
+                <Calendar className='h-3 w-3' />
+                <button
+                  onClick={e => {
+                    e.stopPropagation()
+                    if (router) {
+                      router.push(`/meetings/${meetingData.id}`)
+                    }
+                  }}
+                  className='text-primary hover:text-primary/80 transition-colors'
+                >
+                  View parent meeting
+                </button>
+              </div>
+            )}
             {getStatusBadge(meeting as MeetingWithRelations)}
             <div className='flex items-center gap-1'>
               <Clock className='h-3 w-3 flex-shrink-0' />

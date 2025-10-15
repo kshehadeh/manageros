@@ -158,6 +158,7 @@ export interface UserSettings {
         initiativeId: string
         scheduledFrom: string
         scheduledTo: string
+        meetingType: string
       }
     }
   >
@@ -669,6 +670,7 @@ export function getMeetingTableSettings(
         initiativeId: '',
         scheduledFrom: '',
         scheduledTo: '',
+        meetingType: '',
       },
     }
   )
@@ -698,6 +700,7 @@ export function updateMeetingTableSettings(
       initiativeId: '',
       scheduledFrom: '',
       scheduledTo: '',
+      meetingType: '',
     },
   }
 

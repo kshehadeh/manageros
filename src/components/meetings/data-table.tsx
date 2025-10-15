@@ -89,6 +89,7 @@ interface MeetingDataTableProps {
     initiativeId?: string
     scheduledFrom?: string
     scheduledTo?: string
+    meetingType?: string
   }
 }
 
@@ -245,7 +246,8 @@ export function MeetingDataTable({
       settings.filters.teamId !== '' ||
       settings.filters.initiativeId !== '' ||
       settings.filters.scheduledFrom !== '' ||
-      settings.filters.scheduledTo !== ''
+      settings.filters.scheduledTo !== '' ||
+      settings.filters.meetingType !== ''
     )
   }, [settings.filters])
 
@@ -454,6 +456,7 @@ export function MeetingDataTable({
                             initiativeId: '',
                             scheduledFrom: '',
                             scheduledTo: '',
+                            meetingType: '',
                           })
                         }}
                         className='text-sm text-muted-foreground hover:text-foreground'
@@ -463,6 +466,37 @@ export function MeetingDataTable({
                     </div>
 
                     <div className='space-y-4'>
+                      {/* Meeting Type Filter */}
+                      <div className='space-y-2'>
+                        <label className='text-sm font-medium'>
+                          Meeting Type
+                        </label>
+                        <Select
+                          value={settings.filters.meetingType || 'all'}
+                          onValueChange={value =>
+                            updateFilters({
+                              meetingType: value === 'all' ? '' : value,
+                            })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder='All meetings' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value='all'>All meetings</SelectItem>
+                            <SelectItem value='recurring'>
+                              Recurring Meetings
+                            </SelectItem>
+                            <SelectItem value='instances'>
+                              Instances of Recurring Meetings
+                            </SelectItem>
+                            <SelectItem value='non-recurring'>
+                              Non-Recurring Meetings
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
                       {/* Team Filter - Hidden if immutable */}
                       {!immutableFilters?.teamId && (
                         <div className='space-y-2'>
