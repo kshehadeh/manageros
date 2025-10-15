@@ -1,13 +1,55 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
+import { Prisma } from '@prisma/client'
+
+// Type definitions for meeting and instance with includes
+type MeetingWithRelations = Prisma.MeetingGetPayload<{
+  include: {
+    team: true
+    initiative: true
+    owner: true
+    createdBy: true
+    participants: {
+      include: {
+        person: true
+      }
+    }
+  }
+}> & { type: 'meeting' }
+
+type MeetingInstanceWithRelations = Prisma.MeetingInstanceGetPayload<{
+  include: {
+    meeting: {
+      include: {
+        team: true
+        initiative: true
+        owner: true
+        participants: {
+          include: {
+            person: true
+          }
+        }
+      }
+    }
+    participants: {
+      include: {
+        person: true
+      }
+    }
+  }
+}> & { type: 'instance' }
+
+type CombinedMeeting = MeetingWithRelations | MeetingInstanceWithRelations
 
 // Build order by clause from sort parameter
-function buildOrderByClause(sortParam: string) {
-  if (!sortParam) return { scheduledAt: 'desc' as const }
+function buildOrderByClause(
+  sortParam: string
+): Prisma.MeetingOrderByWithRelationInput {
+  if (!sortParam) return { scheduledAt: 'desc' }
 
   const [field, direction] = sortParam.split(':')
-  const dir = direction === 'desc' ? 'desc' : 'asc'
+  const dir = (direction === 'desc' ? 'desc' : 'asc') as Prisma.SortOrder
 
   switch (field) {
     case 'scheduledAt':
@@ -20,7 +62,7 @@ function buildOrderByClause(sortParam: string) {
     case 'team':
       return { team: { name: dir } }
     default:
-      return { scheduledAt: 'desc' as const }
+      return { scheduledAt: 'desc' }
   }
 }
 
@@ -86,10 +128,10 @@ export async function GET(request: NextRequest) {
     const initiativeIdFilter =
       (immutableFilters.initiativeId as string) || initiativeId
 
-    // Build where clause for filtering
-    const buildWhereClause = (isInstance: boolean) => {
-      const baseWhere: any = {
-        organizationId: user.organizationId,
+    // Build where clause for meeting instances
+    const buildInstanceWhereClause = (): Prisma.MeetingInstanceWhereInput => {
+      const baseWhere: Prisma.MeetingInstanceWhereInput = {
+        organizationId: user.organizationId!,
       }
 
       // Only apply date filters if explicitly provided
@@ -103,122 +145,147 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      // Build the access control OR clause
-      const accessControlOr: any[] = []
+      // Build the access control OR clause for instances
+      const accessControlOr: Prisma.MeetingInstanceWhereInput[] = []
 
-      if (isInstance) {
-        // For instances, check:
-        // 1. Meeting is public
-        accessControlOr.push({
-          meeting: {
-            isPrivate: false,
-          },
-        })
-        // 2. User is the creator of the meeting
-        accessControlOr.push({
-          meeting: {
-            createdById: user.id,
-          },
-        })
-        // 3. User is the owner of the meeting
-        if (currentPerson) {
-          accessControlOr.push({
-            meeting: {
-              ownerId: currentPerson.id,
-            },
-          })
-        }
-        // 4. User is a participant of the instance
-        if (currentPerson) {
-          accessControlOr.push({
-            participants: {
-              some: {
-                personId: currentPerson.id,
-              },
-            },
-          })
-        }
-        // 5. User is a participant of the main meeting
-        if (currentPerson) {
-          accessControlOr.push({
-            meeting: {
-              participants: {
-                some: {
-                  personId: currentPerson.id,
-                },
-              },
-            },
-          })
-        }
-      } else {
-        // For regular meetings, check:
-        // 1. Meeting is public
-        accessControlOr.push({
+      // 1. Meeting is public
+      accessControlOr.push({
+        meeting: {
           isPrivate: false,
-        })
-        // 2. User is the creator
-        accessControlOr.push({
+        },
+      })
+      // 2. User is the creator of the meeting
+      accessControlOr.push({
+        meeting: {
           createdById: user.id,
-        })
-        // 3. User is the owner
-        if (currentPerson) {
-          accessControlOr.push({
+        },
+      })
+      // 3. User is the owner of the meeting
+      if (currentPerson) {
+        accessControlOr.push({
+          meeting: {
             ownerId: currentPerson.id,
-          })
-        }
-        // 4. User is a participant
-        if (currentPerson) {
-          accessControlOr.push({
+          },
+        })
+      }
+      // 4. User is a participant of the instance
+      if (currentPerson) {
+        accessControlOr.push({
+          participants: {
+            some: {
+              personId: currentPerson.id,
+            },
+          },
+        })
+      }
+      // 5. User is a participant of the main meeting
+      if (currentPerson) {
+        accessControlOr.push({
+          meeting: {
             participants: {
               some: {
                 personId: currentPerson.id,
               },
             },
-          })
-        }
+          },
+        })
       }
 
       baseWhere.OR = accessControlOr
 
       // Add search filter
       if (searchFilter) {
-        if (isInstance) {
-          baseWhere.meeting = {
-            title: {
-              contains: searchFilter,
-              mode: 'insensitive',
-            },
-          }
-        } else {
-          baseWhere.title = {
+        baseWhere.meeting = {
+          title: {
             contains: searchFilter,
             mode: 'insensitive',
-          }
+          },
         }
       }
 
       // Add team filter
       if (teamIdFilter) {
-        if (isInstance) {
-          if (!baseWhere.meeting) baseWhere.meeting = {}
-          baseWhere.meeting.teamId = teamIdFilter
-        } else {
-          baseWhere.teamId = teamIdFilter
+        if (!baseWhere.meeting) {
+          baseWhere.meeting = {}
         }
+        baseWhere.meeting.teamId = teamIdFilter
       }
 
       // Add initiative filter
       if (initiativeIdFilter) {
-        if (isInstance) {
-          if (!baseWhere.meeting) baseWhere.meeting = {}
-          baseWhere.meeting.initiativeId = initiativeIdFilter
-        } else {
-          baseWhere.initiativeId = initiativeIdFilter
+        if (!baseWhere.meeting) {
+          baseWhere.meeting = {}
+        }
+        baseWhere.meeting.initiativeId = initiativeIdFilter
+      }
+
+      return baseWhere
+    }
+
+    // Build where clause for regular meetings
+    const buildMeetingWhereClause = (): Prisma.MeetingWhereInput => {
+      const baseWhere: Prisma.MeetingWhereInput = {
+        organizationId: user.organizationId!,
+        isRecurring: false,
+      }
+
+      // Only apply date filters if explicitly provided
+      if (scheduledFromFilter || scheduledToFilter) {
+        baseWhere.scheduledAt = {}
+        if (scheduledFromFilter) {
+          baseWhere.scheduledAt.gte = new Date(scheduledFromFilter)
+        }
+        if (scheduledToFilter) {
+          baseWhere.scheduledAt.lte = new Date(scheduledToFilter)
         }
       }
 
-      if (!isInstance) {
-        baseWhere.isRecurring = false
+      // Build the access control OR clause for meetings
+      const accessControlOr: Prisma.MeetingWhereInput[] = []
+
+      // 1. Meeting is public
+      accessControlOr.push({
+        isPrivate: false,
+      })
+      // 2. User is the creator
+      accessControlOr.push({
+        createdById: user.id,
+      })
+      // 3. User is the owner
+      if (currentPerson) {
+        accessControlOr.push({
+          ownerId: currentPerson.id,
+        })
+      }
+      // 4. User is a participant
+      if (currentPerson) {
+        accessControlOr.push({
+          participants: {
+            some: {
+              personId: currentPerson.id,
+            },
+          },
+        })
+      }
+
+      baseWhere.OR = accessControlOr
+
+      // Add search filter
+      if (searchFilter) {
+        baseWhere.title = {
+          contains: searchFilter,
+          mode: 'insensitive',
+        }
+      }
+
+      // Add team filter
+      if (teamIdFilter) {
+        baseWhere.teamId = teamIdFilter
+      }
+
+      // Add initiative filter
+      if (initiativeIdFilter) {
+        baseWhere.initiativeId = initiativeIdFilter
       }
 
       return baseWhere
@@ -229,7 +296,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch upcoming meeting instances (for recurring meetings)
     const upcomingMeetingInstances = await prisma.meetingInstance.findMany({
-      where: buildWhereClause(true),
+      where: buildInstanceWhereClause(),
       include: {
         meeting: {
           include: {
@@ -251,13 +318,15 @@ export async function GET(request: NextRequest) {
       },
       orderBy:
         orderBy.scheduledAt !== undefined
-          ? { scheduledAt: orderBy.scheduledAt }
+          ? ({
+              scheduledAt: orderBy.scheduledAt,
+            } as Prisma.MeetingInstanceOrderByWithRelationInput)
           : undefined,
     })
 
     // Fetch upcoming non-recurring meetings
     const upcomingMeetings = await prisma.meeting.findMany({
-      where: buildWhereClause(false),
+      where: buildMeetingWhereClause(),
       include: {
         team: true,
         initiative: true,
@@ -273,15 +342,15 @@ export async function GET(request: NextRequest) {
     })
 
     // Combine and sort all meetings
-    const allMeetings = [
-      ...upcomingMeetings.map(meeting => ({
+    const allMeetings: CombinedMeeting[] = [
+      ...(upcomingMeetings.map(meeting => ({
         ...meeting,
         type: 'meeting' as const,
-      })),
-      ...upcomingMeetingInstances.map(instance => ({
+      })) as MeetingWithRelations[]),
+      ...(upcomingMeetingInstances.map(instance => ({
         ...instance,
         type: 'instance' as const,
-      })),
+      })) as MeetingInstanceWithRelations[]),
     ]
 
     // Sort based on the orderBy parameter
@@ -293,34 +362,28 @@ export async function GET(request: NextRequest) {
       })
     } else if (orderBy.title) {
       allMeetings.sort((a, b) => {
-        const titleA =
-          (a.type === 'instance'
-            ? (a as any).meeting.title
-            : (a as any).title) || ''
-        const titleB =
-          (b.type === 'instance'
-            ? (b as any).meeting.title
-            : (b as any).title) || ''
+        const titleA = a.type === 'instance' ? a.meeting.title : a.title
+        const titleB = b.type === 'instance' ? b.meeting.title : b.title
         const comparison = titleA.localeCompare(titleB)
         return orderBy.title === 'desc' ? -comparison : comparison
       })
     } else if (orderBy.initiative) {
       allMeetings.sort((a, b) => {
-        const meetingA = a.type === 'instance' ? (a as any).meeting : (a as any)
-        const meetingB = b.type === 'instance' ? (b as any).meeting : (b as any)
+        const meetingA = a.type === 'instance' ? a.meeting : a
+        const meetingB = b.type === 'instance' ? b.meeting : b
         const initiativeA = meetingA.initiative?.title || ''
         const initiativeB = meetingB.initiative?.title || ''
         const comparison = initiativeA.localeCompare(initiativeB)
-        return orderBy.initiative.title === 'desc' ? -comparison : comparison
+        return orderBy.initiative?.title === 'desc' ? -comparison : comparison
       })
     } else if (orderBy.team) {
       allMeetings.sort((a, b) => {
-        const meetingA = a.type === 'instance' ? (a as any).meeting : (a as any)
-        const meetingB = b.type === 'instance' ? (b as any).meeting : (b as any)
+        const meetingA = a.type === 'instance' ? a.meeting : a
+        const meetingB = b.type === 'instance' ? b.meeting : b
         const teamA = meetingA.team?.name || ''
         const teamB = meetingB.team?.name || ''
         const comparison = teamA.localeCompare(teamB)
-        return orderBy.team.name === 'desc' ? -comparison : comparison
+        return orderBy.team?.name === 'desc' ? -comparison : comparison
       })
     }
 
