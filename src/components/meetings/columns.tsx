@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { ColumnDef } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import {
   MoreHorizontal,
   Calendar,
@@ -12,28 +11,42 @@ import {
   Clock,
   Users,
 } from 'lucide-react'
-import type { UpcomingMeeting } from '@/components/meetings/shared-meetings-table'
+import type {
+  UpcomingMeeting,
+  MeetingWithRelations,
+  MeetingInstanceWithRelations,
+} from '@/components/meetings/shared-meetings-table'
 
 interface CreateColumnsProps {
-  onButtonClick?: (_e: React.MouseEvent, _meetingId: string) => void
+  onButtonClick?: (
+    _e: React.MouseEvent,
+    _meetingId: string,
+    _isInstance?: boolean
+  ) => void
   grouping?: string[]
 }
 
 // Utility functions
-function formatDate(date: Date) {
+function formatDate(date: Date | string) {
+  const dateObj = typeof date === 'string' ? new Date(date) : date
+  if (isNaN(dateObj.getTime())) return '—'
+
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
-  }).format(date)
+  }).format(dateObj)
 }
 
-function formatTime(date: Date) {
+function formatTime(date: Date | string) {
+  const dateObj = typeof date === 'string' ? new Date(date) : date
+  if (isNaN(dateObj.getTime())) return '—'
+
   return new Intl.DateTimeFormat('en-US', {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
-  }).format(date)
+  }).format(dateObj)
 }
 
 function formatDuration(minutes: number | null) {
@@ -63,23 +76,24 @@ export function createMeetingColumns({
       accessorFn: row => {
         const isInstance = row.type === 'instance'
         if (isInstance) {
-          return (row as any).meeting.title
+          return (row as MeetingInstanceWithRelations).meeting.title
         }
-        return (row as any).title
+        return (row as MeetingWithRelations).title
       },
       cell: ({ row }) => {
         const meeting = row.original
         const isInstance = meeting.type === 'instance'
         const meetingData = isInstance
-          ? (meeting as any).meeting
-          : (meeting as any)
+          ? (meeting as MeetingInstanceWithRelations).meeting
+          : (meeting as MeetingWithRelations)
 
         const participantCount = isInstance
           ? Math.max(
-              (meeting as any).participants.length,
-              (meeting as any).meeting.participants.length
+              (meeting as MeetingInstanceWithRelations).participants.length,
+              (meeting as MeetingInstanceWithRelations).meeting.participants
+                .length
             )
-          : (meeting as any).participants.length
+          : (meeting as MeetingWithRelations).participants.length
 
         return (
           <div className='flex items-start gap-3'>
@@ -157,7 +171,7 @@ export function createMeetingColumns({
         const meeting = row.original
         const isInstance = meeting.type === 'instance'
         const meetingId = isInstance
-          ? `${(meeting as any).meeting.id}-${meeting.id}`
+          ? `${(meeting as MeetingInstanceWithRelations).meeting.id}-${meeting.id}`
           : meeting.id
 
         return (
@@ -167,7 +181,7 @@ export function createMeetingColumns({
             onClick={e => {
               e.stopPropagation()
               if (onButtonClick) {
-                onButtonClick(e, meetingId)
+                onButtonClick(e, meetingId, isInstance)
               }
             }}
           >
@@ -187,16 +201,16 @@ export function createMeetingColumns({
       accessorFn: row => {
         const isInstance = row.type === 'instance'
         const meetingData = isInstance
-          ? (row as any).meeting
-          : (row as any)
+          ? (row as MeetingInstanceWithRelations).meeting
+          : (row as MeetingWithRelations)
         return meetingData.team?.name || 'No Team'
       },
       cell: ({ row }) => {
         const meeting = row.original
         const isInstance = meeting.type === 'instance'
         const meetingData = isInstance
-          ? (meeting as any).meeting
-          : (meeting as any)
+          ? (meeting as MeetingInstanceWithRelations).meeting
+          : (meeting as MeetingWithRelations)
         return meetingData.team?.name || 'No Team'
       },
       meta: {
@@ -210,16 +224,16 @@ export function createMeetingColumns({
       accessorFn: row => {
         const isInstance = row.type === 'instance'
         const meetingData = isInstance
-          ? (row as any).meeting
-          : (row as any)
+          ? (row as MeetingInstanceWithRelations).meeting
+          : (row as MeetingWithRelations)
         return meetingData.initiative?.title || 'No Initiative'
       },
       cell: ({ row }) => {
         const meeting = row.original
         const isInstance = meeting.type === 'instance'
         const meetingData = isInstance
-          ? (meeting as any).meeting
-          : (meeting as any)
+          ? (meeting as MeetingInstanceWithRelations).meeting
+          : (meeting as MeetingWithRelations)
         return meetingData.initiative?.title || 'No Initiative'
       },
       meta: {
@@ -229,4 +243,3 @@ export function createMeetingColumns({
     },
   ]
 }
-

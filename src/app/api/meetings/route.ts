@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db'
 
 // Build order by clause from sort parameter
 function buildOrderByClause(sortParam: string) {
-  if (!sortParam) return { scheduledAt: 'asc' as const }
+  if (!sortParam) return { scheduledAt: 'desc' as const }
 
   const [field, direction] = sortParam.split(':')
   const dir = direction === 'desc' ? 'desc' : 'asc'
@@ -20,7 +20,7 @@ function buildOrderByClause(sortParam: string) {
     case 'team':
       return { team: { name: dir } }
     default:
-      return { scheduledAt: 'asc' as const }
+      return { scheduledAt: 'desc' as const }
   }
 }
 
@@ -86,68 +86,104 @@ export async function GET(request: NextRequest) {
     const initiativeIdFilter =
       (immutableFilters.initiativeId as string) || initiativeId
 
-    // Default to upcoming week if no dates specified
-    const now = new Date()
-    const oneWeekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-
-    const fromDate = scheduledFromFilter
-      ? new Date(scheduledFromFilter)
-      : new Date(now.toISOString())
-    const toDate = scheduledToFilter
-      ? new Date(scheduledToFilter)
-      : new Date(oneWeekFromNow.toISOString())
-
     // Build where clause for filtering
     const buildWhereClause = (isInstance: boolean) => {
       const baseWhere: any = {
         organizationId: user.organizationId,
-        scheduledAt: {
-          gte: fromDate,
-          lte: toDate,
-        },
-        OR: [
-          // User is a participant
-          {
-            [isInstance ? 'participants' : 'participants']: {
+      }
+
+      // Only apply date filters if explicitly provided
+      if (scheduledFromFilter || scheduledToFilter) {
+        baseWhere.scheduledAt = {}
+        if (scheduledFromFilter) {
+          baseWhere.scheduledAt.gte = new Date(scheduledFromFilter)
+        }
+        if (scheduledToFilter) {
+          baseWhere.scheduledAt.lte = new Date(scheduledToFilter)
+        }
+      }
+
+      // Build the access control OR clause
+      const accessControlOr: any[] = []
+
+      if (isInstance) {
+        // For instances, check:
+        // 1. Meeting is public
+        accessControlOr.push({
+          meeting: {
+            isPrivate: false,
+          },
+        })
+        // 2. User is the creator of the meeting
+        accessControlOr.push({
+          meeting: {
+            createdById: user.id,
+          },
+        })
+        // 3. User is the owner of the meeting
+        if (currentPerson) {
+          accessControlOr.push({
+            meeting: {
+              ownerId: currentPerson.id,
+            },
+          })
+        }
+        // 4. User is a participant of the instance
+        if (currentPerson) {
+          accessControlOr.push({
+            participants: {
               some: {
                 personId: currentPerson.id,
               },
             },
-          },
-          // For instances, also check if user is participant of main meeting
-          ...(isInstance
-            ? [
-              {
-                meeting: {
-                  participants: {
-                    some: {
-                      personId: currentPerson.id,
-                    },
-                  },
-                },
-              },
-            ]
-            : []),
-          // User is the creator
-          {
-            [isInstance ? 'meeting' : 'createdBy']: isInstance
-              ? {
-                createdBy: {
+          })
+        }
+        // 5. User is a participant of the main meeting
+        if (currentPerson) {
+          accessControlOr.push({
+            meeting: {
+              participants: {
+                some: {
                   personId: currentPerson.id,
                 },
-              }
-              : {
+              },
+            },
+          })
+        }
+      } else {
+        // For regular meetings, check:
+        // 1. Meeting is public
+        accessControlOr.push({
+          isPrivate: false,
+        })
+        // 2. User is the creator
+        accessControlOr.push({
+          createdById: user.id,
+        })
+        // 3. User is the owner
+        if (currentPerson) {
+          accessControlOr.push({
+            ownerId: currentPerson.id,
+          })
+        }
+        // 4. User is a participant
+        if (currentPerson) {
+          accessControlOr.push({
+            participants: {
+              some: {
                 personId: currentPerson.id,
               },
-          },
-        ],
+            },
+          })
+        }
       }
+
+      baseWhere.OR = accessControlOr
 
       // Add search filter
       if (searchFilter) {
         if (isInstance) {
           baseWhere.meeting = {
-            ...baseWhere.meeting,
             title: {
               contains: searchFilter,
               mode: 'insensitive',
@@ -164,10 +200,8 @@ export async function GET(request: NextRequest) {
       // Add team filter
       if (teamIdFilter) {
         if (isInstance) {
-          baseWhere.meeting = {
-            ...baseWhere.meeting,
-            teamId: teamIdFilter,
-          }
+          if (!baseWhere.meeting) baseWhere.meeting = {}
+          baseWhere.meeting.teamId = teamIdFilter
         } else {
           baseWhere.teamId = teamIdFilter
         }
@@ -176,10 +210,8 @@ export async function GET(request: NextRequest) {
       // Add initiative filter
       if (initiativeIdFilter) {
         if (isInstance) {
-          baseWhere.meeting = {
-            ...baseWhere.meeting,
-            initiativeId: initiativeIdFilter,
-          }
+          if (!baseWhere.meeting) baseWhere.meeting = {}
+          baseWhere.meeting.initiativeId = initiativeIdFilter
         } else {
           baseWhere.initiativeId = initiativeIdFilter
         }
@@ -240,8 +272,8 @@ export async function GET(request: NextRequest) {
       orderBy,
     })
 
-    // Combine and sort all upcoming meetings
-    const allUpcomingMeetings = [
+    // Combine and sort all meetings
+    const allMeetings = [
       ...upcomingMeetings.map(meeting => ({
         ...meeting,
         type: 'meeting' as const,
@@ -250,18 +282,54 @@ export async function GET(request: NextRequest) {
         ...instance,
         type: 'instance' as const,
       })),
-    ].sort((a, b) => {
-      const dateA = a.scheduledAt
-      const dateB = b.scheduledAt
-      return new Date(dateA).getTime() - new Date(dateB).getTime()
-    })
+    ]
+
+    // Sort based on the orderBy parameter
+    if (orderBy.scheduledAt) {
+      allMeetings.sort((a, b) => {
+        const dateA = new Date(a.scheduledAt).getTime()
+        const dateB = new Date(b.scheduledAt).getTime()
+        return orderBy.scheduledAt === 'desc' ? dateB - dateA : dateA - dateB
+      })
+    } else if (orderBy.title) {
+      allMeetings.sort((a, b) => {
+        const titleA =
+          (a.type === 'instance'
+            ? (a as any).meeting.title
+            : (a as any).title) || ''
+        const titleB =
+          (b.type === 'instance'
+            ? (b as any).meeting.title
+            : (b as any).title) || ''
+        const comparison = titleA.localeCompare(titleB)
+        return orderBy.title === 'desc' ? -comparison : comparison
+      })
+    } else if (orderBy.initiative) {
+      allMeetings.sort((a, b) => {
+        const meetingA = a.type === 'instance' ? (a as any).meeting : (a as any)
+        const meetingB = b.type === 'instance' ? (b as any).meeting : (b as any)
+        const initiativeA = meetingA.initiative?.title || ''
+        const initiativeB = meetingB.initiative?.title || ''
+        const comparison = initiativeA.localeCompare(initiativeB)
+        return orderBy.initiative.title === 'desc' ? -comparison : comparison
+      })
+    } else if (orderBy.team) {
+      allMeetings.sort((a, b) => {
+        const meetingA = a.type === 'instance' ? (a as any).meeting : (a as any)
+        const meetingB = b.type === 'instance' ? (b as any).meeting : (b as any)
+        const teamA = meetingA.team?.name || ''
+        const teamB = meetingB.team?.name || ''
+        const comparison = teamA.localeCompare(teamB)
+        return orderBy.team.name === 'desc' ? -comparison : comparison
+      })
+    }
 
     // Apply pagination
     const skip = (page - 1) * limit
-    const paginatedMeetings = allUpcomingMeetings.slice(skip, skip + limit)
+    const paginatedMeetings = allMeetings.slice(skip, skip + limit)
 
     // Calculate pagination metadata
-    const totalCount = allUpcomingMeetings.length
+    const totalCount = allMeetings.length
     const totalPages = Math.ceil(totalCount / limit)
     const hasNextPage = page < totalPages
     const hasPreviousPage = page > 1

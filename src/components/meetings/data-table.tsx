@@ -56,15 +56,19 @@ import {
   ArrowUpDown,
 } from 'lucide-react'
 import { deleteMeeting } from '@/lib/actions/meeting'
+import { deleteMeetingInstance } from '@/lib/actions/meeting-instance'
 import { toast } from 'sonner'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { createMeetingColumns } from './columns'
 import { useSession } from 'next-auth/react'
 import { useMeetings } from '@/hooks/use-meetings'
 import { useMeetingTableSettings } from '@/hooks/use-meeting-table-settings'
-import { MultiSelect } from '@/components/ui/multi-select'
 import { InitiativeMultiSelect } from '@/components/ui/initiative-multi-select'
-import type { UpcomingMeeting } from '@/components/meetings/shared-meetings-table'
+import type {
+  UpcomingMeeting,
+  MeetingWithRelations,
+  MeetingInstanceWithRelations,
+} from '@/components/meetings/shared-meetings-table'
 import { useTeamsCache } from '@/hooks/use-organization-cache'
 
 // Type for column meta
@@ -97,7 +101,9 @@ const globalFilterFn = (
   const meeting = row.original
   const searchValue = value.toLowerCase()
   const isInstance = meeting.type === 'instance'
-  const meetingData = isInstance ? (meeting as any).meeting : (meeting as any)
+  const meetingData = isInstance
+    ? (meeting as MeetingInstanceWithRelations).meeting
+    : (meeting as MeetingWithRelations)
 
   return (
     meetingData.title.toLowerCase().includes(searchValue) ||
@@ -156,10 +162,10 @@ export function MeetingDataTable({
 
   // Initialize search input from loaded settings
   useEffect(() => {
-    if (settingsLoaded && settings.filters.search !== searchInput) {
+    if (settingsLoaded) {
       setSearchInput(settings.filters.search)
     }
-  }, [settingsLoaded, settings.filters.search, searchInput])
+  }, [settingsLoaded, settings.filters.search])
 
   // Debounce search input to prevent excessive API calls
   useEffect(() => {
@@ -248,12 +254,14 @@ export function MeetingDataTable({
     x: number
     y: number
     meetingId: string
+    isInstance: boolean
     triggerType: 'rightClick' | 'button'
   }>({
     visible: false,
     x: 0,
     y: 0,
     meetingId: '',
+    isInstance: false,
     triggerType: 'rightClick',
   })
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -266,7 +274,11 @@ export function MeetingDataTable({
     router.push(href)
   }
 
-  const handleButtonClick = (e: React.MouseEvent, meetingId: string) => {
+  const handleButtonClick = (
+    e: React.MouseEvent,
+    meetingId: string,
+    isInstance = false
+  ) => {
     e.stopPropagation()
     const rect = e.currentTarget.getBoundingClientRect()
     setContextMenu({
@@ -274,14 +286,22 @@ export function MeetingDataTable({
       x: rect.right - 160,
       y: rect.bottom + 4,
       meetingId,
+      isInstance,
       triggerType: 'button',
     })
   }
 
-  const handleDeleteConfirm = async (meetingId: string) => {
+  const handleDeleteConfirm = async (meetingId: string, isInstance = false) => {
     try {
-      await deleteMeeting(meetingId)
-      toast.success('Meeting deleted successfully')
+      if (isInstance) {
+        // For instances, split the composite ID
+        const instanceId = meetingId.split('-')[1]
+        await deleteMeetingInstance(instanceId)
+        toast.success('Meeting instance deleted successfully')
+      } else {
+        await deleteMeeting(meetingId)
+        toast.success('Meeting deleted successfully')
+      }
       await refetch()
     } catch (error) {
       console.error('Failed to delete meeting:', error)
@@ -448,16 +468,18 @@ export function MeetingDataTable({
                         <div className='space-y-2'>
                           <label className='text-sm font-medium'>Team</label>
                           <Select
-                            value={settings.filters.teamId}
+                            value={settings.filters.teamId || 'all'}
                             onValueChange={value =>
-                              updateFilters({ teamId: value })
+                              updateFilters({
+                                teamId: value === 'all' ? '' : value,
+                              })
                             }
                           >
                             <SelectTrigger>
                               <SelectValue placeholder='All teams' />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value=''>All teams</SelectItem>
+                              <SelectItem value='all'>All teams</SelectItem>
                               {teams.map(team => (
                                 <SelectItem key={team.id} value={team.id}>
                                   {team.name}
@@ -713,9 +735,7 @@ export function MeetingDataTable({
                               row.groupingColumnId!
                             )}
                           </span>
-                          <Badge>
-                            {row.subRows.length}
-                          </Badge>
+                          <Badge>{row.subRows.length}</Badge>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -726,7 +746,7 @@ export function MeetingDataTable({
                 const meeting = row.original
                 const isInstance = meeting.type === 'instance'
                 const meetingId = isInstance
-                  ? `${(meeting as any).meeting.id}-${meeting.id}`
+                  ? `${(meeting as MeetingInstanceWithRelations).meeting.id}-${meeting.id}`
                   : meeting.id
 
                 return (
@@ -851,7 +871,10 @@ export function MeetingDataTable({
             <button
               className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
               onClick={() => {
-                router.push(`/meetings/${contextMenu.meetingId}`)
+                const href = contextMenu.isInstance
+                  ? `/meetings/${contextMenu.meetingId.split('-')[0]}/instances/${contextMenu.meetingId.split('-')[1]}`
+                  : `/meetings/${contextMenu.meetingId}`
+                router.push(href)
                 setContextMenu(prev => ({ ...prev, visible: false }))
               }}
             >
@@ -861,7 +884,10 @@ export function MeetingDataTable({
             <button
               className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
               onClick={() => {
-                router.push(`/meetings/${contextMenu.meetingId}/edit`)
+                const href = contextMenu.isInstance
+                  ? `/meetings/${contextMenu.meetingId.split('-')[0]}/instances/${contextMenu.meetingId.split('-')[1]}/edit`
+                  : `/meetings/${contextMenu.meetingId}/edit`
+                router.push(href)
                 setContextMenu(prev => ({ ...prev, visible: false }))
               }}
             >
@@ -892,13 +918,14 @@ export function MeetingDataTable({
         }}
         onConfirm={() => {
           if (deleteTargetId) {
-            return handleDeleteConfirm(deleteTargetId)
+            return handleDeleteConfirm(deleteTargetId, contextMenu.isInstance)
           }
         }}
-        title='Delete Meeting'
-        entityName='meeting'
+        title={
+          contextMenu.isInstance ? 'Delete Meeting Instance' : 'Delete Meeting'
+        }
+        entityName={contextMenu.isInstance ? 'meeting instance' : 'meeting'}
       />
     </div>
   )
 }
-

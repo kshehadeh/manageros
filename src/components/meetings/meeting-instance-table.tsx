@@ -102,14 +102,17 @@ export function MeetingInstanceTable({
     })
   }
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: Date | string) => {
+    const dateObj = typeof date === 'string' ? new Date(date) : date
+    if (isNaN(dateObj.getTime())) return '—'
+
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
-    }).format(new Date(date))
+    }).format(dateObj)
   }
 
   const getStatusBadge = (instance: MeetingInstanceWithRelations) => {
