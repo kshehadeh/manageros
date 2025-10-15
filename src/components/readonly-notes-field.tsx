@@ -41,12 +41,16 @@ export function ReadonlyNotesField({
   }
 
   return (
-    <div className={`${getVariantClasses()} text-foreground ${className}`}>
+    <div
+      className={`${getVariantClasses()} text-foreground break-words ${className}`}
+    >
       <ReactMarkdown
         components={{
           // Paragraphs
           p: ({ children }) => (
-            <p className='mb-3 text-foreground leading-relaxed'>{children}</p>
+            <p className='mb-3 text-foreground leading-relaxed break-words'>
+              {children}
+            </p>
           ),
 
           // Headings
@@ -80,7 +84,7 @@ export function ReadonlyNotesField({
           a: ({ href, children }) => (
             <a
               href={href}
-              className='text-primary hover:text-primary/90 underline decoration-primary/30 hover:decoration-primary/60 transition-colors'
+              className='text-primary hover:text-primary/90 underline decoration-primary/30 hover:decoration-primary/60 transition-colors break-all'
               target='_blank'
               rel='noopener noreferrer'
             >
