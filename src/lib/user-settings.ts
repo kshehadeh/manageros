@@ -323,100 +323,71 @@ export function getTaskTableSettings(
         dueDateTo: '',
       },
     }
-  )
   }
 
-  /**
-   * Update task table settings for a specific view
-   */
-  export function updateTaskTableSettings(
-    userId: string,
-    settingsId: string,
-    tableSettings: Partial<UserSettings['taskTableSettings'][string]>
-  ): void {
-    const currentSettings = loadUserSettings(userId)
-    const currentTableSettings = currentSettings.taskTableSettings[
-      settingsId
-    ] || {
+  return tableSettings
+}
+
+/**
+ * Update task table settings for a specific view
+ */
+export function updateTaskTableSettings(
+  userId: string,
+  settingsId: string,
+  tableSettings: Partial<UserSettings['taskTableSettings'][string]>
+): void {
+  const currentSettings = loadUserSettings(userId)
+  const currentTableSettings = currentSettings.taskTableSettings[
+    settingsId
+  ] || {
+    sorting: [],
+    grouping: 'none',
+    sort: {
+      field: '',
+      direction: 'asc' as const,
+    },
+    filters: {
+      search: '',
+      status: [],
+      assigneeId: [],
+      initiativeId: [],
+      priority: [],
+      dueDateFrom: '',
+      dueDateTo: '',
+    },
+  }
+
+  const updatedTableSettings = {
+    ...currentTableSettings,
+    ...tableSettings,
+  }
+
+  const updatedSettings = {
+    ...currentSettings,
+    taskTableSettings: {
+      ...currentSettings.taskTableSettings,
+      [settingsId]: updatedTableSettings,
+    },
+  }
+
+  saveUserSettings(userId, updatedSettings)
+}
+
+/**
+ * Get initiative table settings for a specific view
+ */
+export function getInitiativeTableSettings(
+  userId: string,
+  settingsId: string
+): UserSettings['initiativeTableSettings'][string] {
+  const settings = loadUserSettings(userId)
+  return (
+    settings.initiativeTableSettings[settingsId] || {
       sorting: [],
       grouping: 'none',
       sort: {
         field: '',
-        direction: 'asc' as const,
-      },
-      filters: {
-        search: '',
-        status: [],
-        assigneeId: [],
-        initiativeId: [],
-        priority: [],
-        dueDateFrom: '',
-        dueDateTo: '',
-      },
-    }
-
-    const updatedTableSettings = {
-      ...currentTableSettings,
-      ...tableSettings,
-    }
-
-    const updatedSettings = {
-      ...currentSettings,
-      taskTableSettings: {
-        ...currentSettings.taskTableSettings,
-        [settingsId]: updatedTableSettings,
-      },
-    }
-
-    saveUserSettings(userId, updatedSettings)
-  }
-
-  /**
-   * Get initiative table settings for a specific view
-   */
-  export function getInitiativeTableSettings(
-    userId: string,
-    settingsId: string
-  ): UserSettings['initiativeTableSettings'][string] {
-    const settings = loadUserSettings(userId)
-    return (
-      settings.initiativeTableSettings[settingsId] || {
-        sorting: [],
-        grouping: 'none',
-        sort: {
-          field: '',
-          direction: 'asc',
-        },
-        filters: {
-          search: '',
-          teamId: '',
-          ownerId: '',
-          rag: '',
-          status: '',
-          dateFrom: '',
-          dateTo: '',
-        },
-      }
-    )
-  }
-
-  /**
-   * Update initiative table settings for a specific view
-   */
-  export function updateInitiativeTableSettings(
-    userId: string,
-    settingsId: string,
-    tableSettings: Partial<UserSettings['initiativeTableSettings'][string]>
-  ): void {
-    const currentSettings = loadUserSettings(userId)
-    const currentTableSettings = currentSettings.initiativeTableSettings[
-      settingsId
-    ] || {
-      sorting: [],
-      grouping: 'none',
-      sort: {
-        field: '',
-        direction: 'asc' as const,
+        direction: 'asc',
       },
       filters: {
         search: '',
@@ -428,91 +399,69 @@ export function getTaskTableSettings(
         dateTo: '',
       },
     }
+  )
+}
 
-    const updatedTableSettings = {
-      ...currentTableSettings,
-      ...tableSettings,
-    }
-
-    const updatedSettings = {
-      ...currentSettings,
-      initiativeTableSettings: {
-        ...currentSettings.initiativeTableSettings,
-        [settingsId]: updatedTableSettings,
-      },
-    }
-
-    saveUserSettings(userId, updatedSettings)
+/**
+ * Update initiative table settings for a specific view
+ */
+export function updateInitiativeTableSettings(
+  userId: string,
+  settingsId: string,
+  tableSettings: Partial<UserSettings['initiativeTableSettings'][string]>
+): void {
+  const currentSettings = loadUserSettings(userId)
+  const currentTableSettings = currentSettings.initiativeTableSettings[
+    settingsId
+  ] || {
+    sorting: [],
+    grouping: 'none',
+    sort: {
+      field: '',
+      direction: 'asc' as const,
+    },
+    filters: {
+      search: '',
+      teamId: '',
+      ownerId: '',
+      rag: '',
+      status: '',
+      dateFrom: '',
+      dateTo: '',
+    },
   }
 
-  /**
-   * Get people table settings for a specific view
-   */
-  export function getPeopleTableSettings(
-    userId: string,
-    settingsId: string
-  ): UserSettings['peopleTableSettings'][string] {
-    const settings = loadUserSettings(userId)
-    return (
-      settings.peopleTableSettings[settingsId] || {
-        sorting: [],
-        grouping: 'team',
-        sort: {
-          field: '',
-          direction: 'asc',
-        },
-        filters: {
-          search: '',
-          teamId: '',
-          managerId: '',
-          jobRoleId: '',
-          status: '',
-        },
-      }
-    )
+  const updatedTableSettings = {
+    ...currentTableSettings,
+    ...tableSettings,
   }
 
-  /**
-   * Get team table settings for a specific view
-   */
-  export function getTeamTableSettings(
-    userId: string,
-    settingsId: string
-  ): UserSettings['teamTableSettings'][string] {
-    const settings = loadUserSettings(userId)
-    return (
-      settings.teamTableSettings[settingsId] || {
-        sorting: [],
-        grouping: 'parent',
-        sort: {
-          field: '',
-          direction: 'asc',
-        },
-        filters: {
-          search: '',
-          parentId: '',
-        },
-      }
-    )
+  const updatedSettings = {
+    ...currentSettings,
+    initiativeTableSettings: {
+      ...currentSettings.initiativeTableSettings,
+      [settingsId]: updatedTableSettings,
+    },
   }
 
-  /**
-   * Update people table settings for a specific view
-   */
-  export function updatePeopleTableSettings(
-    userId: string,
-    settingsId: string,
-    tableSettings: Partial<UserSettings['peopleTableSettings'][string]>
-  ): void {
-    const currentSettings = loadUserSettings(userId)
-    const currentTableSettings = currentSettings.peopleTableSettings[
-      settingsId
-    ] || {
+  saveUserSettings(userId, updatedSettings)
+}
+
+/**
+ * Get people table settings for a specific view
+ */
+export function getPeopleTableSettings(
+  userId: string,
+  settingsId: string
+): UserSettings['peopleTableSettings'][string] {
+  const settings = loadUserSettings(userId)
+  return (
+    settings.peopleTableSettings[settingsId] || {
       sorting: [],
       grouping: 'team',
       sort: {
         field: '',
-        direction: 'asc' as const,
+        direction: 'asc',
       },
       filters: {
         search: '',
@@ -522,105 +471,131 @@ export function getTaskTableSettings(
         status: '',
       },
     }
+  )
+}
 
-    const updatedTableSettings = {
-      ...currentTableSettings,
-      ...tableSettings,
-    }
-
-    const updatedSettings = {
-      ...currentSettings,
-      peopleTableSettings: {
-        ...currentSettings.peopleTableSettings,
-        [settingsId]: updatedTableSettings,
-      },
-    }
-
-    saveUserSettings(userId, updatedSettings)
-  }
-
-  /**
-   * Update team table settings for a specific view
-   */
-  export function updateTeamTableSettings(
-    userId: string,
-    settingsId: string,
-    tableSettings: Partial<UserSettings['teamTableSettings'][string]>
-  ): void {
-    const currentSettings = loadUserSettings(userId)
-    const currentTableSettings = currentSettings.teamTableSettings[
-      settingsId
-    ] || {
+/**
+ * Get team table settings for a specific view
+ */
+export function getTeamTableSettings(
+  userId: string,
+  settingsId: string
+): UserSettings['teamTableSettings'][string] {
+  const settings = loadUserSettings(userId)
+  return (
+    settings.teamTableSettings[settingsId] || {
       sorting: [],
       grouping: 'parent',
       sort: {
         field: '',
-        direction: 'asc' as const,
+        direction: 'asc',
       },
       filters: {
         search: '',
         parentId: '',
       },
     }
+  )
+}
 
-    const updatedTableSettings = {
-      ...currentTableSettings,
-      ...tableSettings,
-    }
-
-    const updatedSettings = {
-      ...currentSettings,
-      teamTableSettings: {
-        ...currentSettings.teamTableSettings,
-        [settingsId]: updatedTableSettings,
-      },
-    }
-
-    saveUserSettings(userId, updatedSettings)
+/**
+ * Update people table settings for a specific view
+ */
+export function updatePeopleTableSettings(
+  userId: string,
+  settingsId: string,
+  tableSettings: Partial<UserSettings['peopleTableSettings'][string]>
+): void {
+  const currentSettings = loadUserSettings(userId)
+  const currentTableSettings = currentSettings.peopleTableSettings[
+    settingsId
+  ] || {
+    sorting: [],
+    grouping: 'team',
+    sort: {
+      field: '',
+      direction: 'asc' as const,
+    },
+    filters: {
+      search: '',
+      teamId: '',
+      managerId: '',
+      jobRoleId: '',
+      status: '',
+    },
   }
 
-  /**
-   * Get one-on-one table settings for a specific view
-   */
-  export function getOneOnOneTableSettings(
-    userId: string,
-    settingsId: string
-  ): UserSettings['oneOnOneTableSettings'][string] {
-    const settings = loadUserSettings(userId)
-    return (
-      settings.oneOnOneTableSettings[settingsId] || {
-        sorting: [],
-        grouping: 'none',
-        sort: {
-          field: '',
-          direction: 'asc',
-        },
-        filters: {
-          search: '',
-          scheduledFrom: '',
-          scheduledTo: '',
-        },
-      }
-    )
+  const updatedTableSettings = {
+    ...currentTableSettings,
+    ...tableSettings,
   }
 
-  /**
-   * Update one-on-one table settings for a specific view
-   */
-  export function updateOneOnOneTableSettings(
-    userId: string,
-    settingsId: string,
-    tableSettings: Partial<UserSettings['oneOnOneTableSettings'][string]>
-  ): void {
-    const currentSettings = loadUserSettings(userId)
-    const currentTableSettings = currentSettings.oneOnOneTableSettings[
-      settingsId
-    ] || {
+  const updatedSettings = {
+    ...currentSettings,
+    peopleTableSettings: {
+      ...currentSettings.peopleTableSettings,
+      [settingsId]: updatedTableSettings,
+    },
+  }
+
+  saveUserSettings(userId, updatedSettings)
+}
+
+/**
+ * Update team table settings for a specific view
+ */
+export function updateTeamTableSettings(
+  userId: string,
+  settingsId: string,
+  tableSettings: Partial<UserSettings['teamTableSettings'][string]>
+): void {
+  const currentSettings = loadUserSettings(userId)
+  const currentTableSettings = currentSettings.teamTableSettings[
+    settingsId
+  ] || {
+    sorting: [],
+    grouping: 'parent',
+    sort: {
+      field: '',
+      direction: 'asc' as const,
+    },
+    filters: {
+      search: '',
+      parentId: '',
+    },
+  }
+
+  const updatedTableSettings = {
+    ...currentTableSettings,
+    ...tableSettings,
+  }
+
+  const updatedSettings = {
+    ...currentSettings,
+    teamTableSettings: {
+      ...currentSettings.teamTableSettings,
+      [settingsId]: updatedTableSettings,
+    },
+  }
+
+  saveUserSettings(userId, updatedSettings)
+}
+
+/**
+ * Get one-on-one table settings for a specific view
+ */
+export function getOneOnOneTableSettings(
+  userId: string,
+  settingsId: string
+): UserSettings['oneOnOneTableSettings'][string] {
+  const settings = loadUserSettings(userId)
+  return (
+    settings.oneOnOneTableSettings[settingsId] || {
       sorting: [],
       grouping: 'none',
       sort: {
         field: '',
-        direction: 'asc' as const,
+        direction: 'asc',
       },
       filters: {
         search: '',
@@ -628,67 +603,65 @@ export function getTaskTableSettings(
         scheduledTo: '',
       },
     }
+  )
+}
 
-    const updatedTableSettings = {
-      ...currentTableSettings,
-      ...tableSettings,
-    }
-
-    const updatedSettings = {
-      ...currentSettings,
-      oneOnOneTableSettings: {
-        ...currentSettings.oneOnOneTableSettings,
-        [settingsId]: updatedTableSettings,
-      },
-    }
-
-    saveUserSettings(userId, updatedSettings)
+/**
+ * Update one-on-one table settings for a specific view
+ */
+export function updateOneOnOneTableSettings(
+  userId: string,
+  settingsId: string,
+  tableSettings: Partial<UserSettings['oneOnOneTableSettings'][string]>
+): void {
+  const currentSettings = loadUserSettings(userId)
+  const currentTableSettings = currentSettings.oneOnOneTableSettings[
+    settingsId
+  ] || {
+    sorting: [],
+    grouping: 'none',
+    sort: {
+      field: '',
+      direction: 'asc' as const,
+    },
+    filters: {
+      search: '',
+      scheduledFrom: '',
+      scheduledTo: '',
+    },
   }
 
-  /**
-   * Get meeting table settings for a specific view
-   */
-  export function getMeetingTableSettings(
-    userId: string,
-    settingsId: string
-  ): UserSettings['meetingTableSettings'][string] {
-    const settings = loadUserSettings(userId)
-    return (
-      settings.meetingTableSettings[settingsId] || {
-        sorting: [],
-        grouping: 'none',
-        sort: {
-          field: '',
-          direction: 'asc',
-        },
-        filters: {
-          search: '',
-          teamId: '',
-          initiativeId: '',
-          scheduledFrom: '',
-          scheduledTo: '',
-        },
-      }
-    )
+  const updatedTableSettings = {
+    ...currentTableSettings,
+    ...tableSettings,
   }
 
-  /**
-   * Update meeting table settings for a specific view
-   */
-  export function updateMeetingTableSettings(
-    userId: string,
-    settingsId: string,
-    tableSettings: Partial<UserSettings['meetingTableSettings'][string]>
-  ): void {
-    const currentSettings = loadUserSettings(userId)
-    const currentTableSettings = currentSettings.meetingTableSettings[
-      settingsId
-    ] || {
+  const updatedSettings = {
+    ...currentSettings,
+    oneOnOneTableSettings: {
+      ...currentSettings.oneOnOneTableSettings,
+      [settingsId]: updatedTableSettings,
+    },
+  }
+
+  saveUserSettings(userId, updatedSettings)
+}
+
+/**
+ * Get meeting table settings for a specific view
+ */
+export function getMeetingTableSettings(
+  userId: string,
+  settingsId: string
+): UserSettings['meetingTableSettings'][string] {
+  const settings = loadUserSettings(userId)
+  return (
+    settings.meetingTableSettings[settingsId] || {
       sorting: [],
       grouping: 'none',
       sort: {
         field: '',
-        direction: 'asc' as const,
+        direction: 'asc',
       },
       filters: {
         search: '',
@@ -698,19 +671,48 @@ export function getTaskTableSettings(
         scheduledTo: '',
       },
     }
+  )
+}
 
-    const updatedTableSettings = {
-      ...currentTableSettings,
-      ...tableSettings,
-    }
-
-    const updatedSettings = {
-      ...currentSettings,
-      meetingTableSettings: {
-        ...currentSettings.meetingTableSettings,
-        [settingsId]: updatedTableSettings,
-      },
-    }
-
-    saveUserSettings(userId, updatedSettings)
+/**
+ * Update meeting table settings for a specific view
+ */
+export function updateMeetingTableSettings(
+  userId: string,
+  settingsId: string,
+  tableSettings: Partial<UserSettings['meetingTableSettings'][string]>
+): void {
+  const currentSettings = loadUserSettings(userId)
+  const currentTableSettings = currentSettings.meetingTableSettings[
+    settingsId
+  ] || {
+    sorting: [],
+    grouping: 'none',
+    sort: {
+      field: '',
+      direction: 'asc' as const,
+    },
+    filters: {
+      search: '',
+      teamId: '',
+      initiativeId: '',
+      scheduledFrom: '',
+      scheduledTo: '',
+    },
   }
+
+  const updatedTableSettings = {
+    ...currentTableSettings,
+    ...tableSettings,
+  }
+
+  const updatedSettings = {
+    ...currentSettings,
+    meetingTableSettings: {
+      ...currentSettings.meetingTableSettings,
+      [settingsId]: updatedTableSettings,
+    },
+  }
+
+  saveUserSettings(userId, updatedSettings)
+}
