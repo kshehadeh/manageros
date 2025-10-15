@@ -148,11 +148,17 @@ export function TaskDataTable({
   const [globalFilter, setGlobalFilter] = useState('')
 
   // Use settings hook for persistent state
-  const { settings, updateSorting, updateGrouping, updateSort, updateFilters } =
-    useTaskTableSettings({
-      settingsId: settingsId || 'default',
-      enabled: true,
-    })
+  const {
+    settings,
+    isLoaded: settingsLoaded,
+    updateSorting,
+    updateGrouping,
+    updateSort,
+    updateFilters,
+  } = useTaskTableSettings({
+    settingsId: settingsId || 'default',
+    enabled: true,
+  })
 
   // Debounced search state - separate from internal filters to prevent immediate API calls
   const [searchInput, setSearchInput] = useState('')
@@ -178,8 +184,15 @@ export function TaskDataTable({
   // Get current user's personId for my tasks filtering
   const { status: sessionStatus } = useSession()
 
-  // Don't fetch data if we're waiting for session
-  const shouldFetch = sessionStatus !== 'loading'
+  // Don't fetch data if we're waiting for session or settings to load
+  const shouldFetch = sessionStatus !== 'loading' && settingsLoaded
+
+  // Initialize search input from loaded settings
+  useEffect(() => {
+    if (settingsLoaded && settings.filters.search !== searchInput) {
+      setSearchInput(settings.filters.search)
+    }
+  }, [settingsLoaded, settings.filters.search, searchInput])
 
   // Debounce search input to prevent excessive API calls
   useEffect(() => {
@@ -197,7 +210,7 @@ export function TaskDataTable({
   const memoizedFilters = useMemo(
     () => settings.filters,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [JSON.stringify(settings.filters)]
+    [JSON.stringify(settings.filters), settingsLoaded]
   )
 
   const memoizedImmutableFilters = useMemo(

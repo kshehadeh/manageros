@@ -55,10 +55,10 @@ export interface UserSettings {
       }
       filters: {
         search: string
-        status: string | string[]
-        assigneeId: string | string[]
-        initiativeId: string | string[]
-        priority: string | string[]
+        status: string[]
+        assigneeId: string[]
+        initiativeId: string[]
+        priority: string[]
         dueDateFrom: string
         dueDateTo: string
       }
@@ -282,8 +282,10 @@ export function getTaskTableSettings(
   settingsId: string
 ): UserSettings['taskTableSettings'][string] {
   const settings = loadUserSettings(userId)
-  return (
-    settings.taskTableSettings[settingsId] || {
+  const tableSettings = settings.taskTableSettings[settingsId]
+
+  if (!tableSettings) {
+    return {
       sorting: [],
       grouping: 'none',
       sort: {
@@ -292,15 +294,49 @@ export function getTaskTableSettings(
       },
       filters: {
         search: '',
-        status: '',
-        assigneeId: '',
-        initiativeId: '',
-        priority: '',
+        status: [],
+        assigneeId: [],
+        initiativeId: [],
+        priority: [],
         dueDateFrom: '',
         dueDateTo: '',
       },
     }
-  )
+  }
+
+  // Migrate old string-based filters to array format
+  const migratedFilters = {
+    search: tableSettings.filters.search || '',
+    status: Array.isArray(tableSettings.filters.status)
+      ? tableSettings.filters.status
+      : tableSettings.filters.status && tableSettings.filters.status !== ''
+        ? [tableSettings.filters.status]
+        : [],
+    assigneeId: Array.isArray(tableSettings.filters.assigneeId)
+      ? tableSettings.filters.assigneeId
+      : tableSettings.filters.assigneeId &&
+          tableSettings.filters.assigneeId !== ''
+        ? [tableSettings.filters.assigneeId]
+        : [],
+    initiativeId: Array.isArray(tableSettings.filters.initiativeId)
+      ? tableSettings.filters.initiativeId
+      : tableSettings.filters.initiativeId &&
+          tableSettings.filters.initiativeId !== ''
+        ? [tableSettings.filters.initiativeId]
+        : [],
+    priority: Array.isArray(tableSettings.filters.priority)
+      ? tableSettings.filters.priority
+      : tableSettings.filters.priority && tableSettings.filters.priority !== ''
+        ? [tableSettings.filters.priority]
+        : [],
+    dueDateFrom: tableSettings.filters.dueDateFrom || '',
+    dueDateTo: tableSettings.filters.dueDateTo || '',
+  }
+
+  return {
+    ...tableSettings,
+    filters: migratedFilters,
+  }
 }
 
 /**
@@ -323,10 +359,10 @@ export function updateTaskTableSettings(
     },
     filters: {
       search: '',
-      status: '',
-      assigneeId: '',
-      initiativeId: '',
-      priority: '',
+      status: [],
+      assigneeId: [],
+      initiativeId: [],
+      priority: [],
       dueDateFrom: '',
       dueDateTo: '',
     },

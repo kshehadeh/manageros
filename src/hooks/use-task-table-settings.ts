@@ -17,10 +17,10 @@ interface TaskTableSettings {
   }
   filters: {
     search: string
-    status: string | string[]
-    assigneeId: string | string[]
-    initiativeId: string | string[]
-    priority: string | string[]
+    status: string[]
+    assigneeId: string[]
+    initiativeId: string[]
+    priority: string[]
     dueDateFrom: string
     dueDateTo: string
   }
