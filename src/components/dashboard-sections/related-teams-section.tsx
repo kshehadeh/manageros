@@ -50,9 +50,9 @@ export function DashboardRelatedTeamsSection() {
   // Transform the data to match the expected format
   const formattedTeams = teams.map(team => ({
     ...team,
-    avatar: null,
-    people: [], // Not needed for list item display
-    initiatives: [], // Not needed for list item display
+    avatar: team.avatar, // Preserve the actual avatar from API
+    people: Array(team._count.people).fill(null), // Create array with correct length for stats
+    initiatives: Array(team._count.initiatives).fill(null), // Create array with correct length for stats
     parent: team.parent
       ? {
           id: team.parent.id,
@@ -61,11 +61,10 @@ export function DashboardRelatedTeamsSection() {
           organizationId: team.organizationId,
           createdAt: team.createdAt,
           updatedAt: team.updatedAt,
-          avatar: null,
+          avatar: team.parent.avatar || null, // Ensure avatar is string | null, not undefined
           parentId: null,
         }
       : null,
-    _count: team._count,
   }))
 
   return (

@@ -4,6 +4,7 @@ export interface TeamListItem {
   id: string
   name: string
   description: string | null
+  avatar: string | null
   parentId: string | null
   organizationId: string
   createdAt: Date
@@ -11,6 +12,7 @@ export interface TeamListItem {
   parent: {
     id: string
     name: string | null
+    avatar?: string | null
   } | null
   _count: {
     people: number
