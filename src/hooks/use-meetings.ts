@@ -18,6 +18,9 @@ interface MeetingsResponse {
 interface MeetingFilters {
   scheduledFrom?: string
   scheduledTo?: string
+  search?: string
+  teamId?: string
+  initiativeId?: string
   [key: string]: string | undefined
 }
 
@@ -26,6 +29,7 @@ interface UseMeetingsOptions {
   limit?: number
   filters?: MeetingFilters
   immutableFilters?: MeetingFilters
+  sort?: string
   enabled?: boolean
 }
 
@@ -34,6 +38,7 @@ export function useMeetings({
   limit = 20,
   filters,
   immutableFilters,
+  sort,
   enabled = true,
 }: UseMeetingsOptions = {}) {
   const [data, setData] = useState<MeetingsResponse | null>(null)
@@ -60,6 +65,11 @@ export function useMeetings({
         ),
       })
 
+      // Add sort parameter
+      if (sort) {
+        searchParams.set('sort', sort)
+      }
+
       // Add immutable filters as JSON-encoded parameter
       if (Object.keys(immutableFilters || {}).length > 0) {
         searchParams.set('immutableFilters', JSON.stringify(immutableFilters))
@@ -80,7 +90,7 @@ export function useMeetings({
     } finally {
       setLoading(false)
     }
-  }, [page, limit, filters, immutableFilters, enabled])
+  }, [page, limit, filters, immutableFilters, sort, enabled])
 
   useEffect(() => {
     fetchMeetings()

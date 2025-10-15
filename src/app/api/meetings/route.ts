@@ -2,6 +2,28 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
 
+// Build order by clause from sort parameter
+function buildOrderByClause(sortParam: string) {
+  if (!sortParam) return { scheduledAt: 'asc' as const }
+
+  const [field, direction] = sortParam.split(':')
+  const dir = direction === 'desc' ? 'desc' : 'asc'
+
+  switch (field) {
+    case 'scheduledAt':
+    case 'scheduledDate':
+      return { scheduledAt: dir }
+    case 'title':
+      return { title: dir }
+    case 'initiative':
+      return { initiative: { title: dir } }
+    case 'team':
+      return { team: { name: dir } }
+    default:
+      return { scheduledAt: 'asc' as const }
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser()
@@ -34,6 +56,10 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const scheduledFrom = searchParams.get('scheduledFrom') || ''
     const scheduledTo = searchParams.get('scheduledTo') || ''
+    const search = searchParams.get('search') || ''
+    const teamId = searchParams.get('teamId') || ''
+    const initiativeId = searchParams.get('initiativeId') || ''
+    const sortParam = searchParams.get('sort') || ''
 
     // Parse immutable filters from query parameter
     let immutableFilters: Record<string, unknown> = {}
@@ -50,11 +76,15 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Apply date range filter (immutable takes precedence)
+    // Apply filters (immutable takes precedence)
     const scheduledFromFilter =
       (immutableFilters.scheduledFrom as string) || scheduledFrom
     const scheduledToFilter =
       (immutableFilters.scheduledTo as string) || scheduledTo
+    const searchFilter = (immutableFilters.search as string) || search
+    const teamIdFilter = (immutableFilters.teamId as string) || teamId
+    const initiativeIdFilter =
+      (immutableFilters.initiativeId as string) || initiativeId
 
     // Default to upcoming week if no dates specified
     const now = new Date()
@@ -67,43 +97,107 @@ export async function GET(request: NextRequest) {
       ? new Date(scheduledToFilter)
       : new Date(oneWeekFromNow.toISOString())
 
-    // Fetch upcoming meeting instances (for recurring meetings)
-    const upcomingMeetingInstances = await prisma.meetingInstance.findMany({
-      where: {
+    // Build where clause for filtering
+    const buildWhereClause = (isInstance: boolean) => {
+      const baseWhere: any = {
         organizationId: user.organizationId,
         scheduledAt: {
           gte: fromDate,
           lte: toDate,
         },
         OR: [
-          // User is a participant of the instance itself
+          // User is a participant
           {
-            participants: {
+            [isInstance ? 'participants' : 'participants']: {
               some: {
                 personId: currentPerson.id,
               },
             },
           },
-          // User is a participant of the main meeting
-          {
-            meeting: {
-              participants: {
-                some: {
-                  personId: currentPerson.id,
+          // For instances, also check if user is participant of main meeting
+          ...(isInstance
+            ? [
+              {
+                meeting: {
+                  participants: {
+                    some: {
+                      personId: currentPerson.id,
+                    },
+                  },
                 },
               },
-            },
-          },
-          // User is the creator of the meeting
+            ]
+            : []),
+          // User is the creator
           {
-            meeting: {
-              createdBy: {
+            [isInstance ? 'meeting' : 'createdBy']: isInstance
+              ? {
+                createdBy: {
+                  personId: currentPerson.id,
+                },
+              }
+              : {
                 personId: currentPerson.id,
               },
-            },
           },
         ],
-      },
+      }
+
+      // Add search filter
+      if (searchFilter) {
+        if (isInstance) {
+          baseWhere.meeting = {
+            ...baseWhere.meeting,
+            title: {
+              contains: searchFilter,
+              mode: 'insensitive',
+            },
+          }
+        } else {
+          baseWhere.title = {
+            contains: searchFilter,
+            mode: 'insensitive',
+          }
+        }
+      }
+
+      // Add team filter
+      if (teamIdFilter) {
+        if (isInstance) {
+          baseWhere.meeting = {
+            ...baseWhere.meeting,
+            teamId: teamIdFilter,
+          }
+        } else {
+          baseWhere.teamId = teamIdFilter
+        }
+      }
+
+      // Add initiative filter
+      if (initiativeIdFilter) {
+        if (isInstance) {
+          baseWhere.meeting = {
+            ...baseWhere.meeting,
+            initiativeId: initiativeIdFilter,
+          }
+        } else {
+          baseWhere.initiativeId = initiativeIdFilter
+        }
+      }
+
+      if (!isInstance) {
+        baseWhere.isRecurring = false
+      }
+
+      return baseWhere
+    }
+
+    // Get order by clause
+    const orderBy = buildOrderByClause(sortParam)
+
+    // Fetch upcoming meeting instances (for recurring meetings)
+    const upcomingMeetingInstances = await prisma.meetingInstance.findMany({
+      where: buildWhereClause(true),
       include: {
         meeting: {
           include: {
@@ -123,37 +217,15 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: {
-        scheduledAt: 'asc',
-      },
+      orderBy:
+        orderBy.scheduledAt !== undefined
+          ? { scheduledAt: orderBy.scheduledAt }
+          : undefined,
     })
 
     // Fetch upcoming non-recurring meetings
     const upcomingMeetings = await prisma.meeting.findMany({
-      where: {
-        organizationId: user.organizationId,
-        isRecurring: false,
-        scheduledAt: {
-          gte: fromDate,
-          lte: toDate,
-        },
-        OR: [
-          // User is a participant of the meeting
-          {
-            participants: {
-              some: {
-                personId: currentPerson.id,
-              },
-            },
-          },
-          // User is the creator of the meeting
-          {
-            createdBy: {
-              personId: currentPerson.id,
-            },
-          },
-        ],
-      },
+      where: buildWhereClause(false),
       include: {
         team: true,
         initiative: true,
@@ -165,9 +237,7 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: {
-        scheduledAt: 'asc',
-      },
+      orderBy,
     })
 
     // Combine and sort all upcoming meetings
