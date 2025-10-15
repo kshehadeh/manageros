@@ -55,10 +55,10 @@ export interface UserSettings {
       }
       filters: {
         search: string
-        status: string | string[]
-        assigneeId: string | string[]
-        initiativeId: string | string[]
-        priority: string | string[]
+        status: string[]
+        assigneeId: string[]
+        initiativeId: string[]
+        priority: string[]
         dueDateFrom: string
         dueDateTo: string
       }
@@ -142,6 +142,26 @@ export interface UserSettings {
     }
   >
 
+  // Per-view meeting table settings
+  meetingTableSettings: Record<
+    string,
+    {
+      sorting: Array<{ id: string; desc: boolean }>
+      grouping: string
+      sort: {
+        field: string
+        direction: 'asc' | 'desc'
+      }
+      filters: {
+        search: string
+        teamId: string
+        initiativeId: string
+        scheduledFrom: string
+        scheduledTo: string
+      }
+    }
+  >
+
   // Future expandable settings can be added here:
   // sidebarCollapsed: boolean
   // defaultPageSize: number
@@ -185,6 +205,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   peopleTableSettings: {},
   teamTableSettings: {},
   oneOnOneTableSettings: {},
+  meetingTableSettings: {},
   // When adding new settings, add their defaults here:
   // sidebarCollapsed: false
   // defaultPageSize: 25
@@ -282,8 +303,10 @@ export function getTaskTableSettings(
   settingsId: string
 ): UserSettings['taskTableSettings'][string] {
   const settings = loadUserSettings(userId)
-  return (
-    settings.taskTableSettings[settingsId] || {
+  const tableSettings = settings.taskTableSettings[settingsId]
+
+  if (!tableSettings) {
+    return {
       sorting: [],
       grouping: 'none',
       sort: {
@@ -292,15 +315,49 @@ export function getTaskTableSettings(
       },
       filters: {
         search: '',
-        status: '',
-        assigneeId: '',
-        initiativeId: '',
-        priority: '',
+        status: [],
+        assigneeId: [],
+        initiativeId: [],
+        priority: [],
         dueDateFrom: '',
         dueDateTo: '',
       },
     }
-  )
+  }
+
+  // Migrate old string-based filters to array format
+  const migratedFilters = {
+    search: tableSettings.filters.search || '',
+    status: Array.isArray(tableSettings.filters.status)
+      ? tableSettings.filters.status
+      : tableSettings.filters.status && tableSettings.filters.status !== ''
+        ? [tableSettings.filters.status]
+        : [],
+    assigneeId: Array.isArray(tableSettings.filters.assigneeId)
+      ? tableSettings.filters.assigneeId
+      : tableSettings.filters.assigneeId &&
+        tableSettings.filters.assigneeId !== ''
+        ? [tableSettings.filters.assigneeId]
+        : [],
+    initiativeId: Array.isArray(tableSettings.filters.initiativeId)
+      ? tableSettings.filters.initiativeId
+      : tableSettings.filters.initiativeId &&
+        tableSettings.filters.initiativeId !== ''
+        ? [tableSettings.filters.initiativeId]
+        : [],
+    priority: Array.isArray(tableSettings.filters.priority)
+      ? tableSettings.filters.priority
+      : tableSettings.filters.priority && tableSettings.filters.priority !== ''
+        ? [tableSettings.filters.priority]
+        : [],
+    dueDateFrom: tableSettings.filters.dueDateFrom || '',
+    dueDateTo: tableSettings.filters.dueDateTo || '',
+  }
+
+  return {
+    ...tableSettings,
+    filters: migratedFilters,
+  }
 }
 
 /**
@@ -323,10 +380,10 @@ export function updateTaskTableSettings(
     },
     filters: {
       search: '',
-      status: '',
-      assigneeId: '',
-      initiativeId: '',
-      priority: '',
+      status: [],
+      assigneeId: [],
+      initiativeId: [],
+      priority: [],
       dueDateFrom: '',
       dueDateTo: '',
     },
@@ -615,6 +672,76 @@ export function updateOneOnOneTableSettings(
     ...currentSettings,
     oneOnOneTableSettings: {
       ...currentSettings.oneOnOneTableSettings,
+      [settingsId]: updatedTableSettings,
+    },
+  }
+
+  saveUserSettings(userId, updatedSettings)
+}
+
+/**
+ * Get meeting table settings for a specific view
+ */
+export function getMeetingTableSettings(
+  userId: string,
+  settingsId: string
+): UserSettings['meetingTableSettings'][string] {
+  const settings = loadUserSettings(userId)
+  return (
+    settings.meetingTableSettings[settingsId] || {
+      sorting: [],
+      grouping: 'none',
+      sort: {
+        field: '',
+        direction: 'asc',
+      },
+      filters: {
+        search: '',
+        teamId: '',
+        initiativeId: '',
+        scheduledFrom: '',
+        scheduledTo: '',
+      },
+    }
+  )
+}
+
+/**
+ * Update meeting table settings for a specific view
+ */
+export function updateMeetingTableSettings(
+  userId: string,
+  settingsId: string,
+  tableSettings: Partial<UserSettings['meetingTableSettings'][string]>
+): void {
+  const currentSettings = loadUserSettings(userId)
+  const currentTableSettings = currentSettings.meetingTableSettings[
+    settingsId
+  ] || {
+    sorting: [],
+    grouping: 'none',
+    sort: {
+      field: '',
+      direction: 'asc' as const,
+    },
+    filters: {
+      search: '',
+      teamId: '',
+      initiativeId: '',
+      scheduledFrom: '',
+      scheduledTo: '',
+    },
+  }
+
+  const updatedTableSettings = {
+    ...currentTableSettings,
+    ...tableSettings,
+  }
+
+  const updatedSettings = {
+    ...currentSettings,
+    meetingTableSettings: {
+      ...currentSettings.meetingTableSettings,
       [settingsId]: updatedTableSettings,
     },
   }

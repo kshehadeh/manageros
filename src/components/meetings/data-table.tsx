@@ -55,94 +55,74 @@ import {
   Group,
   ArrowUpDown,
 } from 'lucide-react'
-import { updateTaskStatus, deleteTask } from '@/lib/actions/task'
-import {
-  taskStatusUtils,
-  type TaskStatus,
-  TASK_STATUS,
-  ALL_TASK_STATUSES,
-} from '@/lib/task-status'
-import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
+import { deleteMeeting } from '@/lib/actions/meeting'
+import { deleteMeetingInstance } from '@/lib/actions/meeting-instance'
 import { toast } from 'sonner'
-import type { Person, Initiative } from '@prisma/client'
-import type { ExtendedTaskListItem, TaskListItem } from '@/lib/task-list-select'
+import { DeleteModal } from '@/components/common/delete-modal'
+import { createMeetingColumns } from './columns'
+import { useSession } from 'next-auth/react'
+import { useMeetings } from '@/hooks/use-meetings'
+import { useMeetingTableSettings } from '@/hooks/use-meeting-table-settings'
+import { InitiativeMultiSelect } from '@/components/ui/initiative-multi-select'
+import type {
+  UpcomingMeeting,
+  MeetingWithRelations,
+  MeetingInstanceWithRelations,
+} from '@/components/meetings/shared-meetings-table'
+import { useTeamsCache } from '@/hooks/use-organization-cache'
 
 // Type for column meta
 interface ColumnMeta {
   hidden?: boolean
   className?: string
 }
-import { TaskQuickEditDialog } from '@/components/tasks/task-quick-edit-dialog'
-import { DeleteModal } from '@/components/common/delete-modal'
-import { createTaskColumns } from './columns'
-import { useSession } from 'next-auth/react'
-import { useTasks } from '@/hooks/use-tasks'
-import { usePeopleCache } from '@/hooks/use-organization-cache'
-import { useTaskTableSettings } from '@/hooks/use-task-table-settings'
-import { MultiSelect } from '@/components/ui/multi-select'
-import { InitiativeMultiSelect } from '@/components/ui/initiative-multi-select'
 
-interface ContextMenuState {
-  visible: boolean
-  x: number
-  y: number
-  taskId: string
-  triggerType: 'rightClick' | 'button'
-}
-
-interface TaskDataTableProps {
-  onTaskUpdate?: () => void
+interface MeetingDataTableProps {
+  onMeetingUpdate?: () => void
   hideFilters?: boolean
-  showOnlyMyTasks?: boolean
-  settingsId?: string // Unique identifier for saving per-view settings
-  // Pagination options
-  page?: number
+  settingsId?: string
   limit?: number
   enablePagination?: boolean
-  // Immutable filters that cannot be changed by user interaction
   immutableFilters?: {
     search?: string
-    status?: string
-    assigneeId?: string
+    teamId?: string
     initiativeId?: string
-    priority?: string // Priority as string (1=Critical, 2=High, 3=Medium, 4=Low, 5=Very Low)
-    dueDateFrom?: string
-    dueDateTo?: string
+    scheduledFrom?: string
+    scheduledTo?: string
   }
-  // Legacy props for backward compatibility (now ignored)
-  tasks?: ExtendedTaskListItem[]
-  people?: Person[]
-  initiatives?: Initiative[]
 }
 
 // Global filter function for search
 const globalFilterFn = (
-  row: { original: TaskListItem },
+  row: { original: UpcomingMeeting },
   columnId: string,
   value: string
 ) => {
-  const task = row.original
+  const meeting = row.original
   const searchValue = value.toLowerCase()
+  const isInstance = meeting.type === 'instance'
+  const meetingData = isInstance
+    ? (meeting as MeetingInstanceWithRelations).meeting
+    : (meeting as MeetingWithRelations)
 
   return (
-    task.title.toLowerCase().includes(searchValue) ||
-    task.description?.toLowerCase().includes(searchValue) ||
-    task.assignee?.name.toLowerCase().includes(searchValue) ||
-    task.initiative?.title.toLowerCase().includes(searchValue) ||
+    meetingData.title.toLowerCase().includes(searchValue) ||
+    meetingData.description?.toLowerCase().includes(searchValue) ||
+    meetingData.team?.name.toLowerCase().includes(searchValue) ||
+    meetingData.initiative?.title.toLowerCase().includes(searchValue) ||
     false
   )
 }
 
-export function TaskDataTable({
-  onTaskUpdate: _onTaskUpdate,
+export function MeetingDataTable({
+  onMeetingUpdate: _onMeetingUpdate,
   hideFilters = false,
   settingsId,
   limit = 20,
   enablePagination = false,
   immutableFilters,
-}: TaskDataTableProps) {
+}: MeetingDataTableProps) {
   const router = useRouter()
-  const [_updatingTasks, setUpdatingTasks] = useState<Set<string>>(new Set()) // Only used for delete operations
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [expanded, setExpanded] = useState<ExpandedState>({})
   const [globalFilter, setGlobalFilter] = useState('')
@@ -155,7 +135,7 @@ export function TaskDataTable({
     updateGrouping,
     updateSort,
     updateFilters,
-  } = useTaskTableSettings({
+  } = useMeetingTableSettings({
     settingsId: settingsId || 'default',
     enabled: true,
   })
@@ -174,14 +154,7 @@ export function TaskDataTable({
     return settings.grouping === 'none' ? [] : [settings.grouping]
   }, [settings.grouping])
 
-  // Set initial sorting for status grouping
-  useEffect(() => {
-    if (effectiveGrouping.includes('status') && settings.sorting.length === 0) {
-      updateSorting([{ id: 'status', desc: false }])
-    }
-  }, [effectiveGrouping, settings.sorting.length, updateSorting])
-
-  // Get current user's personId for my tasks filtering
+  // Get current user's session
   const { status: sessionStatus } = useSession()
 
   // Don't fetch data if we're waiting for session or settings to load
@@ -189,10 +162,10 @@ export function TaskDataTable({
 
   // Initialize search input from loaded settings
   useEffect(() => {
-    if (settingsLoaded && settings.filters.search !== searchInput) {
+    if (settingsLoaded) {
       setSearchInput(settings.filters.search)
     }
-  }, [settingsLoaded, settings.filters.search, searchInput])
+  }, [settingsLoaded, settings.filters.search])
 
   // Debounce search input to prevent excessive API calls
   useEffect(() => {
@@ -225,15 +198,13 @@ export function TaskDataTable({
     return `${settings.sort.field}:${settings.sort.direction}`
   }, [settings.sort])
 
-  // Fetch data using single useTasks hook with internal filters
-  // For server-side pagination, we pass the current page/size from TanStack Table state
+  // Fetch data using useMeetings hook
   const {
-    data: tasksData,
+    data: meetingsData,
     loading,
     error,
     refetch,
-    updateTask,
-  } = useTasks({
+  } = useMeetings({
     page: enablePagination ? pagination.pageIndex + 1 : 1,
     limit: enablePagination ? pagination.pageSize : 1000,
     filters: memoizedFilters,
@@ -249,171 +220,115 @@ export function TaskDataTable({
     }
   }, [loading, isSearching])
 
-  // Listen for task creation events to refresh the list
+  // Listen for meeting creation events to refresh the list
   useEffect(() => {
-    const handleTaskCreated = () => {
+    const handleMeetingCreated = () => {
       refetch()
     }
 
-    window.addEventListener('task:created', handleTaskCreated)
-    return () => window.removeEventListener('task:created', handleTaskCreated)
+    window.addEventListener('meeting:created', handleMeetingCreated)
+    return () =>
+      window.removeEventListener('meeting:created', handleMeetingCreated)
   }, [refetch])
 
-  const { people } = usePeopleCache()
+  const { teams } = useTeamsCache()
 
-  const tasks = useMemo(() => tasksData?.tasks || [], [tasksData?.tasks])
+  const meetings = useMemo(
+    () => meetingsData?.meetings || [],
+    [meetingsData?.meetings]
+  )
 
   // Check if there are active filters
   const hasActiveFilters = useMemo(() => {
-    const statusArray = Array.isArray(settings.filters.status)
-      ? settings.filters.status
-      : []
-    const assigneeArray = Array.isArray(settings.filters.assigneeId)
-      ? settings.filters.assigneeId
-      : []
-    const initiativeArray = Array.isArray(settings.filters.initiativeId)
-      ? settings.filters.initiativeId
-      : []
-    const priorityArray = Array.isArray(settings.filters.priority)
-      ? settings.filters.priority
-      : []
-
     return (
       settings.filters.search !== '' ||
-      statusArray.length > 0 ||
-      priorityArray.length > 0 ||
-      assigneeArray.length > 0 ||
-      initiativeArray.length > 0 ||
-      settings.filters.dueDateFrom !== '' ||
-      settings.filters.dueDateTo !== ''
+      settings.filters.teamId !== '' ||
+      settings.filters.initiativeId !== '' ||
+      settings.filters.scheduledFrom !== '' ||
+      settings.filters.scheduledTo !== ''
     )
   }, [settings.filters])
 
-  const [contextMenu, setContextMenu] = useState<ContextMenuState>({
+  const [contextMenu, setContextMenu] = useState<{
+    visible: boolean
+    x: number
+    y: number
+    meetingId: string
+    isInstance: boolean
+    triggerType: 'rightClick' | 'button'
+  }>({
     visible: false,
     x: 0,
     y: 0,
-    taskId: '',
+    meetingId: '',
+    isInstance: false,
     triggerType: 'rightClick',
   })
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
-  const [quickEditDialog, setQuickEditDialog] = useState<{
-    open: boolean
-    taskId: string | null
-  }>({
-    open: false,
-    taskId: null,
-  })
 
-  const handleTaskComplete = async (
-    taskId: string,
-    currentStatus: TaskStatus
+  const handleRowClick = (meetingId: string, isInstance = false) => {
+    const href = isInstance
+      ? `/meetings/${meetingId.split('-')[0]}/instances/${meetingId.split('-')[1]}`
+      : `/meetings/${meetingId}`
+    router.push(href)
+  }
+
+  const handleButtonClick = (
+    e: React.MouseEvent,
+    meetingId: string,
+    isInstance = false
   ) => {
-    const newStatus =
-      currentStatus === TASK_STATUS.DONE ? TASK_STATUS.TODO : TASK_STATUS.DONE
-
-    // Store the previous data for rollback
-    const previousData = tasksData
-
-    // Optimistically update the local data immediately
-    updateTask(taskId, { status: newStatus })
-
-    try {
-      await updateTaskStatus(taskId, newStatus)
-      toast.success(
-        newStatus === TASK_STATUS.DONE
-          ? 'Task marked as complete'
-          : 'Task marked as incomplete'
-      )
-      // Don't call onTaskUpdate?.() here as it triggers a full refresh
-    } catch (error) {
-      console.error('Failed to update task status:', error)
-
-      // Rollback to previous data on error
-      if (previousData) {
-        // Find the original task to restore its status
-        const originalTask = previousData.tasks.find(task => task.id === taskId)
-        if (originalTask) {
-          updateTask(taskId, { status: originalTask.status })
-        }
-      }
-
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to update task status'
-      )
-    }
-  }
-
-  const handleDeleteConfirm = async (taskId: string) => {
-    setUpdatingTasks(prev => new Set(prev).add(taskId))
-
-    try {
-      await deleteTask(taskId)
-      toast.success('Task deleted successfully')
-      await refetch()
-      // Don't call onTaskUpdate?.() as refetch already updates the list
-    } catch (error) {
-      console.error('Failed to delete task:', error)
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to delete task'
-      )
-    } finally {
-      setUpdatingTasks(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(taskId)
-        return newSet
-      })
-    }
-  }
-
-  const handleRowClick = (taskId: string) => {
-    handleQuickEdit(taskId)
-  }
-
-  const handleButtonClick = (e: React.MouseEvent, taskId: string) => {
     e.stopPropagation()
     const rect = e.currentTarget.getBoundingClientRect()
     setContextMenu({
       visible: true,
       x: rect.right - 160,
       y: rect.bottom + 4,
-      taskId,
+      meetingId,
+      isInstance,
       triggerType: 'button',
     })
   }
 
-  const handleQuickEdit = (taskId: string) => {
-    setQuickEditDialog({
-      open: true,
-      taskId,
-    })
-    setContextMenu(prev => ({ ...prev, visible: false }))
+  const handleDeleteConfirm = async (meetingId: string, isInstance = false) => {
+    try {
+      if (isInstance) {
+        // For instances, split the composite ID
+        const instanceId = meetingId.split('-')[1]
+        await deleteMeetingInstance(instanceId)
+        toast.success('Meeting instance deleted successfully')
+      } else {
+        await deleteMeeting(meetingId)
+        toast.success('Meeting deleted successfully')
+      }
+      await refetch()
+    } catch (error) {
+      console.error('Failed to delete meeting:', error)
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to delete meeting'
+      )
+    }
   }
 
   const getGroupLabel = (groupValue: string, groupingColumn: string) => {
     switch (groupingColumn) {
-      case 'status':
-        return taskStatusUtils.getLabel(groupValue as TaskStatus)
-      case 'assignee':
-        // groupValue is now the assignee name from accessorFn
-        return groupValue || 'Unassigned'
+      case 'team':
+        return groupValue || 'No Team'
       case 'initiative':
-        // groupValue is now the initiative title from accessorFn
         return groupValue || 'No Initiative'
       default:
         return groupValue
     }
   }
 
-  const columns = createTaskColumns({
-    onTaskComplete: handleTaskComplete,
+  const columns = createMeetingColumns({
     onButtonClick: handleButtonClick,
     grouping: effectiveGrouping,
   })
 
   const table = useReactTable({
-    data: tasks,
+    data: meetings,
     columns,
     state: {
       grouping: effectiveGrouping,
@@ -449,11 +364,11 @@ export function TaskDataTable({
     enableGrouping: true,
     enableColumnResizing: false,
     globalFilterFn,
-    manualPagination: enablePagination, // Use server-side pagination - TanStack manages state, we fetch data
+    manualPagination: enablePagination, // Use server-side pagination
     pageCount:
-      enablePagination && tasksData?.pagination
-        ? tasksData.pagination.totalPages
-        : undefined, // Tell TanStack how many pages exist
+      enablePagination && meetingsData?.pagination
+        ? meetingsData.pagination.totalPages
+        : undefined,
   })
 
   // Expand all groups by default when table is ready
@@ -461,7 +376,6 @@ export function TaskDataTable({
     if (effectiveGrouping.length > 0 && !hasExpandedGroups.current) {
       const rowModel = table.getRowModel()
       if (rowModel.rows.length > 0) {
-        // Find all group rows and expand them
         const groupRows = rowModel.rows.filter(row => row.getIsGrouped())
         if (groupRows.length > 0) {
           const expandedState: Record<string, boolean> = {}
@@ -478,7 +392,7 @@ export function TaskDataTable({
   if (error) {
     return (
       <div className='flex items-center justify-center py-8'>
-        <div className='text-destructive'>Error loading tasks: {error}</div>
+        <div className='text-destructive'>Error loading meetings: {error}</div>
       </div>
     )
   }
@@ -495,7 +409,7 @@ export function TaskDataTable({
                 <div className='relative flex-1 max-w-sm'>
                   <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
                   <Input
-                    placeholder='Search tasks...'
+                    placeholder='Search meetings...'
                     value={searchInput}
                     onChange={e => setSearchInput(e.target.value)}
                     className='pl-8'
@@ -528,7 +442,7 @@ export function TaskDataTable({
                 <PopoverContent className='w-80' align='end'>
                   <div className='space-y-4'>
                     <div className='flex items-center justify-between'>
-                      <h3 className='font-medium'>Filter Tasks</h3>
+                      <h3 className='font-medium'>Filter Meetings</h3>
                       <button
                         onClick={() => {
                           setGlobalFilter('')
@@ -536,12 +450,10 @@ export function TaskDataTable({
                           setSearchInput('')
                           updateFilters({
                             search: '',
-                            status: [],
-                            assigneeId: [],
-                            initiativeId: [],
-                            priority: [],
-                            dueDateFrom: '',
-                            dueDateTo: '',
+                            teamId: '',
+                            initiativeId: '',
+                            scheduledFrom: '',
+                            scheduledTo: '',
                           })
                         }}
                         className='text-sm text-muted-foreground hover:text-foreground'
@@ -551,76 +463,30 @@ export function TaskDataTable({
                     </div>
 
                     <div className='space-y-4'>
-                      {/* Status Filter - Hidden if immutable */}
-                      {!immutableFilters?.status && (
+                      {/* Team Filter - Hidden if immutable */}
+                      {!immutableFilters?.teamId && (
                         <div className='space-y-2'>
-                          <label className='text-sm font-medium'>Status</label>
-                          <MultiSelect
-                            options={ALL_TASK_STATUSES.map(status => ({
-                              label: taskStatusUtils.getLabel(status),
-                              value: status,
-                            }))}
-                            selected={
-                              Array.isArray(settings.filters.status)
-                                ? settings.filters.status
-                                : []
+                          <label className='text-sm font-medium'>Team</label>
+                          <Select
+                            value={settings.filters.teamId || 'all'}
+                            onValueChange={value =>
+                              updateFilters({
+                                teamId: value === 'all' ? '' : value,
+                              })
                             }
-                            onChange={value => updateFilters({ status: value })}
-                            placeholder='All statuses'
-                          />
-                        </div>
-                      )}
-
-                      {/* Priority Filter - Hidden if immutable */}
-                      {!immutableFilters?.priority && (
-                        <div className='space-y-2'>
-                          <label className='text-sm font-medium'>
-                            Priority
-                          </label>
-                          <MultiSelect
-                            options={[1, 2, 3, 4, 5].map(priority => ({
-                              label: taskPriorityUtils.getLabel(
-                                priority as TaskPriority
-                              ),
-                              value: priority.toString(),
-                            }))}
-                            selected={
-                              Array.isArray(settings.filters.priority)
-                                ? settings.filters.priority
-                                : []
-                            }
-                            onChange={value =>
-                              updateFilters({ priority: value })
-                            }
-                            placeholder='All priorities'
-                          />
-                        </div>
-                      )}
-
-                      {/* Assignee Filter - Hidden if immutable */}
-                      {!immutableFilters?.assigneeId && (
-                        <div className='space-y-2'>
-                          <label className='text-sm font-medium'>
-                            Assignee
-                          </label>
-                          <MultiSelect
-                            options={[
-                              { label: 'Unassigned', value: 'unassigned' },
-                              ...people.map(person => ({
-                                label: person.name,
-                                value: person.id,
-                              })),
-                            ]}
-                            selected={
-                              Array.isArray(settings.filters.assigneeId)
-                                ? settings.filters.assigneeId
-                                : []
-                            }
-                            onChange={value =>
-                              updateFilters({ assigneeId: value })
-                            }
-                            placeholder='All assignees'
-                          />
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder='All teams' />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value='all'>All teams</SelectItem>
+                              {teams.map(team => (
+                                <SelectItem key={team.id} value={team.id}>
+                                  {team.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                       )}
 
@@ -632,12 +498,14 @@ export function TaskDataTable({
                           </label>
                           <InitiativeMultiSelect
                             selected={
-                              Array.isArray(settings.filters.initiativeId)
-                                ? settings.filters.initiativeId
+                              settings.filters.initiativeId
+                                ? [settings.filters.initiativeId]
                                 : []
                             }
                             onChange={value =>
-                              updateFilters({ initiativeId: value })
+                              updateFilters({
+                                initiativeId: value[0] || '',
+                              })
                             }
                             placeholder='All initiatives'
                           />
@@ -647,6 +515,7 @@ export function TaskDataTable({
                   </div>
                 </PopoverContent>
               </Popover>
+
               {/* Grouping Dropdown */}
               <TooltipProvider>
                 <Tooltip>
@@ -662,15 +531,14 @@ export function TaskDataTable({
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value='none'>None</SelectItem>
-                          <SelectItem value='status'>Status</SelectItem>
-                          <SelectItem value='assignee'>Assignee</SelectItem>
+                          <SelectItem value='team'>Team</SelectItem>
                           <SelectItem value='initiative'>Initiative</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Group tasks by status, assignee, or initiative</p>
+                    <p>Group meetings by team or initiative</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -695,7 +563,7 @@ export function TaskDataTable({
                 <PopoverContent className='w-80' align='end'>
                   <div className='space-y-4'>
                     <div className='flex items-center justify-between'>
-                      <h3 className='font-medium'>Sort Tasks</h3>
+                      <h3 className='font-medium'>Sort Meetings</h3>
                       <button
                         onClick={() => {
                           updateSort({ field: '', direction: 'asc' })
@@ -724,9 +592,14 @@ export function TaskDataTable({
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value='none'>None</SelectItem>
-                            <SelectItem value='duedate'>Due Date</SelectItem>
-                            <SelectItem value='priority'>Priority</SelectItem>
-                            <SelectItem value='assignee'>Assignee</SelectItem>
+                            <SelectItem value='scheduledAt'>
+                              Scheduled Date
+                            </SelectItem>
+                            <SelectItem value='title'>Title</SelectItem>
+                            <SelectItem value='team'>Team</SelectItem>
+                            <SelectItem value='initiative'>
+                              Initiative
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -759,29 +632,30 @@ export function TaskDataTable({
               </Popover>
             </div>
             <div className='text-sm text-muted-foreground'>
-              {enablePagination && tasksData?.pagination ? (
+              {enablePagination && meetingsData?.pagination ? (
                 <>
-                  {tasksData.pagination.totalCount > 0 ? (
+                  {meetingsData.pagination.totalCount > 0 ? (
                     <>
                       Showing{' '}
-                      {(tasksData.pagination.page - 1) *
-                        tasksData.pagination.limit +
+                      {(meetingsData.pagination.page - 1) *
+                        meetingsData.pagination.limit +
                         1}{' '}
                       to{' '}
                       {Math.min(
-                        tasksData.pagination.page * tasksData.pagination.limit,
-                        tasksData.pagination.totalCount
+                        meetingsData.pagination.page *
+                          meetingsData.pagination.limit,
+                        meetingsData.pagination.totalCount
                       )}{' '}
-                      of {tasksData.pagination.totalCount} tasks
+                      of {meetingsData.pagination.totalCount} meetings
                     </>
                   ) : (
-                    <>No tasks found</>
+                    <>No meetings found</>
                   )}
                 </>
               ) : (
                 <>
                   Showing {table.getFilteredRowModel().rows.length} of{' '}
-                  {tasks.length} tasks
+                  {meetings.length} meetings
                 </>
               )}
             </div>
@@ -789,7 +663,7 @@ export function TaskDataTable({
         </div>
       )}
 
-      {/* Task Table */}
+      {/* Meeting Table */}
       <div className='rounded-md border relative'>
         {/* Loading Spinner in top right corner */}
         {loading && (
@@ -861,21 +735,25 @@ export function TaskDataTable({
                               row.groupingColumnId!
                             )}
                           </span>
-                          <Badge variant='secondary'>
-                            {row.subRows.length}
-                          </Badge>
+                          <Badge>{row.subRows.length}</Badge>
                         </div>
                       </TableCell>
                     </TableRow>
                   )
                 }
 
-                // Regular task row
+                // Regular meeting row
+                const meeting = row.original
+                const isInstance = meeting.type === 'instance'
+                const meetingId = isInstance
+                  ? `${(meeting as MeetingInstanceWithRelations).meeting.id}-${meeting.id}`
+                  : meeting.id
+
                 return (
                   <TableRow
                     key={row.id}
                     className='hover:bg-accent/50 cursor-pointer'
-                    onClick={() => handleRowClick(row.original.id)}
+                    onClick={() => handleRowClick(meetingId, isInstance)}
                   >
                     {row
                       .getVisibleCells()
@@ -910,7 +788,7 @@ export function TaskDataTable({
                   }
                   className='h-24 text-center'
                 >
-                  No tasks found.
+                  No meetings found.
                 </TableCell>
               </TableRow>
             )}
@@ -972,103 +850,64 @@ export function TaskDataTable({
 
       {/* Context Menu */}
       {contextMenu.visible && (
-        <div
-          className='fixed z-50 bg-popover text-popover-foreground border rounded-md shadow-lg py-1 min-w-[160px]'
-          style={{
-            left: contextMenu.x,
-            top: contextMenu.y,
-          }}
-          onClick={e => e.stopPropagation()}
-        >
-          <button
-            className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
-            onClick={() => {
-              router.push(`/tasks/${contextMenu.taskId}`)
+        <>
+          {/* Backdrop to close menu */}
+          <div
+            className='fixed inset-0 z-40'
+            onClick={() =>
               setContextMenu(prev => ({ ...prev, visible: false }))
-            }}
-          >
-            <Eye className='w-4 h-4' />
-            View
-          </button>
-          <button
-            className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
-            onClick={() => {
-              handleQuickEdit(contextMenu.taskId)
-            }}
-          >
-            <Edit className='w-4 h-4' />
-            Quick Edit
-          </button>
-          <button
-            className='w-full px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors flex items-center gap-2'
-            onClick={() => {
-              setContextMenu(prev => ({ ...prev, visible: false }))
-              setDeleteTargetId(contextMenu.taskId)
-              setShowDeleteModal(true)
-            }}
-          >
-            <Trash2 className='w-4 h-4' />
-            Delete
-          </button>
-        </div>
-      )}
+            }
+          />
 
-      {/* Quick Edit Dialog */}
-      {quickEditDialog.open &&
-        quickEditDialog.taskId &&
-        (() => {
-          const task = tasks.find(
-            (t: TaskListItem) => t.id === quickEditDialog.taskId
-          )!
-          return (
-            <TaskQuickEditDialog
-              open={quickEditDialog.open}
-              onOpenChange={open => setQuickEditDialog({ open, taskId: null })}
-              task={{
-                id: task.id,
-                title: task.title,
-                description: task.description,
-                assigneeId: task.assigneeId,
-                dueDate: task.dueDate,
-                priority: task.priority,
-                status: task.status as TaskStatus,
+          {/* Context Menu */}
+          <div
+            className='fixed z-50 bg-popover text-popover-foreground border rounded-md shadow-lg py-1 min-w-[160px]'
+            style={{
+              left: contextMenu.x,
+              top: contextMenu.y,
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
+              onClick={() => {
+                const href = contextMenu.isInstance
+                  ? `/meetings/${contextMenu.meetingId.split('-')[0]}/instances/${contextMenu.meetingId.split('-')[1]}`
+                  : `/meetings/${contextMenu.meetingId}`
+                router.push(href)
+                setContextMenu(prev => ({ ...prev, visible: false }))
               }}
-              people={
-                (people || []).map(p => ({
-                  id: p.id,
-                  name: p.name,
-                  email: p.email,
-                  role: p.role,
-                  avatar: p.avatar,
-                  status: p.status,
-                  organizationId: p.organizationId,
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                  birthday: null,
-                  employeeType: null,
-                  teamId: null,
-                  managerId: null,
-                  jobRoleId: null,
-                  startedAt: null,
-                })) as Person[]
-              }
-              onTaskUpdate={updatedTaskData => {
-                // Optimistically update the task in the local state
-                // Convert dueDate string to Date if needed
-                const taskUpdates = {
-                  ...updatedTaskData,
-                  dueDate: updatedTaskData.dueDate
-                    ? typeof updatedTaskData.dueDate === 'string'
-                      ? new Date(updatedTaskData.dueDate)
-                      : updatedTaskData.dueDate
-                    : null,
-                }
-                updateTask(task.id, taskUpdates)
-                // Don't call onTaskUpdate?.() here as it triggers a full refresh
+            >
+              <Eye className='w-4 h-4' />
+              View
+            </button>
+            <button
+              className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
+              onClick={() => {
+                const href = contextMenu.isInstance
+                  ? `/meetings/${contextMenu.meetingId.split('-')[0]}/instances/${contextMenu.meetingId.split('-')[1]}/edit`
+                  : `/meetings/${contextMenu.meetingId}/edit`
+                router.push(href)
+                setContextMenu(prev => ({ ...prev, visible: false }))
               }}
-            />
-          )
-        })()}
+            >
+              <Edit className='w-4 h-4' />
+              Edit
+            </button>
+            <button
+              className='w-full px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors flex items-center gap-2'
+              onClick={() => {
+                setContextMenu(prev => ({ ...prev, visible: false }))
+                setDeleteTargetId(contextMenu.meetingId)
+                setShowDeleteModal(true)
+              }}
+            >
+              <Trash2 className='w-4 h-4' />
+              Delete
+            </button>
+          </div>
+        </>
+      )}
 
       {/* Delete Confirmation Modal */}
       <DeleteModal
@@ -1079,11 +918,13 @@ export function TaskDataTable({
         }}
         onConfirm={() => {
           if (deleteTargetId) {
-            return handleDeleteConfirm(deleteTargetId)
+            return handleDeleteConfirm(deleteTargetId, contextMenu.isInstance)
           }
         }}
-        title='Delete Task'
-        entityName='task'
+        title={
+          contextMenu.isInstance ? 'Delete Meeting Instance' : 'Delete Meeting'
+        }
+        entityName={contextMenu.isInstance ? 'meeting instance' : 'meeting'}
       />
     </div>
   )

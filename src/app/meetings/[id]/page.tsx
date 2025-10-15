@@ -12,6 +12,7 @@ import { MeetingInstanceList } from '@/components/meetings/meeting-instance-list
 import { MeetingActionsDropdown } from '@/components/meetings/meeting-actions-dropdown'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { LinkManager } from '@/components/entity-links'
+import { PersonAvatar } from '@/components/people/person-avatar'
 import {
   Clock,
   Users,
@@ -174,6 +175,11 @@ export default async function MeetingDetailPage({
                         className='flex items-center justify-between'
                       >
                         <div className='flex items-center gap-3'>
+                          <PersonAvatar
+                            name={participant.person.name}
+                            avatar={participant.person.avatar}
+                            size='sm'
+                          />
                           <Link
                             href={`/people/${participant.person.id}`}
                             className='hover:text-primary transition-colors'

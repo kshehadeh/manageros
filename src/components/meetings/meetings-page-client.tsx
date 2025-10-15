@@ -1,45 +1,12 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { SharedMeetingsTable } from '@/components/meetings/shared-meetings-table'
-import { MeetingsFilterBar } from '@/components/meetings/meetings-filter-bar'
+import { MeetingDataTable } from '@/components/meetings/data-table'
 import { Button } from '@/components/ui/button'
 import { Plus, Calendar } from 'lucide-react'
-import { Meeting, Team, Person, User as PrismaUser } from '@prisma/client'
 import { HelpIcon } from '@/components/help-icon'
 
-type MeetingWithRelations = Meeting & {
-  team: Team | null
-  initiative: { id: string; title: string } | null
-  owner: Person | null
-  createdBy: PrismaUser | null
-  participants: Array<{
-    person: Person
-    status: string
-  }>
-}
-
-interface MeetingsPageClientProps {
-  meetings: MeetingWithRelations[]
-}
-
-export function MeetingsPageClient({ meetings }: MeetingsPageClientProps) {
-  const [filteredMeetings, setFilteredMeetings] =
-    useState<MeetingWithRelations[]>(meetings)
-
-  // Update filtered meetings when meetings prop changes
-  useEffect(() => {
-    setFilteredMeetings(meetings)
-  }, [meetings])
-
-  const handleFilteredMeetingsChange = useCallback(
-    (newFilteredMeetings: MeetingWithRelations[]) => {
-      setFilteredMeetings(newFilteredMeetings)
-    },
-    []
-  )
-
+export function MeetingsPageClient() {
   return (
     <div className='page-container'>
       <div className='page-header'>
@@ -64,14 +31,10 @@ export function MeetingsPageClient({ meetings }: MeetingsPageClientProps) {
       </div>
 
       <div className='page-section'>
-        <MeetingsFilterBar
-          meetings={meetings}
-          onFilteredMeetingsChange={handleFilteredMeetingsChange}
-        />
-
-        <SharedMeetingsTable
-          meetings={meetings}
-          filteredMeetings={filteredMeetings}
+        <MeetingDataTable
+          settingsId='meetings-list'
+          enablePagination={true}
+          limit={20}
         />
       </div>
     </div>

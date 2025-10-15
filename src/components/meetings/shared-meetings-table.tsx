@@ -122,24 +122,32 @@ interface ContextMenuState {
 }
 
 // Utility functions
-function formatDate(date: Date) {
+function formatDate(date: Date | string) {
+  const dateObj = typeof date === 'string' ? new Date(date) : date
+  if (isNaN(dateObj.getTime())) return '—'
+
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
-  }).format(date)
+  }).format(dateObj)
 }
 
-function formatTime(date: Date) {
+function formatTime(date: Date | string) {
+  const dateObj = typeof date === 'string' ? new Date(date) : date
+  if (isNaN(dateObj.getTime())) return '—'
+
   return new Intl.DateTimeFormat('en-US', {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
-  }).format(date)
+  }).format(dateObj)
 }
 
-function formatDateTime(date: Date) {
-  const localDate = new Date(date)
+function formatDateTime(date: Date | string) {
+  const dateObj = typeof date === 'string' ? new Date(date) : date
+  if (isNaN(dateObj.getTime())) return '—'
+
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
@@ -147,7 +155,7 @@ function formatDateTime(date: Date) {
     minute: '2-digit',
     hour12: true,
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-  }).format(localDate)
+  }).format(dateObj)
 }
 
 function formatDuration(minutes: number | null) {

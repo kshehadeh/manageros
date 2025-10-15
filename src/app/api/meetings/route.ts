@@ -1,6 +1,70 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
+import { Prisma } from '@prisma/client'
+
+// Type definitions for meeting and instance with includes
+type MeetingWithRelations = Prisma.MeetingGetPayload<{
+  include: {
+    team: true
+    initiative: true
+    owner: true
+    createdBy: true
+    participants: {
+      include: {
+        person: true
+      }
+    }
+  }
+}> & { type: 'meeting' }
+
+type MeetingInstanceWithRelations = Prisma.MeetingInstanceGetPayload<{
+  include: {
+    meeting: {
+      include: {
+        team: true
+        initiative: true
+        owner: true
+        participants: {
+          include: {
+            person: true
+          }
+        }
+      }
+    }
+    participants: {
+      include: {
+        person: true
+      }
+    }
+  }
+}> & { type: 'instance' }
+
+type CombinedMeeting = MeetingWithRelations | MeetingInstanceWithRelations
+
+// Build order by clause from sort parameter
+function buildOrderByClause(
+  sortParam: string
+): Prisma.MeetingOrderByWithRelationInput {
+  if (!sortParam) return { scheduledAt: 'desc' }
+
+  const [field, direction] = sortParam.split(':')
+  const dir = (direction === 'desc' ? 'desc' : 'asc') as Prisma.SortOrder
+
+  switch (field) {
+    case 'scheduledAt':
+    case 'scheduledDate':
+      return { scheduledAt: dir }
+    case 'title':
+      return { title: dir }
+    case 'initiative':
+      return { initiative: { title: dir } }
+    case 'team':
+      return { team: { name: dir } }
+    default:
+      return { scheduledAt: 'desc' }
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -34,6 +98,10 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const scheduledFrom = searchParams.get('scheduledFrom') || ''
     const scheduledTo = searchParams.get('scheduledTo') || ''
+    const search = searchParams.get('search') || ''
+    const teamId = searchParams.get('teamId') || ''
+    const initiativeId = searchParams.get('initiativeId') || ''
+    const sortParam = searchParams.get('sort') || ''
 
     // Parse immutable filters from query parameter
     let immutableFilters: Record<string, unknown> = {}
@@ -50,60 +118,185 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Apply date range filter (immutable takes precedence)
+    // Apply filters (immutable takes precedence)
     const scheduledFromFilter =
       (immutableFilters.scheduledFrom as string) || scheduledFrom
     const scheduledToFilter =
       (immutableFilters.scheduledTo as string) || scheduledTo
+    const searchFilter = (immutableFilters.search as string) || search
+    const teamIdFilter = (immutableFilters.teamId as string) || teamId
+    const initiativeIdFilter =
+      (immutableFilters.initiativeId as string) || initiativeId
 
-    // Default to upcoming week if no dates specified
-    const now = new Date()
-    const oneWeekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+    // Build where clause for meeting instances
+    const buildInstanceWhereClause = (): Prisma.MeetingInstanceWhereInput => {
+      const baseWhere: Prisma.MeetingInstanceWhereInput = {
+        organizationId: user.organizationId!,
+      }
 
-    const fromDate = scheduledFromFilter
-      ? new Date(scheduledFromFilter)
-      : new Date(now.toISOString())
-    const toDate = scheduledToFilter
-      ? new Date(scheduledToFilter)
-      : new Date(oneWeekFromNow.toISOString())
+      // Only apply date filters if explicitly provided
+      if (scheduledFromFilter || scheduledToFilter) {
+        baseWhere.scheduledAt = {}
+        if (scheduledFromFilter) {
+          baseWhere.scheduledAt.gte = new Date(scheduledFromFilter)
+        }
+        if (scheduledToFilter) {
+          baseWhere.scheduledAt.lte = new Date(scheduledToFilter)
+        }
+      }
 
-    // Fetch upcoming meeting instances (for recurring meetings)
-    const upcomingMeetingInstances = await prisma.meetingInstance.findMany({
-      where: {
-        organizationId: user.organizationId,
-        scheduledAt: {
-          gte: fromDate,
-          lte: toDate,
+      // Build the access control OR clause for instances
+      const accessControlOr: Prisma.MeetingInstanceWhereInput[] = []
+
+      // 1. Meeting is public
+      accessControlOr.push({
+        meeting: {
+          isPrivate: false,
         },
-        OR: [
-          // User is a participant of the instance itself
-          {
+      })
+      // 2. User is the creator of the meeting
+      accessControlOr.push({
+        meeting: {
+          createdById: user.id,
+        },
+      })
+      // 3. User is the owner of the meeting
+      if (currentPerson) {
+        accessControlOr.push({
+          meeting: {
+            ownerId: currentPerson.id,
+          },
+        })
+      }
+      // 4. User is a participant of the instance
+      if (currentPerson) {
+        accessControlOr.push({
+          participants: {
+            some: {
+              personId: currentPerson.id,
+            },
+          },
+        })
+      }
+      // 5. User is a participant of the main meeting
+      if (currentPerson) {
+        accessControlOr.push({
+          meeting: {
             participants: {
               some: {
                 personId: currentPerson.id,
               },
             },
           },
-          // User is a participant of the main meeting
-          {
-            meeting: {
-              participants: {
-                some: {
-                  personId: currentPerson.id,
-                },
-              },
+        })
+      }
+
+      baseWhere.OR = accessControlOr
+
+      // Add search filter
+      if (searchFilter) {
+        baseWhere.meeting = {
+          title: {
+            contains: searchFilter,
+            mode: 'insensitive',
+          },
+        }
+      }
+
+      // Add team filter
+      if (teamIdFilter) {
+        if (!baseWhere.meeting) {
+          baseWhere.meeting = {}
+        }
+        baseWhere.meeting.teamId = teamIdFilter
+      }
+
+      // Add initiative filter
+      if (initiativeIdFilter) {
+        if (!baseWhere.meeting) {
+          baseWhere.meeting = {}
+        }
+        baseWhere.meeting.initiativeId = initiativeIdFilter
+      }
+
+      return baseWhere
+    }
+
+    // Build where clause for regular meetings
+    const buildMeetingWhereClause = (): Prisma.MeetingWhereInput => {
+      const baseWhere: Prisma.MeetingWhereInput = {
+        organizationId: user.organizationId!,
+        isRecurring: false,
+      }
+
+      // Only apply date filters if explicitly provided
+      if (scheduledFromFilter || scheduledToFilter) {
+        baseWhere.scheduledAt = {}
+        if (scheduledFromFilter) {
+          baseWhere.scheduledAt.gte = new Date(scheduledFromFilter)
+        }
+        if (scheduledToFilter) {
+          baseWhere.scheduledAt.lte = new Date(scheduledToFilter)
+        }
+      }
+
+      // Build the access control OR clause for meetings
+      const accessControlOr: Prisma.MeetingWhereInput[] = []
+
+      // 1. Meeting is public
+      accessControlOr.push({
+        isPrivate: false,
+      })
+      // 2. User is the creator
+      accessControlOr.push({
+        createdById: user.id,
+      })
+      // 3. User is the owner
+      if (currentPerson) {
+        accessControlOr.push({
+          ownerId: currentPerson.id,
+        })
+      }
+      // 4. User is a participant
+      if (currentPerson) {
+        accessControlOr.push({
+          participants: {
+            some: {
+              personId: currentPerson.id,
             },
           },
-          // User is the creator of the meeting
-          {
-            meeting: {
-              createdBy: {
-                personId: currentPerson.id,
-              },
-            },
-          },
-        ],
-      },
+        })
+      }
+
+      baseWhere.OR = accessControlOr
+
+      // Add search filter
+      if (searchFilter) {
+        baseWhere.title = {
+          contains: searchFilter,
+          mode: 'insensitive',
+        }
+      }
+
+      // Add team filter
+      if (teamIdFilter) {
+        baseWhere.teamId = teamIdFilter
+      }
+
+      // Add initiative filter
+      if (initiativeIdFilter) {
+        baseWhere.initiativeId = initiativeIdFilter
+      }
+
+      return baseWhere
+    }
+
+    // Get order by clause
+    const orderBy = buildOrderByClause(sortParam)
+
+    // Fetch upcoming meeting instances (for recurring meetings)
+    const upcomingMeetingInstances = await prisma.meetingInstance.findMany({
+      where: buildInstanceWhereClause(),
       include: {
         meeting: {
           include: {
@@ -123,37 +316,17 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: {
-        scheduledAt: 'asc',
-      },
+      orderBy:
+        orderBy.scheduledAt !== undefined
+          ? ({
+              scheduledAt: orderBy.scheduledAt,
+            } as Prisma.MeetingInstanceOrderByWithRelationInput)
+          : undefined,
     })
 
     // Fetch upcoming non-recurring meetings
     const upcomingMeetings = await prisma.meeting.findMany({
-      where: {
-        organizationId: user.organizationId,
-        isRecurring: false,
-        scheduledAt: {
-          gte: fromDate,
-          lte: toDate,
-        },
-        OR: [
-          // User is a participant of the meeting
-          {
-            participants: {
-              some: {
-                personId: currentPerson.id,
-              },
-            },
-          },
-          // User is the creator of the meeting
-          {
-            createdBy: {
-              personId: currentPerson.id,
-            },
-          },
-        ],
-      },
+      where: buildMeetingWhereClause(),
       include: {
         team: true,
         initiative: true,
@@ -165,33 +338,61 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: {
-        scheduledAt: 'asc',
-      },
+      orderBy,
     })
 
-    // Combine and sort all upcoming meetings
-    const allUpcomingMeetings = [
-      ...upcomingMeetings.map(meeting => ({
+    // Combine and sort all meetings
+    const allMeetings: CombinedMeeting[] = [
+      ...(upcomingMeetings.map(meeting => ({
         ...meeting,
         type: 'meeting' as const,
-      })),
-      ...upcomingMeetingInstances.map(instance => ({
+      })) as MeetingWithRelations[]),
+      ...(upcomingMeetingInstances.map(instance => ({
         ...instance,
         type: 'instance' as const,
-      })),
-    ].sort((a, b) => {
-      const dateA = a.scheduledAt
-      const dateB = b.scheduledAt
-      return new Date(dateA).getTime() - new Date(dateB).getTime()
-    })
+      })) as MeetingInstanceWithRelations[]),
+    ]
+
+    // Sort based on the orderBy parameter
+    if (orderBy.scheduledAt) {
+      allMeetings.sort((a, b) => {
+        const dateA = new Date(a.scheduledAt).getTime()
+        const dateB = new Date(b.scheduledAt).getTime()
+        return orderBy.scheduledAt === 'desc' ? dateB - dateA : dateA - dateB
+      })
+    } else if (orderBy.title) {
+      allMeetings.sort((a, b) => {
+        const titleA = a.type === 'instance' ? a.meeting.title : a.title
+        const titleB = b.type === 'instance' ? b.meeting.title : b.title
+        const comparison = titleA.localeCompare(titleB)
+        return orderBy.title === 'desc' ? -comparison : comparison
+      })
+    } else if (orderBy.initiative) {
+      allMeetings.sort((a, b) => {
+        const meetingA = a.type === 'instance' ? a.meeting : a
+        const meetingB = b.type === 'instance' ? b.meeting : b
+        const initiativeA = meetingA.initiative?.title || ''
+        const initiativeB = meetingB.initiative?.title || ''
+        const comparison = initiativeA.localeCompare(initiativeB)
+        return orderBy.initiative?.title === 'desc' ? -comparison : comparison
+      })
+    } else if (orderBy.team) {
+      allMeetings.sort((a, b) => {
+        const meetingA = a.type === 'instance' ? a.meeting : a
+        const meetingB = b.type === 'instance' ? b.meeting : b
+        const teamA = meetingA.team?.name || ''
+        const teamB = meetingB.team?.name || ''
+        const comparison = teamA.localeCompare(teamB)
+        return orderBy.team?.name === 'desc' ? -comparison : comparison
+      })
+    }
 
     // Apply pagination
     const skip = (page - 1) * limit
-    const paginatedMeetings = allUpcomingMeetings.slice(skip, skip + limit)
+    const paginatedMeetings = allMeetings.slice(skip, skip + limit)
 
     // Calculate pagination metadata
-    const totalCount = allUpcomingMeetings.length
+    const totalCount = allMeetings.length
     const totalPages = Math.ceil(totalCount / limit)
     const hasNextPage = page < totalPages
     const hasPreviousPage = page > 1

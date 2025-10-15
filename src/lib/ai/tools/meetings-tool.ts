@@ -65,13 +65,52 @@ export const meetingsTool = {
     createdAfter?: string
     createdBefore?: string
   }) => {
+    console.log(
+      'meetingsTool',
+      ownerId,
+      participantId,
+      query,
+      scheduledAfter,
+      scheduledBefore,
+      createdAfter,
+      createdBefore
+    )
     const user = await getCurrentUser()
     if (!user.organizationId) {
       throw new Error('User must belong to an organization')
     }
 
+    // Get the current user's person record (may be null if not linked)
+    const currentPerson = await prisma.person.findFirst({
+      where: {
+        user: {
+          id: user.id,
+        },
+      },
+    })
+
+    // Build access control for privacy
+    const accessControlOr: Prisma.MeetingWhereInput[] = [
+      { isPrivate: false }, // Public meetings
+      { createdById: user.id }, // Private meetings created by current user
+    ]
+
+    if (currentPerson) {
+      accessControlOr.push(
+        { ownerId: currentPerson.id }, // Private meetings where user is the owner
+        {
+          participants: {
+            some: {
+              personId: currentPerson.id,
+            },
+          },
+        } // Private meetings where user is a participant
+      )
+    }
+
     const whereClause: Prisma.MeetingWhereInput = {
       organizationId: user.organizationId,
+      OR: accessControlOr,
     }
 
     if (ownerId) whereClause.ownerId = ownerId
