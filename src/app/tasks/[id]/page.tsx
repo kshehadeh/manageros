@@ -6,13 +6,13 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { TaskDetailBreadcrumbClient } from '@/components/tasks/task-detail-breadcrumb-client'
-import { TaskStatusSelector } from '@/components/tasks/task-status-selector'
 import { TaskActionsDropdown } from '@/components/tasks/task-actions-dropdown'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
-import { LinkManager } from '@/components/entity-links'
+import { TaskSidebar } from '@/components/tasks/task-sidebar'
+import { SectionHeader } from '@/components/ui/section-header'
 import { Badge } from '@/components/ui/badge'
-import { Calendar, User, Clock, FileText, Info } from 'lucide-react'
-import { type TaskStatus } from '@/lib/task-status'
+import { Calendar, User, Clock, FileText, ListTodo } from 'lucide-react'
+import { taskStatusUtils, type TaskStatus } from '@/lib/task-status'
 import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
 
 export default async function TaskDetailPage({
@@ -58,175 +58,118 @@ export default async function TaskDetailPage({
 
   return (
     <TaskDetailBreadcrumbClient taskTitle={task.title} taskId={task.id}>
-      <div className='page-container'>
-        <div className='page-header'>
-          <div className='flex items-start justify-between'>
-            <div className='flex-1'>
-              <div className='flex items-center gap-3 mb-2'>
-                <h1 className='page-title'>{task.title}</h1>
-                <TaskStatusSelector
-                  taskId={task.id}
-                  currentStatus={task.status as TaskStatus}
-                />
-                <Badge
-                  variant={taskPriorityUtils.getUIVariant(
-                    task.priority as TaskPriority
-                  )}
-                >
-                  {taskPriorityUtils.getLabel(task.priority as TaskPriority)}
-                </Badge>
-              </div>
-
-              {/* Basic Information with Icons */}
-              <div className='flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground'>
-                <div className='flex items-center gap-1'>
-                  <Calendar className='w-4 h-4' />
-                  <span>
-                    Created {new Date(task.createdAt).toLocaleDateString()}
-                  </span>
+      <div className='space-y-6'>
+        {/* Header - Full Width */}
+        <div className='px-4 lg:px-6'>
+          <div className='page-header'>
+            <div className='flex items-start justify-between'>
+              <div className='flex-1'>
+                <div className='flex items-center gap-3 mb-2'>
+                  <ListTodo className='h-6 w-6 text-muted-foreground' />
+                  <h1 className='page-title'>{task.title}</h1>
                 </div>
-                {task.completedAt && (
-                  <div className='flex items-center gap-1'>
-                    <Clock className='w-4 h-4' />
+
+                {/* Status, Priority, Created Date, and Assignee in subheader */}
+                <div className='flex flex-wrap items-center gap-3 mt-2 mb-3'>
+                  <Badge
+                    variant={taskStatusUtils.getUIVariant(
+                      task.status as TaskStatus
+                    )}
+                  >
+                    {taskStatusUtils.getLabel(task.status as TaskStatus)}
+                  </Badge>
+                  <Badge
+                    variant={taskPriorityUtils.getUIVariant(
+                      task.priority as TaskPriority
+                    )}
+                  >
+                    {taskPriorityUtils.getLabel(task.priority as TaskPriority)}
+                  </Badge>
+                  <div className='flex items-center gap-1 text-sm text-muted-foreground'>
+                    <Calendar className='w-4 h-4' />
                     <span>
-                      Completed{' '}
-                      {new Date(task.completedAt).toLocaleDateString()}
+                      Created {new Date(task.createdAt).toLocaleDateString()}
                     </span>
                   </div>
-                )}
-                {task.assignee && (
-                  <div className='flex items-center gap-1'>
-                    <User className='w-4 h-4' />
-                    <Link
-                      href={`/people/${task.assignee.id}`}
-                      className='hover:text-primary transition-colors'
-                    >
-                      {task.assignee.name}
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </div>
-            <TaskActionsDropdown taskId={task.id} task={task} />
-          </div>
-        </div>
-
-        {/* Task Description */}
-        <div className='page-section'>
-          <h2 className='page-section-title font-bold flex items-center gap-2'>
-            <FileText className='w-4 h-4' />
-            Description
-          </h2>
-          {task.description ? (
-            <ReadonlyNotesField
-              content={task.description}
-              variant='default'
-              emptyStateText='No description provided'
-            />
-          ) : (
-            <div className='text-muted-foreground italic'>
-              No description provided
-            </div>
-          )}
-        </div>
-
-        {/* Additional Details */}
-        {(task.initiative ||
-          task.objective ||
-          task.estimate ||
-          task.dueDate ||
-          task.createdBy) && (
-          <div className='page-section'>
-            <h2 className='page-section-title font-bold flex items-center gap-2'>
-              <Info className='w-4 h-4' />
-              Additional Details
-            </h2>
-            <div className='card'>
-              <div className='grid gap-4 md:grid-cols-2'>
-                {task.initiative && (
-                  <div>
-                    <span className='text-sm font-medium text-muted-foreground'>
-                      Initiative:
-                    </span>
-                    <div className='mt-1'>
+                  {task.assignee && (
+                    <div className='flex items-center gap-1 text-sm text-muted-foreground'>
+                      <User className='w-4 h-4' />
                       <Link
-                        href={`/initiatives/${task.initiative.id}`}
-                        className='text-primary hover:text-primary/80 font-medium'
+                        href={`/people/${task.assignee.id}`}
+                        className='hover:text-primary transition-colors'
                       >
-                        {task.initiative.title}
+                        {task.assignee.name}
                       </Link>
                     </div>
-                  </div>
-                )}
-
-                {task.objective && (
-                  <div>
-                    <span className='text-sm font-medium text-muted-foreground'>
-                      Objective:
-                    </span>
-                    <div className='mt-1 text-sm'>{task.objective.title}</div>
-                  </div>
-                )}
-
-                {task.estimate && (
-                  <div>
-                    <span className='text-sm font-medium text-muted-foreground'>
-                      Estimate:
-                    </span>
-                    <div className='mt-1 text-sm'>{task.estimate} hours</div>
-                  </div>
-                )}
-
-                {task.dueDate && (
-                  <div>
-                    <span className='text-sm font-medium text-muted-foreground'>
-                      Due Date:
-                    </span>
-                    <div className='mt-1 text-sm'>
-                      {new Date(task.dueDate).toLocaleDateString()}
+                  )}
+                  {task.completedAt && (
+                    <div className='flex items-center gap-1 text-sm text-muted-foreground'>
+                      <Clock className='w-4 h-4' />
+                      <span>
+                        Completed{' '}
+                        {new Date(task.completedAt).toLocaleDateString()}
+                      </span>
                     </div>
-                  </div>
-                )}
-
-                {task.createdBy && (
-                  <div>
-                    <span className='text-sm font-medium text-muted-foreground'>
-                      Created By:
-                    </span>
-                    <div className='mt-1 text-sm'>{task.createdBy.name}</div>
-                  </div>
-                )}
-
-                <div>
-                  <span className='text-sm font-medium text-muted-foreground'>
-                    Last Updated:
-                  </span>
-                  <div className='mt-1 text-sm'>
-                    {new Date(task.updatedAt).toLocaleString()}
-                  </div>
+                  )}
                 </div>
+              </div>
+              <TaskActionsDropdown
+                taskId={task.id}
+                task={{
+                  id: task.id,
+                  title: task.title,
+                  status: task.status as TaskStatus,
+                  assignee: task.assignee,
+                  initiative: task.initiative,
+                  team: task.team,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content and Sidebar */}
+        <div className='flex flex-col lg:flex-row gap-6 px-4 lg:px-6'>
+          {/* Main Content */}
+          <div className='flex-1 min-w-0'>
+            <div className='space-y-6'>
+              {/* Task Description */}
+              <div className='page-section'>
+                <SectionHeader icon={FileText} title='Description' />
+                {task.description ? (
+                  <ReadonlyNotesField
+                    content={task.description}
+                    variant='default'
+                    emptyStateText='No description provided'
+                  />
+                ) : (
+                  <div className='text-muted-foreground italic'>
+                    No description provided
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        )}
 
-        {/* Links Section */}
-        <div className='page-section'>
-          <div className='card'>
-            <LinkManager
-              entityType='Task'
-              entityId={task.id}
-              links={entityLinks.map(link => ({
-                id: link.id,
-                url: link.url,
-                title: link.title,
-                description: link.description,
-                createdAt: link.createdAt,
-                updatedAt: link.updatedAt,
-                createdBy: link.createdBy,
-              }))}
-            />
-          </div>
+          {/* Right Sidebar */}
+          <TaskSidebar
+            links={entityLinks.map(link => ({
+              id: link.id,
+              url: link.url,
+              title: link.title,
+              description: link.description,
+              createdAt: link.createdAt,
+              updatedAt: link.updatedAt,
+              createdBy: link.createdBy,
+            }))}
+            entityId={task.id}
+            initiative={task.initiative}
+            objective={task.objective}
+            estimate={task.estimate}
+            dueDate={task.dueDate}
+            createdBy={task.createdBy}
+            updatedAt={task.updatedAt}
+          />
         </div>
       </div>
     </TaskDetailBreadcrumbClient>

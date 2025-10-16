@@ -1,6 +1,6 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { MoreHorizontal, Calendar } from 'lucide-react'
 import {
@@ -15,13 +15,14 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { deleteMeetingInstance } from '@/lib/actions/meeting-instance'
 import { toast } from 'sonner'
-import { ConfirmAction } from '@/components/common/confirm-action'
+import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
+import { DeleteMenuItem } from '@/components/common/context-menu-items'
+import { DeleteModal } from '@/components/common/delete-modal'
 import {
   MeetingInstance,
   Person,
   MeetingInstanceParticipant,
 } from '@prisma/client'
-import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
 
 type MeetingInstanceWithRelations = MeetingInstance & {
   participants: (MeetingInstanceParticipant & {
@@ -41,6 +42,8 @@ export function MeetingInstanceTable({
   const [, startTransition] = useTransition()
   const router = useRouter()
   const { handleButtonClick, ContextMenuComponent } = useDataTableContextMenu()
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
   const handleDelete = async (instanceId: string) => {
     await deleteMeetingInstance(instanceId)
@@ -215,69 +218,32 @@ export function MeetingInstanceTable({
               <MoreHorizontal className='w-4 h-4' />
               Edit
             </button>
-            <ConfirmAction
-              onConfirm={() => {
-                handleDelete(entityId)
-                close()
+            <DeleteMenuItem
+              onDelete={() => {
+                setDeleteTargetId(entityId)
+                setShowDeleteModal(true)
               }}
-              onError={error => {
-                console.error('Failed to delete meeting instance:', error)
-                toast.error(
-                  error instanceof Error
-                    ? error.message
-                    : 'Failed to delete meeting instance'
-                )
-              }}
-              renderTrigger={({ open, isPending }) => (
-                <button
-                  className='w-full px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors flex items-center gap-2'
-                  onClick={event => {
-                    event.stopPropagation()
-                    open()
-                  }}
-                  disabled={isPending}
-                >
-                  <MoreHorizontal className='w-4 h-4' />
-                  Delete
-                </button>
-              )}
-              renderConfirm={({ confirm, cancel, isPending }) => (
-                <div
-                  onClick={event => event.stopPropagation()}
-                  className='px-3 py-2 space-y-2'
-                >
-                  <div className='text-sm font-medium text-destructive'>
-                    Delete this meeting instance?
-                  </div>
-                  <div className='text-xs text-muted-foreground'>
-                    This action cannot be undone.
-                  </div>
-                  <div className='flex gap-2'>
-                    <Button
-                      onClick={confirm}
-                      disabled={isPending}
-                      variant='destructive'
-                      size='sm'
-                      className='flex-1'
-                    >
-                      {isPending ? 'Deleting...' : 'Delete'}
-                    </Button>
-                    <Button
-                      onClick={cancel}
-                      disabled={isPending}
-                      variant='outline'
-                      size='sm'
-                      className='flex-1'
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              )}
+              close={close}
             />
           </>
         )}
       </ContextMenuComponent>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false)
+          setDeleteTargetId(null)
+        }}
+        onConfirm={() => {
+          if (deleteTargetId) {
+            return handleDelete(deleteTargetId)
+          }
+        }}
+        title='Delete Meeting Instance'
+        entityName='meeting instance'
+      />
     </div>
   )
 }
