@@ -35,12 +35,14 @@ interface MeetingInstanceListProps {
     personId: string
     status: string
   }>
+  parentScheduledAt?: Date
 }
 
 export function MeetingInstanceList({
   instances,
   meetingId,
   parentParticipants = [],
+  parentScheduledAt,
 }: MeetingInstanceListProps) {
   const [open, setOpen] = useState(false)
   const router = useRouter()
@@ -55,6 +57,20 @@ export function MeetingInstanceList({
     personId: p.personId,
     status: 'invited' as const,
   }))
+
+  // Set default date to today with time from parent meeting
+  let defaultScheduledAt = ''
+  if (parentScheduledAt) {
+    const parentMeetingDate = new Date(parentScheduledAt)
+    const todayWithParentTime = new Date()
+    todayWithParentTime.setHours(parentMeetingDate.getHours())
+    todayWithParentTime.setMinutes(parentMeetingDate.getMinutes())
+    todayWithParentTime.setSeconds(0)
+    todayWithParentTime.setMilliseconds(0)
+
+    // Format as datetime-local input value (YYYY-MM-DDTHH:mm)
+    defaultScheduledAt = todayWithParentTime.toISOString().slice(0, 16)
+  }
 
   return (
     <div className='space-y-6'>
@@ -75,7 +91,10 @@ export function MeetingInstanceList({
               </DialogHeader>
               <MeetingInstanceForm
                 meetingId={meetingId}
-                initialData={{ participants: initialParticipants }}
+                initialData={{
+                  participants: initialParticipants,
+                  scheduledAt: defaultScheduledAt,
+                }}
                 onSuccess={handleSuccess}
               />
             </DialogContent>
@@ -102,7 +121,10 @@ export function MeetingInstanceList({
               </DialogHeader>
               <MeetingInstanceForm
                 meetingId={meetingId}
-                initialData={{ participants: initialParticipants }}
+                initialData={{
+                  participants: initialParticipants,
+                  scheduledAt: defaultScheduledAt,
+                }}
                 onSuccess={handleSuccess}
               />
             </DialogContent>

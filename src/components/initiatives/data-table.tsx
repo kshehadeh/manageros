@@ -46,9 +46,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import {
-  Eye,
-  Edit,
-  Trash2,
   ChevronRight,
   ChevronDown,
   Search,
@@ -64,19 +61,17 @@ import { useInitiatives } from '@/hooks/use-initiatives'
 import { useInitiativeTableSettings } from '@/hooks/use-initiative-table-settings'
 import { createInitiativeColumns } from './columns'
 import { DeleteModal } from '@/components/common/delete-modal'
+import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
+import {
+  ViewDetailsMenuItem,
+  EditMenuItem,
+  DeleteMenuItem,
+} from '@/components/common/context-menu-items'
 
 // Type for column meta
 interface ColumnMeta {
   hidden?: boolean
   className?: string
-}
-
-interface ContextMenuState {
-  visible: boolean
-  x: number
-  y: number
-  initiativeId: string
-  triggerType: 'rightClick' | 'button'
 }
 
 interface InitiativeDataTableProps {
@@ -111,13 +106,7 @@ export function InitiativeDataTable({
   immutableFilters,
 }: InitiativeDataTableProps) {
   const router = useRouter()
-  const [contextMenu, setContextMenu] = useState<ContextMenuState>({
-    visible: false,
-    x: 0,
-    y: 0,
-    initiativeId: '',
-    triggerType: 'rightClick',
-  })
+  const { handleButtonClick, ContextMenuComponent } = useDataTableContextMenu()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -261,42 +250,15 @@ export function InitiativeDataTable({
     router.push(`/initiatives/${initiativeId}`)
   }
 
-  const handleContextMenuButtonClick = (
-    e: React.MouseEvent,
-    initiativeId: string
-  ) => {
-    e.stopPropagation()
-    const rect = (e.target as HTMLElement).getBoundingClientRect()
-    setContextMenu({
-      visible: true,
-      x: rect.left,
-      y: rect.bottom + 5,
-      initiativeId,
-      triggerType: 'button',
-    })
-  }
-
-  // Close context menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setContextMenu(prev => ({ ...prev, visible: false }))
-    }
-
-    if (contextMenu.visible) {
-      document.addEventListener('click', handleClickOutside)
-      return () => document.removeEventListener('click', handleClickOutside)
-    }
-  }, [contextMenu.visible])
-
   // Create columns
   const columns = useMemo(
     () =>
       createInitiativeColumns({
-        onButtonClick: handleContextMenuButtonClick,
+        onButtonClick: handleButtonClick,
         grouping: effectiveGrouping,
         visibleColumns,
       }),
-    [effectiveGrouping, visibleColumns]
+    [handleButtonClick, effectiveGrouping, visibleColumns]
   )
 
   const table = useReactTable({
@@ -856,48 +818,29 @@ export function InitiativeDataTable({
       )}
 
       {/* Context Menu */}
-      {contextMenu.visible && (
-        <div
-          className='fixed z-50 bg-popover text-popover-foreground border rounded-md shadow-lg py-1 min-w-[160px]'
-          style={{
-            left: contextMenu.x,
-            top: contextMenu.y,
-          }}
-          onClick={e => e.stopPropagation()}
-        >
-          <button
-            className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
-            onClick={() => {
-              router.push(`/initiatives/${contextMenu.initiativeId}`)
-              setContextMenu(prev => ({ ...prev, visible: false }))
-            }}
-          >
-            <Eye className='w-4 h-4' />
-            View
-          </button>
-          <button
-            className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
-            onClick={() => {
-              router.push(`/initiatives/${contextMenu.initiativeId}/edit`)
-              setContextMenu(prev => ({ ...prev, visible: false }))
-            }}
-          >
-            <Edit className='w-4 h-4' />
-            Edit
-          </button>
-          <button
-            className='w-full px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors flex items-center gap-2'
-            onClick={() => {
-              setContextMenu(prev => ({ ...prev, visible: false }))
-              setDeleteTargetId(contextMenu.initiativeId)
-              setShowDeleteModal(true)
-            }}
-          >
-            <Trash2 className='w-4 h-4' />
-            Delete
-          </button>
-        </div>
-      )}
+      <ContextMenuComponent>
+        {({ entityId, close }) => (
+          <>
+            <ViewDetailsMenuItem
+              entityId={entityId}
+              entityType='initiatives'
+              close={close}
+            />
+            <EditMenuItem
+              entityId={entityId}
+              entityType='initiatives'
+              close={close}
+            />
+            <DeleteMenuItem
+              onDelete={() => {
+                setDeleteTargetId(entityId)
+                setShowDeleteModal(true)
+              }}
+              close={close}
+            />
+          </>
+        )}
+      </ContextMenuComponent>
 
       {/* Delete Confirmation Modal */}
       <DeleteModal

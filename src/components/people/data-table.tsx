@@ -46,9 +46,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import {
-  Eye,
-  Edit,
-  Trash2,
   ChevronRight,
   ChevronDown,
   Search,
@@ -64,19 +61,17 @@ import { usePeopleTableSettings } from '@/hooks/use-people-table-settings'
 import { createPeopleColumns } from './columns'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { deletePerson } from '@/lib/actions/person'
+import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
+import {
+  ViewDetailsMenuItem,
+  EditMenuItem,
+  DeleteMenuItem,
+} from '@/components/common/context-menu-items'
 
 // Type for column meta
 interface ColumnMeta {
   hidden?: boolean
   className?: string
-}
-
-interface ContextMenuState {
-  visible: boolean
-  x: number
-  y: number
-  personId: string
-  triggerType: 'rightClick' | 'button'
 }
 
 interface PeopleDataTableProps {
@@ -125,13 +120,7 @@ export function PeopleDataTable({
   immutableFilters,
 }: PeopleDataTableProps) {
   const router = useRouter()
-  const [contextMenu, setContextMenu] = useState<ContextMenuState>({
-    visible: false,
-    x: 0,
-    y: 0,
-    personId: '',
-    triggerType: 'rightClick',
-  })
+  const { handleButtonClick, ContextMenuComponent } = useDataTableContextMenu()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -255,7 +244,6 @@ export function PeopleDataTable({
   const handleDeleteClick = (personId: string) => {
     setDeleteTargetId(personId)
     setShowDeleteModal(true)
-    setContextMenu(prev => ({ ...prev, visible: false }))
   }
 
   const handleDeleteConfirm = async () => {
@@ -277,18 +265,6 @@ export function PeopleDataTable({
 
   const handleRowClick = (personId: string) => {
     router.push(`/people/${personId}`)
-  }
-
-  const handleButtonClick = (e: React.MouseEvent, personId: string) => {
-    e.stopPropagation()
-    const rect = e.currentTarget.getBoundingClientRect()
-    setContextMenu({
-      visible: true,
-      x: rect.right - 160,
-      y: rect.bottom + 4,
-      personId,
-      triggerType: 'button',
-    })
   }
 
   const columns = createPeopleColumns({
@@ -357,20 +333,6 @@ export function PeopleDataTable({
       }
     }
   }, [effectiveGrouping.length, table])
-
-  // Close context menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = () => {
-      if (contextMenu.visible) {
-        setContextMenu(prev => ({ ...prev, visible: false }))
-      }
-    }
-
-    if (contextMenu.visible) {
-      document.addEventListener('click', handleClickOutside)
-      return () => document.removeEventListener('click', handleClickOutside)
-    }
-  }, [contextMenu.visible])
 
   if (error) {
     return (
@@ -801,44 +763,26 @@ export function PeopleDataTable({
       )}
 
       {/* Context Menu */}
-      {contextMenu.visible && (
-        <div
-          className='fixed bg-popover border border-border rounded-md shadow-md py-1 z-50 min-w-[160px]'
-          style={{
-            left: `${contextMenu.x}px`,
-            top: `${contextMenu.y}px`,
-          }}
-          onClick={e => e.stopPropagation()}
-        >
-          <button
-            onClick={() => {
-              router.push(`/people/${contextMenu.personId}`)
-              setContextMenu(prev => ({ ...prev, visible: false }))
-            }}
-            className='w-full px-3 py-2 text-sm hover:bg-accent flex items-center gap-2 text-left'
-          >
-            <Eye className='h-4 w-4' />
-            View Details
-          </button>
-          <button
-            onClick={() => {
-              router.push(`/people/${contextMenu.personId}/edit`)
-              setContextMenu(prev => ({ ...prev, visible: false }))
-            }}
-            className='w-full px-3 py-2 text-sm hover:bg-accent flex items-center gap-2 text-left'
-          >
-            <Edit className='h-4 w-4' />
-            Edit
-          </button>
-          <button
-            onClick={() => handleDeleteClick(contextMenu.personId)}
-            className='w-full px-3 py-2 text-sm hover:bg-accent flex items-center gap-2 text-destructive text-left'
-          >
-            <Trash2 className='h-4 w-4' />
-            Delete
-          </button>
-        </div>
-      )}
+      <ContextMenuComponent>
+        {({ entityId, close }) => (
+          <>
+            <ViewDetailsMenuItem
+              entityId={entityId}
+              entityType='people'
+              close={close}
+            />
+            <EditMenuItem
+              entityId={entityId}
+              entityType='people'
+              close={close}
+            />
+            <DeleteMenuItem
+              onDelete={() => handleDeleteClick(entityId)}
+              close={close}
+            />
+          </>
+        )}
+      </ContextMenuComponent>
 
       {/* Delete Modal */}
       <DeleteModal

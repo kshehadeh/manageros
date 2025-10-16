@@ -6,6 +6,7 @@ import { Rag } from '@/components/rag'
 import { CheckInForm } from '@/components/checkin-form'
 import { DeleteCheckInButton } from '@/components/delete-checkin-button'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { SectionHeader } from '@/components/ui/section-header'
 import { EditIconButton } from './edit-icon-button'
 import { CheckCircle, Plus } from 'lucide-react'
@@ -176,18 +177,21 @@ export function CheckInList({
       </div>
 
       {/* Edit Check-in Form */}
-      {editingCheckIn && (
-        <div className='fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50'>
-          <div className='bg-popover text-popover-foreground border rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto'>
+      <Dialog
+        open={!!editingCheckIn}
+        onOpenChange={() => setEditingCheckIn(null)}
+      >
+        <DialogContent className='max-w-2xl max-h-[90vh] overflow-y-auto'>
+          {editingCheckIn && (
             <CheckInForm
               initiativeId={initiativeId}
               initiativeTitle={initiativeTitle}
               checkIn={editingCheckIn}
               onSuccess={handleFormSuccess}
             />
-          </div>
-        </div>
-      )}
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

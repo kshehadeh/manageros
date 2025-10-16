@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
 import {
   flexRender,
   getCoreRowModel,
@@ -45,9 +44,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import {
-  Eye,
-  Edit,
-  Trash2,
   ChevronRight,
   ChevronDown,
   Search,
@@ -81,14 +77,11 @@ import { usePeopleCache } from '@/hooks/use-organization-cache'
 import { useTaskTableSettings } from '@/hooks/use-task-table-settings'
 import { MultiSelect } from '@/components/ui/multi-select'
 import { InitiativeMultiSelect } from '@/components/ui/initiative-multi-select'
-
-interface ContextMenuState {
-  visible: boolean
-  x: number
-  y: number
-  taskId: string
-  triggerType: 'rightClick' | 'button'
-}
+import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
+import {
+  ViewDetailsMenuItem,
+  DeleteMenuItem,
+} from '@/components/common/context-menu-items'
 
 interface TaskDataTableProps {
   onTaskUpdate?: () => void
@@ -141,7 +134,6 @@ export function TaskDataTable({
   enablePagination = false,
   immutableFilters,
 }: TaskDataTableProps) {
-  const router = useRouter()
   const [_updatingTasks, setUpdatingTasks] = useState<Set<string>>(new Set()) // Only used for delete operations
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [expanded, setExpanded] = useState<ExpandedState>({})
@@ -289,13 +281,7 @@ export function TaskDataTable({
     )
   }, [settings.filters])
 
-  const [contextMenu, setContextMenu] = useState<ContextMenuState>({
-    visible: false,
-    x: 0,
-    y: 0,
-    taskId: '',
-    triggerType: 'rightClick',
-  })
+  const { handleButtonClick, ContextMenuComponent } = useDataTableContextMenu()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [quickEditDialog, setQuickEditDialog] = useState<{
@@ -371,24 +357,11 @@ export function TaskDataTable({
     handleQuickEdit(taskId)
   }
 
-  const handleButtonClick = (e: React.MouseEvent, taskId: string) => {
-    e.stopPropagation()
-    const rect = e.currentTarget.getBoundingClientRect()
-    setContextMenu({
-      visible: true,
-      x: rect.right - 160,
-      y: rect.bottom + 4,
-      taskId,
-      triggerType: 'button',
-    })
-  }
-
   const handleQuickEdit = (taskId: string) => {
     setQuickEditDialog({
       open: true,
       taskId,
     })
-    setContextMenu(prev => ({ ...prev, visible: false }))
   }
 
   const getGroupLabel = (groupValue: string, groupingColumn: string) => {
@@ -971,47 +944,34 @@ export function TaskDataTable({
       )}
 
       {/* Context Menu */}
-      {contextMenu.visible && (
-        <div
-          className='fixed z-50 bg-popover text-popover-foreground border rounded-md shadow-lg py-1 min-w-[160px]'
-          style={{
-            left: contextMenu.x,
-            top: contextMenu.y,
-          }}
-          onClick={e => e.stopPropagation()}
-        >
-          <button
-            className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
-            onClick={() => {
-              router.push(`/tasks/${contextMenu.taskId}`)
-              setContextMenu(prev => ({ ...prev, visible: false }))
-            }}
-          >
-            <Eye className='w-4 h-4' />
-            View
-          </button>
-          <button
-            className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
-            onClick={() => {
-              handleQuickEdit(contextMenu.taskId)
-            }}
-          >
-            <Edit className='w-4 h-4' />
-            Quick Edit
-          </button>
-          <button
-            className='w-full px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors flex items-center gap-2'
-            onClick={() => {
-              setContextMenu(prev => ({ ...prev, visible: false }))
-              setDeleteTargetId(contextMenu.taskId)
-              setShowDeleteModal(true)
-            }}
-          >
-            <Trash2 className='w-4 h-4' />
-            Delete
-          </button>
-        </div>
-      )}
+      <ContextMenuComponent>
+        {({ entityId, close }) => (
+          <>
+            <ViewDetailsMenuItem
+              entityId={entityId}
+              entityType='tasks'
+              close={close}
+            />
+            <button
+              className='w-full px-3 py-2 text-left text-sm hover:bg-accent flex items-center gap-2'
+              onClick={() => {
+                handleQuickEdit(entityId)
+                close()
+              }}
+            >
+              <ChevronRight className='h-4 w-4' />
+              Quick Edit
+            </button>
+            <DeleteMenuItem
+              onDelete={() => {
+                setDeleteTargetId(entityId)
+                setShowDeleteModal(true)
+              }}
+              close={close}
+            />
+          </>
+        )}
+      </ContextMenuComponent>
 
       {/* Quick Edit Dialog */}
       {quickEditDialog.open &&

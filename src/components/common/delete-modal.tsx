@@ -1,6 +1,15 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
 
 interface DeleteModalProps {
@@ -41,42 +50,24 @@ export function DeleteModal({
     description ||
     `Are you sure you want to delete this ${entityName}? This action cannot be undone.`
 
-  if (!isOpen) return null
-
   return (
-    <>
-      {/* Modal Backdrop */}
-      <div className='fixed inset-0 z-50 bg-black/50' onClick={onClose} />
-
-      {/* Modal Content */}
-      <div className='fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 bg-popover rounded-lg border p-6 shadow-lg min-w-[320px]'>
-        <div className='space-y-4'>
-          <div className='space-y-2'>
-            <h3 className='text-lg font-semibold'>{finalTitle}</h3>
-            <p className='text-sm text-muted-foreground'>{finalDescription}</p>
-          </div>
-          <div className='flex gap-2'>
-            <Button
-              onClick={onClose}
-              variant='outline'
-              size='sm'
-              className='flex-1'
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleConfirm}
-              variant='destructive'
-              size='sm'
-              className='flex-1'
-              disabled={isLoading}
-            >
-              {isLoading ? 'Deleting...' : 'Delete'}
-            </Button>
-          </div>
-        </div>
-      </div>
-    </>
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{finalTitle}</AlertDialogTitle>
+          <AlertDialogDescription>{finalDescription}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleConfirm}
+            disabled={isLoading}
+            className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+          >
+            {isLoading ? 'Deleting...' : 'Delete'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }

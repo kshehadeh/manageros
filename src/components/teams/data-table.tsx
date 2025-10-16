@@ -57,6 +57,11 @@ import { useTeams as useTeamsApi } from '@/hooks/use-teams'
 import { useTeamsCache } from '@/hooks/use-organization-cache'
 import { useTeamTableSettings } from '@/hooks/use-team-table-settings'
 import { createTeamsColumns } from './columns'
+import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
+import {
+  ViewDetailsMenuItem,
+  EditMenuItem,
+} from '@/components/common/context-menu-items'
 
 interface TeamsDataTableProps {
   settingsId?: string
@@ -74,6 +79,8 @@ export function TeamsDataTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [expanded, setExpanded] = useState<ExpandedState>({})
   const [globalFilter, setGlobalFilter] = useState('')
+
+  const { handleButtonClick, ContextMenuComponent } = useDataTableContextMenu()
 
   const { settings, updateSorting, updateGrouping, updateSort, updateFilters } =
     useTeamTableSettings({
@@ -154,12 +161,10 @@ export function TeamsDataTable({
   const columns = useMemo(
     () =>
       createTeamsColumns({
-        onButtonClick: (_e, teamId) => {
-          router.push(`/teams/${teamId}`)
-        },
+        onButtonClick: handleButtonClick,
         grouping: effectiveGrouping,
       }),
-    [router, effectiveGrouping]
+    [handleButtonClick, effectiveGrouping]
   )
 
   const table = useReactTable({
@@ -468,6 +473,24 @@ export function TeamsDataTable({
           </div>
         </div>
       )}
+
+      {/* Context Menu */}
+      <ContextMenuComponent>
+        {({ entityId, close }) => (
+          <>
+            <ViewDetailsMenuItem
+              entityId={entityId}
+              entityType='teams'
+              close={close}
+            />
+            <EditMenuItem
+              entityId={entityId}
+              entityType='teams'
+              close={close}
+            />
+          </>
+        )}
+      </ContextMenuComponent>
     </div>
   )
 }

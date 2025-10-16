@@ -4,9 +4,6 @@ import React, { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   MoreHorizontal,
-  Edit,
-  Eye,
-  Trash2,
   Target,
   Calendar,
   CalendarCheck,
@@ -29,6 +26,12 @@ import { deleteMeeting } from '@/lib/actions/meeting'
 import { toast } from 'sonner'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { Meeting, Team, Person, User as PrismaUser } from '@prisma/client'
+import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
+import {
+  ViewDetailsMenuItem,
+  EditMenuItem,
+  DeleteMenuItem,
+} from '@/components/common/context-menu-items'
 
 export type MeetingWithRelations = Meeting & {
   team: Team | null
@@ -112,14 +115,6 @@ export interface SharedMeetingsTableProps {
     label: string
     onClick: () => void
   }
-}
-
-interface ContextMenuState {
-  visible: boolean
-  x: number
-  y: number
-  meetingId: string
-  triggerType: 'rightClick' | 'button'
 }
 
 // Utility functions
@@ -417,13 +412,7 @@ export function SharedMeetingsTable({
 }: SharedMeetingsTableProps) {
   const [_isPending, startTransition] = useTransition()
   const router = useRouter()
-  const [contextMenu, setContextMenu] = useState<ContextMenuState>({
-    visible: false,
-    x: 0,
-    y: 0,
-    meetingId: '',
-    triggerType: 'rightClick',
-  })
+  const { handleButtonClick, ContextMenuComponent } = useDataTableContextMenu()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
@@ -450,26 +439,15 @@ export function SharedMeetingsTable({
   const handleRowRightClick = (e: React.MouseEvent, meetingId: string) => {
     if (enableRightClick) {
       e.preventDefault()
-      setContextMenu({
-        visible: true,
-        x: e.clientX,
-        y: e.clientY,
-        meetingId,
-        triggerType: 'rightClick',
-      })
+      // For right-click, manually position at mouse
+      handleButtonClick(
+        {
+          ...e,
+          currentTarget: e.currentTarget,
+        } as React.MouseEvent,
+        meetingId
+      )
     }
-  }
-
-  const handleButtonClick = (e: React.MouseEvent, meetingId: string) => {
-    e.stopPropagation()
-    const rect = e.currentTarget.getBoundingClientRect()
-    setContextMenu({
-      visible: true,
-      x: rect.right - 160,
-      y: rect.bottom + 4,
-      meetingId,
-      triggerType: 'button',
-    })
   }
 
   // Use the provided columns or default configuration
@@ -587,60 +565,29 @@ export function SharedMeetingsTable({
       </Table>
 
       {/* Context Menu */}
-      {contextMenu.visible && (
-        <>
-          {/* Backdrop to close menu */}
-          <div
-            className='fixed inset-0 z-40'
-            onClick={() =>
-              setContextMenu(prev => ({ ...prev, visible: false }))
-            }
-          />
-
-          {/* Context Menu */}
-          <div
-            className='fixed z-50 bg-popover text-popover-foreground border rounded-md shadow-lg py-1 min-w-[160px]'
-            style={{
-              left: contextMenu.x,
-              top: contextMenu.y,
-            }}
-            onClick={e => e.stopPropagation()}
-          >
-            <button
-              className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
-              onClick={() => {
-                router.push(`/meetings/${contextMenu.meetingId}`)
-                setContextMenu(prev => ({ ...prev, visible: false }))
-              }}
-            >
-              <Eye className='w-4 h-4' />
-              View
-            </button>
-            <button
-              className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
-              onClick={() => {
-                router.push(`/meetings/${contextMenu.meetingId}/edit`)
-                setContextMenu(prev => ({ ...prev, visible: false }))
-              }}
-            >
-              <Edit className='w-4 h-4' />
-              Edit
-            </button>
-            <button
-              className='w-full px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors flex items-center gap-2'
-              onClick={event => {
-                event.stopPropagation()
-                setContextMenu(prev => ({ ...prev, visible: false }))
-                setDeleteTargetId(contextMenu.meetingId)
+      <ContextMenuComponent>
+        {({ entityId, close }) => (
+          <>
+            <ViewDetailsMenuItem
+              entityId={entityId}
+              entityType='meetings'
+              close={close}
+            />
+            <EditMenuItem
+              entityId={entityId}
+              entityType='meetings'
+              close={close}
+            />
+            <DeleteMenuItem
+              onDelete={() => {
+                setDeleteTargetId(entityId)
                 setShowDeleteModal(true)
               }}
-            >
-              <Trash2 className='w-4 h-4' />
-              Delete
-            </button>
-          </div>
-        </>
-      )}
+              close={close}
+            />
+          </>
+        )}
+      </ContextMenuComponent>
 
       {/* Delete Confirmation Modal */}
       <DeleteModal

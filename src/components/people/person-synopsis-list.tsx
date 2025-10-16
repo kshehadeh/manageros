@@ -7,7 +7,14 @@ import {
 } from '@/lib/actions/synopsis'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { CalendarDays, Plus, X, ChevronDown, ChevronUp } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { CalendarDays, Plus, ChevronDown, ChevronUp } from 'lucide-react'
 import { DeleteSynopsisButton } from '@/components/delete-synopsis-button'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { SynopsisCard } from '@/components/synopsis-card'
@@ -276,102 +283,98 @@ export function PersonSynopsisList({
       )}
 
       {/* Modal */}
-      {showModal && (
-        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-          <div className='bg-background border rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto'>
-            <div className='flex items-center justify-between mb-4'>
-              <h4 className='font-medium text-lg'>Generate Synopsis</h4>
-              <Button
-                variant='ghost'
-                size='sm'
-                onClick={handleCloseModal}
-                className='h-8 w-8 p-0'
-              >
-                <X className='h-4 w-4' />
-              </Button>
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent className='max-w-2xl max-h-[90vh] overflow-y-auto'>
+          <DialogHeader>
+            <DialogTitle>Generate Synopsis</DialogTitle>
+          </DialogHeader>
+
+          {!generatedSynopsis && !loading && (
+            <div className='space-y-4'>
+              <div className='flex items-center gap-2'>
+                <CalendarDays className='w-4 h-4' />
+                <label className='text-sm font-medium'>Time Period:</label>
+                <select
+                  className='bg-background border px-3 py-2 rounded-md text-sm'
+                  value={daysBack}
+                  onChange={e => setDaysBack(parseInt(e.target.value))}
+                >
+                  <option value={7}>Last 7 days</option>
+                  <option value={14}>Last 14 days</option>
+                  <option value={30}>Last 30 days</option>
+                  <option value={90}>Last 90 days</option>
+                </select>
+              </div>
+
+              <div className='flex items-center gap-2'>
+                <Checkbox
+                  checked={includeFeedback}
+                  onCheckedChange={v => setIncludeFeedback(Boolean(v))}
+                />
+                <label className='text-sm'>
+                  Include feedback and campaign responses
+                </label>
+              </div>
             </div>
+          )}
 
+          {loading && (
+            <div className='text-center py-8'>
+              <div className='text-lg font-medium mb-2'>
+                Generating synopsis...
+              </div>
+              <div className='text-sm text-muted-foreground'>
+                This may take a few moments
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <div className='text-center py-8'>
+              <div className='text-red-500 mb-4'>{error}</div>
+            </div>
+          )}
+
+          {generatedSynopsis && (
+            <div className='space-y-4'>
+              <div className='text-xs text-muted-foreground'>
+                Generated on{' '}
+                {new Date(generatedSynopsis.createdAt).toLocaleString()} •
+                Sources: {generatedSynopsis.sources.join(', ')}
+              </div>
+              <div className='border rounded-lg p-4 bg-muted/20'>
+                <ReadonlyNotesField
+                  content={generatedSynopsis.content}
+                  variant='detailed'
+                  emptyStateText='No synopsis content available'
+                />
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
             {!generatedSynopsis && !loading && (
-              <div className='space-y-4'>
-                <div className='flex items-center gap-2'>
-                  <CalendarDays className='w-4 h-4' />
-                  <label className='text-sm font-medium'>Time Period:</label>
-                  <select
-                    className='bg-background border px-3 py-2 rounded-md text-sm'
-                    value={daysBack}
-                    onChange={e => setDaysBack(parseInt(e.target.value))}
-                  >
-                    <option value={7}>Last 7 days</option>
-                    <option value={14}>Last 14 days</option>
-                    <option value={30}>Last 30 days</option>
-                    <option value={90}>Last 90 days</option>
-                  </select>
-                </div>
-
-                <div className='flex items-center gap-2'>
-                  <Checkbox
-                    checked={includeFeedback}
-                    onCheckedChange={v => setIncludeFeedback(Boolean(v))}
-                  />
-                  <label className='text-sm'>
-                    Include feedback and campaign responses
-                  </label>
-                </div>
-
-                <div className='flex justify-end gap-2 pt-4'>
-                  <Button variant='outline' onClick={handleCloseModal}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleGenerate}>Generate Synopsis</Button>
-                </div>
-              </div>
+              <>
+                <Button variant='outline' onClick={handleCloseModal}>
+                  Cancel
+                </Button>
+                <Button onClick={handleGenerate}>Generate Synopsis</Button>
+              </>
             )}
-
-            {loading && (
-              <div className='text-center py-8'>
-                <div className='text-lg font-medium mb-2'>
-                  Generating synopsis...
-                </div>
-                <div className='text-sm text-muted-foreground'>
-                  This may take a few moments
-                </div>
-              </div>
-            )}
-
             {error && (
-              <div className='text-center py-8'>
-                <div className='text-red-500 mb-4'>{error}</div>
-                <div className='flex justify-center gap-2'>
-                  <Button variant='outline' onClick={handleCloseModal}>
-                    Close
-                  </Button>
-                  <Button onClick={handleGenerate}>Try Again</Button>
-                </div>
-              </div>
+              <>
+                <Button variant='outline' onClick={handleCloseModal}>
+                  Close
+                </Button>
+                <Button onClick={handleGenerate}>Try Again</Button>
+              </>
             )}
-
             {generatedSynopsis && (
-              <div className='space-y-4'>
-                <div className='text-xs text-muted-foreground'>
-                  Generated on{' '}
-                  {new Date(generatedSynopsis.createdAt).toLocaleString()} •
-                  Sources: {generatedSynopsis.sources.join(', ')}
-                </div>
-                <div className='border rounded-lg p-4 bg-muted/20'>
-                  <ReadonlyNotesField
-                    content={generatedSynopsis.content}
-                    variant='detailed'
-                    emptyStateText='No synopsis content available'
-                  />
-                </div>
-                <div className='flex justify-end'>
-                  <Button onClick={handleCloseModal}>Close</Button>
-                </div>
-              </div>
+              <Button onClick={handleCloseModal}>Close</Button>
             )}
-          </div>
-        </div>
-      )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -37,6 +37,17 @@ export default async function NewMeetingInstancePage({
     status: 'invited' as const, // Reset status to invited for new instance
   }))
 
+  // Set default date to today with time from parent meeting
+  const parentMeetingDate = new Date(meeting.scheduledAt)
+  const todayWithParentTime = new Date()
+  todayWithParentTime.setHours(parentMeetingDate.getHours())
+  todayWithParentTime.setMinutes(parentMeetingDate.getMinutes())
+  todayWithParentTime.setSeconds(0)
+  todayWithParentTime.setMilliseconds(0)
+
+  // Format as datetime-local input value (YYYY-MM-DDTHH:mm)
+  const defaultScheduledAt = todayWithParentTime.toISOString().slice(0, 16)
+
   return (
     <div className='space-y-6'>
       <div>
@@ -49,7 +60,10 @@ export default async function NewMeetingInstancePage({
       <div className='max-w-2xl'>
         <MeetingInstanceForm
           meetingId={meeting.id}
-          initialData={{ participants: initialParticipants }}
+          initialData={{
+            participants: initialParticipants,
+            scheduledAt: defaultScheduledAt,
+          }}
         />
       </div>
     </div>

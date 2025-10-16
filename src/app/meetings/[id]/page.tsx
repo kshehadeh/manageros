@@ -217,6 +217,7 @@ export default async function MeetingDetailPage({
                       personId: p.personId,
                       status: p.status,
                     }))}
+                    parentScheduledAt={meeting.scheduledAt}
                   />
                 </div>
               )}

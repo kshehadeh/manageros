@@ -4,7 +4,14 @@ import { useState } from 'react'
 import { generatePersonSynopsis } from '@/lib/actions/synopsis'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { CalendarDays, Loader2, X } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { CalendarDays, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface SynopsisGenerationModalProps {
@@ -65,31 +72,18 @@ export function SynopsisGenerationModal({
     }
   }
 
-  const handleClose = () => {
-    if (!loading) {
+  const handleOpenChange = (open: boolean) => {
+    if (!open && !loading) {
       onClose()
     }
   }
 
-  if (!isOpen) return null
-
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-      <div className='bg-background border rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto'>
-        <div className='flex items-center justify-between mb-4'>
-          <h4 className='font-medium text-lg'>
-            Generate Synopsis for {personName}
-          </h4>
-          <Button
-            variant='ghost'
-            size='sm'
-            onClick={handleClose}
-            className='h-8 w-8 p-0'
-            disabled={loading}
-          >
-            <X className='h-4 w-4' />
-          </Button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogContent className='max-w-2xl max-h-[90vh] overflow-y-auto'>
+        <DialogHeader>
+          <DialogTitle>Generate Synopsis for {personName}</DialogTitle>
+        </DialogHeader>
 
         <div className='space-y-4'>
           <div className='flex items-center gap-2'>
@@ -118,24 +112,24 @@ export function SynopsisGenerationModal({
               Include feedback and campaign responses
             </label>
           </div>
-
-          <div className='flex justify-end gap-2 pt-4'>
-            <Button variant='outline' onClick={handleClose} disabled={loading}>
-              Cancel
-            </Button>
-            <Button onClick={handleGenerate} disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className='w-4 h-4 mr-2 animate-spin' />
-                  Generating...
-                </>
-              ) : (
-                'Generate Synopsis'
-              )}
-            </Button>
-          </div>
         </div>
-      </div>
-    </div>
+
+        <DialogFooter>
+          <Button variant='outline' onClick={onClose} disabled={loading}>
+            Cancel
+          </Button>
+          <Button onClick={handleGenerate} disabled={loading}>
+            {loading ? (
+              <>
+                <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                Generating...
+              </>
+            ) : (
+              'Generate Synopsis'
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

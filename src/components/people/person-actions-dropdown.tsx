@@ -14,6 +14,12 @@ import {
   Edit,
 } from 'lucide-react'
 import { ActionDropdown } from '@/components/common/action-dropdown'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 interface PersonActionsDropdownProps {
   person: Person & {
@@ -149,18 +155,18 @@ export function PersonActionsDropdown({
         )}
       </ActionDropdown>
 
-      {showFeedbackForm && (
-        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-          <div className='bg-popover text-popover-foreground border rounded-xl p-6 max-w-md w-full mx-4'>
-            <h4 className='font-medium mb-4'>Add New Feedback</h4>
-            <FeedbackForm
-              person={person}
-              onSuccess={handleFeedbackSuccess}
-              onCancel={handleFeedbackCancel}
-            />
-          </div>
-        </div>
-      )}
+      <Dialog open={showFeedbackForm} onOpenChange={setShowFeedbackForm}>
+        <DialogContent className='max-w-md'>
+          <DialogHeader>
+            <DialogTitle>Add New Feedback</DialogTitle>
+          </DialogHeader>
+          <FeedbackForm
+            person={person}
+            onSuccess={handleFeedbackSuccess}
+            onCancel={handleFeedbackCancel}
+          />
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

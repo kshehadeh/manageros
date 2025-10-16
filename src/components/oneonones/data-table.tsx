@@ -45,9 +45,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import {
-  Eye,
-  Edit,
-  Trash2,
   ChevronRight,
   ChevronDown,
   Search,
@@ -62,19 +59,17 @@ import { useOneOnOneTableSettings } from '@/hooks/use-oneonone-table-settings'
 import { createOneOnOneColumns } from './columns'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { deleteOneOnOne } from '@/lib/actions/oneonone'
+import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
+import {
+  ViewDetailsMenuItem,
+  EditMenuItem,
+  DeleteMenuItem,
+} from '@/components/common/context-menu-items'
 
 // Type for column meta
 interface ColumnMeta {
   hidden?: boolean
   className?: string
-}
-
-interface ContextMenuState {
-  visible: boolean
-  x: number
-  y: number
-  oneOnOneId: string
-  triggerType: 'rightClick' | 'button'
 }
 
 interface OneOnOneDataTableProps {
@@ -102,13 +97,7 @@ export function OneOnOneDataTable({
   immutableFilters,
 }: OneOnOneDataTableProps) {
   const router = useRouter()
-  const [contextMenu, setContextMenu] = useState<ContextMenuState>({
-    visible: false,
-    x: 0,
-    y: 0,
-    oneOnOneId: '',
-    triggerType: 'rightClick',
-  })
+  const { handleButtonClick, ContextMenuComponent } = useDataTableContextMenu()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -234,18 +223,6 @@ export function OneOnOneDataTable({
 
   const handleRowClick = (oneOnOneId: string) => {
     router.push(`/oneonones/${oneOnOneId}`)
-  }
-
-  const handleButtonClick = (e: React.MouseEvent, oneOnOneId: string) => {
-    e.stopPropagation()
-    const rect = e.currentTarget.getBoundingClientRect()
-    setContextMenu({
-      visible: true,
-      x: rect.right - 160,
-      y: rect.bottom + 4,
-      oneOnOneId,
-      triggerType: 'button',
-    })
   }
 
   const columns = createOneOnOneColumns({
@@ -620,55 +597,29 @@ export function OneOnOneDataTable({
       )}
 
       {/* Context Menu */}
-      {contextMenu.visible && (
-        <>
-          <div
-            className='fixed inset-0 z-40'
-            onClick={() =>
-              setContextMenu(prev => ({ ...prev, visible: false }))
-            }
-          />
-          <div
-            className='fixed z-50 w-40 rounded-md border bg-popover p-1 shadow-md'
-            style={{
-              top: `${contextMenu.y}px`,
-              left: `${contextMenu.x}px`,
-            }}
-          >
-            <button
-              onClick={() => {
-                router.push(`/oneonones/${contextMenu.oneOnOneId}`)
-                setContextMenu(prev => ({ ...prev, visible: false }))
-              }}
-              className='flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent'
-            >
-              <Eye className='h-4 w-4' />
-              View
-            </button>
-            <button
-              onClick={() => {
-                router.push(`/oneonones/${contextMenu.oneOnOneId}/edit`)
-                setContextMenu(prev => ({ ...prev, visible: false }))
-              }}
-              className='flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent'
-            >
-              <Edit className='h-4 w-4' />
-              Edit
-            </button>
-            <button
-              onClick={() => {
-                setDeleteTargetId(contextMenu.oneOnOneId)
+      <ContextMenuComponent>
+        {({ entityId, close }) => (
+          <>
+            <ViewDetailsMenuItem
+              entityId={entityId}
+              entityType='oneonones'
+              close={close}
+            />
+            <EditMenuItem
+              entityId={entityId}
+              entityType='oneonones'
+              close={close}
+            />
+            <DeleteMenuItem
+              onDelete={() => {
+                setDeleteTargetId(entityId)
                 setShowDeleteModal(true)
-                setContextMenu(prev => ({ ...prev, visible: false }))
               }}
-              className='flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-destructive hover:bg-accent'
-            >
-              <Trash2 className='h-4 w-4' />
-              Delete
-            </button>
-          </div>
-        </>
-      )}
+              close={close}
+            />
+          </>
+        )}
+      </ContextMenuComponent>
 
       {/* Delete Modal */}
       {showDeleteModal && deleteTargetId && (

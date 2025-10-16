@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useTransition } from 'react'
+import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { MoreHorizontal, Edit, Eye, Trash2, Calendar } from 'lucide-react'
+import { MoreHorizontal, Calendar } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -21,6 +21,7 @@ import {
   Person,
   MeetingInstanceParticipant,
 } from '@prisma/client'
+import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
 
 type MeetingInstanceWithRelations = MeetingInstance & {
   participants: (MeetingInstanceParticipant & {
@@ -33,39 +34,13 @@ interface MeetingInstanceTableProps {
   meetingId: string
 }
 
-interface ContextMenuState {
-  visible: boolean
-  x: number
-  y: number
-  instanceId: string
-  triggerType: 'rightClick' | 'button'
-}
-
 export function MeetingInstanceTable({
   instances,
   meetingId,
 }: MeetingInstanceTableProps) {
   const [, startTransition] = useTransition()
   const router = useRouter()
-  const [contextMenu, setContextMenu] = useState<ContextMenuState>({
-    visible: false,
-    x: 0,
-    y: 0,
-    instanceId: '',
-    triggerType: 'rightClick',
-  })
-
-  // Handle clicking outside context menu to close it
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setContextMenu(prev => ({ ...prev, visible: false }))
-    }
-
-    if (contextMenu.visible) {
-      document.addEventListener('click', handleClickOutside)
-      return () => document.removeEventListener('click', handleClickOutside)
-    }
-  }, [contextMenu.visible])
+  const { handleButtonClick, ContextMenuComponent } = useDataTableContextMenu()
 
   const handleDelete = async (instanceId: string) => {
     await deleteMeetingInstance(instanceId)
@@ -81,25 +56,7 @@ export function MeetingInstanceTable({
 
   const handleRowRightClick = (e: React.MouseEvent, instanceId: string) => {
     e.preventDefault()
-    setContextMenu({
-      visible: true,
-      x: e.clientX,
-      y: e.clientY,
-      instanceId,
-      triggerType: 'rightClick',
-    })
-  }
-
-  const handleButtonClick = (e: React.MouseEvent, instanceId: string) => {
-    e.stopPropagation()
-    const rect = e.currentTarget.getBoundingClientRect()
-    setContextMenu({
-      visible: true,
-      x: rect.right - 160, // Position menu to the left of the button
-      y: rect.bottom + 4, // Position menu below the button
-      instanceId,
-      triggerType: 'button',
-    })
+    handleButtonClick(e as React.MouseEvent, instanceId)
   }
 
   const formatDate = (date: Date | string) => {
@@ -235,103 +192,92 @@ export function MeetingInstanceTable({
       </Table>
 
       {/* Context Menu */}
-      {contextMenu.visible && (
-        <div
-          className='fixed z-50 bg-popover text-popover-foreground border rounded-md shadow-lg py-1 min-w-[160px]'
-          style={{
-            left: contextMenu.x,
-            top: contextMenu.y,
-          }}
-          onClick={e => e.stopPropagation()}
-        >
-          <button
-            className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
-            onClick={() => {
-              router.push(
-                `/meetings/${meetingId}/instances/${contextMenu.instanceId}`
-              )
-              setContextMenu(prev => ({ ...prev, visible: false }))
-            }}
-          >
-            <Eye className='w-4 h-4' />
-            View
-          </button>
-          <button
-            className='w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2'
-            onClick={() => {
-              router.push(
-                `/meetings/${meetingId}/instances/${contextMenu.instanceId}/edit`
-              )
-              setContextMenu(prev => ({ ...prev, visible: false }))
-            }}
-          >
-            <Edit className='w-4 h-4' />
-            Edit
-          </button>
-          <ConfirmAction
-            onConfirm={() => handleDelete(contextMenu.instanceId)}
-            onError={error => {
-              console.error('Failed to delete meeting instance:', error)
-              toast.error(
-                error instanceof Error
-                  ? error.message
-                  : 'Failed to delete meeting instance'
-              )
-            }}
-            onOpenChange={open => {
-              if (!open) {
-                setContextMenu(prev => ({ ...prev, visible: false }))
-              }
-            }}
-            renderTrigger={({ open, isPending }) => (
-              <button
-                className='w-full px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors flex items-center gap-2'
-                onClick={event => {
-                  event.stopPropagation()
-                  open()
-                }}
-                disabled={isPending}
-              >
-                <Trash2 className='w-4 h-4' />
-                Delete
-              </button>
-            )}
-            renderConfirm={({ confirm, cancel, isPending }) => (
-              <div
-                onClick={event => event.stopPropagation()}
-                className='px-3 py-2 space-y-2'
-              >
-                <div className='text-sm font-medium text-destructive'>
-                  Delete this meeting instance?
+      <ContextMenuComponent>
+        {({ entityId, close }) => (
+          <>
+            <button
+              className='w-full px-3 py-2 text-left text-sm hover:bg-accent flex items-center gap-2'
+              onClick={() => {
+                router.push(`/meetings/${meetingId}/instances/${entityId}`)
+                close()
+              }}
+            >
+              <Calendar className='w-4 h-4' />
+              View Details
+            </button>
+            <button
+              className='w-full px-3 py-2 text-left text-sm hover:bg-accent flex items-center gap-2'
+              onClick={() => {
+                router.push(`/meetings/${meetingId}/instances/${entityId}/edit`)
+                close()
+              }}
+            >
+              <MoreHorizontal className='w-4 h-4' />
+              Edit
+            </button>
+            <ConfirmAction
+              onConfirm={() => {
+                handleDelete(entityId)
+                close()
+              }}
+              onError={error => {
+                console.error('Failed to delete meeting instance:', error)
+                toast.error(
+                  error instanceof Error
+                    ? error.message
+                    : 'Failed to delete meeting instance'
+                )
+              }}
+              renderTrigger={({ open, isPending }) => (
+                <button
+                  className='w-full px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors flex items-center gap-2'
+                  onClick={event => {
+                    event.stopPropagation()
+                    open()
+                  }}
+                  disabled={isPending}
+                >
+                  <MoreHorizontal className='w-4 h-4' />
+                  Delete
+                </button>
+              )}
+              renderConfirm={({ confirm, cancel, isPending }) => (
+                <div
+                  onClick={event => event.stopPropagation()}
+                  className='px-3 py-2 space-y-2'
+                >
+                  <div className='text-sm font-medium text-destructive'>
+                    Delete this meeting instance?
+                  </div>
+                  <div className='text-xs text-muted-foreground'>
+                    This action cannot be undone.
+                  </div>
+                  <div className='flex gap-2'>
+                    <Button
+                      onClick={confirm}
+                      disabled={isPending}
+                      variant='destructive'
+                      size='sm'
+                      className='flex-1'
+                    >
+                      {isPending ? 'Deleting...' : 'Delete'}
+                    </Button>
+                    <Button
+                      onClick={cancel}
+                      disabled={isPending}
+                      variant='outline'
+                      size='sm'
+                      className='flex-1'
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                 </div>
-                <div className='text-xs text-muted-foreground'>
-                  This action cannot be undone.
-                </div>
-                <div className='flex gap-2'>
-                  <Button
-                    onClick={confirm}
-                    disabled={isPending}
-                    variant='destructive'
-                    size='sm'
-                    className='flex-1'
-                  >
-                    {isPending ? 'Deleting...' : 'Delete'}
-                  </Button>
-                  <Button
-                    onClick={cancel}
-                    disabled={isPending}
-                    variant='outline'
-                    size='sm'
-                    className='flex-1'
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            )}
-          />
-        </div>
-      )}
+              )}
+            />
+          </>
+        )}
+      </ContextMenuComponent>
     </div>
   )
 }
