@@ -39,6 +39,40 @@ const sampleData = {
     { name: 'Marketing', description: 'Marketing and growth' },
   ],
 
+  childTeams: [
+    {
+      parentName: 'Engineering',
+      name: 'Frontend Team',
+      description: 'Web and UI development',
+    },
+    {
+      parentName: 'Engineering',
+      name: 'Backend Team',
+      description: 'API and infrastructure',
+    },
+    {
+      parentName: 'Engineering',
+      name: 'DevOps Team',
+      description: 'Deployment and infrastructure',
+    },
+    { parentName: 'Product', name: 'Design', description: 'UX/UI design' },
+    {
+      parentName: 'Product',
+      name: 'Analytics',
+      description: 'Data and insights',
+    },
+    {
+      parentName: 'Marketing',
+      name: 'Social Media',
+      description: 'Social media and community',
+    },
+    {
+      parentName: 'Marketing',
+      name: 'Content',
+      description: 'Content creation and strategy',
+    },
+  ],
+
   jobRoles: [
     { title: 'Senior Engineer', domain: 'Engineering', level: 'Senior' },
     { title: 'Junior Engineer', domain: 'Engineering', level: 'Junior' },
@@ -139,6 +173,65 @@ async function seedDemoData() {
   console.log('🌱 Starting demo data seeding for Acme organization...\n')
 
   try {
+    // Step 0: Clear existing demo data for Acme
+    console.log('🧹 Cleaning up existing demo data...')
+    const acmeOrg = await prisma.organization.findUnique({
+      where: { slug: 'acme-corp' },
+    })
+
+    if (acmeOrg) {
+      // Delete in dependency order
+      await prisma.meetingInstanceParticipant.deleteMany({
+        where: { meetingInstance: { organizationId: acmeOrg.id } },
+      })
+      await prisma.meetingInstance.deleteMany({
+        where: { organizationId: acmeOrg.id },
+      })
+      await prisma.meetingParticipant.deleteMany({
+        where: { meeting: { organizationId: acmeOrg.id } },
+      })
+      await prisma.meeting.deleteMany({
+        where: { organizationId: acmeOrg.id },
+      })
+      await prisma.feedback.deleteMany({
+        where: { about: { organizationId: acmeOrg.id } },
+      })
+      await prisma.oneOnOne.deleteMany({
+        where: { manager: { organizationId: acmeOrg.id } },
+      })
+      await prisma.task.deleteMany({
+        where: { createdBy: { organizationId: acmeOrg.id } },
+      })
+      await prisma.checkIn.deleteMany({
+        where: { initiative: { organizationId: acmeOrg.id } },
+      })
+      await prisma.objective.deleteMany({
+        where: { initiative: { organizationId: acmeOrg.id } },
+      })
+      await prisma.initiativeOwner.deleteMany({
+        where: { initiative: { organizationId: acmeOrg.id } },
+      })
+      await prisma.initiative.deleteMany({
+        where: { organizationId: acmeOrg.id },
+      })
+      await prisma.person.deleteMany({
+        where: { organizationId: acmeOrg.id },
+      })
+      await prisma.team.deleteMany({
+        where: { organizationId: acmeOrg.id },
+      })
+      await prisma.jobRole.deleteMany({
+        where: { organizationId: acmeOrg.id },
+      })
+      await prisma.jobLevel.deleteMany({
+        where: { organizationId: acmeOrg.id },
+      })
+      await prisma.jobDomain.deleteMany({
+        where: { organizationId: acmeOrg.id },
+      })
+      console.log(`✓ Cleaned up existing data\n`)
+    }
+
     // Step 1: Ensure Acme organization exists
     console.log('📦 Setting up organization...')
     const organization = await prisma.organization.upsert({
@@ -326,7 +419,30 @@ async function seedDemoData() {
     )
     console.log(`✓ Created ${teams.length} teams\n`)
 
-    // Step 6: Create people
+    // Step 6: Create child teams
+    console.log('🏢 Creating child teams...')
+    const childTeams = await Promise.all(
+      sampleData.childTeams.map(childTeamData => {
+        const parentTeam = teams.find(t => t.name === childTeamData.parentName)
+        if (!parentTeam) {
+          console.warn(
+            `Parent team "${childTeamData.parentName}" not found for child team "${childTeamData.name}". Skipping.`
+          )
+          return null
+        }
+        return prisma.team.create({
+          data: {
+            name: childTeamData.name,
+            description: childTeamData.description,
+            organizationId: organization.id,
+            parentId: parentTeam.id,
+          },
+        })
+      })
+    )
+    console.log(`✓ Created ${childTeams.length} child teams\n`)
+
+    // Step 7: Create people
     console.log('👤 Creating people...')
     const people: any[] = []
 
@@ -482,7 +598,13 @@ async function seedDemoData() {
       data: { personId: regularUserPerson.id },
     })
 
-    // Step 7: Create initiatives
+    // Link admin user to a manager
+    await prisma.user.update({
+      where: { id: adminUser.id },
+      data: { personId: engineeringLead.id },
+    })
+
+    // Step 8: Create initiatives
     console.log('🎯 Creating initiatives...')
     const initiatives = await Promise.all(
       sampleData.initiatives.map((initData, index) => {
@@ -531,7 +653,7 @@ async function seedDemoData() {
     )
     console.log(`✓ Created ${initiatives.length} initiatives with objectives\n`)
 
-    // Step 8: Create tasks
+    // Step 9: Create tasks
     console.log('📝 Creating tasks...')
     let taskCount = 0
     for (const initiative of initiatives) {
@@ -567,7 +689,7 @@ async function seedDemoData() {
     }
     console.log(`✓ Created ${taskCount} tasks\n`)
 
-    // Step 9: Create check-ins
+    // Step 10: Create check-ins
     console.log('📊 Creating check-ins...')
     let checkInCount = 0
     for (const initiative of initiatives) {
@@ -592,7 +714,7 @@ async function seedDemoData() {
     }
     console.log(`✓ Created ${checkInCount} check-ins\n`)
 
-    // Step 10: Create one-on-ones
+    // Step 11: Create one-on-ones
     console.log('🤝 Creating one-on-ones...')
     const oneOnOnes = []
     const managers = [engineeringLead, productLead, marketingLead]
@@ -617,7 +739,7 @@ async function seedDemoData() {
     }
     console.log(`✓ Created ${oneOnOnes.length} one-on-ones\n`)
 
-    // Step 11: Create feedback
+    // Step 12: Create feedback
     console.log('💬 Creating feedback...')
     let feedbackCount = 0
     for (let i = 0; i < 15; i++) {
@@ -645,7 +767,7 @@ async function seedDemoData() {
     }
     console.log(`✓ Created ${feedbackCount} feedback items\n`)
 
-    // Step 12: Create meetings
+    // Step 13: Create meetings
     console.log('📅 Creating meetings...')
     let meetingCount = 0
     for (let i = 0; i < 8; i++) {
@@ -655,14 +777,18 @@ async function seedDemoData() {
       )
       meetingDate.setHours(Math.floor(Math.random() * 8) + 9, 0, 0, 0)
 
-      const participants = []
-      const participantCount = 2 + Math.floor(Math.random() * 4)
-      for (let p = 0; p < participantCount; p++) {
-        participants.push({
-          personId: people[Math.floor(Math.random() * people.length)].id,
+      // Shuffle and select unique participants
+      const shuffledPeople = [...people].sort(() => Math.random() - 0.5)
+      const participantCount = Math.min(
+        2 + Math.floor(Math.random() * 4),
+        people.length
+      )
+      const participants = shuffledPeople
+        .slice(0, participantCount)
+        .map(person => ({
+          personId: person.id,
           status: 'invited',
-        })
-      }
+        }))
 
       await prisma.meeting.create({
         data: {
@@ -689,7 +815,7 @@ async function seedDemoData() {
     }
     console.log(`✓ Created ${meetingCount} meetings\n`)
 
-    // Step 13: Create feedback template
+    // Step 14: Create feedback template
     console.log('📋 Creating feedback template...')
     const existingTemplate = await prisma.feedbackTemplate.findFirst({
       where: { isDefault: true },
@@ -763,6 +889,7 @@ async function seedDemoData() {
 }
 
 if (import.meta.main) {
+  q
   seedDemoData()
 }
 
