@@ -889,7 +889,6 @@ async function seedDemoData() {
 }
 
 if (import.meta.main) {
-  q
   seedDemoData()
 }
 

@@ -2,12 +2,13 @@ import { getOneOnOneById } from '@/lib/actions/oneonone'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { OneOnOneDetailClient } from '@/components/oneonone-detail-client'
 import { EditIconButton } from '@/components/edit-icon-button'
 import { MessageCircle, Info, StickyNote } from 'lucide-react'
+import { SectionHeader } from '@/components/ui/section-header'
+import { PersonListItem } from '@/components/people/person-list-item'
 
 interface OneOnOneViewPageProps {
   params: Promise<{
@@ -36,98 +37,101 @@ export default async function OneOnOneViewPage({
         oneOnOneId={oneOnOne.id}
       >
         <div className='space-y-6'>
-          <div className='flex items-center justify-between'>
-            <div>
-              <h2 className='text-lg font-bold flex items-center gap-2'>
-                <MessageCircle className='w-4 h-4' />
-                1:1 Meeting
-              </h2>
-              <p className='text-sm text-neutral-400 mt-1'>
-                Meeting between {oneOnOne.manager.name} and{' '}
-                {oneOnOne.report.name}
-              </p>
-            </div>
-            <div className='flex items-center gap-2'>
-              <EditIconButton
-                href={`/oneonones/${oneOnOne.id}/edit`}
-                variant='outline'
-                size='default'
-              />
+          {/* Header - Full Width */}
+          <div className='px-4 lg:px-6'>
+            <div className='page-header'>
+              <div className='flex items-start justify-between'>
+                <div className='flex-1'>
+                  <div className='flex items-center gap-3 mb-2'>
+                    <MessageCircle className='h-6 w-6 text-muted-foreground' />
+                    <h1 className='page-title'>1:1 Meeting</h1>
+                  </div>
+                  <p className='page-subtitle'>
+                    Meeting between {oneOnOne.manager.name} and{' '}
+                    {oneOnOne.report.name}
+                  </p>
+                </div>
+                <EditIconButton
+                  href={`/oneonones/${oneOnOne.id}/edit`}
+                  variant='outline'
+                  size='default'
+                />
+              </div>
             </div>
           </div>
 
-          <div className='grid gap-6 md:grid-cols-2'>
-            {/* Meeting Details */}
-            <section className='card'>
-              <h3 className='font-bold mb-4 flex items-center gap-2'>
-                <Info className='w-4 h-4' />
-                Meeting Details
-              </h3>
-              <div className='space-y-3'>
-                <div>
-                  <span className='text-sm font-medium'>Participant 1:</span>
+          {/* Main Content and Sidebar */}
+          <div className='flex flex-col lg:flex-row gap-6 px-4 lg:px-6'>
+            {/* Main Content */}
+            <div className='flex-1 min-w-0'>
+              <div className='space-y-6'>
+                {/* Meeting Notes */}
+                <div className='page-section'>
+                  <SectionHeader icon={StickyNote} title='Meeting Notes' />
                   <div className='text-sm text-neutral-400'>
-                    <Link
-                      href={`/people/${oneOnOne.manager.id}`}
-                      className='hover:text-blue-400'
-                    >
-                      {oneOnOne.manager.name}
-                    </Link>
-                    <div className='text-xs text-neutral-500'>
-                      {oneOnOne.manager.email} •{' '}
-                      {oneOnOne.manager.role || 'No role'}
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <span className='text-sm font-medium'>Participant 2:</span>
-                  <div className='text-sm text-neutral-400'>
-                    <Link
-                      href={`/people/${oneOnOne.report.id}`}
-                      className='hover:text-blue-400'
-                    >
-                      {oneOnOne.report.name}
-                    </Link>
-                    <div className='text-xs text-neutral-500'>
-                      {oneOnOne.report.email} •{' '}
-                      {oneOnOne.report.role || 'No role'}
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <span className='text-sm font-medium'>Scheduled Date:</span>
-                  <div className='text-sm text-neutral-400'>
-                    {oneOnOne.scheduledAt
-                      ? new Date(oneOnOne.scheduledAt).toLocaleString()
-                      : 'Not scheduled'}
+                    {oneOnOne.notes ? (
+                      <ReadonlyNotesField
+                        content={oneOnOne.notes}
+                        variant='default'
+                        emptyStateText='No notes recorded yet'
+                      />
+                    ) : (
+                      <div className='text-center py-8 text-neutral-500'>
+                        No notes recorded yet
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-            </section>
-          </div>
-
-          {/* Meeting Notes */}
-          <section className='card'>
-            <h3 className='font-bold mb-4 flex items-center gap-2'>
-              <StickyNote className='w-4 h-4' />
-              Meeting Notes
-            </h3>
-            <div className='text-sm text-neutral-400'>
-              {oneOnOne.notes ? (
-                <ReadonlyNotesField
-                  content={oneOnOne.notes}
-                  variant='default'
-                  emptyStateText='No notes recorded yet'
-                />
-              ) : (
-                <div className='text-center py-8 text-neutral-500'>
-                  No notes recorded yet
-                </div>
-              )}
             </div>
-          </section>
+
+            {/* Right Sidebar */}
+            <div className='w-full lg:w-80 lg:flex-shrink-0'>
+              <div className='page-section'>
+                <SectionHeader icon={Info} title='Meeting Details' />
+                <div className='space-y-4'>
+                  <div>
+                    <h4 className='text-sm font-medium mb-2'>Participant 1</h4>
+                    <PersonListItem
+                      person={{
+                        id: oneOnOne.manager.id,
+                        name: oneOnOne.manager.name,
+                        email: oneOnOne.manager.email,
+                        avatar: oneOnOne.manager.avatar,
+                        role: oneOnOne.manager.role,
+                      }}
+                      showRole={true}
+                      showEmail={true}
+                    />
+                  </div>
+
+                  <div>
+                    <h4 className='text-sm font-medium mb-2'>Participant 2</h4>
+                    <PersonListItem
+                      person={{
+                        id: oneOnOne.report.id,
+                        name: oneOnOne.report.name,
+                        email: oneOnOne.report.email,
+                        avatar: oneOnOne.report.avatar,
+                        role: oneOnOne.report.role,
+                      }}
+                      showRole={true}
+                      showEmail={true}
+                    />
+                  </div>
+
+                  <div className='pt-2 border-t border-muted'>
+                    <span className='text-sm font-medium'>Scheduled Date:</span>
+                    <div className='text-sm text-neutral-400 mt-1'>
+                      {oneOnOne.scheduledAt
+                        ? new Date(oneOnOne.scheduledAt).toLocaleString()
+                        : 'Not scheduled'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </OneOnOneDetailClient>
     )
