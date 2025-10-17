@@ -1,13 +1,11 @@
 import { Rag } from '@/components/rag'
 import { InitiativeActionsDropdown } from '@/components/initiatives/initiative-actions-dropdown'
-import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { Rocket } from 'lucide-react'
 
 interface InitiativeHeaderProps {
   initiative: {
     id: string
     title: string
-    summary: string | null
     rag: string
     completionRate: number
   }
@@ -28,15 +26,6 @@ export function InitiativeHeader({ initiative }: InitiativeHeaderProps) {
               </span>
             </div>
           </div>
-          {initiative.summary && (
-            <div className='page-subtitle'>
-              <ReadonlyNotesField
-                content={initiative.summary}
-                variant='compact'
-                showEmptyState={false}
-              />
-            </div>
-          )}
         </div>
 
         {/* Action Buttons */}

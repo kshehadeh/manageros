@@ -10,10 +10,13 @@ import { InitiativeCheckIns } from '@/components/initiatives/initiative-checkins
 import { InitiativeMeetings } from '@/components/initiatives/initiative-meetings'
 import { InitiativeSidebar } from '@/components/initiatives/initiative-sidebar'
 import { NotesSection } from '@/components/notes/notes-section'
+import { SectionHeader } from '@/components/ui/section-header'
+import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { Suspense } from 'react'
 import { Loading } from '@/components/ui/loading'
 import { calculateTaskCompletionPercentage } from '@/lib/completion-utils'
 import { getNotesForEntity } from '@/lib/actions/notes'
+import { FileText } from 'lucide-react'
 
 export default async function InitiativeDetail({
   params,
@@ -142,7 +145,6 @@ export default async function InitiativeDetail({
             initiative={{
               id: init.id,
               title: init.title,
-              summary: init.summary,
               rag: init.rag,
               completionRate: completionRate,
             }}
@@ -154,6 +156,18 @@ export default async function InitiativeDetail({
           {/* Main Content */}
           <div className='flex-1 min-w-0'>
             <div className='space-y-6'>
+              {/* Summary Section */}
+              {init.summary && (
+                <div className='page-section'>
+                  <SectionHeader icon={FileText} title='Summary' />
+                  <ReadonlyNotesField
+                    content={init.summary}
+                    variant='default'
+                    emptyStateText='No summary provided'
+                  />
+                </div>
+              )}
+
               <Suspense
                 fallback={
                   <div className='page-section'>
