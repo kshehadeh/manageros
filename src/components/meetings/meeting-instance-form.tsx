@@ -20,9 +20,19 @@ import {
   type MeetingInstanceFormData,
   meetingInstanceSchema,
 } from '@/lib/validations'
-import { AlertCircle, Plus, X } from 'lucide-react'
+import {
+  AlertCircle,
+  Plus,
+  X,
+  Calendar,
+  StickyNote,
+  Users,
+  CheckCircle2,
+  Copy,
+} from 'lucide-react'
 import { MarkdownEditor } from '@/components/markdown-editor'
 import { PersonSelect } from '@/components/ui/person-select'
+import { SectionHeader } from '@/components/ui/section-header'
 
 interface MeetingInstanceFormProps {
   meetingId: string
@@ -30,6 +40,16 @@ interface MeetingInstanceFormProps {
   isEditing?: boolean
   instanceId?: string
   onSuccess?: () => void
+  parentMeetingParticipants?: Array<{
+    id: string
+    personId: string
+    status: string
+    person: {
+      id: string
+      name: string
+      avatar?: string | null
+    }
+  }>
 }
 
 export function MeetingInstanceForm({
@@ -38,6 +58,7 @@ export function MeetingInstanceForm({
   isEditing = false,
   instanceId,
   onSuccess,
+  parentMeetingParticipants,
 }: MeetingInstanceFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -126,53 +147,124 @@ export function MeetingInstanceForm({
     }))
   }
 
+  const toggleAllAttendance = () => {
+    setFormData(prev => ({
+      ...prev,
+      participants: prev.participants.map(p => ({
+        ...p,
+        status: p.status === 'invited' ? 'attended' : 'invited',
+      })),
+    }))
+  }
+
+  const inheritParentParticipants = () => {
+    if (!parentMeetingParticipants) return
+
+    setFormData(prev => {
+      const existingPersonIds = new Set(prev.participants.map(p => p.personId))
+      const newParticipants = parentMeetingParticipants
+        .filter(p => !existingPersonIds.has(p.personId))
+        .map(p => ({
+          personId: p.personId,
+          status: 'invited' as const,
+        }))
+
+      return {
+        ...prev,
+        participants: [...prev.participants, ...newParticipants],
+      }
+    })
+  }
+
   return (
     <form onSubmit={handleSubmit} className='space-y-6'>
       {errors.general && (
-        <div className='flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-md'>
+        <div className='bg-destructive/10 border border-destructive/20 rounded-lg p-3 text-destructive text-sm flex items-center gap-2'>
           <AlertCircle className='h-4 w-4' />
-          <span className='text-sm'>{errors.general}</span>
+          {errors.general}
         </div>
       )}
 
-      <div className='space-y-4'>
-        <div>
-          <Label htmlFor='scheduledAt'>Date & Time *</Label>
-          <Input
-            id='scheduledAt'
-            type='datetime-local'
-            value={formData.scheduledAt}
-            onChange={e => handleInputChange('scheduledAt', e.target.value)}
-            className={errors.scheduledAt ? 'border-red-500' : ''}
-          />
-          {errors.scheduledAt && (
-            <p className='text-red-500 text-sm mt-1'>{errors.scheduledAt}</p>
-          )}
-        </div>
-
-        <div>
-          <Label htmlFor='notes'>Notes</Label>
-          <MarkdownEditor
-            value={formData.notes || ''}
-            onChange={value => handleInputChange('notes', value)}
-            placeholder='Meeting notes and outcomes... Use Markdown for formatting!'
-          />
-        </div>
-
-        <div>
-          <div className='flex items-center justify-between mb-2'>
-            <Label>Participants</Label>
-            <Button
-              type='button'
-              variant='outline'
-              size='sm'
-              onClick={addParticipant}
-              className='flex items-center gap-2'
-            >
-              <Plus className='h-4 w-4' />
-              Add Participant
-            </Button>
+      <div className='flex flex-col gap-6'>
+        {/* Schedule */}
+        <div className='space-y-4'>
+          <SectionHeader icon={Calendar} title='Schedule' />
+          <div className='space-y-4'>
+            <div className='space-y-2'>
+              <Label htmlFor='scheduledAt'>
+                Date & Time <span className='text-destructive'>*</span>
+              </Label>
+              <Input
+                id='scheduledAt'
+                type='datetime-local'
+                value={formData.scheduledAt}
+                onChange={e => handleInputChange('scheduledAt', e.target.value)}
+                className={errors.scheduledAt ? 'border-destructive' : ''}
+              />
+              {errors.scheduledAt && (
+                <p className='text-sm text-destructive'>{errors.scheduledAt}</p>
+              )}
+            </div>
           </div>
+        </div>
+
+        {/* Notes */}
+        <div className='space-y-4'>
+          <SectionHeader icon={StickyNote} title='Notes' />
+          <div className='space-y-4'>
+            <MarkdownEditor
+              value={formData.notes || ''}
+              onChange={value => handleInputChange('notes', value)}
+              placeholder='Meeting notes and outcomes... Use Markdown for formatting!'
+            />
+          </div>
+        </div>
+
+        {/* Participants */}
+        <div className='space-y-4'>
+          <SectionHeader
+            icon={Users}
+            title='Participants'
+            action={
+              <div className='flex items-center gap-2'>
+                <Button
+                  type='button'
+                  variant='outline'
+                  size='sm'
+                  onClick={addParticipant}
+                  className='flex items-center gap-2'
+                >
+                  <Plus className='h-4 w-4' />
+                  Add Participant
+                </Button>
+                {parentMeetingParticipants &&
+                  parentMeetingParticipants.length > 0 && (
+                    <Button
+                      type='button'
+                      variant='outline'
+                      size='sm'
+                      onClick={inheritParentParticipants}
+                      className='flex items-center gap-2'
+                    >
+                      <Copy className='h-4 w-4' />
+                      Inherit from Parent
+                    </Button>
+                  )}
+                <Button
+                  type='button'
+                  variant='outline'
+                  size='sm'
+                  onClick={toggleAllAttendance}
+                  className='flex items-center gap-2'
+                >
+                  <CheckCircle2 className='h-4 w-4' />
+                  {formData.participants.every(p => p.status === 'attended')
+                    ? 'Mark All Invited'
+                    : 'Mark All Attended'}
+                </Button>
+              </div>
+            }
+          />
 
           <div className='space-y-2'>
             {formData.participants.map((participant, index) => (
@@ -223,7 +315,7 @@ export function MeetingInstanceForm({
         </div>
       </div>
 
-      <div className='flex justify-end gap-3'>
+      <div className='flex justify-end gap-3 pt-4'>
         <Button type='submit' disabled={isSubmitting}>
           {isSubmitting
             ? 'Saving...'

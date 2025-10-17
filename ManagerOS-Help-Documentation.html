@@ -1,0 +1,3119 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Jira Integration</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pandoc-css-reset@1.1.0/pandoc.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Jira Integration</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#help-content-index" id="toc-help-content-index">Help
+Content Index</a>
+<ul>
+<li><a href="#overview" id="toc-overview">Overview</a></li>
+<li><a href="#categories" id="toc-categories">Categories</a></li>
+<li><a href="#all-topics" id="toc-all-topics">All Topics</a></li>
+<li><a href="#usage" id="toc-usage">Usage</a></li>
+</ul></li>
+<li><a href="#welcome-to-manageros"
+id="toc-welcome-to-manageros">Welcome to ManagerOS</a>
+<ul>
+<li><a href="#core-concepts" id="toc-core-concepts">Core
+Concepts</a></li>
+<li><a href="#work-management" id="toc-work-management">Work
+Management</a></li>
+<li><a href="#meetings" id="toc-meetings">Meetings</a></li>
+<li><a href="#feedback-growth" id="toc-feedback-growth">Feedback &amp;
+Growth</a></li>
+<li><a href="#integrations" id="toc-integrations">Integrations</a></li>
+<li><a href="#entity-links" id="toc-entity-links">Entity Links</a></li>
+<li><a href="#common-flows" id="toc-common-flows">Common Flows</a></li>
+<li><a href="#tips" id="toc-tips">Tips</a></li>
+<li><a href="#learn-more" id="toc-learn-more">Learn More</a></li>
+</ul></li>
+<li><a href="#keyboard-shortcuts" id="toc-keyboard-shortcuts">Keyboard
+Shortcuts</a>
+<ul>
+<li><a href="#global-shortcuts" id="toc-global-shortcuts">Global
+Shortcuts</a></li>
+<li><a href="#navigation-tips" id="toc-navigation-tips">Navigation
+Tips</a></li>
+<li><a href="#browser-shortcuts" id="toc-browser-shortcuts">Browser
+Shortcuts</a></li>
+<li><a href="#accessibility"
+id="toc-accessibility">Accessibility</a></li>
+<li><a href="#tips-1" id="toc-tips-1">Tips</a></li>
+</ul></li>
+<li><a href="#people" id="toc-people">People</a>
+<ul>
+<li><a href="#overview-1" id="toc-overview-1">Overview</a></li>
+<li><a href="#key-features" id="toc-key-features">Key Features</a></li>
+<li><a href="#navigation" id="toc-navigation">Navigation</a></li>
+<li><a href="#admin-functions" id="toc-admin-functions">Admin
+Functions</a></li>
+<li><a href="#best-practices" id="toc-best-practices">Best
+Practices</a></li>
+<li><a href="#related-topics" id="toc-related-topics">Related
+Topics</a></li>
+<li><a href="#tips-2" id="toc-tips-2">Tips</a></li>
+</ul></li>
+<li><a href="#people-hierarchy" id="toc-people-hierarchy">People
+Hierarchy</a>
+<ul>
+<li><a href="#key-features-1" id="toc-key-features-1">Key
+Features</a></li>
+<li><a href="#best-practices-1" id="toc-best-practices-1">Best
+Practices</a></li>
+</ul></li>
+<li><a href="#job-roles-and-organizational-structure"
+id="toc-job-roles-and-organizational-structure">Job Roles and
+Organizational Structure</a>
+<ul>
+<li><a href="#overview-2" id="toc-overview-2">Overview</a></li>
+<li><a href="#key-concepts" id="toc-key-concepts">Key Concepts</a></li>
+<li><a href="#managing-job-roles" id="toc-managing-job-roles">Managing
+Job Roles</a></li>
+<li><a href="#assigning-job-roles-to-people"
+id="toc-assigning-job-roles-to-people">Assigning Job Roles to
+People</a></li>
+<li><a href="#job-descriptions" id="toc-job-descriptions">Job
+Descriptions</a></li>
+<li><a href="#best-practices-2" id="toc-best-practices-2">Best
+Practices</a></li>
+<li><a href="#viewing-job-role-information"
+id="toc-viewing-job-role-information">Viewing Job Role
+Information</a></li>
+<li><a href="#common-use-cases" id="toc-common-use-cases">Common Use
+Cases</a></li>
+<li><a href="#faqs" id="toc-faqs">FAQs</a></li>
+<li><a href="#need-help" id="toc-need-help">Need Help?</a></li>
+</ul></li>
+<li><a href="#direct-reports" id="toc-direct-reports">Direct Reports</a>
+<ul>
+<li><a href="#overview-3" id="toc-overview-3">Overview</a></li>
+<li><a href="#management-tools" id="toc-management-tools">Management
+Tools</a></li>
+<li><a href="#key-metrics" id="toc-key-metrics">Key Metrics</a></li>
+</ul></li>
+<li><a href="#meetings-1" id="toc-meetings-1">Meetings</a>
+<ul>
+<li><a href="#create-a-meeting" id="toc-create-a-meeting">Create a
+meeting</a></li>
+<li><a href="#recurrence-optional"
+id="toc-recurrence-optional">Recurrence (optional)</a></li>
+<li><a href="#associations" id="toc-associations">Associations</a></li>
+<li><a href="#participant-status"
+id="toc-participant-status">Participant status</a></li>
+<li><a href="#best-practices-3" id="toc-best-practices-3">Best
+practices</a></li>
+<li><a href="#troubleshooting"
+id="toc-troubleshooting">Troubleshooting</a></li>
+</ul></li>
+<li><a href="#meeting-instances" id="toc-meeting-instances">Meeting
+Instances</a>
+<ul>
+<li><a href="#manage-an-instance" id="toc-manage-an-instance">Manage an
+instance</a></li>
+<li><a href="#editing-instances-vs-the-series"
+id="toc-editing-instances-vs-the-series">Editing instances vs the
+series</a></li>
+<li><a href="#action-items" id="toc-action-items">Action items</a></li>
+<li><a href="#tips-3" id="toc-tips-3">Tips</a></li>
+<li><a href="#common-issues" id="toc-common-issues">Common
+issues</a></li>
+</ul></li>
+<li><a href="#meetings-and-meeting-instances"
+id="toc-meetings-and-meeting-instances">Meetings and Meeting
+Instances</a>
+<ul>
+<li><a href="#meeting-types" id="toc-meeting-types">Meeting
+Types</a></li>
+<li><a href="#meeting-creation" id="toc-meeting-creation">Meeting
+Creation</a></li>
+<li><a href="#meeting-instances-1" id="toc-meeting-instances-1">Meeting
+Instances</a></li>
+<li><a href="#meeting-workflow" id="toc-meeting-workflow">Meeting
+Workflow</a></li>
+<li><a href="#best-practices-4" id="toc-best-practices-4">Best
+Practices</a></li>
+<li><a href="#integration-features"
+id="toc-integration-features">Integration Features</a></li>
+<li><a href="#troubleshooting-1"
+id="toc-troubleshooting-1">Troubleshooting</a></li>
+</ul></li>
+<li><a href="#one-on-one-meetings"
+id="toc-one-on-one-meetings">One-on-One Meetings</a>
+<ul>
+<li><a href="#purpose-benefits" id="toc-purpose-benefits">Purpose &amp;
+Benefits</a></li>
+<li><a href="#meeting-structure" id="toc-meeting-structure">Meeting
+Structure</a></li>
+<li><a href="#best-practices-5" id="toc-best-practices-5">Best
+Practices</a></li>
+</ul></li>
+<li><a href="#initiatives" id="toc-initiatives">Initiatives</a>
+<ul>
+<li><a href="#what-are-initiatives" id="toc-what-are-initiatives">What
+are Initiatives?</a></li>
+<li><a href="#key-components" id="toc-key-components">Key
+Components</a></li>
+<li><a href="#best-practices-6" id="toc-best-practices-6">Best
+Practices</a></li>
+</ul></li>
+<li><a href="#task-status" id="toc-task-status">Task Status</a>
+<ul>
+<li><a href="#status-types" id="toc-status-types">Status Types</a></li>
+<li><a href="#best-practices-7" id="toc-best-practices-7">Best
+Practices</a></li>
+<li><a href="#workflow-tips" id="toc-workflow-tips">Workflow
+Tips</a></li>
+</ul></li>
+<li><a href="#task-priorities" id="toc-task-priorities">Task
+Priorities</a>
+<ul>
+<li><a href="#priority-levels" id="toc-priority-levels">Priority
+Levels</a></li>
+<li><a href="#best-practices-8" id="toc-best-practices-8">Best
+Practices</a></li>
+</ul></li>
+<li><a href="#feedback-campaigns" id="toc-feedback-campaigns">Feedback
+Campaigns</a>
+<ul>
+<li><a href="#campaign-types" id="toc-campaign-types">Campaign
+Types</a></li>
+<li><a href="#campaign-process" id="toc-campaign-process">Campaign
+Process</a></li>
+<li><a href="#best-practices-9" id="toc-best-practices-9">Best
+Practices</a></li>
+</ul></li>
+<li><a href="#feedback-campaigns-and-responses"
+id="toc-feedback-campaigns-and-responses">Feedback Campaigns and
+Responses</a>
+<ul>
+<li><a href="#campaign-types-1" id="toc-campaign-types-1">Campaign
+Types</a></li>
+<li><a href="#campaign-setup" id="toc-campaign-setup">Campaign
+Setup</a></li>
+<li><a href="#response-collection" id="toc-response-collection">Response
+Collection</a></li>
+<li><a href="#response-analysis" id="toc-response-analysis">Response
+Analysis</a></li>
+<li><a href="#privacy-and-security"
+id="toc-privacy-and-security">Privacy and Security</a></li>
+<li><a href="#best-practices-10" id="toc-best-practices-10">Best
+Practices</a></li>
+<li><a href="#integration-features-1"
+id="toc-integration-features-1">Integration Features</a></li>
+<li><a href="#troubleshooting-2"
+id="toc-troubleshooting-2">Troubleshooting</a></li>
+</ul></li>
+<li><a href="#synopsis-generation" id="toc-synopsis-generation">Synopsis
+Generation</a>
+<ul>
+<li><a href="#overview-4" id="toc-overview-4">Overview</a></li>
+<li><a href="#data-sources" id="toc-data-sources">Data Sources</a></li>
+<li><a href="#generation-process" id="toc-generation-process">Generation
+Process</a></li>
+<li><a href="#usage-scenarios" id="toc-usage-scenarios">Usage
+Scenarios</a></li>
+<li><a href="#privacy-and-security-1"
+id="toc-privacy-and-security-1">Privacy and Security</a></li>
+<li><a href="#best-practices-11" id="toc-best-practices-11">Best
+Practices</a></li>
+<li><a href="#customization-options"
+id="toc-customization-options">Customization Options</a></li>
+<li><a href="#troubleshooting-3"
+id="toc-troubleshooting-3">Troubleshooting</a></li>
+</ul></li>
+<li><a href="#reports" id="toc-reports">Reports</a>
+<ul>
+<li><a href="#overview-5" id="toc-overview-5">Overview</a></li>
+<li><a href="#available-reports" id="toc-available-reports">Available
+Reports</a></li>
+<li><a href="#data-sources-1" id="toc-data-sources-1">Data
+Sources</a></li>
+<li><a href="#access-control-2" id="toc-access-control-2">Access
+Control</a></li>
+<li><a href="#usage-1" id="toc-usage-1">Usage</a></li>
+<li><a href="#output-formats" id="toc-output-formats">Output
+Formats</a></li>
+<li><a href="#best-practices-12" id="toc-best-practices-12">Best
+Practices</a></li>
+<li><a href="#troubleshooting-4"
+id="toc-troubleshooting-4">Troubleshooting</a></li>
+<li><a href="#integration-with-other-features"
+id="toc-integration-with-other-features">Integration with Other
+Features</a></li>
+<li><a href="#future-enhancements" id="toc-future-enhancements">Future
+Enhancements</a></li>
+</ul></li>
+<li><a href="#ai-synopsis-report" id="toc-ai-synopsis-report">AI
+Synopsis Report</a>
+<ul>
+<li><a href="#overview-6" id="toc-overview-6">Overview</a></li>
+<li><a href="#data-sources-2" id="toc-data-sources-2">Data
+Sources</a></li>
+<li><a href="#usage-2" id="toc-usage-2">Usage</a></li>
+<li><a href="#access-control-3" id="toc-access-control-3">Access
+Control</a></li>
+<li><a href="#technical-details" id="toc-technical-details">Technical
+Details</a></li>
+<li><a href="#best-practices-13" id="toc-best-practices-13">Best
+Practices</a></li>
+<li><a href="#troubleshooting-5"
+id="toc-troubleshooting-5">Troubleshooting</a></li>
+<li><a href="#integration-with-other-features-1"
+id="toc-integration-with-other-features-1">Integration with Other
+Features</a></li>
+</ul></li>
+<li><a href="#person-overview-report-1"
+id="toc-person-overview-report-1">Person Overview Report</a>
+<ul>
+<li><a href="#overview-7" id="toc-overview-7">Overview</a></li>
+<li><a href="#data-sources-3" id="toc-data-sources-3">Data
+Sources</a></li>
+<li><a href="#usage-3" id="toc-usage-3">Usage</a></li>
+<li><a href="#access-control-4" id="toc-access-control-4">Access
+Control</a></li>
+<li><a href="#technical-details-1"
+id="toc-technical-details-1">Technical Details</a></li>
+<li><a href="#best-practices-14" id="toc-best-practices-14">Best
+Practices</a></li>
+<li><a href="#troubleshooting-6"
+id="toc-troubleshooting-6">Troubleshooting</a></li>
+<li><a href="#integration-with-other-features-2"
+id="toc-integration-with-other-features-2">Integration with Other
+Features</a></li>
+</ul></li>
+<li><a href="#github-integration-3" id="toc-github-integration-3">GitHub
+Integration</a>
+<ul>
+<li><a href="#setup-process" id="toc-setup-process">Setup
+Process</a></li>
+<li><a href="#features" id="toc-features">Features</a></li>
+<li><a href="#github-personal-access-token-setup"
+id="toc-github-personal-access-token-setup">GitHub Personal Access Token
+Setup</a></li>
+<li><a href="#best-practices-15" id="toc-best-practices-15">Best
+Practices</a></li>
+<li><a href="#troubleshooting-7"
+id="toc-troubleshooting-7">Troubleshooting</a></li>
+</ul></li>
+<li><a href="#jira-integration-3" id="toc-jira-integration-3">Jira
+Integration</a>
+<ul>
+<li><a href="#setup-process-1" id="toc-setup-process-1">Setup
+Process</a></li>
+<li><a href="#features-1" id="toc-features-1">Features</a></li>
+<li><a href="#best-practices-16" id="toc-best-practices-16">Best
+Practices</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="help-content-index">Help Content Index</h1>
+<p>This file is automatically generated. Do not edit manually.</p>
+<h2 id="overview">Overview</h2>
+<ul>
+<li><strong>Total Topics</strong>: 20</li>
+<li><strong>Categories</strong>: 7</li>
+<li><strong>Last Updated</strong>: 2025-10-01T16:30:59.632Z</li>
+</ul>
+<h2 id="categories">Categories</h2>
+<h3 id="feedback-development-3-topics">Feedback &amp; Development (3
+topics)</h3>
+<ul>
+<li><strong>Feedback Campaigns and Responses</strong>
+(<code>feedback-campaigns-and-responses</code>)</li>
+<li><strong>Synopsis Generation</strong>
+(<code>synopsis-generation</code>)</li>
+<li><strong>Feedback Campaigns</strong>
+(<code>feedback-campaigns</code>)</li>
+</ul>
+<h3 id="getting-started-2-topics">Getting Started (2 topics)</h3>
+<ul>
+<li><strong>Keyboard Shortcuts</strong>
+(<code>keyboard-shortcuts</code>)</li>
+<li><strong>Getting Started with ManagerOS</strong>
+(<code>getting-started</code>)</li>
+</ul>
+<h3 id="integrations-2-topics">Integrations (2 topics)</h3>
+<ul>
+<li><strong>GitHub Integration</strong>
+(<code>github-integration</code>)</li>
+<li><strong>Jira Integration</strong>
+(<code>jira-integration</code>)</li>
+</ul>
+<h3 id="meetings-communication-4-topics">Meetings &amp; Communication (4
+topics)</h3>
+<ul>
+<li><strong>One-on-One Meetings</strong> (<code>one-on-ones</code>)</li>
+<li><strong>Meetings and Meeting Instances</strong>
+(<code>meetings-and-instances</code>)</li>
+<li><strong>Meetings</strong> (<code>meetings</code>)</li>
+<li><strong>Meeting Instances</strong>
+(<code>meeting-instances</code>)</li>
+</ul>
+<h3 id="people-teams-3-topics">People &amp; Teams (3 topics)</h3>
+<ul>
+<li><strong>People Hierarchy</strong>
+(<code>people-hierarchy</code>)</li>
+<li><strong>Direct Reports</strong> (<code>direct-reports</code>)</li>
+<li><strong>People</strong> (<code>people</code>)</li>
+</ul>
+<h3 id="reports-analytics-3-topics">Reports &amp; Analytics (3
+topics)</h3>
+<ul>
+<li><strong>Reports</strong> (<code>reports</code>)</li>
+<li><strong>Person Overview Report</strong>
+(<code>person-overview-report</code>)</li>
+<li><strong>AI Synopsis Report</strong>
+(<code>ai-synopsis-report</code>)</li>
+</ul>
+<h3 id="tasks-projects-3-topics">Tasks &amp; Projects (3 topics)</h3>
+<ul>
+<li><strong>Task Status</strong> (<code>task-status</code>)</li>
+<li><strong>Initiatives</strong> (<code>initiatives</code>)</li>
+<li><strong>Task Priorities</strong> (<code>task-priorities</code>)</li>
+</ul>
+<h2 id="all-topics">All Topics</h2>
+<ul>
+<li><strong>Reports</strong> (<code>reports</code>) - Reports &amp;
+Analytics</li>
+<li><strong>Person Overview Report</strong>
+(<code>person-overview-report</code>) - Reports &amp; Analytics</li>
+<li><strong>AI Synopsis Report</strong>
+(<code>ai-synopsis-report</code>) - Reports &amp; Analytics</li>
+<li><strong>Keyboard Shortcuts</strong>
+(<code>keyboard-shortcuts</code>) - Getting Started</li>
+<li><strong>People Hierarchy</strong> (<code>people-hierarchy</code>) -
+People &amp; Teams</li>
+<li><strong>Direct Reports</strong> (<code>direct-reports</code>) -
+People &amp; Teams</li>
+<li><strong>People</strong> (<code>people</code>) - People &amp;
+Teams</li>
+<li><strong>One-on-One Meetings</strong> (<code>one-on-ones</code>) -
+Meetings &amp; Communication</li>
+<li><strong>Meetings and Meeting Instances</strong>
+(<code>meetings-and-instances</code>) - Meetings &amp;
+Communication</li>
+<li><strong>Meetings</strong> (<code>meetings</code>) - Meetings &amp;
+Communication</li>
+<li><strong>Meeting Instances</strong> (<code>meeting-instances</code>)
+- Meetings &amp; Communication</li>
+<li><strong>Getting Started with ManagerOS</strong>
+(<code>getting-started</code>) - Getting Started</li>
+<li><strong>GitHub Integration</strong>
+(<code>github-integration</code>) - Integrations</li>
+<li><strong>Jira Integration</strong> (<code>jira-integration</code>) -
+Integrations</li>
+<li><strong>Feedback Campaigns and Responses</strong>
+(<code>feedback-campaigns-and-responses</code>) - Feedback &amp;
+Development</li>
+<li><strong>Synopsis Generation</strong>
+(<code>synopsis-generation</code>) - Feedback &amp; Development</li>
+<li><strong>Feedback Campaigns</strong>
+(<code>feedback-campaigns</code>) - Feedback &amp; Development</li>
+<li><strong>Task Status</strong> (<code>task-status</code>) - Tasks
+&amp; Projects</li>
+<li><strong>Initiatives</strong> (<code>initiatives</code>) - Tasks
+&amp; Projects</li>
+<li><strong>Task Priorities</strong> (<code>task-priorities</code>) -
+Tasks &amp; Projects</li>
+</ul>
+<h2 id="usage">Usage</h2>
+<p>To use help content in your components:</p>
+<pre class="tsx"><code>import { HelpIcon } from &#39;@/components/help-icon&#39;
+
+&lt;HelpIcon helpId=&quot;reports&quot; /&gt;</code></pre>
+<p>To add new help content:</p>
+<ol type="1">
+<li>Create a new markdown file in the appropriate category folder under
+<code>help/</code>
+<ul>
+<li><code>help/tasks-projects/</code> - Task and project related
+help</li>
+<li><code>help/people-teams/</code> - People and team management
+help<br />
+</li>
+<li><code>help/meetings-communication/</code> - Meeting and
+communication help</li>
+<li><code>help/integrations/</code> - Third-party integration help</li>
+<li><code>help/feedback-development/</code> - Feedback and development
+help</li>
+</ul></li>
+<li>Add front matter with id, title, and category to the markdown
+file</li>
+<li>Run <code>bun scripts/help-content-manager.ts validate</code> to
+check</li>
+<li>Run <code>bun scripts/generate-help-content.ts</code> to regenerate
+TypeScript files</li>
+</ol>
+<h1 id="welcome-to-manageros">Welcome to ManagerOS</h1>
+<p>ManagerOS helps managers organize people and teams, run initiatives,
+manage tasks, hold effective meetings and one‑on‑ones, collect feedback,
+and integrate with developer tools. This guide orients you to the main
+concepts and how they relate.</p>
+<h2 id="core-concepts">Core Concepts</h2>
+<ul>
+<li><strong>Organization</strong>: Your top‑level container. All data is
+isolated per organization.</li>
+<li><strong>People</strong>: Individual members of your organization.
+People can belong to teams and have managers.</li>
+<li><strong>Teams</strong>: Groups of people with a parent/child
+hierarchy. Teams own initiatives and can be nested.</li>
+</ul>
+<p>See more: People &amp; Teams → <a href="/people">People
+Hierarchy</a>, <a href="/teams">Teams</a></p>
+<h2 id="work-management">Work Management</h2>
+<ul>
+<li><strong>Initiatives</strong>: Multi‑week efforts that group
+objectives and tasks. Use initiatives to drive outcomes across
+teams.</li>
+<li><strong>Tasks</strong>: Actionable items that can be assigned,
+prioritized, and tracked. Tasks may belong to initiatives or stand
+alone.</li>
+</ul>
+<p>See more: Tasks &amp; Projects → <a
+href="/initiatives">Initiatives</a>, <a href="/tasks">Tasks</a></p>
+<h2 id="meetings">Meetings</h2>
+<ul>
+<li><strong>Meetings</strong>: Scheduled sessions with agendas, notes,
+and instances. Meetings can recur and generate individual meeting
+instances.</li>
+<li><strong>One‑on‑Ones</strong>: Private meetings between a manager and
+a report. Only participants can view the details.</li>
+</ul>
+<p>See more: Meetings &amp; Communication → <a
+href="/meetings">Meetings</a>, <a href="/oneonones">One‑on‑Ones</a></p>
+<h2 id="feedback-growth">Feedback &amp; Growth</h2>
+<ul>
+<li><strong>Feedback Campaigns</strong>: Structured requests for
+feedback about a person. Campaign creators control visibility and
+collect responses.</li>
+<li><strong>Responses</strong>: Individual submissions to a campaign.
+Private feedback is only visible to the author.</li>
+<li><strong>Synopses</strong>: AI‑generated summaries for a person. Only
+the person or org admins can access.</li>
+</ul>
+<p>See more: Feedback &amp; Development → <a
+href="/feedback-campaigns">Feedback Campaigns</a>, open a person page to
+view Feedback &amp; Synopses under People</p>
+<h2 id="integrations">Integrations</h2>
+<ul>
+<li><strong>GitHub Integration</strong>: Link accounts to surface PR
+activity and related context.</li>
+<li><strong>Jira Integration</strong>: Link accounts to sync assigned
+tickets and work activity.</li>
+</ul>
+<p>See more: Integrations → <a href="/settings">GitHub Integration</a>,
+<a href="/settings">Jira Integration</a></p>
+<h2 id="entity-links">Entity Links</h2>
+<p>Attach external links (docs, dashboards, tickets) to people, teams,
+initiatives, tasks, meetings, and more to centralize context.</p>
+<p>See more: Add links via the “Links” section on entity detail
+pages</p>
+<h2 id="common-flows">Common Flows</h2>
+<ol type="1">
+<li>Create your organization and invite people</li>
+<li>Build your team structure</li>
+<li>Define initiatives and objectives</li>
+<li>Create and assign tasks</li>
+<li>Schedule meetings and 1:1s</li>
+<li>Run a feedback campaign for growth cycles</li>
+<li>Connect GitHub/Jira for richer context</li>
+</ol>
+<h2 id="tips">Tips</h2>
+<ul>
+<li>Look for the small help icon on pages to open targeted help.</li>
+<li>Use the Command Palette (⌘/Ctrl + K) to jump to pages and
+actions.</li>
+<li>Start with an initiative and link tasks, meetings, and docs for one
+source of truth.</li>
+</ul>
+<h2 id="learn-more">Learn More</h2>
+<p>Open these pages and click the help icon for deep dives:</p>
+<ul>
+<li>People &amp; Teams: org structure, reporting, direct reports</li>
+<li>Tasks &amp; Projects: statuses, priorities, planning</li>
+<li>Meetings &amp; Communication: recurring meetings, instances, 1:1
+best practices</li>
+<li>Feedback &amp; Development: campaigns, response visibility,
+synopses</li>
+<li>Integrations: GitHub and Jira linking and data shown</li>
+</ul>
+<h1 id="keyboard-shortcuts">Keyboard Shortcuts</h1>
+<p>ManagerOS includes several keyboard shortcuts to help you navigate
+and work more efficiently.</p>
+<h2 id="global-shortcuts">Global Shortcuts</h2>
+<h3 id="command-palette">Command Palette</h3>
+<ul>
+<li><strong>⌘K</strong> (Mac) / <strong>Ctrl+K</strong>
+(Windows/Linux)</li>
+<li>Opens the command palette where you can quickly navigate to any page
+or perform common actions</li>
+<li>Type to search for pages, people, teams, initiatives, or tasks</li>
+<li>Press Enter to navigate or Escape to close</li>
+</ul>
+<h3 id="ai-chat">AI Chat</h3>
+<ul>
+<li><strong>⌘J</strong> (Mac) / <strong>Ctrl+J</strong>
+(Windows/Linux)</li>
+<li>Opens the AI chat sidebar</li>
+<li>Allows you to quickly access the AI assistant for questions about
+your organization</li>
+<li>Press Escape to close the chat</li>
+</ul>
+<h3 id="quick-task-creation">Quick Task Creation</h3>
+<ul>
+<li><strong>Q</strong> (anywhere in the app)</li>
+<li>Opens the quick task creation dialog</li>
+<li>Allows you to quickly create a new task without navigating to the
+tasks page</li>
+<li>Press Escape to cancel</li>
+</ul>
+<h3 id="quick-edit">Quick Edit</h3>
+<ul>
+<li><strong>E</strong> (on detail pages)</li>
+<li>Opens the edit form for the current detail page</li>
+<li>Works on people, initiatives, meetings, tasks, one-on-ones,
+feedback, and teams detail pages</li>
+<li>Press Escape to cancel editing</li>
+</ul>
+<h2 id="navigation-tips">Navigation Tips</h2>
+<ul>
+<li>Use the command palette (⌘K) to quickly jump between different
+sections of the app</li>
+<li>Use AI chat (⌘J) to quickly ask questions about your organization’s
+data</li>
+<li>The command palette remembers your recent searches and frequently
+accessed items</li>
+<li>You can search for specific people, teams, or initiatives by typing
+their names</li>
+<li>Use arrow keys to navigate through search results in the command
+palette</li>
+</ul>
+<h2 id="browser-shortcuts">Browser Shortcuts</h2>
+<p>These standard browser shortcuts also work in ManagerOS:</p>
+<ul>
+<li><strong>⌘R</strong> (Mac) / <strong>Ctrl+R</strong> (Windows/Linux)
+- Refresh the page</li>
+<li><strong>⌘L</strong> (Mac) / <strong>Ctrl+L</strong> (Windows/Linux)
+- Focus the address bar</li>
+<li><strong>⌘T</strong> (Mac) / <strong>Ctrl+T</strong> (Windows/Linux)
+- Open new tab</li>
+<li><strong>⌘W</strong> (Mac) / <strong>Ctrl+W</strong> (Windows/Linux)
+- Close current tab</li>
+</ul>
+<h2 id="accessibility">Accessibility</h2>
+<p>All keyboard shortcuts are designed to work with screen readers and
+other assistive technologies. If you need to customize shortcuts or have
+accessibility concerns, please contact support.</p>
+<h2 id="tips-1">Tips</h2>
+<ul>
+<li>The command palette is your fastest way to navigate the app</li>
+<li>Use AI chat (⌘J) to quickly get answers about your organization’s
+data</li>
+<li>Use Q to quickly capture tasks as they come up in meetings or
+conversations</li>
+<li>Keyboard shortcuts work consistently across all pages in
+ManagerOS</li>
+<li>You can always use the mouse if you prefer - keyboard shortcuts are
+optional</li>
+</ul>
+<h1 id="people">People</h1>
+<p>The People page is your central hub for managing all team members in
+your organization. This comprehensive view provides tools for viewing,
+filtering, and managing people across your organization.</p>
+<h2 id="overview-1">Overview</h2>
+<p>The People page displays all members of your organization in a
+searchable, filterable table format. You can:</p>
+<ul>
+<li><strong>View all team members</strong> in your organization</li>
+<li><strong>Filter and search</strong> people by name, role, team, or
+status</li>
+<li><strong>Access individual profiles</strong> for detailed
+information</li>
+<li><strong>Manage people</strong> (if you’re an admin)</li>
+</ul>
+<h2 id="key-features">Key Features</h2>
+<h3 id="people-table">People Table</h3>
+<ul>
+<li><strong>Name and contact information</strong> for each person</li>
+<li><strong>Role and team assignments</strong></li>
+<li><strong>Status indicators</strong> (active, inactive, etc.)</li>
+<li><strong>Quick access</strong> to individual profiles</li>
+</ul>
+<h3 id="filtering-and-search">Filtering and Search</h3>
+<ul>
+<li><strong>Search by name</strong> or other attributes</li>
+<li><strong>Filter by team</strong> or department</li>
+<li><strong>Filter by role</strong> or status</li>
+<li><strong>Sort by different criteria</strong></li>
+</ul>
+<h3 id="actions-available">Actions Available</h3>
+<ul>
+<li><strong>View Chart</strong>: Switch to the organizational chart
+view</li>
+<li><strong>Import CSV</strong>: Bulk import people from a CSV file
+(admin only)</li>
+<li><strong>New Person</strong>: Add a new team member (admin only)</li>
+</ul>
+<h2 id="navigation">Navigation</h2>
+<h3 id="individual-profiles">Individual Profiles</h3>
+<p>Click on any person’s name to access their detailed profile, which
+includes:</p>
+<ul>
+<li><strong>Personal information</strong> and contact details</li>
+<li><strong>Team assignments</strong> and reporting relationships</li>
+<li><strong>Tasks and initiatives</strong> they’re involved in</li>
+<li><strong>Feedback and performance</strong> information</li>
+<li><strong>Meeting history</strong> and one-on-ones</li>
+<li><strong>Integration data</strong> from GitHub and Jira</li>
+</ul>
+<h3 id="chart-view">Chart View</h3>
+<p>Use the “Chart” button to switch to the organizational hierarchy
+view, which shows:</p>
+<ul>
+<li><strong>Reporting relationships</strong> visually</li>
+<li><strong>Team structure</strong> and hierarchy</li>
+<li><strong>Interactive navigation</strong> between levels</li>
+</ul>
+<h2 id="admin-functions">Admin Functions</h2>
+<p>If you’re an organization administrator, you have additional
+capabilities:</p>
+<h3 id="import-people">Import People</h3>
+<ul>
+<li><strong>CSV import</strong> for bulk adding team members</li>
+<li><strong>Template download</strong> with required fields</li>
+<li><strong>Validation</strong> to ensure data quality</li>
+</ul>
+<h3 id="add-new-person">Add New Person</h3>
+<ul>
+<li><strong>Manual entry</strong> for individual team members</li>
+<li><strong>Role assignment</strong> and team membership</li>
+<li><strong>Contact information</strong> and preferences</li>
+</ul>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="data-management">Data Management</h3>
+<ul>
+<li><strong>Keep information current</strong> by regularly updating
+profiles</li>
+<li><strong>Use consistent naming</strong> conventions for roles and
+teams</li>
+<li><strong>Maintain accurate reporting</strong> relationships</li>
+</ul>
+<h3 id="organization">Organization</h3>
+<ul>
+<li><strong>Use filters effectively</strong> to find specific people
+quickly</li>
+<li><strong>Leverage search</strong> for large organizations</li>
+<li><strong>Regularly review</strong> team composition and
+structure</li>
+</ul>
+<h3 id="access-control">Access Control</h3>
+<ul>
+<li><strong>Respect privacy settings</strong> for sensitive
+information</li>
+<li><strong>Use appropriate permissions</strong> for different user
+roles</li>
+<li><strong>Maintain data security</strong> across the organization</li>
+</ul>
+<h2 id="related-topics">Related Topics</h2>
+<ul>
+<li><strong><a href="/help/people-hierarchy">People
+Hierarchy</a></strong>: Understanding organizational structure</li>
+<li><strong><a href="/help/direct-reports">Direct Reports</a></strong>:
+Managing your team members</li>
+<li><strong><a href="/help/one-on-ones">One-on-Ones</a></strong>:
+Regular check-ins with team members</li>
+<li><strong><a href="/help/feedback-campaigns">Feedback
+Campaigns</a></strong>: Collecting performance feedback</li>
+</ul>
+<h2 id="tips-2">Tips</h2>
+<ul>
+<li>Use the search function to quickly find people in large
+organizations</li>
+<li>The chart view is helpful for understanding reporting
+relationships</li>
+<li>Regular updates to people profiles ensure accurate information
+across the platform</li>
+<li>Leverage filters to focus on specific teams or roles when
+needed</li>
+</ul>
+<h1 id="people-hierarchy">People Hierarchy</h1>
+<p>The people hierarchy shows the organizational structure of your team.
+This view helps you understand:</p>
+<ul>
+<li><strong>Reporting relationships</strong> between team members</li>
+<li><strong>Management structure</strong> and who reports to whom</li>
+<li><strong>Team composition</strong> and organizational depth</li>
+</ul>
+<h2 id="key-features-1">Key Features</h2>
+<ul>
+<li><strong>Visual representation</strong> of the org chart</li>
+<li><strong>Interactive navigation</strong> to individual profiles</li>
+<li><strong>Role-based access</strong> to different levels of the
+hierarchy</li>
+</ul>
+<h2 id="best-practices-1">Best Practices</h2>
+<ul>
+<li>Keep the hierarchy updated as team changes occur</li>
+<li>Use clear role titles and descriptions</li>
+<li>Ensure proper reporting relationships are maintained</li>
+</ul>
+<h1 id="job-roles-and-organizational-structure">Job Roles and
+Organizational Structure</h1>
+<h2 id="overview-2">Overview</h2>
+<p>Job Roles provide structured definitions of positions within your
+organization. They combine job levels, domains, and detailed
+descriptions to create a comprehensive organizational hierarchy.</p>
+<h2 id="key-concepts">Key Concepts</h2>
+<h3 id="job-levels">Job Levels</h3>
+<p>Job levels represent seniority within your organization and can be
+organized in a hierarchy:</p>
+<ul>
+<li><strong>Junior</strong> - Entry-level positions (order: 0)</li>
+<li><strong>Professional</strong> - Individual contributors (order:
+1)</li>
+<li><strong>Senior Professional</strong> - Experienced individual
+contributors (order: 2)</li>
+<li><strong>Staff</strong> - Senior contributors with mentoring
+responsibilities (order: 3)</li>
+<li><strong>Principal</strong> - Technical leaders and architecture
+(order: 4)</li>
+</ul>
+<p><strong>Level Ordering</strong>: Job levels are displayed in order
+from lowest to highest. This order determines how levels appear in
+selection dropdowns and helps establish clear career progression
+paths.</p>
+<h3 id="job-domains">Job Domains</h3>
+<p>Job domains represent functional areas:</p>
+<ul>
+<li><strong>Engineering</strong> - Software development and technical
+roles</li>
+<li><strong>Product</strong> - Product management and strategy</li>
+<li><strong>Design</strong> - User experience and visual design</li>
+<li><strong>Marketing</strong> - Marketing and communications</li>
+</ul>
+<h3 id="job-roles">Job Roles</h3>
+<p>Job roles combine levels and domains into specific positions:</p>
+<ul>
+<li><strong>Senior Software Engineer</strong> (Senior Level, Engineering
+Domain)</li>
+<li><strong>Product Manager</strong> (Multiple Levels, Product
+Domain)</li>
+<li><strong>UX Designer</strong> (Multiple Levels, Design Domain)</li>
+</ul>
+<h2 id="managing-job-roles">Managing Job Roles</h2>
+<h3 id="as-an-administrator">As an Administrator</h3>
+<ol type="1">
+<li><strong>Navigate to Organization Settings</strong>
+<ul>
+<li>Go to Organization Settings in the sidebar (admin only)</li>
+<li>Find the “Job Role Management” section</li>
+</ul></li>
+<li><strong>Create Job Levels</strong>
+<ul>
+<li>Click “Add Level” in the Job Levels section</li>
+<li>Enter level name (e.g., “Senior”, “Staff”)</li>
+<li>Click “Create” to save</li>
+<li>New levels automatically receive the next order number</li>
+</ul></li>
+<li><strong>Order Job Levels</strong>
+<ul>
+<li>Drag and drop levels to reorder them</li>
+<li>Order numbers automatically update based on position</li>
+<li>Levels appear in selection dropdowns based on their order</li>
+<li>Use the grip handle (⋮⋮) to drag levels up or down</li>
+</ul></li>
+<li><strong>Create Job Domains</strong>
+<ul>
+<li>Click “Add Domain” in the Job Domains section</li>
+<li>Enter domain name (e.g., “Engineering”, “Product”)</li>
+<li>Click “Create” to save</li>
+</ul></li>
+<li><strong>Create Job Roles</strong>
+<ul>
+<li>Click “Add Job Role” in the Job Roles section</li>
+<li>Fill in the job title (e.g., “Senior Software Engineer”)</li>
+<li>Select a level from the dropdown</li>
+<li>Select a domain from the dropdown</li>
+<li>Write a job description using markdown</li>
+<li>Click “Create” to save</li>
+</ul></li>
+</ol>
+<h3 id="editing-and-deleting">Editing and Deleting</h3>
+<ul>
+<li><strong>Edit</strong>: Click the “Edit” button next to any level,
+domain, or role</li>
+<li><strong>Delete</strong>: Click the “Delete” button (only allowed if
+no roles/people are assigned)</li>
+<li><strong>Safety</strong>: You cannot delete levels or domains that
+have job roles assigned, or job roles that have people assigned</li>
+</ul>
+<h3 id="drag-and-drop-ordering">Drag-and-Drop Ordering</h3>
+<p>Job levels support intuitive drag-and-drop reordering:</p>
+<ul>
+<li><strong>Visual Indicators</strong>: Each level shows a grip handle
+(⋮⋮) for dragging</li>
+<li><strong>Smooth Animation</strong>: Visual feedback during drag
+operations with shadow effects</li>
+<li><strong>Automatic Persistence</strong>: New order is automatically
+saved to the database</li>
+<li><strong>Real-time Updates</strong>: Changes reflect immediately in
+job role forms and selections</li>
+</ul>
+<p><strong>Tip</strong>: Lower order numbers appear first in dropdown
+menus, so place junior roles at the top and senior roles at the
+bottom.</p>
+<h2 id="assigning-job-roles-to-people">Assigning Job Roles to
+People</h2>
+<h3 id="creating-new-people">Creating New People</h3>
+<ol type="1">
+<li>Navigate to People → Add Person</li>
+<li>Fill in basic information</li>
+<li>In the “Job Role” section, select a role from the dropdown</li>
+<li>Save the person</li>
+</ol>
+<h3 id="editing-existing-people">Editing Existing People</h3>
+<ol type="1">
+<li>Go to People table and click “Edit” on a person</li>
+<li>In the “Job Role” section, select a role from the dropdown</li>
+<li>Save changes</li>
+</ol>
+<h2 id="job-descriptions">Job Descriptions</h2>
+<p>Job descriptions support markdown formatting:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">### Responsibilities</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Design and implement software solutions</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Mentor junior team members</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Collaborate with product and design teams</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">### Requirements</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Experience**: 5+ years in software development</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Skills**: React, TypeScript, Node.js</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Education**: Computer Science degree or equivalent</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">### Preferred Qualifications</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Previous startup experience</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Knowledge of cloud platforms</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Experience with mobile development</span></code></pre></div>
+<h2 id="best-practices-2">Best Practices</h2>
+<h3 id="setting-up-job-roles">Setting Up Job Roles</h3>
+<ol type="1">
+<li><strong>Start with Levels</strong>: Define the organizational
+hierarchy first</li>
+<li><strong>Map Domains</strong>: Identify functional areas in your
+organization</li>
+<li><strong>Create Roles</strong>: Combine levels and domains for
+specific positions</li>
+<li><strong>Write Descriptions</strong>: Include responsibilities,
+requirements, and growth opportunities</li>
+</ol>
+<h3 id="maintaining-consistency">Maintaining Consistency</h3>
+<ol type="1">
+<li><strong>Regular Reviews</strong>: Periodically review and update job
+roles</li>
+<li><strong>Clear Descriptions</strong>: Keep job descriptions current
+and detailed</li>
+<li><strong>Aligned Grading</strong>: Ensure levels align with your
+compensation philosophy</li>
+<li><strong>Domain Clarity</strong>: Make sure domains reflect actual
+organizational structure</li>
+</ol>
+<h2 id="viewing-job-role-information">Viewing Job Role Information</h2>
+<h3 id="in-the-people-table">In the People Table</h3>
+<ul>
+<li>Job roles appear in a dedicated “Job Role” column</li>
+<li>Shows role title with level and domain information</li>
+<li>Displays as “—” for people without assigned roles</li>
+</ul>
+<h3 id="in-person-details">In Person Details</h3>
+<ul>
+<li>Full job role information visible when viewing individual person
+profiles</li>
+<li>Includes full job description with markdown formatting</li>
+<li>Shows who else has the same job role</li>
+</ul>
+<h2 id="common-use-cases">Common Use Cases</h2>
+<h3 id="career-development">Career Development</h3>
+<ul>
+<li><strong>Growth Planning</strong>: Use levels to plan career
+progression</li>
+<li><strong>Skill Mapping</strong>: Link job descriptions to development
+areas</li>
+<li><strong>Cross-Domain</strong>: Track movement between different
+functional areas</li>
+</ul>
+<h3 id="organizational-analysis">Organizational Analysis</h3>
+<ul>
+<li><strong>Role Distribution</strong>: See how roles are distributed
+across the organization</li>
+<li><strong>Level Breakdown</strong>: Understand the seniority
+distribution</li>
+<li><strong>Domain Balance</strong>: Ensure balanced representation
+across functional areas</li>
+</ul>
+<h3 id="recruitment">Recruitment</h3>
+<ul>
+<li><strong>Clear Roles</strong>: Provide specific job descriptions for
+new hires</li>
+<li><strong>Role Mapping</strong>: Help candidates understand
+organizational structure</li>
+<li><strong>Expectations</strong>: Set clear expectations about
+responsibilities and growth</li>
+</ul>
+<h2 id="faqs">FAQs</h2>
+<p><strong>Q: Can one person have multiple job roles?</strong> A: No,
+each person can only have one job role assigned. This ensures clarity
+about their primary role and responsibilities.</p>
+<p><strong>Q: Can I change a person’s job role?</strong> A: Yes,
+administrators can edit a person’s job role assignment at any time
+through the person edit form.</p>
+<p><strong>Q: What happens if I delete a job role that has people
+assigned?</strong> A: You cannot delete job roles that have people
+assigned. You must first reassign or remove the people from that
+role.</p>
+<p><strong>Q: How do I handle promotions?</strong> A: Update the
+person’s job role to reflect their new level and responsibilities. You
+can also update the job role description if needed.</p>
+<p><strong>Q: Can I see who else has the same job role?</strong> A: Yes,
+the job role management interface shows all people assigned to each
+role.</p>
+<h2 id="need-help">Need Help?</h2>
+<p>If you need assistance with job role management:</p>
+<ol type="1">
+<li>Check the main <a href="../../README.md">People
+documentation</a></li>
+<li>Contact your organization administrator</li>
+<li>Review organization settings for proper permissions</li>
+</ol>
+<h1 id="direct-reports">Direct Reports</h1>
+<p>Direct reports are team members who report directly to you. This
+section provides:</p>
+<h2 id="overview-3">Overview</h2>
+<ul>
+<li><strong>Team size</strong> and composition</li>
+<li><strong>Individual performance</strong> indicators</li>
+<li><strong>Quick access</strong> to team member profiles</li>
+</ul>
+<h2 id="management-tools">Management Tools</h2>
+<ul>
+<li><strong>One-on-one scheduling</strong> and tracking</li>
+<li><strong>Performance feedback</strong> collection</li>
+<li><strong>Goal setting</strong> and progress monitoring</li>
+<li><strong>Task assignment</strong> and follow-up</li>
+</ul>
+<h2 id="key-metrics">Key Metrics</h2>
+<ul>
+<li><strong>Team productivity</strong> indicators</li>
+<li><strong>Engagement levels</strong> and satisfaction</li>
+<li><strong>Development progress</strong> and growth areas</li>
+</ul>
+<p>Use this section to stay connected with your team and ensure their
+success.</p>
+<h1 id="meetings-1">Meetings</h1>
+<p>Meetings in ManagerOS let you plan one-time or recurring sessions,
+invite participants, and connect discussions to work.</p>
+<h2 id="create-a-meeting">Create a meeting</h2>
+<ul>
+<li><strong>Title</strong>: Name the meeting clearly</li>
+<li><strong>Description</strong>: Purpose, agenda, or context</li>
+<li><strong>Date &amp; time</strong>: Start time; add duration in
+minutes</li>
+<li><strong>Location</strong>: Room or video link</li>
+<li><strong>Participants</strong>: Add people from your org and external
+guests</li>
+<li><strong>Owner</strong>: Assign the coordinator responsible for the
+meeting</li>
+</ul>
+<h2 id="recurrence-optional">Recurrence (optional)</h2>
+<p>Create a series with a repeat pattern. ManagerOS generates individual
+instances you can manage separately.</p>
+<ul>
+<li>Patterns: daily, weekly, monthly, bi‑monthly, semi‑annually</li>
+<li>Start/end dates define the range of generated instances</li>
+</ul>
+<h2 id="associations">Associations</h2>
+<p>Link meetings so work stays connected:</p>
+<ul>
+<li>Teams</li>
+<li>Initiatives and objectives</li>
+<li>Notes for preparation and outcomes</li>
+</ul>
+<h2 id="participant-status">Participant status</h2>
+<p>Track responses at the meeting level:</p>
+<ul>
+<li>invited, accepted, declined, tentative</li>
+</ul>
+<h2 id="best-practices-3">Best practices</h2>
+<ul>
+<li>Share a short agenda and materials in advance</li>
+<li>Keep duration aligned to the content</li>
+<li>Invite only necessary participants</li>
+<li>Respect time zones for distributed teams</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<ul>
+<li>If invites aren’t received, verify email addresses and resend</li>
+<li>Adjust recurrence dates if instances aren’t appearing</li>
+<li>Update participants when team membership changes</li>
+</ul>
+<h1 id="meeting-instances">Meeting Instances</h1>
+<p>Meeting instances are the individual occurrences of a recurring
+meeting series. Each instance tracks its own timing, notes, and
+attendance.</p>
+<h2 id="manage-an-instance">Manage an instance</h2>
+<ul>
+<li><strong>Schedule</strong>: Adjust the specific date/time if this
+occurrence shifts</li>
+<li><strong>Notes</strong>: Capture outcomes, decisions, and action
+items</li>
+<li><strong>Participants</strong>: Add/remove participants for this
+instance only</li>
+<li><strong>Statuses</strong>: invited, accepted, declined,
+tentative</li>
+<li><strong>Attendance</strong>: attended, absent, excused</li>
+</ul>
+<h2 id="editing-instances-vs-the-series">Editing instances vs the
+series</h2>
+<ul>
+<li>Edit the series to change the pattern, participants, or defaults
+going forward</li>
+<li>Edit an instance to change a single occurrence without impacting the
+series</li>
+</ul>
+<h2 id="action-items">Action items</h2>
+<ul>
+<li>Create tasks from instance notes and link them back for context</li>
+<li>Assign responsibilities and due dates to ensure follow‑through</li>
+</ul>
+<h2 id="tips-3">Tips</h2>
+<ul>
+<li>Keep notes concise and decision‑oriented</li>
+<li>Record attendance promptly after the meeting</li>
+<li>Cancel instances that are no longer needed to keep calendars
+clean</li>
+</ul>
+<h2 id="common-issues">Common issues</h2>
+<ul>
+<li>If an instance is missing, verify the series date range and
+recurrence</li>
+<li>If participants don’t appear, confirm they were added to the series
+or instance</li>
+</ul>
+<h1 id="meetings-and-meeting-instances">Meetings and Meeting
+Instances</h1>
+<p>ManagerOS provides comprehensive meeting management with support for
+both one-time meetings and recurring meeting series with individual
+instances.</p>
+<h2 id="meeting-types">Meeting Types</h2>
+<h3 id="one-time-meetings">One-Time Meetings</h3>
+<ul>
+<li><strong>Single occurrence</strong> meetings with specific date and
+time</li>
+<li><strong>Direct scheduling</strong> without recurrence patterns</li>
+<li><strong>Simple participant management</strong> and status
+tracking</li>
+<li><strong>Individual notes</strong> and follow-up actions</li>
+</ul>
+<h3 id="recurring-meetings">Recurring Meetings</h3>
+<ul>
+<li><strong>Series of meetings</strong> with consistent participants and
+agenda</li>
+<li><strong>Multiple recurrence patterns:</strong>
+<ul>
+<li>Daily</li>
+<li>Weekly</li>
+<li>Monthly</li>
+<li>Bi-monthly</li>
+<li>Semi-annually</li>
+</ul></li>
+<li><strong>Automatic instance generation</strong> based on pattern</li>
+<li><strong>Consistent structure</strong> across all instances</li>
+</ul>
+<h2 id="meeting-creation">Meeting Creation</h2>
+<h3 id="basic-information">Basic Information</h3>
+<ul>
+<li><strong>Title</strong> - Clear, descriptive meeting name</li>
+<li><strong>Description</strong> - Meeting purpose and agenda</li>
+<li><strong>Date and time</strong> - Scheduled start time</li>
+<li><strong>Duration</strong> - Meeting length in minutes</li>
+<li><strong>Location</strong> - Physical or virtual meeting space</li>
+</ul>
+<h3 id="participants">Participants</h3>
+<ul>
+<li><strong>Add team members</strong> from your organization</li>
+<li><strong>Set initial status</strong> (invited, accepted, declined,
+tentative)</li>
+<li><strong>Include external participants</strong> via email</li>
+<li><strong>Assign meeting owner</strong> for responsibility</li>
+</ul>
+<h3 id="associations-1">Associations</h3>
+<ul>
+<li><strong>Link to teams</strong> for team-specific meetings</li>
+<li><strong>Connect to initiatives</strong> for project meetings</li>
+<li><strong>Associate with objectives</strong> for goal-focused
+sessions</li>
+<li><strong>Add meeting notes</strong> for context and preparation</li>
+</ul>
+<h2 id="meeting-instances-1">Meeting Instances</h2>
+<h3 id="instance-management">Instance Management</h3>
+<ul>
+<li><strong>Individual instances</strong> for each occurrence of
+recurring meetings</li>
+<li><strong>Instance-specific notes</strong> and updates</li>
+<li><strong>Participant status tracking</strong> per instance</li>
+<li><strong>Attendance recording</strong> (attended, absent,
+excused)</li>
+</ul>
+<h3 id="instance-features">Instance Features</h3>
+<ul>
+<li><strong>Flexible scheduling</strong> - Modify individual instance
+times</li>
+<li><strong>Instance-specific notes</strong> - Capture unique discussion
+points</li>
+<li><strong>Participant management</strong> - Add/remove participants
+per instance</li>
+<li><strong>Status updates</strong> - Track attendance and
+participation</li>
+</ul>
+<h3 id="instance-statuses">Instance Statuses</h3>
+<ul>
+<li><strong>Invited</strong> - Participant has been invited</li>
+<li><strong>Accepted</strong> - Participant confirmed attendance</li>
+<li><strong>Declined</strong> - Participant cannot attend</li>
+<li><strong>Tentative</strong> - Participant unsure about
+attendance</li>
+<li><strong>Attended</strong> - Participant was present</li>
+<li><strong>Absent</strong> - Participant did not attend</li>
+</ul>
+<h2 id="meeting-workflow">Meeting Workflow</h2>
+<h3 id="planning-phase">Planning Phase</h3>
+<ol type="1">
+<li><strong>Create meeting</strong> with basic information</li>
+<li><strong>Add participants</strong> and set initial statuses</li>
+<li><strong>Set recurrence pattern</strong> if applicable</li>
+<li><strong>Add notes</strong> and preparation materials</li>
+</ol>
+<h3 id="execution-phase">Execution Phase</h3>
+<ol type="1">
+<li><strong>Send invitations</strong> to participants</li>
+<li><strong>Track responses</strong> and update statuses</li>
+<li><strong>Hold meeting</strong> and record attendance</li>
+<li><strong>Add instance notes</strong> and follow-up items</li>
+</ol>
+<h3 id="follow-up-phase">Follow-up Phase</h3>
+<ol type="1">
+<li><strong>Review meeting outcomes</strong> and decisions</li>
+<li><strong>Create action items</strong> and assign
+responsibilities</li>
+<li><strong>Schedule follow-up meetings</strong> if needed</li>
+<li><strong>Update recurring series</strong> based on feedback</li>
+</ol>
+<h2 id="best-practices-4">Best Practices</h2>
+<h3 id="meeting-planning">Meeting Planning</h3>
+<ul>
+<li><strong>Set clear objectives</strong> for each meeting</li>
+<li><strong>Prepare agenda</strong> and share in advance</li>
+<li><strong>Choose appropriate duration</strong> based on content</li>
+<li><strong>Select optimal timing</strong> for all participants</li>
+</ul>
+<h3 id="participant-management">Participant Management</h3>
+<ul>
+<li><strong>Invite relevant stakeholders</strong> only</li>
+<li><strong>Set realistic expectations</strong> for attendance</li>
+<li><strong>Provide context</strong> in meeting descriptions</li>
+<li><strong>Respect time zones</strong> for distributed teams</li>
+</ul>
+<h3 id="recurring-meetings-1">Recurring Meetings</h3>
+<ul>
+<li><strong>Establish consistent schedule</strong> and format</li>
+<li><strong>Review series regularly</strong> for relevance</li>
+<li><strong>Adjust frequency</strong> based on team needs</li>
+<li><strong>Cancel or modify</strong> when no longer needed</li>
+</ul>
+<h3 id="documentation">Documentation</h3>
+<ul>
+<li><strong>Take comprehensive notes</strong> during meetings</li>
+<li><strong>Record decisions</strong> and action items clearly</li>
+<li><strong>Follow up</strong> on commitments and deadlines</li>
+<li><strong>Archive completed</strong> meeting instances</li>
+</ul>
+<h2 id="integration-features">Integration Features</h2>
+<h3 id="team-association">Team Association</h3>
+<ul>
+<li><strong>Link meetings to teams</strong> for better organization</li>
+<li><strong>Team-specific meeting</strong> visibility and access</li>
+<li><strong>Collaborative scheduling</strong> within team context</li>
+<li><strong>Team performance</strong> and meeting analytics</li>
+</ul>
+<h3 id="initiative-connection">Initiative Connection</h3>
+<ul>
+<li><strong>Connect meetings to initiatives</strong> for project
+alignment</li>
+<li><strong>Track project-related</strong> discussions and
+decisions</li>
+<li><strong>Monitor initiative progress</strong> through meeting
+outcomes</li>
+<li><strong>Coordinate cross-functional</strong> project meetings</li>
+</ul>
+<h3 id="task-integration">Task Integration</h3>
+<ul>
+<li><strong>Create tasks</strong> from meeting action items</li>
+<li><strong>Assign responsibilities</strong> to meeting
+participants</li>
+<li><strong>Track follow-up</strong> and completion status</li>
+<li><strong>Link tasks to meeting</strong> instances for context</li>
+</ul>
+<h2 id="troubleshooting-1">Troubleshooting</h2>
+<h3 id="scheduling-issues">Scheduling Issues</h3>
+<ul>
+<li><strong>Check participant availability</strong> before
+scheduling</li>
+<li><strong>Verify time zones</strong> for distributed teams</li>
+<li><strong>Confirm meeting room</strong> or virtual space access</li>
+<li><strong>Test technology</strong> for virtual meetings</li>
+</ul>
+<h3 id="participant-problems">Participant Problems</h3>
+<ul>
+<li><strong>Resend invitations</strong> if participants don’t receive
+them</li>
+<li><strong>Update contact information</strong> for external
+participants</li>
+<li><strong>Handle conflicts</strong> and reschedule when necessary</li>
+<li><strong>Manage no-shows</strong> and follow-up appropriately</li>
+</ul>
+<h3 id="recurring-meeting-issues">Recurring Meeting Issues</h3>
+<ul>
+<li><strong>Review recurrence pattern</strong> if instances aren’t
+generating</li>
+<li><strong>Check date ranges</strong> for series validity</li>
+<li><strong>Update participant lists</strong> for new team members</li>
+<li><strong>Modify series</strong> when team structure changes</li>
+</ul>
+<h1 id="one-on-one-meetings">One-on-One Meetings</h1>
+<p>One-on-one meetings are regular, structured conversations between
+managers and their direct reports. They’re essential for:</p>
+<h2 id="purpose-benefits">Purpose &amp; Benefits</h2>
+<h3 id="for-managers">For Managers</h3>
+<ul>
+<li><strong>Stay connected</strong> with team members</li>
+<li><strong>Identify issues</strong> early before they become
+problems</li>
+<li><strong>Provide guidance</strong> and support</li>
+<li><strong>Understand team dynamics</strong> and individual needs</li>
+</ul>
+<h3 id="for-team-members">For Team Members</h3>
+<ul>
+<li><strong>Get regular feedback</strong> and direction</li>
+<li><strong>Discuss career development</strong> and growth</li>
+<li><strong>Raise concerns</strong> in a safe environment</li>
+<li><strong>Align on priorities</strong> and expectations</li>
+</ul>
+<h2 id="meeting-structure">Meeting Structure</h2>
+<h3 id="regular-cadence">Regular Cadence</h3>
+<ul>
+<li><strong>Weekly or bi-weekly</strong> for most roles</li>
+<li><strong>Monthly</strong> for senior or independent contributors</li>
+<li><strong>Ad-hoc</strong> for urgent issues or special
+circumstances</li>
+</ul>
+<h3 id="agenda-topics">Agenda Topics</h3>
+<ul>
+<li><strong>Work progress</strong> and current priorities</li>
+<li><strong>Challenges and obstacles</strong> being faced</li>
+<li><strong>Career development</strong> and growth opportunities</li>
+<li><strong>Team dynamics</strong> and collaboration</li>
+<li><strong>Feedback exchange</strong> in both directions</li>
+</ul>
+<h2 id="best-practices-5">Best Practices</h2>
+<ul>
+<li><strong>Schedule consistently</strong> and protect the time</li>
+<li><strong>Prepare an agenda</strong> but remain flexible</li>
+<li><strong>Listen actively</strong> and ask open-ended questions</li>
+<li><strong>Follow up</strong> on commitments and action items</li>
+<li><strong>Document key points</strong> and decisions</li>
+</ul>
+<h1 id="initiatives">Initiatives</h1>
+<p>Initiatives are strategic projects or programs that drive
+organizational goals forward. They help you:</p>
+<h2 id="what-are-initiatives">What are Initiatives?</h2>
+<ul>
+<li><strong>Strategic projects</strong> with clear objectives</li>
+<li><strong>Cross-functional work</strong> involving multiple team
+members</li>
+<li><strong>Goal-oriented activities</strong> with measurable
+outcomes</li>
+</ul>
+<h2 id="key-components">Key Components</h2>
+<h3 id="objectives">Objectives</h3>
+<ul>
+<li><strong>Clear, measurable goals</strong> for the initiative</li>
+<li><strong>Success criteria</strong> and key results</li>
+<li><strong>Timeline and milestones</strong> for tracking progress</li>
+</ul>
+<h3 id="tasks">Tasks</h3>
+<ul>
+<li><strong>Actionable items</strong> that contribute to the
+initiative</li>
+<li><strong>Assigned responsibilities</strong> and ownership</li>
+<li><strong>Progress tracking</strong> and status updates</li>
+</ul>
+<h3 id="check-ins">Check-ins</h3>
+<ul>
+<li><strong>Regular progress reviews</strong> and updates</li>
+<li><strong>Stakeholder communication</strong> and alignment</li>
+<li><strong>Course corrections</strong> and adjustments</li>
+</ul>
+<h2 id="best-practices-6">Best Practices</h2>
+<ul>
+<li><strong>Define clear success metrics</strong> before starting</li>
+<li><strong>Assign clear ownership</strong> for each component</li>
+<li><strong>Schedule regular check-ins</strong> to maintain
+momentum</li>
+<li><strong>Document lessons learned</strong> for future
+initiatives</li>
+</ul>
+<h1 id="task-status">Task Status</h1>
+<p>Task status helps you track the progress of work items through their
+lifecycle. ManagerOS uses a simple but effective status system:</p>
+<h2 id="status-types">Status Types</h2>
+<h3 id="to-do">📋 To Do</h3>
+<ul>
+<li><strong>New tasks</strong> that haven’t been started yet</li>
+<li><strong>Future work</strong> planned but not yet in progress</li>
+<li><strong>Ideas and concepts</strong> that need further
+definition</li>
+<li><strong>Default status</strong> for newly created tasks</li>
+</ul>
+<h3 id="doing">🔄 Doing</h3>
+<ul>
+<li><strong>Active work</strong> currently being completed</li>
+<li><strong>Tasks being worked on</strong> by team members</li>
+<li><strong>Items in development</strong> or implementation phase</li>
+<li><strong>Work in progress</strong> that requires attention</li>
+</ul>
+<h3 id="blocked">⏸️ Blocked</h3>
+<ul>
+<li><strong>Tasks waiting</strong> for external dependencies</li>
+<li><strong>Work stalled</strong> due to obstacles or issues</li>
+<li><strong>Items requiring</strong> additional information or
+resources</li>
+<li><strong>Impediments</strong> that prevent progress</li>
+</ul>
+<h3 id="done">✅ Done</h3>
+<ul>
+<li><strong>Completed tasks</strong> that have been finished</li>
+<li><strong>Work items</strong> ready for review or deployment</li>
+<li><strong>Deliverables</strong> that meet acceptance criteria</li>
+<li><strong>Successfully completed</strong> work</li>
+</ul>
+<h3 id="dropped">🗑️ Dropped</h3>
+<ul>
+<li><strong>Cancelled tasks</strong> that are no longer needed</li>
+<li><strong>Work items</strong> that became obsolete</li>
+<li><strong>Tasks abandoned</strong> due to changing priorities</li>
+<li><strong>Non-essential items</strong> removed from scope</li>
+</ul>
+<h2 id="best-practices-7">Best Practices</h2>
+<ul>
+<li><strong>Update status regularly</strong> as work progresses</li>
+<li><strong>Use “Blocked” status</strong> when dependencies prevent
+progress</li>
+<li><strong>Move to “Done”</strong> only when work is truly
+complete</li>
+<li><strong>Use “Dropped”</strong> for cancelled or obsolete tasks</li>
+<li><strong>Review “To Do”</strong> regularly to prioritize next
+steps</li>
+</ul>
+<h2 id="workflow-tips">Workflow Tips</h2>
+<ul>
+<li><strong>Start with “To Do”</strong> for new tasks</li>
+<li><strong>Move to “Doing”</strong> when work begins</li>
+<li><strong>Set to “Blocked”</strong> if obstacles arise</li>
+<li><strong>Mark as “Done”</strong> when work is complete</li>
+<li><strong>Use “Dropped”</strong> for cancelled work</li>
+</ul>
+<h1 id="task-priorities">Task Priorities</h1>
+<p>Task priorities help you and your team focus on what matters most.
+ManagerOS uses a simple but effective priority system:</p>
+<h2 id="priority-levels">Priority Levels</h2>
+<h3 id="high-priority">🔴 High Priority</h3>
+<ul>
+<li><strong>Critical tasks</strong> that need immediate attention</li>
+<li><strong>Deadline-driven</strong> work with tight timelines</li>
+<li><strong>Blocking issues</strong> that prevent other work</li>
+</ul>
+<h3 id="medium-priority">🟡 Medium Priority</h3>
+<ul>
+<li><strong>Important tasks</strong> that should be completed soon</li>
+<li><strong>Regular work</strong> that contributes to goals</li>
+<li><strong>Supporting activities</strong> for high-priority items</li>
+</ul>
+<h3 id="low-priority">🟢 Low Priority</h3>
+<ul>
+<li><strong>Nice-to-have</strong> tasks when time permits</li>
+<li><strong>Future planning</strong> and preparation work</li>
+<li><strong>Optional improvements</strong> and enhancements</li>
+</ul>
+<h2 id="best-practices-8">Best Practices</h2>
+<ul>
+<li><strong>Limit high-priority tasks</strong> to 3-5 items maximum</li>
+<li><strong>Review priorities weekly</strong> and adjust as needed</li>
+<li><strong>Communicate changes</strong> to stakeholders when priorities
+shift</li>
+<li><strong>Use deadlines</strong> to help determine priority
+levels</li>
+</ul>
+<h1 id="feedback-campaigns">Feedback Campaigns</h1>
+<p>Feedback campaigns help you collect structured feedback from your
+team and stakeholders in a systematic way.</p>
+<h2 id="campaign-types">Campaign Types</h2>
+<h3 id="degree-feedback">360-Degree Feedback</h3>
+<ul>
+<li><strong>Multi-source feedback</strong> from peers, managers, and
+direct reports</li>
+<li><strong>Comprehensive view</strong> of performance and behavior</li>
+<li><strong>Anonymous responses</strong> to encourage honest
+feedback</li>
+</ul>
+<h3 id="performance-reviews">Performance Reviews</h3>
+<ul>
+<li><strong>Structured evaluation</strong> of goals and objectives</li>
+<li><strong>Development planning</strong> and career discussions</li>
+<li><strong>Documentation</strong> for HR and performance records</li>
+</ul>
+<h3 id="pulse-surveys">Pulse Surveys</h3>
+<ul>
+<li><strong>Quick check-ins</strong> on team satisfaction and
+engagement</li>
+<li><strong>Regular monitoring</strong> of team health and culture</li>
+<li><strong>Trend analysis</strong> over time</li>
+</ul>
+<h2 id="campaign-process">Campaign Process</h2>
+<ol type="1">
+<li><strong>Setup</strong> - Define questions, participants, and
+timeline</li>
+<li><strong>Distribution</strong> - Send invitations and reminders</li>
+<li><strong>Collection</strong> - Gather responses and feedback</li>
+<li><strong>Analysis</strong> - Review results and identify
+patterns</li>
+<li><strong>Action</strong> - Create development plans and
+follow-up</li>
+</ol>
+<h2 id="best-practices-9">Best Practices</h2>
+<ul>
+<li><strong>Keep campaigns focused</strong> on specific objectives</li>
+<li><strong>Ensure anonymity</strong> when appropriate</li>
+<li><strong>Follow up</strong> on feedback with concrete actions</li>
+<li><strong>Share results</strong> transparently with participants</li>
+</ul>
+<h1 id="feedback-campaigns-and-responses">Feedback Campaigns and
+Responses</h1>
+<p>Feedback campaigns provide a structured way to collect comprehensive
+feedback from multiple sources about team members, enabling 360-degree
+reviews, performance evaluations, and pulse surveys.</p>
+<h2 id="campaign-types-1">Campaign Types</h2>
+<h3 id="degree-feedback-1">360-Degree Feedback</h3>
+<ul>
+<li><strong>Multi-source evaluation</strong> from peers, managers, and
+direct reports</li>
+<li><strong>Comprehensive performance</strong> and behavior
+assessment</li>
+<li><strong>Anonymous responses</strong> to encourage honest
+feedback</li>
+<li><strong>Balanced perspective</strong> on individual
+contributions</li>
+</ul>
+<h3 id="performance-reviews-1">Performance Reviews</h3>
+<ul>
+<li><strong>Structured evaluation</strong> of goals and objectives</li>
+<li><strong>Development planning</strong> and career discussions</li>
+<li><strong>Documentation</strong> for HR and performance records</li>
+<li><strong>Goal setting</strong> and improvement planning</li>
+</ul>
+<h3 id="pulse-surveys-1">Pulse Surveys</h3>
+<ul>
+<li><strong>Quick check-ins</strong> on team satisfaction and
+engagement</li>
+<li><strong>Regular monitoring</strong> of team health and culture</li>
+<li><strong>Trend analysis</strong> over time</li>
+<li><strong>Immediate feedback</strong> on team dynamics</li>
+</ul>
+<h2 id="campaign-setup">Campaign Setup</h2>
+<h3 id="basic-configuration">Basic Configuration</h3>
+<ul>
+<li><strong>Campaign name</strong> - Descriptive title for the feedback
+cycle</li>
+<li><strong>Target person</strong> - Individual receiving feedback</li>
+<li><strong>Template selection</strong> - Pre-defined question sets</li>
+<li><strong>Date range</strong> - Start and end dates for responses</li>
+<li><strong>Status management</strong> - Draft, active, completed,
+cancelled</li>
+</ul>
+<h3 id="participant-management-1">Participant Management</h3>
+<ul>
+<li><strong>Invite list</strong> - Email addresses of feedback
+providers</li>
+<li><strong>Role-based invitations</strong> - Peers, managers, direct
+reports</li>
+<li><strong>External participants</strong> - Clients, partners,
+stakeholders</li>
+<li><strong>Anonymous options</strong> - Protect responder identity</li>
+</ul>
+<h3 id="template-system">Template System</h3>
+<ul>
+<li><strong>Pre-built templates</strong> for common feedback
+scenarios</li>
+<li><strong>Customizable questions</strong> for specific needs</li>
+<li><strong>Rating scales</strong> and open-ended responses</li>
+<li><strong>Consistent format</strong> across campaigns</li>
+</ul>
+<h2 id="response-collection">Response Collection</h2>
+<h3 id="invitation-process">Invitation Process</h3>
+<ul>
+<li><strong>Email invitations</strong> sent to all participants</li>
+<li><strong>Unique invite links</strong> for secure access</li>
+<li><strong>Reminder notifications</strong> for incomplete
+responses</li>
+<li><strong>Deadline management</strong> and extensions</li>
+</ul>
+<h3 id="response-interface">Response Interface</h3>
+<ul>
+<li><strong>User-friendly forms</strong> for easy completion</li>
+<li><strong>Progress tracking</strong> through multi-step surveys</li>
+<li><strong>Save and resume</strong> functionality</li>
+<li><strong>Mobile-responsive</strong> design for accessibility</li>
+</ul>
+<h3 id="response-management">Response Management</h3>
+<ul>
+<li><strong>Real-time tracking</strong> of response completion</li>
+<li><strong>Duplicate prevention</strong> - one response per email</li>
+<li><strong>Response validation</strong> and quality checks</li>
+<li><strong>Anonymous response</strong> handling</li>
+</ul>
+<h2 id="response-analysis">Response Analysis</h2>
+<h3 id="data-collection">Data Collection</h3>
+<ul>
+<li><strong>Structured responses</strong> in JSON format</li>
+<li><strong>Response metadata</strong> including timestamps</li>
+<li><strong>Participant information</strong> (when not anonymous)</li>
+<li><strong>Campaign context</strong> and target person details</li>
+</ul>
+<h3 id="analysis-features">Analysis Features</h3>
+<ul>
+<li><strong>Quantitative analysis</strong> of rating scales</li>
+<li><strong>Qualitative insights</strong> from open-ended responses</li>
+<li><strong>Trend identification</strong> across multiple campaigns</li>
+<li><strong>Comparative analysis</strong> between team members</li>
+</ul>
+<h3 id="reporting">Reporting</h3>
+<ul>
+<li><strong>Summary reports</strong> for managers and HR</li>
+<li><strong>Individual feedback</strong> summaries for recipients</li>
+<li><strong>Team insights</strong> and organizational patterns</li>
+<li><strong>Actionable recommendations</strong> based on data</li>
+</ul>
+<h2 id="privacy-and-security">Privacy and Security</h2>
+<h3 id="data-protection">Data Protection</h3>
+<ul>
+<li><strong>Encrypted storage</strong> of sensitive feedback</li>
+<li><strong>Access controls</strong> based on organizational roles</li>
+<li><strong>Audit trails</strong> for compliance requirements</li>
+<li><strong>Data retention</strong> policies and cleanup</li>
+</ul>
+<h3 id="anonymity-options">Anonymity Options</h3>
+<ul>
+<li><strong>Anonymous responses</strong> to encourage honesty</li>
+<li><strong>Aggregated reporting</strong> to protect individual
+identity</li>
+<li><strong>Minimum response thresholds</strong> for statistical
+validity</li>
+<li><strong>Confidential handling</strong> of sensitive feedback</li>
+</ul>
+<h3 id="compliance">Compliance</h3>
+<ul>
+<li><strong>GDPR compliance</strong> for European users</li>
+<li><strong>Data minimization</strong> principles</li>
+<li><strong>Right to deletion</strong> and data portability</li>
+<li><strong>Consent management</strong> for data processing</li>
+</ul>
+<h2 id="best-practices-10">Best Practices</h2>
+<h3 id="campaign-design">Campaign Design</h3>
+<ul>
+<li><strong>Clear objectives</strong> and expected outcomes</li>
+<li><strong>Appropriate question selection</strong> for the context</li>
+<li><strong>Balanced participant mix</strong> for comprehensive
+feedback</li>
+<li><strong>Realistic timelines</strong> for response collection</li>
+</ul>
+<h3 id="participant-engagement">Participant Engagement</h3>
+<ul>
+<li><strong>Clear communication</strong> about purpose and process</li>
+<li><strong>Sufficient time</strong> for thoughtful responses</li>
+<li><strong>Regular reminders</strong> without being intrusive</li>
+<li><strong>Appreciation</strong> for participation and effort</li>
+</ul>
+<h3 id="response-quality">Response Quality</h3>
+<ul>
+<li><strong>Specific examples</strong> rather than general
+statements</li>
+<li><strong>Constructive feedback</strong> focused on improvement</li>
+<li><strong>Balanced perspective</strong> highlighting both strengths
+and areas for growth</li>
+<li><strong>Actionable insights</strong> that can drive development</li>
+</ul>
+<h3 id="follow-up-actions">Follow-up Actions</h3>
+<ul>
+<li><strong>Timely sharing</strong> of results with recipients</li>
+<li><strong>Development planning</strong> based on feedback</li>
+<li><strong>Goal setting</strong> and improvement strategies</li>
+<li><strong>Regular check-ins</strong> on progress</li>
+</ul>
+<h2 id="integration-features-1">Integration Features</h2>
+<h3 id="performance-management">Performance Management</h3>
+<ul>
+<li><strong>Link to performance reviews</strong> and evaluations</li>
+<li><strong>Goal setting</strong> based on feedback insights</li>
+<li><strong>Development planning</strong> and career discussions</li>
+<li><strong>Progress tracking</strong> over time</li>
+</ul>
+<h3 id="team-development">Team Development</h3>
+<ul>
+<li><strong>Team-level insights</strong> from aggregated feedback</li>
+<li><strong>Training needs</strong> identification</li>
+<li><strong>Culture assessment</strong> and improvement</li>
+<li><strong>Organizational development</strong> planning</li>
+</ul>
+<h3 id="hr-integration">HR Integration</h3>
+<ul>
+<li><strong>Performance records</strong> and documentation</li>
+<li><strong>Talent management</strong> and succession planning</li>
+<li><strong>Compensation decisions</strong> and promotions</li>
+<li><strong>Compliance reporting</strong> and audits</li>
+</ul>
+<h2 id="troubleshooting-2">Troubleshooting</h2>
+<h3 id="low-response-rates">Low Response Rates</h3>
+<ul>
+<li><strong>Review invitation timing</strong> and frequency</li>
+<li><strong>Simplify questions</strong> and reduce complexity</li>
+<li><strong>Provide clear value</strong> proposition for
+participants</li>
+<li><strong>Offer incentives</strong> or recognition for
+participation</li>
+</ul>
+<h3 id="technical-issues">Technical Issues</h3>
+<ul>
+<li><strong>Test invite links</strong> before sending campaigns</li>
+<li><strong>Verify email delivery</strong> and spam filters</li>
+<li><strong>Check mobile compatibility</strong> of response forms</li>
+<li><strong>Monitor system performance</strong> during peak usage</li>
+</ul>
+<h3 id="data-quality">Data Quality</h3>
+<ul>
+<li><strong>Validate responses</strong> for completeness and
+relevance</li>
+<li><strong>Filter out spam</strong> or inappropriate content</li>
+<li><strong>Ensure anonymity</strong> when promised</li>
+<li><strong>Maintain data integrity</strong> throughout the process</li>
+</ul>
+<h1 id="synopsis-generation">Synopsis Generation</h1>
+<p>ManagerOS uses AI-powered synopsis generation to create concise,
+professional summaries of team members’ work activities, combining data
+from tasks, GitHub pull requests, Jira tickets, and feedback to provide
+comprehensive performance insights.</p>
+<h2 id="overview-4">Overview</h2>
+<h3 id="what-is-synopsis-generation">What is Synopsis Generation?</h3>
+<p>Synopsis generation automatically creates professional work summaries
+by analyzing:</p>
+<ul>
+<li><strong>Task completion</strong> and progress</li>
+<li><strong>GitHub pull requests</strong> and contributions</li>
+<li><strong>Jira ticket activity</strong> and work items</li>
+<li><strong>Feedback responses</strong> and performance data</li>
+<li><strong>Meeting participation</strong> and outcomes</li>
+</ul>
+<h3 id="benefits">Benefits</h3>
+<ul>
+<li><strong>Time-saving</strong> - Automated summary creation</li>
+<li><strong>Consistency</strong> - Standardized format and
+structure</li>
+<li><strong>Comprehensive</strong> - Multiple data sources combined</li>
+<li><strong>Professional</strong> - AI-generated, manager-ready
+content</li>
+<li><strong>Historical</strong> - Track performance over time</li>
+</ul>
+<h2 id="data-sources">Data Sources</h2>
+<h3 id="task-management">Task Management</h3>
+<ul>
+<li><strong>Completed tasks</strong> within the specified date
+range</li>
+<li><strong>Task status changes</strong> and progress updates</li>
+<li><strong>Priority levels</strong> and initiative associations</li>
+<li><strong>Completion dates</strong> and effort tracking</li>
+</ul>
+<h3 id="github-integration">GitHub Integration</h3>
+<ul>
+<li><strong>Pull request activity</strong> for linked accounts</li>
+<li><strong>Repository contributions</strong> and code reviews</li>
+<li><strong>Merge activity</strong> and collaboration patterns</li>
+<li><strong>Development metrics</strong> and productivity</li>
+</ul>
+<h3 id="jira-integration">Jira Integration</h3>
+<ul>
+<li><strong>Assigned tickets</strong> and work items</li>
+<li><strong>Status updates</strong> and progress tracking</li>
+<li><strong>Project contributions</strong> and deliverables</li>
+<li><strong>Work activity</strong> and capacity utilization</li>
+</ul>
+<h3 id="feedback-data">Feedback Data</h3>
+<ul>
+<li><strong>Feedback responses</strong> from campaigns</li>
+<li><strong>Performance evaluations</strong> and ratings</li>
+<li><strong>Peer feedback</strong> and manager assessments</li>
+<li><strong>Development insights</strong> and recommendations</li>
+</ul>
+<h2 id="generation-process">Generation Process</h2>
+<h3 id="configuration-options">Configuration Options</h3>
+<ul>
+<li><strong>Date range</strong> - Specify the period for analysis
+(default: 14 days)</li>
+<li><strong>Include feedback</strong> - Option to incorporate feedback
+data</li>
+<li><strong>Data sources</strong> - Select which integrations to
+include</li>
+<li><strong>Customization</strong> - Adjust tone and focus areas</li>
+</ul>
+<h3 id="ai-processing">AI Processing</h3>
+<ul>
+<li><strong>Data aggregation</strong> from multiple sources</li>
+<li><strong>Pattern recognition</strong> and trend analysis</li>
+<li><strong>Content synthesis</strong> into coherent narrative</li>
+<li><strong>Professional formatting</strong> with bullet points</li>
+<li><strong>Quality assurance</strong> and fact-checking</li>
+</ul>
+<h3 id="output-format">Output Format</h3>
+<ul>
+<li><strong>Concise bullet points</strong> (5-8 items typically)</li>
+<li><strong>Past tense</strong> professional language</li>
+<li><strong>Specific outcomes</strong> and metrics when available</li>
+<li><strong>Action-oriented</strong> descriptions</li>
+<li><strong>Manager-ready</strong> format</li>
+</ul>
+<h2 id="usage-scenarios">Usage Scenarios</h2>
+<h3 id="performance-reviews-2">Performance Reviews</h3>
+<ul>
+<li><strong>Quarterly summaries</strong> for formal evaluations</li>
+<li><strong>Goal achievement</strong> tracking and documentation</li>
+<li><strong>Development progress</strong> and skill growth</li>
+<li><strong>Contribution analysis</strong> and impact assessment</li>
+</ul>
+<h3 id="weekly-check-ins">Weekly Check-ins</h3>
+<ul>
+<li><strong>Regular updates</strong> for manager meetings</li>
+<li><strong>Progress tracking</strong> and milestone monitoring</li>
+<li><strong>Workload assessment</strong> and capacity planning</li>
+<li><strong>Quick status</strong> updates and highlights</li>
+</ul>
+<h3 id="project-reporting">Project Reporting</h3>
+<ul>
+<li><strong>Initiative progress</strong> and deliverable tracking</li>
+<li><strong>Team contributions</strong> to specific projects</li>
+<li><strong>Cross-functional</strong> collaboration insights</li>
+<li><strong>Project milestone</strong> achievements</li>
+</ul>
+<h3 id="development-planning">Development Planning</h3>
+<ul>
+<li><strong>Skill development</strong> tracking and progress</li>
+<li><strong>Learning opportunities</strong> identification</li>
+<li><strong>Career growth</strong> documentation</li>
+<li><strong>Training needs</strong> assessment</li>
+</ul>
+<h2 id="privacy-and-security-1">Privacy and Security</h2>
+<h3 id="data-access">Data Access</h3>
+<ul>
+<li><strong>Organization-level</strong> data isolation</li>
+<li><strong>Role-based permissions</strong> for synopsis access</li>
+<li><strong>Private feedback</strong> protection and filtering</li>
+<li><strong>Secure data handling</strong> throughout the process</li>
+</ul>
+<h3 id="access-control-1">Access Control</h3>
+<ul>
+<li><strong>Personal synopses</strong>: Users can only generate synopses
+for their own linked person record</li>
+<li><strong>Admin privileges</strong>: Organization administrators can
+generate synopses for any person in their organization</li>
+<li><strong>Viewing restrictions</strong>: Same access control applies
+to viewing and deleting synopses</li>
+<li><strong>Linked person requirement</strong>: Users must have a linked
+person record to generate synopses for themselves</li>
+</ul>
+<h3 id="feedback-privacy">Feedback Privacy</h3>
+<ul>
+<li><strong>Private feedback</strong> only visible to authors</li>
+<li><strong>Public feedback</strong> included in summaries</li>
+<li><strong>Anonymous responses</strong> handled appropriately</li>
+<li><strong>Consent-based</strong> data inclusion</li>
+</ul>
+<h3 id="ai-processing-1">AI Processing</h3>
+<ul>
+<li><strong>Secure API calls</strong> to AI services</li>
+<li><strong>Data minimization</strong> - only necessary information
+processed</li>
+<li><strong>No data retention</strong> by external AI services</li>
+<li><strong>Encrypted transmission</strong> of sensitive data</li>
+</ul>
+<h2 id="best-practices-11">Best Practices</h2>
+<h3 id="regular-generation">Regular Generation</h3>
+<ul>
+<li><strong>Consistent timing</strong> for synopsis creation</li>
+<li><strong>Appropriate frequency</strong> based on team needs</li>
+<li><strong>Date range selection</strong> for relevant periods</li>
+<li><strong>Feedback inclusion</strong> when appropriate</li>
+</ul>
+<h3 id="data-quality-1">Data Quality</h3>
+<ul>
+<li><strong>Accurate task tracking</strong> and status updates</li>
+<li><strong>Complete GitHub</strong> and Jira integrations</li>
+<li><strong>Regular feedback</strong> collection and campaigns</li>
+<li><strong>Up-to-date</strong> team member information</li>
+</ul>
+<h3 id="usage-guidelines">Usage Guidelines</h3>
+<ul>
+<li><strong>Review generated content</strong> for accuracy</li>
+<li><strong>Supplement with personal</strong> observations</li>
+<li><strong>Use as starting point</strong> for discussions</li>
+<li><strong>Combine with qualitative</strong> feedback</li>
+</ul>
+<h3 id="team-communication">Team Communication</h3>
+<ul>
+<li><strong>Share synopses</strong> with team members</li>
+<li><strong>Discuss insights</strong> and development areas</li>
+<li><strong>Set goals</strong> based on generated summaries</li>
+<li><strong>Track progress</strong> over time</li>
+</ul>
+<h2 id="customization-options">Customization Options</h2>
+<h3 id="content-focus">Content Focus</h3>
+<ul>
+<li><strong>Technical contributions</strong> emphasis</li>
+<li><strong>Leadership activities</strong> highlighting</li>
+<li><strong>Collaboration patterns</strong> and teamwork</li>
+<li><strong>Innovation and creativity</strong> focus</li>
+</ul>
+<h3 id="tone-and-style">Tone and Style</h3>
+<ul>
+<li><strong>Formal business</strong> language</li>
+<li><strong>Conversational</strong> and approachable</li>
+<li><strong>Technical detail</strong> level adjustment</li>
+<li><strong>Length and depth</strong> customization</li>
+</ul>
+<h3 id="data-integration">Data Integration</h3>
+<ul>
+<li><strong>Selective source</strong> inclusion</li>
+<li><strong>Custom date ranges</strong> and periods</li>
+<li><strong>Specific project</strong> or initiative focus</li>
+<li><strong>Team-level</strong> vs individual summaries</li>
+</ul>
+<h2 id="troubleshooting-3">Troubleshooting</h2>
+<h3 id="missing-data">Missing Data</h3>
+<ul>
+<li><strong>Verify integrations</strong> are properly configured</li>
+<li><strong>Check date ranges</strong> for data availability</li>
+<li><strong>Confirm account linking</strong> for GitHub/Jira</li>
+<li><strong>Review task completion</strong> and status updates</li>
+</ul>
+<h3 id="quality-issues">Quality Issues</h3>
+<ul>
+<li><strong>Adjust date ranges</strong> for more comprehensive data</li>
+<li><strong>Include feedback</strong> for richer context</li>
+<li><strong>Verify data accuracy</strong> in source systems</li>
+<li><strong>Review AI prompts</strong> and customization</li>
+</ul>
+<h3 id="performance">Performance</h3>
+<ul>
+<li><strong>Optimize date ranges</strong> for faster processing</li>
+<li><strong>Limit data sources</strong> if experiencing delays</li>
+<li><strong>Check system resources</strong> and API limits</li>
+<li><strong>Monitor generation</strong> frequency and usage</li>
+</ul>
+<h3 id="integration-problems">Integration Problems</h3>
+<ul>
+<li><strong>Test GitHub</strong> and Jira connections</li>
+<li><strong>Verify API permissions</strong> and tokens</li>
+<li><strong>Check account linking</strong> for team members</li>
+<li><strong>Review data sync</strong> status and frequency</li>
+</ul>
+<h1 id="reports">Reports</h1>
+<p>Reports in ManagerOS provide powerful data analysis and insights by
+aggregating information from multiple sources across your organization.
+They help managers and team members understand work patterns, track
+progress, and make data-driven decisions.</p>
+<h2 id="overview-5">Overview</h2>
+<h3 id="what-are-reports">What are Reports?</h3>
+<p>Reports are structured data analysis tools that combine information
+from various ManagerOS features and external integrations to provide
+comprehensive insights. They can be generated on-demand with
+customizable parameters and are designed to support performance
+management, team oversight, and organizational analytics.</p>
+<h3 id="key-features-2">Key Features</h3>
+<ul>
+<li><strong>Multi-source data integration</strong> - Combines tasks,
+initiatives, GitHub, Jira, feedback, and more</li>
+<li><strong>Flexible time periods</strong> - Configurable date ranges
+for specific analysis periods</li>
+<li><strong>Multiple output formats</strong> - Support for markdown,
+PDF, and other formats</li>
+<li><strong>Access control</strong> - Secure access based on user
+permissions and organization membership</li>
+<li><strong>Historical tracking</strong> - Persistent report instances
+for historical analysis</li>
+<li><strong>Real-time data</strong> - Always uses current data from
+integrated systems</li>
+</ul>
+<h2 id="available-reports">Available Reports</h2>
+<h3 id="person-overview-report">Person Overview Report</h3>
+<p>A comprehensive analysis of an individual’s work activity,
+including:</p>
+<ul>
+<li>Task completion and progress</li>
+<li>Initiative involvement</li>
+<li>GitHub pull request activity</li>
+<li>Jira ticket work</li>
+<li>Optional feedback integration</li>
+</ul>
+<p><strong>Use Cases</strong>: Performance reviews, progress tracking,
+individual development planning</p>
+<h3 id="person-ai-synopsis-report">Person AI Synopsis Report</h3>
+<p>AI-powered professional summaries of work activity, featuring:</p>
+<ul>
+<li>Intelligent content generation</li>
+<li>Multi-source data analysis</li>
+<li>Professional manager-ready output</li>
+<li>Configurable data source inclusion</li>
+</ul>
+<p><strong>Use Cases</strong>: Performance summaries, manager briefings,
+achievement documentation</p>
+<h2 id="data-sources-1">Data Sources</h2>
+<p>Reports can integrate data from multiple sources:</p>
+<h3 id="internal-manageros-data">Internal ManagerOS Data</h3>
+<ul>
+<li><strong>Tasks</strong>: Completion status, priorities, assignments,
+and progress</li>
+<li><strong>Initiatives</strong>: Project involvement, contributions,
+and outcomes</li>
+<li><strong>Meetings</strong>: One-on-ones, team meetings, and
+communication patterns</li>
+<li><strong>Feedback</strong>: Campaign responses, peer feedback, and
+performance data</li>
+<li><strong>People</strong>: Role information, team structure, and
+organizational hierarchy</li>
+</ul>
+<h3 id="external-integrations">External Integrations</h3>
+<ul>
+<li><strong>GitHub</strong>: Pull requests, code contributions,
+repository activity</li>
+<li><strong>Jira</strong>: Ticket assignments, work items, project
+contributions</li>
+<li><strong>Other integrations</strong>: Additional tools as they become
+available</li>
+</ul>
+<h2 id="access-control-2">Access Control</h2>
+<h3 id="security-rules">Security Rules</h3>
+<ul>
+<li><strong>Organization Isolation</strong>: Users can only access
+reports for their organization</li>
+<li><strong>Role-based Access</strong>: Different access levels based on
+user roles</li>
+<li><strong>Personal Data</strong>: Users can generate reports for their
+own data</li>
+<li><strong>Manager Access</strong>: Managers can generate reports for
+their direct reports</li>
+<li><strong>Admin Access</strong>: Organization administrators have
+broader access</li>
+</ul>
+<h3 id="permission-requirements">Permission Requirements</h3>
+<ul>
+<li>User must belong to an organization</li>
+<li>User must have appropriate role permissions</li>
+<li>Target data must belong to the same organization</li>
+<li>External integrations must be properly configured</li>
+</ul>
+<h2 id="usage-1">Usage</h2>
+<h3 id="running-reports">Running Reports</h3>
+<ol type="1">
+<li>Navigate to the <strong>Reports</strong> section in the
+application</li>
+<li>Select the desired report from the available options</li>
+<li>Configure report parameters:
+<ul>
+<li>Select target person or data scope</li>
+<li>Set date ranges for analysis</li>
+<li>Choose data sources to include</li>
+<li>Configure output options</li>
+</ul></li>
+<li>Click <strong>Run Report</strong> to generate</li>
+<li>View results in the report viewer</li>
+<li>Download or share as needed</li>
+</ol>
+<h3 id="report-parameters">Report Parameters</h3>
+<h4 id="common-parameters">Common Parameters</h4>
+<ul>
+<li><strong>Date Range</strong>: Start and end dates for data
+analysis</li>
+<li><strong>Person Selection</strong>: Target individual for
+person-focused reports</li>
+<li><strong>Data Sources</strong>: Choose which integrations to
+include</li>
+<li><strong>Output Format</strong>: Select preferred output format</li>
+</ul>
+<h4 id="report-specific-parameters">Report-Specific Parameters</h4>
+<p>Each report type has specific parameters tailored to its purpose:</p>
+<ul>
+<li><strong>Person Overview</strong>: Task filtering, initiative scope,
+feedback inclusion</li>
+<li><strong>AI Synopsis</strong>: Content focus, summary length, data
+source weighting</li>
+</ul>
+<h2 id="output-formats">Output Formats</h2>
+<h3 id="markdown">Markdown</h3>
+<ul>
+<li><strong>Format</strong>: Structured markdown documents</li>
+<li><strong>Use Cases</strong>: Documentation, sharing, integration with
+other tools</li>
+<li><strong>Features</strong>: Headers, lists, tables, formatting</li>
+</ul>
+<h3 id="future-formats">Future Formats</h3>
+<ul>
+<li><strong>PDF</strong>: Professional document generation</li>
+<li><strong>CSV</strong>: Data export for analysis</li>
+<li><strong>JSON</strong>: Programmatic access to structured data</li>
+</ul>
+<h2 id="best-practices-12">Best Practices</h2>
+<h3 id="report-generation">Report Generation</h3>
+<ul>
+<li><strong>Regular Intervals</strong>: Generate reports consistently
+(weekly, monthly, quarterly)</li>
+<li><strong>Appropriate Scope</strong>: Use relevant date ranges and
+data sources</li>
+<li><strong>Data Quality</strong>: Ensure underlying data is accurate
+and up-to-date</li>
+<li><strong>Access Control</strong>: Respect privacy and security
+requirements</li>
+</ul>
+<h3 id="content-review">Content Review</h3>
+<ul>
+<li><strong>Accuracy Verification</strong>: Review generated content for
+factual accuracy</li>
+<li><strong>Context Addition</strong>: Supplement reports with personal
+observations</li>
+<li><strong>Action Planning</strong>: Use insights to drive future
+actions and improvements</li>
+<li><strong>Documentation</strong>: Save important reports for
+historical reference</li>
+</ul>
+<h3 id="team-usage">Team Usage</h3>
+<ul>
+<li><strong>Performance Management</strong>: Use reports for reviews and
+evaluations</li>
+<li><strong>Progress Tracking</strong>: Monitor team and individual
+progress</li>
+<li><strong>Resource Planning</strong>: Use data for capacity and
+workload planning</li>
+<li><strong>Recognition</strong>: Identify achievements and
+contributions</li>
+</ul>
+<h2 id="troubleshooting-4">Troubleshooting</h2>
+<h3 id="common-issues-1">Common Issues</h3>
+<h4 id="data-availability">Data Availability</h4>
+<ul>
+<li><strong>Missing Data</strong>: Verify integrations are properly
+configured</li>
+<li><strong>Date Range Issues</strong>: Check that data exists for
+specified periods</li>
+<li><strong>Account Linking</strong>: Ensure person records are linked
+to external accounts</li>
+<li><strong>Permission Problems</strong>: Verify API credentials and
+access rights</li>
+</ul>
+<h4 id="report-quality">Report Quality</h4>
+<ul>
+<li><strong>Incomplete Data</strong>: Adjust date ranges or data source
+selection</li>
+<li><strong>Integration Errors</strong>: Check external service status
+and connectivity</li>
+<li><strong>Access Denied</strong>: Verify user permissions and
+organization membership</li>
+<li><strong>Performance Issues</strong>: Optimize date ranges and data
+source selection</li>
+</ul>
+<h4 id="technical-problems">Technical Problems</h4>
+<ul>
+<li><strong>Generation Failures</strong>: Check system resources and API
+limits</li>
+<li><strong>Format Issues</strong>: Verify output format
+compatibility</li>
+<li><strong>Caching Problems</strong>: Clear caches if data appears
+stale</li>
+<li><strong>Integration Timeouts</strong>: Reduce data scope or retry
+generation</li>
+</ul>
+<h3 id="performance-optimization">Performance Optimization</h3>
+<ul>
+<li><strong>Reasonable Date Ranges</strong>: Avoid extremely long
+periods that may timeout</li>
+<li><strong>Selective Data Sources</strong>: Disable unnecessary
+integrations for faster generation</li>
+<li><strong>API Limits</strong>: Monitor external service usage and
+respect rate limits</li>
+<li><strong>System Resources</strong>: Check server capacity during peak
+usage periods</li>
+</ul>
+<h2 id="integration-with-other-features">Integration with Other
+Features</h2>
+<h3 id="performance-management-1">Performance Management</h3>
+<ul>
+<li><strong>Review Preparation</strong>: Generate reports before
+performance discussions</li>
+<li><strong>Progress Documentation</strong>: Create regular progress
+reports</li>
+<li><strong>Goal Setting</strong>: Use insights for future objective
+planning</li>
+<li><strong>Development Planning</strong>: Identify areas for growth and
+improvement</li>
+</ul>
+<h3 id="team-management">Team Management</h3>
+<ul>
+<li><strong>Team Overview</strong>: Generate reports for all team
+members</li>
+<li><strong>Cross-team Analysis</strong>: Compare performance across
+different teams</li>
+<li><strong>Resource Allocation</strong>: Use data for workload and
+capacity planning</li>
+<li><strong>Recognition Programs</strong>: Identify high performers and
+contributors</li>
+</ul>
+<h3 id="organizational-analytics">Organizational Analytics</h3>
+<ul>
+<li><strong>Trend Analysis</strong>: Track patterns over time across the
+organization</li>
+<li><strong>Capacity Planning</strong>: Use aggregated data for resource
+planning</li>
+<li><strong>Process Improvement</strong>: Identify areas for workflow
+optimization</li>
+<li><strong>Strategic Planning</strong>: Support decision-making with
+data insights</li>
+</ul>
+<h2 id="future-enhancements">Future Enhancements</h2>
+<h3 id="planned-features">Planned Features</h3>
+<ul>
+<li><strong>Custom Reports</strong>: User-defined report templates and
+configurations</li>
+<li><strong>Scheduled Reports</strong>: Automated report generation and
+delivery</li>
+<li><strong>Advanced Analytics</strong>: Statistical analysis and trend
+identification</li>
+<li><strong>Interactive Dashboards</strong>: Real-time data
+visualization</li>
+<li><strong>Export Options</strong>: Additional output formats and
+sharing capabilities</li>
+</ul>
+<h3 id="integration-expansion">Integration Expansion</h3>
+<ul>
+<li><strong>Additional Tools</strong>: Support for more external
+integrations</li>
+<li><strong>API Access</strong>: Programmatic report generation and data
+access</li>
+<li><strong>Webhook Support</strong>: Real-time data updates and
+notifications</li>
+<li><strong>Third-party Analytics</strong>: Integration with business
+intelligence tools</li>
+</ul>
+<h1 id="ai-synopsis-report">AI Synopsis Report</h1>
+<p>The AI Synopsis Report generates professional, AI-powered summaries
+of a person’s work activity over a specific time period, combining data
+from multiple sources to provide comprehensive performance insights.</p>
+<h2 id="overview-6">Overview</h2>
+<h3 id="what-is-the-ai-synopsis-report">What is the AI Synopsis
+Report?</h3>
+<p>The AI Synopsis Report is an advanced reporting feature that creates
+concise, professional work summaries by analyzing:</p>
+<ul>
+<li><strong>Task completion</strong> and progress updates</li>
+<li><strong>Initiative involvement</strong> and contributions</li>
+<li><strong>GitHub pull requests</strong> and code contributions</li>
+<li><strong>Jira ticket activity</strong> and work items</li>
+<li><strong>Feedback responses</strong> and performance data</li>
+</ul>
+<h3 id="key-features-3">Key Features</h3>
+<ul>
+<li><strong>Multi-source data integration</strong> - Combines tasks,
+initiatives, GitHub, Jira, and feedback</li>
+<li><strong>Time-period focused</strong> - Configurable date ranges for
+specific analysis periods</li>
+<li><strong>AI-powered content</strong> - Professional, manager-ready
+summaries generated by AI</li>
+<li><strong>Data source attribution</strong> - Clear indication of which
+data sources were used</li>
+<li><strong>Access control</strong> - Secure access based on user
+permissions and organization membership</li>
+</ul>
+<h2 id="data-sources-2">Data Sources</h2>
+<h3 id="task-management-1">Task Management</h3>
+<ul>
+<li><strong>Completed tasks</strong> within the specified date
+range</li>
+<li><strong>Task status changes</strong> and progress updates</li>
+<li><strong>Priority levels</strong> and initiative associations</li>
+<li><strong>Completion dates</strong> and effort tracking</li>
+</ul>
+<h3 id="initiative-management">Initiative Management</h3>
+<ul>
+<li><strong>Initiative ownership</strong> and participation</li>
+<li><strong>Task contributions</strong> to initiatives</li>
+<li><strong>Progress updates</strong> and status changes</li>
+<li><strong>Cross-functional collaboration</strong></li>
+</ul>
+<h3 id="github-integration-1">GitHub Integration</h3>
+<ul>
+<li><strong>Pull request activity</strong> for linked GitHub
+accounts</li>
+<li><strong>Repository contributions</strong> and code reviews</li>
+<li><strong>Merge activity</strong> and collaboration patterns</li>
+<li><strong>Development metrics</strong> and productivity
+indicators</li>
+</ul>
+<h3 id="jira-integration-1">Jira Integration</h3>
+<ul>
+<li><strong>Assigned tickets</strong> and work items</li>
+<li><strong>Status updates</strong> and progress tracking</li>
+<li><strong>Project contributions</strong> and deliverables</li>
+<li><strong>Work activity</strong> and capacity utilization</li>
+</ul>
+<h3 id="feedback-data-1">Feedback Data</h3>
+<ul>
+<li><strong>Feedback responses</strong> from campaigns (optional)</li>
+<li><strong>Performance evaluations</strong> and ratings</li>
+<li><strong>Peer feedback</strong> and manager assessments</li>
+<li><strong>Development insights</strong> and recommendations</li>
+</ul>
+<h2 id="usage-2">Usage</h2>
+<h3 id="accessing-the-report">Accessing the Report</h3>
+<ol type="1">
+<li>Navigate to the <strong>Reports</strong> section in the
+application</li>
+<li>Select <strong>“Person AI Synopsis”</strong> from the available
+reports</li>
+<li>Configure the report parameters:
+<ul>
+<li><strong>Person</strong>: Select the person to analyze</li>
+<li><strong>From Date</strong>: Start of the analysis period</li>
+<li><strong>To Date</strong>: End of the analysis period</li>
+<li><strong>Include Feedback</strong>: Option to include feedback
+data</li>
+</ul></li>
+</ol>
+<h3 id="report-parameters-1">Report Parameters</h3>
+<h4 id="required-parameters">Required Parameters</h4>
+<ul>
+<li><strong>Person ID</strong>: The person to generate the synopsis
+for</li>
+<li><strong>From Date</strong>: Start date for the analysis period (ISO
+format)</li>
+<li><strong>To Date</strong>: End date for the analysis period (ISO
+format)</li>
+</ul>
+<h4 id="optional-parameters">Optional Parameters</h4>
+<ul>
+<li><strong>Include Feedback</strong>: Whether to include feedback data
+in the analysis (default: false)</li>
+</ul>
+<h3 id="output-format-1">Output Format</h3>
+<p>The report generates a professional markdown document containing:</p>
+<ol type="1">
+<li><strong>Header</strong>: Person name, role, and analysis period</li>
+<li><strong>AI Synopsis</strong>: 5-8 bullet points summarizing key
+activities and achievements</li>
+<li><strong>Data Sources</strong>: List of data sources used in the
+analysis</li>
+<li><strong>Data Summary</strong>: Quantitative summary of activities
+(task count, PR count, etc.)</li>
+<li><strong>Metadata</strong>: Report generation timestamp</li>
+</ol>
+<h2 id="access-control-3">Access Control</h2>
+<h3 id="security-rules-1">Security Rules</h3>
+<ul>
+<li><strong>Personal Access</strong>: Users can generate synopses for
+their own linked person record</li>
+<li><strong>Admin Access</strong>: Organization administrators can
+generate synopses for any person in their organization</li>
+<li><strong>Organization Isolation</strong>: All data is strictly
+filtered by organization membership</li>
+<li><strong>Feedback Privacy</strong>: Private feedback is only included
+if the current user is the author</li>
+</ul>
+<h3 id="permission-requirements-1">Permission Requirements</h3>
+<ul>
+<li>User must belong to an organization</li>
+<li>User must have a linked person record (for personal synopses)</li>
+<li>User must be an organization admin (for other people’s
+synopses)</li>
+</ul>
+<h2 id="technical-details">Technical Details</h2>
+<h3 id="report-definition">Report Definition</h3>
+<ul>
+<li><strong>Code ID</strong>: <code>person-ai-synopsis</code></li>
+<li><strong>Supported Renderers</strong>: <code>markdown</code></li>
+<li><strong>Input Schema</strong>: Zod schema with person ID, date
+range, and feedback inclusion options</li>
+<li><strong>Output Type</strong>: Structured JSON with synopsis content
+and metadata</li>
+</ul>
+<h3 id="ai-processing-2">AI Processing</h3>
+<ul>
+<li><strong>Model</strong>: GPT-4o-mini via OpenAI API</li>
+<li><strong>Temperature</strong>: 0.2 (for consistent, professional
+output)</li>
+<li><strong>Max Tokens</strong>: 350 (for concise summaries)</li>
+<li><strong>System Prompt</strong>: Professional manager-focused
+synopsis generation</li>
+<li><strong>Data Processing</strong>: Comprehensive data aggregation
+before AI analysis</li>
+</ul>
+<h3 id="data-integration-1">Data Integration</h3>
+<ul>
+<li><strong>Real-time Data</strong>: Fetches current data from all
+integrated systems</li>
+<li><strong>Error Handling</strong>: Graceful degradation if external
+services are unavailable</li>
+<li><strong>Caching</strong>: No caching - always uses fresh data for
+accuracy</li>
+<li><strong>Rate Limiting</strong>: Respects API limits for GitHub and
+Jira integrations</li>
+</ul>
+<h2 id="best-practices-13">Best Practices</h2>
+<h3 id="report-generation-1">Report Generation</h3>
+<ul>
+<li><strong>Regular Intervals</strong>: Generate synopses weekly or
+bi-weekly for consistent tracking</li>
+<li><strong>Appropriate Date Ranges</strong>: Use 1-4 week periods for
+meaningful analysis</li>
+<li><strong>Feedback Inclusion</strong>: Include feedback for
+comprehensive performance reviews</li>
+<li><strong>Data Quality</strong>: Ensure task statuses and GitHub/Jira
+accounts are up to date</li>
+</ul>
+<h3 id="content-review-1">Content Review</h3>
+<ul>
+<li><strong>Accuracy Check</strong>: Review generated content for
+factual accuracy</li>
+<li><strong>Context Addition</strong>: Supplement AI summaries with
+personal observations</li>
+<li><strong>Discussion Preparation</strong>: Use synopses as starting
+points for performance discussions</li>
+<li><strong>Goal Setting</strong>: Reference synopses when setting
+future goals and objectives</li>
+</ul>
+<h3 id="team-usage-1">Team Usage</h3>
+<ul>
+<li><strong>Performance Reviews</strong>: Use for quarterly or annual
+performance evaluations</li>
+<li><strong>Progress Tracking</strong>: Monitor team member progress and
+development</li>
+<li><strong>Recognition</strong>: Highlight achievements and
+contributions</li>
+<li><strong>Development Planning</strong>: Identify areas for growth and
+improvement</li>
+</ul>
+<h2 id="troubleshooting-5">Troubleshooting</h2>
+<h3 id="common-issues-2">Common Issues</h3>
+<h4 id="missing-data-1">Missing Data</h4>
+<ul>
+<li><strong>Verify Integrations</strong>: Ensure GitHub and Jira
+accounts are properly linked</li>
+<li><strong>Check Date Ranges</strong>: Confirm data exists for the
+specified time period</li>
+<li><strong>Account Linking</strong>: Verify person records are linked
+to external accounts</li>
+<li><strong>Permission Issues</strong>: Check API credentials and
+permissions</li>
+</ul>
+<h4 id="quality-concerns">Quality Concerns</h4>
+<ul>
+<li><strong>Adjust Date Ranges</strong>: Use longer periods for more
+comprehensive data</li>
+<li><strong>Include Feedback</strong>: Enable feedback inclusion for
+richer context</li>
+<li><strong>Data Accuracy</strong>: Verify task completion and status
+updates are current</li>
+<li><strong>Integration Status</strong>: Check GitHub and Jira
+integration health</li>
+</ul>
+<h4 id="access-problems">Access Problems</h4>
+<ul>
+<li><strong>Organization Membership</strong>: Confirm user belongs to
+the correct organization</li>
+<li><strong>Person Linking</strong>: Verify user has a linked person
+record</li>
+<li><strong>Admin Permissions</strong>: Check if admin access is
+required for the target person</li>
+<li><strong>Security Rules</strong>: Review access control
+requirements</li>
+</ul>
+<h3 id="performance-optimization-1">Performance Optimization</h3>
+<ul>
+<li><strong>Date Range Limits</strong>: Use reasonable date ranges to
+avoid timeouts</li>
+<li><strong>Data Source Selection</strong>: Disable unnecessary
+integrations if experiencing delays</li>
+<li><strong>API Limits</strong>: Monitor GitHub and Jira API usage and
+limits</li>
+<li><strong>System Resources</strong>: Check server resources during
+peak usage</li>
+</ul>
+<h2 id="integration-with-other-features-1">Integration with Other
+Features</h2>
+<h3 id="synopsis-generation-1">Synopsis Generation</h3>
+<p>The AI Synopsis Report complements the existing synopsis generation
+feature by providing:</p>
+<ul>
+<li><strong>Report Format</strong>: Structured, shareable report
+output</li>
+<li><strong>Historical Tracking</strong>: Persistent report instances
+for historical analysis</li>
+<li><strong>Data Attribution</strong>: Clear indication of data sources
+used</li>
+<li><strong>Professional Format</strong>: Manager-ready markdown
+output</li>
+</ul>
+<h3 id="performance-management-2">Performance Management</h3>
+<ul>
+<li><strong>Review Preparation</strong>: Generate synopses before
+performance reviews</li>
+<li><strong>Progress Documentation</strong>: Create regular progress
+reports</li>
+<li><strong>Achievement Tracking</strong>: Document accomplishments and
+contributions</li>
+<li><strong>Development Planning</strong>: Use insights for future goal
+setting</li>
+</ul>
+<h3 id="team-management-1">Team Management</h3>
+<ul>
+<li><strong>Team Overview</strong>: Generate synopses for all team
+members</li>
+<li><strong>Cross-team Analysis</strong>: Compare performance across
+different team members</li>
+<li><strong>Resource Planning</strong>: Use data for capacity and
+workload planning</li>
+<li><strong>Recognition Programs</strong>: Identify high performers and
+contributors</li>
+</ul>
+<h1 id="person-overview-report-1">Person Overview Report</h1>
+<p>The Person Overview Report provides a comprehensive analysis of an
+individual’s work activity by aggregating data from multiple sources
+within ManagerOS and external integrations. It offers detailed insights
+into task completion, initiative involvement, and overall work
+patterns.</p>
+<h2 id="overview-7">Overview</h2>
+<h3 id="what-is-the-person-overview-report">What is the Person Overview
+Report?</h3>
+<p>The Person Overview Report is a detailed analytical report that
+examines a person’s work activity over a specified time period. It
+combines data from tasks, initiatives, GitHub pull requests, Jira
+tickets, and optional feedback to provide a complete picture of work
+contributions and patterns.</p>
+<h3 id="key-features-4">Key Features</h3>
+<ul>
+<li><strong>Comprehensive data aggregation</strong> - Combines multiple
+data sources for complete analysis</li>
+<li><strong>Flexible time periods</strong> - Configurable date ranges
+for specific analysis periods</li>
+<li><strong>Optional feedback integration</strong> - Include or exclude
+feedback data based on needs</li>
+<li><strong>External integration support</strong> - Incorporates GitHub
+and Jira activity</li>
+<li><strong>Structured output</strong> - Organized markdown format for
+easy reading and sharing</li>
+<li><strong>Access control</strong> - Secure access based on user
+permissions and organization membership</li>
+</ul>
+<h2 id="data-sources-3">Data Sources</h2>
+<h3 id="task-management-2">Task Management</h3>
+<p>The report includes detailed task information:</p>
+<ul>
+<li><strong>Task completion</strong> - Completed tasks within the
+specified date range</li>
+<li><strong>Task status</strong> - Current status of all tasks (pending,
+in progress, completed)</li>
+<li><strong>Priority levels</strong> - Task priorities and their
+distribution</li>
+<li><strong>Initiative associations</strong> - Tasks linked to specific
+initiatives</li>
+<li><strong>Completion dates</strong> - When tasks were completed</li>
+<li><strong>Update timestamps</strong> - Last modification dates</li>
+</ul>
+<h3 id="initiative-management-1">Initiative Management</h3>
+<p>Initiative-related data provides context for project work:</p>
+<ul>
+<li><strong>Initiative participation</strong> - Initiatives the person
+is involved in</li>
+<li><strong>Task contributions</strong> - Tasks associated with each
+initiative</li>
+<li><strong>Initiative status</strong> - Current status of
+initiatives</li>
+<li><strong>Cross-functional work</strong> - Collaboration across
+different initiatives</li>
+<li><strong>Project progress</strong> - Contribution to overall
+initiative goals</li>
+</ul>
+<h3 id="github-integration-2">GitHub Integration</h3>
+<p>For users with linked GitHub accounts:</p>
+<ul>
+<li><strong>Pull request activity</strong> - PRs created, reviewed, or
+merged</li>
+<li><strong>Repository contributions</strong> - Work across different
+repositories</li>
+<li><strong>Code review participation</strong> - Review activity and
+collaboration</li>
+<li><strong>Merge activity</strong> - Successful code integrations</li>
+<li><strong>Development metrics</strong> - Lines of code, commits, and
+other metrics</li>
+</ul>
+<h3 id="jira-integration-2">Jira Integration</h3>
+<p>For users with linked Jira accounts:</p>
+<ul>
+<li><strong>Ticket assignments</strong> - Work items assigned to the
+person</li>
+<li><strong>Status updates</strong> - Progress on various tickets</li>
+<li><strong>Project contributions</strong> - Work across different Jira
+projects</li>
+<li><strong>Issue types</strong> - Types of work (bugs, features,
+tasks)</li>
+<li><strong>Work activity patterns</strong> - Timing and frequency of
+work</li>
+</ul>
+<h3 id="feedback-data-optional">Feedback Data (Optional)</h3>
+<p>When feedback inclusion is enabled:</p>
+<ul>
+<li><strong>Feedback responses</strong> - Responses to feedback
+campaigns</li>
+<li><strong>Performance evaluations</strong> - Ratings and
+assessments</li>
+<li><strong>Peer feedback</strong> - Input from colleagues and team
+members</li>
+<li><strong>Manager assessments</strong> - Direct manager feedback</li>
+<li><strong>Development insights</strong> - Areas for improvement and
+growth</li>
+</ul>
+<h2 id="usage-3">Usage</h2>
+<h3 id="accessing-the-report-1">Accessing the Report</h3>
+<ol type="1">
+<li>Navigate to the <strong>Reports</strong> section in the
+application</li>
+<li>Select <strong>“Person Overview”</strong> from the available
+reports</li>
+<li>Configure the report parameters:
+<ul>
+<li><strong>Person</strong>: Select the person to analyze</li>
+<li><strong>From Date</strong>: Start of the analysis period</li>
+<li><strong>To Date</strong>: End of the analysis period</li>
+<li><strong>Include Feedback</strong>: Option to include feedback
+data</li>
+</ul></li>
+<li>Click <strong>Run Report</strong> to generate the analysis</li>
+</ol>
+<h3 id="report-parameters-2">Report Parameters</h3>
+<h4 id="required-parameters-1">Required Parameters</h4>
+<ul>
+<li><strong>Person ID</strong>: The person to generate the overview
+for</li>
+<li><strong>From Date</strong>: Start date for the analysis period (ISO
+format: YYYY-MM-DD)</li>
+<li><strong>To Date</strong>: End date for the analysis period (ISO
+format: YYYY-MM-DD)</li>
+</ul>
+<h4 id="optional-parameters-1">Optional Parameters</h4>
+<ul>
+<li><strong>Include Feedback</strong>: Whether to include feedback data
+in the analysis (default: false)</li>
+</ul>
+<h3 id="output-format-2">Output Format</h3>
+<p>The report generates a structured markdown document containing:</p>
+<ol type="1">
+<li><strong>Header Section</strong>:
+<ul>
+<li>Person name and basic information</li>
+<li>Analysis period (from date to date)</li>
+<li>Report generation timestamp</li>
+</ul></li>
+<li><strong>Task Summary</strong>:
+<ul>
+<li>Total tasks completed</li>
+<li>Tasks by status (pending, in progress, completed)</li>
+<li>Task completion timeline</li>
+<li>Priority distribution</li>
+</ul></li>
+<li><strong>Initiative Summary</strong>:
+<ul>
+<li>Initiatives involved in</li>
+<li>Tasks per initiative</li>
+<li>Initiative status overview</li>
+<li>Contribution patterns</li>
+</ul></li>
+<li><strong>GitHub Activity</strong> (if linked):
+<ul>
+<li>Pull requests created, reviewed, merged</li>
+<li>Repository contributions</li>
+<li>Code review activity</li>
+<li>Development metrics</li>
+</ul></li>
+<li><strong>Jira Activity</strong> (if linked):
+<ul>
+<li>Tickets assigned and completed</li>
+<li>Project contributions</li>
+<li>Issue type distribution</li>
+<li>Work activity patterns</li>
+</ul></li>
+<li><strong>Feedback Summary</strong> (if included):
+<ul>
+<li>Feedback responses received</li>
+<li>Performance ratings</li>
+<li>Peer input</li>
+<li>Development areas</li>
+</ul></li>
+</ol>
+<h2 id="access-control-4">Access Control</h2>
+<h3 id="security-rules-2">Security Rules</h3>
+<ul>
+<li><strong>Personal Access</strong>: Users can generate overviews for
+their own linked person record</li>
+<li><strong>Manager Access</strong>: Managers can generate overviews for
+their direct reports</li>
+<li><strong>Admin Access</strong>: Organization administrators can
+generate overviews for any person in their organization</li>
+<li><strong>Organization Isolation</strong>: All data is strictly
+filtered by organization membership</li>
+<li><strong>Feedback Privacy</strong>: Private feedback is only included
+if the current user is the author</li>
+</ul>
+<h3 id="permission-requirements-2">Permission Requirements</h3>
+<ul>
+<li>User must belong to an organization</li>
+<li>User must have appropriate access to the target person’s data</li>
+<li>External integrations must be properly configured for the target
+person</li>
+<li>Feedback data requires additional permissions based on privacy
+settings</li>
+</ul>
+<h2 id="technical-details-1">Technical Details</h2>
+<h3 id="report-definition-1">Report Definition</h3>
+<ul>
+<li><strong>Code ID</strong>: <code>person-overview</code></li>
+<li><strong>Supported Renderers</strong>: <code>markdown</code></li>
+<li><strong>Input Schema</strong>: Zod schema with person ID, date
+range, and feedback inclusion options</li>
+<li><strong>Output Type</strong>: Structured JSON with comprehensive
+work activity data</li>
+</ul>
+<h3 id="data-processing">Data Processing</h3>
+<ul>
+<li><strong>Real-time Data</strong>: Fetches current data from all
+integrated systems</li>
+<li><strong>Error Handling</strong>: Graceful degradation if external
+services are unavailable</li>
+<li><strong>Data Validation</strong>: Ensures data integrity and
+consistency</li>
+<li><strong>Performance Optimization</strong>: Efficient queries to
+minimize processing time</li>
+</ul>
+<h3 id="integration-handling">Integration Handling</h3>
+<ul>
+<li><strong>GitHub API</strong>: Respects rate limits and handles
+authentication</li>
+<li><strong>Jira API</strong>: Manages permissions and data access</li>
+<li><strong>Database Queries</strong>: Optimized for performance and
+security</li>
+<li><strong>Caching Strategy</strong>: No caching - always uses fresh
+data for accuracy</li>
+</ul>
+<h2 id="best-practices-14">Best Practices</h2>
+<h3 id="report-generation-2">Report Generation</h3>
+<ul>
+<li><strong>Regular Intervals</strong>: Generate overviews weekly or
+monthly for consistent tracking</li>
+<li><strong>Appropriate Date Ranges</strong>: Use 2-4 week periods for
+meaningful analysis</li>
+<li><strong>Feedback Inclusion</strong>: Include feedback for
+comprehensive performance reviews</li>
+<li><strong>Data Quality</strong>: Ensure task statuses and external
+accounts are up to date</li>
+</ul>
+<h3 id="content-analysis">Content Analysis</h3>
+<ul>
+<li><strong>Pattern Recognition</strong>: Look for trends in task
+completion and work patterns</li>
+<li><strong>Initiative Focus</strong>: Analyze contribution to different
+initiatives</li>
+<li><strong>External Activity</strong>: Review GitHub and Jira activity
+for development insights</li>
+<li><strong>Feedback Integration</strong>: Use feedback data to
+understand performance perceptions</li>
+</ul>
+<h3 id="team-usage-2">Team Usage</h3>
+<ul>
+<li><strong>Performance Reviews</strong>: Use overviews for quarterly or
+annual evaluations</li>
+<li><strong>Progress Tracking</strong>: Monitor team member progress and
+development</li>
+<li><strong>Workload Analysis</strong>: Understand capacity and work
+distribution</li>
+<li><strong>Development Planning</strong>: Identify areas for growth and
+improvement</li>
+</ul>
+<h2 id="troubleshooting-6">Troubleshooting</h2>
+<h3 id="common-issues-3">Common Issues</h3>
+<h4 id="missing-data-2">Missing Data</h4>
+<ul>
+<li><strong>Verify Integrations</strong>: Ensure GitHub and Jira
+accounts are properly linked</li>
+<li><strong>Check Date Ranges</strong>: Confirm data exists for the
+specified time period</li>
+<li><strong>Account Linking</strong>: Verify person records are linked
+to external accounts</li>
+<li><strong>Permission Issues</strong>: Check API credentials and
+permissions</li>
+</ul>
+<h4 id="data-quality-concerns">Data Quality Concerns</h4>
+<ul>
+<li><strong>Task Status</strong>: Verify task completion dates and
+status updates</li>
+<li><strong>Initiative Data</strong>: Check initiative associations and
+status updates</li>
+<li><strong>External Activity</strong>: Confirm GitHub and Jira
+integration health</li>
+<li><strong>Feedback Access</strong>: Verify feedback permissions and
+privacy settings</li>
+</ul>
+<h4 id="access-problems-1">Access Problems</h4>
+<ul>
+<li><strong>Organization Membership</strong>: Confirm user belongs to
+the correct organization</li>
+<li><strong>Person Access</strong>: Verify user has access to the target
+person’s data</li>
+<li><strong>Manager Relationships</strong>: Check direct report
+relationships</li>
+<li><strong>Admin Permissions</strong>: Verify admin access if
+needed</li>
+</ul>
+<h3 id="performance-optimization-2">Performance Optimization</h3>
+<ul>
+<li><strong>Date Range Limits</strong>: Use reasonable date ranges to
+avoid timeouts</li>
+<li><strong>Data Source Selection</strong>: Disable unnecessary
+integrations if experiencing delays</li>
+<li><strong>API Limits</strong>: Monitor GitHub and Jira API usage and
+limits</li>
+<li><strong>System Resources</strong>: Check server resources during
+peak usage</li>
+</ul>
+<h2 id="integration-with-other-features-2">Integration with Other
+Features</h2>
+<h3 id="performance-management-3">Performance Management</h3>
+<ul>
+<li><strong>Review Preparation</strong>: Generate overviews before
+performance discussions</li>
+<li><strong>Progress Documentation</strong>: Create regular progress
+reports</li>
+<li><strong>Achievement Tracking</strong>: Document accomplishments and
+contributions</li>
+<li><strong>Development Planning</strong>: Use insights for future goal
+setting</li>
+</ul>
+<h3 id="team-management-2">Team Management</h3>
+<ul>
+<li><strong>Team Overview</strong>: Generate overviews for all team
+members</li>
+<li><strong>Cross-team Analysis</strong>: Compare work patterns across
+different team members</li>
+<li><strong>Resource Planning</strong>: Use data for capacity and
+workload planning</li>
+<li><strong>Recognition Programs</strong>: Identify high performers and
+contributors</li>
+</ul>
+<h3 id="task-and-initiative-management">Task and Initiative
+Management</h3>
+<ul>
+<li><strong>Workload Analysis</strong>: Understand task distribution and
+completion patterns</li>
+<li><strong>Initiative Tracking</strong>: Monitor contribution to
+organizational initiatives</li>
+<li><strong>Capacity Planning</strong>: Use data for future project
+planning</li>
+<li><strong>Process Improvement</strong>: Identify workflow optimization
+opportunities</li>
+</ul>
+<h1 id="github-integration-3">GitHub Integration</h1>
+<p>ManagerOS integrates with GitHub to provide visibility into your
+team’s development work, track pull requests, and link team members to
+their GitHub accounts.</p>
+<h2 id="setup-process">Setup Process</h2>
+<h3 id="configure-github-credentials">1. Configure GitHub
+Credentials</h3>
+<ul>
+<li><strong>Go to Settings</strong> → GitHub Integration</li>
+<li><strong>Enter your GitHub username</strong> and Personal Access
+Token (PAT)</li>
+<li><strong>Test the connection</strong> to verify access</li>
+<li><strong>Save credentials</strong> securely (PAT is encrypted)</li>
+</ul>
+<h3 id="link-team-members">2. Link Team Members</h3>
+<ul>
+<li><strong>Navigate to a person’s profile</strong></li>
+<li><strong>Click “Link GitHub Account”</strong></li>
+<li><strong>Search for their GitHub username</strong></li>
+<li><strong>Verify and confirm</strong> the account link</li>
+</ul>
+<h3 id="view-github-activity">3. View GitHub Activity</h3>
+<ul>
+<li><strong>Pull request tracking</strong> for linked accounts</li>
+<li><strong>Recent activity</strong> and contribution history</li>
+<li><strong>Repository visibility</strong> based on permissions</li>
+</ul>
+<h2 id="features">Features</h2>
+<h3 id="pull-request-tracking">Pull Request Tracking</h3>
+<ul>
+<li><strong>View recent pull requests</strong> for each team member</li>
+<li><strong>Track PR status</strong> (open, merged, closed)</li>
+<li><strong>Monitor contribution patterns</strong> and activity
+levels</li>
+<li><strong>Filter by date range</strong> (default: last 30 days)</li>
+</ul>
+<h3 id="account-linking">Account Linking</h3>
+<ul>
+<li><strong>Secure GitHub account association</strong> with ManagerOS
+profiles</li>
+<li><strong>Automatic profile matching</strong> by username</li>
+<li><strong>Display name and email</strong> synchronization</li>
+<li><strong>Easy unlinking</strong> when needed</li>
+</ul>
+<h3 id="work-activity-integration">Work Activity Integration</h3>
+<ul>
+<li><strong>GitHub PRs</strong> appear in work activity summaries</li>
+<li><strong>Contribution tracking</strong> for performance reviews</li>
+<li><strong>Development metrics</strong> and productivity insights</li>
+</ul>
+<h2 id="github-personal-access-token-setup">GitHub Personal Access Token
+Setup</h2>
+<h3 id="creating-a-pat">Creating a PAT</h3>
+<ol type="1">
+<li><strong>Go to GitHub Settings</strong> → Developer settings →
+Personal access tokens</li>
+<li><strong>Click “Generate new token (classic)”</strong></li>
+<li><strong>Select scopes:</strong>
+<ul>
+<li><code>repo</code> - Full control of private repositories</li>
+<li><code>read:user</code> - Read user profile data</li>
+</ul></li>
+<li><strong>Generate and copy</strong> the token immediately</li>
+<li><strong>Enter in ManagerOS</strong> settings</li>
+</ol>
+<h3 id="required-permissions">Required Permissions</h3>
+<ul>
+<li><strong>Repository access</strong> - To fetch pull request data</li>
+<li><strong>User profile access</strong> - To verify account
+information</li>
+<li><strong>Organization access</strong> - If working with organization
+repos</li>
+</ul>
+<h2 id="best-practices-15">Best Practices</h2>
+<h3 id="security">Security</h3>
+<ul>
+<li><strong>Use fine-grained tokens</strong> when possible</li>
+<li><strong>Rotate tokens regularly</strong> for security</li>
+<li><strong>Limit token scope</strong> to minimum required
+permissions</li>
+<li><strong>Never share tokens</strong> in plain text</li>
+</ul>
+<h3 id="team-management-3">Team Management</h3>
+<ul>
+<li><strong>Link accounts proactively</strong> for new team members</li>
+<li><strong>Verify permissions</strong> before linking accounts</li>
+<li><strong>Update links</strong> when team members change GitHub
+usernames</li>
+<li><strong>Unlink accounts</strong> for departed team members</li>
+</ul>
+<h3 id="data-privacy">Data Privacy</h3>
+<ul>
+<li><strong>Respect GitHub’s API rate limits</strong></li>
+<li><strong>Only track public repositories</strong> unless explicitly
+authorized</li>
+<li><strong>Maintain confidentiality</strong> of private repository
+data</li>
+<li><strong>Follow your organization’s</strong> GitHub usage
+policies</li>
+</ul>
+<h2 id="troubleshooting-7">Troubleshooting</h2>
+<h3 id="connection-issues">Connection Issues</h3>
+<ul>
+<li><strong>Verify PAT permissions</strong> and expiration</li>
+<li><strong>Check GitHub username</strong> spelling</li>
+<li><strong>Test connection</strong> in settings</li>
+<li><strong>Review API rate limits</strong> if experiencing
+failures</li>
+</ul>
+<h3 id="missing-data-3">Missing Data</h3>
+<ul>
+<li><strong>Confirm account linking</strong> for team members</li>
+<li><strong>Check repository permissions</strong> for private repos</li>
+<li><strong>Verify date ranges</strong> for activity queries</li>
+<li><strong>Review GitHub API status</strong> for service issues</li>
+</ul>
+<h3 id="performance-1">Performance</h3>
+<ul>
+<li><strong>Limit date ranges</strong> for large datasets</li>
+<li><strong>Use appropriate filters</strong> to reduce API calls</li>
+<li><strong>Monitor API usage</strong> to avoid rate limiting</li>
+<li><strong>Cache data</strong> when possible for better
+performance</li>
+</ul>
+<h1 id="jira-integration-3">Jira Integration</h1>
+<p>ManagerOS integrates with Jira to provide a unified view of your
+team’s work across both platforms.</p>
+<h2 id="setup-process-1">Setup Process</h2>
+<h3 id="connect-your-jira-account">1. Connect Your Jira Account</h3>
+<ul>
+<li><strong>Enter your Jira URL</strong> (e.g.,
+yourcompany.atlassian.net)</li>
+<li><strong>Provide authentication credentials</strong> (API token
+recommended)</li>
+<li><strong>Test the connection</strong> to ensure proper access</li>
+</ul>
+<h3 id="link-team-members-1">2. Link Team Members</h3>
+<ul>
+<li><strong>Associate Jira accounts</strong> with ManagerOS people</li>
+<li><strong>Map Jira usernames</strong> to team member profiles</li>
+<li><strong>Verify access permissions</strong> for each user</li>
+</ul>
+<h3 id="configure-work-tracking">3. Configure Work Tracking</h3>
+<ul>
+<li><strong>Select projects</strong> to track in ManagerOS</li>
+<li><strong>Choose issue types</strong> to include in work activity</li>
+<li><strong>Set up automatic sync</strong> for real-time updates</li>
+</ul>
+<h2 id="features-1">Features</h2>
+<h3 id="work-activity-tracking">Work Activity Tracking</h3>
+<ul>
+<li><strong>View assigned tickets</strong> for each team member</li>
+<li><strong>Track progress</strong> on Jira issues</li>
+<li><strong>Monitor workload</strong> and capacity</li>
+</ul>
+<h3 id="status-synchronization">Status Synchronization</h3>
+<ul>
+<li><strong>Real-time updates</strong> from Jira to ManagerOS</li>
+<li><strong>Automatic task creation</strong> from Jira issues</li>
+<li><strong>Progress tracking</strong> across both platforms</li>
+</ul>
+<h2 id="best-practices-16">Best Practices</h2>
+<ul>
+<li><strong>Use consistent naming</strong> between Jira and
+ManagerOS</li>
+<li><strong>Regular sync</strong> to keep data current</li>
+<li><strong>Train team members</strong> on the integration</li>
+<li><strong>Monitor performance</strong> and adjust as needed</li>
+</ul>
+</body>
+</html>

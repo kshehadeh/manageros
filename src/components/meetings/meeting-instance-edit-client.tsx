@@ -4,12 +4,24 @@ import React from 'react'
 import { MeetingInstanceForm } from '@/components/meetings/meeting-instance-form'
 import { type MeetingInstanceFormData } from '@/lib/validations'
 
+interface Participant {
+  id: string
+  personId: string
+  status: string
+  person: {
+    id: string
+    name: string
+    avatar?: string | null
+  }
+}
+
 interface MeetingInstanceEditClientProps {
   meetingId: string
   instanceId: string
   meetingTitle: string
   initialData: Partial<MeetingInstanceFormData>
   meetingInstanceId: string
+  parentMeetingParticipants?: Participant[]
 }
 
 export function MeetingInstanceEditClient({
@@ -18,6 +30,7 @@ export function MeetingInstanceEditClient({
   meetingTitle,
   initialData,
   meetingInstanceId,
+  parentMeetingParticipants,
 }: MeetingInstanceEditClientProps) {
   return (
     <div className='space-y-6'>
@@ -28,14 +41,13 @@ export function MeetingInstanceEditClient({
         </p>
       </div>
 
-      <div className='max-w-2xl'>
-        <MeetingInstanceForm
-          meetingId={meetingId}
-          initialData={initialData}
-          isEditing={true}
-          instanceId={meetingInstanceId}
-        />
-      </div>
+      <MeetingInstanceForm
+        meetingId={meetingId}
+        initialData={initialData}
+        isEditing={true}
+        instanceId={meetingInstanceId}
+        parentMeetingParticipants={parentMeetingParticipants}
+      />
     </div>
   )
 }

@@ -4,7 +4,6 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Badge } from '@/components/ui/badge'
 import { SectionHeader } from '@/components/ui/section-header'
 import { notFound } from 'next/navigation'
 import { MeetingDetailBreadcrumbClient } from '@/components/meetings/meeting-detail-breadcrumb-client'
@@ -12,7 +11,7 @@ import { MeetingInstanceList } from '@/components/meetings/meeting-instance-list
 import { MeetingActionsDropdown } from '@/components/meetings/meeting-actions-dropdown'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { LinkManager } from '@/components/entity-links'
-import { PersonAvatar } from '@/components/people/person-avatar'
+import { MeetingParticipantsSidebar } from '@/components/meetings/meeting-participants-sidebar'
 import {
   Clock,
   Users,
@@ -62,19 +61,6 @@ export default async function MeetingDetailPage({
         : `${hours} hour${hours !== 1 ? 's' : ''}`
     }
     return `${mins} minute${mins !== 1 ? 's' : ''}`
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'accepted':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-      case 'declined':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-      case 'tentative':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-      default:
-        return 'bg-muted text-muted-foreground'
-    }
   }
 
   return (
@@ -164,39 +150,6 @@ export default async function MeetingDetailPage({
                 </div>
               )}
 
-              {/* Participants */}
-              {meeting.participants.length > 0 && (
-                <div className='page-section'>
-                  <SectionHeader icon={Users} title='Participants' />
-                  <div className='space-y-3'>
-                    {meeting.participants.map(participant => (
-                      <div
-                        key={participant.id}
-                        className='flex items-center justify-between'
-                      >
-                        <div className='flex items-center gap-3'>
-                          <PersonAvatar
-                            name={participant.person.name}
-                            avatar={participant.person.avatar}
-                            size='sm'
-                          />
-                          <Link
-                            href={`/people/${participant.person.id}`}
-                            className='hover:text-primary transition-colors'
-                          >
-                            {participant.person.name}
-                          </Link>
-                        </div>
-                        <Badge className={getStatusColor(participant.status)}>
-                          {participant.status.charAt(0).toUpperCase() +
-                            participant.status.slice(1)}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* Notes */}
               <div className='page-section'>
                 <SectionHeader icon={StickyNote} title='Notes' />
@@ -226,7 +179,8 @@ export default async function MeetingDetailPage({
 
           {/* Right Sidebar - Full width on mobile, fixed width on desktop */}
           <div className='w-full lg:w-80 lg:flex-shrink-0'>
-            <div className='page-section'>
+            <MeetingParticipantsSidebar participants={meeting.participants} />
+            <div className='page-section mt-6'>
               <LinkManager
                 entityType='Meeting'
                 entityId={meeting.id}

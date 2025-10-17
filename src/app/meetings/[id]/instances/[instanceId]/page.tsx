@@ -3,16 +3,15 @@ import { getEntityLinks } from '@/lib/actions/entity-links'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { Badge } from '@/components/ui/badge'
-import { SectionHeader } from '@/components/ui/section-header'
 import { notFound } from 'next/navigation'
-import { Calendar, Users, StickyNote } from 'lucide-react'
+import { Calendar, StickyNote } from 'lucide-react'
 import { MeetingInstanceDetailBreadcrumbClient } from '@/components/meetings/meeting-instance-detail-breadcrumb-client'
 import { MeetingInstanceActionsDropdown } from '@/components/meetings/meeting-instance-actions-dropdown'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { LinkManager } from '@/components/entity-links'
 import { HelpIcon } from '@/components/help-icon'
+import { MeetingParticipantsSidebar } from '@/components/meetings/meeting-participants-sidebar'
+import { SectionHeader } from '@/components/ui/section-header'
 
 export default async function MeetingInstanceDetailPage({
   params,
@@ -51,23 +50,6 @@ export default async function MeetingInstanceDetailPage({
       minute: '2-digit',
       hour12: true,
     }).format(date)
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'attended':
-        return 'bg-green-100 text-green-800'
-      case 'absent':
-        return 'bg-red-100 text-red-800'
-      case 'accepted':
-        return 'bg-blue-100 text-blue-800'
-      case 'declined':
-        return 'bg-gray-100 text-gray-800'
-      case 'tentative':
-        return 'bg-yellow-100 text-yellow-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
   }
 
   const attendedCount = meetingInstance.participants.filter(
@@ -124,40 +106,17 @@ export default async function MeetingInstanceDetailPage({
                   emptyStateText='No notes for this meeting instance'
                 />
               </div>
-
-              {/* Participants */}
-              {meetingInstance.participants.length > 0 && (
-                <div className='page-section'>
-                  <SectionHeader icon={Users} title='Participants' />
-                  <div className='space-y-3'>
-                    {meetingInstance.participants.map(participant => (
-                      <div
-                        key={participant.id}
-                        className='flex items-center justify-between'
-                      >
-                        <div className='flex items-center gap-3'>
-                          <Link
-                            href={`/people/${participant.person.id}`}
-                            className='hover:text-primary transition-colors'
-                          >
-                            {participant.person.name}
-                          </Link>
-                        </div>
-                        <Badge className={getStatusColor(participant.status)}>
-                          {participant.status.charAt(0).toUpperCase() +
-                            participant.status.slice(1)}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
           {/* Right Sidebar - Full width on mobile, fixed width on desktop */}
           <div className='w-full lg:w-80 lg:flex-shrink-0'>
             <div className='page-section'>
+              <MeetingParticipantsSidebar
+                participants={meetingInstance.participants}
+              />
+            </div>
+            <div className='page-section mt-6'>
               <LinkManager
                 entityType='MeetingInstance'
                 entityId={meetingInstance.id}

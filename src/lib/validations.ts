@@ -279,7 +279,14 @@ export const meetingSchema = z
         z.object({
           personId: z.string().min(1, 'Person ID is required'),
           status: z
-            .enum(['invited', 'accepted', 'declined', 'tentative'])
+            .enum([
+              'invited',
+              'accepted',
+              'declined',
+              'tentative',
+              'attended',
+              'absent',
+            ])
             .default('invited'),
         })
       )
@@ -334,7 +341,14 @@ export const meetingUpdateSchema = z
         z.object({
           personId: z.string().min(1, 'Person ID is required'),
           status: z
-            .enum(['invited', 'accepted', 'declined', 'tentative'])
+            .enum([
+              'invited',
+              'accepted',
+              'declined',
+              'tentative',
+              'attended',
+              'absent',
+            ])
             .default('invited'),
         })
       )
@@ -363,7 +377,14 @@ export type MeetingUpdateData = z.infer<typeof meetingUpdateSchema>
 export const meetingParticipantSchema = z.object({
   personId: z.string().min(1, 'Person ID is required'),
   status: z
-    .enum(['invited', 'accepted', 'declined', 'tentative'])
+    .enum([
+      'invited',
+      'accepted',
+      'declined',
+      'tentative',
+      'attended',
+      'absent',
+    ])
     .default('invited'),
 })
 

@@ -1,4 +1,5 @@
 import { getMeetingInstance } from '@/lib/actions/meeting-instance'
+import { getMeeting } from '@/lib/actions/meeting'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -22,9 +23,12 @@ export default async function EditMeetingInstancePage({
   }
 
   const { id, instanceId } = await params
-  const meetingInstance = await getMeetingInstance(instanceId)
+  const [meetingInstance, parentMeeting] = await Promise.all([
+    getMeetingInstance(instanceId),
+    getMeeting(id),
+  ])
 
-  if (!meetingInstance) {
+  if (!meetingInstance || !parentMeeting) {
     notFound()
   }
 
@@ -52,6 +56,7 @@ export default async function EditMeetingInstancePage({
       meetingTitle={meetingInstance.meeting.title}
       initialData={initialData}
       meetingInstanceId={meetingInstance.id}
+      parentMeetingParticipants={parentMeeting.participants}
     />
   )
 }

@@ -32,6 +32,7 @@ import {
   CalendarDays,
   Upload,
   Loader2,
+  CheckCircle2,
 } from 'lucide-react'
 import { MarkdownEditor } from '@/components/markdown-editor'
 import { SectionHeader } from '@/components/ui/section-header'
@@ -182,6 +183,19 @@ export function MeetingForm({
       participants: prev.participants.map((p, i) =>
         i === index ? { ...p, [field]: value } : p
       ),
+    }))
+  }
+
+  const toggleAllParticipantAttendance = () => {
+    const allAccepted = formData.participants.every(
+      p => p.status === 'accepted'
+    )
+    setFormData(prev => ({
+      ...prev,
+      participants: prev.participants.map(p => ({
+        ...p,
+        status: allAccepted ? 'invited' : 'accepted',
+      })),
     }))
   }
 
@@ -448,15 +462,28 @@ export function MeetingForm({
                 icon={Users}
                 title='Participants'
                 action={
-                  <Button
-                    type='button'
-                    variant='outline'
-                    size='sm'
-                    onClick={addParticipant}
-                  >
-                    <Plus className='h-4 w-4' />
-                    Add Participant
-                  </Button>
+                  <div className='flex items-center gap-2'>
+                    <Button
+                      type='button'
+                      variant='outline'
+                      size='sm'
+                      onClick={addParticipant}
+                    >
+                      <Plus className='h-4 w-4' />
+                      Add Participant
+                    </Button>
+                    <Button
+                      type='button'
+                      variant='outline'
+                      size='sm'
+                      onClick={toggleAllParticipantAttendance}
+                    >
+                      <CheckCircle2 className='h-4 w-4' />
+                      {formData.participants.every(p => p.status === 'accepted')
+                        ? 'Mark All Invited'
+                        : 'Mark All Accepted'}
+                    </Button>
+                  </div>
                 }
               />
               <div className='space-y-4'>
@@ -508,6 +535,8 @@ export function MeetingForm({
                               <SelectItem value='tentative'>
                                 Tentative
                               </SelectItem>
+                              <SelectItem value='attended'>Attended</SelectItem>
+                              <SelectItem value='absent'>Absent</SelectItem>
                             </SelectContent>
                           </Select>
 
