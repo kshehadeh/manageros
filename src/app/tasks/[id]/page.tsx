@@ -121,7 +121,6 @@ export default async function TaskDetailPage({
                   status: task.status as TaskStatus,
                   assignee: task.assignee,
                   initiative: task.initiative,
-                  team: task.team,
                 }}
               />
             </div>
