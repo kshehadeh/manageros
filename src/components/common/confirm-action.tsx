@@ -93,14 +93,6 @@ export function ConfirmAction({
     }
   }
 
-  if (!isConfirming) {
-    return <>{renderTrigger({ open, isPending })}</>
-  }
-
-  if (renderConfirm) {
-    return <>{renderConfirm({ confirm, cancel, isPending })}</>
-  }
-
   const directionClass =
     layout === 'stacked' ? 'flex-col items-stretch' : 'flex-row items-center'
   const alignClass =
@@ -109,6 +101,14 @@ export function ConfirmAction({
       : align === 'end'
         ? 'justify-end'
         : 'justify-center'
+
+  if (!isConfirming) {
+    return <>{renderTrigger({ open, isPending })}</>
+  }
+
+  if (renderConfirm) {
+    return <>{renderConfirm({ confirm, cancel, isPending })}</>
+  }
 
   return (
     <div
