@@ -18,7 +18,6 @@ export function DashboardOpenInitiativesSection({
   // Memoize immutableFilters to prevent infinite loop
   const immutableFilters = useMemo(
     () => ({
-      status: 'planned,active',
       ownerId: personId || '',
     }),
     [personId]

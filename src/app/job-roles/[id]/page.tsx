@@ -6,7 +6,9 @@ import { redirect } from 'next/navigation'
 import { JobRoleDetailClient } from '@/components/jobs/job-role-detail-client'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { JobRoleActionsDropdown } from '@/components/jobs/job-role-actions-dropdown'
-import { Building2, Users, Briefcase } from 'lucide-react'
+import { SectionHeader } from '@/components/ui/section-header'
+import { PersonListItem } from '@/components/people/person-list-item'
+import { Building2, Users, Briefcase, FileText } from 'lucide-react'
 import Link from 'next/link'
 
 interface JobRoleDetailPageProps {
@@ -34,95 +36,88 @@ export default async function JobRoleDetailPage({
 
     return (
       <JobRoleDetailClient jobRoleTitle={jobRole.title} jobRoleId={jobRole.id}>
-        <div className='page-container'>
+        <div className='space-y-6'>
           {/* Header */}
-          <div className='page-header'>
-            <div className='flex items-start justify-between'>
-              <div className='flex-1'>
-                <div className='flex items-center gap-3 mb-2'>
+          <div className='px-4 lg:px-6'>
+            <div className='page-header'>
+              <div className='flex items-start justify-between'>
+                <div className='flex-1'>
                   <h1 className='page-title'>{jobRole.title}</h1>
-                </div>
-                <div className='page-section-subtitle'>
-                  {jobRole.level.name} • {jobRole.domain.name}
-                </div>
+                  <div className='page-section-subtitle'>
+                    {jobRole.level.name} • {jobRole.domain.name}
+                  </div>
 
-                {/* Basic Information with Icons */}
-                <div className='flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground'>
-                  <div className='flex items-center gap-1'>
-                    <Briefcase className='w-4 h-4' />
-                    <span>{jobRole.level.name} Level</span>
-                  </div>
-                  <div className='flex items-center gap-1'>
-                    <Building2 className='w-4 h-4' />
-                    <span>{jobRole.domain.name} Domain</span>
-                  </div>
-                  <div className='flex items-center gap-1'>
-                    <Users className='w-4 h-4' />
-                    <span>
-                      {jobRole.people.length}{' '}
-                      {jobRole.people.length === 1 ? 'person' : 'people'}{' '}
-                      assigned
-                    </span>
+                  {/* Basic Information with Icons */}
+                  <div className='flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground'>
+                    <div className='flex items-center gap-1'>
+                      <Briefcase className='w-4 h-4' />
+                      <span>{jobRole.level.name} Level</span>
+                    </div>
+                    <div className='flex items-center gap-1'>
+                      <Building2 className='w-4 h-4' />
+                      <span>{jobRole.domain.name} Domain</span>
+                    </div>
+                    <div className='flex items-center gap-1'>
+                      <Users className='w-4 h-4' />
+                      <span>
+                        {jobRole.people.length}{' '}
+                        {jobRole.people.length === 1 ? 'person' : 'people'}{' '}
+                        assigned
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className='flex items-center gap-2'>
-                <JobRoleActionsDropdown
-                  jobRoleId={jobRole.id}
-                  jobRoleTitle={jobRole.title}
-                />
+                <div className='flex items-center gap-2'>
+                  <JobRoleActionsDropdown
+                    jobRoleId={jobRole.id}
+                    jobRoleTitle={jobRole.title}
+                  />
+                </div>
               </div>
             </div>
           </div>
 
           {/* Main Content */}
-          <div className='main-layout'>
-            <div className='main-content'>
+          <div className='px-4 lg:px-6'>
+            <div className='space-y-6'>
               {/* Description Section */}
-              <section>
-                <h3 className='section-title'>Description</h3>
-                <div className='section-content'>
-                  {jobRole.description ? (
-                    <ReadonlyNotesField
-                      content={jobRole.description}
-                      variant='detailed'
-                      showEmptyState={false}
-                    />
-                  ) : (
-                    <div className='text-muted-foreground italic'>
-                      No description available for this job role.
-                    </div>
-                  )}
+              {jobRole.description && (
+                <div className='page-section'>
+                  <SectionHeader icon={FileText} title='Description' />
+                  <ReadonlyNotesField
+                    content={jobRole.description}
+                    variant='detailed'
+                    showEmptyState={false}
+                  />
                 </div>
-              </section>
+              )}
 
               {/* People Section */}
               {jobRole.people.length > 0 && (
-                <section>
-                  <h3 className='section-title'>
-                    People ({jobRole.people.length})
-                  </h3>
-                  <div className='section-content'>
-                    <div className='space-y-2'>
-                      {jobRole.people.map(person => (
-                        <Link
-                          key={person.id}
-                          href={`/people/${person.id}`}
-                          className='content-card'
-                        >
-                          <div className='card-content'>
-                            <div>
-                              <div className='card-title'>{person.name}</div>
-                              <div className='card-description'>
-                                {person.email}
-                              </div>
-                            </div>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
+                <div className='page-section'>
+                  <SectionHeader
+                    icon={Users}
+                    title={`People (${jobRole.people.length})`}
+                  />
+                  <div className='space-y-2'>
+                    {jobRole.people.map(person => (
+                      <Link
+                        key={person.id}
+                        href={`/people/${person.id}`}
+                        className='block'
+                      >
+                        <PersonListItem
+                          person={{
+                            id: person.id,
+                            name: person.name,
+                            email: person.email,
+                          }}
+                          showEmail={true}
+                        />
+                      </Link>
+                    ))}
                   </div>
-                </section>
+                </div>
               )}
             </div>
           </div>

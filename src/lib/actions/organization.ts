@@ -831,6 +831,7 @@ export async function getCurrentUserWithPerson() {
           role: true,
           status: true,
           avatar: true,
+          jobRoleId: true,
         },
       })
     : null

@@ -17,16 +17,17 @@ import {
   Settings,
   Calendar,
   Building,
-  Keyboard,
   BarChart3,
   Command,
   Bot,
   CheckSquare,
+  Keyboard,
 } from 'lucide-react'
 import { useState } from 'react'
 import { HelpDialog } from '@/components/shared'
 import { useAIChat } from '@/components/ai-chat-provider'
 import { APP_VERSION } from '@/lib/version'
+import { PersonAvatar } from '@/components/people/person-avatar'
 
 interface NavItem {
   name: string
@@ -38,6 +39,15 @@ interface NavItem {
 interface SidebarProps {
   navigation?: NavItem[]
   serverSession?: NextAuthUser | null
+  personData?: {
+    id: string
+    name: string
+    avatar: string | null
+    email: string | null
+    role: string | null
+    jobRoleId: string | null
+    jobRoleTitle: string | null
+  } | null
 }
 
 const iconMap = {
@@ -56,6 +66,7 @@ const iconMap = {
 export default function Sidebar({
   navigation = [],
   serverSession,
+  personData,
 }: SidebarProps) {
   const { data: session, status } = useSession()
   const pathname = usePathname()
@@ -149,23 +160,52 @@ export default function Sidebar({
 
         {/* User Info */}
         <div className='px-6 py-4 border-b'>
-          <div className='text-sm text-foreground font-medium'>
-            {serverSession?.name || session?.user?.name}
+          <div className='flex items-start gap-3'>
+            {personData ? (
+              <PersonAvatar
+                name={personData.name}
+                avatar={personData.avatar}
+                size='sm'
+              />
+            ) : (
+              <div className='h-8 w-8 bg-muted rounded-full flex-shrink-0' />
+            )}
+            <div className='flex-1 min-w-0'>
+              {personData ? (
+                <Link href={`/people/${personData.id}`}>
+                  <div className='text-sm text-foreground font-medium truncate hover:underline cursor-pointer'>
+                    {personData.name}
+                  </div>
+                </Link>
+              ) : (
+                <div className='text-sm text-foreground font-medium truncate'>
+                  {session?.user?.name}
+                </div>
+              )}
+              {personData?.email || session?.user?.email ? (
+                <div className='text-xs text-muted-foreground truncate'>
+                  {personData?.email || session?.user?.email}
+                </div>
+              ) : null}
+              {personData?.jobRoleId ? (
+                <Link
+                  href={`/job-roles/${personData.jobRoleId}`}
+                  className='text-xs text-muted-foreground truncate hover:underline'
+                >
+                  {personData.jobRoleTitle || 'Job Role'}
+                </Link>
+              ) : personData?.role || session?.user?.role ? (
+                <div className='text-xs text-muted-foreground truncate'>
+                  {personData?.role || session?.user?.role}
+                </div>
+              ) : null}
+              {serverSession?.role || session?.user?.role ? (
+                <div className='text-xs text-muted-foreground truncate'>
+                  {serverSession?.role || session?.user?.role}
+                </div>
+              ) : null}
+            </div>
           </div>
-          {serverSession?.organizationName ||
-          session?.user?.organizationName ? (
-            <>
-              <div className='text-xs text-muted-foreground'>
-                {serverSession?.organizationName ||
-                  session?.user?.organizationName}
-              </div>
-              <div className='text-xs text-muted-foreground'>
-                {serverSession?.role || session?.user?.role}
-              </div>
-            </>
-          ) : (
-            <div className='text-xs text-muted-foreground'>No organization</div>
-          )}
         </div>
 
         {/* Navigation */}

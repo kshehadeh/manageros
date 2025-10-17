@@ -17,8 +17,10 @@ import { EditFormNavigator } from '@/components/edit-form-navigator'
 import { OfflineAwareLayout } from '@/components/offline-aware-layout'
 import { AIChatSidebarWrapper } from '@/components/ai-chat-sidebar-wrapper'
 import { CacheProvider } from '@/components/cache-provider'
-import { getFilteredNavigation, getCurrentUser } from '@/lib/auth-utils'
+import { getFilteredNavigation } from '@/lib/auth-utils'
 import type { User as NextAuthUser } from 'next-auth'
+import { getCurrentUserWithPerson } from '@/lib/actions/organization'
+import { prisma } from '@/lib/db'
 
 interface ServerConditionalLayoutProps {
   children: ReactNode
@@ -59,14 +61,45 @@ export default async function ServerConditionalLayout({
     adminOnly?: boolean
   }> = []
   let serverSession: NextAuthUser | null = null
+  let personData: {
+    id: string
+    name: string
+    avatar: string | null
+    email: string | null
+    role: string | null
+    jobRoleId: string | null
+    jobRoleTitle: string | null
+  } | null = null
   try {
     filteredNavigation = await getFilteredNavigation()
-    serverSession = await getCurrentUser()
+    const userWithPerson = await getCurrentUserWithPerson()
+    serverSession = userWithPerson.user as NextAuthUser
+    if (userWithPerson.person) {
+      let jobRoleTitle: string | null = null
+      if (userWithPerson.person.jobRoleId) {
+        const jobRole = await prisma.jobRole.findUnique({
+          where: { id: userWithPerson.person.jobRoleId },
+          select: { title: true },
+        })
+        jobRoleTitle = jobRole?.title || null
+      }
+
+      personData = {
+        id: userWithPerson.person.id,
+        name: userWithPerson.person.name,
+        avatar: userWithPerson.person.avatar,
+        email: userWithPerson.person.email,
+        role: userWithPerson.person.role,
+        jobRoleId: userWithPerson.person.jobRoleId,
+        jobRoleTitle,
+      }
+    }
   } catch {
     // If user is not authenticated, getFilteredNavigation will throw
     // This should not happen due to middleware, but handle gracefully
     filteredNavigation = []
     serverSession = null
+    personData = null
   }
 
   // Render full layout for authenticated routes
@@ -90,6 +123,7 @@ export default async function ServerConditionalLayout({
                       <Sidebar
                         navigation={filteredNavigation}
                         serverSession={serverSession}
+                        personData={personData}
                       />
                       <div className='flex-1 flex flex-col overflow-hidden lg:ml-0'>
                         <TopBar />
