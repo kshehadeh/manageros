@@ -24,8 +24,12 @@ The `dataTableStyles` object is organized into the following categories:
 #### Container Styles
 
 - `container`: Main wrapper for the entire data table component
-- `tableWrapper`: Standard table wrapper with border and rounding
+- `tableWrapper`: Standard table wrapper with responsive behavior
+  - **Mobile**: Extends to screen edges using negative margins (`-mx-3`), no border-radius, top/bottom borders only
+  - **Desktop (md+)**: Normal spacing, full border, rounded corners
 - `tableWrapperRelative`: Alternative wrapper with relative positioning for loading indicators
+  - **Mobile**: Extends to screen edges using negative margins (`-mx-3`), no border-radius, top/bottom borders only
+  - **Desktop (md+)**: Normal spacing, full border, rounded corners
 
 #### Loading Indicators
 
@@ -159,6 +163,7 @@ const className = combineDataTableStyles(
 3. **Type Safety**: TypeScript provides autocomplete and type checking
 4. **Scalability**: Easy to add new style variations or extend existing ones
 5. **Documentation**: All styles are documented in one place
+6. **Mobile Optimized**: Tables automatically extend to screen edges on mobile devices for better content visibility
 
 ## Customization
 
@@ -198,6 +203,39 @@ After making changes to the centralized styles:
 2. Test each data table page to ensure styling is applied correctly
 3. Check responsive behavior on different screen sizes
 
+## Mobile Responsiveness
+
+Both data tables and page headers are optimized for mobile viewing:
+
+- **Mobile (< md breakpoint)**: Tables extend to the edges of the screen using negative margins that counteract the page padding
+- **Desktop (≥ md breakpoint)**: Tables have normal padding, borders, and rounded corners
+
+This is achieved through responsive Tailwind classes:
+
+- `-mx-3`: Negative horizontal margin on mobile to extend to screen edges
+- `md:mx-0`: Reset margins on desktop
+- `border-y`: Top and bottom borders only on mobile
+- `md:border`: Full border on desktop
+- `md:rounded-md`: Rounded corners only on desktop
+
+The negative margin approach (`-mx-3`) is calibrated to match the standard page padding (`p-3`) used in the layout.
+
+### Page Headers & Section Headers
+
+Both page headers and section headers extend to screen edges on mobile using a similar approach:
+
+**Page Headers** (`.page-header` class in `globals.css`):
+
+- **Mobile**: `-mx-3 px-3` extends to edges while maintaining internal padding for content
+- **Desktop**: `md:mx-0 md:px-0` resets margins and padding
+
+**Section Headers** (`SectionHeader` component):
+
+- **Mobile**: `-mx-3 px-3` extends to edges while maintaining internal padding for content
+- **Desktop**: `md:mx-0 md:px-0` resets margins and padding
+
+This creates a cohesive mobile experience where page headers, section headers, and tables all align edge-to-edge.
+
 ## Future Enhancements
 
 Potential improvements to consider:
@@ -207,3 +245,4 @@ Potential improvements to consider:
 3. Color scheme variants for different data types
 4. Animation configurations
 5. Accessibility enhancements (high contrast modes)
+6. Horizontal scroll indicators for wide tables on mobile

@@ -15,10 +15,16 @@ export const dataTableStyles = {
   container: 'space-y-4',
 
   // Table wrapper (applies border and rounding)
-  tableWrapper: 'rounded-md border overflow-hidden',
+  // On mobile: extends to screen edges with negative margins and no border-radius
+  // On desktop (md+): normal border and border-radius
+  tableWrapper:
+    '-mx-3 md:mx-0 md:rounded-md border-y md:border overflow-hidden',
 
   // Alternative table wrapper with relative positioning for loading indicators
-  tableWrapperRelative: 'rounded-md border relative',
+  // On mobile: extends to screen edges with negative margins and no border-radius
+  // On desktop (md+): normal border and border-radius
+  tableWrapperRelative:
+    '-mx-3 md:mx-0 md:rounded-md border-y md:border relative',
 
   // Loading spinner container (positioned in top right of table)
   loadingSpinner:

@@ -67,7 +67,9 @@ export function ExpandableSection({
   const IconComponent = icon ? iconMap[icon] : null
 
   return (
-    <section className={`rounded-xl p-4 space-y-4 ${className}`}>
+    <section
+      className={`rounded-xl py-4 -mx-3 px-3 md:mx-0 md:px-4 space-y-4 ${className}`}
+    >
       <SectionHeader
         icon={IconComponent || User}
         title={title}

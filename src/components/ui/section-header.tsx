@@ -32,7 +32,7 @@ export function SectionHeader({
 
   return (
     <div
-      className={`flex items-center justify-between border-b border-muted pb-3 mb-3 ${className}`}
+      className={`flex items-center justify-between border-b border-muted pb-3 mb-3 -mx-3 px-3 md:mx-0 md:px-0 ${className}`}
     >
       <h3 className='font-bold flex items-center gap-2'>
         <Icon className='w-4 h-4' />

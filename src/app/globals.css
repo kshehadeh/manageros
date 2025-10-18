@@ -220,7 +220,7 @@ input[type='time']::-webkit-calendar-picker-indicator {
 }
 
 .page-header {
-  @apply mb-6;
+  @apply mb-6 -mx-3 px-3 md:mx-0 md:px-0;
 }
 
 .page-title {
