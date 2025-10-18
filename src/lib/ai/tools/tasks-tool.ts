@@ -44,6 +44,15 @@ export const tasksTool = {
     updatedAfter?: string
     updatedBefore?: string
   }) => {
+    console.log('🔧 tasksTool called with parameters:', {
+      status,
+      priority,
+      assigneeId,
+      initiativeId,
+      query,
+      updatedAfter,
+      updatedBefore,
+    })
     const user = await getCurrentUser()
     if (!user.organizationId) {
       throw new Error('User must belong to an organization')

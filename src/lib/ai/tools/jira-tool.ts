@@ -49,6 +49,13 @@ export const jiraTool = {
     assignee?: string
     limit?: number
   }) => {
+    console.log('🔧 jiraTool called with parameters:', {
+      project,
+      statusCategory,
+      personId,
+      assignee,
+      limit,
+    })
     try {
       const user = await getCurrentUser()
       if (!user.organizationId) {

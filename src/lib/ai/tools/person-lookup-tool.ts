@@ -14,6 +14,7 @@ export const personLookupTool = {
       ),
   }),
   execute: async ({ name }: { name: string }) => {
+    console.log('🔧 personLookupTool called with parameters:', { name })
     try {
       const user = await getCurrentUser()
       if (!user.organizationId) {

@@ -77,6 +77,13 @@ export const githubTool = {
     state?: 'open' | 'closed' | 'all'
     limit?: number
   }) => {
+    console.log('🔧 githubTool called with parameters:', {
+      query,
+      personId,
+      repository,
+      state,
+      limit,
+    })
     try {
       const user = await getCurrentUser()
       if (!user.organizationId) {
@@ -148,7 +155,10 @@ export const githubTool = {
 
         githubUsername = person.githubAccount.githubUsername
 
-        console.log('githubUsername', githubUsername, person.name)
+        console.log('🔧 GitHub username resolved:', {
+          githubUsername,
+          personName: person.name,
+        })
         // Validate GitHub username format (alphanumeric and hyphens only)
         if (!/^[a-zA-Z0-9-]+$/.test(githubUsername)) {
           throw new Error(

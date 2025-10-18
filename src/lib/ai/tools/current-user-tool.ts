@@ -7,6 +7,7 @@ export const currentUserTool = {
     'Get information about the current user to help interpret pronouns like "me" or "I" or "my" in chat inputs',
   parameters: z.object({}),
   execute: async () => {
+    console.log('🔧 currentUserTool called with parameters:', {})
     const user = await getCurrentUser()
     if (!user) {
       throw new Error('User not authenticated')

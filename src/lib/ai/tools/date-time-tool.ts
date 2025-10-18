@@ -5,6 +5,7 @@ export const dateTimeTool = {
     'Get the current date and time information. Use this tool when you need to calculate date ranges like "last week", "this month", "today", etc.',
   parameters: z.object({}),
   execute: async () => {
+    console.log('🔧 dateTimeTool called with parameters:', {})
     const now = new Date()
 
     // Calculate helpful date boundaries

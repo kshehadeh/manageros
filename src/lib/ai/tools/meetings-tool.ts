@@ -65,16 +65,15 @@ export const meetingsTool = {
     createdAfter?: string
     createdBefore?: string
   }) => {
-    console.log(
-      'meetingsTool',
+    console.log('🔧 meetingsTool called with parameters:', {
       ownerId,
       participantId,
       query,
       scheduledAfter,
       scheduledBefore,
       createdAfter,
-      createdBefore
-    )
+      createdBefore,
+    })
     const user = await getCurrentUser()
     if (!user.organizationId) {
       throw new Error('User must belong to an organization')

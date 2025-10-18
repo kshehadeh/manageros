@@ -32,6 +32,12 @@ export const initiativesTool = {
     teamId?: string
     query?: string
   }) => {
+    console.log('🔧 initiativesTool called with parameters:', {
+      status,
+      rag,
+      teamId,
+      query,
+    })
     const user = await getCurrentUser()
     if (!user.organizationId) {
       throw new Error('User must belong to an organization')

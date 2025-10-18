@@ -28,6 +28,11 @@ export const peopleTool = {
     includeManager?: boolean
     includeReports?: boolean
   }) => {
+    console.log('🔧 peopleTool called with parameters:', {
+      query,
+      includeManager,
+      includeReports,
+    })
     try {
       const user = await getCurrentUser()
       if (!user.organizationId) {

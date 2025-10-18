@@ -14,6 +14,11 @@ import { personLookupTool } from '@/lib/ai/tools/person-lookup-tool'
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json()
+    console.log('🔧 Chat API called with messages:', messages.length)
+    console.log(
+      '🔧 Last message:',
+      messages[messages.length - 1]?.content || 'No content'
+    )
 
     const convertedMessages = convertToModelMessages(messages)
 
@@ -76,6 +81,7 @@ export async function POST(req: Request) {
       system: `You are an AI assistant for ManagerOS, a management platform for engineering managers. You help users understand and interact with their organizational data including people, initiatives, tasks, meetings, and teams.
 
 Key guidelines:
+- If a time-based prompt is provided, always use the dateTime tool to get the current date and helpful date ranges
 - Always use the available tools to fetch current data from the database
 - When asked about relative time periods (like "last week", "this month", "yesterday"), FIRST call the dateTime tool to get the current date and helpful date ranges
 - When asked about a specific person by name (e.g., "John", "Sarah Smith"), use the personLookup tool to find their person ID. If multiple matches are found, ask the user to clarify which person they mean.
@@ -95,7 +101,14 @@ Key guidelines:
 `,
     })
 
-    return result.toUIMessageStreamResponse()
+    console.log('🔧 StreamText result created, returning response')
+    try {
+      return result.toUIMessageStreamResponse()
+    } catch (error) {
+      console.error('Error in toUIMessageStreamResponse:', error)
+      // Fallback to text stream if UI message stream fails
+      return result.toTextStreamResponse()
+    }
   } catch (error) {
     console.error('Error in chat API:', error)
     return new Response(JSON.stringify({ error: 'Internal server error' }), {

@@ -19,6 +19,10 @@ export const teamsTool = {
     parentId?: string
     query?: string
   }) => {
+    console.log('🔧 teamsTool called with parameters:', {
+      parentId,
+      query,
+    })
     const user = await getCurrentUser()
     if (!user.organizationId) {
       throw new Error('User must belong to an organization')
