@@ -65,6 +65,7 @@ import {
   EditMenuItem,
   DeleteMenuItem,
 } from '@/components/common/context-menu-items'
+import { dataTableStyles } from '@/components/common/data-table-styles'
 
 // Type for column meta
 interface ColumnMeta {
@@ -298,7 +299,7 @@ export function OneOnOneDataTable({
   }
 
   return (
-    <div className='space-y-4'>
+    <div className={dataTableStyles.container}>
       {/* Filters and Controls */}
       {!hideFilters && (
         <div className='flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>
@@ -426,7 +427,7 @@ export function OneOnOneDataTable({
       )}
 
       {/* Table */}
-      <div className='rounded-md border relative'>
+      <div className={dataTableStyles.tableWrapperRelative}>
         {/* Loading Spinner in top right corner */}
         {loading && (
           <div className='absolute top-2 right-2 z-10 bg-background/80 rounded-full p-2'>
@@ -469,7 +470,7 @@ export function OneOnOneDataTable({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className='h-24 text-center'
+                  className={dataTableStyles.body.emptyCell}
                 >
                   Loading...
                 </TableCell>
@@ -552,7 +553,7 @@ export function OneOnOneDataTable({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className='h-24 text-center'
+                  className={dataTableStyles.body.emptyCell}
                 >
                   No 1:1s found.
                 </TableCell>

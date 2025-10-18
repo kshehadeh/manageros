@@ -82,6 +82,7 @@ import {
   ViewDetailsMenuItem,
   DeleteMenuItem,
 } from '@/components/common/context-menu-items'
+import { dataTableStyles } from '@/components/common/data-table-styles'
 
 interface TaskDataTableProps {
   onTaskUpdate?: () => void
@@ -457,7 +458,7 @@ export function TaskDataTable({
   }
 
   return (
-    <div className='space-y-4'>
+    <div className={dataTableStyles.container}>
       {/* Filter Controls */}
       {!hideFilters && (
         <div>
@@ -763,11 +764,11 @@ export function TaskDataTable({
       )}
 
       {/* Task Table */}
-      <div className='rounded-md border relative'>
+      <div className={dataTableStyles.tableWrapperRelative}>
         {/* Loading Spinner in top right corner */}
         {loading && (
-          <div className='absolute top-2 right-2 z-10 bg-background/80 rounded-full p-2'>
-            <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent' />
+          <div className={dataTableStyles.loadingSpinner}>
+            <div className={dataTableStyles.loadingSpinnerIcon} />
           </div>
         )}
         <Table className='table-fixed'>
@@ -807,7 +808,10 @@ export function TaskDataTable({
                 if (row.getIsGrouped()) {
                   // Group header row
                   return (
-                    <TableRow key={row.id} className='bg-muted/50'>
+                    <TableRow
+                      key={row.id}
+                      className={dataTableStyles.body.groupRow}
+                    >
                       <TableCell
                         colSpan={
                           columns.filter(
@@ -881,7 +885,7 @@ export function TaskDataTable({
                     columns.filter(col => !(col.meta as ColumnMeta)?.hidden)
                       .length
                   }
-                  className='h-24 text-center'
+                  className={dataTableStyles.body.emptyCell}
                 >
                   No tasks found.
                 </TableCell>

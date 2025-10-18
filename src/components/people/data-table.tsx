@@ -67,6 +67,7 @@ import {
   EditMenuItem,
   DeleteMenuItem,
 } from '@/components/common/context-menu-items'
+import { dataTableStyles } from '@/components/common/data-table-styles'
 
 // Type for column meta
 interface ColumnMeta {
@@ -343,24 +344,24 @@ export function PeopleDataTable({
   }
 
   return (
-    <div className='space-y-4'>
+    <div className={dataTableStyles.container}>
       {/* Filter Controls */}
       {!hideFilters && (
         <div>
-          <div className='flex items-center justify-between gap-4'>
+          <div className={dataTableStyles.filterBar.topRow}>
             <div className='flex items-center gap-2 flex-1'>
               {/* Search Input - Always visible */}
-              <div className='relative flex-1 max-w-sm'>
-                <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
+              <div className={dataTableStyles.filterBar.searchWrapper}>
+                <Search className={dataTableStyles.filterBar.searchIcon} />
                 <Input
                   placeholder='Search people...'
                   value={searchInput}
                   onChange={e => setSearchInput(e.target.value)}
-                  className='pl-8'
+                  className={dataTableStyles.filterBar.searchInput}
                 />
                 {isSearching && (
                   <div className='absolute right-2 top-2.5'>
-                    <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent' />
+                    <div className={dataTableStyles.loadingSpinnerIcon} />
                   </div>
                 )}
               </div>
@@ -433,8 +434,10 @@ export function PeopleDataTable({
                       </div>
 
                       {/* Status Filter */}
-                      <div className='space-y-2'>
-                        <label className='text-sm font-medium'>Status</label>
+                      <div className={dataTableStyles.filter.section}>
+                        <label className={dataTableStyles.filter.sectionLabel}>
+                          Status
+                        </label>
                         <Select
                           value={settings.filters.status || 'all'}
                           onValueChange={value =>
@@ -471,7 +474,9 @@ export function PeopleDataTable({
                         value={settings.grouping}
                         onValueChange={updateGrouping}
                       >
-                        <SelectTrigger className='w-32'>
+                        <SelectTrigger
+                          className={dataTableStyles.grouping.trigger}
+                        >
                           <Group className='h-4 w-4' />
                           <SelectValue />
                         </SelectTrigger>
@@ -497,35 +502,44 @@ export function PeopleDataTable({
                   <Button
                     variant='outline'
                     size='sm'
-                    className={`flex items-center gap-2 ${
-                      settings.sort?.field ? 'border-primary bg-primary/5' : ''
-                    }`}
+                    className={
+                      settings.sort?.field
+                        ? dataTableStyles.sort.buttonActive
+                        : dataTableStyles.sort.button
+                    }
                   >
                     <ArrowUpDown className='h-4 w-4' />
                     Sort
                     {settings.sort?.field && (
-                      <div className='h-2 w-2 bg-primary rounded-full' />
+                      <div className={dataTableStyles.sort.indicator} />
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className='w-80' align='end'>
-                  <div className='space-y-4'>
-                    <div className='flex items-center justify-between'>
-                      <h3 className='font-medium'>Sort People</h3>
+                <PopoverContent
+                  className={dataTableStyles.sort.popoverContent}
+                  align='end'
+                >
+                  <div className={dataTableStyles.sort.content}>
+                    <div className={dataTableStyles.sort.header}>
+                      <h3 className={dataTableStyles.sort.headerTitle}>
+                        Sort People
+                      </h3>
                       <button
                         onClick={() => {
                           updateSort({ field: '', direction: 'asc' })
                         }}
-                        className='text-sm text-muted-foreground hover:text-foreground'
+                        className={dataTableStyles.sort.clearButton}
                       >
                         Clear
                       </button>
                     </div>
 
-                    <div className='space-y-4'>
+                    <div className={dataTableStyles.sort.content}>
                       {/* Sort Field */}
-                      <div className='space-y-2'>
-                        <label className='text-sm font-medium'>Sort By</label>
+                      <div className={dataTableStyles.sort.section}>
+                        <label className={dataTableStyles.sort.sectionLabel}>
+                          Sort By
+                        </label>
                         <Select
                           value={settings.sort?.field || 'none'}
                           onValueChange={value =>
@@ -550,8 +564,10 @@ export function PeopleDataTable({
                       </div>
 
                       {/* Sort Direction */}
-                      <div className='space-y-2'>
-                        <label className='text-sm font-medium'>Direction</label>
+                      <div className={dataTableStyles.sort.section}>
+                        <label className={dataTableStyles.sort.sectionLabel}>
+                          Direction
+                        </label>
                         <Select
                           value={settings.sort?.direction || 'asc'}
                           onValueChange={value =>
@@ -576,7 +592,7 @@ export function PeopleDataTable({
                 </PopoverContent>
               </Popover>
             </div>
-            <div className='text-sm text-muted-foreground'>
+            <div className={dataTableStyles.filterBar.resultsCount}>
               {enablePagination && peopleData?.pagination ? (
                 <>
                   {peopleData.pagination.totalCount > 0 ? (
@@ -606,7 +622,7 @@ export function PeopleDataTable({
       )}
 
       {/* Table */}
-      <div className='rounded-md border overflow-hidden'>
+      <div className={dataTableStyles.tableWrapper}>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
@@ -641,7 +657,7 @@ export function PeopleDataTable({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className='h-24 text-center'
+                  className={dataTableStyles.body.emptyCell}
                 >
                   <div className='flex items-center justify-center'>
                     <div className='h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent' />
@@ -660,17 +676,20 @@ export function PeopleDataTable({
                   )
 
                   return (
-                    <TableRow key={row.id} className='bg-muted/50'>
+                    <TableRow
+                      key={row.id}
+                      className={dataTableStyles.body.groupRow}
+                    >
                       <TableCell
                         colSpan={
                           columns.filter(c => !(c.meta as ColumnMeta)?.hidden)
                             .length
                         }
-                        className='font-medium py-3'
+                        className={dataTableStyles.body.groupCell}
                       >
                         <button
                           onClick={() => row.toggleExpanded()}
-                          className='flex items-center gap-2 hover:text-primary transition-colors w-full'
+                          className={dataTableStyles.groupToggle}
                         >
                           {row.getIsExpanded() ? (
                             <ChevronDown className='h-4 w-4' />
@@ -693,7 +712,7 @@ export function PeopleDataTable({
                     key={row.id}
                     data-state={row.getIsSelected() && 'selected'}
                     onClick={() => handleRowClick(row.original.id)}
-                    className='cursor-pointer hover:bg-muted/50 transition-colors'
+                    className={dataTableStyles.body.row}
                   >
                     {row.getVisibleCells().map(cell => {
                       const meta = cell.column.columnDef.meta as
@@ -722,7 +741,7 @@ export function PeopleDataTable({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className='h-24 text-center'
+                  className={dataTableStyles.body.emptyCell}
                 >
                   No people found.
                 </TableCell>
@@ -734,12 +753,12 @@ export function PeopleDataTable({
 
       {/* Pagination Controls */}
       {enablePagination && peopleData?.pagination && (
-        <div className='flex items-center justify-between px-2'>
-          <div className='flex-1 text-sm text-muted-foreground'>
+        <div className={dataTableStyles.pagination.container}>
+          <div className={dataTableStyles.pagination.pageInfo}>
             Page {peopleData.pagination.page} of{' '}
             {peopleData.pagination.totalPages}
           </div>
-          <div className='flex items-center space-x-2'>
+          <div className={dataTableStyles.pagination.controls}>
             <Button
               variant='outline'
               size='sm'

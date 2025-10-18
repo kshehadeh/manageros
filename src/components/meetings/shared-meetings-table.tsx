@@ -32,6 +32,7 @@ import {
   EditMenuItem,
   DeleteMenuItem,
 } from '@/components/common/context-menu-items'
+import { dataTableStyles } from '@/components/common/data-table-styles'
 
 export type MeetingWithRelations = Meeting & {
   team: Team | null
@@ -523,7 +524,7 @@ export function SharedMeetingsTable({
 
   // Render the dynamic table
   return (
-    <div className='rounded-md border'>
+    <div className={dataTableStyles.tableWrapper}>
       <Table>
         <TableHeader>
           <TableRow>

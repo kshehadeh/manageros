@@ -62,6 +62,7 @@ import {
   ViewDetailsMenuItem,
   EditMenuItem,
 } from '@/components/common/context-menu-items'
+import { dataTableStyles } from '@/components/common/data-table-styles'
 
 interface TeamsDataTableProps {
   settingsId?: string
@@ -240,7 +241,7 @@ export function TeamsDataTable({
   }, [effectiveGrouping.length, table])
 
   return (
-    <div className='space-y-4'>
+    <div className={dataTableStyles.container}>
       {/* Filters */}
       <div className='flex items-center gap-3 flex-wrap'>
         <div className='relative w-full sm:w-64'>
@@ -313,7 +314,7 @@ export function TeamsDataTable({
       </div>
 
       {/* Table */}
-      <div className='rounded-md border relative'>
+      <div className={dataTableStyles.tableWrapperRelative}>
         {/* Loading Spinner in top right corner */}
         {loading && (
           <div className='absolute top-2 right-2 z-10 bg-background/80 rounded-full p-2'>
@@ -358,7 +359,10 @@ export function TeamsDataTable({
                   if (row.getIsGrouped()) {
                     // Group header row
                     return (
-                      <TableRow key={row.id} className='bg-muted/50'>
+                      <TableRow
+                        key={row.id}
+                        className={dataTableStyles.body.groupRow}
+                      >
                         <TableCell
                           colSpan={
                             columns.filter(

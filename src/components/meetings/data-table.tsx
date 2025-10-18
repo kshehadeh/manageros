@@ -70,6 +70,7 @@ import type {
   MeetingInstanceWithRelations,
 } from '@/components/meetings/shared-meetings-table'
 import { useTeamsCache } from '@/hooks/use-organization-cache'
+import { dataTableStyles } from '@/components/common/data-table-styles'
 
 // Type for column meta
 interface ColumnMeta {
@@ -400,7 +401,7 @@ export function MeetingDataTable({
   }
 
   return (
-    <div className='space-y-4'>
+    <div className={dataTableStyles.container}>
       {/* Filter Controls */}
       {!hideFilters && (
         <div>
@@ -698,7 +699,7 @@ export function MeetingDataTable({
       )}
 
       {/* Meeting Table */}
-      <div className='rounded-md border relative'>
+      <div className={dataTableStyles.tableWrapperRelative}>
         {/* Loading Spinner in top right corner */}
         {loading && (
           <div className='absolute top-2 right-2 z-10 bg-background/80 rounded-full p-2'>
@@ -742,7 +743,10 @@ export function MeetingDataTable({
                 if (row.getIsGrouped()) {
                   // Group header row
                   return (
-                    <TableRow key={row.id} className='bg-muted/50'>
+                    <TableRow
+                      key={row.id}
+                      className={dataTableStyles.body.groupRow}
+                    >
                       <TableCell
                         colSpan={
                           columns.filter(
@@ -820,7 +824,7 @@ export function MeetingDataTable({
                     columns.filter(col => !(col.meta as ColumnMeta)?.hidden)
                       .length
                   }
-                  className='h-24 text-center'
+                  className={dataTableStyles.body.emptyCell}
                 >
                   No meetings found.
                 </TableCell>

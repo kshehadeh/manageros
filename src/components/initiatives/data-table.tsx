@@ -67,6 +67,7 @@ import {
   EditMenuItem,
   DeleteMenuItem,
 } from '@/components/common/context-menu-items'
+import { dataTableStyles } from '@/components/common/data-table-styles'
 
 // Type for column meta
 interface ColumnMeta {
@@ -339,7 +340,7 @@ export function InitiativeDataTable({
   }
 
   return (
-    <div className='space-y-4'>
+    <div className={dataTableStyles.container}>
       {/* Filters Section */}
       {!hideFilters && (
         <div className='flex flex-col gap-4'>
@@ -629,7 +630,7 @@ export function InitiativeDataTable({
       )}
 
       {/* Table */}
-      <div className='rounded-md border relative'>
+      <div className={dataTableStyles.tableWrapperRelative}>
         {/* Loading Spinner in top right corner */}
         {loading && (
           <div className='absolute top-2 right-2 z-10 bg-background/80 rounded-full p-2'>
@@ -676,7 +677,7 @@ export function InitiativeDataTable({
                       return !meta?.hidden
                     }).length
                   }
-                  className='h-24 text-center'
+                  className={dataTableStyles.body.emptyCell}
                 >
                   <div className='flex items-center justify-center'>
                     <div className='h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent' />
@@ -769,7 +770,7 @@ export function InitiativeDataTable({
                       return !meta?.hidden
                     }).length
                   }
-                  className='h-24 text-center'
+                  className={dataTableStyles.body.emptyCell}
                 >
                   {hasActiveFilters
                     ? 'No initiatives found matching your filters.'

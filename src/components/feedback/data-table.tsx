@@ -44,6 +44,7 @@ import { DeleteModal } from '@/components/common/delete-modal'
 import { FeedbackDialog } from './feedback-dialog'
 import { deleteFeedback } from '@/lib/actions/feedback'
 import type { FeedbackListItem } from '@/types/api'
+import { dataTableStyles } from '@/components/common/data-table-styles'
 
 interface FeedbackDataTableProps {
   onFeedbackUpdate?: () => void
@@ -311,7 +312,7 @@ export function FeedbackDataTable({
   }
 
   return (
-    <div className='space-y-4'>
+    <div className={dataTableStyles.container}>
       {/* Filter Controls */}
       {!hideFilters && (
         <div>
@@ -552,7 +553,7 @@ export function FeedbackDataTable({
       )}
 
       {/* Table */}
-      <div className='rounded-md border overflow-hidden'>
+      <div className={dataTableStyles.tableWrapper}>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
@@ -582,7 +583,7 @@ export function FeedbackDataTable({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className='h-24 text-center'
+                  className={dataTableStyles.body.emptyCell}
                 >
                   <div className='flex items-center justify-center'>
                     <div className='h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent' />
@@ -596,7 +597,7 @@ export function FeedbackDataTable({
                     key={row.id}
                     data-state={row.getIsSelected() && 'selected'}
                     onClick={() => handleRowClick(row.original.id)}
-                    className='cursor-pointer hover:bg-muted/50 transition-colors'
+                    className={dataTableStyles.body.row}
                   >
                     {row.getVisibleCells().map(cell => {
                       return (
@@ -620,7 +621,7 @@ export function FeedbackDataTable({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className='h-24 text-center'
+                  className={dataTableStyles.body.emptyCell}
                 >
                   {hasActiveFilters
                     ? 'No feedback matches your filters.'
