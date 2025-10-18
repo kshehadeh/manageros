@@ -123,6 +123,7 @@ export async function getOneOnOneById(id: string) {
           name: true,
           email: true,
           role: true,
+          avatar: true,
         },
       },
       report: {
@@ -131,6 +132,7 @@ export async function getOneOnOneById(id: string) {
           name: true,
           email: true,
           role: true,
+          avatar: true,
         },
       },
     },
