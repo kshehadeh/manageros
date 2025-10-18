@@ -3,6 +3,7 @@ import { getReport } from '@/lib/reports/registry'
 import { requireAuth } from '@/lib/auth-utils'
 import { DynamicReportForm } from '@/components/dynamic-report-form'
 import { ReportRunBreadcrumbClient } from '@/components/report-run-breadcrumb-client'
+import { z } from 'zod'
 
 export default async function RunReportPage({
   params,
@@ -19,8 +20,8 @@ export default async function RunReportPage({
 
   // For initial implementation, accept query params matching schema keys
   const input: Record<string, unknown> = {}
-  if (def.inputSchema._def && def.inputSchema._def.shape) {
-    for (const key of Object.keys(def.inputSchema._def.shape)) {
+  if (def.inputSchema instanceof z.ZodObject) {
+    for (const key of Object.keys(def.inputSchema.shape)) {
       const v = searchParamsFinal[key]
       if (typeof v === 'string') input[key] = v
     }

@@ -530,7 +530,7 @@ function parseTeamCSV(csvText: string): {
             description: rowData.description || '',
             parent: rowData.parent || '',
           },
-          errors: error.errors.map(e => `${e.path.join('.')}: ${e.message}`),
+          errors: error.issues.map(e => `${e.path.join('.')}: ${e.message}`),
         })
       } else {
         errors.push({

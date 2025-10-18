@@ -209,7 +209,7 @@ export async function createJobRole(data: JobRoleFormData) {
     return jobRole
   } catch (error) {
     if (error instanceof z.ZodError) {
-      throw new Error(error.errors.map(e => e.message).join(', '))
+      throw new Error(error.issues.map(e => e.message).join(', '))
     }
     throw error
   }
@@ -301,7 +301,7 @@ export async function updateJobRole(
     return updatedRole
   } catch (error) {
     if (error instanceof z.ZodError) {
-      throw new Error(error.errors.map(e => e.message).join(', '))
+      throw new Error(error.issues.map(e => e.message).join(', '))
     }
     throw error
   }
@@ -349,7 +349,7 @@ export async function deleteJobRole(id: string) {
     return { success: true }
   } catch (error) {
     if (error instanceof z.ZodError) {
-      throw new Error(error.errors.map(e => e.message).join(', '))
+      throw new Error(error.issues.map(e => e.message).join(', '))
     }
     throw error
   }

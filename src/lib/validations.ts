@@ -222,7 +222,10 @@ export type FeedbackCampaignFormData = z.infer<typeof feedbackCampaignSchema>
 export const feedbackResponseSchema = z.object({
   campaignId: z.string().min(1, 'Campaign ID is required'),
   responderEmail: z.string().email('Invalid email address'),
-  responses: z.record(z.any()), // Flexible JSON structure for feedback responses
+  responses: z.record(
+    z.string(),
+    z.union([z.string(), z.number(), z.boolean(), z.null()])
+  ), // Prisma Json type compatible
 })
 
 export type FeedbackResponseFormData = z.infer<typeof feedbackResponseSchema>
@@ -230,7 +233,10 @@ export type FeedbackResponseFormData = z.infer<typeof feedbackResponseSchema>
 export const feedbackResponseByInviteLinkSchema = z.object({
   inviteLink: z.string().min(1, 'Invite link is required'),
   responderEmail: z.string().email('Invalid email address'),
-  responses: z.record(z.any()), // Flexible JSON structure for feedback responses
+  responses: z.record(
+    z.string(),
+    z.union([z.string(), z.number(), z.boolean(), z.null()])
+  ), // Prisma Json type compatible
 })
 
 export type FeedbackResponseByInviteLinkFormData = z.infer<
