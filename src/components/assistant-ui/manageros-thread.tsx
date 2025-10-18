@@ -254,6 +254,13 @@ const MessageError: FC = () => {
     <MessagePrimitive.Error>
       <ErrorPrimitive.Root className='aui-message-error-root mt-2 rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive dark:bg-destructive/5 dark:text-red-200'>
         <ErrorPrimitive.Message className='aui-message-error-message line-clamp-2' />
+        <div className='mt-2'>
+          <ActionBarPrimitive.Reload asChild>
+            <Button variant='outline' size='sm'>
+              Try Again
+            </Button>
+          </ActionBarPrimitive.Reload>
+        </div>
       </ErrorPrimitive.Root>
     </MessagePrimitive.Error>
   )

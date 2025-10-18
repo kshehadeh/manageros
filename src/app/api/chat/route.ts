@@ -25,6 +25,7 @@ export async function POST(req: Request) {
     const result = streamText({
       model: openai('gpt-4o'),
       messages: convertedMessages,
+
       tools: {
         people: {
           description: peopleTool.description,
@@ -111,9 +112,44 @@ Key guidelines:
     }
   } catch (error) {
     console.error('Error in chat API:', error)
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    })
+
+    // Provide more specific error messages based on error type
+    let errorMessage = 'An error occurred while processing your request'
+    let statusCode = 500
+
+    if (error instanceof Error) {
+      if (error.message.includes('API key')) {
+        errorMessage = 'AI service configuration error. Please contact support.'
+        statusCode = 503
+      } else if (error.message.includes('rate limit')) {
+        errorMessage = 'Rate limit exceeded. Please try again in a moment.'
+        statusCode = 429
+      } else if (error.message.includes('timeout')) {
+        errorMessage = 'Request timed out. Please try again.'
+        statusCode = 408
+      } else if (error.message.includes('network')) {
+        errorMessage =
+          'Network error. Please check your connection and try again.'
+        statusCode = 503
+      } else {
+        errorMessage = error.message
+      }
+    }
+
+    return new Response(
+      JSON.stringify({
+        error: errorMessage,
+        details:
+          process.env.NODE_ENV === 'development'
+            ? error instanceof Error
+              ? error.message
+              : String(error)
+            : undefined,
+      }),
+      {
+        status: statusCode,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    )
   }
 }

@@ -4,10 +4,11 @@ import { Bot, X, Plus, Expand, Shrink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AssistantRuntimeProvider } from '@assistant-ui/react'
 import { useChatRuntime } from '@assistant-ui/react-ai-sdk'
-import { DefaultChatTransport } from 'ai'
+import { AssistantChatTransport } from '@assistant-ui/react-ai-sdk'
 import { useCallback } from 'react'
 
 import { ManagerOSThread } from '@/components/assistant-ui/manageros-thread'
+import { AssistantErrorBoundary } from '@/components/assistant-ui/assistant-error-boundary'
 
 interface ManagerOSAssistantSidebarProps {
   isOpen: boolean
@@ -26,7 +27,7 @@ export const ManagerOSAssistantSidebar: FC<ManagerOSAssistantSidebarProps> = ({
 }) => {
   // Configure the chat runtime for assistant-ui
   const runtime = useChatRuntime({
-    transport: new DefaultChatTransport({
+    transport: new AssistantChatTransport({
       api: '/api/chat',
     }),
   })
@@ -99,7 +100,9 @@ export const ManagerOSAssistantSidebar: FC<ManagerOSAssistantSidebarProps> = ({
 
         {/* Chat Thread */}
         <div className='flex-1 overflow-hidden'>
-          <ManagerOSThread exampleQuestions={exampleQuestions} />
+          <AssistantErrorBoundary>
+            <ManagerOSThread exampleQuestions={exampleQuestions} />
+          </AssistantErrorBoundary>
         </div>
       </div>
     </AssistantRuntimeProvider>
