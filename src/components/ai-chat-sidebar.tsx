@@ -1,146 +1,18 @@
 'use client'
 
-import { DefaultChatTransport } from 'ai'
-import { useChat, type UIMessage } from '@ai-sdk/react'
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type FormEvent,
-} from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Card, CardContent } from '@/components/ui/card'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import {
-  Send,
-  Bot,
-  User,
-  X,
-  Users,
-  Rocket,
-  ListTodo,
-  Calendar,
-  Building2,
-  Expand,
-  Shrink,
-  Plus,
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { AiResponseText } from './ai-response-text'
+import { useEffect } from 'react'
 import { useUserSettings } from '@/lib/hooks/use-user-settings'
 import { useAIChat } from '@/components/ai-chat-provider'
-import { PersonAvatar } from '@/components/people/person-avatar'
-import { getCurrentUserWithPerson } from '@/lib/actions/organization'
+import { ManagerOSAssistantSidebar } from '@/components/assistant-ui/manageros-assistant-sidebar'
 
 interface AIChatSidebarProps {
   isOpen: boolean
   onClose: () => void
 }
 
-type MessagePart = UIMessage['parts'][number]
-
-// Map tool names to their corresponding icons
-const getToolIcon = (toolName: string) => {
-  switch (toolName) {
-    case 'people':
-      return Users
-    case 'initiatives':
-      return Rocket
-    case 'tasks':
-      return ListTodo
-    case 'meetings':
-      return Calendar
-    case 'teams':
-      return Building2
-    default:
-      return Bot // fallback icon
-  }
-}
-
 export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
-  const { settings, updateSetting, isLoaded } = useUserSettings()
+  const { settings, updateSetting } = useUserSettings()
   const { openedViaKeyboard, setOpenedViaKeyboard } = useAIChat()
-  const [inputValue, setInputValue] = useState('')
-  const [currentPerson, setCurrentPerson] = useState<{
-    name: string
-    avatar: string | null
-  } | null>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const transport = useMemo(
-    () => new DefaultChatTransport({ api: '/api/chat' }),
-    []
-  )
-  const { messages, sendMessage, status, setMessages } = useChat({
-    transport: transport,
-  })
-
-  const isLoading = status === 'submitted' || status === 'streaming'
-
-  // Handler to start a new chat
-  const handleNewChat = useCallback(() => {
-    setMessages([])
-    setInputValue('')
-  }, [setMessages])
-
-  // Fetch current user's person data
-  useEffect(() => {
-    const loadCurrentPerson = async () => {
-      try {
-        const userWithPerson = await getCurrentUserWithPerson()
-        if (userWithPerson.person) {
-          setCurrentPerson({
-            name: userWithPerson.person.name,
-            avatar: userWithPerson.person.avatar,
-          })
-        }
-      } catch (error) {
-        console.error('Failed to load current person:', error)
-      }
-    }
-    loadCurrentPerson()
-  }, [])
-
-  const handleInputChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      setInputValue(event.target.value)
-    },
-    []
-  )
-
-  const handleFormSubmit = useCallback(
-    (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault()
-      const trimmedInput = inputValue.trim()
-
-      if (!trimmedInput) {
-        return
-      }
-
-      setInputValue('')
-      void sendMessage({ text: trimmedInput }).catch(() => {
-        setInputValue(trimmedInput)
-      })
-    },
-    [inputValue, sendMessage]
-  )
-
-  // Focus input when opened via keyboard
-  useEffect(() => {
-    if (isOpen && openedViaKeyboard && inputRef.current) {
-      // Small delay to ensure the sidebar is fully rendered
-      const timeoutId = setTimeout(() => {
-        inputRef.current?.focus()
-        setOpenedViaKeyboard(false) // Reset the flag
-      }, 100)
-
-      return () => clearTimeout(timeoutId)
-    }
-  }, [isOpen, openedViaKeyboard, setOpenedViaKeyboard])
 
   // Handle Escape key to close the AI chat
   useEffect(() => {
@@ -157,302 +29,42 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, onClose])
 
-  const renderMessagePart = useCallback((part: MessagePart, index: number) => {
-    const key = (() => {
-      if ('id' in part && part.id) {
-        return `${part.type}-${part.id}`
-      }
-      if (
-        part.type.startsWith('tool-') &&
-        'toolCallId' in part &&
-        part.toolCallId
-      ) {
-        return `${part.type}-${part.toolCallId}`
-      }
-      return `${part.type}-${index}`
-    })()
+  // Focus input when opened via keyboard
+  useEffect(() => {
+    if (isOpen && openedViaKeyboard) {
+      // Small delay to ensure the sidebar is fully rendered
+      const timeoutId = setTimeout(() => {
+        // Focus the composer input in the assistant-ui thread
+        const composerInput = document.querySelector(
+          '[aria-label="Message input"]'
+        ) as HTMLTextAreaElement
+        composerInput?.focus()
+        setOpenedViaKeyboard(false) // Reset the flag
+      }, 100)
 
-    if (part.type === 'text' || part.type === 'reasoning') {
-      return (
-        <div key={key} className='text-sm leading-relaxed'>
-          <AiResponseText text={part.text} />
-        </div>
-      )
+      return () => clearTimeout(timeoutId)
     }
-
-    if (part.type === 'file') {
-      return (
-        <a
-          key={key}
-          href={part.url}
-          target='_blank'
-          rel='noopener noreferrer'
-          className='text-xs underline break-all'
-        >
-          {part.filename ?? part.url}
-        </a>
-      )
-    }
-
-    if (part.type === 'source-url') {
-      return (
-        <a
-          key={key}
-          href={part.url}
-          target='_blank'
-          rel='noopener noreferrer'
-          className='text-xs underline'
-        >
-          {part.title ?? part.url}
-        </a>
-      )
-    }
-
-    if (part.type === 'source-document') {
-      return (
-        <div key={key} className='text-xs space-y-1'>
-          <div className='font-medium'>{part.title}</div>
-          <div className='text-muted-foreground'>
-            {part.filename ?? part.mediaType}
-          </div>
-        </div>
-      )
-    }
-
-    if (part.type === 'dynamic-tool' || part.type.startsWith('tool-')) {
-      const toolName =
-        part.type === 'dynamic-tool'
-          ? 'dynamic'
-          : part.type.replace('tool-', '')
-
-      // Get the appropriate icon for the tool
-      const IconComponent = getToolIcon(toolName)
-
-      return (
-        <div
-          key={key}
-          className='flex items-center gap-2 text-xs text-muted-foreground'
-        >
-          <div className='flex items-center gap-1'>
-            <IconComponent className='h-3 w-3 text-primary' />
-            Calling {toolName}...
-          </div>
-        </div>
-      )
-    }
-
-    if (typeof part.type === 'string' && part.type.startsWith('data-')) {
-      const data = 'data' in part ? part.data : null
-      return (
-        <pre
-          key={key}
-          className='text-xs whitespace-pre-wrap rounded bg-muted p-2'
-        >
-          {JSON.stringify(data, null, 2)}
-        </pre>
-      )
-    }
-
-    if (part.type === 'step-start') {
-      return ''
-    }
-
-    return (
-      <pre
-        key={key}
-        className='text-xs whitespace-pre-wrap rounded bg-muted p-2 text-muted-foreground'
-      >
-        {JSON.stringify(part, null, 2)}
-      </pre>
-    )
-  }, [])
+  }, [isOpen, openedViaKeyboard, setOpenedViaKeyboard])
 
   const exampleQuestions = [
     'List initiatives that are currently in progress',
-    'Who manages Karim Shehadeh?',
     'Show me all high priority tasks',
     'What teams do we have?',
     'Find meetings scheduled for this week',
   ]
 
-  if (!isOpen) return null
-
   return (
-    <div
-      className={cn(
-        'fixed top-0 h-full bg-card shadow-lg z-50 flex flex-col',
-        // Mobile: always fullscreen
-        'w-full left-0',
-        // Desktop: sidebar mode unless fullscreen
-        'md:w-96 md:right-0 md:left-auto md:border-l',
-        // Desktop fullscreen mode
-        settings.chatWindowSettings.isFullscreen &&
-          'md:w-full md:left-0 md:right-0 md:border-l-0'
-      )}
-    >
-      {/* Header */}
-      <div className='flex items-center justify-between p-4 border-b'>
-        <div className='flex items-center gap-2'>
-          <Bot className='h-5 w-5 text-primary' />
-          <h2 className='font-semibold'>AI Chat</h2>
-        </div>
-        <div className='flex items-center gap-1'>
-          {/* New Chat button */}
-          <Button
-            variant='ghost'
-            size='sm'
-            onClick={handleNewChat}
-            disabled={isLoading || messages.length === 0}
-            title='Start a new chat'
-          >
-            <Plus className='h-4 w-4' />
-          </Button>
-          {/* Desktop fullscreen toggle - hidden on mobile */}
-          <Button
-            variant='ghost'
-            size='sm'
-            onClick={() =>
-              updateSetting('chatWindowSettings', {
-                ...settings.chatWindowSettings,
-                isFullscreen: !settings.chatWindowSettings.isFullscreen,
-              })
-            }
-            className='hidden md:flex'
-            disabled={!isLoaded}
-            title={
-              settings.chatWindowSettings.isFullscreen
-                ? 'Exit fullscreen'
-                : 'Enter fullscreen'
-            }
-          >
-            {settings.chatWindowSettings.isFullscreen ? (
-              <Shrink className='h-4 w-4' />
-            ) : (
-              <Expand className='h-4 w-4' />
-            )}
-          </Button>
-          <Button
-            variant='ghost'
-            size='sm'
-            onClick={onClose}
-            title='Close chat'
-          >
-            <X className='h-4 w-4' />
-          </Button>
-        </div>
-      </div>
-
-      <>
-        {/* Messages */}
-        <ScrollArea className='flex-1 p-4'>
-          <div className='space-y-4'>
-            {messages.length === 0 && (
-              <div className='space-y-3'>
-                <p className='text-sm text-muted-foreground'>
-                  Ask me anything about your organization&apos;s data:
-                </p>
-                <div className='space-y-2'>
-                  {exampleQuestions.map((question, index) => (
-                    <Button
-                      key={index}
-                      variant='outline'
-                      size='sm'
-                      className='w-full justify-start text-left h-auto p-2'
-                      onClick={() => {
-                        setInputValue(question)
-                      }}
-                    >
-                      <span className='text-xs'>{question}</span>
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {messages.map((message: UIMessage) => (
-              <div
-                key={message.id}
-                className={cn(
-                  'flex gap-3',
-                  message.role === 'user' ? 'justify-end' : 'justify-start'
-                )}
-              >
-                {message.role === 'assistant' && (
-                  <Avatar className='h-8 w-8'>
-                    <AvatarFallback>
-                      <Bot className='h-4 w-4' />
-                    </AvatarFallback>
-                  </Avatar>
-                )}
-
-                <Card
-                  className={cn(
-                    'max-w-[80%]',
-                    message.role === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted'
-                  )}
-                >
-                  <CardContent className='p-3 space-y-2'>
-                    {message.parts.map((part, index) =>
-                      renderMessagePart(part, index)
-                    )}
-                  </CardContent>
-                </Card>
-
-                {message.role === 'user' &&
-                  (currentPerson ? (
-                    <PersonAvatar
-                      name={currentPerson.name}
-                      avatar={currentPerson.avatar}
-                      size='sm'
-                    />
-                  ) : (
-                    <Avatar className='h-8 w-8'>
-                      <AvatarFallback>
-                        <User className='h-4 w-4' />
-                      </AvatarFallback>
-                    </Avatar>
-                  ))}
-              </div>
-            ))}
-
-            {isLoading && (
-              <div className='flex gap-3'>
-                <Avatar className='h-8 w-8'>
-                  <AvatarFallback>
-                    <Bot className='h-4 w-4' />
-                  </AvatarFallback>
-                </Avatar>
-                <Card className='bg-muted'>
-                  <CardContent className='p-3'>
-                    <div className='text-sm text-muted-foreground'>
-                      Thinking...
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-          </div>
-        </ScrollArea>
-
-        {/* Input */}
-        <div className='p-4 border-t'>
-          <form onSubmit={handleFormSubmit} className='flex gap-2'>
-            <Input
-              ref={inputRef}
-              value={inputValue}
-              onChange={handleInputChange}
-              placeholder='Ask about your organization...'
-              disabled={isLoading}
-              className='flex-1'
-            />
-            <Button type='submit' disabled={isLoading || !inputValue?.trim()}>
-              <Send className='h-4 w-4' />
-            </Button>
-          </form>
-        </div>
-      </>
-    </div>
+    <ManagerOSAssistantSidebar
+      isOpen={isOpen}
+      onClose={onClose}
+      isFullscreen={settings.chatWindowSettings.isFullscreen}
+      onToggleFullscreen={() =>
+        updateSetting('chatWindowSettings', {
+          ...settings.chatWindowSettings,
+          isFullscreen: !settings.chatWindowSettings.isFullscreen,
+        })
+      }
+      exampleQuestions={exampleQuestions}
+    />
   )
 }
