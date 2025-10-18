@@ -43,13 +43,13 @@ export const ManagerOSAssistantSidebar: FC<ManagerOSAssistantSidebarProps> = ({
     <AssistantRuntimeProvider runtime={runtime}>
       <div
         className={cn(
-          'fixed top-0 h-full bg-card shadow-lg z-50 flex flex-col',
-          // Mobile: always fullscreen
-          'w-full left-0',
+          'fixed top-0 h-full bg-card shadow-lg z-[60] flex flex-col',
+          // Mobile: always fullscreen (use inset to ensure full coverage)
+          'inset-x-0 w-screen',
           // Desktop: sidebar mode unless fullscreen
-          'md:w-96 md:right-0 md:left-auto md:border-l',
+          'md:inset-x-auto md:w-96 md:right-0 md:border-l',
           // Desktop fullscreen mode
-          isFullscreen && 'md:w-full md:left-0 md:right-0 md:border-l-0'
+          isFullscreen && 'md:inset-x-0 md:w-full md:border-l-0'
         )}
       >
         {/* Header */}

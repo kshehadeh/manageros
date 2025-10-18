@@ -14,6 +14,29 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
   const { settings, updateSetting } = useUserSettings()
   const { openedViaKeyboard, setOpenedViaKeyboard } = useAIChat()
 
+  // Prevent body scroll on mobile when chat is open
+  useEffect(() => {
+    if (!isOpen) return
+
+    // Only prevent scroll on mobile (screens smaller than md breakpoint)
+    const isMobile = window.innerWidth < 768
+    if (isMobile) {
+      // Save current scroll position
+      const scrollY = window.scrollY
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollY}px`
+      document.body.style.width = '100%'
+
+      return () => {
+        // Restore scroll position
+        document.body.style.position = ''
+        document.body.style.top = ''
+        document.body.style.width = ''
+        window.scrollTo(0, scrollY)
+      }
+    }
+  }, [isOpen])
+
   // Handle Escape key to close the AI chat
   useEffect(() => {
     if (!isOpen) return
@@ -54,17 +77,28 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
   ]
 
   return (
-    <ManagerOSAssistantSidebar
-      isOpen={isOpen}
-      onClose={onClose}
-      isFullscreen={settings.chatWindowSettings.isFullscreen}
-      onToggleFullscreen={() =>
-        updateSetting('chatWindowSettings', {
-          ...settings.chatWindowSettings,
-          isFullscreen: !settings.chatWindowSettings.isFullscreen,
-        })
-      }
-      exampleQuestions={exampleQuestions}
-    />
+    <>
+      {/* Mobile overlay - blocks interaction with page behind chat */}
+      {isOpen && (
+        <div
+          className='md:hidden fixed inset-0 bg-black/50 z-50'
+          onClick={onClose}
+          aria-hidden='true'
+        />
+      )}
+
+      <ManagerOSAssistantSidebar
+        isOpen={isOpen}
+        onClose={onClose}
+        isFullscreen={settings.chatWindowSettings.isFullscreen}
+        onToggleFullscreen={() =>
+          updateSetting('chatWindowSettings', {
+            ...settings.chatWindowSettings,
+            isFullscreen: !settings.chatWindowSettings.isFullscreen,
+          })
+        }
+        exampleQuestions={exampleQuestions}
+      />
+    </>
   )
 }
