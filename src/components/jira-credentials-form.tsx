@@ -81,15 +81,10 @@ export function JiraCredentialsForm({
 
   return (
     <div className='space-y-4'>
-      <div>
-        <h3 className='text-lg font-medium text-foreground'>
-          Jira Integration
-        </h3>
-        <p className='text-sm text-muted-foreground'>
-          Configure your Jira credentials to enable work activity tracking for
-          your team members.
-        </p>
-      </div>
+      <p className='text-sm text-muted-foreground'>
+        Configure your Jira credentials to enable work activity tracking for
+        your team members.
+      </p>
 
       {initialCredentials ? (
         <div className='rounded-md bg-secondary/30 border p-4'>

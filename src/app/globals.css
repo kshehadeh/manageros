@@ -232,7 +232,7 @@ input[type='time']::-webkit-calendar-picker-indicator {
 }
 
 .page-section {
-  @apply space-y-4;
+  @apply space-y-6;
 }
 
 .page-section-title {

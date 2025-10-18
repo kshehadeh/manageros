@@ -324,33 +324,31 @@ export function TeamsDataTable({
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <TableHead
-                    key={header.id}
-                    className={
-                      (
-                        header.column.columnDef.meta as
-                          | { className?: string }
-                          | undefined
-                      )?.className
-                    }
-                  >
-                    {header.isPlaceholder ? null : (
-                      <div
-                        className='flex items-center gap-2 select-none'
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                        {header.column.getCanSort() && (
-                          <ArrowUpDown className='h-4 w-4 text-muted-foreground' />
-                        )}
-                      </div>
-                    )}
-                  </TableHead>
-                ))}
+                {headerGroup.headers.map(header => {
+                  const meta = header.column.columnDef.meta as
+                    | { hidden?: boolean; className?: string }
+                    | undefined
+                  if (meta?.hidden) return null
+
+                  return (
+                    <TableHead key={header.id} className={meta?.className}>
+                      {header.isPlaceholder ? null : (
+                        <div
+                          className='flex items-center gap-2 select-none'
+                          onClick={header.column.getToggleSortingHandler()}
+                        >
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                          {header.column.getCanSort() && (
+                            <ArrowUpDown className='h-4 w-4 text-muted-foreground' />
+                          )}
+                        </div>
+                      )}
+                    </TableHead>
+                  )
+                })}
               </TableRow>
             ))}
           </TableHeader>
