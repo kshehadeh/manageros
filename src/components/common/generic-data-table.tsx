@@ -510,7 +510,8 @@ export function GenericDataTable<
     onPaginationChange: enablePagination ? setPagination : undefined,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    // Disable frontend sorting when using server-side sorting
+    getSortedRowModel: sortParam ? getCoreRowModel() : getSortedRowModel(),
     getGroupedRowModel: getGroupedRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getPaginationRowModel: enablePagination
@@ -520,6 +521,7 @@ export function GenericDataTable<
     enableColumnResizing: false,
     globalFilterFn: config.globalFilterFn,
     manualPagination: enablePagination, // Use server-side pagination
+    manualSorting: Boolean(sortParam), // Disable frontend sorting when backend sorting is active
     pageCount:
       enablePagination && entitiesData
         ? (entitiesData as { pagination?: { totalPages: number } }).pagination
