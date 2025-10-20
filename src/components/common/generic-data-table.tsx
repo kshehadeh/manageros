@@ -29,7 +29,15 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { ChevronRight, ChevronDown, Search, ChevronLeft } from 'lucide-react'
+import {
+  ChevronRight,
+  ChevronDown,
+  Search,
+  ChevronLeft,
+  Layers,
+  ArrowUpDown,
+  Filter,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
@@ -124,6 +132,9 @@ export interface DataTableConfig<
   }) => React.ReactNode
   hasActiveFiltersFn?: (_filters: TFilters) => boolean
   clearFiltersFn?: () => Partial<TFilters>
+
+  // Optional: format a concise, human-readable summary of active filters
+  formatFiltersSummary?: (_filters: TFilters) => string
 
   // Group label formatting
   getGroupLabel?: (_groupValue: string, _groupingColumn: string) => string
@@ -332,6 +343,47 @@ export function GenericDataTable<
         value !== 'all' &&
         (!Array.isArray(value) || value.length > 0)
     )
+  }, [settings.filters, config])
+
+  // Generate human-readable labels for grouping and sorting using provided options
+  const groupingLabel = useMemo(() => {
+    const value = settings.grouping
+    const option = config.groupingOptions.find(o => o.value === value)
+    if (!option) return value === 'none' ? 'No grouping' : value
+    return option.label
+  }, [settings.grouping, config.groupingOptions])
+
+  const sortingLabel = useMemo(() => {
+    const field = settings.sort?.field
+    if (!field) return 'Default Sort'
+    const option = config.sortOptions.find(o => o.value === field)
+    const dir = settings.sort?.direction === 'desc' ? 'desc' : 'asc'
+    const fieldLabel = option ? option.label : field
+    return `${fieldLabel} (${dir})`
+  }, [settings.sort, config.sortOptions])
+
+  // Compute filter summary
+  const filtersSummary = useMemo(() => {
+    const filters = settings.filters as TFilters
+    if (config.formatFiltersSummary) return config.formatFiltersSummary(filters)
+    // Default: show search and count of other active filters
+    const entries = Object.entries(filters)
+    const active = entries.filter(([_, v]) => {
+      if (v === '' || v === 'all' || v === null || v === undefined) return false
+      if (Array.isArray(v)) return v.length > 0
+      return true
+    })
+    if (active.length === 0) return 'None'
+    const searchEntry = active.find(([k]) => k === 'search')
+    const others = active.filter(([k]) => k !== 'search')
+    const parts: string[] = []
+    if (searchEntry) {
+      const val = String(searchEntry[1])
+      if (val) parts.push(`search: "${val}"`)
+    }
+    if (others.length > 0)
+      parts.push(`${others.length} filter${others.length > 1 ? 's' : ''}`)
+    return parts.join(', ')
   }, [settings.filters, config])
 
   // Helper function to format group labels
@@ -567,19 +619,38 @@ export function GenericDataTable<
             />
           </div>
 
-          {/* Results Count */}
+          {/* Results Count with View Summary */}
           <div className='mx-[var(--spacing-md)] text-sm text-muted-foreground'>
             {loading && entities.length === 0
               ? config.loadingMessage
-              : `Showing ${entities.length} ${
-                  entities.length === 1
-                    ? config.entityName.toLowerCase()
-                    : config.entityNamePlural.toLowerCase()
-                }${
-                  entitiesData
-                    ? ` of ${(entitiesData as { pagination?: { totalCount: number } }).pagination?.totalCount || 0} total`
-                    : ''
-                }`}
+              : (() => {
+                  const countText = `Showing ${entities.length} ${
+                    entities.length === 1
+                      ? config.entityName.toLowerCase()
+                      : config.entityNamePlural.toLowerCase()
+                  }${
+                    entitiesData
+                      ? ` of ${(entitiesData as { pagination?: { totalCount: number } }).pagination?.totalCount || 0} total`
+                      : ''
+                  }`
+                  return (
+                    <div className='flex flex-wrap items-center gap-x-3 gap-y-1'>
+                      <span>{countText}</span>
+                      <span className='inline-flex items-center gap-1'>
+                        <Layers className='h-3.5 w-3.5' />
+                        <span>{groupingLabel}</span>
+                      </span>
+                      <span className='inline-flex items-center gap-1'>
+                        <ArrowUpDown className='h-3.5 w-3.5' />
+                        <span>{sortingLabel}</span>
+                      </span>
+                      <span className='inline-flex items-center gap-1'>
+                        <Filter className='h-3.5 w-3.5' />
+                        <span>{filtersSummary}</span>
+                      </span>
+                    </div>
+                  )
+                })()}
           </div>
         </div>
       )}

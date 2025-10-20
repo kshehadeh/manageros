@@ -65,7 +65,8 @@ function buildOrderByClause(sortParam: string) {
 
       switch (name.toLowerCase()) {
         case 'title':
-          return Prisma.sql`i.title ${Prisma.raw(dir)}`
+          // Case-insensitive alphabetical sort by title
+          return Prisma.sql`LOWER(i.title) ${Prisma.raw(dir)}`
         case 'status':
           return Prisma.sql`i.status ${Prisma.raw(dir)}`
         case 'rag':
