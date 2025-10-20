@@ -33,6 +33,7 @@ export function DashboardAssignedTasksSection({
         settingsId='dashboard-assigned-tasks'
         hideFilters={true}
         immutableFilters={immutableFilters}
+        visibleColumns={['title', 'dueDate']}
       />
     </ExpandableSection>
   )

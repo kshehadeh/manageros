@@ -36,7 +36,8 @@ export const peopleDataTableConfig: DataTableConfig<
   useSettingsHook: usePeopleTableSettings,
 
   // Column definitions
-  createColumns: ({ onButtonClick, visibleColumns }) => {
+  createColumns: ({ onButtonClick, grouping, visibleColumns }) => {
+    const isGroupedByTeam = grouping && grouping.includes('team')
     const getStatusBadgeVariant = (status: string): BadgeVariant => {
       switch (status) {
         case 'active':
@@ -125,7 +126,9 @@ export const peopleDataTableConfig: DataTableConfig<
         minSize: 120,
         maxSize: 200,
         meta: {
-          hidden: visibleColumns?.includes('team') === false,
+          hidden:
+            visibleColumns?.includes('team') === false ||
+            Boolean(isGroupedByTeam),
         },
       },
       {
