@@ -537,8 +537,44 @@ export async function GET(request: NextRequest) {
     const hasNextPage = page < totalPages
     const hasPreviousPage = page > 1
 
+    // Transform raw SQL results to match expected TaskListItem structure
+    const transformedTasks = tasks.map(task => ({
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      status: task.status,
+      priority: task.priority,
+      estimate: null, // Not included in raw query
+      dueDate: task.dueDate,
+      createdAt: task.createdAt,
+      updatedAt: task.updatedAt,
+      assigneeId: task.assigneeId,
+      initiativeId: task.initiativeId,
+      objectiveId: task.objectiveId,
+      createdById: task.createdById,
+      assignee:
+        task.assigneeId && task.assigneeName
+          ? {
+              id: task.assigneeId,
+              name: task.assigneeName,
+            }
+          : null,
+      initiative:
+        task.initiativeId && task.initiativeTitle
+          ? {
+              id: task.initiativeId,
+              title: task.initiativeTitle,
+            }
+          : null,
+      objective: null, // Not included in raw query
+      createdBy: {
+        id: task.createdById,
+        name: task.createdByName || 'Unknown',
+      },
+    }))
+
     return NextResponse.json({
-      tasks,
+      tasks: transformedTasks,
       pagination: {
         page,
         limit,

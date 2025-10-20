@@ -49,7 +49,7 @@ export default function CreateOrganizationPage() {
 
   return (
     <div className='min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8'>
-      <div className='max-w-md w-full space-y-8'>
+      <div className='max-w-xl w-full space-y-8'>
         <div>
           <h2 className='mt-6 text-center text-3xl font-extrabold text-neutral-100'>
             Create Organization
@@ -108,7 +108,12 @@ export default function CreateOrganizationPage() {
           </div>
 
           <div>
-            <Button type='submit' disabled={isLoading} variant='outline' className='w-full justify-center'>
+            <Button
+              type='submit'
+              disabled={isLoading}
+              variant='outline'
+              className='w-full justify-center'
+            >
               {isLoading ? 'Creating organization...' : 'Create organization'}
             </Button>
           </div>

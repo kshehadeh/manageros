@@ -23,7 +23,6 @@ import {
   Person,
   MeetingInstanceParticipant,
 } from '@prisma/client'
-import { dataTableStyles } from '@/components/common/data-table-styles'
 
 type MeetingInstanceWithRelations = MeetingInstance & {
   participants: (MeetingInstanceParticipant & {
@@ -128,7 +127,7 @@ export function MeetingInstanceTable({
   }
 
   return (
-    <div className={dataTableStyles.tableWrapper}>
+    <div className='-mx-3 md:mx-0 md:rounded-md border-y md:border overflow-hidden'>
       <Table>
         <TableHeader>
           <TableRow className='hover:bg-accent/50'>

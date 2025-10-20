@@ -109,7 +109,7 @@ export default async function MarketingHome() {
               Outcomes
             </Link>
             <Link href='#cta' className='transition-colors hover:text-white'>
-              Pricing
+              Get Started
             </Link>
           </nav>
           <div className='flex items-center gap-3'>
@@ -124,7 +124,7 @@ export default async function MarketingHome() {
               asChild
               className='bg-white text-black shadow-[0_18px_40px_rgba(88,86,255,0.45)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90'
             >
-              <Link href='/auth/signup'>Start free trial</Link>
+              <Link href='/auth/signup'>Register now</Link>
             </Button>
           </div>
         </header>
@@ -142,7 +142,7 @@ export default async function MarketingHome() {
             </h1>
           </FadeInOnScroll>
           <FadeInOnScroll delay={200}>
-            <p className='mx-auto max-w-2xl text-base text-white/70 sm:text-lg'>
+            <p className='mx-auto max-w-4xl text-base text-white/70 sm:text-lg'>
               ManagerOS brings planning, 1:1s, feedback, and delivery signals
               together so engineering managers can lead with confidence—not
               spreadsheets. Stay aligned, move faster, and grow people without
@@ -275,10 +275,10 @@ export default async function MarketingHome() {
               <h2 className='text-3xl font-semibold text-white sm:text-4xl'>
                 Bring harmony to how your engineering teams deliver.
               </h2>
-              <p className='mx-auto max-w-2xl text-base text-white/70'>
-                Try ManagerOS free for 14 days. Invite your leads, connect your
-                rituals, and see how a shared operating system transforms the
-                way you support engineers.
+              <p className='mx-auto max-w-4xl text-base text-white/70'>
+                Get started with ManagerOS today. Invite your leads, connect
+                your rituals, and see how a shared operating system transforms
+                the way you support engineers.
               </p>
               <div className='flex flex-wrap items-center justify-center gap-4'>
                 <Button
@@ -287,7 +287,7 @@ export default async function MarketingHome() {
                   className='bg-white text-black shadow-[0_18px_40px_rgba(148,163,255,0.45)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90'
                 >
                   <Link href='/auth/signup' className='flex items-center gap-2'>
-                    Launch your trial
+                    Get started
                     <ArrowRight className='h-4 w-4' />
                   </Link>
                 </Button>
@@ -315,7 +315,7 @@ export default async function MarketingHome() {
                 href='/auth/signup'
                 className='transition-colors hover:text-white'
               >
-                Start trial
+                Register
               </Link>
               <Link
                 href='/auth/signin'

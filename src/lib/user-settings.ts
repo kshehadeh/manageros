@@ -163,6 +163,28 @@ export interface UserSettings {
     }
   >
 
+  // Per-view feedback table settings
+  feedbackTableSettings: Record<
+    string,
+    {
+      sorting: Array<{ id: string; desc: boolean }>
+      grouping: string
+      sort: {
+        field: string
+        direction: 'asc' | 'desc'
+      }
+      filters: {
+        search: string
+        fromPersonId: string
+        aboutPersonId: string
+        kind: string
+        isPrivate: string
+        startDate: string
+        endDate: string
+      }
+    }
+  >
+
   // Future expandable settings can be added here:
   // sidebarCollapsed: boolean
   // defaultPageSize: number
@@ -207,6 +229,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   teamTableSettings: {},
   oneOnOneTableSettings: {},
   meetingTableSettings: {},
+  feedbackTableSettings: {},
   // When adding new settings, add their defaults here:
   // sidebarCollapsed: false
   // defaultPageSize: 25
@@ -713,6 +736,84 @@ export function updateMeetingTableSettings(
     ...currentSettings,
     meetingTableSettings: {
       ...currentSettings.meetingTableSettings,
+      [settingsId]: updatedTableSettings,
+    },
+  }
+
+  saveUserSettings(userId, updatedSettings)
+}
+
+/**
+ * Get feedback table settings for a specific view
+ */
+export function getFeedbackTableSettings(
+  userId: string,
+  settingsId: string
+): UserSettings['feedbackTableSettings'][string] {
+  const settings = loadUserSettings(userId)
+  const tableSettings = settings.feedbackTableSettings[settingsId]
+
+  if (!tableSettings) {
+    return {
+      sorting: [],
+      grouping: 'none',
+      sort: {
+        field: '',
+        direction: 'asc',
+      },
+      filters: {
+        search: '',
+        fromPersonId: 'all',
+        aboutPersonId: 'all',
+        kind: 'all',
+        isPrivate: 'all',
+        startDate: '',
+        endDate: '',
+      },
+    }
+  }
+
+  return tableSettings
+}
+
+/**
+ * Update feedback table settings for a specific view
+ */
+export function updateFeedbackTableSettings(
+  userId: string,
+  settingsId: string,
+  tableSettings: Partial<UserSettings['feedbackTableSettings'][string]>
+): void {
+  const currentSettings = loadUserSettings(userId)
+  const currentTableSettings = currentSettings.feedbackTableSettings[
+    settingsId
+  ] || {
+    sorting: [],
+    grouping: 'none',
+    sort: {
+      field: '',
+      direction: 'asc' as const,
+    },
+    filters: {
+      search: '',
+      fromPersonId: 'all',
+      aboutPersonId: 'all',
+      kind: 'all',
+      isPrivate: 'all',
+      startDate: '',
+      endDate: '',
+    },
+  }
+
+  const updatedTableSettings = {
+    ...currentTableSettings,
+    ...tableSettings,
+  }
+
+  const updatedSettings = {
+    ...currentSettings,
+    feedbackTableSettings: {
+      ...currentSettings.feedbackTableSettings,
       [settingsId]: updatedTableSettings,
     },
   }

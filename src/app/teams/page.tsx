@@ -42,7 +42,7 @@ export default async function TeamsPage() {
           </div>
         </div>
       </div>
-      <div className='page-section -mx-3 md:mx-0'>
+      <div className='page-section'>
         <TeamsDataTable enablePagination={true} limit={100} />
       </div>
     </div>

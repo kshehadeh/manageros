@@ -235,7 +235,7 @@ export async function GET(request: NextRequest) {
     const hasPreviousPage = page > 1
 
     return NextResponse.json({
-      oneOnOnes: formattedOneOnOnes,
+      oneonones: formattedOneOnOnes,
       pagination: {
         page,
         limit,

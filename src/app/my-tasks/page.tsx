@@ -7,7 +7,7 @@ export default async function MyTasksPage() {
   const user = await requireAuth({ requireOrganization: true })
 
   return (
-    <div className='page-container px-3 md:px-0'>
+    <div className='page-container'>
       <div className='page-header'>
         <div className='flex items-center justify-between'>
           <div>
@@ -23,7 +23,7 @@ export default async function MyTasksPage() {
         </div>
       </div>
 
-      <div className='page-section -mx-3 md:mx-0'>
+      <div className='page-section'>
         <MyTasksPageClient personId={user.personId!} />
       </div>
     </div>

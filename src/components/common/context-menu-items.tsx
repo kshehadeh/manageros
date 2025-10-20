@@ -1,8 +1,11 @@
 'use client'
 
-import { Eye, Edit, Trash2 } from 'lucide-react'
+import { Eye, Edit, Trash2, Check } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { ReactNode } from 'react'
+import { toast } from 'sonner'
+import { updateTaskStatus } from '@/lib/actions/task'
+import { TASK_STATUS } from '@/lib/task-status'
 
 interface ContextMenuItemProps {
   onClick: () => void
@@ -115,6 +118,48 @@ export function DeleteMenuItem({
       variant='destructive'
     >
       {label}
+    </ContextMenuItem>
+  )
+}
+
+interface MarkAsDoneItemProps {
+  taskId: string
+  currentStatus: string
+  close: () => void
+  onSuccess?: () => void
+}
+
+export function MarkAsDoneMenuItem({
+  taskId,
+  currentStatus,
+  close,
+  onSuccess,
+}: MarkAsDoneItemProps) {
+  const handleMarkAsDone = async () => {
+    try {
+      await updateTaskStatus(taskId, TASK_STATUS.DONE)
+      toast.success('Task marked as done')
+      onSuccess?.()
+      close()
+    } catch (error) {
+      console.error('Failed to mark task as done:', error)
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to mark task as done'
+      )
+    }
+  }
+
+  // Only show the menu item if the task is not already done
+  if (currentStatus === TASK_STATUS.DONE) {
+    return null
+  }
+
+  return (
+    <ContextMenuItem
+      onClick={handleMarkAsDone}
+      icon={<Check className='h-4 w-4' />}
+    >
+      Mark as Done
     </ContextMenuItem>
   )
 }

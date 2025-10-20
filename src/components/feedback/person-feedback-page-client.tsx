@@ -1,8 +1,10 @@
 'use client'
 
 import { MessageCircle } from 'lucide-react'
-import { FeedbackDataTable } from './data-table'
+import { GenericDataTable } from '@/components/common/generic-data-table'
+import { feedbackDataTableConfig } from './data-table-config'
 import { usePageBreadcrumbs } from '@/lib/hooks/use-breadcrumb'
+import { useRouter } from 'next/navigation'
 
 interface PersonFeedbackPageClientProps {
   aboutPersonId: string
@@ -13,6 +15,8 @@ export function PersonFeedbackPageClient({
   aboutPersonId,
   personName,
 }: PersonFeedbackPageClientProps) {
+  const router = useRouter()
+
   // Set up breadcrumbs with person's name
   usePageBreadcrumbs([
     { name: 'Feedback', href: '/feedback' },
@@ -22,6 +26,17 @@ export function PersonFeedbackPageClient({
       href: `/feedback/about/${aboutPersonId}`,
     },
   ])
+
+  // Custom row click handler - could open a dialog, navigate to detail page, etc.
+  const handleRowClick = (feedbackId: string) => {
+    // Example: Navigate to a feedback detail page
+    router.push(`/feedback/${feedbackId}`)
+
+    // Or you could:
+    // - Open a dialog/modal
+    // - Show a sidebar
+    // - Perform any other custom action
+  }
 
   return (
     <div className='page-container'>
@@ -36,10 +51,13 @@ export function PersonFeedbackPageClient({
         </p>
       </div>
 
-      <FeedbackDataTable
+      <GenericDataTable
+        config={feedbackDataTableConfig}
+        settingsId={`person-feedback-${aboutPersonId}`}
         immutableFilters={{
           aboutPersonId: aboutPersonId,
         }}
+        onRowClick={handleRowClick} // Custom row click behavior
       />
     </div>
   )

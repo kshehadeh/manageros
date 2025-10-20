@@ -1,21 +1,13 @@
-import { prisma } from '@/lib/db'
 import { requireAuth } from '@/lib/auth-utils'
 import { CreateTaskButton } from '@/components/tasks/create-task-button'
 import { ListTodo } from 'lucide-react'
 import { TaskDataTable } from '../../components/tasks/data-table'
 
 export default async function TasksPage() {
-  const user = await requireAuth({ requireOrganization: true })
-
-  const people = await prisma.person.findMany({
-    where: {
-      organizationId: user.organizationId!,
-    },
-    orderBy: { name: 'asc' },
-  })
+  await requireAuth({ requireOrganization: true })
 
   return (
-    <div className='page-container px-3 md:px-0'>
+    <div className='page-container'>
       <div className='page-header'>
         <div className='flex items-center justify-between'>
           <div>
@@ -31,8 +23,8 @@ export default async function TasksPage() {
         </div>
       </div>
 
-      <div className='page-section -mx-3 md:mx-0'>
-        <TaskDataTable people={people} enablePagination={true} />
+      <div className='page-section'>
+        <TaskDataTable enablePagination={true} />
       </div>
     </div>
   )

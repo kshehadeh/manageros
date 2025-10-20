@@ -99,7 +99,7 @@ export default function SignInPage() {
 
   return (
     <div className='p-4'>
-      <Card className='w-full max-w-md'>
+      <Card className='w-full max-w-xl'>
         <CardHeader className='space-y-1'>
           <CardTitle className='text-2xl font-bold text-center'>
             Welcome back

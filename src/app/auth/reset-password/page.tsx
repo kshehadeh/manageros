@@ -112,7 +112,7 @@ export default function ResetPasswordPage() {
   if (tokenValid === null) {
     return (
       <div className='p-4'>
-        <Card className='w-full max-w-md'>
+        <Card className='w-full max-w-xl'>
           <CardContent className='pt-6'>
             <div className='text-center'>Validating reset token...</div>
           </CardContent>
@@ -124,7 +124,7 @@ export default function ResetPasswordPage() {
   if (tokenValid === false) {
     return (
       <div className='p-4'>
-        <Card className='w-full max-w-md'>
+        <Card className='w-full max-w-xl'>
           <CardHeader className='space-y-1'>
             <CardTitle className='text-2xl font-bold text-center text-destructive'>
               Invalid Reset Link
@@ -165,7 +165,7 @@ export default function ResetPasswordPage() {
 
   return (
     <div className='p-4'>
-      <Card className='w-full max-w-md'>
+      <Card className='w-full max-w-xl'>
         <CardHeader className='space-y-1'>
           <CardTitle className='text-2xl font-bold text-center'>
             Set new password

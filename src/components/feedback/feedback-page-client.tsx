@@ -1,7 +1,8 @@
 'use client'
 
 import { MessageCircle } from 'lucide-react'
-import { FeedbackDataTable } from './data-table'
+import { GenericDataTable } from '@/components/common/generic-data-table'
+import { feedbackDataTableConfig } from './data-table-config'
 
 export function FeedbackPageClient() {
   return (
@@ -17,7 +18,10 @@ export function FeedbackPageClient() {
         </p>
       </div>
 
-      <FeedbackDataTable />
+      <GenericDataTable
+        config={feedbackDataTableConfig}
+        settingsId='feedback-main'
+      />
     </div>
   )
 }

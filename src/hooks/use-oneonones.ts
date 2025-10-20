@@ -36,7 +36,7 @@ interface PaginationInfo {
 }
 
 interface OneOnOnesResponse {
-  oneOnOnes: OneOnOneListItem[]
+  oneonones: OneOnOneListItem[]
   pagination: PaginationInfo
 }
 
@@ -127,11 +127,11 @@ export function useOneOnOnes({
       setData(prevData => {
         if (!prevData) return prevData
 
-        const updatedOneOnOnes = prevData.oneOnOnes.map(oneOnOne =>
+        const updatedOneOnOnes = prevData.oneonones.map(oneOnOne =>
           oneOnOne.id === oneOnOneId ? { ...oneOnOne, ...updates } : oneOnOne
         )
 
-        return { ...prevData, oneOnOnes: updatedOneOnOnes }
+        return { ...prevData, oneonones: updatedOneOnOnes }
       })
     },
     []
