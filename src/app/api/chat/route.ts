@@ -10,6 +10,7 @@ import { githubTool } from '@/lib/ai/tools/github-tool'
 import { jiraTool } from '@/lib/ai/tools/jira-tool'
 import { dateTimeTool } from '@/lib/ai/tools/date-time-tool'
 import { personLookupTool } from '@/lib/ai/tools/person-lookup-tool'
+import { feedbackTool } from '@/lib/ai/tools/feedback-tool'
 
 export async function POST(req: Request) {
   try {
@@ -76,6 +77,11 @@ export async function POST(req: Request) {
           description: personLookupTool.description,
           inputSchema: personLookupTool.parameters,
           execute: personLookupTool.execute,
+        },
+        feedback: {
+          description: feedbackTool.description,
+          inputSchema: feedbackTool.parameters,
+          execute: feedbackTool.execute,
         },
       },
       stopWhen: stepCountIs(10),

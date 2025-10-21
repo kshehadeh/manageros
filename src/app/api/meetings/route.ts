@@ -196,14 +196,28 @@ export async function GET(request: NextRequest) {
 
       baseWhere.OR = accessControlOr
 
-      // Add search filter
+      // Add search filter - combine with existing conditions using AND
       if (searchFilter) {
-        baseWhere.meeting = {
-          title: {
-            contains: searchFilter,
-            mode: 'insensitive',
+        const existingAnd = Array.isArray(baseWhere.AND)
+          ? baseWhere.AND
+          : baseWhere.AND
+            ? [baseWhere.AND]
+            : []
+        baseWhere.AND = [
+          ...existingAnd,
+          {
+            meeting: {
+              OR: [
+                { title: { contains: searchFilter, mode: 'insensitive' } },
+                {
+                  description: { contains: searchFilter, mode: 'insensitive' },
+                },
+                { location: { contains: searchFilter, mode: 'insensitive' } },
+                { notes: { contains: searchFilter, mode: 'insensitive' } },
+              ],
+            },
           },
-        }
+        ]
       }
 
       // Add team filter
@@ -282,12 +296,24 @@ export async function GET(request: NextRequest) {
 
       baseWhere.OR = accessControlOr
 
-      // Add search filter
+      // Add search filter - combine with existing conditions using AND
       if (searchFilter) {
-        baseWhere.title = {
-          contains: searchFilter,
-          mode: 'insensitive',
-        }
+        const existingAnd = Array.isArray(baseWhere.AND)
+          ? baseWhere.AND
+          : baseWhere.AND
+            ? [baseWhere.AND]
+            : []
+        baseWhere.AND = [
+          ...existingAnd,
+          {
+            OR: [
+              { title: { contains: searchFilter, mode: 'insensitive' } },
+              { description: { contains: searchFilter, mode: 'insensitive' } },
+              { location: { contains: searchFilter, mode: 'insensitive' } },
+              { notes: { contains: searchFilter, mode: 'insensitive' } },
+            ],
+          },
+        ]
       }
 
       // Add team filter
