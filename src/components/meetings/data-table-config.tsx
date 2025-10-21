@@ -119,6 +119,8 @@ export const meetingDataTableConfig: DataTableConfig<
   createColumns: ({ onButtonClick, grouping, visibleColumns }) => {
     // Check if we're grouped by team to hide the team column
     const isGroupedByTeam = grouping && grouping.includes('team')
+    // Check if we're grouped by initiative to hide the initiative column
+    const isGroupedByInitiative = grouping && grouping.includes('initiative')
 
     return [
       {
@@ -329,7 +331,9 @@ export const meetingDataTableConfig: DataTableConfig<
         minSize: 120,
         maxSize: 200,
         meta: {
-          hidden: visibleColumns?.includes('initiative') === false,
+          hidden:
+            visibleColumns?.includes('initiative') === false ||
+            isGroupedByInitiative,
         },
       },
       {
