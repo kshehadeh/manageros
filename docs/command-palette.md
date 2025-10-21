@@ -64,7 +64,13 @@ To add new commands:
 
 ### Role-Based Commands
 
-Commands can be conditionally shown based on user roles. The `userRole` parameter is passed to `getItems()` and contains the current user's role ('ADMIN' or 'USER'). Use this to show admin-only commands:
+Commands can be conditionally shown based on user roles. The `userRole` parameter is passed to `getItems()` and contains the current user's role ('ADMIN' or 'USER'). Use this to show admin-only commands.
+
+Admin-only commands currently include:
+- **Create Person** - Add a new person to the organization (navigates to `/people/new`)
+- **Organization Settings** - Manage organization settings
+
+Example:
 
 ```ts
 export const adminSource: CommandSource = {
