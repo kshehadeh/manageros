@@ -103,7 +103,7 @@ export default function SignUpPage() {
 
   return (
     <div className='p-4'>
-      <Card className='w-full max-w-xl'>
+      <Card className='w-full'>
         <CardHeader className='space-y-1'>
           <CardTitle className='text-2xl font-bold text-center'>
             Create an account
