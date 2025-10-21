@@ -2,8 +2,25 @@
 
 import { LinkManager } from '@/components/entity-links'
 import { SectionHeader } from '@/components/ui/section-header'
-import { Calendar, User, Clock, Rocket, Target } from 'lucide-react'
+import { InlineEditableDropdown } from '@/components/common/inline-editable-dropdown'
+import { InlineEditableDate } from '@/components/common/inline-editable-date'
+import {
+  Calendar,
+  User,
+  Clock,
+  Rocket,
+  Target,
+  Flag,
+  ListTodo,
+} from 'lucide-react'
 import Link from 'next/link'
+import {
+  updateTaskStatus,
+  updateTaskPriority,
+  updateTaskDueDate,
+} from '@/lib/actions/task'
+import { taskStatusUtils, type TaskStatus } from '@/lib/task-status'
+import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
 
 interface EntityLink {
   id: string
@@ -22,6 +39,8 @@ interface EntityLink {
 interface TaskSidebarProps {
   links: EntityLink[]
   entityId: string
+  status: TaskStatus
+  priority: TaskPriority
   initiative?: {
     id: string
     title: string
@@ -42,6 +61,8 @@ interface TaskSidebarProps {
 export function TaskSidebar({
   links,
   entityId,
+  status,
+  priority,
   initiative,
   objective,
   estimate,
@@ -51,77 +72,168 @@ export function TaskSidebar({
 }: TaskSidebarProps) {
   const hasDetails = initiative || objective || estimate || dueDate || createdBy
 
+  const handleStatusChange = async (newStatus: string | number) => {
+    console.log('handleStatusChange', newStatus)
+    await updateTaskStatus(entityId, newStatus as TaskStatus)
+  }
+
+  const handlePriorityChange = async (newPriority: string | number) => {
+    await updateTaskPriority(entityId, newPriority as number)
+  }
+
+  const handleDueDateChange = async (newDueDate: Date | null) => {
+    await updateTaskDueDate(entityId, newDueDate)
+  }
+
+  const statusOptions = taskStatusUtils.getSelectOptions().map(option => ({
+    value: option.value,
+    label: option.label,
+    variant: taskStatusUtils.getVariant(option.value),
+  }))
+
+  const priorityOptions = taskPriorityUtils.getSelectOptions().map(option => ({
+    value: option.value,
+    label: option.label,
+    variant: taskPriorityUtils.getRAGVariant(option.value),
+  }))
+
   return (
     <div className='w-full lg:w-80 space-y-6'>
       {/* Details Section */}
       {hasDetails && (
         <div className='page-section'>
-          <SectionHeader icon={Clock} title='Details' className='mb-3' />
-          <div className='space-y-3 text-sm'>
-            {initiative && (
-              <div>
-                <div className='flex items-center gap-2 text-muted-foreground mb-1'>
-                  <Rocket className='w-3.5 h-3.5' />
-                  <span className='font-medium'>Initiative</span>
-                </div>
-                <Link
-                  href={`/initiatives/${initiative.id}`}
-                  className='text-primary hover:text-primary/80 font-medium ml-5'
-                >
-                  {initiative.title}
-                </Link>
-              </div>
-            )}
+          <SectionHeader icon={Clock} title='Details' />
+          <div className='text-sm'>
+            <table className='w-full'>
+              <tbody>
+                <tr>
+                  <td className='py-1 pr-3'>
+                    <div className='flex items-center gap-2 text-muted-foreground'>
+                      <ListTodo className='w-3.5 h-3.5' />
+                      <span className='font-medium'>Status</span>
+                    </div>
+                  </td>
+                  <td className='py-1'>
+                    <InlineEditableDropdown
+                      value={status}
+                      options={statusOptions}
+                      onValueChange={handleStatusChange}
+                      getVariant={value =>
+                        taskStatusUtils.getVariant(value as TaskStatus)
+                      }
+                      getLabel={value =>
+                        taskStatusUtils.getLabel(value as TaskStatus)
+                      }
+                    />
+                  </td>
+                </tr>
 
-            {objective && (
-              <div>
-                <div className='flex items-center gap-2 text-muted-foreground mb-1'>
-                  <Target className='w-3.5 h-3.5' />
-                  <span className='font-medium'>Objective</span>
-                </div>
-                <div className='ml-5'>{objective.title}</div>
-              </div>
-            )}
+                <tr>
+                  <td className='py-1 pr-3'>
+                    <div className='flex items-center gap-2 text-muted-foreground'>
+                      <Flag className='w-3.5 h-3.5' />
+                      <span className='font-medium'>Priority</span>
+                    </div>
+                  </td>
+                  <td className='py-1'>
+                    <InlineEditableDropdown
+                      value={priority}
+                      options={priorityOptions}
+                      onValueChange={handlePriorityChange}
+                      getVariant={value =>
+                        taskPriorityUtils.getRAGVariant(value as TaskPriority)
+                      }
+                      getLabel={value =>
+                        taskPriorityUtils.getLabel(value as TaskPriority)
+                      }
+                    />
+                  </td>
+                </tr>
 
-            {estimate && (
-              <div>
-                <div className='flex items-center gap-2 text-muted-foreground mb-1'>
-                  <Clock className='w-3.5 h-3.5' />
-                  <span className='font-medium'>Estimate</span>
-                </div>
-                <div className='ml-5'>{estimate} hours</div>
-              </div>
-            )}
+                {initiative && (
+                  <tr>
+                    <td className='py-1 pr-3'>
+                      <div className='flex items-center gap-2 text-muted-foreground'>
+                        <Rocket className='w-3.5 h-3.5' />
+                        <span className='font-medium'>Initiative</span>
+                      </div>
+                    </td>
+                    <td className='py-1'>
+                      <Link
+                        href={`/initiatives/${initiative.id}`}
+                        className='text-primary hover:text-primary/80 font-medium'
+                      >
+                        {initiative.title}
+                      </Link>
+                    </td>
+                  </tr>
+                )}
 
-            {dueDate && (
-              <div>
-                <div className='flex items-center gap-2 text-muted-foreground mb-1'>
-                  <Calendar className='w-3.5 h-3.5' />
-                  <span className='font-medium'>Due Date</span>
-                </div>
-                <div className='ml-5'>
-                  {new Date(dueDate).toLocaleDateString()}
-                </div>
-              </div>
-            )}
+                {objective && (
+                  <tr>
+                    <td className='py-1 pr-3'>
+                      <div className='flex items-center gap-2 text-muted-foreground'>
+                        <Target className='w-3.5 h-3.5' />
+                        <span className='font-medium'>Objective</span>
+                      </div>
+                    </td>
+                    <td className='py-1'>{objective.title}</td>
+                  </tr>
+                )}
 
-            {createdBy && (
-              <div>
-                <div className='flex items-center gap-2 text-muted-foreground mb-1'>
-                  <User className='w-3.5 h-3.5' />
-                  <span className='font-medium'>Created By</span>
-                </div>
-                <div className='ml-5'>{createdBy.name}</div>
-              </div>
-            )}
+                {estimate && (
+                  <tr>
+                    <td className='py-1 pr-3'>
+                      <div className='flex items-center gap-2 text-muted-foreground'>
+                        <Clock className='w-3.5 h-3.5' />
+                        <span className='font-medium'>Estimate</span>
+                      </div>
+                    </td>
+                    <td className='py-1'>{estimate} hours</td>
+                  </tr>
+                )}
 
-            <div>
-              <div className='flex items-center gap-2 text-muted-foreground mb-1'>
-                <Clock className='w-3.5 h-3.5' />
-                <span className='font-medium'>Last Updated</span>
-              </div>
-              <div className='ml-5'>{new Date(updatedAt).toLocaleString()}</div>
-            </div>
+                <tr>
+                  <td className='py-1 pr-3'>
+                    <div className='flex items-center gap-2 text-muted-foreground'>
+                      <Calendar className='w-3.5 h-3.5' />
+                      <span className='font-medium'>Due Date</span>
+                    </div>
+                  </td>
+                  <td className='py-1'>
+                    <InlineEditableDate
+                      value={dueDate || null}
+                      onValueChange={handleDueDateChange}
+                      emptyStateText='Click to set due date'
+                    />
+                  </td>
+                </tr>
+
+                {createdBy && (
+                  <tr>
+                    <td className='py-1 pr-3'>
+                      <div className='flex items-center gap-2 text-muted-foreground'>
+                        <User className='w-3.5 h-3.5' />
+                        <span className='font-medium'>Created By</span>
+                      </div>
+                    </td>
+                    <td className='py-1'>{createdBy.name}</td>
+                  </tr>
+                )}
+
+                <tr>
+                  <td className='py-1 pr-3'>
+                    <div className='flex items-center gap-2 text-muted-foreground'>
+                      <Clock className='w-3.5 h-3.5' />
+                      <span className='font-medium'>Last Updated</span>
+                    </div>
+                  </td>
+                  <td className='py-1'>
+                    {new Date(updatedAt).toLocaleString()}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       )}

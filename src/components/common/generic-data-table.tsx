@@ -37,6 +37,8 @@ import {
   Layers,
   ArrowUpDown,
   Filter,
+  Eye,
+  Edit,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { DeleteModal } from '@/components/common/delete-modal'
@@ -45,6 +47,7 @@ import {
   ViewDetailsMenuItem,
   EditMenuItem,
   DeleteMenuItem,
+  ContextMenuItem,
 } from '@/components/common/context-menu-items'
 import { ViewDropdown } from '@/components/common/view-dropdown'
 
@@ -160,6 +163,24 @@ export interface DataTableConfig<
     refetch: () => void
     onDelete: () => void
   }) => React.ReactNode
+
+  // Configurable detail and edit context menu item overrides
+  onViewDetails?: (
+    _router: AppRouterInstance,
+    _params: {
+      entityId: string
+      entity: TData
+      close: () => void
+    }
+  ) => void
+  onEdit?: (
+    _router: AppRouterInstance,
+    _params: {
+      entityId: string
+      entity: TData
+      close: () => void
+    }
+  ) => void
 
   // Custom row className function
   getRowClassName?: (_entity: TData) => string
@@ -890,35 +911,65 @@ export function GenericDataTable<
             })
           }
 
-          // Default context menu items
+          // Default context menu items with configurable overrides
           return (
             <>
-              <ViewDetailsMenuItem
-                entityId={entityId}
-                entityType={
-                  config.entityType as
-                    | 'people'
-                    | 'teams'
-                    | 'initiatives'
-                    | 'meetings'
-                    | 'oneonones'
-                    | 'tasks'
-                }
-                close={close}
-              />
-              <EditMenuItem
-                entityId={entityId}
-                entityType={
-                  config.entityType as
-                    | 'people'
-                    | 'teams'
-                    | 'initiatives'
-                    | 'meetings'
-                    | 'oneonones'
-                    | 'tasks'
-                }
-                close={close}
-              />
+              {config.onViewDetails ? (
+                <ContextMenuItem
+                  onClick={() => {
+                    config.onViewDetails!(router, {
+                      entityId,
+                      entity: entity!,
+                      close,
+                    })
+                  }}
+                  icon={<Eye className='h-4 w-4' />}
+                >
+                  View Details
+                </ContextMenuItem>
+              ) : (
+                <ViewDetailsMenuItem
+                  entityId={entityId}
+                  entityType={
+                    config.entityType as
+                      | 'people'
+                      | 'teams'
+                      | 'initiatives'
+                      | 'meetings'
+                      | 'oneonones'
+                      | 'tasks'
+                  }
+                  close={close}
+                />
+              )}
+              {config.onEdit ? (
+                <ContextMenuItem
+                  onClick={() => {
+                    config.onEdit!(router, {
+                      entityId,
+                      entity: entity!,
+                      close,
+                    })
+                  }}
+                  icon={<Edit className='h-4 w-4' />}
+                >
+                  Edit
+                </ContextMenuItem>
+              ) : (
+                <EditMenuItem
+                  entityId={entityId}
+                  entityType={
+                    config.entityType as
+                      | 'people'
+                      | 'teams'
+                      | 'initiatives'
+                      | 'meetings'
+                      | 'oneonones'
+                      | 'tasks'
+                  }
+                  close={close}
+                />
+              )}
               {config.deleteAction && (
                 <DeleteMenuItem
                   onDelete={() => {

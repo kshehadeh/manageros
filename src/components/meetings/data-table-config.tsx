@@ -92,6 +92,14 @@ export const meetingDataTableConfig: DataTableConfig<
     return (entity as MeetingWithRelations).id
   },
 
+  onEdit: (router, { entityId }) => {
+    router.push(`/meetings/${entityId}/edit`)
+  },
+
+  onViewDetails: (router, { entityId }) => {
+    router.push(`/meetings/${entityId}`)
+  },
+
   // Custom row click handler for meetings (handles different meeting types)
   onRowClick: (router, entityId, _extra) => {
     // For meetings, we need to handle the navigation manually since meeting instances

@@ -45,6 +45,14 @@ export const initiativeDataTableConfig: DataTableConfig<
     router.push(`/initiatives/${initiativeId}`)
   },
 
+  onEdit: (router, { entityId }) => {
+    router.push(`/initiatives/${entityId}/edit`)
+  },
+
+  onViewDetails: (router, { entityId }) => {
+    router.push(`/initiatives/${entityId}`)
+  },
+
   // Column definitions
   createColumns: ({ onButtonClick, visibleColumns }) => {
     return [

@@ -35,6 +35,14 @@ export const peopleDataTableConfig: DataTableConfig<
   // Settings management
   useSettingsHook: usePeopleTableSettings,
 
+  onEdit: (router, { entityId }) => {
+    router.push(`/people/${entityId}/edit`)
+  },
+
+  onViewDetails: (router, { entityId }) => {
+    router.push(`/people/${entityId}`)
+  },
+
   // Column definitions
   createColumns: ({ onButtonClick, grouping, visibleColumns }) => {
     const isGroupedByTeam = grouping && grouping.includes('team')

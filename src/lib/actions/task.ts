@@ -706,3 +706,90 @@ export async function updateTaskQuickEdit(
 
   return task
 }
+
+export async function updateTaskDescription(
+  taskId: string,
+  description: string
+) {
+  const user = await getCurrentUser()
+
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to update tasks')
+  }
+
+  const existingTask = await prisma.task.findFirst({
+    where: {
+      id: taskId,
+      ...getTaskAccessWhereClause(
+        user.organizationId,
+        user.id,
+        user.personId || undefined
+      ),
+    },
+  })
+
+  if (!existingTask) {
+    throw new Error('Task not found or access denied')
+  }
+
+  const task = await prisma.task.update({
+    where: { id: taskId },
+    data: {
+      description: description.trim() || null,
+    },
+    include: {
+      assignee: true,
+      initiative: true,
+      objective: true,
+      createdBy: true,
+    },
+  })
+
+  revalidatePath('/tasks')
+  revalidatePath('/my-tasks')
+  revalidatePath(`/tasks/${taskId}`)
+
+  return task
+}
+
+export async function updateTaskDueDate(taskId: string, dueDate: Date | null) {
+  const user = await getCurrentUser()
+
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to update tasks')
+  }
+
+  const existingTask = await prisma.task.findFirst({
+    where: {
+      id: taskId,
+      ...getTaskAccessWhereClause(
+        user.organizationId,
+        user.id,
+        user.personId || undefined
+      ),
+    },
+  })
+
+  if (!existingTask) {
+    throw new Error('Task not found or access denied')
+  }
+
+  const task = await prisma.task.update({
+    where: { id: taskId },
+    data: {
+      dueDate,
+    },
+    include: {
+      assignee: true,
+      initiative: true,
+      objective: true,
+      createdBy: true,
+    },
+  })
+
+  revalidatePath('/tasks')
+  revalidatePath('/my-tasks')
+  revalidatePath(`/tasks/${taskId}`)
+
+  return task
+}

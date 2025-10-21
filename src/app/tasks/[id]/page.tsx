@@ -7,13 +7,13 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { TaskDetailBreadcrumbClient } from '@/components/tasks/task-detail-breadcrumb-client'
 import { TaskActionsDropdown } from '@/components/tasks/task-actions-dropdown'
-import { ReadonlyNotesField } from '@/components/readonly-notes-field'
+import { InlineEditableText } from '@/components/common/inline-editable-text'
 import { TaskSidebar } from '@/components/tasks/task-sidebar'
 import { SectionHeader } from '@/components/ui/section-header'
-import { Badge } from '@/components/ui/badge'
 import { Calendar, User, Clock, FileText, ListTodo } from 'lucide-react'
-import { taskStatusUtils, type TaskStatus } from '@/lib/task-status'
-import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
+import { type TaskStatus } from '@/lib/task-status'
+import { type TaskPriority } from '@/lib/task-priority'
+import { updateTaskTitle, updateTaskDescription } from '@/lib/actions/task'
 
 export default async function TaskDetailPage({
   params,
@@ -66,25 +66,19 @@ export default async function TaskDetailPage({
               <div className='flex-1'>
                 <div className='flex items-center gap-3 mb-2'>
                   <ListTodo className='h-6 w-6 text-muted-foreground' />
-                  <h1 className='page-title'>{task.title}</h1>
+                  <InlineEditableText
+                    value={task.title}
+                    onValueChange={async newTitle => {
+                      'use server'
+                      await updateTaskTitle(task.id, newTitle)
+                    }}
+                    placeholder='Enter task title'
+                    className='text-2xl font-bold flex-1'
+                  />
                 </div>
 
-                {/* Status, Priority, Created Date, and Assignee in subheader */}
+                {/* Created Date, Assignee, and Completion Date in subheader */}
                 <div className='flex flex-wrap items-center gap-3 mt-2 mb-3'>
-                  <Badge
-                    variant={taskStatusUtils.getUIVariant(
-                      task.status as TaskStatus
-                    )}
-                  >
-                    {taskStatusUtils.getLabel(task.status as TaskStatus)}
-                  </Badge>
-                  <Badge
-                    variant={taskPriorityUtils.getUIVariant(
-                      task.priority as TaskPriority
-                    )}
-                  >
-                    {taskPriorityUtils.getLabel(task.priority as TaskPriority)}
-                  </Badge>
                   <div className='flex items-center gap-1 text-sm text-muted-foreground'>
                     <Calendar className='w-4 h-4' />
                     <span>
@@ -135,17 +129,16 @@ export default async function TaskDetailPage({
               {/* Task Description */}
               <div className='page-section'>
                 <SectionHeader icon={FileText} title='Description' />
-                {task.description ? (
-                  <ReadonlyNotesField
-                    content={task.description}
-                    variant='default'
-                    emptyStateText='No description provided'
-                  />
-                ) : (
-                  <div className='text-muted-foreground italic'>
-                    No description provided
-                  </div>
-                )}
+                <InlineEditableText
+                  value={task.description || ''}
+                  onValueChange={async newDescription => {
+                    'use server'
+                    await updateTaskDescription(task.id, newDescription)
+                  }}
+                  placeholder='Enter task description'
+                  multiline={true}
+                  emptyStateText='Click to add description'
+                />
               </div>
             </div>
           </div>
@@ -162,6 +155,8 @@ export default async function TaskDetailPage({
               createdBy: link.createdBy,
             }))}
             entityId={task.id}
+            status={task.status as TaskStatus}
+            priority={task.priority as TaskPriority}
             initiative={task.initiative}
             objective={task.objective}
             estimate={task.estimate}

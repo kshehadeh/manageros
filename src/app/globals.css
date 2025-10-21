@@ -333,7 +333,7 @@ input[type='time']::-webkit-calendar-picker-indicator {
 .page-section {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-2xl);
+  gap: var(--spacing-lg);
 }
 
 .page-section-title {
