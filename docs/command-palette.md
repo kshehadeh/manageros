@@ -62,6 +62,27 @@ To add new commands:
 2. Export a `CommandSource` whose `getItems` returns matching `CommandItemDescriptor[]` based on the query.
 3. Register the source in `src/components/command-palette/command-palette.tsx` by adding it to the `sources` array.
 
+### Quick Actions
+
+Quick actions available in the command palette include:
+- **Create Task** - Opens quick task creation modal
+- **Create 1:1 Meeting** - Schedule a new one-on-one meeting
+- **Create Meeting** - Schedule a new team meeting (navigates to `/meetings/new`)
+- **Create Initiative** - Start a new initiative or OKR
+- **Create Feedback** - Give feedback to a team member
+
+### Navigation Commands
+
+Navigation commands to quickly jump to different sections:
+- **View Tasks** - Go to tasks list
+- **View My Tasks** - Go to assigned tasks
+- **View People** - Go to people directory
+- **View Teams** - Go to teams directory
+- **View Initiatives** - Go to initiatives
+- **View Feedback** - Go to feedback page
+- **View Meetings** - Go to meetings page
+- **View Reports** - Go to reports page
+
 ### Role-Based Commands
 
 Commands can be conditionally shown based on user roles. The `userRole` parameter is passed to `getItems()` and contains the current user's role ('ADMIN' or 'USER'). Use this to show admin-only commands.
