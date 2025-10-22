@@ -13,6 +13,7 @@ import {
 import { PersonSelect } from '@/components/ui/person-select'
 import { TeamSelect } from '@/components/ui/team-select'
 import { SectionHeader } from '@/components/ui/section-header'
+import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
 import { useState } from 'react'
 import { updateInitiative, createInitiative } from '@/lib/actions/initiative'
 import { type InitiativeFormData, initiativeSchema } from '@/lib/validations'
@@ -63,21 +64,21 @@ export function InitiativeForm({
   preselectedOwnerId,
   preselectedTeamId,
 }: InitiativeFormProps) {
-  // Format dates for input fields
-  const formatDate = (date: Date | null) => {
+  // Format dates for input fields - convert Date to ISO string
+  const formatDateToISO = (date: Date | null) => {
     if (!date) return ''
-    return new Date(date).toISOString().split('T')[0]
+    return new Date(date).toISOString()
   }
 
   // Get today's date for new initiatives
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toISOString()
 
   const [formData, setFormData] = useState<InitiativeFormData>({
     title: initiative?.title || '',
     summary: initiative?.summary || '',
     outcome: initiative?.outcome || '',
-    startDate: initiative ? formatDate(initiative.startDate) : today,
-    targetDate: initiative ? formatDate(initiative.targetDate) : '',
+    startDate: initiative ? formatDateToISO(initiative.startDate) : today,
+    targetDate: initiative ? formatDateToISO(initiative.targetDate) : '',
     status: (initiative?.status as InitiativeFormData['status']) || 'planned',
     rag: (initiative?.rag as InitiativeFormData['rag']) || 'green',
     confidence: initiative?.confidence || 80,
@@ -284,37 +285,29 @@ export function InitiativeForm({
           <div className='space-y-4'>
             <SectionHeader icon={Calendar} title='Timeline' />
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <div className='space-y-2'>
-                <Label htmlFor='startDate'>Start Date</Label>
-                <Input
-                  id='startDate'
-                  type='date'
-                  value={formData.startDate}
-                  onChange={e => handleInputChange('startDate', e.target.value)}
-                  className={errors.startDate ? 'border-destructive' : ''}
-                />
-                {errors.startDate && (
-                  <p className='text-sm text-destructive'>{errors.startDate}</p>
-                )}
-              </div>
+              <DateTimePickerWithNaturalInput
+                label='Start Date'
+                value={formData.startDate}
+                onChange={value => handleInputChange('startDate', value)}
+                placeholder='Pick start date and time'
+                error={!!errors.startDate}
+                className={errors.startDate ? 'border-destructive' : ''}
+              />
+              {errors.startDate && (
+                <p className='text-sm text-destructive'>{errors.startDate}</p>
+              )}
 
-              <div className='space-y-2'>
-                <Label htmlFor='targetDate'>Target Date</Label>
-                <Input
-                  id='targetDate'
-                  type='date'
-                  value={formData.targetDate}
-                  onChange={e =>
-                    handleInputChange('targetDate', e.target.value)
-                  }
-                  className={errors.targetDate ? 'border-destructive' : ''}
-                />
-                {errors.targetDate && (
-                  <p className='text-sm text-destructive'>
-                    {errors.targetDate}
-                  </p>
-                )}
-              </div>
+              <DateTimePickerWithNaturalInput
+                label='Target Date'
+                value={formData.targetDate}
+                onChange={value => handleInputChange('targetDate', value)}
+                placeholder='Pick target date and time'
+                error={!!errors.targetDate}
+                className={errors.targetDate ? 'border-destructive' : ''}
+              />
+              {errors.targetDate && (
+                <p className='text-sm text-destructive'>{errors.targetDate}</p>
+              )}
             </div>
           </div>
 

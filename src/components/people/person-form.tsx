@@ -14,6 +14,7 @@ import {
 import { PersonSelect } from '@/components/ui/person-select'
 import { TeamSelect } from '@/components/ui/team-select'
 import { SectionHeader } from '@/components/ui/section-header'
+import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
 import { useState } from 'react'
 import { createPerson, updatePerson } from '@/lib/actions/person'
 import { type PersonFormData, personSchema } from '@/lib/validations'
@@ -80,13 +81,10 @@ export function PersonForm({
   jiraAccount,
   githubAccount,
 }: PersonFormProps) {
-  // Format date for date input without timezone issues
-  const formatDateForInput = (date: Date | null) => {
+  // Format date for input fields - convert Date to ISO string
+  const formatDateToISO = (date: Date | null) => {
     if (!date) return ''
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
+    return new Date(date).toISOString()
   }
 
   const [formData, setFormData] = useState<PersonFormData>({
@@ -94,13 +92,13 @@ export function PersonForm({
     email: person?.email || '',
     role: person?.role || '',
     status: (person?.status as PersonFormData['status']) || 'active',
-    birthday: formatDateForInput(person?.birthday || null),
+    birthday: formatDateToISO(person?.birthday || null),
     avatar: person?.avatar || '',
     employeeType: person?.employeeType || undefined,
     teamId: person?.teamId || initialTeamId || '',
     managerId: person?.managerId || initialManagerId || '',
     jobRoleId: person?.jobRoleId || '',
-    startedAt: formatDateForInput(person?.startedAt || null),
+    startedAt: formatDateToISO(person?.startedAt || null),
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -363,33 +361,31 @@ export function PersonForm({
                 )}
               </div>
 
-              <div className='space-y-2'>
-                <Label htmlFor='birthday'>Birthday</Label>
-                <Input
-                  id='birthday'
-                  type='date'
-                  value={formData.birthday}
-                  onChange={e => handleInputChange('birthday', e.target.value)}
-                  className={errors.birthday ? 'border-destructive' : ''}
-                />
-                {errors.birthday && (
-                  <p className='text-sm text-destructive'>{errors.birthday}</p>
-                )}
-              </div>
+              <DateTimePickerWithNaturalInput
+                label='Birthday'
+                value={formData.birthday}
+                onChange={value => handleInputChange('birthday', value)}
+                placeholder='Pick birthday'
+                error={!!errors.birthday}
+                className={errors.birthday ? 'border-destructive' : ''}
+                dateOnly={true}
+              />
+              {errors.birthday && (
+                <p className='text-sm text-destructive'>{errors.birthday}</p>
+              )}
 
-              <div className='space-y-2'>
-                <Label htmlFor='startedAt'>Start Date</Label>
-                <Input
-                  id='startedAt'
-                  type='date'
-                  value={formData.startedAt}
-                  onChange={e => handleInputChange('startedAt', e.target.value)}
-                  className={errors.startedAt ? 'border-destructive' : ''}
-                />
-                {errors.startedAt && (
-                  <p className='text-sm text-destructive'>{errors.startedAt}</p>
-                )}
-              </div>
+              <DateTimePickerWithNaturalInput
+                label='Start Date'
+                value={formData.startedAt}
+                onChange={value => handleInputChange('startedAt', value)}
+                placeholder='Pick start date'
+                error={!!errors.startedAt}
+                className={errors.startedAt ? 'border-destructive' : ''}
+                dateOnly={true}
+              />
+              {errors.startedAt && (
+                <p className='text-sm text-destructive'>{errors.startedAt}</p>
+              )}
             </div>
           </div>
 

@@ -61,6 +61,9 @@
   --calendar-icon-hue: 346deg;
   --calendar-icon-brightness: 104%;
   --calendar-icon-contrast: 97%;
+
+  --rdp-accent-color: var(--color-primary);
+  --rdp-background-color: var(--color-background);
 }
 
 .dark {
@@ -108,6 +111,15 @@
   --calendar-icon-hue: 93deg;
   --calendar-icon-brightness: 103%;
   --calendar-icon-contrast: 103%;
+}
+
+.rdp-root {
+  --rdp-accent-color: var(--color-primary);
+  --rdp-background-color: var(--color-background);
+  --rdp-day-height: 32px;
+  --rdp-day-width: 32px;
+  --rdp-day_button-height: 32px;
+  --rdp-day_button-width: 32px;
 }
 
 @layer base {
@@ -305,6 +317,10 @@
 
 .rdp-caption_label {
   color: var(--color-foreground) !important;
+}
+
+.rdp-month_caption {
+  font-size: 0.875rem !important; /* Override the large font size */
 }
 
 .rdp-nav_button:hover {

@@ -32,19 +32,25 @@ interface DateTimePickerWithNaturalInputProps {
   label?: string
   required?: boolean
   shortFormat?: boolean
+  dateOnly?: boolean // If true, only show date selection without time
 }
 
 export function DateTimePickerWithNaturalInput({
   value,
   onChange,
-  placeholder = 'Pick a date and time',
+  placeholder,
   className,
   disabled = false,
   error = false,
   label,
   required = false,
   shortFormat = false,
+  dateOnly = false,
 }: DateTimePickerWithNaturalInputProps) {
+  // Set default placeholder based on dateOnly mode
+  const defaultPlaceholder = dateOnly ? 'Pick a date' : 'Pick a date and time'
+  const finalPlaceholder = placeholder || defaultPlaceholder
+
   const [open, setOpen] = React.useState(false)
   const [inputValue, setInputValue] = React.useState('')
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(
@@ -65,7 +71,11 @@ export function DateTimePickerWithNaturalInput({
         period: hours24 >= 12 ? 'PM' : 'AM',
       }
     }
-    return { hours: '09', minutes: '00', period: 'AM' }
+    // For date-only mode, default to midnight (12:00 AM)
+    // For datetime mode, default to 9:00 AM
+    return dateOnly
+      ? { hours: '12', minutes: '00', period: 'AM' }
+      : { hours: '09', minutes: '00', period: 'AM' }
   })
 
   // Update selected date when value prop changes
@@ -82,8 +92,14 @@ export function DateTimePickerWithNaturalInput({
       })
     } else {
       setSelectedDate(undefined)
+      // Reset time to default based on dateOnly mode
+      setSelectedTime(
+        dateOnly
+          ? { hours: '12', minutes: '00', period: 'AM' }
+          : { hours: '09', minutes: '00', period: 'AM' }
+      )
     }
-  }, [value])
+  }, [value, dateOnly])
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const inputVal = event.target.value
@@ -95,23 +111,45 @@ export function DateTimePickerWithNaturalInput({
       const hours24 = parsedDate.getHours()
       const hours12 = hours24 === 0 ? 12 : hours24 > 12 ? hours24 - 12 : hours24
       setSelectedDate(parsedDate)
-      setSelectedTime({
-        hours: hours12.toString().padStart(2, '0'),
-        minutes: parsedDate.getMinutes().toString().padStart(2, '0'),
-        period: hours24 >= 12 ? 'PM' : 'AM',
-      })
-      updateDateTime(parsedDate, hours24, parsedDate.getMinutes())
+
+      // For date-only mode, always set time to midnight
+      if (dateOnly) {
+        setSelectedTime({
+          hours: '12',
+          minutes: '00',
+          period: 'AM',
+        })
+        updateDateTime(parsedDate, 0, 0) // Set to midnight
+      } else {
+        setSelectedTime({
+          hours: hours12.toString().padStart(2, '0'),
+          minutes: parsedDate.getMinutes().toString().padStart(2, '0'),
+          period: hours24 >= 12 ? 'PM' : 'AM',
+        })
+        updateDateTime(parsedDate, hours24, parsedDate.getMinutes())
+      }
     }
   }
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
       setSelectedDate(date)
-      const hours24 = convertTo24Hour(
-        parseInt(selectedTime.hours),
-        selectedTime.period
-      )
-      updateDateTime(date, hours24, parseInt(selectedTime.minutes))
+
+      // For date-only mode, always set time to midnight
+      if (dateOnly) {
+        setSelectedTime({
+          hours: '12',
+          minutes: '00',
+          period: 'AM',
+        })
+        updateDateTime(date, 0, 0) // Set to midnight
+      } else {
+        const hours24 = convertTo24Hour(
+          parseInt(selectedTime.hours),
+          selectedTime.period
+        )
+        updateDateTime(date, hours24, parseInt(selectedTime.minutes))
+      }
     }
   }
 
@@ -143,13 +181,18 @@ export function DateTimePickerWithNaturalInput({
   }
 
   const formatDisplayValue = () => {
-    if (!selectedDate) return placeholder
+    if (!selectedDate) return finalPlaceholder
     const dateFormat = shortFormat ? 'MMM dd' : 'PPP'
-    return (
-      format(selectedDate, dateFormat) +
-      ' at ' +
-      `${selectedTime.hours}:${selectedTime.minutes} ${selectedTime.period}`
-    )
+
+    if (dateOnly) {
+      return format(selectedDate, dateFormat)
+    } else {
+      return (
+        format(selectedDate, dateFormat) +
+        ' at ' +
+        `${selectedTime.hours}:${selectedTime.minutes} ${selectedTime.period}`
+      )
+    }
   }
 
   const generateTimeOptions = (type: 'hours' | 'minutes') => {
@@ -202,132 +245,147 @@ export function DateTimePickerWithNaturalInput({
           </Button>
         </PopoverTrigger>
         <PopoverContent className='w-auto p-0' align='start'>
-          <div className='p-3 space-y-3'>
+          <div className='p-3'>
             {/* Natural language input */}
             <Input
-              placeholder="e.g., 'next Monday', 'tomorrow at 2pm', 'in 3 days'"
+              placeholder={
+                dateOnly
+                  ? "e.g., 'next Monday', 'tomorrow', 'in 3 days'"
+                  : "e.g., 'next Monday', 'tomorrow at 2pm', 'in 3 days'"
+              }
               value={inputValue}
               onChange={handleInputChange}
-              className='text-sm'
+              className='text-sm mb-3'
             />
 
-            {/* Calendar */}
-            <Calendar
-              mode='single'
-              captionLayout='dropdown'
-              selected={selectedDate}
-              onSelect={handleDateSelect}
-              className='rounded-md border [--cell-size:1.5rem]'
-            />
+            {/* Calendar and Time selection side by side */}
+            <div className='flex gap-4'>
+              {/* Calendar */}
+              <Calendar
+                mode='single'
+                captionLayout='dropdown'
+                selected={selectedDate}
+                onSelect={handleDateSelect}
+                className='rounded-md border [--cell-size:1.5rem]'
+              />
 
-            {/* Time selection */}
-            {selectedDate && (
-              <div className='flex gap-2'>
-                <div className='flex-1'>
-                  <Label className='text-xs text-muted-foreground'>Hour</Label>
-                  <Select
-                    value={selectedTime.hours}
-                    onValueChange={value => handleTimeChange('hours', value)}
-                  >
-                    <SelectTrigger className='h-8'>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {generateTimeOptions('hours')}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className='flex-1'>
-                  <Label className='text-xs text-muted-foreground'>
-                    Minute
-                  </Label>
-                  <Select
-                    value={selectedTime.minutes}
-                    onValueChange={value => handleTimeChange('minutes', value)}
-                  >
-                    <SelectTrigger className='h-8'>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {generateTimeOptions('minutes')}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className='flex-1'>
-                  <Label className='text-xs text-muted-foreground'>
-                    Period
-                  </Label>
-                  <Select
-                    value={selectedTime.period}
-                    onValueChange={value => handleTimeChange('period', value)}
-                  >
-                    <SelectTrigger className='h-8'>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='AM'>AM</SelectItem>
-                      <SelectItem value='PM'>PM</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            )}
+              {/* Time selection - only show if not in dateOnly mode */}
+              {selectedDate && !dateOnly && (
+                <div className='flex flex-col gap-3 min-w-[200px]'>
+                  <div className='space-y-2'>
+                    <Label className='text-xs text-muted-foreground'>
+                      Time
+                    </Label>
+                    <div className='flex gap-2'>
+                      <div className='flex-1'>
+                        <Select
+                          value={selectedTime.hours}
+                          onValueChange={value =>
+                            handleTimeChange('hours', value)
+                          }
+                        >
+                          <SelectTrigger className='h-8'>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {generateTimeOptions('hours')}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className='flex-1'>
+                        <Select
+                          value={selectedTime.minutes}
+                          onValueChange={value =>
+                            handleTimeChange('minutes', value)
+                          }
+                        >
+                          <SelectTrigger className='h-8'>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {generateTimeOptions('minutes')}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className='flex-1'>
+                        <Select
+                          value={selectedTime.period}
+                          onValueChange={value =>
+                            handleTimeChange('period', value)
+                          }
+                        >
+                          <SelectTrigger className='h-8'>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value='AM'>AM</SelectItem>
+                            <SelectItem value='PM'>PM</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
 
-            {/* Quick time buttons */}
-            {selectedDate && (
-              <div className='grid grid-cols-2 gap-1'>
-                {[
-                  {
-                    time: '09:00 AM',
-                    hours: '09',
-                    minutes: '00',
-                    period: 'AM',
-                  },
-                  {
-                    time: '12:00 PM',
-                    hours: '12',
-                    minutes: '00',
-                    period: 'PM',
-                  },
-                  {
-                    time: '02:00 PM',
-                    hours: '02',
-                    minutes: '00',
-                    period: 'PM',
-                  },
-                  {
-                    time: '04:00 PM',
-                    hours: '04',
-                    minutes: '00',
-                    period: 'PM',
-                  },
-                ].map(({ time, hours, minutes, period }) => (
-                  <Button
-                    key={time}
-                    variant='outline'
-                    size='sm'
-                    className='h-7 text-xs'
-                    onClick={() => {
-                      setSelectedTime({
-                        hours,
-                        minutes,
-                        period: period as 'AM' | 'PM',
-                      })
-                      if (selectedDate) {
-                        const hours24 = convertTo24Hour(
-                          parseInt(hours),
-                          period as 'AM' | 'PM'
-                        )
-                        updateDateTime(selectedDate, hours24, parseInt(minutes))
-                      }
-                    }}
-                  >
-                    <Clock className='mr-1 h-3 w-3' />
-                    {time}
-                  </Button>
-                ))}
-              </div>
-            )}
+                  {/* Quick time buttons */}
+                  <div className='grid grid-cols-2 gap-1'>
+                    {[
+                      {
+                        time: '9 AM',
+                        hours: '09',
+                        minutes: '00',
+                        period: 'AM',
+                      },
+                      {
+                        time: '12 PM',
+                        hours: '12',
+                        minutes: '00',
+                        period: 'PM',
+                      },
+                      {
+                        time: '2 PM',
+                        hours: '02',
+                        minutes: '00',
+                        period: 'PM',
+                      },
+                      {
+                        time: '4 PM',
+                        hours: '04',
+                        minutes: '00',
+                        period: 'PM',
+                      },
+                    ].map(({ time, hours, minutes, period }) => (
+                      <Button
+                        key={time}
+                        variant='outline'
+                        size='sm'
+                        className='h-7 text-xs'
+                        onClick={() => {
+                          setSelectedTime({
+                            hours,
+                            minutes,
+                            period: period as 'AM' | 'PM',
+                          })
+                          if (selectedDate) {
+                            const hours24 = convertTo24Hour(
+                              parseInt(hours),
+                              period as 'AM' | 'PM'
+                            )
+                            updateDateTime(
+                              selectedDate,
+                              hours24,
+                              parseInt(minutes)
+                            )
+                          }
+                        }}
+                      >
+                        <Clock className='mr-1 h-3 w-3' />
+                        {time}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </PopoverContent>
       </Popover>
