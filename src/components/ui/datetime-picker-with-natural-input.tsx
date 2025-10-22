@@ -32,6 +32,7 @@ interface DateTimePickerWithNaturalInputProps {
   label?: string
   required?: boolean
   shortFormat?: boolean
+  dateOnly?: boolean // When true, only date is selected (no time)
 }
 
 export function DateTimePickerWithNaturalInput({
@@ -44,6 +45,7 @@ export function DateTimePickerWithNaturalInput({
   label,
   required = false,
   shortFormat = false,
+  dateOnly = false,
 }: DateTimePickerWithNaturalInputProps) {
   const [open, setOpen] = React.useState(false)
   const [inputValue, setInputValue] = React.useState('')
@@ -92,26 +94,41 @@ export function DateTimePickerWithNaturalInput({
     // Try to parse natural language input
     const parsedDate = chrono.parseDate(inputVal)
     if (parsedDate) {
-      const hours24 = parsedDate.getHours()
-      const hours12 = hours24 === 0 ? 12 : hours24 > 12 ? hours24 - 12 : hours24
       setSelectedDate(parsedDate)
-      setSelectedTime({
-        hours: hours12.toString().padStart(2, '0'),
-        minutes: parsedDate.getMinutes().toString().padStart(2, '0'),
-        period: hours24 >= 12 ? 'PM' : 'AM',
-      })
-      updateDateTime(parsedDate, hours24, parsedDate.getMinutes())
+      
+      if (dateOnly) {
+        // For date-only mode, ignore time and return ISO date string
+        const dateOnlyValue = new Date(parsedDate)
+        dateOnlyValue.setHours(0, 0, 0, 0)
+        onChange(dateOnlyValue.toISOString().split('T')[0])
+      } else {
+        const hours24 = parsedDate.getHours()
+        const hours12 = hours24 === 0 ? 12 : hours24 > 12 ? hours24 - 12 : hours24
+        setSelectedTime({
+          hours: hours12.toString().padStart(2, '0'),
+          minutes: parsedDate.getMinutes().toString().padStart(2, '0'),
+          period: hours24 >= 12 ? 'PM' : 'AM',
+        })
+        updateDateTime(parsedDate, hours24, parsedDate.getMinutes())
+      }
     }
   }
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
       setSelectedDate(date)
-      const hours24 = convertTo24Hour(
-        parseInt(selectedTime.hours),
-        selectedTime.period
-      )
-      updateDateTime(date, hours24, parseInt(selectedTime.minutes))
+      if (dateOnly) {
+        // For date-only mode, set time to midnight and return ISO date string
+        const dateOnly = new Date(date)
+        dateOnly.setHours(0, 0, 0, 0)
+        onChange(dateOnly.toISOString().split('T')[0])
+      } else {
+        const hours24 = convertTo24Hour(
+          parseInt(selectedTime.hours),
+          selectedTime.period
+        )
+        updateDateTime(date, hours24, parseInt(selectedTime.minutes))
+      }
     }
   }
 
@@ -145,6 +162,9 @@ export function DateTimePickerWithNaturalInput({
   const formatDisplayValue = () => {
     if (!selectedDate) return placeholder
     const dateFormat = shortFormat ? 'MMM dd' : 'PPP'
+    if (dateOnly) {
+      return format(selectedDate, dateFormat)
+    }
     return (
       format(selectedDate, dateFormat) +
       ' at ' +
@@ -205,7 +225,11 @@ export function DateTimePickerWithNaturalInput({
           <div className='p-3 space-y-3'>
             {/* Natural language input */}
             <Input
-              placeholder="e.g., 'next Monday', 'tomorrow at 2pm', 'in 3 days'"
+              placeholder={
+                dateOnly
+                  ? "e.g., 'next Monday', 'tomorrow', 'in 3 days'"
+                  : "e.g., 'next Monday', 'tomorrow at 2pm', 'in 3 days'"
+              }
               value={inputValue}
               onChange={handleInputChange}
               className='text-sm'
@@ -221,7 +245,7 @@ export function DateTimePickerWithNaturalInput({
             />
 
             {/* Time selection */}
-            {selectedDate && (
+            {!dateOnly && selectedDate && (
               <div className='flex gap-2'>
                 <div className='flex-1'>
                   <Label className='text-xs text-muted-foreground'>Hour</Label>
@@ -274,7 +298,7 @@ export function DateTimePickerWithNaturalInput({
             )}
 
             {/* Quick time buttons */}
-            {selectedDate && (
+            {!dateOnly && selectedDate && (
               <div className='grid grid-cols-2 gap-1'>
                 {[
                   {

@@ -19,6 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
 import { useState } from 'react'
 import { updateInitiative } from '@/lib/actions/initiative'
 import { type InitiativeFormData, initiativeSchema } from '@/lib/validations'
@@ -275,15 +276,13 @@ export function InitiativeEditForm({ initiative }: InitiativeEditFormProps) {
             <CardContent>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                 <div className='space-y-2'>
-                  <Label htmlFor='startDate'>Start Date</Label>
-                  <Input
-                    id='startDate'
-                    type='date'
+                  <DateTimePickerWithNaturalInput
+                    label='Start Date'
                     value={formData.startDate}
-                    onChange={e =>
-                      handleInputChange('startDate', e.target.value)
-                    }
-                    className={errors.startDate ? 'border-destructive' : ''}
+                    onChange={value => handleInputChange('startDate', value)}
+                    placeholder='Pick start date'
+                    error={!!errors.startDate}
+                    dateOnly={true}
                   />
                   {errors.startDate && (
                     <p className='text-sm text-destructive'>
@@ -293,15 +292,13 @@ export function InitiativeEditForm({ initiative }: InitiativeEditFormProps) {
                 </div>
 
                 <div className='space-y-2'>
-                  <Label htmlFor='targetDate'>Target Date</Label>
-                  <Input
-                    id='targetDate'
-                    type='date'
+                  <DateTimePickerWithNaturalInput
+                    label='Target Date'
                     value={formData.targetDate}
-                    onChange={e =>
-                      handleInputChange('targetDate', e.target.value)
-                    }
-                    className={errors.targetDate ? 'border-destructive' : ''}
+                    onChange={value => handleInputChange('targetDate', value)}
+                    placeholder='Pick target date'
+                    error={!!errors.targetDate}
+                    dateOnly={true}
                   />
                   {errors.targetDate && (
                     <p className='text-sm text-destructive'>
