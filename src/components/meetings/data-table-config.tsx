@@ -390,7 +390,7 @@ export const meetingDataTableConfig: DataTableConfig<
   ],
   sortOptions: [
     { value: 'title', label: 'Title' },
-    { value: 'date', label: 'Date' },
+    { value: 'scheduledAt', label: 'Date' },
     { value: 'duration', label: 'Duration' },
   ],
 }

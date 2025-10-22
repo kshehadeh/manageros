@@ -42,7 +42,7 @@ type MeetingInstanceWithRelations = Prisma.MeetingInstanceGetPayload<{
 
 type CombinedMeeting = MeetingWithRelations | MeetingInstanceWithRelations
 
-// Build order by clause from sort parameter
+// Build order by clause from sort parameter for regular meetings
 function buildOrderByClause(
   sortParam: string
 ): Prisma.MeetingOrderByWithRelationInput {
@@ -61,6 +61,30 @@ function buildOrderByClause(
       return { initiative: { title: dir } }
     case 'team':
       return { team: { name: dir } }
+    default:
+      return { scheduledAt: 'desc' }
+  }
+}
+
+// Build order by clause from sort parameter for meeting instances
+function buildInstanceOrderByClause(
+  sortParam: string
+): Prisma.MeetingInstanceOrderByWithRelationInput {
+  if (!sortParam) return { scheduledAt: 'desc' }
+
+  const [field, direction] = sortParam.split(':')
+  const dir = (direction === 'desc' ? 'desc' : 'asc') as Prisma.SortOrder
+
+  switch (field) {
+    case 'scheduledAt':
+    case 'scheduledDate':
+      return { scheduledAt: dir }
+    case 'title':
+      return { meeting: { title: dir } }
+    case 'initiative':
+      return { meeting: { initiative: { title: dir } } }
+    case 'team':
+      return { meeting: { team: { name: dir } } }
     default:
       return { scheduledAt: 'desc' }
   }
@@ -329,8 +353,9 @@ export async function GET(request: NextRequest) {
       return baseWhere
     }
 
-    // Get order by clause
+    // Get order by clauses
     const orderBy = buildOrderByClause(sortParam)
+    const instanceOrderBy = buildInstanceOrderByClause(sortParam)
 
     // Fetch data based on meeting type filter
     let upcomingMeetingInstances: MeetingInstanceWithRelations[] = []
@@ -359,12 +384,7 @@ export async function GET(request: NextRequest) {
             },
           },
         },
-        orderBy:
-          orderBy.scheduledAt !== undefined
-            ? ({
-                scheduledAt: orderBy.scheduledAt,
-              } as Prisma.MeetingInstanceOrderByWithRelationInput)
-            : undefined,
+        orderBy: instanceOrderBy,
       })
       upcomingMeetingInstances = instances.map(instance => ({
         ...instance,
