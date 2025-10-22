@@ -11,6 +11,7 @@ import {
   Handshake,
   CheckSquare,
   UserPlus,
+  Calendar,
 } from 'lucide-react'
 import { type CommandItemDescriptor, type CommandSource } from '../types'
 
@@ -47,6 +48,18 @@ function createStaticItems(
           ? `/oneonones/new?participant1Id=${currentUserPersonId}`
           : '/oneonones/new'
         router.push(url)
+        closePalette()
+      },
+    },
+    {
+      id: 'meeting.create',
+      title: 'Create Meeting',
+      subtitle: 'Schedule a new team meeting',
+      icon: <Calendar className='h-4 w-4' />,
+      keywords: ['meeting', 'schedule', 'calendar', 'team meeting', 'new meeting'],
+      group: 'Quick Actions',
+      perform: ({ closePalette, router }) => {
+        router.push('/meetings/new')
         closePalette()
       },
     },
@@ -165,6 +178,18 @@ function createStaticItems(
       group: 'Navigation',
       perform: ({ closePalette, router }) => {
         router.push('/feedback')
+        closePalette()
+      },
+    },
+    {
+      id: 'nav.meetings',
+      title: 'View Meetings',
+      subtitle: 'Go to meetings page',
+      icon: <Calendar className='h-4 w-4' />,
+      keywords: ['meetings', 'calendar', 'schedule'],
+      group: 'Navigation',
+      perform: ({ closePalette, router }) => {
+        router.push('/meetings')
         closePalette()
       },
     },
