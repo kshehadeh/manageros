@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { MarkdownEditor } from '@/components/markdown-editor'
+import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { Check, X, Edit2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -167,7 +168,11 @@ export function InlineEditableText({
         <div className='flex-1 min-w-0'>
           {value ? (
             multiline ? (
-              <div className='whitespace-pre-wrap text-sm'>{value}</div>
+              <ReadonlyNotesField
+                content={value}
+                variant='default'
+                showEmptyState={false}
+              />
             ) : (
               <div className='text-sm font-medium'>{value}</div>
             )
