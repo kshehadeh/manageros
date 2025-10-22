@@ -31,7 +31,14 @@ print_error() {
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+# Find the git repository root dynamically
+if git rev-parse --show-toplevel > /dev/null 2>&1; then
+    PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+else
+    # Fallback: assume script is in the project root
+    PROJECT_ROOT="$SCRIPT_DIR"
+fi
 
 # Change to project root
 cd "$PROJECT_ROOT"
