@@ -58,6 +58,65 @@ function formatDuration(minutes: number | null) {
   return `${mins}m`
 }
 
+// Get relative date group for a given date
+function getRelativeDateGroup(date: Date | string): string {
+  const dateObj = typeof date === 'string' ? new Date(date) : date
+  if (isNaN(dateObj.getTime())) return 'invalid'
+
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const meetingDate = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate())
+  
+  const diffTime = today.getTime() - meetingDate.getTime()
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+
+  // Future dates
+  if (diffDays < 0) {
+    return '0-today'
+  }
+  
+  // Today
+  if (diffDays === 0) {
+    return '0-today'
+  }
+  
+  // Yesterday
+  if (diffDays === 1) {
+    return '1-yesterday'
+  }
+  
+  // Last 7 days (excluding yesterday)
+  if (diffDays <= 7) {
+    return '2-last-week'
+  }
+  
+  // Last 30 days (excluding last week)
+  if (diffDays <= 30) {
+    return '3-last-month'
+  }
+  
+  // Everything else
+  return '4-older'
+}
+
+// Format relative date group label
+function formatRelativeDateGroupLabel(groupKey: string): string {
+  switch (groupKey) {
+    case '0-today':
+      return 'Today'
+    case '1-yesterday':
+      return 'Yesterday'
+    case '2-last-week':
+      return 'Last Week'
+    case '3-last-month':
+      return 'Last Month'
+    case '4-older':
+      return 'Older'
+    default:
+      return groupKey
+  }
+}
+
 type MeetingFilters = {
   scheduledFrom?: string
   scheduledTo?: string
@@ -223,10 +282,16 @@ export const meetingDataTableConfig: DataTableConfig<
         header: 'Date',
         accessorFn: row => {
           const isInstance = row.type === 'instance'
-          if (isInstance) {
-            return (row as MeetingInstanceWithRelations).scheduledAt
+          const scheduledAt = isInstance
+            ? (row as MeetingInstanceWithRelations).scheduledAt
+            : (row as MeetingWithRelations).scheduledAt
+          
+          // When grouping by date, return the relative date group
+          // Otherwise return the actual date for sorting
+          if (grouping && grouping.includes('date')) {
+            return getRelativeDateGroup(scheduledAt)
           }
-          return (row as MeetingWithRelations).scheduledAt
+          return scheduledAt
         },
         cell: ({ row }) => {
           const meeting = row.original
@@ -393,4 +458,12 @@ export const meetingDataTableConfig: DataTableConfig<
     { value: 'scheduledAt', label: 'Date' },
     { value: 'duration', label: 'Duration' },
   ],
+
+  // Custom group label formatting
+  getGroupLabel: (groupValue: string, groupingColumn: string) => {
+    if (groupingColumn === 'date') {
+      return formatRelativeDateGroupLabel(groupValue)
+    }
+    return groupValue || 'Unassigned'
+  },
 }
