@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { Prisma } from '@prisma/client'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
 
@@ -107,12 +108,32 @@ export const feedbackTool = {
         throw new Error('No person record found for current user')
       }
 
-      const results: any[] = []
+      const results: Array<{
+        id: string
+        type: 'direct' | 'campaign'
+        content: string | Record<string, string>
+        kind: 'positive' | 'constructive' | 'general'
+        isPrivate: boolean
+        createdAt: Date
+        about: { id: string; name: string; email: string | null }
+        from: { id: string; name: string; email: string | null }
+        source: string
+        campaignId?: string
+        template?: {
+          id: string
+          name: string
+          questions: Array<{
+            id: string
+            question: string
+            sortOrder: number
+          }>
+        } | null
+      }> = []
 
       // Search direct feedback if requested
       if (includeDirectFeedback) {
         // Build where clause for direct feedback
-        const directFeedbackWhere: any = {
+        const directFeedbackWhere: Prisma.FeedbackWhereInput = {
           OR: [
             { isPrivate: false }, // Public feedback
             { fromId: currentPerson.id }, // Private feedback by current user
@@ -132,7 +153,7 @@ export const feedbackTool = {
               contains: personName,
               mode: 'insensitive',
             },
-          }
+          } as Prisma.PersonWhereInput
         }
 
         // Add from person filters
@@ -145,7 +166,7 @@ export const feedbackTool = {
               mode: 'insensitive',
             },
             organizationId: user.organizationId,
-          }
+          } as Prisma.PersonWhereInput
         }
 
         // Add kind filter
@@ -181,17 +202,20 @@ export const feedbackTool = {
         })
 
         // Transform direct feedback to consistent format
-        const transformedDirectFeedback = directFeedback.map(feedback => ({
-          id: feedback.id,
-          type: 'direct',
-          content: feedback.body,
-          kind: feedback.kind,
-          isPrivate: feedback.isPrivate,
-          createdAt: feedback.createdAt,
-          about: feedback.about,
-          from: feedback.from,
-          source: 'Direct Feedback',
-        }))
+        const transformedDirectFeedback = directFeedback.map(
+          feedback =>
+            ({
+              id: feedback.id,
+              type: 'direct' as const,
+              content: feedback.body,
+              kind: feedback.kind as 'positive' | 'constructive' | 'general',
+              isPrivate: feedback.isPrivate,
+              createdAt: feedback.createdAt,
+              about: feedback.about,
+              from: feedback.from,
+              source: 'Direct Feedback',
+            }) as const
+        )
 
         results.push(...transformedDirectFeedback)
       }
@@ -199,7 +223,7 @@ export const feedbackTool = {
       // Search feedback campaign responses if requested
       if (includeCampaigns) {
         // Build where clause for feedback campaigns
-        const campaignWhere: any = {
+        const campaignWhere: Prisma.FeedbackCampaignWhereInput = {
           userId: user.id, // Only campaigns created by current user
           targetPerson: {
             organizationId: user.organizationId, // Ensure target person is in same org
@@ -216,7 +240,7 @@ export const feedbackTool = {
               contains: personName,
               mode: 'insensitive',
             },
-          }
+          } as Prisma.PersonWhereInput
         }
 
         const campaigns = await prisma.feedbackCampaign.findMany({
@@ -245,23 +269,26 @@ export const feedbackTool = {
 
         // Transform campaign responses to consistent format
         const transformedCampaignResponses = campaigns.flatMap(campaign =>
-          campaign.responses.map(response => ({
-            id: response.id,
-            type: 'campaign',
-            content: response.responses,
-            kind: 'general', // Campaign responses are generally categorized as general
-            isPrivate: false, // Campaign responses are considered public within the organization
-            createdAt: response.submittedAt,
-            about: campaign.targetPerson,
-            from: {
-              id: response.responderEmail,
-              name: response.responderEmail,
-              email: response.responderEmail,
-            },
-            source: `Feedback Campaign: ${campaign.name || 'Unnamed Campaign'}`,
-            campaignId: campaign.id,
-            template: campaign.template,
-          }))
+          campaign.responses.map(
+            response =>
+              ({
+                id: response.id,
+                type: 'campaign' as const,
+                content: response.responses as Record<string, string>,
+                kind: 'general' as const, // Campaign responses are generally categorized as general
+                isPrivate: false, // Campaign responses are considered public within the organization
+                createdAt: response.submittedAt,
+                about: campaign.targetPerson,
+                from: {
+                  id: response.responderEmail,
+                  name: response.responderEmail,
+                  email: response.responderEmail,
+                },
+                source: `Feedback Campaign: ${campaign.name || 'Unnamed Campaign'}`,
+                campaignId: campaign.id,
+                template: campaign.template,
+              }) as const
+          )
         )
 
         results.push(...transformedCampaignResponses)

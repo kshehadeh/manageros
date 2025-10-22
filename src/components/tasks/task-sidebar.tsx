@@ -197,7 +197,7 @@ export function TaskSidebar({
                   <td className='py-1 pr-3'>
                     <div className='flex items-center gap-2 text-muted-foreground'>
                       <Calendar className='w-3.5 h-3.5' />
-                      <span className='font-medium'>Due Date</span>
+                      <span className='font-medium'>Due</span>
                     </div>
                   </td>
                   <td className='py-1'>
@@ -205,6 +205,7 @@ export function TaskSidebar({
                       value={dueDate || null}
                       onValueChange={handleDueDateChange}
                       emptyStateText='Click to set due date'
+                      shortFormat={true}
                     />
                   </td>
                 </tr>
@@ -214,7 +215,7 @@ export function TaskSidebar({
                     <td className='py-1 pr-3'>
                       <div className='flex items-center gap-2 text-muted-foreground'>
                         <User className='w-3.5 h-3.5' />
-                        <span className='font-medium'>Created By</span>
+                        <span className='font-medium'>Creator</span>
                       </div>
                     </td>
                     <td className='py-1'>{createdBy.name}</td>
@@ -225,7 +226,7 @@ export function TaskSidebar({
                   <td className='py-1 pr-3'>
                     <div className='flex items-center gap-2 text-muted-foreground'>
                       <Clock className='w-3.5 h-3.5' />
-                      <span className='font-medium'>Last Updated</span>
+                      <span className='font-medium'>Updated</span>
                     </div>
                   </td>
                   <td className='py-1'>

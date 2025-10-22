@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Check, X, Edit2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
+import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
 
 interface InlineEditableDateProps {
   value: Date | null
@@ -14,6 +14,8 @@ interface InlineEditableDateProps {
   className?: string
   disabled?: boolean
   emptyStateText?: string
+  showTime?: boolean
+  shortFormat?: boolean
 }
 
 export function InlineEditableDate({
@@ -23,102 +25,75 @@ export function InlineEditableDate({
   className,
   disabled = false,
   emptyStateText = 'Click to set date',
+  showTime = false,
+  shortFormat = false,
 }: InlineEditableDateProps) {
   const [isEditing, setIsEditing] = useState(false)
-  const [editValue, setEditValue] = useState<Date | null>(value)
+  const [editValue, setEditValue] = useState<string>(
+    value ? value.toISOString() : ''
+  )
   const [isLoading, setIsLoading] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  // Focus input when entering edit mode
-  useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus()
-      inputRef.current.select()
-    }
-  }, [isEditing])
 
   // Update edit value when value prop changes
   useEffect(() => {
-    setEditValue(value)
+    setEditValue(value ? value.toISOString() : '')
   }, [value])
 
   const handleStartEdit = () => {
     if (disabled || isLoading) return
-    setEditValue(value)
+    setEditValue(value ? value.toISOString() : '')
     setIsEditing(true)
   }
 
   const handleSave = async () => {
-    if (editValue === value || isLoading) {
+    const newDate = editValue ? new Date(editValue) : null
+    if (newDate === value || isLoading) {
       setIsEditing(false)
       return
     }
 
     setIsLoading(true)
     try {
-      await onValueChange(editValue)
+      await onValueChange(newDate)
       setIsEditing(false)
     } catch (error) {
       console.error('Failed to update date:', error)
       // Reset to original value on error
-      setEditValue(value)
+      setEditValue(value ? value.toISOString() : '')
     } finally {
       setIsLoading(false)
     }
   }
 
   const handleCancel = () => {
-    setEditValue(value)
+    setEditValue(value ? value.toISOString() : '')
     setIsEditing(false)
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      handleSave()
-    } else if (e.key === 'Escape') {
-      e.preventDefault()
-      handleCancel()
-    }
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value
-    if (inputValue === '') {
-      setEditValue(null)
-    } else {
-      // Try to parse the date
-      const parsedDate = new Date(inputValue)
-      if (!isNaN(parsedDate.getTime())) {
-        setEditValue(parsedDate)
-      }
-    }
-  }
-
-  const formatDateForInput = (date: Date | null) => {
-    if (!date) return ''
-    return format(date, 'yyyy-MM-dd')
   }
 
   const formatDateForDisplay = (date: Date | null) => {
     if (!date) return ''
-    return format(date, 'MMM dd, yyyy')
+    if (shortFormat) {
+      return showTime ? format(date, 'MMM dd, h:mm a') : format(date, 'MMM dd')
+    }
+    return showTime
+      ? format(date, 'MMM dd, yyyy h:mm a')
+      : format(date, 'MMM dd, yyyy')
   }
 
   if (isEditing) {
     return (
       <div className={cn('w-full', className)}>
         <div className='flex items-center gap-2 w-full'>
-          <Input
-            ref={inputRef}
-            type='date'
-            value={formatDateForInput(editValue)}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            placeholder={placeholder}
-            disabled={isLoading}
-            className='flex-1 min-w-0 h-8 text-sm'
-          />
+          <div className='flex-1 min-w-0'>
+            <DateTimePickerWithNaturalInput
+              value={editValue}
+              onChange={setEditValue}
+              placeholder={placeholder}
+              disabled={isLoading}
+              className='h-8'
+              shortFormat={shortFormat}
+            />
+          </div>
           <Button
             size='sm'
             onClick={handleSave}

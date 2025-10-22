@@ -7,6 +7,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectScrollUpButton,
+  SelectScrollDownButton,
 } from '@/components/ui/select'
 import { useInitiatives } from '@/hooks/use-initiatives'
 import {
@@ -105,6 +107,7 @@ export function InitiativeSelect({
         />
       </SelectTrigger>
       <SelectContent>
+        <SelectScrollUpButton />
         {includeNone && <SelectItem value='none'>{noneLabel}</SelectItem>}
         {initiatives.map(initiative => (
           <SelectItem key={initiative.id} value={initiative.id}>
@@ -118,6 +121,7 @@ export function InitiativeSelect({
             No initiatives found
           </div>
         )}
+        <SelectScrollDownButton />
       </SelectContent>
     </Select>
   )

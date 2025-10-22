@@ -7,9 +7,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectScrollUpButton,
+  SelectScrollDownButton,
 } from '@/components/ui/select'
 import { PersonAvatar } from '@/components/people/person-avatar'
 import { usePeopleForSelect } from '@/hooks/use-organization-cache'
+import { useViewportPosition } from '@/hooks/use-viewport-position'
+import { useKeyboardSearch } from '@/hooks/use-keyboard-search'
 
 interface Person {
   id: string
@@ -46,6 +50,19 @@ export function PersonSelect({
 }: PersonSelectProps) {
   const { people, isLoading } = usePeopleForSelect()
   const [selectOpen, setSelectOpen] = useState(false)
+  const { position, maxHeight, triggerRef } = useViewportPosition(
+    selectOpen,
+    300,
+    16
+  )
+
+  // Use keyboard search hook
+  const { searchQuery, filteredItems: filteredPeople } = useKeyboardSearch({
+    items: people,
+    getItemText: person => person.name,
+    onSelect: person => onValueChange?.(person.id),
+    isOpen: selectOpen,
+  })
 
   // Auto-open dropdown if requested
   useEffect(() => {
@@ -83,18 +100,35 @@ export function PersonSelect({
       open={selectOpen}
       onOpenChange={setSelectOpen}
     >
-      <SelectTrigger className={className}>
+      <SelectTrigger ref={triggerRef} className={className}>
         <SelectValue
           placeholder={isLoading ? 'Loading people...' : placeholder}
         />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent
+        side={position}
+        sideOffset={4}
+        style={{ maxHeight: `${maxHeight}px` }}
+        className='overflow-y-auto'
+      >
+        {searchQuery && (
+          <div className='px-2 py-1 text-xs text-muted-foreground border-b'>
+            Searching: &ldquo;{searchQuery}&rdquo;
+          </div>
+        )}
+        <SelectScrollUpButton />
         {includeNone && <SelectItem value='none'>{noneLabel}</SelectItem>}
-        {people.map(person => (
+        {filteredPeople.map(person => (
           <SelectItem key={person.id} value={person.id}>
             {showAvatar ? renderPersonItem(person) : renderPersonText(person)}
           </SelectItem>
         ))}
+        {filteredPeople.length === 0 && searchQuery && (
+          <div className='py-6 text-center text-sm text-muted-foreground'>
+            No people found matching &ldquo;{searchQuery}&rdquo;
+          </div>
+        )}
+        <SelectScrollDownButton />
       </SelectContent>
     </Select>
   )

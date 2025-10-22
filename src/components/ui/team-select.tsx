@@ -7,6 +7,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectScrollUpButton,
+  SelectScrollDownButton,
 } from '@/components/ui/select'
 import { useTeamsForSelect } from '@/hooks/use-organization-cache'
 
@@ -68,12 +70,14 @@ export function TeamSelect({
         />
       </SelectTrigger>
       <SelectContent>
+        <SelectScrollUpButton />
         {includeNone && <SelectItem value='none'>{noneLabel}</SelectItem>}
         {teams.map(team => (
           <SelectItem key={team.id} value={team.id}>
             {renderTeamText(team)}
           </SelectItem>
         ))}
+        <SelectScrollDownButton />
       </SelectContent>
     </Select>
   )

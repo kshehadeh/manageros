@@ -43,6 +43,10 @@ export const peopleDataTableConfig: DataTableConfig<
     router.push(`/people/${entityId}`)
   },
 
+  onRowClick: (router, personId) => {
+    router.push(`/people/${personId}`)
+  },
+
   // Column definitions
   createColumns: ({ onButtonClick, grouping, visibleColumns }) => {
     const isGroupedByTeam = grouping && grouping.includes('team')

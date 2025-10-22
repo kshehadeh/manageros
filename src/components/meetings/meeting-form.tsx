@@ -38,6 +38,7 @@ import { MarkdownEditor } from '@/components/markdown-editor'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PersonSelect } from '@/components/ui/person-select'
 import { InitiativeSelect } from '@/components/ui/initiative-select'
+import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
 import { toast } from 'sonner'
 
 interface MeetingFormProps {
@@ -353,17 +354,15 @@ export function MeetingForm({
               <div className='space-y-4'>
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                   <div className='space-y-2'>
-                    <Label htmlFor='scheduledAt'>
-                      Date & Time <span className='text-destructive'>*</span>
-                    </Label>
-                    <Input
-                      id='scheduledAt'
-                      type='datetime-local'
+                    <DateTimePickerWithNaturalInput
                       value={formData.scheduledAt}
-                      onChange={e =>
-                        handleInputChange('scheduledAt', e.target.value)
+                      onChange={value =>
+                        handleInputChange('scheduledAt', value)
                       }
-                      className={errors.scheduledAt ? 'border-destructive' : ''}
+                      label='Date & Time'
+                      required
+                      error={!!errors.scheduledAt}
+                      placeholder='Pick a date and time'
                     />
                     {errors.scheduledAt && (
                       <p className='text-sm text-destructive'>

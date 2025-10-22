@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import 'react-day-picker/dist/style.css';
 
 @theme {
   --color-background: hsl(0 0% 100%);
@@ -266,6 +267,49 @@
   padding-left: var(--spacing-lg);
   font-style: italic;
   color: var(--color-muted-foreground);
+}
+
+/* React Day Picker theming overrides */
+.rdp-day_selected {
+  background-color: var(--color-primary) !important;
+  color: var(--color-primary-foreground) !important;
+}
+
+.rdp-day_today {
+  background-color: var(--color-accent) !important;
+  color: var(--color-accent-foreground) !important;
+}
+
+.rdp-day_selected.rdp-day_today {
+  background-color: var(--color-primary) !important;
+  color: var(--color-primary-foreground) !important;
+}
+
+.rdp-day:hover:not(.rdp-day_selected):not(.rdp-day_today) {
+  background-color: var(--color-accent) !important;
+  color: var(--color-accent-foreground) !important;
+}
+
+.rdp-day_outside {
+  color: var(--color-muted-foreground) !important;
+}
+
+.rdp-day_disabled {
+  color: var(--color-muted-foreground) !important;
+  opacity: 0.5 !important;
+}
+
+.rdp-weekday {
+  color: var(--color-muted-foreground) !important;
+}
+
+.rdp-caption_label {
+  color: var(--color-foreground) !important;
+}
+
+.rdp-nav_button:hover {
+  background-color: var(--color-accent) !important;
+  color: var(--color-accent-foreground) !important;
 }
 
 /* Fix calendar icon visibility to honor theme tokens */
