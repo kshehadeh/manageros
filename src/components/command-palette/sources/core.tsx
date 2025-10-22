@@ -10,6 +10,7 @@ import {
   BarChart3,
   Handshake,
   CheckSquare,
+  UserPlus,
 } from 'lucide-react'
 import { type CommandItemDescriptor, type CommandSource } from '../types'
 
@@ -183,18 +184,32 @@ function createStaticItems(
 
   // Add admin-only commands
   if (userRole === 'ADMIN') {
-    items.push({
-      id: 'nav.org-settings',
-      title: 'Organization Settings',
-      subtitle: 'Manage organization settings',
-      icon: <Settings className='h-4 w-4' />,
-      keywords: ['settings', 'organization', 'admin', 'config'],
-      group: 'Administration',
-      perform: ({ closePalette, router }) => {
-        router.push('/organization/settings')
-        closePalette()
+    items.push(
+      {
+        id: 'person.create',
+        title: 'Create Person',
+        subtitle: 'Add a new person to the organization',
+        icon: <UserPlus className='h-4 w-4' />,
+        keywords: ['person', 'people', 'new person', 'add person', 'employee', 'team member'],
+        group: 'Quick Actions',
+        perform: ({ closePalette, router }) => {
+          router.push('/people/new')
+          closePalette()
+        },
       },
-    })
+      {
+        id: 'nav.org-settings',
+        title: 'Organization Settings',
+        subtitle: 'Manage organization settings',
+        icon: <Settings className='h-4 w-4' />,
+        keywords: ['settings', 'organization', 'admin', 'config'],
+        group: 'Administration',
+        perform: ({ closePalette, router }) => {
+          router.push('/organization/settings')
+          closePalette()
+        },
+      }
+    )
   }
 
   return items.filter(item => {
