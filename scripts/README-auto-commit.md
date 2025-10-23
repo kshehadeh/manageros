@@ -106,6 +106,8 @@ If AI is unavailable, the script falls back to rule-based analysis:
 - Graceful fallback if GitHub CLI is not installed
 - API key validation during setup
 - Automatic PR creation with proper titles and descriptions
+- **Security**: Uses execFileSync with argument arrays to prevent shell injection attacks
+- **Input sanitization**: All user inputs and AI outputs are safely passed to commands without shell interpretation
 
 ## Troubleshooting
 

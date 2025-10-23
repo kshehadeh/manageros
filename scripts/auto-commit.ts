@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /* eslint-disable camelcase */
 
-import { execSync } from 'child_process'
+import { execSync, execFileSync } from 'child_process'
 
 // Colors for output
 const colors = {
@@ -140,8 +140,13 @@ class GitOperations {
 
   createBranch(branchName: string): void {
     try {
-      // Use silent mode to avoid duplicate output
-      this.execGitCommand(`git checkout -b "${branchName}"`, { silent: true })
+      // Use execFileSync with argument arrays to prevent shell injection
+      const args = ['checkout', '-b', branchName]
+      execFileSync('git', args, {
+        cwd: this.projectRoot,
+        stdio: 'pipe',
+        encoding: 'utf8',
+      })
       printStatus(`Created and switched to branch: ${branchName}`)
     } catch (error) {
       // If branch creation fails, it might already exist or we might already be on it
@@ -167,7 +172,13 @@ class GitOperations {
 
   commit(message: string): void {
     try {
-      this.execGitCommand(`git commit -m "${message}"`, { silent: true })
+      // Use execFileSync with argument arrays to prevent shell injection
+      const args = ['commit', '-m', message]
+      execFileSync('git', args, {
+        cwd: this.projectRoot,
+        stdio: 'pipe',
+        encoding: 'utf8',
+      })
       printStatus('Changes committed successfully')
     } catch (error) {
       printError('Failed to commit changes')
@@ -177,8 +188,12 @@ class GitOperations {
 
   pushBranch(branchName: string): void {
     try {
-      this.execGitCommand(`git push -u origin "${branchName}"`, {
-        silent: true,
+      // Use execFileSync with argument arrays to prevent shell injection
+      const args = ['push', '-u', 'origin', branchName]
+      execFileSync('git', args, {
+        cwd: this.projectRoot,
+        stdio: 'pipe',
+        encoding: 'utf8',
       })
       printStatus(`Branch '${branchName}' pushed to remote`)
     } catch (error) {
@@ -207,10 +222,28 @@ class GitOperations {
         return
       }
 
-      // Create the pull request
-      const prCommand = `gh pr create --title "${title}" --body "${description}" --head "${branchName}"`
-      this.execGitCommand(prCommand, { silent: true })
-      printSuccess('Pull request created successfully!')
+      // Create the pull request using execFileSync with argument arrays to prevent shell injection
+      const args = [
+        'pr',
+        'create',
+        '--title',
+        title,
+        '--body',
+        description,
+        '--head',
+        branchName,
+      ]
+
+      try {
+        execFileSync('gh', args, {
+          cwd: this.projectRoot,
+          stdio: 'pipe',
+          encoding: 'utf8',
+        })
+        printSuccess('Pull request created successfully!')
+      } catch (execError) {
+        throw new Error(`GitHub CLI command failed: ${execError}`)
+      }
     } catch (error) {
       printWarning('Failed to create pull request automatically')
       printStatus(
