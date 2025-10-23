@@ -203,6 +203,15 @@ export const taskDataTableConfig: DataTableConfig<
             </Badge>
           )
         },
+        sortingFn: (rowA, rowB, columnId) => {
+          const statusA = rowA.getValue(columnId) as TaskStatus
+          const statusB = rowB.getValue(columnId) as TaskStatus
+
+          const orderA = taskStatusUtils.getSortOrder(statusA)
+          const orderB = taskStatusUtils.getSortOrder(statusB)
+
+          return orderA - orderB
+        },
         size: 120,
         minSize: 100,
         maxSize: 150,
@@ -429,5 +438,13 @@ export const taskDataTableConfig: DataTableConfig<
   // Custom row className function
   getRowClassName: task => {
     return task.status === TASK_STATUS.DONE ? 'line-through opacity-60' : ''
+  },
+
+  // Group label formatting
+  getGroupLabel: (groupValue: string, groupingColumn: string) => {
+    if (groupingColumn === 'status') {
+      return taskStatusUtils.getLabel(groupValue as TaskStatus)
+    }
+    return groupValue || 'Unassigned'
   },
 }
