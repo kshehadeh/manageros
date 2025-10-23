@@ -19,13 +19,13 @@ if [ "$BRANCH" = "main" ]; then
     # On main branch - only deploy if commit starts with "chore: release"
     if [[ "$COMMIT_MESSAGE" =~ ^chore:\ release ]]; then
         echo "✅ Main branch with release commit - proceeding with build"
-        exit 0
+        exit 1
     else
         echo "❌ Main branch without release commit - skipping build"
-        exit 1
+        exit 0
     fi
 else
     # Not main branch - always build (for PRs, feature branches, etc.)
     echo "✅ Non-main branch ($BRANCH) - proceeding with build"
-    exit 0
+    exit 1
 fi
