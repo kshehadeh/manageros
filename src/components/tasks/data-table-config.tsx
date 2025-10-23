@@ -38,6 +38,7 @@ import {
   MarkAsDoneMenuItem,
 } from '@/components/common/context-menu-items'
 import { toast } from 'sonner'
+import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 
 type TaskFilters = {
   search?: string
@@ -140,8 +141,12 @@ export const taskDataTableConfig: DataTableConfig<
               <div className='space-y-0.5 flex-1'>
                 <div className='font-medium'>{task.title}</div>
                 {task.description && (
-                  <div className='text-xs text-muted-foreground line-clamp-2'>
-                    {task.description}
+                  <div className='line-clamp-2'>
+                    <ReadonlyNotesField
+                      content={task.description}
+                      variant='compact'
+                      showEmptyState={false}
+                    />
                   </div>
                 )}
               </div>
