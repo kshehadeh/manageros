@@ -10,6 +10,68 @@ import { useOneOnOneTableSettings } from '@/hooks/use-oneonone-table-settings'
 import { deleteOneOnOne } from '@/lib/actions/oneonone'
 import type { DataTableConfig } from '@/components/common/generic-data-table'
 
+// Get relative date group for a given date
+function getRelativeDateGroup(date: Date | string | null): string {
+  if (!date) return 'unscheduled'
+
+  const dateObj = typeof date === 'string' ? new Date(date) : date
+  if (isNaN(dateObj.getTime())) return 'invalid'
+
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const meetingDate = new Date(
+    dateObj.getFullYear(),
+    dateObj.getMonth(),
+    dateObj.getDate()
+  )
+
+  const diffTime = today.getTime() - meetingDate.getTime()
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+
+  // Future dates (including today)
+  if (diffDays <= 0) {
+    return '0-today'
+  }
+
+  // Yesterday
+  if (diffDays === 1) {
+    return '1-yesterday'
+  }
+
+  // Last 7 days (excluding yesterday)
+  if (diffDays <= 7) {
+    return '2-last-week'
+  }
+
+  // Last 30 days (excluding last week)
+  if (diffDays <= 30) {
+    return '3-last-month'
+  }
+
+  // Everything else
+  return '4-older'
+}
+
+// Format relative date group label
+function formatRelativeDateGroupLabel(groupKey: string): string {
+  switch (groupKey) {
+    case 'unscheduled':
+      return 'Unscheduled'
+    case '0-today':
+      return 'Today'
+    case '1-yesterday':
+      return 'Yesterday'
+    case '2-last-week':
+      return 'Last Week'
+    case '3-last-month':
+      return 'Last Month'
+    case '4-older':
+      return 'Older'
+    default:
+      return groupKey
+  }
+}
+
 type OneOnOneFilters = {
   search?: string
   managerId?: string
@@ -37,7 +99,12 @@ export const oneOnOneDataTableConfig: DataTableConfig<
   useSettingsHook: useOneOnOneTableSettings,
 
   // Column definitions
-  createColumns: ({ onButtonClick, visibleColumns }) => {
+  createColumns: ({ onButtonClick, visibleColumns, grouping }) => {
+    // Check which column is being grouped by to hide it
+    const isGroupedByManager = grouping && grouping.includes('manager')
+    const isGroupedByReport = grouping && grouping.includes('report')
+    const isGroupedByDate = grouping && grouping.includes('scheduledAt')
+
     return [
       {
         accessorKey: 'participants',
@@ -90,8 +157,64 @@ export const oneOnOneDataTableConfig: DataTableConfig<
         },
       },
       {
-        accessorKey: 'scheduledAt',
+        id: 'manager',
+        header: 'Manager',
+        accessorFn: row => row.manager.name,
+        cell: ({ row }) => {
+          const oneOnOne = row.original
+          return (
+            <Link
+              href={`/people/${oneOnOne.manager.id}`}
+              className='font-medium link-hover'
+              onClick={e => e.stopPropagation()}
+            >
+              {oneOnOne.manager.name}
+            </Link>
+          )
+        },
+        size: 150,
+        minSize: 120,
+        maxSize: 200,
+        meta: {
+          hidden:
+            visibleColumns?.includes('manager') === false || isGroupedByManager,
+        },
+      },
+      {
+        id: 'report',
+        header: 'Report',
+        accessorFn: row => row.report.name,
+        cell: ({ row }) => {
+          const oneOnOne = row.original
+          return (
+            <Link
+              href={`/people/${oneOnOne.report.id}`}
+              className='font-medium link-hover'
+              onClick={e => e.stopPropagation()}
+            >
+              {oneOnOne.report.name}
+            </Link>
+          )
+        },
+        size: 150,
+        minSize: 120,
+        maxSize: 200,
+        meta: {
+          hidden:
+            visibleColumns?.includes('report') === false || isGroupedByReport,
+        },
+      },
+      {
+        id: 'scheduledAt',
         header: 'Scheduled',
+        accessorFn: row => {
+          // When grouping by date, return the relative date group
+          // Otherwise return the actual date for sorting
+          if (grouping && grouping.includes('scheduledAt')) {
+            return getRelativeDateGroup(row.scheduledAt)
+          }
+          return row.scheduledAt
+        },
         cell: ({ row }) => {
           const oneOnOne = row.original
           return (
@@ -109,7 +232,9 @@ export const oneOnOneDataTableConfig: DataTableConfig<
         minSize: 150,
         maxSize: 300,
         meta: {
-          hidden: visibleColumns?.includes('scheduledAt') === false,
+          hidden:
+            visibleColumns?.includes('scheduledAt') === false ||
+            isGroupedByDate,
         },
       },
       {
@@ -155,10 +280,22 @@ export const oneOnOneDataTableConfig: DataTableConfig<
   // Grouping and sorting options
   groupingOptions: [
     { value: 'none', label: 'No grouping' },
+    { value: 'manager', label: 'Group by manager' },
+    { value: 'report', label: 'Group by report' },
     { value: 'scheduledAt', label: 'Group by date' },
   ],
   sortOptions: [
     { value: 'participants', label: 'Participants' },
+    { value: 'manager', label: 'Manager' },
+    { value: 'report', label: 'Report' },
     { value: 'scheduledAt', label: 'Scheduled Date' },
   ],
+
+  // Custom group label formatting
+  getGroupLabel: (groupValue: string, groupingColumn: string) => {
+    if (groupingColumn === 'scheduledAt') {
+      return formatRelativeDateGroupLabel(groupValue)
+    }
+    return groupValue || 'Unassigned'
+  },
 }

@@ -65,6 +65,7 @@ To add new commands:
 ### Quick Actions
 
 Quick actions available in the command palette include:
+
 - **Create Task** - Opens quick task creation modal
 - **Create 1:1 Meeting** - Schedule a new one-on-one meeting
 - **Create Meeting** - Schedule a new team meeting (navigates to `/meetings/new`)
@@ -74,6 +75,7 @@ Quick actions available in the command palette include:
 ### Navigation Commands
 
 Navigation commands to quickly jump to different sections:
+
 - **View Tasks** - Go to tasks list
 - **View My Tasks** - Go to assigned tasks
 - **View People** - Go to people directory
@@ -81,6 +83,7 @@ Navigation commands to quickly jump to different sections:
 - **View Initiatives** - Go to initiatives
 - **View Feedback** - Go to feedback page
 - **View Meetings** - Go to meetings page
+- **View My 1:1s** - Go to your one-on-one meetings
 - **View Reports** - Go to reports page
 
 ### Role-Based Commands
@@ -88,6 +91,7 @@ Navigation commands to quickly jump to different sections:
 Commands can be conditionally shown based on user roles. The `userRole` parameter is passed to `getItems()` and contains the current user's role ('ADMIN' or 'USER'). Use this to show admin-only commands.
 
 Admin-only commands currently include:
+
 - **Create Person** - Add a new person to the organization (navigates to `/people/new`)
 - **Organization Settings** - Manage organization settings
 

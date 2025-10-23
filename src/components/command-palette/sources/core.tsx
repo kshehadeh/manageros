@@ -56,7 +56,13 @@ function createStaticItems(
       title: 'Create Meeting',
       subtitle: 'Schedule a new team meeting',
       icon: <Calendar className='h-4 w-4' />,
-      keywords: ['meeting', 'schedule', 'calendar', 'team meeting', 'new meeting'],
+      keywords: [
+        'meeting',
+        'schedule',
+        'calendar',
+        'team meeting',
+        'new meeting',
+      ],
       group: 'Quick Actions',
       perform: ({ closePalette, router }) => {
         router.push('/meetings/new')
@@ -194,6 +200,24 @@ function createStaticItems(
       },
     },
     {
+      id: 'nav.oneonones',
+      title: 'View My 1:1s',
+      subtitle: 'Go to your one-on-one meetings',
+      icon: <Handshake className='h-4 w-4' />,
+      keywords: [
+        '1:1',
+        'one on one',
+        'oneonone',
+        'meetings',
+        'personal meetings',
+      ],
+      group: 'Navigation',
+      perform: ({ closePalette, router }) => {
+        router.push('/oneonones')
+        closePalette()
+      },
+    },
+    {
       id: 'nav.reports',
       title: 'View Reports',
       subtitle: 'Go to reports page',
@@ -215,7 +239,14 @@ function createStaticItems(
         title: 'Create Person',
         subtitle: 'Add a new person to the organization',
         icon: <UserPlus className='h-4 w-4' />,
-        keywords: ['person', 'people', 'new person', 'add person', 'employee', 'team member'],
+        keywords: [
+          'person',
+          'people',
+          'new person',
+          'add person',
+          'employee',
+          'team member',
+        ],
         group: 'Quick Actions',
         perform: ({ closePalette, router }) => {
           router.push('/people/new')
