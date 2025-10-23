@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /* eslint-disable camelcase */
 
-import { PrismaClient, EmployeeType } from '@prisma/client'
+import { PrismaClient, EmployeeType, Person } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
@@ -444,7 +444,7 @@ async function seedDemoData() {
 
     // Step 7: Create people
     console.log('👤 Creating people...')
-    const people: any[] = []
+    const people: Person[] = []
 
     // Create team leads
     const engineeringLead = await prisma.person.create({
