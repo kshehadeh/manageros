@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { PersonSelect } from '@/components/ui/person-select'
 import { SectionHeader } from '@/components/ui/section-header'
+import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
 import { AlertCircle, FileText, Settings } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
@@ -24,6 +25,40 @@ interface DynamicReportFormProps {
   schemaFields: FormField[]
   codeId: string
   initialData?: Record<string, unknown>
+}
+
+// Helper function to convert field names to human-friendly labels
+function getFieldLabel(fieldName: string): string {
+  const labelMap: Record<string, string> = {
+    fromDate: 'From Date',
+    toDate: 'To Date',
+    startDate: 'Start Date',
+    endDate: 'End Date',
+    personId: 'Person',
+    includeFeedback: 'Include Feedback',
+    includeTasks: 'Include Tasks',
+    includeMeetings: 'Include Meetings',
+    includeOneOnOnes: 'Include One-on-Ones',
+    includeInitiatives: 'Include Initiatives',
+    includeReports: 'Include Reports',
+    includeSynopsis: 'Include Synopsis',
+    teamId: 'Team',
+    initiativeId: 'Initiative',
+    meetingId: 'Meeting',
+    taskId: 'Task',
+    reportId: 'Report',
+    userId: 'User',
+    managerId: 'Manager',
+    directReportId: 'Direct Report',
+  }
+
+  return (
+    labelMap[fieldName] ||
+    fieldName
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, str => str.toUpperCase())
+      .trim()
+  )
 }
 
 export function DynamicReportForm({
@@ -65,7 +100,12 @@ export function DynamicReportForm({
       const submitData = new FormData()
       for (const [key, value] of Object.entries(formData)) {
         if (value !== undefined && value !== null) {
-          submitData.append(key, String(value))
+          // Handle boolean values properly
+          if (typeof value === 'boolean') {
+            submitData.append(key, value ? 'true' : 'false')
+          } else {
+            submitData.append(key, String(value))
+          }
         }
       }
 
@@ -113,7 +153,7 @@ export function DynamicReportForm({
       return (
         <div key={field.name} className='space-y-2'>
           <Label htmlFor={field.name}>
-            {field.name === 'personId' ? 'Person' : field.name}
+            {getFieldLabel(field.name)}
             {field.required && <span className='text-destructive ml-1'>*</span>}
           </Label>
           <PersonSelect
@@ -135,17 +175,14 @@ export function DynamicReportForm({
     if (field.type === 'date' || field.name.toLowerCase().includes('date')) {
       return (
         <div key={field.name} className='space-y-2'>
-          <Label htmlFor={field.name}>
-            {field.name}
-            {field.required && <span className='text-destructive ml-1'>*</span>}
-          </Label>
-          <Input
-            id={field.name}
-            type='date'
+          <DateTimePickerWithNaturalInput
             value={value}
-            onChange={e => handleInputChange(field.name, e.target.value)}
+            onChange={val => handleInputChange(field.name, val)}
+            label={getFieldLabel(field.name)}
             required={field.required}
-            className={hasError ? 'border-destructive' : ''}
+            error={hasError}
+            dateOnly={true}
+            placeholder={`Pick ${getFieldLabel(field.name).toLowerCase()}`}
           />
           {hasError && (
             <p className='text-sm text-destructive'>{errors[field.name]}</p>
@@ -154,8 +191,14 @@ export function DynamicReportForm({
       )
     }
 
-    // Boolean fields
-    if (field.type === 'boolean') {
+    // Boolean fields - check both type and field name patterns
+    if (
+      field.type === 'boolean' ||
+      field.name.toLowerCase().startsWith('include') ||
+      field.name.toLowerCase().startsWith('has') ||
+      field.name.toLowerCase().startsWith('is') ||
+      field.name.toLowerCase().startsWith('show')
+    ) {
       const boolValue = formData[field.name] ?? field.defaultValue ?? false
       return (
         <div key={field.name} className='flex items-center space-x-2'>
@@ -166,7 +209,7 @@ export function DynamicReportForm({
             required={field.required}
           />
           <Label htmlFor={field.name}>
-            {field.name}
+            {getFieldLabel(field.name)}
             {field.required && <span className='text-destructive ml-1'>*</span>}
           </Label>
           {hasError && (
@@ -180,7 +223,7 @@ export function DynamicReportForm({
     return (
       <div key={field.name} className='space-y-2'>
         <Label htmlFor={field.name} className='text-sm font-medium'>
-          {field.name}
+          {getFieldLabel(field.name)}
           {field.required && <span className='text-destructive ml-1'>*</span>}
         </Label>
         <Input

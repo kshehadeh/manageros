@@ -14,28 +14,8 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
   const { settings, updateSetting } = useUserSettings()
   const { openedViaKeyboard, setOpenedViaKeyboard } = useAIChat()
 
-  // Prevent body scroll on mobile when chat is open
-  useEffect(() => {
-    if (!isOpen) return
-
-    // Only prevent scroll on mobile (screens smaller than md breakpoint)
-    const isMobile = window.innerWidth < 768
-    if (isMobile) {
-      // Save current scroll position
-      const scrollY = window.scrollY
-      document.body.style.position = 'fixed'
-      document.body.style.top = `-${scrollY}px`
-      document.body.style.width = '100%'
-
-      return () => {
-        // Restore scroll position
-        document.body.style.position = ''
-        document.body.style.top = ''
-        document.body.style.width = ''
-        window.scrollTo(0, scrollY)
-      }
-    }
-  }, [isOpen])
+  // Note: Scroll locking is handled by Radix UI components (Dialog, etc.)
+  // No custom scroll locking needed here
 
   // Handle Escape key to close the AI chat
   useEffect(() => {

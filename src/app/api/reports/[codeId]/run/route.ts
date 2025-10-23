@@ -14,9 +14,18 @@ export async function POST(
     const formData = await request.formData()
     const input: Record<string, unknown> = {}
 
-    // Convert FormData to object
+    // Convert FormData to object with proper type conversion
     for (const [key, value] of formData.entries()) {
-      input[key] = value
+      const stringValue = value.toString()
+
+      // Convert string representations of booleans to actual booleans
+      if (stringValue === 'true') {
+        input[key] = true
+      } else if (stringValue === 'false') {
+        input[key] = false
+      } else {
+        input[key] = stringValue
+      }
     }
 
     const def = await getReport(codeId)
