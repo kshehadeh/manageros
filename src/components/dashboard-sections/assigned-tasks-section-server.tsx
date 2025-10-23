@@ -26,9 +26,8 @@ export async function DashboardAssignedTasksServerSection({
       ...getTaskAccessWhereClause(user.organizationId, user.id, personId),
     },
     orderBy: [
-      { dueDate: { sort: 'desc', nulls: 'last' } }, // Sort by due date descending (most urgent first), nulls last
+      { dueDate: { sort: 'asc', nulls: 'last' } }, // Sort by due date ascending (least urgent first), nulls last
     ],
-    take: 5,
     include: {
       initiative: {
         select: {

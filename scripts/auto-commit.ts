@@ -174,6 +174,52 @@ class GitOperations {
       throw error
     }
   }
+
+  pushBranch(branchName: string): void {
+    try {
+      this.execGitCommand(`git push -u origin "${branchName}"`, {
+        silent: true,
+      })
+      printStatus(`Branch '${branchName}' pushed to remote`)
+    } catch (error) {
+      printError('Failed to push branch')
+      throw error
+    }
+  }
+
+  createPullRequest(
+    branchName: string,
+    title: string,
+    description: string
+  ): void {
+    try {
+      // Check if gh CLI is available
+      try {
+        execSync('gh --version', { stdio: 'pipe' })
+      } catch {
+        printWarning(
+          'GitHub CLI (gh) not found. Please install it to create PRs automatically.'
+        )
+        printStatus(
+          'You can create a PR manually at: https://github.com/your-repo/compare/' +
+            branchName
+        )
+        return
+      }
+
+      // Create the pull request
+      const prCommand = `gh pr create --title "${title}" --body "${description}" --head "${branchName}"`
+      this.execGitCommand(prCommand, { silent: true })
+      printSuccess('Pull request created successfully!')
+    } catch (error) {
+      printWarning('Failed to create pull request automatically')
+      printStatus(
+        'You can create a PR manually at: https://github.com/your-repo/compare/' +
+          branchName
+      )
+      console.error('PR creation error:', error)
+    }
+  }
 }
 
 // AI-powered commit message generation
@@ -187,31 +233,38 @@ class AICommitGenerator {
   async generateSuggestions(
     diffContent: string,
     changedFiles: string[]
-  ): Promise<{ branchName: string; commitMessage: string } | null> {
+  ): Promise<{
+    branchName: string
+    commitMessage: string
+    prTitle: string
+    prDescription: string
+  } | null> {
     if (!this.apiKey) {
       return null
     }
 
-    const prompt = `Based on the following git diff, generate a concise branch name (kebab-case, max 30 chars) and commit message (max 50 chars) for a React/TypeScript project.
+    const prompt = `You are a git commit assistant. Analyze the following changes and respond with ONLY a valid JSON object.
 
 Files changed: ${changedFiles.join(', ')}
 
 Diff:
 ${diffContent}
 
-IMPORTANT: You must respond with ONLY valid JSON in this exact format:
+CRITICAL: Respond with ONLY this exact JSON format (no other text, no explanations, no markdown):
 {
   "branch_name": "descriptive-branch-name",
-  "commit_message": "Concise commit message"
+  "commit_message": "Concise commit message",
+  "pr_title": "Descriptive PR title", 
+  "pr_description": "Brief description of changes and their purpose"
 }
 
-Do not include any other text, explanations, or formatting. Only return the JSON object.
+Requirements:
+- branch_name: kebab-case, max 30 characters
+- commit_message: max 50 characters, use conventional commits
+- pr_title: max 60 characters, clear and descriptive
+- pr_description: max 200 characters, explain changes and impact
 
-Focus on:
-- What functionality was added/changed
-- Which components were affected
-- The purpose of the changes
-- Use conventional commit format when appropriate`
+Focus on what functionality was added/changed and which components were affected.`
 
     try {
       const response = await fetch(
@@ -242,6 +295,11 @@ Focus on:
         throw new Error('No content in OpenAI response')
       }
 
+      // Debug logging if enabled
+      if (process.env.DEBUG_AUTO_COMMIT) {
+        console.log('Raw AI response:', JSON.stringify(content))
+      }
+
       // Clean the content to extract JSON
       let jsonContent = content.trim()
 
@@ -251,19 +309,52 @@ Focus on:
         jsonContent = jsonMatch[0]
       }
 
-      const parsed = JSON.parse(jsonContent)
+      // Additional cleanup for common AI response issues
+      jsonContent = jsonContent
+        .replace(/^[^{]*/, '') // Remove any text before the first {
+        .replace(/[^}]*$/, '') // Remove any text after the last }
+        .trim()
+
+      // Validate that we have a proper JSON structure
+      if (!jsonContent.startsWith('{') || !jsonContent.endsWith('}')) {
+        throw new Error('Invalid JSON structure in AI response')
+      }
+
+      let parsed: {
+        branch_name: string
+        commit_message: string
+        pr_title: string
+        pr_description: string
+      }
+      try {
+        parsed = JSON.parse(jsonContent)
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError)
+        console.error('Attempted to parse:', jsonContent)
+        throw new Error(`Failed to parse JSON: ${parseError}`)
+      }
 
       // Validate the parsed JSON has the required fields
-      if (!parsed.branch_name || !parsed.commit_message) {
+      if (
+        !parsed.branch_name ||
+        !parsed.commit_message ||
+        !parsed.pr_title ||
+        !parsed.pr_description
+      ) {
         throw new Error('Invalid JSON response: missing required fields')
       }
 
       return {
         branchName: parsed.branch_name,
         commitMessage: parsed.commit_message,
+        prTitle: parsed.pr_title,
+        prDescription: parsed.pr_description,
       }
     } catch (error) {
       console.error('AI generation failed:', error)
+      if (error instanceof Error) {
+        console.error('Error details:', error.message)
+      }
       return null
     }
   }
@@ -311,11 +402,15 @@ class AutoCommit {
 
     let branchName: string
     let commitMessage: string
+    let prTitle: string
+    let prDescription: string
 
     // Check if custom branch name was provided
     if (customBranchName) {
       branchName = customBranchName
       commitMessage = `Update: ${customBranchName}`
+      prTitle = `Update: ${customBranchName}`
+      prDescription = `This PR contains updates related to ${customBranchName}.`
     } else {
       // Try AI generation first
       printStatus('Generating AI-powered suggestions...')
@@ -328,10 +423,24 @@ class AutoCommit {
       if (aiResult) {
         branchName = aiResult.branchName
         commitMessage = aiResult.commitMessage
+        prTitle = aiResult.prTitle
+        prDescription = aiResult.prDescription
         printSuccess(`AI generated: '${branchName}' - '${commitMessage}'`)
+        printStatus(`PR: '${prTitle}'`)
       } else {
-        printError('AI generation failed...')
-        process.exit(1)
+        printError('AI generation failed, using fallback...')
+        // Fallback to rule-based generation
+        const timestamp = new Date()
+          .toISOString()
+          .slice(0, 16)
+          .replace(/[-:]/g, '')
+          .replace('T', '-')
+        branchName = `update-${timestamp}`
+        commitMessage = 'Update: automated commit'
+        prTitle = 'Update: automated changes'
+        prDescription =
+          'This PR contains automated changes made via the auto-commit script.'
+        printWarning(`Using fallback: '${branchName}' - '${commitMessage}'`)
       }
     }
 
@@ -343,17 +452,23 @@ class AutoCommit {
     printStatus('Committing changes...')
     this.git.commit(commitMessage)
 
+    printStatus('Pushing branch to remote...')
+    this.git.pushBranch(branchName)
+
+    printStatus('Creating pull request...')
+    this.git.createPullRequest(branchName, prTitle, prDescription)
+
     const stats = this.git.getChangeStats()
-    printSuccess(`Branch '${branchName}' created and changes committed!`)
+    printSuccess(
+      `Branch '${branchName}' created, committed, pushed, and PR created!`
+    )
     printStatus(`Commit message: ${commitMessage}`)
+    printStatus(`PR title: ${prTitle}`)
     printStatus(`Files changed: ${changedFiles.length}`)
     printStatus(`Lines added: ${stats.added}, deleted: ${stats.deleted}`)
 
     console.log('')
-    printStatus('Next steps:')
-    console.log(`  1. Push the branch: git push -u origin ${branchName}`)
-    console.log('  2. Create a pull request')
-    console.log('  3. Or continue working on this branch')
+    printSuccess('Workflow completed! Your changes are ready for review.')
   }
 }
 
