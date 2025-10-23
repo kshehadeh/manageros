@@ -6,6 +6,23 @@ import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
+// Helper functions for generating relative dates
+const getRelativeDate = (daysOffset: number): Date => {
+  const date = new Date()
+  date.setDate(date.getDate() + daysOffset)
+  return date
+}
+
+const getRandomFutureDate = (minDays: number, maxDays: number): Date => {
+  const daysOffset = minDays + Math.random() * (maxDays - minDays)
+  return getRelativeDate(daysOffset)
+}
+
+const getRandomPastDate = (minDays: number, maxDays: number): Date => {
+  const daysOffset = -(minDays + Math.random() * (maxDays - minDays))
+  return getRelativeDate(daysOffset)
+}
+
 // Helper to generate realistic sample data
 const sampleData = {
   firstNames: [
@@ -608,10 +625,17 @@ async function seedDemoData() {
     console.log('🎯 Creating initiatives...')
     const initiatives = await Promise.all(
       sampleData.initiatives.map((initData, index) => {
-        const startDate = new Date()
-        startDate.setDate(startDate.getDate() - 30)
-        const targetDate = new Date()
-        targetDate.setDate(targetDate.getDate() + 90)
+        // Start dates: some initiatives started recently (past 2-4 weeks), others are planned for future
+        const startDate =
+          index === 0
+            ? getRandomPastDate(14, 28) // First initiative started 2-4 weeks ago
+            : index === 1
+              ? getRandomFutureDate(7, 21) // Second initiative starts in 1-3 weeks
+              : getRandomPastDate(7, 21) // Other initiatives started 1-3 weeks ago
+
+        // Target dates: 2-4 months from start date
+        const targetDate = new Date(startDate)
+        targetDate.setDate(targetDate.getDate() + 60 + Math.random() * 60) // 2-4 months later
 
         return prisma.initiative.create({
           data: {
@@ -678,9 +702,7 @@ async function seedDemoData() {
               status: ['todo', 'doing', 'done'][Math.floor(Math.random() * 3)],
               priority: Math.floor(Math.random() * 3) + 1,
               estimate: [5, 8, 13, 21][Math.floor(Math.random() * 4)],
-              dueDate: new Date(
-                Date.now() + Math.random() * 90 * 24 * 60 * 60 * 1000
-              ),
+              dueDate: getRandomFutureDate(7, 90), // Due dates 1 week to 3 months from now
             },
           })
           taskCount++
@@ -694,8 +716,8 @@ async function seedDemoData() {
     let checkInCount = 0
     for (const initiative of initiatives) {
       for (let week = 0; week < 4; week++) {
-        const weekDate = new Date()
-        weekDate.setDate(weekDate.getDate() - week * 7)
+        // Create check-ins for the past 4 weeks
+        const weekDate = getRelativeDate(-week * 7)
 
         await prisma.checkIn.create({
           data: {
@@ -729,9 +751,7 @@ async function seedDemoData() {
             reportId: report.id,
             notes:
               'Regular check-in to discuss progress, goals, and any concerns.',
-            scheduledAt: new Date(
-              Date.now() + Math.random() * 14 * 24 * 60 * 60 * 1000
-            ),
+            scheduledAt: getRandomFutureDate(1, 14), // Scheduled 1-14 days from now
           },
         })
         oneOnOnes.push(oneOnOne)
@@ -771,10 +791,8 @@ async function seedDemoData() {
     console.log('📅 Creating meetings...')
     let meetingCount = 0
     for (let i = 0; i < 8; i++) {
-      const meetingDate = new Date()
-      meetingDate.setDate(
-        meetingDate.getDate() + Math.floor(Math.random() * 30)
-      )
+      // Schedule meetings in the next 30 days
+      const meetingDate = getRandomFutureDate(1, 30)
       meetingDate.setHours(Math.floor(Math.random() * 8) + 9, 0, 0, 0)
 
       // Shuffle and select unique participants
