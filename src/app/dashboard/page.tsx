@@ -1,17 +1,17 @@
 import { requireAuth } from '@/lib/auth-utils'
 import { DashboardOrganizationSetup } from '@/components/dashboard-organization-setup'
 import { Suspense } from 'react'
-import { DashboardAssignedTasksSection } from '@/components/dashboard-sections/assigned-tasks-section'
-import { DashboardOpenInitiativesSection } from '@/components/dashboard-sections/open-initiatives-section'
+import { DashboardAssignedTasksServerSection } from '@/components/dashboard-sections/assigned-tasks-section-server'
+import { DashboardOpenInitiativesServerSection } from '@/components/dashboard-sections/open-initiatives-section-server'
 import { DashboardDirectReportsSection } from '@/components/dashboard-sections/direct-reports-section'
 import { DashboardRelatedTeamsSection } from '@/components/dashboard-sections/related-teams-section'
 import { DashboardRecentOneOnOnesSection } from '@/components/dashboard-sections/recent-oneonones-section'
 import { DashboardFeedbackCampaignsSection } from '@/components/dashboard-sections/feedback-campaigns-section'
 import { DashboardUpcomingMeetingsSection } from '@/components/dashboard-sections/upcoming-meetings-section'
 import {
-  TasksSectionFallback,
+  TasksServerSectionFallback,
+  OpenInitiativesServerSectionFallback,
   FeedbackCampaignsSectionFallback,
-  OpenInitiativesSectionFallback,
   RecentOneOnOnesSectionFallback,
   RelatedTeamsSectionFallback,
   DirectReportsSectionFallback,
@@ -33,17 +33,18 @@ export default async function Home() {
       <div className='flex flex-col lg:flex-row gap-6'>
         {/* Main Content Area */}
         <div className='flex-1 space-y-6'>
-          <Suspense fallback={<TasksSectionFallback />}>
-            <DashboardAssignedTasksSection personId={user.personId!} />
+          <Suspense fallback={<TasksServerSectionFallback />}>
+            <DashboardAssignedTasksServerSection personId={user.personId!} />
           </Suspense>
 
           <Suspense fallback={<FeedbackCampaignsSectionFallback />}>
             <DashboardFeedbackCampaignsSection />
           </Suspense>
 
-          <Suspense fallback={<OpenInitiativesSectionFallback />}>
-            <DashboardOpenInitiativesSection
+          <Suspense fallback={<OpenInitiativesServerSectionFallback />}>
+            <DashboardOpenInitiativesServerSection
               organizationId={user.organizationId!}
+              personId={user.personId!}
             />
           </Suspense>
 

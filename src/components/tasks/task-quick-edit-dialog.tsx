@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Dialog,
   DialogContent,
@@ -19,12 +18,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
+import { MarkdownEditor } from '@/components/markdown-editor'
 import { updateTaskQuickEdit } from '@/lib/actions/task'
-import type { Person } from '@prisma/client'
 import { type TaskStatus } from '@/lib/task-status'
 import { taskPriorityUtils } from '@/lib/task-priority'
 import { AlertCircle, ExternalLink } from 'lucide-react'
 import { toast } from 'sonner'
+import { usePeopleForSelect } from '@/hooks/use-organization-cache'
 
 interface TaskQuickEditDialogProps {
   open: boolean
@@ -38,7 +39,6 @@ interface TaskQuickEditDialogProps {
     priority: number
     status: TaskStatus
   }
-  people: Person[]
   onTaskUpdate?: (
     _updatedTask: Partial<{
       title: string
@@ -55,12 +55,12 @@ export function TaskQuickEditDialog({
   open,
   onOpenChange,
   task,
-  people,
   onTaskUpdate,
 }: TaskQuickEditDialogProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const { people } = usePeopleForSelect()
 
   const [formData, setFormData] = useState({
     title: task.title,
@@ -69,7 +69,7 @@ export function TaskQuickEditDialog({
     dueDate: task.dueDate
       ? typeof task.dueDate === 'string'
         ? task.dueDate
-        : task.dueDate.toISOString().split('T')[0]
+        : task.dueDate.toISOString()
       : '',
     priority: task.priority,
   })
@@ -82,6 +82,14 @@ export function TaskQuickEditDialog({
     // Clear field error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }))
+    }
+  }
+
+  const handleDateChange = (value: string) => {
+    setFormData(prev => ({ ...prev, dueDate: value }))
+    // Clear field error when user changes date
+    if (errors.dueDate) {
+      setErrors(prev => ({ ...prev, dueDate: '' }))
     }
   }
 
@@ -158,12 +166,12 @@ export function TaskQuickEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-[500px]'>
+      <DialogContent className='sm:max-w-[800px]'>
         <DialogHeader>
           <DialogTitle>Quick Edit Task</DialogTitle>
           <DialogDescription>
-            Make quick changes to this task. Use the full editor for more
-            options.
+            Make quick changes to this task. Use Markdown for rich text
+            formatting. Use the full editor for more options.
           </DialogDescription>
         </DialogHeader>
 
@@ -175,119 +183,123 @@ export function TaskQuickEditDialog({
             </div>
           )}
 
-          <div className='space-y-2'>
-            <label htmlFor='title' className='text-sm font-medium'>
-              Summary *
-            </label>
-            <Input
-              id='title'
-              value={formData.title}
-              onChange={e => handleInputChange('title', e.target.value)}
-              placeholder='Enter task summary'
-              className={errors.title ? 'border-red-500' : ''}
-              disabled={isSubmitting}
-              required
-            />
-            {errors.title && (
-              <p className='text-sm text-red-500'>{errors.title}</p>
-            )}
-          </div>
+          <div className='flex flex-col lg:flex-row gap-6'>
+            {/* Main Content - Summary and Description */}
+            <div className='flex-1 space-y-4'>
+              <div className='space-y-2'>
+                <label htmlFor='title' className='text-sm font-medium'>
+                  Summary *
+                </label>
+                <Input
+                  id='title'
+                  value={formData.title}
+                  onChange={e => handleInputChange('title', e.target.value)}
+                  placeholder='Enter task summary'
+                  className={errors.title ? 'border-red-500' : ''}
+                  disabled={isSubmitting}
+                  required
+                />
+                {errors.title && (
+                  <p className='text-sm text-red-500'>{errors.title}</p>
+                )}
+              </div>
 
-          <div className='space-y-2'>
-            <label htmlFor='description' className='text-sm font-medium'>
-              Description
-            </label>
-            <Textarea
-              id='description'
-              value={formData.description}
-              onChange={e => handleInputChange('description', e.target.value)}
-              placeholder='Enter task description...'
-              className={errors.description ? 'border-red-500' : ''}
-              disabled={isSubmitting}
-              rows={3}
-            />
-            {errors.description && (
-              <p className='text-sm text-red-500'>{errors.description}</p>
-            )}
-          </div>
-
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            <div className='space-y-2'>
-              <label htmlFor='assigneeId' className='text-sm font-medium'>
-                Assignee
-              </label>
-              <Select
-                value={formData.assigneeId}
-                onValueChange={value => handleInputChange('assigneeId', value)}
-                disabled={isSubmitting}
-              >
-                <SelectTrigger
-                  className={errors.assigneeId ? 'border-red-500' : ''}
-                >
-                  <SelectValue placeholder='Select assignee' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='unassigned'>Unassigned</SelectItem>
-                  {people.map(person => (
-                    <SelectItem key={person.id} value={person.id}>
-                      {person.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.assigneeId && (
-                <p className='text-sm text-red-500'>{errors.assigneeId}</p>
-              )}
+              <div className='space-y-2'>
+                <label htmlFor='description' className='text-sm font-medium'>
+                  Description
+                </label>
+                <MarkdownEditor
+                  value={formData.description}
+                  onChange={value => handleInputChange('description', value)}
+                  placeholder='Enter task description... Use Markdown for formatting!'
+                  className={errors.description ? 'border-red-500' : ''}
+                />
+                {errors.description && (
+                  <p className='text-sm text-red-500'>{errors.description}</p>
+                )}
+              </div>
             </div>
 
-            <div className='space-y-2'>
-              <label htmlFor='priority' className='text-sm font-medium'>
-                Priority
-              </label>
-              <Select
-                value={formData.priority.toString()}
-                onValueChange={value =>
-                  handleInputChange('priority', parseInt(value))
-                }
-                disabled={isSubmitting}
-              >
-                <SelectTrigger
-                  className={errors.priority ? 'border-red-500' : ''}
+            {/* Right Sidebar - Assignee, Priority, Due Date */}
+            <div className='w-full lg:w-80 space-y-4'>
+              <div className='space-y-2'>
+                <label htmlFor='assigneeId' className='text-sm font-medium'>
+                  Assignee
+                </label>
+                <Select
+                  value={formData.assigneeId}
+                  onValueChange={value =>
+                    handleInputChange('assigneeId', value)
+                  }
+                  disabled={isSubmitting}
                 >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {taskPriorityUtils.getSelectOptions().map(option => (
-                    <SelectItem
-                      key={option.value}
-                      value={option.value.toString()}
-                    >
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.priority && (
-                <p className='text-sm text-red-500'>{errors.priority}</p>
-              )}
-            </div>
-          </div>
+                  <SelectTrigger
+                    className={errors.assigneeId ? 'border-red-500' : ''}
+                  >
+                    <SelectValue placeholder='Select assignee' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='unassigned'>Unassigned</SelectItem>
+                    {people.map(person => (
+                      <SelectItem key={person.id} value={person.id}>
+                        {person.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.assigneeId && (
+                  <p className='text-sm text-red-500'>{errors.assigneeId}</p>
+                )}
+              </div>
 
-          <div className='space-y-2'>
-            <label htmlFor='dueDate' className='text-sm font-medium'>
-              Due Date
-            </label>
-            <Input
-              id='dueDate'
-              type='date'
-              value={formData.dueDate}
-              onChange={e => handleInputChange('dueDate', e.target.value)}
-              className={errors.dueDate ? 'border-red-500' : ''}
-              disabled={isSubmitting}
-            />
-            {errors.dueDate && (
-              <p className='text-sm text-red-500'>{errors.dueDate}</p>
-            )}
+              <div className='space-y-2'>
+                <label htmlFor='priority' className='text-sm font-medium'>
+                  Priority
+                </label>
+                <Select
+                  value={formData.priority.toString()}
+                  onValueChange={value =>
+                    handleInputChange('priority', parseInt(value))
+                  }
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger
+                    className={errors.priority ? 'border-red-500' : ''}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {taskPriorityUtils.getSelectOptions().map(option => (
+                      <SelectItem
+                        key={option.value}
+                        value={option.value.toString()}
+                      >
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.priority && (
+                  <p className='text-sm text-red-500'>{errors.priority}</p>
+                )}
+              </div>
+
+              <div className='space-y-2'>
+                <DateTimePickerWithNaturalInput
+                  label='Due Date & Time'
+                  value={formData.dueDate}
+                  onChange={handleDateChange}
+                  placeholder="e.g., 'tomorrow at 2pm', 'next Monday', 'in 3 days'"
+                  disabled={isSubmitting}
+                  error={!!errors.dueDate}
+                  dateOnly={false}
+                  shortFormat={true}
+                />
+                {errors.dueDate && (
+                  <p className='text-sm text-red-500'>{errors.dueDate}</p>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className='flex items-center justify-between pt-4'>
