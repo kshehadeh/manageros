@@ -629,7 +629,7 @@ export function MeetingForm({
 
         {/* Submit Button */}
         <div className='flex justify-end gap-3'>
-          <Button type='submit' variant='outline' disabled={isSubmitting}>
+          <Button type='submit' disabled={isSubmitting}>
             <CalendarDays className='w-4 h-4 mr-2' />
             {isSubmitting
               ? 'Saving...'

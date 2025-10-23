@@ -3,10 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import {
-  createFeedback,
-  updateFeedback,
-} from '@/lib/actions/feedback'
+import { createFeedback, updateFeedback } from '@/lib/actions/feedback'
 import { type FeedbackFormData } from '@/lib/validations'
 import { type Person } from '@prisma/client'
 import { MarkdownEditor } from '@/components/markdown-editor'
@@ -125,11 +122,7 @@ export function FeedbackForm({
       </div>
 
       <div className='flex gap-2 pt-4'>
-        <Button
-          type='submit'
-          disabled={isSubmitting || !formData.body.trim()}
-          variant='outline'
-        >
+        <Button type='submit' disabled={isSubmitting || !formData.body.trim()}>
           {isSubmitting
             ? 'Saving...'
             : feedback

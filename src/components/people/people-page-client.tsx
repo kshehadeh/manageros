@@ -42,10 +42,10 @@ export function PeoplePageClient() {
                     <span className='hidden sm:inline'>Import CSV</span>
                   </Link>
                 </Button>
-                <Button asChild variant='outline'>
-                  <Link href='/people/new' className='flex items-center gap-2'>
+                <Button asChild className='flex items-center gap-2'>
+                  <Link href='/people/new'>
                     <UserPlus className='w-4 h-4' />
-                    <span className='hidden sm:inline'>New Person</span>
+                    <span className='hidden sm:inline'>Create Person</span>
                   </Link>
                 </Button>
               </>

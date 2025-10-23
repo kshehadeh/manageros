@@ -2,10 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
-import {
-  createCheckIn,
-  updateCheckIn,
-} from '@/lib/actions/checkin'
+import { createCheckIn, updateCheckIn } from '@/lib/actions/checkin'
 import { Rag } from '@/components/rag'
 import type { CheckInFormData } from '@/lib/validations'
 
@@ -228,7 +225,7 @@ export function CheckInForm({
       </div>
 
       <div className='flex gap-2 pt-4'>
-        <Button type='submit' disabled={isSubmitting} variant='outline'>
+        <Button type='submit' disabled={isSubmitting}>
           {isSubmitting
             ? 'Saving...'
             : isEditing

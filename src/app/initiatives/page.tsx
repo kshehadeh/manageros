@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { InitiativeDataTable } from '@/components/initiatives/data-table'
 import { requireAuth } from '@/lib/auth-utils'
-import { Rocket } from 'lucide-react'
+import { Rocket, Plus } from 'lucide-react'
 import { HelpIcon } from '../../components/help-icon'
 
 export default async function InitiativesPage() {
@@ -19,8 +19,11 @@ export default async function InitiativesPage() {
               <HelpIcon helpId='initiatives' size='md' />
             </div>
           </div>
-          <Button asChild variant='outline'>
-            <Link href='/initiatives/new'>New Initiative</Link>
+          <Button asChild className='flex items-center gap-2'>
+            <Link href='/initiatives/new'>
+              <Plus className='h-4 w-4' />
+              Create Initiative
+            </Link>
           </Button>
         </div>
       </div>

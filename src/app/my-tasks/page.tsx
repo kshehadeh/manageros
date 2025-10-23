@@ -19,7 +19,7 @@ export default async function MyTasksPage() {
               Track and manage tasks assigned to you
             </p>
           </div>
-          <CreateTaskButton />
+          <CreateTaskButton variant='default' />
         </div>
       </div>
 

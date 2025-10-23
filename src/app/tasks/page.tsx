@@ -19,7 +19,7 @@ export default async function TasksPage() {
               Manage and track all tasks across your organization
             </p>
           </div>
-          <CreateTaskButton />
+          <CreateTaskButton variant='default' />
         </div>
       </div>
 

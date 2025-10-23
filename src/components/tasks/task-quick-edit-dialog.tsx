@@ -322,7 +322,7 @@ export function TaskQuickEditDialog({
               >
                 Cancel
               </Button>
-              <Button type='submit' disabled={isSubmitting} variant='outline'>
+              <Button type='submit' disabled={isSubmitting}>
                 {isSubmitting ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>

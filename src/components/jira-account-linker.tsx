@@ -149,7 +149,7 @@ export function JiraAccountLinker({
           />
         </div>
 
-        <Button type='submit' disabled={isLoading} variant='outline'>
+        <Button type='submit' disabled={isLoading}>
           {isLoading ? 'Linking...' : 'Link Account'}
         </Button>
       </form>

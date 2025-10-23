@@ -78,7 +78,11 @@ export default function InvitationForm({
         </div>
 
         <div>
-          <Button type='submit' disabled={isLoading} variant='outline' className='w-full justify-center'>
+          <Button
+            type='submit'
+            disabled={isLoading}
+            className='w-full justify-center'
+          >
             {isLoading ? 'Sending Invitation...' : 'Send Invitation'}
           </Button>
         </div>

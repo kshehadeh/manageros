@@ -64,9 +64,8 @@ export function DeleteTeamButton({
     <>
       <Button
         onClick={() => setShowDeleteModal(true)}
-        variant='outline'
+        variant='destructive'
         size='sm'
-        className='text-destructive border-destructive hover:text-destructive-foreground hover:bg-destructive'
         title={`Delete "${teamName}"`}
       >
         <Trash2 className='w-4 h-4 mr-2' />
