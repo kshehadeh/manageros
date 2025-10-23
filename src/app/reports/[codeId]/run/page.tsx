@@ -58,10 +58,10 @@ function extractSchemaFields(schema: unknown) {
 
   if (schema && typeof schema === 'object' && '_def' in schema) {
     const schemaWithDef = schema as {
-      _def: { shape?: () => Record<string, unknown> }
+      _def: { shape?: Record<string, unknown> }
     }
     if (schemaWithDef._def && schemaWithDef._def.shape) {
-      const shape = schemaWithDef._def.shape()
+      const shape = schemaWithDef._def.shape
       for (const [key, fieldSchema] of Object.entries(shape)) {
         const field = fieldSchema as {
           _def?: {

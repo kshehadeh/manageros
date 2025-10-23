@@ -6,14 +6,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { PersonSelect } from '@/components/ui/person-select'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { AlertCircle } from 'lucide-react'
+import { SectionHeader } from '@/components/ui/section-header'
+import { AlertCircle, FileText, Settings } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 interface FormField {
@@ -118,9 +112,9 @@ export function DynamicReportForm({
     ) {
       return (
         <div key={field.name} className='space-y-2'>
-          <Label htmlFor={field.name} className='text-sm font-medium'>
+          <Label htmlFor={field.name}>
             {field.name === 'personId' ? 'Person' : field.name}
-            {field.required && <span className='text-red-500 ml-1'>*</span>}
+            {field.required && <span className='text-destructive ml-1'>*</span>}
           </Label>
           <PersonSelect
             value={value}
@@ -128,10 +122,10 @@ export function DynamicReportForm({
             placeholder='Select a person...'
             showAvatar={true}
             showRole={true}
-            className={hasError ? 'border-red-500' : ''}
+            className={hasError ? 'border-destructive' : ''}
           />
           {hasError && (
-            <p className='text-sm text-red-500'>{errors[field.name]}</p>
+            <p className='text-sm text-destructive'>{errors[field.name]}</p>
           )}
         </div>
       )
@@ -141,9 +135,9 @@ export function DynamicReportForm({
     if (field.type === 'date' || field.name.toLowerCase().includes('date')) {
       return (
         <div key={field.name} className='space-y-2'>
-          <Label htmlFor={field.name} className='text-sm font-medium'>
+          <Label htmlFor={field.name}>
             {field.name}
-            {field.required && <span className='text-red-500 ml-1'>*</span>}
+            {field.required && <span className='text-destructive ml-1'>*</span>}
           </Label>
           <Input
             id={field.name}
@@ -151,10 +145,10 @@ export function DynamicReportForm({
             value={value}
             onChange={e => handleInputChange(field.name, e.target.value)}
             required={field.required}
-            className={hasError ? 'border-red-500' : ''}
+            className={hasError ? 'border-destructive' : ''}
           />
           {hasError && (
-            <p className='text-sm text-red-500'>{errors[field.name]}</p>
+            <p className='text-sm text-destructive'>{errors[field.name]}</p>
           )}
         </div>
       )
@@ -171,12 +165,12 @@ export function DynamicReportForm({
             onCheckedChange={checked => handleInputChange(field.name, checked)}
             required={field.required}
           />
-          <Label htmlFor={field.name} className='text-sm font-medium'>
+          <Label htmlFor={field.name}>
             {field.name}
-            {field.required && <span className='text-red-500 ml-1'>*</span>}
+            {field.required && <span className='text-destructive ml-1'>*</span>}
           </Label>
           {hasError && (
-            <p className='text-sm text-red-500'>{errors[field.name]}</p>
+            <p className='text-sm text-destructive'>{errors[field.name]}</p>
           )}
         </div>
       )
@@ -187,7 +181,7 @@ export function DynamicReportForm({
       <div key={field.name} className='space-y-2'>
         <Label htmlFor={field.name} className='text-sm font-medium'>
           {field.name}
-          {field.required && <span className='text-red-500 ml-1'>*</span>}
+          {field.required && <span className='text-destructive ml-1'>*</span>}
         </Label>
         <Input
           id={field.name}
@@ -195,57 +189,64 @@ export function DynamicReportForm({
           value={value}
           onChange={e => handleInputChange(field.name, e.target.value)}
           required={field.required}
-          className={hasError ? 'border-red-500' : ''}
+          className={hasError ? 'border-destructive' : ''}
           placeholder={field.description}
         />
         {hasError && (
-          <p className='text-sm text-red-500'>{errors[field.name]}</p>
+          <p className='text-sm text-destructive'>{errors[field.name]}</p>
         )}
       </div>
     )
   }
 
   return (
-    <Card className='w-full max-w-2xl mx-auto'>
-      <CardHeader>
-        <CardTitle>Run {reportName}</CardTitle>
+    <div>
+      {/* Header */}
+      <div className='mb-6'>
+        <h1 className='text-2xl font-bold mb-2'>Run {reportName}</h1>
         {reportDescription && (
-          <CardDescription>{reportDescription}</CardDescription>
+          <p className='text-muted-foreground'>{reportDescription}</p>
         )}
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className='space-y-6'>
-          {fields.length > 0 ? (
-            fields.map(renderField)
-          ) : (
-            <div className='p-4 bg-yellow-50 border border-yellow-200 rounded-md'>
-              <p className='text-sm text-yellow-700'>
+      </div>
+
+      <form onSubmit={handleSubmit} className='space-y-6'>
+        {/* General Error Message */}
+        {errors.submit && (
+          <div className='bg-destructive/10 border border-destructive/20 rounded-lg p-3 text-destructive text-sm flex items-center gap-2'>
+            <AlertCircle className='h-4 w-4' />
+            {errors.submit}
+          </div>
+        )}
+
+        {/* Form Fields Section */}
+        {fields.length > 0 ? (
+          <div className='space-y-6'>
+            <SectionHeader icon={Settings} title='Report Parameters' />
+            <div className='space-y-4'>{fields.map(renderField)}</div>
+          </div>
+        ) : (
+          <div className='bg-muted/50 border border-muted rounded-lg p-4'>
+            <div className='flex items-center gap-2'>
+              <FileText className='h-4 w-4 text-muted-foreground' />
+              <p className='text-sm text-muted-foreground'>
                 No form fields found. This report may not require any input
                 parameters.
               </p>
             </div>
-          )}
-
-          {errors.submit && (
-            <div className='p-3 bg-red-50 border border-red-200 rounded-md'>
-              <div className='flex items-center'>
-                <AlertCircle className='h-4 w-4 text-red-500 mr-2' />
-                <p className='text-sm text-red-700'>{errors.submit}</p>
-              </div>
-            </div>
-          )}
-
-          <div className='flex justify-end space-x-2'>
-            <Button
-              type='submit'
-              disabled={isSubmitting}
-              className='min-w-[100px]'
-            >
-              {isSubmitting ? 'Running...' : 'Run Report'}
-            </Button>
           </div>
-        </form>
-      </CardContent>
-    </Card>
+        )}
+
+        {/* Submit Button */}
+        <div className='flex justify-end'>
+          <Button
+            type='submit'
+            disabled={isSubmitting}
+            className='min-w-[120px]'
+          >
+            {isSubmitting ? 'Running...' : 'Run Report'}
+          </Button>
+        </div>
+      </form>
+    </div>
   )
 }
