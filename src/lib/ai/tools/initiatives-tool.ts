@@ -15,6 +15,12 @@ export const initiativesTool = {
       .enum(['green', 'amber', 'red'])
       .optional()
       .describe('Filter by RAG status'),
+    personId: z
+      .string()
+      .optional()
+      .describe(
+        'Filter by people who are in the list of owners of the initiative'
+      ),
     teamId: z.string().optional().describe('Filter by team ID'),
     query: z
       .string()

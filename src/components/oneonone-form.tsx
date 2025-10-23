@@ -15,10 +15,7 @@ import {
 } from 'lucide-react'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PersonSelect } from '@/components/ui/person-select'
-import {
-  utcToLocalDateTimeString,
-  getCurrentLocalDateTimeString,
-} from '@/lib/timezone-utils'
+import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
 import { usePeopleCache } from '@/hooks/use-organization-cache'
 
 interface OneOnOneData {
@@ -45,15 +42,14 @@ export function OneOnOneForm({
   // Use the people cache to get people data
   const { people, isLoading, error } = usePeopleCache()
 
-  // Get current date and time in the format required by datetime-local input
-  // Use utility functions for proper timezone handling
-
   const [formData, setFormData] = useState<OneOnOneFormData>({
     participant1Id: existingOneOnOne?.managerId || preFilledManagerId || '',
     participant2Id: existingOneOnOne?.reportId || preFilledReportId || '',
     scheduledAt: existingOneOnOne?.scheduledAt
-      ? utcToLocalDateTimeString(existingOneOnOne.scheduledAt)
-      : getCurrentLocalDateTimeString(),
+      ? existingOneOnOne.scheduledAt instanceof Date
+        ? existingOneOnOne.scheduledAt.toISOString()
+        : existingOneOnOne.scheduledAt
+      : new Date().toISOString(),
     notes: existingOneOnOne?.notes || '',
   })
 
@@ -179,14 +175,12 @@ export function OneOnOneForm({
           </div>
 
           <div>
-            <label className='block text-sm font-medium mb-2'>Date *</label>
-            <input
-              type='datetime-local'
+            <DateTimePickerWithNaturalInput
               value={formData.scheduledAt}
-              onChange={e =>
-                setFormData({ ...formData, scheduledAt: e.target.value })
+              onChange={value =>
+                setFormData({ ...formData, scheduledAt: value })
               }
-              className='input'
+              label='Date & Time'
               required
             />
           </div>
