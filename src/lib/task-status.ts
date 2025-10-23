@@ -67,6 +67,15 @@ export const ACTIVE_STATUSES: TaskStatus[] = [
   TASK_STATUS.BLOCKED,
 ]
 
+// Array of task statuses in logical workflow order for sorting/grouping
+export const TASK_STATUS_SORT_ORDER: TaskStatus[] = [
+  TASK_STATUS.TODO,
+  TASK_STATUS.DOING,
+  TASK_STATUS.BLOCKED,
+  TASK_STATUS.DROPPED,
+  TASK_STATUS.DONE,
+]
+
 // Utility functions
 export const taskStatusUtils = {
   /**
@@ -118,6 +127,14 @@ export const taskStatusUtils = {
    */
   isValid: (status: string): status is TaskStatus =>
     ALL_TASK_STATUSES.includes(status as TaskStatus),
+
+  /**
+   * Get the sort order index for a task status (lower = earlier in workflow)
+   */
+  getSortOrder: (status: TaskStatus): number => {
+    const index = TASK_STATUS_SORT_ORDER.indexOf(status)
+    return index === -1 ? 999 : index // Unknown statuses go to the end
+  },
 }
 
 // Type guard function

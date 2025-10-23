@@ -32,6 +32,7 @@
     "version:patch": "bun scripts/bump-version.ts patch",
     "version:minor": "bun scripts/bump-version.ts minor",
     "version:major": "bun scripts/bump-version.ts major",
+    "commit:auto": "bun scripts/auto-commit.ts",
     "postinstall": "bunx prisma generate && bun run help:generate",
     "prepare": "husky",
     "release": "release-it --ci"
