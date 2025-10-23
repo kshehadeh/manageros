@@ -172,7 +172,9 @@ export function TeamImportForm() {
           </table>
         </div>
         <div className='card mb-4'>
-          <h3 className='font-semibold text-foreground mb-2'>Important Notes:</h3>
+          <h3 className='font-semibold text-foreground mb-2'>
+            Important Notes:
+          </h3>
           <ul className='text-muted-foreground text-sm space-y-1'>
             <li>• Team names must be unique within your organization</li>
             <li>
@@ -238,7 +240,7 @@ export function TeamImportForm() {
         </div>
 
         <div className='flex space-x-4'>
-          <Button type='submit' disabled={!file || isLoading} variant='outline'>
+          <Button type='submit' disabled={!file || isLoading}>
             {isLoading ? (
               <>
                 <svg

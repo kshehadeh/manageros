@@ -345,7 +345,7 @@ export function TaskForm({
       </div>
 
       <div className='flex items-center gap-3'>
-        <Button type='submit' disabled={isSubmitting} variant='outline'>
+        <Button type='submit' disabled={isSubmitting}>
           {isSubmitting
             ? 'Saving...'
             : isEditing

@@ -139,7 +139,9 @@ export function PersonImportForm() {
                 <td className='px-4 py-3 text-sm text-destructive border-r'>
                   Yes
                 </td>
-                <td className='px-4 py-3 text-sm text-muted-foreground'>John Doe</td>
+                <td className='px-4 py-3 text-sm text-muted-foreground'>
+                  John Doe
+                </td>
               </tr>
               <tr>
                 <td className='px-4 py-3 text-sm font-medium text-foreground border-r'>
@@ -201,7 +203,9 @@ export function PersonImportForm() {
           </table>
         </div>
         <div className='card mb-4'>
-          <h3 className='font-semibold text-foreground mb-2'>Important Notes:</h3>
+          <h3 className='font-semibold text-foreground mb-2'>
+            Important Notes:
+          </h3>
           <ul className='text-muted-foreground text-sm space-y-1'>
             <li>• Email addresses must be unique within your organization</li>
             <li>• Team names must match existing teams exactly</li>
@@ -259,7 +263,7 @@ export function PersonImportForm() {
         </div>
 
         <div className='flex space-x-4'>
-          <Button type='submit' disabled={!file || isLoading} variant='outline'>
+          <Button type='submit' disabled={!file || isLoading}>
             {isLoading ? (
               <>
                 <svg

@@ -21,10 +21,10 @@ export function MeetingsPageClient() {
               Manage and track your organization&apos;s meetings
             </p>
           </div>
-          <Button asChild variant='outline'>
-            <Link href='/meetings/new' className='flex items-center gap-2'>
+          <Button asChild className='flex items-center gap-2'>
+            <Link href='/meetings/new'>
               <Plus className='h-4 w-4' />
-              New Meeting
+              Create Meeting
             </Link>
           </Button>
         </div>

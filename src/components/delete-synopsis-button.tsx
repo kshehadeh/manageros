@@ -35,9 +35,8 @@ export function DeleteSynopsisButton({
     <>
       <Button
         onClick={() => setShowDeleteModal(true)}
-        variant='outline'
+        variant='destructive'
         size='icon'
-        className='text-destructive border-destructive hover:text-destructive-foreground hover:bg-destructive'
       >
         <Trash2 className='w-4 h-4' />
         <span className='sr-only'>Delete Synopsis</span>

@@ -33,10 +33,10 @@ export default async function TeamsPage() {
                 Import Teams
               </Link>
             </Button>
-            <Button asChild variant='outline'>
+            <Button asChild className='flex items-center gap-2'>
               <Link href='/teams/new'>
                 <Plus className='w-4 h-4' />
-                New Team
+                Create Team
               </Link>
             </Button>
           </div>

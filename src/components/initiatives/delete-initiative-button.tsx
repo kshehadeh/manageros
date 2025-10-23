@@ -32,7 +32,7 @@ export function DeleteInitiativeButton({
     <>
       <Button
         onClick={() => setShowDeleteModal(true)}
-        variant='outline'
+        variant='destructive'
         size='icon'
       >
         <Trash2 className='w-4 h-4' />

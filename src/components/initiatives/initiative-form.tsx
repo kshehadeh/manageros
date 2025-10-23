@@ -540,7 +540,7 @@ export function InitiativeForm({
                       <Button
                         type='button'
                         onClick={() => removeOwner(index)}
-                        variant='outline'
+                        variant='destructive'
                         size='sm'
                         className='h-10 w-10 p-0'
                       >
