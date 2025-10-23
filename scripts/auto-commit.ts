@@ -206,7 +206,7 @@ class GitOperations {
     branchName: string,
     title: string,
     description: string
-  ): void {
+  ): boolean {
     try {
       // Check if gh CLI is available
       try {
@@ -219,7 +219,7 @@ class GitOperations {
           'You can create a PR manually at: https://github.com/your-repo/compare/' +
             branchName
         )
-        return
+        return false
       }
 
       // Create the pull request using execFileSync with argument arrays to prevent shell injection
@@ -241,6 +241,7 @@ class GitOperations {
           encoding: 'utf8',
         })
         printSuccess('Pull request created successfully!')
+        return true
       } catch (execError) {
         throw new Error(`GitHub CLI command failed: ${execError}`)
       }
@@ -251,6 +252,7 @@ class GitOperations {
           branchName
       )
       console.error('PR creation error:', error)
+      return false
     }
   }
 }
@@ -489,19 +491,36 @@ class AutoCommit {
     this.git.pushBranch(branchName)
 
     printStatus('Creating pull request...')
-    this.git.createPullRequest(branchName, prTitle, prDescription)
+    const prCreated = this.git.createPullRequest(
+      branchName,
+      prTitle,
+      prDescription
+    )
 
     const stats = this.git.getChangeStats()
-    printSuccess(
-      `Branch '${branchName}' created, committed, pushed, and PR created!`
-    )
+
+    if (prCreated) {
+      printSuccess(
+        `Branch '${branchName}' created, committed, pushed, and PR created!`
+      )
+    } else {
+      printSuccess(`Branch '${branchName}' created, committed, and pushed!`)
+      printWarning('Pull request creation failed - please create manually')
+    }
+
     printStatus(`Commit message: ${commitMessage}`)
     printStatus(`PR title: ${prTitle}`)
     printStatus(`Files changed: ${changedFiles.length}`)
     printStatus(`Lines added: ${stats.added}, deleted: ${stats.deleted}`)
 
     console.log('')
-    printSuccess('Workflow completed! Your changes are ready for review.')
+    if (prCreated) {
+      printSuccess('Workflow completed! Your changes are ready for review.')
+    } else {
+      printWarning(
+        'Workflow completed with warnings. Please create a PR manually.'
+      )
+    }
   }
 }
 

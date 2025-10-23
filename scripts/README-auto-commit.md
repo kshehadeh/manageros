@@ -43,7 +43,28 @@ This will:
 5. **Stages changes**: Adds all modified files to staging
 6. **Commits**: Creates a commit with a descriptive message based on the changes
 7. **Pushes branch**: Pushes the new branch to the remote repository
-8. **Creates PR**: Automatically creates a pull request using GitHub CLI (gh)
+8. **Creates PR**: Automatically creates a pull request using GitHub CLI (gh) - **with accurate success reporting**
+
+## Success Scenarios
+
+### Complete Success
+
+When everything works perfectly:
+
+```
+✅ Branch 'feature-name' created, committed, pushed, and PR created!
+✅ Workflow completed! Your changes are ready for review.
+```
+
+### Partial Success (PR Creation Failed)
+
+When GitHub CLI is missing or authentication fails:
+
+```
+✅ Branch 'feature-name' created, committed, and pushed!
+⚠️ Pull request creation failed - please create manually
+⚠️ Workflow completed with warnings. Please create a PR manually.
+```
 
 ## AI-Powered Features
 
@@ -155,3 +176,5 @@ This will show the raw AI response to help troubleshoot JSON parsing issues.
 - If AI fails, it will use timestamped branch names
 - If GitHub CLI fails, it provides manual PR creation links
 - All errors are logged with detailed information
+- **Accurate status reporting**: Success messages only appear when operations actually succeed
+- **Clear failure indication**: When PR creation fails, the script clearly indicates this and provides manual steps
