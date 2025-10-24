@@ -231,6 +231,38 @@ export async function deleteTask(taskId: string) {
   revalidatePath('/my-tasks')
 }
 
+export async function getTasksForInitiative(initiativeId: string) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to view tasks')
+  }
+
+  const tasks = await prisma.task.findMany({
+    where: {
+      initiativeId,
+      ...getTaskAccessWhereClause(
+        user.organizationId,
+        user.id,
+        user.personId || undefined
+      ),
+    },
+    include: {
+      assignee: true,
+      initiative: true,
+      objective: true,
+      createdBy: true,
+    },
+    orderBy: [
+      { status: 'asc' }, // Show incomplete tasks first
+      { dueDate: { sort: 'asc', nulls: 'last' } }, // Then sort by due date
+    ],
+  })
+
+  return tasks
+}
+
 export async function getTask(taskId: string) {
   const user = await getCurrentUser()
 

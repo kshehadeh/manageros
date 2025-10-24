@@ -1,7 +1,6 @@
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
 import { getTaskAccessWhereClause } from '@/lib/task-access-utils'
-import { TASK_STATUS } from '@/lib/task-status'
 import { DashboardAssignedTasksClientSection } from './assigned-tasks-section-client'
 
 interface DashboardAssignedTasksServerSectionProps {
@@ -18,15 +17,15 @@ export async function DashboardAssignedTasksServerSection({
     return null
   }
 
-  // Fetch tasks assigned to the current user that are not done
+  // Fetch tasks assigned to the current user (including completed ones)
   const tasks = await prisma.task.findMany({
     where: {
       assigneeId: personId,
-      status: { not: TASK_STATUS.DONE },
       ...getTaskAccessWhereClause(user.organizationId, user.id, personId),
     },
     orderBy: [
-      { dueDate: { sort: 'asc', nulls: 'last' } }, // Sort by due date ascending (least urgent first), nulls last
+      { status: 'asc' }, // Show incomplete tasks first
+      { dueDate: { sort: 'asc', nulls: 'last' } }, // Then sort by due date ascending
     ],
     include: {
       initiative: {
@@ -37,5 +36,7 @@ export async function DashboardAssignedTasksServerSection({
     },
   })
 
-  return <DashboardAssignedTasksClientSection tasks={tasks} />
+  return (
+    <DashboardAssignedTasksClientSection tasks={tasks} personId={personId} />
+  )
 }

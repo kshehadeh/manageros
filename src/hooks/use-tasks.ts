@@ -108,6 +108,19 @@ export function useTasks({
     fetchTasks()
   }, [fetchTasks])
 
+  // Listen for task creation events to automatically refresh the list
+  useEffect(() => {
+    const handleTaskCreated = () => {
+      refetch()
+    }
+
+    window.addEventListener('task:created', handleTaskCreated)
+
+    return () => {
+      window.removeEventListener('task:created', handleTaskCreated)
+    }
+  }, [refetch])
+
   const updateTask = useCallback(
     (taskId: string, updates: Partial<TaskListItem>) => {
       setData(prevData => {

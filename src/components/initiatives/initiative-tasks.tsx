@@ -1,23 +1,12 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { TaskDataTable } from '@/components/tasks/data-table'
-import { SectionHeader } from '@/components/ui/section-header'
-import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import {
-  QuickTaskForm,
-  type QuickTaskFormRef,
-} from '@/components/tasks/quick-task-form'
-import { ListTodo, Plus } from 'lucide-react'
+import { useState } from 'react'
+import { TaskList, type Task } from '@/components/tasks/task-list'
+import { getTasksForInitiative } from '@/lib/actions/task'
 
 interface InitiativeTasksProps {
   initiativeId: string
+  tasks: Task[]
   objectives: Array<{
     id: string
     title: string
@@ -26,48 +15,34 @@ interface InitiativeTasksProps {
   }>
 }
 
-export function InitiativeTasks({ initiativeId }: InitiativeTasksProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const quickTaskFormRef = useRef<QuickTaskFormRef>(null)
+export function InitiativeTasks({
+  initiativeId,
+  tasks: initialTasks,
+}: InitiativeTasksProps) {
+  const [tasks, setTasks] = useState<Task[]>(initialTasks)
 
-  const handleTaskCreated = () => {
-    setIsModalOpen(false)
-    // The page will be revalidated by the server action
+  const handleTaskUpdate = async () => {
+    try {
+      // Fetch updated tasks for this initiative
+      const updatedTasks = await getTasksForInitiative(initiativeId)
+      setTasks(updatedTasks)
+    } catch (error) {
+      console.error('Error fetching updated tasks:', error)
+      // Fallback to page reload if API fails
+      window.location.reload()
+    }
   }
 
   return (
-    <div className='page-section'>
-      <SectionHeader
-        icon={ListTodo}
-        title='Tasks'
-        className='mb-4'
-        action={
-          <Button
-            onClick={() => setIsModalOpen(true)}
-            variant='outline'
-            size='sm'
-          >
-            <Plus className='h-4 w-4 mr-2' />
-            Add Task
-          </Button>
-        }
-      />
-
-      <TaskDataTable immutableFilters={{ initiativeId }} hideFilters={true} />
-
-      {/* Add Task Dialog */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Task to Initiative</DialogTitle>
-          </DialogHeader>
-          <QuickTaskForm
-            ref={quickTaskFormRef}
-            onSuccess={handleTaskCreated}
-            initiativeId={initiativeId}
-          />
-        </DialogContent>
-      </Dialog>
-    </div>
+    <TaskList
+      tasks={tasks}
+      title='Tasks'
+      variant='full'
+      showAddButton={true}
+      initiativeId={initiativeId}
+      emptyStateText='No tasks found for this initiative.'
+      onTaskUpdate={handleTaskUpdate}
+      immutableFilters={{ initiativeId }}
+    />
   )
 }

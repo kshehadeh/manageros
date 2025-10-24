@@ -182,6 +182,7 @@ export default async function InitiativeDetail({
               >
                 <InitiativeTasks
                   initiativeId={init.id}
+                  tasks={init.tasks}
                   objectives={init.objectives}
                 />
               </Suspense>
