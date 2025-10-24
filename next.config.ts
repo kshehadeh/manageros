@@ -9,8 +9,21 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ['*'],
+      allowedOrigins:
+        process.env.NODE_ENV === 'production'
+          ? [
+              process.env.VERCEL_URL
+                ? `https://${process.env.VERCEL_URL}`
+                : 'https://manageros.vercel.app',
+            ]
+          : ['localhost:3000', '127.0.0.1:3000'],
     },
+  },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals.push('@prisma/client')
+    }
+    return config
   },
 }
 
