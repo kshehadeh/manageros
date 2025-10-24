@@ -165,7 +165,7 @@ export class GithubApiService {
       try {
         const prNumber = issue.number as number
         const repoUrl = issue.repository_url as string
-        const repoMatch = repoUrl.match(/\/repos\/([^\/]+)\/([^\/]+)$/)
+        const repoMatch = repoUrl.match(/\/repos\/([^/]+)\/([^/]+)$/)
 
         if (!repoMatch) continue
 

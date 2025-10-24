@@ -42,7 +42,7 @@ export function FeedbackResponseDetail({
     if (!question) return null
 
     switch (question.type) {
-      case 'rating':
+      case 'rating': {
         const rating = Number(value)
         return (
           <div className='flex items-center gap-2'>
@@ -56,7 +56,7 @@ export function FeedbackResponseDetail({
             </span>
           </div>
         )
-
+      }
       case 'multiple_choice':
         return <Badge variant='outline'>{String(value)}</Badge>
 

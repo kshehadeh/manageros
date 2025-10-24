@@ -52,6 +52,7 @@ export function TaskListWithData({
 
   useEffect(() => {
     loadTasks()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleTaskUpdate = () => {

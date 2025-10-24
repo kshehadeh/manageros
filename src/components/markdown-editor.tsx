@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 'use client'
 
 import MDEditor from '@uiw/react-md-editor'

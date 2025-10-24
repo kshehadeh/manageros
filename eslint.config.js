@@ -1,16 +1,8 @@
-import { FlatCompat } from '@eslint/eslintrc'
 import js from '@eslint/js'
-import path from 'path'
-import { fileURLToPath } from 'url'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-})
+import tseslint from '@typescript-eslint/eslint-plugin'
+import tsparser from '@typescript-eslint/parser'
+import reactHooks from 'eslint-plugin-react-hooks'
+import globals from 'globals'
 
 export default [
   {
@@ -19,51 +11,8 @@ export default [
       '.next/**',
       'out/**',
       'build/**',
-      'next-env.d.ts',
-    ],
-  },
-  ...compat.extends('next/core-web-vitals', 'next/typescript', 'prettier'),
-  {
-    files: ['**/*.{js,jsx,ts,tsx}'],
-    languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-      parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
-      },
-    },
-    rules: {
-      // Code quality rules (not formatting - Prettier handles formatting)
-      'no-unused-vars': [
-        'error',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
-      ],
-      eqeqeq: ['error', 'always'],
-      camelcase: 'error',
-
-      // React specific rules
-      'react/jsx-uses-react': 'off', // Not needed in React 17+
-      'react/react-in-jsx-scope': 'off', // Not needed in React 17+
-
-      // TypeScript specific rules
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
-      ],
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-explicit-any': 'warn',
-    },
-  },
-  {
-    ignores: [
-      'node_modules/**',
-      '.next/**',
-      'out/**',
-      'build/**',
       'dist/**',
+      'next-env.d.ts',
       '*.config.js',
       '*.config.ts',
       'prisma/**',
@@ -71,5 +20,44 @@ export default [
       'debug-*.js',
       'check-*.js',
     ],
+  },
+  js.configs.recommended,
+  {
+    files: ['**/*.{js,jsx,ts,tsx}'],
+    languageOptions: {
+      parser: tsparser,
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.es2022,
+        React: 'readonly',
+        RequestInit: 'readonly',
+        NodeJS: 'readonly',
+        EventListener: 'readonly',
+      },
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tseslint,
+      'react-hooks': reactHooks,
+    },
+    rules: {
+      ...tseslint.configs.recommended.rules,
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+      eqeqeq: ['error', 'always'],
+      camelcase: 'error',
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+    },
   },
 ]

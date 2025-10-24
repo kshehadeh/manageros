@@ -95,7 +95,7 @@ function createStaticItems(
       },
     },
     // Add initiative-specific task creation if we're on an initiative page
-    ...(pathname?.match(/^\/initiatives\/[^\/]+$/)
+    ...(pathname?.match(/^\/initiatives\/[^/]+$/)
       ? [
           {
             id: 'task.create.initiative',

@@ -68,7 +68,9 @@ export function PersonSynopsisList({
         if (res.success) {
           setSynopses(res.synopses)
         }
-      } catch {}
+      } catch {
+        // Ignore errors
+      }
       setLoadingList(false)
     }
     load()
@@ -113,7 +115,9 @@ export function PersonSynopsisList({
         if (res.success) {
           setSynopses(res.synopses)
         }
-      } catch {}
+      } catch {
+        // Ignore errors
+      }
     }
     load()
   }
