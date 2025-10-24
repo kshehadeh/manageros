@@ -259,7 +259,11 @@ export async function getTask(taskId: string) {
   return task
 }
 
-export async function createQuickTask(title: string, dueDate?: string) {
+export async function createQuickTask(
+  title: string,
+  dueDate?: string,
+  priority?: number
+) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
@@ -296,7 +300,7 @@ export async function createQuickTask(title: string, dueDate?: string) {
     data: {
       title: title.trim(),
       status: 'todo',
-      priority: DEFAULT_TASK_PRIORITY,
+      priority: priority || DEFAULT_TASK_PRIORITY,
       assigneeId,
       createdById: user.id,
       dueDate: dueDate || null,
@@ -320,7 +324,8 @@ export async function createQuickTaskForInitiative(
   title: string,
   initiativeId: string,
   objectiveId?: string,
-  dueDate?: string
+  dueDate?: string,
+  priority?: number
 ) {
   const user = await getCurrentUser()
 
@@ -384,7 +389,7 @@ export async function createQuickTaskForInitiative(
     data: {
       title: title.trim(),
       status: 'todo',
-      priority: DEFAULT_TASK_PRIORITY,
+      priority: priority || DEFAULT_TASK_PRIORITY,
       assigneeId,
       createdById: user.id,
       initiativeId,

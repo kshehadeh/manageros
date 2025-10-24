@@ -17,6 +17,7 @@ import { taskPriorityUtils, DEFAULT_TASK_PRIORITY } from '@/lib/task-priority'
 import { AlertCircle } from 'lucide-react'
 import { HelpIcon } from '@/components/help-icon'
 import { type DetectedDate } from '@/lib/utils/date-detection'
+import { type DetectedPriority } from '@/lib/utils/priority-detection'
 import { InitiativeSelect } from '@/components/ui/initiative-select'
 
 interface TaskFormProps {
@@ -135,6 +136,13 @@ export function TaskForm({
     }
   }
 
+  function handlePriorityDetected(detectedPriority: DetectedPriority | null) {
+    // Update the priority field if a priority is detected
+    if (detectedPriority) {
+      handleInputChange('priority', detectedPriority.priority)
+    }
+  }
+
   return (
     <form onSubmit={handleSubmit} className='space-y-6'>
       {errors.general && (
@@ -153,9 +161,16 @@ export function TaskForm({
             value={formData.title}
             onChange={value => handleInputChange('title', value)}
             onDateDetected={handleDateDetected}
+            onPriorityDetected={handlePriorityDetected}
+            onSubmit={() => {
+              // Create a minimal synthetic event for handleSubmit
+              const syntheticEvent = {
+                preventDefault: () => {},
+              } as React.FormEvent<HTMLFormElement>
+              handleSubmit(syntheticEvent)
+            }}
             placeholder='Enter task title and details...'
             className={errors.title ? 'border-red-500' : ''}
-            rows={4}
           />
           {errors.title && (
             <p className='text-sm text-red-500 mt-1'>{errors.title}</p>

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
   Dialog,
   DialogContent,
@@ -20,9 +19,12 @@ import {
 } from '@/components/ui/select'
 import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
 import { MarkdownEditor } from '@/components/markdown-editor'
+import { SlateTaskTextarea } from '@/components/tasks/slate-task-textarea'
 import { updateTaskQuickEdit } from '@/lib/actions/task'
 import { type TaskStatus } from '@/lib/task-status'
 import { taskPriorityUtils } from '@/lib/task-priority'
+import { type DetectedDate } from '@/lib/utils/date-detection'
+import { type DetectedPriority } from '@/lib/utils/priority-detection'
 import { AlertCircle, ExternalLink } from 'lucide-react'
 import { toast } from 'sonner'
 import { usePeopleForSelect } from '@/hooks/use-organization-cache'
@@ -71,7 +73,7 @@ export function TaskQuickEditDialog({
         ? task.dueDate
         : task.dueDate.toISOString()
       : '',
-    priority: task.priority,
+    priority: task.priority || 3, // Default to Medium priority if undefined
   })
 
   // Manual scroll lock management to ensure proper cleanup
@@ -111,6 +113,30 @@ export function TaskQuickEditDialog({
     // Clear field error when user changes date
     if (errors.dueDate) {
       setErrors(prev => ({ ...prev, dueDate: '' }))
+    }
+  }
+
+  const handleDateDetected = (detectedDate: DetectedDate | null) => {
+    // Update the due date field if a date is detected
+    if (detectedDate) {
+      setFormData(prev => ({ ...prev, dueDate: detectedDate.date }))
+      // Clear field error when date is detected
+      if (errors.dueDate) {
+        setErrors(prev => ({ ...prev, dueDate: '' }))
+      }
+    }
+  }
+
+  const handlePriorityDetected = (
+    detectedPriority: DetectedPriority | null
+  ) => {
+    // Update the priority field if a priority is detected
+    if (detectedPriority) {
+      setFormData(prev => ({ ...prev, priority: detectedPriority.priority }))
+      // Clear field error when priority is detected
+      if (errors.priority) {
+        setErrors(prev => ({ ...prev, priority: '' }))
+      }
     }
   }
 
@@ -211,14 +237,20 @@ export function TaskQuickEditDialog({
                 <label htmlFor='title' className='text-sm font-medium'>
                   Summary *
                 </label>
-                <Input
-                  id='title'
+                <SlateTaskTextarea
                   value={formData.title}
-                  onChange={e => handleInputChange('title', e.target.value)}
-                  placeholder='Enter task summary'
+                  onChange={value => handleInputChange('title', value)}
+                  onDateDetected={handleDateDetected}
+                  onPriorityDetected={handlePriorityDetected}
+                  onSubmit={() => {
+                    // Create a minimal synthetic event for handleSubmit
+                    const syntheticEvent = {
+                      preventDefault: () => {},
+                    } as React.FormEvent<HTMLFormElement>
+                    handleSubmit(syntheticEvent)
+                  }}
+                  placeholder='Enter task summary...'
                   className={errors.title ? 'border-red-500' : ''}
-                  disabled={isSubmitting}
-                  required
                 />
                 {errors.title && (
                   <p className='text-sm text-red-500'>{errors.title}</p>
@@ -278,7 +310,7 @@ export function TaskQuickEditDialog({
                   Priority
                 </label>
                 <Select
-                  value={formData.priority.toString()}
+                  value={formData.priority?.toString() || '3'}
                   onValueChange={value =>
                     handleInputChange('priority', parseInt(value))
                   }

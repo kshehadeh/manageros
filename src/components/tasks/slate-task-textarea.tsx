@@ -7,6 +7,7 @@ import {
   useMemo,
   useImperativeHandle,
   forwardRef,
+  useRef,
 } from 'react'
 import { createEditor, Descendant, Text } from 'slate'
 import {
@@ -17,21 +18,28 @@ import {
   ReactEditor,
 } from 'slate-react'
 import { withHistory } from 'slate-history'
-import { Calendar, X } from 'lucide-react'
+import { Calendar, X, AlertTriangle } from 'lucide-react'
 import {
   detectDatesInText,
   formatDetectedDate,
   type DetectedDate,
 } from '@/lib/utils/date-detection'
+import {
+  detectPrioritiesInText,
+  formatDetectedPriority,
+  getPriorityBadgeVariant,
+  type DetectedPriority,
+} from '@/lib/utils/priority-detection'
 
 interface SlateTaskTextareaProps {
   value: string
   onChange: (_value: string) => void
   onDateDetected?: (_detectedDate: DetectedDate | null) => void
+  onPriorityDetected?: (_detectedPriority: DetectedPriority | null) => void
+  onSubmit?: () => void
   placeholder?: string
   className?: string
   disabled?: boolean
-  rows?: number
 }
 
 export interface SlateTaskTextareaRef {
@@ -40,15 +48,25 @@ export interface SlateTaskTextareaRef {
 
 // Custom leaf component for highlighting
 const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
+  const leafData = leaf as {
+    highlight?: boolean
+    highlightType?: 'date' | 'priority'
+  }
+
+  let highlightClass = ''
+  if (leafData.highlight) {
+    if (leafData.highlightType === 'priority') {
+      highlightClass =
+        'bg-orange-200 text-orange-900 dark:bg-orange-800 dark:text-orange-100 rounded px-0.5'
+    } else {
+      // Default to date highlighting
+      highlightClass =
+        'bg-yellow-200 text-yellow-900 dark:bg-yellow-800 dark:text-yellow-100 rounded px-0.5'
+    }
+  }
+
   return (
-    <span
-      {...attributes}
-      className={
-        (leaf as { highlight?: boolean }).highlight
-          ? 'bg-yellow-200 dark:bg-yellow-800 rounded px-0.5'
-          : ''
-      }
-    >
+    <span {...attributes} className={highlightClass}>
       {children}
     </span>
   )
@@ -63,14 +81,18 @@ export const SlateTaskTextarea = forwardRef<
       value,
       onChange,
       onDateDetected,
+      onPriorityDetected,
+      onSubmit,
       placeholder = 'Enter task details...',
       className = '',
       disabled = false,
-      rows = 4,
     },
     ref
   ) => {
     const [detectedDates, setDetectedDates] = useState<DetectedDate[]>([])
+    const [detectedPriorities, setDetectedPriorities] = useState<
+      DetectedPriority[]
+    >([])
     const [ignoreSections, setIgnoreSections] = useState<
       { startIndex: number; endIndex: number }[]
     >([])
@@ -89,14 +111,16 @@ export const SlateTaskTextarea = forwardRef<
       [editor]
     )
 
-    // Decorate function to highlight detected dates (uses existing detectedDates state)
+    // Decorate function to highlight detected dates and priorities
     const decorate = useCallback(
       ([node, path]: [Descendant, number[]]) => {
         const ranges: Array<{
           anchor: { path: number[]; offset: number }
           focus: { path: number[]; offset: number }
           highlight: boolean
-          date: string
+          highlightType: 'date' | 'priority'
+          date?: string
+          priority?: number
         }> = []
 
         if (!Text.isText(node)) {
@@ -105,27 +129,49 @@ export const SlateTaskTextarea = forwardRef<
 
         const { text } = node
 
-        // Use existing detected dates instead of re-detecting
+        // Highlight detected dates
         detectedDates.forEach(detectedDate => {
-          // Only highlight if the detected date is within the current text node bounds
           if (
             detectedDate.startIndex < text.length &&
             detectedDate.endIndex <= text.length
           ) {
-            // Check if this date range is in the ignored sections
             const isIgnored = ignoreSections.some(
               ignoredSection =>
                 detectedDate.startIndex >= ignoredSection.startIndex &&
                 detectedDate.endIndex <= ignoredSection.endIndex
             )
 
-            // Only highlight if not ignored
             if (!isIgnored) {
               ranges.push({
                 anchor: { path, offset: detectedDate.startIndex },
                 focus: { path, offset: detectedDate.endIndex },
                 highlight: true,
+                highlightType: 'date',
                 date: detectedDate.date,
+              })
+            }
+          }
+        })
+
+        // Highlight detected priorities
+        detectedPriorities.forEach(detectedPriority => {
+          if (
+            detectedPriority.startIndex < text.length &&
+            detectedPriority.endIndex <= text.length
+          ) {
+            const isIgnored = ignoreSections.some(
+              ignoredSection =>
+                detectedPriority.startIndex >= ignoredSection.startIndex &&
+                detectedPriority.endIndex <= ignoredSection.endIndex
+            )
+
+            if (!isIgnored) {
+              ranges.push({
+                anchor: { path, offset: detectedPriority.startIndex },
+                focus: { path, offset: detectedPriority.endIndex },
+                highlight: true,
+                highlightType: 'priority',
+                priority: detectedPriority.priority,
               })
             }
           }
@@ -133,7 +179,7 @@ export const SlateTaskTextarea = forwardRef<
 
         return ranges
       },
-      [detectedDates, ignoreSections]
+      [detectedDates, detectedPriorities, ignoreSections]
     )
 
     // Convert string value to Slate value
@@ -144,50 +190,104 @@ export const SlateTaskTextarea = forwardRef<
       return [{ type: 'paragraph', children: [{ text: value }] }]
     }, [value])
 
-    // Force editor to update when value changes externally
+    // Track if the editor is currently being updated by user input
+    const isUserInputRef = useRef(false)
+
+    // Force editor to update when value changes externally (not from user input)
     useEffect(() => {
+      if (isUserInputRef.current) {
+        isUserInputRef.current = false
+        return
+      }
+
       const newValue = slateValue
-      if (JSON.stringify(editor.children) !== JSON.stringify(newValue)) {
+      const currentEditorValue = editor.children
+
+      // Only update if the values are actually different
+      if (JSON.stringify(currentEditorValue) !== JSON.stringify(newValue)) {
+        // Store current selection before updating
+        const currentSelection = editor.selection
+
         editor.children = newValue
-        editor.selection = null
+
+        // Restore selection if it was valid and the text hasn't changed significantly
+        if (currentSelection && ReactEditor.isFocused(editor)) {
+          // Only restore if the selection is still valid for the new content
+          try {
+            const firstNode = newValue[0]
+            const textLength =
+              firstNode &&
+              'children' in firstNode &&
+              firstNode.children?.[0] &&
+              'text' in firstNode.children[0]
+                ? firstNode.children[0].text?.length || 0
+                : 0
+            if (
+              currentSelection.anchor.offset <= textLength &&
+              currentSelection.focus.offset <= textLength
+            ) {
+              editor.selection = currentSelection
+            }
+          } catch {
+            // If selection restoration fails, just clear it
+            editor.selection = null
+          }
+        }
       }
     }, [editor, slateValue])
 
-    // Debounced date detection
-    const debouncedDetectDates = useCallback(
+    // Debounced detection for both dates and priorities
+    const debouncedDetect = useCallback(
       (text: string) => {
         const timeoutId = setTimeout(() => {
-          const result = detectDatesInText(text, ignoreSections)
+          const dateResult = detectDatesInText(text, ignoreSections)
+          const priorityResult = detectPrioritiesInText(text, ignoreSections)
 
-          // Store detected dates for display
-          setDetectedDates(result.detectedDates)
+          // Store detected items for display
+          setDetectedDates(dateResult.detectedDates)
+          setDetectedPriorities(priorityResult.detectedPriorities)
 
           // Notify parent component about detected date
           if (onDateDetected) {
             const latestDetectedDate =
-              result.detectedDates.length > 0
-                ? result.detectedDates[result.detectedDates.length - 1]
+              dateResult.detectedDates.length > 0
+                ? dateResult.detectedDates[dateResult.detectedDates.length - 1]
                 : null
             onDateDetected(latestDetectedDate)
+          }
+
+          // Notify parent component about detected priority
+          if (onPriorityDetected) {
+            const latestDetectedPriority =
+              priorityResult.detectedPriorities.length > 0
+                ? priorityResult.detectedPriorities[
+                    priorityResult.detectedPriorities.length - 1
+                  ]
+                : null
+            onPriorityDetected(latestDetectedPriority)
           }
         }, 300)
 
         return () => clearTimeout(timeoutId)
       },
-      [onDateDetected, ignoreSections]
+      [onDateDetected, onPriorityDetected, ignoreSections]
     )
 
     // Handle removing a detected date
     const handleRemoveDate = useCallback(
       (indexToRemove: number) => {
         setDetectedDates(prevDates => {
+          const dateToRemove = prevDates[indexToRemove]
+
+          // Add to ignore sections
           setIgnoreSections(prevSections => [
             ...prevSections,
             {
-              startIndex: prevDates[indexToRemove].startIndex,
-              endIndex: prevDates[indexToRemove].endIndex,
+              startIndex: dateToRemove.startIndex,
+              endIndex: dateToRemove.endIndex,
             },
           ])
+
           const newDates = prevDates.filter(
             (_, index) => index !== indexToRemove
           )
@@ -205,9 +305,46 @@ export const SlateTaskTextarea = forwardRef<
       [onDateDetected]
     )
 
+    // Handle removing a detected priority
+    const handleRemovePriority = useCallback(
+      (indexToRemove: number) => {
+        setDetectedPriorities(prevPriorities => {
+          const priorityToRemove = prevPriorities[indexToRemove]
+
+          // Add to ignore sections
+          setIgnoreSections(prevSections => [
+            ...prevSections,
+            {
+              startIndex: priorityToRemove.startIndex,
+              endIndex: priorityToRemove.endIndex,
+            },
+          ])
+
+          const newPriorities = prevPriorities.filter(
+            (_, index) => index !== indexToRemove
+          )
+
+          // Notify parent component about the latest priority after removal
+          if (onPriorityDetected) {
+            const latestDetectedPriority =
+              newPriorities.length > 0
+                ? newPriorities[newPriorities.length - 1]
+                : null
+            onPriorityDetected(latestDetectedPriority)
+          }
+
+          return newPriorities
+        })
+      },
+      [onPriorityDetected]
+    )
+
     // Handle editor changes
     const handleChange = useCallback(
       (newValue: Descendant[]) => {
+        // Mark that this change is from user input
+        isUserInputRef.current = true
+
         // Extract text from Slate's nested structure
         const text = newValue
           .map((node: Descendant) => {
@@ -249,25 +386,49 @@ export const SlateTaskTextarea = forwardRef<
 
         onChange(text)
 
-        // Trigger date detection directly on text change
+        // Trigger detection directly on text change
         if (text.trim()) {
-          debouncedDetectDates(text)
+          debouncedDetect(text)
         } else {
           setDetectedDates([])
+          setDetectedPriorities([])
           if (onDateDetected) {
             onDateDetected(null)
           }
+          if (onPriorityDetected) {
+            onPriorityDetected(null)
+          }
         }
       },
-      [onChange, debouncedDetectDates, onDateDetected, ignoreSections, value]
+      [
+        onChange,
+        debouncedDetect,
+        onDateDetected,
+        onPriorityDetected,
+        ignoreSections,
+        value,
+      ]
+    )
+
+    // Handle key events for Shift + Enter submission
+    const handleKeyDown = useCallback(
+      (event: React.KeyboardEvent) => {
+        if (event.key === 'Enter' && event.shiftKey && onSubmit) {
+          event.preventDefault()
+          onSubmit()
+        }
+      },
+      [onSubmit]
     )
 
     return (
-      <div className={`space-y-3 ${className}`}>
+      <div
+        className={`border border-input bg-background rounded-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 ${className}`}
+      >
         <div className='relative'>
           <div
-            className={`min-h-[${rows * 1.5}rem] border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 rounded-md`}
-            style={{ minHeight: `${rows * 1.5}rem` }}
+            className='px-3 py-2 text-sm placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50'
+            style={{ minHeight: '2.5rem' }}
           >
             <Slate
               editor={editor}
@@ -280,20 +441,21 @@ export const SlateTaskTextarea = forwardRef<
                 placeholder={placeholder}
                 disabled={disabled}
                 className='outline-none resize-none'
-                style={{ minHeight: `${rows * 1.5}rem` }}
+                style={{ minHeight: '1.5rem' }}
+                onKeyDown={handleKeyDown}
               />
             </Slate>
           </div>
         </div>
 
-        {/* Status area for detected dates */}
-        {detectedDates.length > 0 && (
-          <div className='space-y-2'>
+        {/* Status area for detected dates and priorities - always reserve space */}
+        <div className='px-3 pb-2 min-h-[2rem] bg-muted/30'>
+          {(detectedDates.length > 0 || detectedPriorities.length > 0) && (
             <div className='flex flex-wrap gap-2'>
               {/* Show detected dates */}
               {detectedDates.map((detectedDate, index) => (
                 <div
-                  key={`detected-${index}`}
+                  key={`detected-date-${index}`}
                   className='flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-md text-sm'
                 >
                   <Calendar className='h-3 w-3' />
@@ -308,9 +470,30 @@ export const SlateTaskTextarea = forwardRef<
                   </button>
                 </div>
               ))}
+
+              {/* Show detected priorities */}
+              {detectedPriorities.map((detectedPriority, index) => (
+                <div
+                  key={`detected-priority-${index}`}
+                  className={`flex items-center gap-1 px-2 py-1 rounded-md text-sm ${getPriorityBadgeVariant(detectedPriority.priority)}`}
+                >
+                  <AlertTriangle className='h-3 w-3' />
+                  <span>
+                    {formatDetectedPriority(detectedPriority.priority)}
+                  </span>
+                  <button
+                    type='button'
+                    onClick={() => handleRemovePriority(index)}
+                    className='ml-1 p-0.5 hover:bg-red-200 dark:hover:bg-red-800 rounded transition-colors'
+                    title='Dismiss priority'
+                  >
+                    <X className='h-3 w-3' />
+                  </button>
+                </div>
+              ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     )
   }

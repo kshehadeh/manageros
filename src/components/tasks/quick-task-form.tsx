@@ -13,6 +13,7 @@ import {
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { type DetectedDate } from '@/lib/utils/date-detection'
+import { type DetectedPriority } from '@/lib/utils/priority-detection'
 
 interface QuickTaskFormProps {
   onSuccess?: () => void
@@ -27,6 +28,8 @@ const QuickTaskForm = forwardRef<QuickTaskFormRef, QuickTaskFormProps>(
   ({ onSuccess, initiativeId }, ref) => {
     const [title, setTitle] = useState('')
     const [detectedDate, setDetectedDate] = useState<DetectedDate | null>(null)
+    const [detectedPriority, setDetectedPriority] =
+      useState<DetectedPriority | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const textareaRef = useRef<SlateTaskTextareaRef>(null)
 
@@ -45,9 +48,10 @@ const QuickTaskForm = forwardRef<QuickTaskFormRef, QuickTaskFormProps>(
       setIsSubmitting(true)
 
       try {
-        // Create task with detected date if available
+        // Create task with detected date and priority if available
         let taskTitle = title.trim()
         let taskDueDate: string | undefined = undefined
+        let taskPriority: number | undefined = undefined
 
         if (detectedDate) {
           // Use the detected date
@@ -60,15 +64,28 @@ const QuickTaskForm = forwardRef<QuickTaskFormRef, QuickTaskFormProps>(
           }
         }
 
+        if (detectedPriority) {
+          // Use the detected priority
+          taskPriority = detectedPriority.priority
+
+          // Optionally remove the detected priority text from the title
+          if (detectedPriority.originalText) {
+            taskTitle = taskTitle
+              .replace(detectedPriority.originalText, '')
+              .trim()
+          }
+        }
+
         if (initiativeId) {
           await createQuickTaskForInitiative(
             taskTitle,
             initiativeId,
             undefined,
-            taskDueDate
+            taskDueDate,
+            taskPriority
           )
         } else {
-          await createQuickTask(taskTitle, taskDueDate)
+          await createQuickTask(taskTitle, taskDueDate, taskPriority)
         }
 
         // Show success toast
@@ -98,26 +115,30 @@ const QuickTaskForm = forwardRef<QuickTaskFormRef, QuickTaskFormProps>(
 
     return (
       <form onSubmit={handleSubmit} className='space-y-3'>
-        <div className='flex gap-2'>
-          <div className='flex-1'>
-            <SlateTaskTextarea
-              ref={textareaRef}
-              value={title}
-              onChange={setTitle}
-              onDateDetected={setDetectedDate}
-              placeholder='Add a new task...'
-              disabled={isSubmitting}
-              rows={2}
-            />
-          </div>
+        <SlateTaskTextarea
+          ref={textareaRef}
+          value={title}
+          onChange={setTitle}
+          onDateDetected={setDetectedDate}
+          onPriorityDetected={setDetectedPriority}
+          onSubmit={() => {
+            // Create a minimal synthetic event for handleSubmit
+            const syntheticEvent = {
+              preventDefault: () => {},
+            } as React.FormEvent<HTMLFormElement>
+            handleSubmit(syntheticEvent)
+          }}
+          placeholder='Add a new task...'
+          disabled={isSubmitting}
+        />
+        <div className='flex justify-end'>
           <Button
             type='submit'
             disabled={isSubmitting || !title.trim()}
             variant='outline'
-            size='icon'
-            className='shrink-0 self-start'
           >
-            <Plus className='h-4 w-4' />
+            <Plus className='h-4 w-4 mr-2' />
+            Create Task
           </Button>
         </div>
       </form>
