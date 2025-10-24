@@ -19,6 +19,7 @@
     "publish": false
   },
   "hooks": {
+    "before:bump": "bun run build",
     "after:bump": "bunx prisma generate"
   },
   "plugins": {},

@@ -88,7 +88,7 @@ export function TaskSidebar({
   const statusOptions = taskStatusUtils.getSelectOptions().map(option => ({
     value: option.value,
     label: option.label,
-    variant: taskStatusUtils.getVariant(option.value),
+    variant: taskStatusUtils.getVariant(option.value) || undefined,
   }))
 
   const priorityOptions = taskPriorityUtils.getSelectOptions().map(option => ({
@@ -119,7 +119,8 @@ export function TaskSidebar({
                       options={statusOptions}
                       onValueChange={handleStatusChange}
                       getVariant={value =>
-                        taskStatusUtils.getVariant(value as TaskStatus)
+                        taskStatusUtils.getVariant(value as TaskStatus) ||
+                        'default'
                       }
                       getLabel={value =>
                         taskStatusUtils.getLabel(value as TaskStatus)
