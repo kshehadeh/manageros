@@ -3,6 +3,8 @@
  * This file provides a single source of truth for all task status-related functionality
  */
 
+import type { BadgeVariant } from '@/components/ui/badge'
+
 // Task status enum - matches the database schema
 export const TASK_STATUS = {
   TODO: 'todo',
@@ -24,13 +26,13 @@ export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   [TASK_STATUS.DROPPED]: 'Dropped',
 }
 
-// CSS class variants for each status (for badges, buttons, etc.)
-export const TASK_STATUS_VARIANTS: Record<TaskStatus, string> = {
-  [TASK_STATUS.TODO]: 'badge',
-  [TASK_STATUS.DOING]: 'rag-amber',
-  [TASK_STATUS.BLOCKED]: 'rag-red',
-  [TASK_STATUS.DONE]: 'rag-green',
-  [TASK_STATUS.DROPPED]: 'badge',
+// Badge variants for each status
+export const TASK_STATUS_VARIANTS: Record<TaskStatus, BadgeVariant> = {
+  [TASK_STATUS.TODO]: 'secondary',
+  [TASK_STATUS.DOING]: 'warning',
+  [TASK_STATUS.BLOCKED]: 'error',
+  [TASK_STATUS.DONE]: 'success',
+  [TASK_STATUS.DROPPED]: 'neutral',
 }
 
 // Alternative variants for different UI contexts
@@ -84,9 +86,10 @@ export const taskStatusUtils = {
   getLabel: (status: TaskStatus): string => TASK_STATUS_LABELS[status],
 
   /**
-   * Get the CSS variant class for a task status
+   * Get the badge variant for a task status
    */
-  getVariant: (status: TaskStatus): string => TASK_STATUS_VARIANTS[status],
+  getVariant: (status: TaskStatus): BadgeVariant =>
+    TASK_STATUS_VARIANTS[status],
 
   /**
    * Get the UI variant for a task status

@@ -8,6 +8,8 @@ export default {
   theme: {
     extend: {
       colors: {
+        destructive: 'var(--color-destructive)',
+        'destructive-foreground': 'var(--color-destructive-foreground)',
         badge: {
           success: 'hsl(var(--badge-success))',
           'success-foreground': 'hsl(var(--badge-success-foreground))',
