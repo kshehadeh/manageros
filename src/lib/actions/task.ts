@@ -635,6 +635,7 @@ export async function updateTaskQuickEdit(
     assigneeId?: string | null
     dueDate?: string | null
     priority?: number
+    status?: string
   }
 ) {
   const user = await getCurrentUser()
@@ -683,6 +684,7 @@ export async function updateTaskQuickEdit(
     assigneeId?: string | null
     priority?: number
     dueDate?: Date
+    status?: string
   } = {}
   if (updates.title !== undefined) updateData.title = updates.title
   if (updates.description !== undefined)
@@ -690,6 +692,7 @@ export async function updateTaskQuickEdit(
   if (updates.assigneeId !== undefined)
     updateData.assigneeId = updates.assigneeId
   if (updates.priority !== undefined) updateData.priority = updates.priority
+  if (updates.status !== undefined) updateData.status = updates.status
   if (dueDate !== undefined) updateData.dueDate = dueDate
 
   // Update the task

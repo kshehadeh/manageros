@@ -21,7 +21,7 @@ import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-
 import { MarkdownEditor } from '@/components/markdown-editor'
 import { SlateTaskTextarea } from '@/components/tasks/slate-task-textarea'
 import { updateTaskQuickEdit } from '@/lib/actions/task'
-import { type TaskStatus } from '@/lib/task-status'
+import { type TaskStatus, taskStatusUtils } from '@/lib/task-status'
 import { taskPriorityUtils } from '@/lib/task-priority'
 import { type DetectedDate } from '@/lib/utils/date-detection'
 import { type DetectedPriority } from '@/lib/utils/priority-detection'
@@ -49,6 +49,7 @@ interface TaskQuickEditDialogProps {
       assigneeName: string | null
       dueDate: Date | string | null
       priority: number
+      status: TaskStatus
     }>
   ) => void
 }
@@ -74,6 +75,7 @@ export function TaskQuickEditDialog({
         : task.dueDate.toISOString()
       : '',
     priority: task.priority || 3, // Default to Medium priority if undefined
+    status: task.status,
   })
 
   // Manual scroll lock management to ensure proper cleanup
@@ -154,6 +156,7 @@ export function TaskQuickEditDialog({
           formData.assigneeId === 'unassigned' ? null : formData.assigneeId,
         dueDate: formData.dueDate || null,
         priority: formData.priority,
+        status: formData.status,
       }
 
       await updateTaskQuickEdit(task.id, updateData)
@@ -175,6 +178,7 @@ export function TaskQuickEditDialog({
         assigneeName,
         dueDate: formData.dueDate || null,
         priority: formData.priority,
+        status: formData.status,
       })
 
       onOpenChange(false)
@@ -338,11 +342,38 @@ export function TaskQuickEditDialog({
               </div>
 
               <div className='space-y-2'>
+                <label htmlFor='status' className='text-sm font-medium'>
+                  Status
+                </label>
+                <Select
+                  value={formData.status}
+                  onValueChange={value => handleInputChange('status', value)}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger
+                    className={errors.status ? 'border-red-500' : ''}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {taskStatusUtils.getSelectOptions().map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.status && (
+                  <p className='text-sm text-red-500'>{errors.status}</p>
+                )}
+              </div>
+
+              <div className='space-y-2'>
                 <DateTimePickerWithNaturalInput
                   label='Due Date & Time'
                   value={formData.dueDate}
                   onChange={handleDateChange}
-                  placeholder="e.g., 'tomorrow at 2pm', 'next Monday', 'in 3 days'"
+                  placeholder="e.g., 'tomorrow', 'next Monday'"
                   disabled={isSubmitting}
                   error={!!errors.dueDate}
                   dateOnly={false}

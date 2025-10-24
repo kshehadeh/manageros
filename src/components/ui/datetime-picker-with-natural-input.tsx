@@ -250,8 +250,8 @@ export function DateTimePickerWithNaturalInput({
             <Input
               placeholder={
                 dateOnly
-                  ? "e.g., 'next Monday', 'tomorrow', 'in 3 days'"
-                  : "e.g., 'next Monday', 'tomorrow at 2pm', 'in 3 days'"
+                  ? "e.g., 'tomorrow', 'next Monday'"
+                  : "e.g., 'tomorrow at 2pm', 'next Monday'"
               }
               value={inputValue}
               onChange={handleInputChange}
