@@ -1,8 +1,6 @@
 'use client'
 
-import { SharedMeetingsTable } from '@/components/meetings/shared-meetings-table'
-import { SectionHeader } from '@/components/ui/section-header'
-import { CreateMeetingModal } from './create-meeting-modal'
+import { MeetingListWithData } from '@/components/meetings/meeting-list-with-data'
 import {
   Meeting,
   Team,
@@ -10,7 +8,6 @@ import {
   Person,
   User as PrismaUser,
 } from '@prisma/client'
-import { Calendar } from 'lucide-react'
 
 type MeetingWithRelations = Meeting & {
   team: Team | null
@@ -39,24 +36,12 @@ export function InitiativeMeetings({
   currentTeam,
 }: InitiativeMeetingsProps) {
   return (
-    <div className='page-section'>
-      <SectionHeader
-        icon={Calendar}
-        title='Meetings'
-        action={
-          <CreateMeetingModal
-            initiativeId={initiativeId}
-            people={people}
-            teams={teams}
-            currentTeam={currentTeam}
-          />
-        }
-        className='mb-4'
-      />
-      <SharedMeetingsTable
-        meetings={meetings}
-        emptyStateMessage='No meetings for this initiative'
-      />
-    </div>
+    <MeetingListWithData
+      initiativeId={initiativeId}
+      meetings={meetings}
+      people={people}
+      teams={teams}
+      currentTeam={currentTeam}
+    />
   )
 }

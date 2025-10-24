@@ -367,6 +367,55 @@ export async function getMeetings() {
   return meetings
 }
 
+export async function getMeetingsForInitiative(initiativeId: string) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to view meetings')
+  }
+
+  const meetings = await prisma.meeting.findMany({
+    where: {
+      initiativeId: initiativeId,
+      organizationId: user.organizationId,
+      OR: [
+        { isPrivate: false }, // Public meetings
+        { createdById: user.id }, // Private meetings created by current user
+      ],
+    },
+    include: {
+      organization: true,
+      team: true,
+      initiative: true,
+      owner: true,
+      createdBy: true,
+      participants: {
+        include: {
+          person: true,
+        },
+      },
+      instances: {
+        include: {
+          participants: {
+            include: {
+              person: true,
+            },
+          },
+        },
+        orderBy: {
+          scheduledAt: 'asc',
+        },
+      },
+    },
+    orderBy: {
+      scheduledAt: 'asc',
+    },
+  })
+
+  return meetings
+}
+
 export async function getMeeting(id: string) {
   const user = await getCurrentUser()
 
