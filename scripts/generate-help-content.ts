@@ -189,9 +189,36 @@ export const helpContent: HelpContent = {
 }
 `
 
-        // Write individual file
+        // Write individual file only if content has changed
         const outputFile = join(outputDir, `${frontMatter.id}.ts`)
-        writeFileSync(outputFile, tsContent)
+        try {
+          const existingContent = readFileSync(outputFile, 'utf-8')
+          // Extract the content part from existing file to compare
+          const existingContentMatch = existingContent.match(
+            /content: `([\s\S]*?)`,?\s*}/
+          )
+          const existingEscapedContent = existingContentMatch
+            ? existingContentMatch[1]
+            : ''
+
+          // Only write if content has actually changed
+          if (existingEscapedContent !== escapedContent) {
+            writeFileSync(outputFile, tsContent)
+            console.log(
+              `✅ Updated: ${frontMatter.title} (${frontMatter.id}) from ${relativePath}`
+            )
+          } else {
+            console.log(
+              `⏭️  Skipped: ${frontMatter.title} (${frontMatter.id}) - no changes`
+            )
+          }
+        } catch {
+          // File doesn't exist, write it
+          writeFileSync(outputFile, tsContent)
+          console.log(
+            `✅ Generated: ${frontMatter.title} (${frontMatter.id}) from ${relativePath}`
+          )
+        }
 
         helpIds.push(frontMatter.id)
         categories.add(category)
@@ -288,12 +315,35 @@ export function getHelpIds(): string[] {
 }
 `
 
-    // Write the index file
-    writeFileSync(indexFile, indexContent)
+    // Write the index file only if content has changed
+    try {
+      const existingIndexContent = readFileSync(indexFile, 'utf-8')
+      // Extract the helpIds array from existing file to compare
+      const existingIdsMatch = existingIndexContent.match(/return \[(.*?)\]/s)
+      const existingIds = existingIdsMatch
+        ? existingIdsMatch[1]
+            .split(',')
+            .map(id => id.trim().replace(/['"]/g, ''))
+        : []
 
-    console.log(`✅ Generated help index: ${indexFile}`)
+      // Compare sorted arrays
+      const sortedExistingIds = [...existingIds].sort()
+      const sortedNewIds = [...helpIds].sort()
+
+      // Only write if the help IDs have changed
+      if (JSON.stringify(sortedExistingIds) !== JSON.stringify(sortedNewIds)) {
+        writeFileSync(indexFile, indexContent)
+        console.log(`✅ Updated help index: ${indexFile}`)
+      } else {
+        console.log(`⏭️  Skipped help index - no changes`)
+      }
+    } catch {
+      // File doesn't exist, write it
+      writeFileSync(indexFile, indexContent)
+      console.log(`✅ Generated help index: ${indexFile}`)
+    }
+
     console.log(`📊 ${helpIds.length} help topics processed`)
-    console.log(`📁 Generated ${helpIds.length + 1} TypeScript files`)
 
     return helpIds.length
   } catch (error) {
