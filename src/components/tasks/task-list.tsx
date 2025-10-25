@@ -73,7 +73,7 @@ export interface TaskListProps {
   immutableFilters?: Record<string, unknown>
 }
 
-export function TaskList({
+export function SimpleTaskList({
   tasks,
   title = 'Tasks',
   variant = 'compact',

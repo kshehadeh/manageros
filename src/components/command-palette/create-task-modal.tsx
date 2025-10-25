@@ -48,7 +48,7 @@ export function CreateTaskModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
+      <DialogContent className='md:max-w-[50vw] max-w-full'>
         <DialogHeader>
           <DialogTitle>Create Task</DialogTitle>
         </DialogHeader>
