@@ -3,10 +3,6 @@
     {
       "src": "prisma/schema.prisma",
       "use": "@prisma/client"
-    },
-    {
-      "src": "next.config.ts",
-      "use": "@vercel/static-build"
     }
   ],
   "crons": [
