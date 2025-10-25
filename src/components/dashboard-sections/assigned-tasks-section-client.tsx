@@ -1,6 +1,6 @@
 'use client'
 
-import { TaskList, type Task } from '@/components/tasks/task-list'
+import { SimpleTaskList, type Task } from '@/components/tasks/task-list'
 
 interface DashboardAssignedTasksClientSectionProps {
   tasks: Task[]
@@ -17,7 +17,7 @@ export function DashboardAssignedTasksClientSection({
   }
 
   return (
-    <TaskList
+    <SimpleTaskList
       tasks={tasks}
       title='Assigned Tasks'
       variant='compact'

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { TaskList, type Task } from '@/components/tasks/task-list'
+import { SimpleTaskList, type Task } from '@/components/tasks/task-list'
 import { getTasksForInitiative } from '@/lib/actions/task'
 
 interface InitiativeTasksProps {
@@ -34,7 +34,7 @@ export function InitiativeTasks({
   }
 
   return (
-    <TaskList
+    <SimpleTaskList
       tasks={tasks}
       title='Tasks'
       variant='full'

@@ -1,6 +1,8 @@
-import { ExpandableSection } from '@/components/expandable-section'
 import { prisma } from '@/lib/db'
-import { InitiativeCard } from '@/components/initiatives/initiative-card'
+import {
+  SimpleInitiativeList,
+  type Initiative,
+} from '@/components/initiatives/initiative-list'
 
 interface DashboardOpenInitiativesServerSectionProps {
   organizationId: string
@@ -24,27 +26,39 @@ export async function DashboardOpenInitiativesServerSection({
     include: {
       team: {
         select: {
+          id: true,
           name: true,
+        },
+      },
+      _count: {
+        select: {
+          tasks: true,
+          checkIns: true,
+          objectives: true,
         },
       },
     },
   })
 
+  // Transform the data to match the Initiative interface
+  const transformedInitiatives: Initiative[] = initiatives.map(initiative => ({
+    id: initiative.id,
+    title: initiative.title,
+    status: initiative.status,
+    rag: initiative.rag,
+    team: initiative.team,
+    updatedAt: initiative.updatedAt,
+    createdAt: initiative.createdAt,
+    _count: initiative._count,
+  }))
+
   return (
-    <ExpandableSection
+    <SimpleInitiativeList
+      initiatives={transformedInitiatives}
       title='Your Initiatives'
-      icon='Rocket'
+      variant='compact'
       viewAllHref='/initiatives'
-    >
-      {initiatives.length === 0 ? (
-        <div className='text-neutral-400 text-sm'>
-          No initiatives assigned to you.
-        </div>
-      ) : (
-        initiatives.map(initiative => (
-          <InitiativeCard key={initiative.id} initiative={initiative} />
-        ))
-      )}
-    </ExpandableSection>
+      emptyStateText='No initiatives assigned to you.'
+    />
   )
 }

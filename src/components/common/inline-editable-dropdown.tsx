@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import {
   Popover,
   PopoverContent,
@@ -59,20 +58,16 @@ export function InlineEditableDropdown({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant='ghost'
-          size='sm'
+        <div
           className={cn(
-            'h-auto p-0 hover:bg-transparent focus:bg-transparent',
-            'flex items-center gap-1',
+            'flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity',
             disabled && 'opacity-50 cursor-not-allowed',
             className
           )}
-          disabled={disabled || isLoading}
         >
           <span className='text-sm font-medium'>{currentLabel}</span>
           <ChevronDown className='h-3 w-3 text-muted-foreground' />
-        </Button>
+        </div>
       </PopoverTrigger>
       <PopoverContent align='start' className='w-48 p-1'>
         <div className='space-y-1'>

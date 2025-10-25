@@ -239,7 +239,7 @@ export function SimpleTaskList({
     return (
       <div
         key={task.id}
-        className={`flex items-center justify-between px-3 py-2 border rounded-lg hover:bg-muted/50 transition-colors ${
+        className={`flex items-center justify-between px-3 py-3 hover:bg-muted/50 transition-colors ${
           isProcessing ? 'opacity-75' : ''
         }`}
       >
@@ -275,7 +275,11 @@ export function SimpleTaskList({
                 </>
               )}
               {task.dueDate && (
-                <span>
+                <span
+                  className={
+                    task.dueDate < new Date() ? 'text-destructive' : ''
+                  }
+                >
                   Due{' '}
                   {formatDistanceToNow(task.dueDate, {
                     addSuffix: true,
@@ -340,9 +344,11 @@ export function SimpleTaskList({
       <section className={`rounded-xl py-4 -mx-3 px-3 space-y-4 ${className}`}>
         {renderSectionHeader()}
 
-        <div className='space-y-3'>
+        <div className='space-y-0 divide-y'>
           {visibleTasks.length === 0 ? (
-            <div className='text-neutral-400 text-sm'>{emptyStateText}</div>
+            <div className='text-neutral-400 text-sm px-3 py-3'>
+              {emptyStateText}
+            </div>
           ) : (
             visibleTasks.map(renderTaskItem)
           )}
