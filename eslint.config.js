@@ -2,6 +2,7 @@ import js from '@eslint/js'
 import tseslint from '@typescript-eslint/eslint-plugin'
 import tsparser from '@typescript-eslint/parser'
 import reactHooks from 'eslint-plugin-react-hooks'
+import globals from 'globals'
 
 export default [
   {
@@ -20,21 +21,14 @@ export default [
     ],
   },
   js.configs.recommended,
+  ...tseslint.configs['flat/recommended'],
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
       globals: {
-        console: 'readonly',
-        process: 'readonly',
-        Buffer: 'readonly',
-        global: 'readonly',
-        __dirname: 'readonly',
-        __filename: 'readonly',
-        module: 'readonly',
-        require: 'readonly',
-        exports: 'readonly',
+        ...globals.node,
       },
       parserOptions: {
         ecmaFeatures: {
@@ -61,75 +55,10 @@ export default [
     languageOptions: {
       parser: tsparser,
       globals: {
-        // Node.js globals
-        console: 'readonly',
-        process: 'readonly',
-        Buffer: 'readonly',
-        global: 'readonly',
-        __dirname: 'readonly',
-        __filename: 'readonly',
-        module: 'readonly',
-        require: 'readonly',
-        exports: 'readonly',
-        // Browser globals
-        window: 'readonly',
-        document: 'readonly',
-        navigator: 'readonly',
-        localStorage: 'readonly',
-        sessionStorage: 'readonly',
-        fetch: 'readonly',
-        URL: 'readonly',
-        URLSearchParams: 'readonly',
-        FormData: 'readonly',
-        File: 'readonly',
-        FileList: 'readonly',
-        Blob: 'readonly',
-        setTimeout: 'readonly',
-        clearTimeout: 'readonly',
-        setInterval: 'readonly',
-        clearInterval: 'readonly',
-        alert: 'readonly',
-        confirm: 'readonly',
-        prompt: 'readonly',
-        history: 'readonly',
-        location: 'readonly',
-        // React globals
+        ...globals.node,
+        ...globals.browser,
+        ...globals.es2021,
         React: 'readonly',
-        // DOM types
-        HTMLElement: 'readonly',
-        HTMLInputElement: 'readonly',
-        HTMLTextAreaElement: 'readonly',
-        HTMLButtonElement: 'readonly',
-        HTMLDivElement: 'readonly',
-        HTMLFormElement: 'readonly',
-        HTMLTableElement: 'readonly',
-        HTMLTableRowElement: 'readonly',
-        HTMLTableCellElement: 'readonly',
-        HTMLTableSectionElement: 'readonly',
-        HTMLTableCaptionElement: 'readonly',
-        HTMLParagraphElement: 'readonly',
-        HTMLHeadingElement: 'readonly',
-        HTMLSpanElement: 'readonly',
-        HTMLImageElement: 'readonly',
-        // Event types
-        Event: 'readonly',
-        CustomEvent: 'readonly',
-        KeyboardEvent: 'readonly',
-        MouseEvent: 'readonly',
-        ErrorEvent: 'readonly',
-        PromiseRejectionEvent: 'readonly',
-        // Other types
-        Node: 'readonly',
-        Element: 'readonly',
-        NodeJS: 'readonly',
-        EventListener: 'readonly',
-        DOMException: 'readonly',
-        Request: 'readonly',
-        Response: 'readonly',
-        RequestInit: 'readonly',
-        AbortController: 'readonly',
-        Navigator: 'readonly',
-        IntersectionObserver: 'readonly',
       },
       parserOptions: {
         ecmaVersion: 'latest',
@@ -137,6 +66,7 @@ export default [
         ecmaFeatures: {
           jsx: true,
         },
+        project: './tsconfig.json',
       },
     },
     plugins: {
