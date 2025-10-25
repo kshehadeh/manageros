@@ -65,7 +65,7 @@ export default async function TaskDetailPage({
             <div className='flex items-start justify-between'>
               <div className='flex-1'>
                 <div className='flex items-center gap-3 mb-2'>
-                  <ListTodo className='h-6 w-6 text-muted-foreground' />
+                  <ListTodo className='h-6 w-6 text-muted-foreground hidden md:block' />
                   <InlineEditableText
                     value={task.title}
                     onValueChange={async newTitle => {
@@ -157,6 +157,7 @@ export default async function TaskDetailPage({
             entityId={task.id}
             status={task.status as TaskStatus}
             priority={task.priority as TaskPriority}
+            assignee={task.assignee}
             initiative={task.initiative}
             objective={task.objective}
             estimate={task.estimate}

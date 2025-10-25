@@ -41,6 +41,10 @@ interface TaskSidebarProps {
   entityId: string
   status: TaskStatus
   priority: TaskPriority
+  assignee?: {
+    id: string
+    name: string
+  } | null
   initiative?: {
     id: string
     title: string
@@ -63,6 +67,7 @@ export function TaskSidebar({
   entityId,
   status,
   priority,
+  assignee,
   initiative,
   objective,
   estimate,
@@ -70,7 +75,8 @@ export function TaskSidebar({
   createdBy,
   updatedAt,
 }: TaskSidebarProps) {
-  const hasDetails = initiative || objective || estimate || dueDate || createdBy
+  const hasDetails =
+    assignee || initiative || objective || estimate || dueDate || createdBy
 
   const handleStatusChange = async (newStatus: string | number) => {
     console.log('handleStatusChange', newStatus)
@@ -150,6 +156,25 @@ export function TaskSidebar({
                     />
                   </td>
                 </tr>
+
+                {assignee && (
+                  <tr>
+                    <td className='py-1 pr-3'>
+                      <div className='flex items-center gap-2 text-muted-foreground'>
+                        <User className='w-3.5 h-3.5' />
+                        <span className='font-medium'>Assignee</span>
+                      </div>
+                    </td>
+                    <td className='py-1'>
+                      <Link
+                        href={`/people/${assignee.id}`}
+                        className='text-primary hover:underline'
+                      >
+                        {assignee.name}
+                      </Link>
+                    </td>
+                  </tr>
+                )}
 
                 {initiative && (
                   <tr>

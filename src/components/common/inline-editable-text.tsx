@@ -113,7 +113,7 @@ export function InlineEditableText({
               size='sm'
               onClick={handleSave}
               disabled={isLoading}
-              className='h-8 w-8 p-0 flex-shrink-0'
+              className='h-8 w-8 p-0 shrink-0'
             >
               <Check className='h-3 w-3' />
             </Button>
@@ -122,7 +122,7 @@ export function InlineEditableText({
               variant='outline'
               onClick={handleCancel}
               disabled={isLoading}
-              className='h-8 w-8 p-0 flex-shrink-0'
+              className='h-8 w-8 p-0 shrink-0'
             >
               <X className='h-3 w-3' />
             </Button>
@@ -159,8 +159,7 @@ export function InlineEditableText({
     <div
       className={cn(
         'group cursor-pointer rounded-md p-2 -m-2 hover:bg-muted/50 transition-colors',
-        disabled && 'cursor-not-allowed opacity-50',
-        className
+        disabled && 'cursor-not-allowed opacity-50'
       )}
       onClick={handleStartEdit}
     >
@@ -174,7 +173,9 @@ export function InlineEditableText({
                 showEmptyState={false}
               />
             ) : (
-              <div className='text-sm font-medium'>{value}</div>
+              <div className={cn('text-sm font-medium', className)}>
+                {value}
+              </div>
             )
           ) : (
             <div className='text-sm text-muted-foreground italic'>
@@ -182,7 +183,7 @@ export function InlineEditableText({
             </div>
           )}
         </div>
-        <Edit2 className='h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0' />
+        <Edit2 className='h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-2 shrink-0' />
       </div>
     </div>
   )

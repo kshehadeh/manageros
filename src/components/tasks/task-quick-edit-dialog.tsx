@@ -8,7 +8,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from '@/components/ui/dialog'
 import {
   Select,
@@ -18,14 +17,20 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
-import { MarkdownEditor } from '@/components/markdown-editor'
 import { SlateTaskTextarea } from '@/components/tasks/slate-task-textarea'
 import { updateTaskQuickEdit } from '@/lib/actions/task'
 import { type TaskStatus, taskStatusUtils } from '@/lib/task-status'
 import { taskPriorityUtils } from '@/lib/task-priority'
 import { type DetectedDate } from '@/lib/utils/date-detection'
 import { type DetectedPriority } from '@/lib/utils/priority-detection'
-import { AlertCircle, ExternalLink } from 'lucide-react'
+import {
+  AlertCircle,
+  ExternalLink,
+  User,
+  Calendar,
+  Flag,
+  CheckCircle,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { usePeopleForSelect } from '@/hooks/use-organization-cache'
 
@@ -44,7 +49,6 @@ interface TaskQuickEditDialogProps {
   onTaskUpdate?: (
     _updatedTask: Partial<{
       title: string
-      description: string | null
       assigneeId: string | null
       assigneeName: string | null
       dueDate: Date | string | null
@@ -67,7 +71,6 @@ export function TaskQuickEditDialog({
 
   const [formData, setFormData] = useState({
     title: task.title,
-    description: task.description || '',
     assigneeId: task.assigneeId || 'unassigned',
     dueDate: task.dueDate
       ? typeof task.dueDate === 'string'
@@ -151,7 +154,6 @@ export function TaskQuickEditDialog({
       // Prepare the update data
       const updateData = {
         title: formData.title,
-        description: formData.description || undefined,
         assigneeId:
           formData.assigneeId === 'unassigned' ? null : formData.assigneeId,
         dueDate: formData.dueDate || null,
@@ -172,7 +174,6 @@ export function TaskQuickEditDialog({
       // Pass the updated task data back for optimistic update
       onTaskUpdate?.({
         title: formData.title,
-        description: formData.description || null,
         assigneeId:
           formData.assigneeId === 'unassigned' ? null : formData.assigneeId,
         assigneeName,
@@ -217,13 +218,9 @@ export function TaskQuickEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-[800px]'>
+      <DialogContent className='md:max-w-[50vw] max-w-full'>
         <DialogHeader>
           <DialogTitle>Quick Edit Task</DialogTitle>
-          <DialogDescription>
-            Make quick changes to this task. Use Markdown for rich text
-            formatting. Use the full editor for more options.
-          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className='space-y-4'>
@@ -234,151 +231,137 @@ export function TaskQuickEditDialog({
             </div>
           )}
 
-          <div className='flex flex-col lg:flex-row gap-6'>
-            {/* Main Content - Summary and Description */}
-            <div className='flex-1 space-y-4'>
-              <div className='space-y-2'>
-                <label htmlFor='title' className='text-sm font-medium'>
-                  Summary *
-                </label>
-                <SlateTaskTextarea
-                  value={formData.title}
-                  onChange={value => handleInputChange('title', value)}
-                  onDateDetected={handleDateDetected}
-                  onPriorityDetected={handlePriorityDetected}
-                  onSubmit={() => {
-                    // Create a minimal synthetic event for handleSubmit
-                    const syntheticEvent = {
-                      preventDefault: () => {},
-                    } as React.FormEvent<HTMLFormElement>
-                    handleSubmit(syntheticEvent)
-                  }}
-                  placeholder='Enter task summary...'
-                  className={errors.title ? 'border-red-500' : ''}
-                />
-                {errors.title && (
-                  <p className='text-sm text-red-500'>{errors.title}</p>
-                )}
-              </div>
-
-              <div className='space-y-2'>
-                <label htmlFor='description' className='text-sm font-medium'>
-                  Description
-                </label>
-                <MarkdownEditor
-                  value={formData.description}
-                  onChange={value => handleInputChange('description', value)}
-                  placeholder='Enter task description... Use Markdown for formatting!'
-                  className={errors.description ? 'border-red-500' : ''}
-                />
-                {errors.description && (
-                  <p className='text-sm text-red-500'>{errors.description}</p>
-                )}
-              </div>
+          <div className='space-y-4'>
+            {/* Summary Field */}
+            <div className='space-y-2'>
+              <SlateTaskTextarea
+                value={formData.title}
+                onChange={value => handleInputChange('title', value)}
+                onDateDetected={handleDateDetected}
+                onPriorityDetected={handlePriorityDetected}
+                onSubmit={() => {
+                  // Create a minimal synthetic event for handleSubmit
+                  const syntheticEvent = {
+                    preventDefault: () => {},
+                  } as React.FormEvent<HTMLFormElement>
+                  handleSubmit(syntheticEvent)
+                }}
+                placeholder='Enter task summary...'
+                className={errors.title ? 'border-red-500' : ''}
+              />
+              {errors.title && (
+                <p className='text-sm text-red-500'>{errors.title}</p>
+              )}
             </div>
 
-            {/* Right Sidebar - Assignee, Priority, Due Date */}
-            <div className='w-full lg:w-80 space-y-4'>
+            {/* All Other Fields */}
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              {/* Assignee */}
               <div className='space-y-2'>
-                <label htmlFor='assigneeId' className='text-sm font-medium'>
-                  Assignee
-                </label>
-                <Select
-                  value={formData.assigneeId}
-                  onValueChange={value =>
-                    handleInputChange('assigneeId', value)
-                  }
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger
-                    className={errors.assigneeId ? 'border-red-500' : ''}
+                <div className='flex items-center gap-2'>
+                  <User className='h-4 w-4 text-muted-foreground' />
+                  <Select
+                    value={formData.assigneeId}
+                    onValueChange={value =>
+                      handleInputChange('assigneeId', value)
+                    }
+                    disabled={isSubmitting}
                   >
-                    <SelectValue placeholder='Select assignee' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='unassigned'>Unassigned</SelectItem>
-                    {people.map(person => (
-                      <SelectItem key={person.id} value={person.id}>
-                        {person.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                    <SelectTrigger
+                      className={errors.assigneeId ? 'border-red-500' : ''}
+                    >
+                      <SelectValue placeholder='Select assignee' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='unassigned'>Unassigned</SelectItem>
+                      {people.map(person => (
+                        <SelectItem key={person.id} value={person.id}>
+                          {person.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 {errors.assigneeId && (
                   <p className='text-sm text-red-500'>{errors.assigneeId}</p>
                 )}
               </div>
 
+              {/* Priority */}
               <div className='space-y-2'>
-                <label htmlFor='priority' className='text-sm font-medium'>
-                  Priority
-                </label>
-                <Select
-                  value={formData.priority?.toString() || '3'}
-                  onValueChange={value =>
-                    handleInputChange('priority', parseInt(value))
-                  }
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger
-                    className={errors.priority ? 'border-red-500' : ''}
+                <div className='flex items-center gap-2'>
+                  <Flag className='h-4 w-4 text-muted-foreground' />
+                  <Select
+                    value={formData.priority?.toString() || '3'}
+                    onValueChange={value =>
+                      handleInputChange('priority', parseInt(value))
+                    }
+                    disabled={isSubmitting}
                   >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {taskPriorityUtils.getSelectOptions().map(option => (
-                      <SelectItem
-                        key={option.value}
-                        value={option.value.toString()}
-                      >
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                    <SelectTrigger
+                      className={errors.priority ? 'border-red-500' : ''}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {taskPriorityUtils.getSelectOptions().map(option => (
+                        <SelectItem
+                          key={option.value}
+                          value={option.value.toString()}
+                        >
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 {errors.priority && (
                   <p className='text-sm text-red-500'>{errors.priority}</p>
                 )}
               </div>
 
+              {/* Status */}
               <div className='space-y-2'>
-                <label htmlFor='status' className='text-sm font-medium'>
-                  Status
-                </label>
-                <Select
-                  value={formData.status}
-                  onValueChange={value => handleInputChange('status', value)}
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger
-                    className={errors.status ? 'border-red-500' : ''}
+                <div className='flex items-center gap-2'>
+                  <CheckCircle className='h-4 w-4 text-muted-foreground' />
+                  <Select
+                    value={formData.status}
+                    onValueChange={value => handleInputChange('status', value)}
+                    disabled={isSubmitting}
                   >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {taskStatusUtils.getSelectOptions().map(option => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                    <SelectTrigger
+                      className={errors.status ? 'border-red-500' : ''}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {taskStatusUtils.getSelectOptions().map(option => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 {errors.status && (
                   <p className='text-sm text-red-500'>{errors.status}</p>
                 )}
               </div>
 
+              {/* Due Date */}
               <div className='space-y-2'>
-                <DateTimePickerWithNaturalInput
-                  label='Due Date & Time'
-                  value={formData.dueDate}
-                  onChange={handleDateChange}
-                  placeholder="e.g., 'tomorrow', 'next Monday'"
-                  disabled={isSubmitting}
-                  error={!!errors.dueDate}
-                  dateOnly={false}
-                  shortFormat={true}
-                />
+                <div className='flex items-center gap-2'>
+                  <Calendar className='h-4 w-4 text-muted-foreground' />
+                  <DateTimePickerWithNaturalInput
+                    value={formData.dueDate}
+                    onChange={handleDateChange}
+                    placeholder="e.g., 'tomorrow', 'next Monday'"
+                    disabled={isSubmitting}
+                    error={!!errors.dueDate}
+                    dateOnly={false}
+                    shortFormat={true}
+                  />
+                </div>
                 {errors.dueDate && (
                   <p className='text-sm text-red-500'>{errors.dueDate}</p>
                 )}
@@ -407,7 +390,7 @@ export function TaskQuickEditDialog({
                 Cancel
               </Button>
               <Button type='submit' disabled={isSubmitting}>
-                {isSubmitting ? 'Saving...' : 'Save Changes'}
+                {isSubmitting ? 'Saving...' : 'Save'}
               </Button>
             </div>
           </div>
