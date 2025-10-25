@@ -28,9 +28,13 @@ export interface QuickTaskFormRef {
 
 const QuickTaskFormContent = forwardRef<QuickTaskFormRef, QuickTaskFormProps>(
   ({ onSuccess, initiativeId }, ref) => {
-    const { getCleanedText, detectedDate, detectedPriority } =
-      useSlateTaskTextarea()
-    const [title, setTitle] = useState('')
+    const {
+      getCleanedText,
+      detectedDate,
+      detectedPriority,
+      cleanedText,
+      originalText,
+    } = useSlateTaskTextarea()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const textareaRef = useRef<SlateTaskTextareaRef>(null)
 
@@ -44,13 +48,11 @@ const QuickTaskFormContent = forwardRef<QuickTaskFormRef, QuickTaskFormProps>(
     async function handleSubmit(e: React.FormEvent) {
       e.preventDefault()
 
-      if (!title.trim()) return
-
       setIsSubmitting(true)
 
       try {
         // Get cleaned text from provider (with detected dates/priorities removed)
-        const taskTitle = getCleanedText() || title.trim()
+        const taskTitle = getCleanedText()
         let taskDueDate: string | undefined = undefined
         let taskPriority: number | undefined = undefined
 
@@ -84,9 +86,6 @@ const QuickTaskFormContent = forwardRef<QuickTaskFormRef, QuickTaskFormProps>(
         // Dispatch custom event to notify task lists to refresh
         window.dispatchEvent(new CustomEvent('task:created'))
 
-        // Clear the form after successful submission
-        setTitle('')
-
         // Close the modal
         onSuccess?.()
       } catch (error) {
@@ -103,9 +102,11 @@ const QuickTaskFormContent = forwardRef<QuickTaskFormRef, QuickTaskFormProps>(
     return (
       <form onSubmit={handleSubmit} className='space-y-3'>
         <SlateTaskTextarea
+          value={originalText}
+          onChange={() => {
+            // onChange is handled by the provider context
+          }}
           ref={textareaRef}
-          value={title}
-          onChange={setTitle}
           onSubmit={() => {
             // Create a minimal synthetic event for handleSubmit
             const syntheticEvent = {
@@ -115,11 +116,13 @@ const QuickTaskFormContent = forwardRef<QuickTaskFormRef, QuickTaskFormProps>(
           }}
           placeholder='Add a new task...'
           disabled={isSubmitting}
+          textSize='base'
+          inputClassName='font-medium'
         />
         <div className='flex justify-end'>
           <Button
             type='submit'
-            disabled={isSubmitting || !title.trim()}
+            disabled={isSubmitting || !cleanedText.trim()}
             variant='outline'
           >
             <Plus className='h-4 w-4 mr-2' />

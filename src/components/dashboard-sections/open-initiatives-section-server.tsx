@@ -6,13 +6,26 @@ import {
 
 interface DashboardOpenInitiativesServerSectionProps {
   organizationId: string
-  personId: string
+  personId: string | null
 }
 
 export async function DashboardOpenInitiativesServerSection({
   organizationId,
   personId,
 }: DashboardOpenInitiativesServerSectionProps) {
+  // If user doesn't have a linked person record, return empty state
+  if (!personId) {
+    return (
+      <SimpleInitiativeList
+        initiatives={[]}
+        title='Your Initiatives'
+        variant='compact'
+        viewAllHref='/initiatives'
+        emptyStateText='Please link your account to a person record to see your initiatives.'
+      />
+    )
+  }
+
   // Fetch initiatives where current user is an owner
   const initiatives = await prisma.initiative.findMany({
     where: {

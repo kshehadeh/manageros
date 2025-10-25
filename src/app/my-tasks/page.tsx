@@ -24,7 +24,7 @@ export default async function MyTasksPage() {
       </div>
 
       <div className='page-section'>
-        <MyTasksPageClient personId={user.personId!} />
+        <MyTasksPageClient personId={user.personId} />
       </div>
     </div>
   )

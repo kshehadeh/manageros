@@ -2,7 +2,6 @@
 
 import {
   useState,
-  useEffect,
   useCallback,
   useMemo,
   useImperativeHandle,
@@ -32,6 +31,8 @@ import {
 } from '@/lib/utils/priority-detection'
 import { useSlateTaskTextarea } from './slate-task-textarea-provider'
 
+type TextSize = 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl'
+
 interface SlateTaskTextareaProps {
   value: string
   onChange: (_value: string) => void
@@ -40,6 +41,8 @@ interface SlateTaskTextareaProps {
   onSubmit?: () => void
   placeholder?: string
   className?: string
+  inputClassName?: string
+  textSize?: TextSize
   disabled?: boolean
 }
 
@@ -58,11 +61,11 @@ const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
   if (leafData.highlight) {
     if (leafData.highlightType === 'priority') {
       highlightClass =
-        'bg-orange-200 text-orange-900 dark:bg-orange-800 dark:text-orange-100 rounded px-0.5'
+        'bg-red-200 text-black dark:bg-red-800 dark:text-white rounded px-0.5'
     } else {
       // Default to date highlighting
       highlightClass =
-        'bg-yellow-200 text-yellow-900 dark:bg-yellow-800 dark:text-yellow-100 rounded px-0.5'
+        'bg-blue-200 text-blue-900 dark:bg-blue-800 dark:text-white rounded px-0.5'
     }
   }
 
@@ -71,6 +74,19 @@ const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
       {children}
     </span>
   )
+}
+
+// Helper function to get text size classes
+const getTextSizeClass = (size: TextSize): string => {
+  const sizeMap: Record<TextSize, string> = {
+    xs: 'text-xs',
+    sm: 'text-sm',
+    base: 'text-base',
+    lg: 'text-lg',
+    xl: 'text-xl',
+    '2xl': 'text-2xl',
+  }
+  return sizeMap[size]
 }
 
 export const SlateTaskTextarea = forwardRef<
@@ -86,6 +102,8 @@ export const SlateTaskTextarea = forwardRef<
       onSubmit,
       placeholder = 'Enter task details...',
       className = '',
+      inputClassName = '',
+      textSize = 'sm',
       disabled = false,
     },
     ref
@@ -196,87 +214,40 @@ export const SlateTaskTextarea = forwardRef<
     // Track if the editor is currently being updated by user input
     const isUserInputRef = useRef(false)
 
-    // Force editor to update when value changes externally (not from user input)
-    useEffect(() => {
-      if (isUserInputRef.current) {
-        isUserInputRef.current = false
-        return
-      }
-
-      const newValue = slateValue
-      const currentEditorValue = editor.children
-
-      // Only update if the values are actually different
-      if (JSON.stringify(currentEditorValue) !== JSON.stringify(newValue)) {
-        // Store current selection before updating
-        const currentSelection = editor.selection
-
-        editor.children = newValue
-
-        // Restore selection if it was valid and the text hasn't changed significantly
-        if (currentSelection && ReactEditor.isFocused(editor)) {
-          // Only restore if the selection is still valid for the new content
-          try {
-            const firstNode = newValue[0]
-            const textLength =
-              firstNode &&
-              'children' in firstNode &&
-              firstNode.children?.[0] &&
-              'text' in firstNode.children[0]
-                ? firstNode.children[0].text?.length || 0
-                : 0
-            if (
-              currentSelection.anchor.offset <= textLength &&
-              currentSelection.focus.offset <= textLength
-            ) {
-              editor.selection = currentSelection
-            }
-          } catch {
-            // If selection restoration fails, just clear it
-            editor.selection = null
-          }
-        }
-      }
-    }, [editor, slateValue])
-
-    // Debounced detection for both dates and priorities
-    const debouncedDetect = useCallback(
+    // Immediate detection for both dates and priorities
+    const detectInText = useCallback(
       (text: string) => {
-        const timeoutId = setTimeout(() => {
-          const dateResult = detectDatesInText(text, ignoreSections)
-          const priorityResult = detectPrioritiesInText(text, ignoreSections)
+        const dateResult = detectDatesInText(text, ignoreSections)
+        const priorityResult = detectPrioritiesInText(text, ignoreSections)
 
-          // Store detected items for display
-          setDetectedDates(dateResult.detectedDates)
-          setDetectedPriorities(priorityResult.detectedPriorities)
+        // Store detected items for display
+        setDetectedDates(dateResult.detectedDates)
+        setDetectedPriorities(priorityResult.detectedPriorities)
 
-          // Update provider with detected data
-          const latestDetectedDate =
-            dateResult.detectedDates.length > 0
-              ? dateResult.detectedDates[dateResult.detectedDates.length - 1]
-              : null
-          updateDetectedDate(latestDetectedDate)
+        // Update provider with detected data
+        const latestDetectedDate =
+          dateResult.detectedDates.length > 0
+            ? dateResult.detectedDates[dateResult.detectedDates.length - 1]
+            : null
+        updateDetectedDate(latestDetectedDate)
 
-          const latestDetectedPriority =
-            priorityResult.detectedPriorities.length > 0
-              ? priorityResult.detectedPriorities[
-                  priorityResult.detectedPriorities.length - 1
-                ]
-              : null
-          updateDetectedPriority(latestDetectedPriority)
+        const latestDetectedPriority =
+          priorityResult.detectedPriorities.length > 0
+            ? priorityResult.detectedPriorities[
+                priorityResult.detectedPriorities.length - 1
+              ]
+            : null
+        updateDetectedPriority(latestDetectedPriority)
 
-          // Notify parent component about detected date
-          if (onDateDetected) {
-            onDateDetected(latestDetectedDate)
-          }
+        // Notify parent component about detected date
+        if (onDateDetected) {
+          onDateDetected(latestDetectedDate)
+        }
 
-          // Notify parent component about detected priority
-          if (onPriorityDetected) {
-            onPriorityDetected(latestDetectedPriority)
-          }
-        }, 300)
-
-        return () => clearTimeout(timeoutId)
+        // Notify parent component about detected priority
+        if (onPriorityDetected) {
+          onPriorityDetected(latestDetectedPriority)
+        }
       },
       [
         onDateDetected,
@@ -410,9 +381,9 @@ export const SlateTaskTextarea = forwardRef<
         // Pass original text to parent (no cleaning here)
         onChange(text)
 
-        // Trigger detection directly on text change
+        // Trigger detection immediately on text change
         if (text.trim()) {
-          debouncedDetect(text)
+          detectInText(text)
         } else {
           setDetectedDates([])
           setDetectedPriorities([])
@@ -428,7 +399,7 @@ export const SlateTaskTextarea = forwardRef<
       },
       [
         onChange,
-        debouncedDetect,
+        detectInText,
         onDateDetected,
         onPriorityDetected,
         ignoreSections,
@@ -469,7 +440,7 @@ export const SlateTaskTextarea = forwardRef<
                 decorate={decorate}
                 placeholder={placeholder}
                 disabled={disabled}
-                className='outline-none resize-none'
+                className={`outline-none resize-none ${getTextSizeClass(textSize)} ${inputClassName}`}
                 style={{ minHeight: '1.5rem' }}
                 onKeyDown={handleKeyDown}
               />

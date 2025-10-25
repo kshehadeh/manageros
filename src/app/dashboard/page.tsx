@@ -34,7 +34,7 @@ export default async function Home() {
         {/* Main Content Area */}
         <div className='flex-1 space-y-6'>
           <Suspense fallback={<TasksServerSectionFallback />}>
-            <DashboardAssignedTasksServerSection personId={user.personId!} />
+            <DashboardAssignedTasksServerSection personId={user.personId} />
           </Suspense>
 
           <Suspense fallback={<FeedbackCampaignsSectionFallback />}>
@@ -44,7 +44,7 @@ export default async function Home() {
           <Suspense fallback={<OpenInitiativesServerSectionFallback />}>
             <DashboardOpenInitiativesServerSection
               organizationId={user.organizationId!}
-              personId={user.personId!}
+              personId={user.personId}
             />
           </Suspense>
 

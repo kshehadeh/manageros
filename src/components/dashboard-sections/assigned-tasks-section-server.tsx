@@ -4,7 +4,7 @@ import { getTaskAccessWhereClause } from '@/lib/task-access-utils'
 import { DashboardAssignedTasksClientSection } from './assigned-tasks-section-client'
 
 interface DashboardAssignedTasksServerSectionProps {
-  personId: string
+  personId: string | null
 }
 
 export async function DashboardAssignedTasksServerSection({
@@ -14,6 +14,11 @@ export async function DashboardAssignedTasksServerSection({
 
   // Check if user belongs to an organization
   if (!user.organizationId) {
+    return null
+  }
+
+  // If user doesn't have a linked person record, return null
+  if (!personId) {
     return null
   }
 

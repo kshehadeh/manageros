@@ -66,44 +66,55 @@ function TaskQuickEditDialogContent({
   task,
   onTaskUpdate,
 }: TaskQuickEditDialogProps) {
-  const { getCleanedText } = useSlateTaskTextarea()
+  const { getCleanedText, detectedDate, detectedPriority } =
+    useSlateTaskTextarea()
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const { people } = usePeopleForSelect()
 
+  // Store original values to revert to when detection is cleared
+  const originalDueDate = task.dueDate
+    ? typeof task.dueDate === 'string'
+      ? task.dueDate
+      : task.dueDate.toISOString()
+    : ''
+  const originalPriority = task.priority || 3
+
   const [formData, setFormData] = useState({
     title: task.title,
     assigneeId: task.assigneeId || 'unassigned',
-    dueDate: task.dueDate
-      ? typeof task.dueDate === 'string'
-        ? task.dueDate
-        : task.dueDate.toISOString()
-      : '',
-    priority: task.priority || 3, // Default to Medium priority if undefined
+    dueDate: originalDueDate,
+    priority: originalPriority,
     status: task.status,
   })
 
-  // Manual scroll lock management to ensure proper cleanup
+  // Sync detected values with form fields
   useEffect(() => {
-    if (open) {
-      // Save current scroll position
-      const scrollY = window.scrollY
-      document.body.style.position = 'fixed'
-      document.body.style.top = `-${scrollY}px`
-      document.body.style.width = '100%'
-      document.body.style.overflow = 'hidden'
-
-      return () => {
-        // Restore scroll position and remove styles
-        document.body.style.position = ''
-        document.body.style.top = ''
-        document.body.style.width = ''
-        document.body.style.overflow = ''
-        window.scrollTo(0, scrollY)
+    if (detectedDate) {
+      setFormData(prev => ({ ...prev, dueDate: detectedDate.date }))
+      // Clear field error when date is detected
+      if (errors.dueDate) {
+        setErrors(prev => ({ ...prev, dueDate: '' }))
       }
+    } else {
+      // Revert to original date when detection is cleared
+      setFormData(prev => ({ ...prev, dueDate: originalDueDate }))
     }
-  }, [open])
+  }, [detectedDate, errors.dueDate, originalDueDate])
+
+  useEffect(() => {
+    if (detectedPriority) {
+      setFormData(prev => ({ ...prev, priority: detectedPriority.priority }))
+      // Clear field error when priority is detected
+      if (errors.priority) {
+        setErrors(prev => ({ ...prev, priority: '' }))
+      }
+    } else {
+      // Revert to original priority when detection is cleared
+      setFormData(prev => ({ ...prev, priority: originalPriority }))
+    }
+  }, [detectedPriority, errors.priority, originalPriority])
 
   const handleInputChange = (
     field: keyof typeof formData,
@@ -228,6 +239,8 @@ function TaskQuickEditDialogContent({
                 }}
                 placeholder='Enter task summary...'
                 className={errors.title ? 'border-red-500' : ''}
+                textSize='lg'
+                inputClassName='font-semibold'
               />
               {errors.title && (
                 <p className='text-sm text-red-500'>{errors.title}</p>

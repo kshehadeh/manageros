@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { SlateTaskTextarea } from '@/components/tasks/slate-task-textarea'
@@ -45,7 +45,8 @@ function TaskFormContent({
   isEditing = false,
   taskId,
 }: TaskFormProps) {
-  const { getCleanedText } = useSlateTaskTextarea()
+  const { getCleanedText, detectedDate, detectedPriority } =
+    useSlateTaskTextarea()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [selectedInitiativeId, setSelectedInitiativeId] = useState(
@@ -70,6 +71,19 @@ function TaskFormContent({
   const availableObjectives = selectedInitiativeId
     ? objectives.filter(obj => obj.initiativeId === selectedInitiativeId)
     : []
+
+  // Sync detected values with form fields
+  useEffect(() => {
+    if (detectedDate) {
+      handleInputChange('dueDate', detectedDate.date)
+    }
+  }, [detectedDate, handleInputChange])
+
+  useEffect(() => {
+    if (detectedPriority) {
+      handleInputChange('priority', detectedPriority.priority)
+    }
+  }, [detectedPriority, handleInputChange])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
