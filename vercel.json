@@ -1,10 +1,4 @@
 {
-  "builds": [
-    {
-      "src": "prisma/schema.prisma",
-      "use": "@prisma/client"
-    }
-  ],
   "crons": [
     {
       "path": "/api/cron/notifications?job=birthday-notification",
