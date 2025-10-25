@@ -410,13 +410,15 @@ export const SlateTaskTextarea = forwardRef<
       ]
     )
 
-    // Handle key events for Shift + Enter submission
+    // Handle key events for Shift + Enter submission and Tab navigation
     const handleKeyDown = useCallback(
       (event: React.KeyboardEvent) => {
         if (event.key === 'Enter' && event.shiftKey && onSubmit) {
           event.preventDefault()
           onSubmit()
         }
+        // Allow Tab key to work for keyboard navigation
+        // By not preventing default, the browser will handle tab navigation naturally
       },
       [onSubmit]
     )
@@ -429,6 +431,11 @@ export const SlateTaskTextarea = forwardRef<
           <div
             className='px-3 py-2 text-sm placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50'
             style={{ minHeight: '2.5rem' }}
+            tabIndex={0}
+            onFocus={() => {
+              // When the wrapper is focused via tab, focus the Slate editor
+              ReactEditor.focus(editor)
+            }}
           >
             <Slate
               editor={editor}
