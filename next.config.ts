@@ -19,11 +19,12 @@ const nextConfig: NextConfig = {
           : ['localhost:3000', '127.0.0.1:3000'],
     },
   },
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals.push('@prisma/client')
-    }
-    return config
+  // Include Prisma files in the build output for Vercel
+  outputFileTracingIncludes: {
+    '*': [
+      './node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node',
+      './node_modules/.prisma/client/libquery_engine-darwin-arm64.dylib.node',
+    ],
   },
 }
 

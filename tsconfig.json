@@ -19,6 +19,7 @@
       "@/*": ["src/*"]
     },
     "types": ["node"],
+    "typeRoots": ["./types", "./node_modules/@types"],
     "isolatedModules": true,
     "plugins": [
       {
@@ -30,6 +31,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "types/**/*.d.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
