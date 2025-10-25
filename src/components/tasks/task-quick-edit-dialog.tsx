@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
@@ -22,8 +22,16 @@ import {
   SlateTaskTextareaProvider,
   useSlateTaskTextarea,
 } from '@/components/tasks/slate-task-textarea-provider'
-import { updateTaskQuickEdit } from '@/lib/actions/task'
-import { type TaskStatus, taskStatusUtils } from '@/lib/task-status'
+import {
+  updateTaskQuickEdit,
+  createQuickTask,
+  createQuickTaskForInitiative,
+} from '@/lib/actions/task'
+import {
+  type TaskStatus,
+  taskStatusUtils,
+  TASK_STATUS,
+} from '@/lib/task-status'
 import { taskPriorityUtils } from '@/lib/task-priority'
 import {
   AlertCircle,
@@ -32,6 +40,7 @@ import {
   Calendar,
   Flag,
   CheckCircle,
+  Plus,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { usePeopleForSelect } from '@/hooks/use-organization-cache'
@@ -39,7 +48,7 @@ import { usePeopleForSelect } from '@/hooks/use-organization-cache'
 interface TaskQuickEditDialogProps {
   open: boolean
   onOpenChange: (_open: boolean) => void
-  task: {
+  task?: {
     id: string
     title: string
     description?: string | null
@@ -48,6 +57,7 @@ interface TaskQuickEditDialogProps {
     priority: number
     status: TaskStatus
   }
+  initiativeId?: string
   onTaskUpdate?: (
     _updatedTask: Partial<{
       title: string
@@ -58,36 +68,66 @@ interface TaskQuickEditDialogProps {
       status: TaskStatus
     }>
   ) => void
+  onSuccess?: () => void
+}
+
+export interface TaskQuickEditDialogRef {
+  focus: () => void
 }
 
 function TaskQuickEditDialogContent({
   open,
   onOpenChange,
   task,
+  initiativeId,
   onTaskUpdate,
+  onSuccess,
 }: TaskQuickEditDialogProps) {
-  const { getCleanedText, detectedDate, detectedPriority } =
-    useSlateTaskTextarea()
+  const {
+    getCleanedText,
+    detectedDate,
+    detectedPriority,
+    originalText,
+    cleanedText,
+    reset,
+  } = useSlateTaskTextarea()
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const { people } = usePeopleForSelect()
 
+  const isCreateMode = !task
+
   // Store original values to revert to when detection is cleared
-  const originalDueDate = task.dueDate
+  const originalDueDate = task?.dueDate
     ? typeof task.dueDate === 'string'
       ? task.dueDate
       : task.dueDate.toISOString()
     : ''
-  const originalPriority = task.priority || 3
+  const originalPriority = task?.priority || 3
 
   const [formData, setFormData] = useState({
-    title: task.title,
-    assigneeId: task.assigneeId || 'unassigned',
+    title: task?.title || '',
+    assigneeId: task?.assigneeId || 'unassigned',
     dueDate: originalDueDate,
     priority: originalPriority,
-    status: task.status,
+    status: task?.status || TASK_STATUS.TODO,
   })
+
+  // Reset textarea and form state when dialog opens in create mode
+  useEffect(() => {
+    if (open && isCreateMode) {
+      reset()
+      setFormData({
+        title: '',
+        assigneeId: 'unassigned',
+        dueDate: '',
+        priority: 3,
+        status: TASK_STATUS.TODO,
+      })
+      setErrors({})
+    }
+  }, [open, isCreateMode, reset])
 
   // Sync detected values with form fields
   useEffect(() => {
@@ -144,40 +184,72 @@ function TaskQuickEditDialogContent({
       // Get cleaned text from provider (with detected dates/priorities removed)
       const cleanedTitle = getCleanedText()
 
-      // Prepare the update data
-      const updateData = {
-        title: cleanedTitle || formData.title, // Fallback to original if cleaned is empty
-        assigneeId:
-          formData.assigneeId === 'unassigned' ? null : formData.assigneeId,
-        dueDate: formData.dueDate || null,
-        priority: formData.priority,
-        status: formData.status,
+      if (isCreateMode) {
+        // Create mode
+        const taskTitle = cleanedTitle || formData.title
+        const taskDueDate = formData.dueDate || undefined
+        const taskPriority = formData.priority
+
+        if (initiativeId) {
+          await createQuickTaskForInitiative(
+            taskTitle,
+            initiativeId,
+            undefined,
+            taskDueDate,
+            taskPriority
+          )
+        } else {
+          await createQuickTask(taskTitle, taskDueDate, taskPriority)
+        }
+
+        toast.success('Task created successfully!', {
+          description: `"${taskTitle}" has been added to your tasks.`,
+        })
+
+        // Dispatch custom event to notify task lists to refresh
+        window.dispatchEvent(new CustomEvent('task:created'))
+
+        // Call success callback
+        onSuccess?.()
+      } else {
+        // Edit mode
+        const updateData = {
+          title: cleanedTitle || formData.title, // Fallback to original if cleaned is empty
+          assigneeId:
+            formData.assigneeId === 'unassigned' ? null : formData.assigneeId,
+          dueDate: formData.dueDate || null,
+          priority: formData.priority,
+          status: formData.status,
+        }
+
+        await updateTaskQuickEdit(task.id, updateData)
+
+        toast.success('Task updated successfully')
+
+        // Get the assignee name for the optimistic update
+        const assigneeName =
+          formData.assigneeId === 'unassigned'
+            ? null
+            : people.find(p => p.id === formData.assigneeId)?.name || null
+
+        // Pass the updated task data back for optimistic update
+        onTaskUpdate?.({
+          title: formData.title,
+          assigneeId:
+            formData.assigneeId === 'unassigned' ? null : formData.assigneeId,
+          assigneeName,
+          dueDate: formData.dueDate || null,
+          priority: formData.priority,
+          status: formData.status,
+        })
       }
-
-      await updateTaskQuickEdit(task.id, updateData)
-
-      toast.success('Task updated successfully')
-
-      // Get the assignee name for the optimistic update
-      const assigneeName =
-        formData.assigneeId === 'unassigned'
-          ? null
-          : people.find(p => p.id === formData.assigneeId)?.name || null
-
-      // Pass the updated task data back for optimistic update
-      onTaskUpdate?.({
-        title: formData.title,
-        assigneeId:
-          formData.assigneeId === 'unassigned' ? null : formData.assigneeId,
-        assigneeName,
-        dueDate: formData.dueDate || null,
-        priority: formData.priority,
-        status: formData.status,
-      })
 
       onOpenChange(false)
     } catch (error) {
-      console.error('Error updating task:', error)
+      console.error(
+        `Error ${isCreateMode ? 'creating' : 'updating'} task:`,
+        error
+      )
 
       if (error && typeof error === 'object' && 'errors' in error) {
         // Handle Zod validation errors
@@ -196,7 +268,7 @@ function TaskQuickEditDialogContent({
         const errorMessage =
           error instanceof Error
             ? error.message
-            : 'Error updating task. Please try again.'
+            : `Error ${isCreateMode ? 'creating' : 'updating'} task. Please try again.`
         setErrors({ general: errorMessage })
       }
     } finally {
@@ -205,6 +277,7 @@ function TaskQuickEditDialogContent({
   }
 
   const handleOpenFullEditor = () => {
+    if (!task) return
     onOpenChange(false)
     router.push(`/tasks/${task.id}/edit`)
   }
@@ -213,7 +286,9 @@ function TaskQuickEditDialogContent({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='md:max-w-[50vw] max-w-full'>
         <DialogHeader>
-          <DialogTitle>Quick Edit Task</DialogTitle>
+          <DialogTitle>
+            {isCreateMode ? 'Create Task' : 'Quick Edit Task'}
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className='space-y-4'>
@@ -228,8 +303,10 @@ function TaskQuickEditDialogContent({
             {/* Summary Field */}
             <div className='space-y-2'>
               <SlateTaskTextarea
-                value={formData.title}
-                onChange={value => handleInputChange('title', value)}
+                value={isCreateMode ? originalText : formData.title}
+                onChange={() => {
+                  // Let the provider handle all text updates
+                }}
                 onSubmit={() => {
                   // Create a minimal synthetic event for handleSubmit
                   const syntheticEvent = {
@@ -237,143 +314,153 @@ function TaskQuickEditDialogContent({
                   } as React.FormEvent<HTMLFormElement>
                   handleSubmit(syntheticEvent)
                 }}
-                placeholder='Enter task summary...'
+                placeholder={
+                  isCreateMode ? 'Add a new task...' : 'Enter task summary...'
+                }
                 className={errors.title ? 'border-red-500' : ''}
-                textSize='lg'
-                inputClassName='font-semibold'
+                textSize={isCreateMode ? 'base' : 'lg'}
+                inputClassName={isCreateMode ? 'font-medium' : 'font-semibold'}
               />
               {errors.title && (
                 <p className='text-sm text-red-500'>{errors.title}</p>
               )}
             </div>
 
-            {/* All Other Fields */}
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              {/* Assignee */}
-              <div className='space-y-2'>
-                <div className='flex items-center gap-2'>
-                  <User className='h-4 w-4 text-muted-foreground' />
-                  <Select
-                    value={formData.assigneeId}
-                    onValueChange={value =>
-                      handleInputChange('assigneeId', value)
-                    }
-                    disabled={isSubmitting}
-                  >
-                    <SelectTrigger
-                      className={errors.assigneeId ? 'border-red-500' : ''}
+            {/* All Other Fields - Only show in edit mode or if user wants to expand */}
+            {!isCreateMode && (
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                {/* Assignee */}
+                <div className='space-y-2'>
+                  <div className='flex items-center gap-2'>
+                    <User className='h-4 w-4 text-muted-foreground' />
+                    <Select
+                      value={formData.assigneeId}
+                      onValueChange={value =>
+                        handleInputChange('assigneeId', value)
+                      }
+                      disabled={isSubmitting}
                     >
-                      <SelectValue placeholder='Select assignee' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='unassigned'>Unassigned</SelectItem>
-                      {people.map(person => (
-                        <SelectItem key={person.id} value={person.id}>
-                          {person.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                      <SelectTrigger
+                        className={errors.assigneeId ? 'border-red-500' : ''}
+                      >
+                        <SelectValue placeholder='Select assignee' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='unassigned'>Unassigned</SelectItem>
+                        {people.map(person => (
+                          <SelectItem key={person.id} value={person.id}>
+                            {person.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {errors.assigneeId && (
+                    <p className='text-sm text-red-500'>{errors.assigneeId}</p>
+                  )}
                 </div>
-                {errors.assigneeId && (
-                  <p className='text-sm text-red-500'>{errors.assigneeId}</p>
-                )}
-              </div>
 
-              {/* Priority */}
-              <div className='space-y-2'>
-                <div className='flex items-center gap-2'>
-                  <Flag className='h-4 w-4 text-muted-foreground' />
-                  <Select
-                    value={formData.priority?.toString() || '3'}
-                    onValueChange={value =>
-                      handleInputChange('priority', parseInt(value))
-                    }
-                    disabled={isSubmitting}
-                  >
-                    <SelectTrigger
-                      className={errors.priority ? 'border-red-500' : ''}
+                {/* Priority */}
+                <div className='space-y-2'>
+                  <div className='flex items-center gap-2'>
+                    <Flag className='h-4 w-4 text-muted-foreground' />
+                    <Select
+                      value={formData.priority?.toString() || '3'}
+                      onValueChange={value =>
+                        handleInputChange('priority', parseInt(value))
+                      }
+                      disabled={isSubmitting}
                     >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {taskPriorityUtils.getSelectOptions().map(option => (
-                        <SelectItem
-                          key={option.value}
-                          value={option.value.toString()}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                      <SelectTrigger
+                        className={errors.priority ? 'border-red-500' : ''}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {taskPriorityUtils.getSelectOptions().map(option => (
+                          <SelectItem
+                            key={option.value}
+                            value={option.value.toString()}
+                          >
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {errors.priority && (
+                    <p className='text-sm text-red-500'>{errors.priority}</p>
+                  )}
                 </div>
-                {errors.priority && (
-                  <p className='text-sm text-red-500'>{errors.priority}</p>
-                )}
-              </div>
 
-              {/* Status */}
-              <div className='space-y-2'>
-                <div className='flex items-center gap-2'>
-                  <CheckCircle className='h-4 w-4 text-muted-foreground' />
-                  <Select
-                    value={formData.status}
-                    onValueChange={value => handleInputChange('status', value)}
-                    disabled={isSubmitting}
-                  >
-                    <SelectTrigger
-                      className={errors.status ? 'border-red-500' : ''}
+                {/* Status */}
+                <div className='space-y-2'>
+                  <div className='flex items-center gap-2'>
+                    <CheckCircle className='h-4 w-4 text-muted-foreground' />
+                    <Select
+                      value={formData.status}
+                      onValueChange={value =>
+                        handleInputChange('status', value)
+                      }
+                      disabled={isSubmitting}
                     >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {taskStatusUtils.getSelectOptions().map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                      <SelectTrigger
+                        className={errors.status ? 'border-red-500' : ''}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {taskStatusUtils.getSelectOptions().map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {errors.status && (
+                    <p className='text-sm text-red-500'>{errors.status}</p>
+                  )}
                 </div>
-                {errors.status && (
-                  <p className='text-sm text-red-500'>{errors.status}</p>
-                )}
-              </div>
 
-              {/* Due Date */}
-              <div className='space-y-2'>
-                <div className='flex items-center gap-2'>
-                  <Calendar className='h-4 w-4 text-muted-foreground' />
-                  <DateTimePickerWithNaturalInput
-                    value={formData.dueDate}
-                    onChange={handleDateChange}
-                    placeholder="e.g., 'tomorrow', 'next Monday'"
-                    disabled={isSubmitting}
-                    error={!!errors.dueDate}
-                    dateOnly={false}
-                    shortFormat={true}
-                  />
+                {/* Due Date */}
+                <div className='space-y-2'>
+                  <div className='flex items-center gap-2'>
+                    <Calendar className='h-4 w-4 text-muted-foreground' />
+                    <DateTimePickerWithNaturalInput
+                      value={formData.dueDate}
+                      onChange={handleDateChange}
+                      placeholder="e.g., 'tomorrow', 'next Monday'"
+                      disabled={isSubmitting}
+                      error={!!errors.dueDate}
+                      dateOnly={false}
+                      shortFormat={true}
+                    />
+                  </div>
+                  {errors.dueDate && (
+                    <p className='text-sm text-red-500'>{errors.dueDate}</p>
+                  )}
                 </div>
-                {errors.dueDate && (
-                  <p className='text-sm text-red-500'>{errors.dueDate}</p>
-                )}
               </div>
-            </div>
+            )}
           </div>
 
           <div className='flex items-center justify-between pt-4'>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={handleOpenFullEditor}
-              className='flex items-center gap-2'
-            >
-              <ExternalLink className='h-4 w-4' />
-              Full Editor
-            </Button>
+            {!isCreateMode && (
+              <Button
+                type='button'
+                variant='outline'
+                onClick={handleOpenFullEditor}
+                className='flex items-center gap-2'
+              >
+                <ExternalLink className='h-4 w-4' />
+                Full Editor
+              </Button>
+            )}
 
-            <div className='flex items-center gap-2'>
+            <div
+              className={`flex items-center gap-2 ${isCreateMode ? 'ml-auto' : ''}`}
+            >
               <Button
                 type='button'
                 variant='outline'
@@ -382,8 +469,24 @@ function TaskQuickEditDialogContent({
               >
                 Cancel
               </Button>
-              <Button type='submit' disabled={isSubmitting}>
-                {isSubmitting ? 'Saving...' : 'Save'}
+              <Button
+                type='submit'
+                disabled={isSubmitting || (isCreateMode && !cleanedText.trim())}
+              >
+                {isSubmitting ? (
+                  isCreateMode ? (
+                    'Creating...'
+                  ) : (
+                    'Saving...'
+                  )
+                ) : isCreateMode ? (
+                  <>
+                    <Plus className='h-4 w-4 mr-2' />
+                    Create Task
+                  </>
+                ) : (
+                  'Save'
+                )}
               </Button>
             </div>
           </div>
@@ -393,10 +496,24 @@ function TaskQuickEditDialogContent({
   )
 }
 
-export function TaskQuickEditDialog(props: TaskQuickEditDialogProps) {
+const TaskQuickEditDialogWithRef = forwardRef<
+  TaskQuickEditDialogRef,
+  TaskQuickEditDialogProps
+>((props, ref) => {
+  // Expose focus method to parent component
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      // Focus will be handled by the textarea ref inside the content component
+    },
+  }))
+
   return (
     <SlateTaskTextareaProvider>
       <TaskQuickEditDialogContent {...props} />
     </SlateTaskTextareaProvider>
   )
-}
+})
+
+TaskQuickEditDialogWithRef.displayName = 'TaskQuickEditDialog'
+
+export const TaskQuickEditDialog = TaskQuickEditDialogWithRef

@@ -23,6 +23,7 @@ interface SlateTaskTextareaContextValue {
   updateDetectedDate: (date: DetectedDate | null) => void
   updateDetectedPriority: (priority: DetectedPriority | null) => void
   getCleanedText: () => string
+  reset: () => void
 }
 
 const SlateTaskTextareaContext =
@@ -93,6 +94,12 @@ export function SlateTaskTextareaProvider({
     return cleanedText
   }, [originalText, detectedDate, detectedPriority])
 
+  const reset = useCallback(() => {
+    setOriginalText('')
+    setDetectedDate(null)
+    setDetectedPriority(null)
+  }, [])
+
   const value: SlateTaskTextareaContextValue = {
     originalText,
     cleanedText: getCleanedText(),
@@ -102,6 +109,7 @@ export function SlateTaskTextareaProvider({
     updateDetectedDate,
     updateDetectedPriority,
     getCleanedText,
+    reset,
   }
 
   return (

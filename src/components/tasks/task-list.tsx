@@ -1,13 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { SectionHeader } from '@/components/ui/section-header'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ListTodo, Eye, MoreHorizontal, Plus } from 'lucide-react'
 import Link from 'next/link'
-import { TaskQuickEditDialog } from '@/components/tasks/task-quick-edit-dialog'
+import {
+  TaskQuickEditDialog,
+  type TaskQuickEditDialogRef,
+} from '@/components/tasks/task-quick-edit-dialog'
 import { taskStatusUtils, TASK_STATUS } from '@/lib/task-status'
 import type { TaskStatus } from '@/lib/task-status'
 import { formatDistanceToNow } from 'date-fns'
@@ -21,17 +24,6 @@ import {
   DeleteMenuItem,
 } from '@/components/common/context-menu-items'
 import { DeleteModal } from '@/components/common/delete-modal'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import {
-  QuickTaskForm,
-  type QuickTaskFormRef,
-} from '@/components/tasks/quick-task-form'
-import { useRef } from 'react'
 
 export interface Task {
   id: string
@@ -93,7 +85,7 @@ export function SimpleTaskList({
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const quickTaskFormRef = useRef<QuickTaskFormRef>(null)
+  const taskDialogRef = useRef<TaskQuickEditDialogRef>(null)
 
   const { handleButtonClick, ContextMenuComponent } = useDataTableContextMenu()
 
@@ -370,18 +362,13 @@ export function SimpleTaskList({
 
       {/* Add Task Dialog */}
       {showAddButton && initiativeId && (
-        <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add Task to Initiative</DialogTitle>
-            </DialogHeader>
-            <QuickTaskForm
-              ref={quickTaskFormRef}
-              onSuccess={handleTaskCreated}
-              initiativeId={initiativeId}
-            />
-          </DialogContent>
-        </Dialog>
+        <TaskQuickEditDialog
+          ref={taskDialogRef}
+          open={isAddModalOpen}
+          onOpenChange={setIsAddModalOpen}
+          initiativeId={initiativeId}
+          onSuccess={handleTaskCreated}
+        />
       )}
 
       {/* Context Menu */}
