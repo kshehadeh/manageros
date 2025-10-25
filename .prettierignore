@@ -121,3 +121,6 @@ bun.lockb
 
 # Husky
 .husky/
+
+# Next.js generated files
+next-env.d.ts
