@@ -19,11 +19,23 @@ const nextConfig: NextConfig = {
           : ['localhost:3000', '127.0.0.1:3000'],
     },
   },
+  // Ensure Prisma query engine binaries are included in the build
   webpack: (config, { isServer }) => {
     if (isServer) {
-      config.externals.push('@prisma/client')
+      // Include Prisma query engine binaries
+      config.externals.push({
+        'prisma/libquery_engine-rhel-openssl-3.0.x.so.node':
+          'commonjs prisma/libquery_engine-rhel-openssl-3.0.x.so.node',
+      })
     }
     return config
+  },
+  // Include Prisma files in the build output for Vercel
+  outputFileTracingIncludes: {
+    '/api/**/*': [
+      './node_modules/prisma/libquery_engine-rhel-openssl-3.0.x.so.node',
+      './node_modules/prisma/libquery_engine-darwin-arm64.dylib.node',
+    ],
   },
 }
 

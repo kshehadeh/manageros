@@ -8,5 +8,7 @@
       "path": "/api/cron/notifications?job=activity-monitoring",
       "schedule": "0 10 * * 1"
     }
-  ]
+  ],
+  "buildCommand": "bunx prisma generate && next build --turbo",
+  "installCommand": "bun install"
 }
