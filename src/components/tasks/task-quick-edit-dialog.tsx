@@ -18,11 +18,13 @@ import {
 } from '@/components/ui/select'
 import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
 import { SlateTaskTextarea } from '@/components/tasks/slate-task-textarea'
+import {
+  SlateTaskTextareaProvider,
+  useSlateTaskTextarea,
+} from '@/components/tasks/slate-task-textarea-provider'
 import { updateTaskQuickEdit } from '@/lib/actions/task'
 import { type TaskStatus, taskStatusUtils } from '@/lib/task-status'
 import { taskPriorityUtils } from '@/lib/task-priority'
-import { type DetectedDate } from '@/lib/utils/date-detection'
-import { type DetectedPriority } from '@/lib/utils/priority-detection'
 import {
   AlertCircle,
   ExternalLink,
@@ -58,12 +60,13 @@ interface TaskQuickEditDialogProps {
   ) => void
 }
 
-export function TaskQuickEditDialog({
+function TaskQuickEditDialogContent({
   open,
   onOpenChange,
   task,
   onTaskUpdate,
 }: TaskQuickEditDialogProps) {
+  const { getCleanedText } = useSlateTaskTextarea()
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -121,39 +124,18 @@ export function TaskQuickEditDialog({
     }
   }
 
-  const handleDateDetected = (detectedDate: DetectedDate | null) => {
-    // Update the due date field if a date is detected
-    if (detectedDate) {
-      setFormData(prev => ({ ...prev, dueDate: detectedDate.date }))
-      // Clear field error when date is detected
-      if (errors.dueDate) {
-        setErrors(prev => ({ ...prev, dueDate: '' }))
-      }
-    }
-  }
-
-  const handlePriorityDetected = (
-    detectedPriority: DetectedPriority | null
-  ) => {
-    // Update the priority field if a priority is detected
-    if (detectedPriority) {
-      setFormData(prev => ({ ...prev, priority: detectedPriority.priority }))
-      // Clear field error when priority is detected
-      if (errors.priority) {
-        setErrors(prev => ({ ...prev, priority: '' }))
-      }
-    }
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
     setErrors({})
 
     try {
+      // Get cleaned text from provider (with detected dates/priorities removed)
+      const cleanedTitle = getCleanedText()
+
       // Prepare the update data
       const updateData = {
-        title: formData.title,
+        title: cleanedTitle || formData.title, // Fallback to original if cleaned is empty
         assigneeId:
           formData.assigneeId === 'unassigned' ? null : formData.assigneeId,
         dueDate: formData.dueDate || null,
@@ -237,8 +219,6 @@ export function TaskQuickEditDialog({
               <SlateTaskTextarea
                 value={formData.title}
                 onChange={value => handleInputChange('title', value)}
-                onDateDetected={handleDateDetected}
-                onPriorityDetected={handlePriorityDetected}
                 onSubmit={() => {
                   // Create a minimal synthetic event for handleSubmit
                   const syntheticEvent = {
@@ -397,5 +377,13 @@ export function TaskQuickEditDialog({
         </form>
       </DialogContent>
     </Dialog>
+  )
+}
+
+export function TaskQuickEditDialog(props: TaskQuickEditDialogProps) {
+  return (
+    <SlateTaskTextareaProvider>
+      <TaskQuickEditDialogContent {...props} />
+    </SlateTaskTextareaProvider>
   )
 }

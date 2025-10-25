@@ -30,6 +30,7 @@ import {
   getPriorityBadgeVariant,
   type DetectedPriority,
 } from '@/lib/utils/priority-detection'
+import { useSlateTaskTextarea } from './slate-task-textarea-provider'
 
 interface SlateTaskTextareaProps {
   value: string
@@ -89,6 +90,8 @@ export const SlateTaskTextarea = forwardRef<
     },
     ref
   ) => {
+    const { updateText, updateDetectedDate, updateDetectedPriority } =
+      useSlateTaskTextarea()
     const [detectedDates, setDetectedDates] = useState<DetectedDate[]>([])
     const [detectedPriorities, setDetectedPriorities] = useState<
       DetectedPriority[]
@@ -247,30 +250,41 @@ export const SlateTaskTextarea = forwardRef<
           setDetectedDates(dateResult.detectedDates)
           setDetectedPriorities(priorityResult.detectedPriorities)
 
+          // Update provider with detected data
+          const latestDetectedDate =
+            dateResult.detectedDates.length > 0
+              ? dateResult.detectedDates[dateResult.detectedDates.length - 1]
+              : null
+          updateDetectedDate(latestDetectedDate)
+
+          const latestDetectedPriority =
+            priorityResult.detectedPriorities.length > 0
+              ? priorityResult.detectedPriorities[
+                  priorityResult.detectedPriorities.length - 1
+                ]
+              : null
+          updateDetectedPriority(latestDetectedPriority)
+
           // Notify parent component about detected date
           if (onDateDetected) {
-            const latestDetectedDate =
-              dateResult.detectedDates.length > 0
-                ? dateResult.detectedDates[dateResult.detectedDates.length - 1]
-                : null
             onDateDetected(latestDetectedDate)
           }
 
           // Notify parent component about detected priority
           if (onPriorityDetected) {
-            const latestDetectedPriority =
-              priorityResult.detectedPriorities.length > 0
-                ? priorityResult.detectedPriorities[
-                    priorityResult.detectedPriorities.length - 1
-                  ]
-                : null
             onPriorityDetected(latestDetectedPriority)
           }
         }, 300)
 
         return () => clearTimeout(timeoutId)
       },
-      [onDateDetected, onPriorityDetected, ignoreSections]
+      [
+        onDateDetected,
+        onPriorityDetected,
+        ignoreSections,
+        updateDetectedDate,
+        updateDetectedPriority,
+      ]
     )
 
     // Handle removing a detected date
@@ -292,17 +306,20 @@ export const SlateTaskTextarea = forwardRef<
             (_, index) => index !== indexToRemove
           )
 
+          // Update provider with latest date after removal
+          const latestDetectedDate =
+            newDates.length > 0 ? newDates[newDates.length - 1] : null
+          updateDetectedDate(latestDetectedDate)
+
           // Notify parent component about the latest date after removal
           if (onDateDetected) {
-            const latestDetectedDate =
-              newDates.length > 0 ? newDates[newDates.length - 1] : null
             onDateDetected(latestDetectedDate)
           }
 
           return newDates
         })
       },
-      [onDateDetected]
+      [onDateDetected, updateDetectedDate]
     )
 
     // Handle removing a detected priority
@@ -324,19 +341,22 @@ export const SlateTaskTextarea = forwardRef<
             (_, index) => index !== indexToRemove
           )
 
+          // Update provider with latest priority after removal
+          const latestDetectedPriority =
+            newPriorities.length > 0
+              ? newPriorities[newPriorities.length - 1]
+              : null
+          updateDetectedPriority(latestDetectedPriority)
+
           // Notify parent component about the latest priority after removal
           if (onPriorityDetected) {
-            const latestDetectedPriority =
-              newPriorities.length > 0
-                ? newPriorities[newPriorities.length - 1]
-                : null
             onPriorityDetected(latestDetectedPriority)
           }
 
           return newPriorities
         })
       },
-      [onPriorityDetected]
+      [onPriorityDetected, updateDetectedPriority]
     )
 
     // Handle editor changes
@@ -384,6 +404,10 @@ export const SlateTaskTextarea = forwardRef<
           })
         }
 
+        // Update provider with original text
+        updateText(text)
+
+        // Pass original text to parent (no cleaning here)
         onChange(text)
 
         // Trigger detection directly on text change
@@ -392,6 +416,8 @@ export const SlateTaskTextarea = forwardRef<
         } else {
           setDetectedDates([])
           setDetectedPriorities([])
+          updateDetectedDate(null)
+          updateDetectedPriority(null)
           if (onDateDetected) {
             onDateDetected(null)
           }
@@ -407,6 +433,9 @@ export const SlateTaskTextarea = forwardRef<
         onPriorityDetected,
         ignoreSections,
         value,
+        updateText,
+        updateDetectedDate,
+        updateDetectedPriority,
       ]
     )
 

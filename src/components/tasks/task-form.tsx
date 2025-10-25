@@ -4,6 +4,10 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { SlateTaskTextarea } from '@/components/tasks/slate-task-textarea'
+import {
+  SlateTaskTextareaProvider,
+  useSlateTaskTextarea,
+} from '@/components/tasks/slate-task-textarea-provider'
 import { MarkdownEditor } from '@/components/markdown-editor'
 import { createTask, updateTask } from '@/lib/actions/task'
 import { type TaskFormData, taskSchema } from '@/lib/validations'
@@ -31,7 +35,7 @@ interface TaskFormProps {
   taskId?: string
 }
 
-export function TaskForm({
+function TaskFormContent({
   people,
   objectives,
   preselectedAssigneeId,
@@ -41,6 +45,7 @@ export function TaskForm({
   isEditing = false,
   taskId,
 }: TaskFormProps) {
+  const { getCleanedText } = useSlateTaskTextarea()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [selectedInitiativeId, setSelectedInitiativeId] = useState(
@@ -72,8 +77,17 @@ export function TaskForm({
     setErrors({})
 
     try {
+      // Get cleaned text from provider (with detected dates/priorities removed)
+      const cleanedTitle = getCleanedText()
+
+      // Create form data with cleaned title
+      const formDataWithCleanedTitle = {
+        ...formData,
+        title: cleanedTitle || formData.title, // Fallback to original if cleaned is empty
+      }
+
       // Validate the form data using Zod schema
-      const validatedData = taskSchema.parse(formData)
+      const validatedData = taskSchema.parse(formDataWithCleanedTitle)
 
       if (isEditing && taskId) {
         await updateTask(taskId, validatedData)
@@ -369,5 +383,13 @@ export function TaskForm({
         </Button>
       </div>
     </form>
+  )
+}
+
+export function TaskForm(props: TaskFormProps) {
+  return (
+    <SlateTaskTextareaProvider>
+      <TaskFormContent {...props} />
+    </SlateTaskTextareaProvider>
   )
 }

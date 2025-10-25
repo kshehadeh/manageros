@@ -7,13 +7,15 @@ import {
   type SlateTaskTextareaRef,
 } from '@/components/tasks/slate-task-textarea'
 import {
+  SlateTaskTextareaProvider,
+  useSlateTaskTextarea,
+} from '@/components/tasks/slate-task-textarea-provider'
+import {
   createQuickTask,
   createQuickTaskForInitiative,
 } from '@/lib/actions/task'
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
-import { type DetectedDate } from '@/lib/utils/date-detection'
-import { type DetectedPriority } from '@/lib/utils/priority-detection'
 
 interface QuickTaskFormProps {
   onSuccess?: () => void
@@ -24,12 +26,11 @@ export interface QuickTaskFormRef {
   focus: () => void
 }
 
-const QuickTaskForm = forwardRef<QuickTaskFormRef, QuickTaskFormProps>(
+const QuickTaskFormContent = forwardRef<QuickTaskFormRef, QuickTaskFormProps>(
   ({ onSuccess, initiativeId }, ref) => {
+    const { getCleanedText, detectedDate, detectedPriority } =
+      useSlateTaskTextarea()
     const [title, setTitle] = useState('')
-    const [detectedDate, setDetectedDate] = useState<DetectedDate | null>(null)
-    const [detectedPriority, setDetectedPriority] =
-      useState<DetectedPriority | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const textareaRef = useRef<SlateTaskTextareaRef>(null)
 
@@ -48,32 +49,19 @@ const QuickTaskForm = forwardRef<QuickTaskFormRef, QuickTaskFormProps>(
       setIsSubmitting(true)
 
       try {
-        // Create task with detected date and priority if available
-        let taskTitle = title.trim()
+        // Get cleaned text from provider (with detected dates/priorities removed)
+        const taskTitle = getCleanedText() || title.trim()
         let taskDueDate: string | undefined = undefined
         let taskPriority: number | undefined = undefined
 
         if (detectedDate) {
           // Use the detected date
           taskDueDate = detectedDate.date
-
-          // Optionally remove the detected date text from the title
-          // This gives the parent component control over whether to clean the title
-          if (detectedDate.originalText) {
-            taskTitle = taskTitle.replace(detectedDate.originalText, '').trim()
-          }
         }
 
         if (detectedPriority) {
           // Use the detected priority
           taskPriority = detectedPriority.priority
-
-          // Optionally remove the detected priority text from the title
-          if (detectedPriority.originalText) {
-            taskTitle = taskTitle
-              .replace(detectedPriority.originalText, '')
-              .trim()
-          }
         }
 
         if (initiativeId) {
@@ -98,7 +86,6 @@ const QuickTaskForm = forwardRef<QuickTaskFormRef, QuickTaskFormProps>(
 
         // Clear the form after successful submission
         setTitle('')
-        setDetectedDate(null)
 
         // Close the modal
         onSuccess?.()
@@ -119,8 +106,6 @@ const QuickTaskForm = forwardRef<QuickTaskFormRef, QuickTaskFormProps>(
           ref={textareaRef}
           value={title}
           onChange={setTitle}
-          onDateDetected={setDetectedDate}
-          onPriorityDetected={setDetectedPriority}
           onSubmit={() => {
             // Create a minimal synthetic event for handleSubmit
             const syntheticEvent = {
@@ -142,6 +127,18 @@ const QuickTaskForm = forwardRef<QuickTaskFormRef, QuickTaskFormProps>(
           </Button>
         </div>
       </form>
+    )
+  }
+)
+
+QuickTaskFormContent.displayName = 'QuickTaskFormContent'
+
+const QuickTaskForm = forwardRef<QuickTaskFormRef, QuickTaskFormProps>(
+  (props, ref) => {
+    return (
+      <SlateTaskTextareaProvider>
+        <QuickTaskFormContent {...props} ref={ref} />
+      </SlateTaskTextareaProvider>
     )
   }
 )
