@@ -10,7 +10,7 @@ import {
 import { type DetectedDate } from '@/lib/utils/date-detection'
 import { type DetectedPriority } from '@/lib/utils/priority-detection'
 
-interface SlateTaskTextareaContextValue {
+interface TaskSummaryInputContextValue {
   // Original text as typed by the user
   originalText: string
   // Cleaned text with detected dates/priorities removed
@@ -26,30 +26,30 @@ interface SlateTaskTextareaContextValue {
   reset: () => void
 }
 
-const SlateTaskTextareaContext =
-  createContext<SlateTaskTextareaContextValue | null>(null)
+const TaskSummaryInputContext =
+  createContext<TaskSummaryInputContextValue | null>(null)
 
-export function useSlateTaskTextarea() {
-  const context = useContext(SlateTaskTextareaContext)
+export function useTaskSummaryInput() {
+  const context = useContext(TaskSummaryInputContext)
   if (!context) {
     throw new Error(
-      'useSlateTaskTextarea must be used within a SlateTaskTextareaProvider'
+      'useTaskSummaryInput must be used within a TaskSummaryInputProvider'
     )
   }
   return context
 }
 
-interface SlateTaskTextareaProviderProps {
+interface TaskSummaryInputProviderProps {
   children: ReactNode
   onDateDetected?: (detectedDate: DetectedDate | null) => void
   onPriorityDetected?: (detectedPriority: DetectedPriority | null) => void
 }
 
-export function SlateTaskTextareaProvider({
+export function TaskSummaryInputProvider({
   children,
   onDateDetected,
   onPriorityDetected,
-}: SlateTaskTextareaProviderProps) {
+}: TaskSummaryInputProviderProps) {
   const [originalText, setOriginalText] = useState('')
   const [detectedDate, setDetectedDate] = useState<DetectedDate | null>(null)
   const [detectedPriority, setDetectedPriority] =
@@ -100,7 +100,7 @@ export function SlateTaskTextareaProvider({
     setDetectedPriority(null)
   }, [])
 
-  const value: SlateTaskTextareaContextValue = {
+  const value: TaskSummaryInputContextValue = {
     originalText,
     cleanedText: getCleanedText(),
     detectedDate,
@@ -113,8 +113,8 @@ export function SlateTaskTextareaProvider({
   }
 
   return (
-    <SlateTaskTextareaContext.Provider value={value}>
+    <TaskSummaryInputContext.Provider value={value}>
       {children}
-    </SlateTaskTextareaContext.Provider>
+    </TaskSummaryInputContext.Provider>
   )
 }

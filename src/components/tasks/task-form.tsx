@@ -3,13 +3,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import {
-  SlateTaskTextarea,
-  type SlateTaskTextareaRef,
-} from '@/components/tasks/slate-task-textarea'
+  TaskSummaryInput,
+  type TaskSummaryInputRef,
+} from '@/components/tasks/task-summary-input'
 import {
-  SlateTaskTextareaProvider,
-  useSlateTaskTextarea,
-} from '@/components/tasks/slate-task-textarea-provider'
+  TaskSummaryInputProvider,
+  useTaskSummaryInput,
+} from '@/components/tasks/task-summary-input-provider'
 import { MarkdownEditor } from '@/components/markdown-editor'
 import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
 import { createTask, updateTask } from '@/lib/actions/task'
@@ -55,13 +55,13 @@ function TaskFormContent({
   taskId,
 }: TaskFormProps) {
   const { getCleanedText, detectedDate, detectedPriority } =
-    useSlateTaskTextarea()
+    useTaskSummaryInput()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [selectedInitiativeId, setSelectedInitiativeId] = useState(
     preselectedInitiativeId || initialData?.initiativeId || ''
   )
-  const summaryInputRef = useRef<SlateTaskTextareaRef>(null)
+  const summaryInputRef = useRef<TaskSummaryInputRef>(null)
 
   // Store original values to revert to when detection is cleared
   const originalDueDate = initialData?.dueDate || ''
@@ -208,7 +208,7 @@ function TaskFormContent({
 
       <div className='space-y-4'>
         <div>
-          <SlateTaskTextarea
+          <TaskSummaryInput
             ref={summaryInputRef}
             value={formData.title}
             inputClassName='text-2xl font-semibold'
@@ -407,8 +407,8 @@ function TaskFormContent({
 
 export function TaskForm(props: TaskFormProps) {
   return (
-    <SlateTaskTextareaProvider>
+    <TaskSummaryInputProvider>
       <TaskFormContent {...props} />
-    </SlateTaskTextareaProvider>
+    </TaskSummaryInputProvider>
   )
 }

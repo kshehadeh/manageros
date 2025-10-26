@@ -29,11 +29,11 @@ import {
   getPriorityBadgeVariant,
   type DetectedPriority,
 } from '@/lib/utils/priority-detection'
-import { useSlateTaskTextarea } from './slate-task-textarea-provider'
+import { useTaskSummaryInput } from './task-summary-input-provider'
 
 type TextSize = 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl'
 
-interface SlateTaskTextareaProps {
+interface TaskSummaryInputProps {
   value: string
   onChange: (_value: string) => void
   onDateDetected?: (_detectedDate: DetectedDate | null) => void
@@ -46,7 +46,7 @@ interface SlateTaskTextareaProps {
   disabled?: boolean
 }
 
-export interface SlateTaskTextareaRef {
+export interface TaskSummaryInputRef {
   focus: () => void
 }
 
@@ -89,9 +89,9 @@ const getTextSizeClass = (size: TextSize): string => {
   return sizeMap[size]
 }
 
-export const SlateTaskTextarea = forwardRef<
-  SlateTaskTextareaRef,
-  SlateTaskTextareaProps
+export const TaskSummaryInput = forwardRef<
+  TaskSummaryInputRef,
+  TaskSummaryInputProps
 >(
   (
     {
@@ -109,7 +109,7 @@ export const SlateTaskTextarea = forwardRef<
     ref
   ) => {
     const { updateText, updateDetectedDate, updateDetectedPriority } =
-      useSlateTaskTextarea()
+      useTaskSummaryInput()
     const [detectedDates, setDetectedDates] = useState<DetectedDate[]>([])
     const [detectedPriorities, setDetectedPriorities] = useState<
       DetectedPriority[]
@@ -513,4 +513,4 @@ export const SlateTaskTextarea = forwardRef<
   }
 )
 
-SlateTaskTextarea.displayName = 'SlateTaskTextarea'
+TaskSummaryInput.displayName = 'TaskSummaryInput'

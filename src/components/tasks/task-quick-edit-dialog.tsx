@@ -24,13 +24,13 @@ import {
 } from '@/components/ui/select'
 import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
 import {
-  SlateTaskTextarea,
-  type SlateTaskTextareaRef,
-} from '@/components/tasks/slate-task-textarea'
+  TaskSummaryInput,
+  type TaskSummaryInputRef,
+} from '@/components/tasks/task-summary-input'
 import {
-  SlateTaskTextareaProvider,
-  useSlateTaskTextarea,
-} from '@/components/tasks/slate-task-textarea-provider'
+  TaskSummaryInputProvider,
+  useTaskSummaryInput,
+} from '@/components/tasks/task-summary-input-provider'
 import {
   updateTaskQuickEdit,
   createQuickTask,
@@ -107,12 +107,12 @@ const TaskQuickEditDialogContent = forwardRef<
       originalText,
       cleanedText,
       reset,
-    } = useSlateTaskTextarea()
+    } = useTaskSummaryInput()
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [errors, setErrors] = useState<Record<string, string>>({})
     const { people } = usePeopleForSelect()
-    const textareaRef = useRef<SlateTaskTextareaRef>(null)
+    const textareaRef = useRef<TaskSummaryInputRef>(null)
 
     const isCreateMode = !task
 
@@ -339,7 +339,7 @@ const TaskQuickEditDialogContent = forwardRef<
             <div className='space-y-4'>
               {/* Summary Field */}
               <div className='space-y-2'>
-                <SlateTaskTextarea
+                <TaskSummaryInput
                   ref={textareaRef}
                   value={isCreateMode ? originalText : formData.title}
                   onChange={() => {
@@ -548,9 +548,9 @@ const TaskQuickEditDialogWithRef = forwardRef<
   TaskQuickEditDialogProps
 >((props, ref) => {
   return (
-    <SlateTaskTextareaProvider>
+    <TaskSummaryInputProvider>
       <TaskQuickEditDialogContent {...props} ref={ref} />
-    </SlateTaskTextareaProvider>
+    </TaskSummaryInputProvider>
   )
 })
 
