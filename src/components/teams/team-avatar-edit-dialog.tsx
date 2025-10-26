@@ -11,10 +11,7 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Upload, X } from 'lucide-react'
-import {
-  uploadTeamAvatar,
-  updateTeamAvatar,
-} from '@/lib/actions/avatar'
+import { uploadTeamAvatar, updateTeamAvatar } from '@/lib/actions/avatar'
 import { useRef } from 'react'
 
 interface TeamAvatarEditDialogProps {
@@ -101,7 +98,7 @@ export function TeamAvatarEditDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-md'>
+      <DialogContent className='max-w-[50vw] max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>Edit Team Avatar</DialogTitle>
           <DialogDescription>
@@ -112,7 +109,7 @@ export function TeamAvatarEditDialog({
           <div className='space-y-4'>
             {/* Current Avatar Display */}
             <div className='flex items-center gap-4'>
-              <Avatar className='h-20 w-20 flex-shrink-0'>
+              <Avatar className='h-20 w-20 shrink-0'>
                 {avatar && <AvatarImage src={avatar} alt={teamName} />}
                 <AvatarFallback className='text-lg'>
                   {getInitials(teamName)}

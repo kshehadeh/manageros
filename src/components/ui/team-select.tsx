@@ -10,12 +10,14 @@ import {
   SelectScrollUpButton,
   SelectScrollDownButton,
 } from '@/components/ui/select'
+import { TeamAvatar } from '@/components/teams/team-avatar'
 import { useTeamsForSelect } from '@/hooks/use-organization-cache'
 
 interface Team {
   id: string
   name: string
   parentId?: string | null
+  avatar?: string | null
 }
 
 interface TeamSelectProps {
@@ -27,6 +29,7 @@ interface TeamSelectProps {
   noneLabel?: string // Optional: label for "None" option (default: "No team")
   className?: string
   autoFocus?: boolean // Optional: whether to auto-open dropdown (default: false)
+  excludeTeamIds?: string[] // Optional: team IDs to exclude from the list
 }
 
 export function TeamSelect({
@@ -38,22 +41,31 @@ export function TeamSelect({
   noneLabel = 'No team',
   className,
   autoFocus = false,
+  excludeTeamIds = [],
 }: TeamSelectProps) {
   const { teams, isLoading } = useTeamsForSelect()
   const [selectOpen, setSelectOpen] = useState(false)
 
+  // Filter out excluded teams
+  const filteredTeams = teams.filter(team => !excludeTeamIds.includes(team.id))
+
   // Auto-open dropdown if requested
   useEffect(() => {
-    if (autoFocus && !isLoading && teams.length > 0) {
+    if (autoFocus && !isLoading && filteredTeams.length > 0) {
       const timer = setTimeout(() => {
         setSelectOpen(true)
       }, 150)
       return () => clearTimeout(timer)
     }
-  }, [autoFocus, isLoading, teams.length])
+  }, [autoFocus, isLoading, filteredTeams.length])
 
-  const renderTeamText = (team: Team) => {
-    return team.name
+  const renderTeamOption = (team: Team) => {
+    return (
+      <div className='flex items-center gap-2'>
+        <TeamAvatar name={team.name} avatar={team.avatar} size='xs' />
+        <span>{team.name}</span>
+      </div>
+    )
   }
 
   return (
@@ -72,9 +84,9 @@ export function TeamSelect({
       <SelectContent>
         <SelectScrollUpButton />
         {includeNone && <SelectItem value='none'>{noneLabel}</SelectItem>}
-        {teams.map(team => (
+        {filteredTeams.map(team => (
           <SelectItem key={team.id} value={team.id}>
-            {renderTeamText(team)}
+            {renderTeamOption(team)}
           </SelectItem>
         ))}
         <SelectScrollDownButton />

@@ -3,13 +3,10 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Users } from 'lucide-react'
+import { TeamSelect } from '@/components/ui/team-select'
 
-import { useState, useEffect } from 'react'
-import {
-  createTeam,
-  updateTeam,
-  getTeamsForSelection,
-} from '@/lib/actions/team'
+import { useState } from 'react'
+import { createTeam, updateTeam } from '@/lib/actions/team'
 import { type TeamFormData } from '@/lib/validations'
 import { FormTemplate, type FormSection } from '@/components/ui/form-template'
 
@@ -33,21 +30,6 @@ export function TeamForm({ team, parentId }: TeamFormProps) {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
-  const [availableTeams, setAvailableTeams] = useState<
-    Array<{ id: string; name: string; parentId: string | null }>
-  >([])
-
-  useEffect(() => {
-    const loadTeams = async () => {
-      try {
-        const teams = await getTeamsForSelection(team?.id)
-        setAvailableTeams(teams)
-      } catch (error) {
-        console.error('Error loading teams:', error)
-      }
-    }
-    loadTeams()
-  }, [team?.id, parentId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -62,6 +44,15 @@ export function TeamForm({ team, parentId }: TeamFormProps) {
       }
     } catch (error) {
       console.error('Error submitting form:', error)
+
+      // Don't handle redirect errors - let them bubble up
+      if (error && typeof error === 'object' && 'digest' in error) {
+        const digest = (error as { digest?: string }).digest
+        if (digest?.startsWith('NEXT_REDIRECT')) {
+          throw error // Re-throw redirect errors
+        }
+      }
+
       setError(error instanceof Error ? error.message : 'An error occurred')
       setIsSubmitting(false)
     }
@@ -102,24 +93,18 @@ export function TeamForm({ team, parentId }: TeamFormProps) {
 
           <div className='space-y-2'>
             <Label htmlFor='parentId'>Parent Team</Label>
-            <select
-              id='parentId'
-              value={formData.parentId || ''}
-              onChange={e =>
+            <TeamSelect
+              value={formData.parentId || 'none'}
+              onValueChange={value =>
                 setFormData({
                   ...formData,
-                  parentId: e.target.value === '' ? undefined : e.target.value,
+                  parentId: value === 'none' ? undefined : value,
                 })
               }
-              className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
-            >
-              <option value=''>No parent team (top-level team)</option>
-              {availableTeams.map(availableTeam => (
-                <option key={availableTeam.id} value={availableTeam.id}>
-                  {availableTeam.name}
-                </option>
-              ))}
-            </select>
+              includeNone={true}
+              noneLabel='No parent team (top-level team)'
+              excludeTeamIds={team?.id ? [team.id] : []}
+            />
             <p className='text-xs text-muted-foreground mt-1'>
               Select a parent team to create a hierarchy. Teams can only have
               one parent but multiple children.

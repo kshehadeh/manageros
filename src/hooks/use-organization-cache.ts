@@ -204,7 +204,7 @@ export function useTeams() {
 
 /**
  * Hook for accessing teams data optimized for select components
- * Returns simplified team objects with just id, name, parentId
+ * Returns simplified team objects with just id, name, parentId, avatar
  */
 export function useTeamsForSelect() {
   const { teams, isLoading, error } = useTeamsCache()
@@ -213,6 +213,7 @@ export function useTeamsForSelect() {
     id: team.id,
     name: team.name,
     parentId: team.parentId,
+    avatar: team.avatar,
   }))
 
   return {
