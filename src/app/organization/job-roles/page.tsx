@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { getJobLevels, getJobDomains } from '@/lib/actions/job-roles'
 import { JobRoleHeaderButton } from '@/components/jobs/job-role-header-button'
 import { JobRolesContent } from '@/components/jobs/job-roles-content'
+import { JobRolesBreadcrumbClient } from '@/components/jobs/job-roles-breadcrumb-client'
 
 export default async function JobRoleManagementPage() {
   const session = await getServerSession(authOptions)
@@ -26,23 +27,25 @@ export default async function JobRoleManagementPage() {
   const [levels, domains] = await Promise.all([getJobLevels(), getJobDomains()])
 
   return (
-    <div className='page-container'>
-      <div className='page-header'>
-        <div className='flex items-center justify-between'>
-          <div>
-            <h1 className='page-title'>Job Role Management</h1>
-            <p className='page-subtitle'>
-              Configure job levels, domains, and roles for your organization
-            </p>
-          </div>
-          <div className='flex gap-2'>
-            <JobRoleHeaderButton levels={levels} domains={domains} />
+    <JobRolesBreadcrumbClient>
+      <div className='page-container'>
+        <div className='page-header'>
+          <div className='flex items-center justify-between'>
+            <div>
+              <h1 className='page-title'>Job Role Management</h1>
+              <p className='page-subtitle'>
+                Configure job levels, domains, and roles for your organization
+              </p>
+            </div>
+            <div className='flex gap-2'>
+              <JobRoleHeaderButton levels={levels} domains={domains} />
+            </div>
           </div>
         </div>
+        <div className='page-section'>
+          <JobRolesContent levels={levels} domains={domains} />
+        </div>
       </div>
-      <div className='page-section'>
-        <JobRolesContent levels={levels} domains={domains} />
-      </div>
-    </div>
+    </JobRolesBreadcrumbClient>
   )
 }

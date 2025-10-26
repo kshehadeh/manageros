@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { getOrganizationInvitations } from '@/lib/actions/organization'
 import InvitationForm from '@/components/invitation-form'
 import InvitationList from '@/components/invitation-list'
+import { InvitationsBreadcrumbClient } from '@/components/organization/invitations-breadcrumb-client'
 
 export default async function OrganizationInvitationsPage() {
   const session = await getServerSession(authOptions)
@@ -25,19 +26,21 @@ export default async function OrganizationInvitationsPage() {
   const invitations = await getOrganizationInvitations()
 
   return (
-    <div className='page-container'>
-      <div className='page-header'>
-        <h1 className='page-title'>Organization Invitations</h1>
-        <p className='page-subtitle'>
-          Invite users to join your organization. They will be automatically
-          added when they create their account.
-        </p>
-      </div>
+    <InvitationsBreadcrumbClient>
+      <div className='page-container'>
+        <div className='page-header'>
+          <h1 className='page-title'>Organization Invitations</h1>
+          <p className='page-subtitle'>
+            Invite users to join your organization. They will be automatically
+            added when they create their account.
+          </p>
+        </div>
 
-      <div className='page-section'>
-        <InvitationForm />
-        <InvitationList invitations={invitations} />
+        <div className='page-section'>
+          <InvitationForm />
+          <InvitationList invitations={invitations} />
+        </div>
       </div>
-    </div>
+    </InvitationsBreadcrumbClient>
   )
 }
