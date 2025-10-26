@@ -1,7 +1,7 @@
 {
   "name": "manageros-starter",
   "private": true,
-  "version": "0.5.34",
+  "version": "0.5.35",
   "type": "module",
   "scripts": {
     "dev": "next dev --turbo",
