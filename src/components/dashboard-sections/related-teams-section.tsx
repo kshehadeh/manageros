@@ -1,8 +1,8 @@
 'use client'
 
 import { useMemo } from 'react'
-import { ExpandableSection } from '@/components/expandable-section'
-import { TeamListItem } from '@/components/teams/team-list-item'
+import { SimpleTeamList } from '@/components/teams/team-list'
+import { SimpleTaskListSkeleton } from '@/components/common/simple-task-list-skeleton'
 import { useTeams } from '@/hooks/use-teams'
 import { useSession } from 'next-auth/react'
 
@@ -26,15 +26,11 @@ export function DashboardRelatedTeamsSection() {
 
   if (loading || status === 'loading') {
     return (
-      <ExpandableSection
+      <SimpleTaskListSkeleton
         title='Related Teams'
-        icon='Users2'
-        viewAllHref='/teams'
-      >
-        <div className='flex items-center justify-center py-8'>
-          <div className='text-muted-foreground'>Loading...</div>
-        </div>
-      </ExpandableSection>
+        variant='simple'
+        itemCount={3}
+      />
     )
   }
 
@@ -47,31 +43,34 @@ export function DashboardRelatedTeamsSection() {
 
   if (!teams || teams.length === 0) return null
 
-  // Transform the data to match the expected format
+  // Transform the data to match SimpleTeamList format
   const formattedTeams = teams.map(team => ({
-    ...team,
-    avatar: team.avatar, // Preserve the actual avatar from API
-    people: Array(team._count.people).fill(null), // Create array with correct length for stats
-    initiatives: Array(team._count.initiatives).fill(null), // Create array with correct length for stats
-    parent: team.parent
-      ? {
-          id: team.parent.id,
-          name: team.parent.name || '',
-          description: null,
-          organizationId: team.organizationId,
-          createdAt: team.createdAt,
-          updatedAt: team.updatedAt,
-          avatar: team.parent.avatar || null, // Ensure avatar is string | null, not undefined
-          parentId: null,
-        }
-      : null,
+    id: team.id,
+    name: team.name,
+    description: team.description,
+    avatar: team.avatar,
+    updatedAt: team.updatedAt,
+    people: Array.from({ length: team._count.people || 0 }, () => ({
+      id: '',
+      name: '',
+    })),
+    initiatives: Array.from({ length: team._count.initiatives || 0 }, () => ({
+      id: '',
+      title: '',
+    })),
   }))
 
   return (
-    <ExpandableSection title='Related Teams' icon='Users2' viewAllHref='/teams'>
-      {formattedTeams.map(team => (
-        <TeamListItem key={team.id} team={team} />
-      ))}
-    </ExpandableSection>
+    <SimpleTeamList
+      teams={formattedTeams}
+      title='Related Teams'
+      variant='compact'
+      viewAllHref='/teams'
+      emptyStateText='No related teams found.'
+      showDescription={false}
+      showMembers={true}
+      showInitiatives={false}
+      showUpdatedAt={false}
+    />
   )
 }

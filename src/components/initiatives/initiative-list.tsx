@@ -42,6 +42,8 @@ export interface InitiativeListProps {
   title?: string
   variant?: 'compact' | 'full'
   showAddButton?: boolean
+  addButtonHref?: string
+  addButtonLabel?: string
   viewAllHref?: string
   viewAllLabel?: string
   emptyStateText?: string
@@ -55,6 +57,8 @@ export function SimpleInitiativeList({
   title = 'Initiatives',
   variant = 'compact',
   showAddButton = false,
+  addButtonHref,
+  addButtonLabel = 'Add Initiative',
   viewAllHref,
   viewAllLabel = 'View All',
   emptyStateText = 'No initiatives found.',
@@ -189,19 +193,13 @@ export function SimpleInitiativeList({
       )
     }
 
-    if (showAddButton) {
+    if (showAddButton && addButtonHref) {
       actions.push(
-        <Button
-          onClick={() => {
-            // TODO: Implement add initiative modal
-            console.log('Add initiative clicked')
-          }}
-          variant='outline'
-          size='sm'
-          key='add-initiative'
-        >
-          <Plus className='h-4 w-4 mr-2' />
-          Add Initiative
+        <Button asChild variant='outline' size='sm' key='add-initiative'>
+          <Link href={addButtonHref} className='flex items-center gap-2'>
+            <Plus className='w-4 h-4' />
+            {addButtonLabel}
+          </Link>
         </Button>
       )
     }

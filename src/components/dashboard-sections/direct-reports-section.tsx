@@ -1,10 +1,11 @@
 'use client'
 
 import { useMemo } from 'react'
-import { DirectReports } from '@/components/dashboard-direct-reports'
-import { ExpandableSection } from '@/components/expandable-section'
+import { SimplePeopleList } from '@/components/people/person-list'
+import { SimpleTaskListSkeleton } from '@/components/common/simple-task-list-skeleton'
 import { usePeople } from '@/hooks/use-people'
 import { useSession } from 'next-auth/react'
+import type { Person } from '@/types/person'
 
 export function DashboardDirectReportsSection() {
   const { data: session, status } = useSession()
@@ -28,15 +29,11 @@ export function DashboardDirectReportsSection() {
 
   if (loading || status === 'loading') {
     return (
-      <ExpandableSection
+      <SimpleTaskListSkeleton
         title='Direct Reports'
-        icon='User'
-        viewAllHref='/direct-reports'
-      >
-        <div className='flex items-center justify-center py-8'>
-          <div className='text-muted-foreground'>Loading...</div>
-        </div>
-      </ExpandableSection>
+        variant='simple'
+        itemCount={3}
+      />
     )
   }
 
@@ -49,36 +46,42 @@ export function DashboardDirectReportsSection() {
 
   if (!directReports || directReports.length === 0) return null
 
-  // Transform the data to match the expected format
-  const formattedReports = directReports.map(report => ({
-    ...report,
+  // Transform the data to match SimplePeopleList format
+  const formattedReports: Person[] = directReports.map(report => ({
+    id: report.id,
+    name: report.name,
+    email: report.email,
+    role: report.role,
+    status: report.status,
     birthday: null,
     avatar: report.avatarUrl,
     employeeType: null,
-    startedAt: report.startDate,
     team:
       report.teamId && report.teamName
         ? {
             id: report.teamId,
             name: report.teamName,
-            description: null,
-            organizationId: report.organizationId,
-            createdAt: report.createdAt,
-            updatedAt: report.updatedAt,
-            avatar: null,
-            parentId: null,
           }
         : null,
-    reports: [], // Reports count is included in _count
+    jobRole: null,
+    manager: null,
+    reports: [],
+    level: 0,
   }))
 
   return (
-    <ExpandableSection
+    <SimplePeopleList
+      people={formattedReports}
       title='Direct Reports'
-      icon='User'
+      variant='compact'
       viewAllHref='/direct-reports'
-    >
-      <DirectReports directReports={formattedReports} />
-    </ExpandableSection>
+      emptyStateText='No direct reports.'
+      showEmail={true}
+      showRole={false}
+      showTeam={false}
+      showJobRole={false}
+      showManager={false}
+      showReportsCount={false}
+    />
   )
 }

@@ -32,6 +32,7 @@ import {
 } from 'lucide-react'
 import { HelpIcon } from '@/components/help-icon'
 import { InitiativeSelect } from '@/components/ui/initiative-select'
+import { PersonSelect } from '@/components/ui/person-select'
 
 interface TaskFormProps {
   people: Person[]
@@ -45,7 +46,7 @@ interface TaskFormProps {
 }
 
 function TaskFormContent({
-  people,
+  people: _people,
   objectives,
   preselectedAssigneeId,
   preselectedInitiativeId,
@@ -246,20 +247,19 @@ function TaskFormContent({
           <div>
             <div className='flex items-center gap-2'>
               <User className='h-4 w-4 text-muted-foreground shrink-0' />
-              <select
-                id='assigneeId'
-                name='assigneeId'
+              <PersonSelect
                 value={formData.assigneeId || ''}
-                onChange={e => handleInputChange('assigneeId', e.target.value)}
-                className={`input flex-1 ${errors.assigneeId ? 'border-red-500' : ''}`}
-              >
-                <option value=''>Select assignee (optional)</option>
-                {people.map(person => (
-                  <option key={person.id} value={person.id}>
-                    {person.name}
-                  </option>
-                ))}
-              </select>
+                onValueChange={value => {
+                  const actualValue = value === 'none' ? '' : value
+                  handleInputChange('assigneeId', actualValue || undefined)
+                }}
+                placeholder='Select assignee (optional)'
+                includeNone={true}
+                noneLabel='No assignee'
+                showAvatar={true}
+                showRole={true}
+                className={`flex-1 ${errors.assigneeId ? 'border-red-500' : ''}`}
+              />
             </div>
             {errors.assigneeId && (
               <p className='text-sm text-red-500 mt-1'>{errors.assigneeId}</p>

@@ -33,10 +33,21 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
       parent: true,
       children: {
         include: {
-          people: true,
-          initiatives: true,
+          people: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          initiatives: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
         },
-        orderBy: { name: 'asc' },
+        orderBy: { updatedAt: 'desc' },
+        take: 100,
       },
       people: {
         include: {
@@ -55,6 +66,17 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
           reports: true,
         },
         orderBy: { name: 'asc' },
+      },
+      initiatives: {
+        include: {
+          team: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: { updatedAt: 'desc' },
       },
     },
   })

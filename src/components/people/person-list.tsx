@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { SectionHeader } from '@/components/ui/section-header'
-import { Eye, MoreHorizontal, Plus, Building2 } from 'lucide-react'
+import { Eye, MoreHorizontal, Plus, User } from 'lucide-react'
 import Link from 'next/link'
 import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
 import {
@@ -12,30 +12,13 @@ import {
   DeleteMenuItem,
 } from '@/components/common/context-menu-items'
 import { DeleteModal } from '@/components/common/delete-modal'
-import { TeamAvatar } from './team-avatar'
-import { Users, Target } from 'lucide-react'
-import { deleteTeam } from '@/lib/actions/team'
+import { PersonAvatar } from './person-avatar'
+import type { Person } from '@/types/person'
+import { deletePerson } from '@/lib/actions/person'
 import { toast } from 'sonner'
-import { formatDistanceToNow } from 'date-fns'
 
-export interface Team {
-  id: string
-  name: string
-  description?: string | null
-  avatar?: string | null
-  updatedAt?: Date
-  people?: Array<{
-    id: string
-    name: string
-  }>
-  initiatives?: Array<{
-    id: string
-    title: string
-  }>
-}
-
-export interface TeamListProps {
-  teams: Team[]
+export interface PersonListProps {
+  people: Person[]
   title?: string
   variant?: 'compact' | 'full'
   showAddButton?: boolean
@@ -44,140 +27,148 @@ export interface TeamListProps {
   viewAllHref?: string
   viewAllLabel?: string
   emptyStateText?: string
-  onTeamUpdate?: () => void
+  onPersonUpdate?: () => void
   className?: string
   immutableFilters?: Record<string, unknown>
-  showDescription?: boolean
-  showMembers?: boolean
-  showInitiatives?: boolean
-  showUpdatedAt?: boolean
+  showEmail?: boolean
+  showRole?: boolean
+  showTeam?: boolean
+  showJobRole?: boolean
+  showManager?: boolean
+  showReportsCount?: boolean
 }
 
-export function SimpleTeamList({
-  teams,
-  title = 'Teams',
+export function SimplePeopleList({
+  people,
+  title = 'People',
   variant = 'compact',
   showAddButton = false,
   addButtonHref,
-  addButtonLabel = 'Add Team',
+  addButtonLabel = 'Add Member',
   viewAllHref,
   viewAllLabel = 'View All',
-  emptyStateText = 'No teams found.',
-  onTeamUpdate,
+  emptyStateText = 'No people found.',
+  onPersonUpdate,
   className = '',
   immutableFilters,
-  showDescription = true,
-  showMembers = true,
-  showInitiatives = true,
-  showUpdatedAt = true,
-}: TeamListProps) {
+  showEmail = true,
+  showRole = true,
+  showTeam = true,
+  showJobRole = true,
+  showManager = true,
+  showReportsCount = true,
+}: PersonListProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
   const { handleButtonClick, ContextMenuComponent } = useDataTableContextMenu()
 
-  const handleDeleteTeam = async () => {
+  const handleDeletePerson = async () => {
     if (!deleteTargetId) return
 
     try {
-      await deleteTeam(deleteTargetId)
-      toast.success('Team deleted successfully')
-      onTeamUpdate?.()
+      await deletePerson(deleteTargetId)
+      toast.success('Person deleted successfully')
+      onPersonUpdate?.()
     } catch (error) {
-      console.error('Error deleting team:', error)
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to delete team'
-      )
+      console.error('Error deleting person:', error)
+      toast.error('Failed to delete person')
     }
   }
 
-  // Filter teams based on immutable filters
-  const filterTeams = (teamsToFilter: Team[]) => {
+  // Filter people based on immutable filters
+  const filterPeople = (peopleToFilter: Person[]) => {
     if (!immutableFilters || Object.keys(immutableFilters).length === 0) {
-      return teamsToFilter
+      return peopleToFilter
     }
 
-    return teamsToFilter.filter(team => {
+    return peopleToFilter.filter(person => {
       return Object.entries(immutableFilters).every(([key, value]) => {
         switch (key) {
-          case 'parentId':
-            return (
-              (team as unknown as Record<string, unknown>).parentId === value
-            )
-          case 'organizationId':
-            return (
-              (team as unknown as Record<string, unknown>).organizationId ===
-              value
-            )
+          case 'teamId':
+            return person.team?.id === value
+          case 'managerId':
+            return person.manager?.id === value
+          case 'status':
+            if (Array.isArray(value)) {
+              return value.includes(person.status)
+            }
+            return person.status === value
+          case 'jobRoleId':
+            return person.jobRole?.id === value
           default:
-            // For any other filters, try to match against team properties
-            return (team as unknown as Record<string, unknown>)[key] === value
+            // For any other filters, try to match against person properties
+            return (person as unknown as Record<string, unknown>)[key] === value
         }
       })
     })
   }
 
-  // Apply filters to teams
-  const visibleTeams = filterTeams(teams)
+  // Apply filters to people
+  const visiblePeople = filterPeople(people)
 
-  const renderTeamItem = (team: Team) => {
-    const memberCount = team.people?.length || 0
-    const initiativeCount = team.initiatives?.length || 0
-
+  const renderPersonItem = (person: Person) => {
     const subheaderItems: React.ReactNode[] = []
 
-    if (showDescription && team.description && variant === 'full') {
+    if (showRole && person.role) {
       subheaderItems.push(
-        <span key='description' className='truncate'>
-          {team.description}
+        <span key='role' className='truncate'>
+          {person.role}
         </span>
       )
     }
 
-    if (showMembers) {
+    if (showTeam && person.team && variant === 'compact') {
       subheaderItems.push(
-        <span key='members' className='flex items-center gap-1'>
-          <Users className='h-3 w-3' />
-          {memberCount} {memberCount === 1 ? 'member' : 'members'}
+        <span key='team' className='truncate'>
+          {person.team.name}
         </span>
       )
     }
 
-    if (showInitiatives) {
+    if (showJobRole && variant === 'full' && person.jobRole) {
       subheaderItems.push(
-        <span key='initiatives' className='flex items-center gap-1'>
-          <Target className='h-3 w-3' />
-          {initiativeCount}{' '}
-          {initiativeCount === 1 ? 'initiative' : 'initiatives'}
+        <span key='jobRole' className='truncate'>
+          {person.jobRole.title}
         </span>
       )
     }
 
-    if (showUpdatedAt && team.updatedAt) {
+    if (showManager && variant === 'full' && person.manager) {
       subheaderItems.push(
-        <span key='updated'>
-          Updated {formatDistanceToNow(team.updatedAt, { addSuffix: true })}
+        <span key='manager' className='truncate'>
+          Manager: {person.manager.name}
         </span>
       )
+    }
+
+    if (showReportsCount && person.reports && person.reports.length > 0) {
+      subheaderItems.push(
+        <span key='reports'>{person.reports.length} reports</span>
+      )
+    }
+
+    if (showEmail) {
+      subheaderItems.push(<span key='email'>{person.email || 'No email'}</span>)
     }
 
     return (
       <div
-        key={team.id}
+        key={person.id}
         className='flex items-center justify-between px-3 py-3 hover:bg-muted/50 transition-colors'
       >
         <Link
-          href={`/teams/${team.id}`}
+          href={`/people/${person.id}`}
           className='flex items-start gap-3 flex-1 min-w-0'
         >
-          <TeamAvatar
-            name={team.name}
-            avatar={team.avatar}
+          <PersonAvatar
+            name={person.name}
+            avatar={person.avatar}
             size='sm'
             className='shrink-0'
           />
           <div className='flex-1 min-w-0'>
-            <h3 className='font-medium text-sm truncate mb-1'>{team.name}</h3>
+            <h3 className='font-medium text-sm truncate mb-1'>{person.name}</h3>
 
             {subheaderItems.length > 0 && (
               <div className='flex items-center gap-2 text-xs text-muted-foreground'>
@@ -196,7 +187,7 @@ export function SimpleTeamList({
           variant='ghost'
           size='sm'
           className='h-8 w-8 p-0 hover:bg-muted shrink-0'
-          onClick={e => handleButtonClick(e, team.id)}
+          onClick={e => handleButtonClick(e, person.id)}
         >
           <MoreHorizontal className='h-4 w-4' />
         </Button>
@@ -220,7 +211,7 @@ export function SimpleTeamList({
 
     if (showAddButton && addButtonHref) {
       actions.push(
-        <Button asChild variant='outline' size='sm' key='add-team'>
+        <Button asChild variant='outline' size='sm' key='add-person'>
           <Link href={addButtonHref} className='flex items-center gap-2'>
             <Plus className='w-4 h-4' />
             {addButtonLabel}
@@ -231,7 +222,7 @@ export function SimpleTeamList({
 
     return (
       <SectionHeader
-        icon={Building2}
+        icon={User}
         title={title}
         action={actions.length > 0 ? actions : undefined}
       />
@@ -244,12 +235,12 @@ export function SimpleTeamList({
         {renderSectionHeader()}
 
         <div className='space-y-0 divide-y'>
-          {visibleTeams.length === 0 ? (
+          {visiblePeople.length === 0 ? (
             <div className='text-neutral-400 text-sm px-3 py-3'>
               {emptyStateText}
             </div>
           ) : (
-            visibleTeams.map(renderTeamItem)
+            visiblePeople.map(renderPersonItem)
           )}
         </div>
       </section>
@@ -257,19 +248,19 @@ export function SimpleTeamList({
       {/* Context Menu */}
       <ContextMenuComponent>
         {({ entityId, close }) => {
-          const team = teams.find(t => t.id === entityId)
-          if (!team) return null
+          const person = people.find(p => p.id === entityId)
+          if (!person) return null
 
           return (
             <>
               <ViewDetailsMenuItem
                 entityId={entityId}
-                entityType='teams'
+                entityType='people'
                 close={close}
               />
               <EditMenuItem
                 entityId={entityId}
-                entityType='teams'
+                entityType='people'
                 close={close}
               />
               <DeleteMenuItem
@@ -291,9 +282,9 @@ export function SimpleTeamList({
           setShowDeleteModal(false)
           setDeleteTargetId(null)
         }}
-        onConfirm={handleDeleteTeam}
-        title='Delete Team'
-        entityName='team'
+        onConfirm={handleDeletePerson}
+        title='Delete Person'
+        entityName='person'
       />
     </>
   )

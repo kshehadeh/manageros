@@ -32,7 +32,9 @@ export const teamDataTableConfig: DataTableConfig<TeamListItem, TeamFilters> = {
   },
 
   // Column definitions
-  createColumns: ({ onButtonClick, visibleColumns }) => {
+  createColumns: ({ onButtonClick, visibleColumns, grouping }) => {
+    const isGroupedByParent = grouping && grouping.includes('parent')
+
     return [
       {
         accessorKey: 'name',
@@ -123,7 +125,9 @@ export const teamDataTableConfig: DataTableConfig<TeamListItem, TeamFilters> = {
         minSize: 120,
         maxSize: 200,
         meta: {
-          hidden: visibleColumns?.includes('parent') === false,
+          hidden:
+            visibleColumns?.includes('parent') === false ||
+            Boolean(isGroupedByParent),
         },
       },
       {

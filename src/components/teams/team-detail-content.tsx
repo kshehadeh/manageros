@@ -2,28 +2,13 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { TeamActionsDropdown } from './team-actions-dropdown'
 import { ClickableTeamAvatar } from './clickable-team-avatar'
 import { TeamAvatarEditDialog } from './team-avatar-edit-dialog'
-import { User, Rocket, Building2 } from 'lucide-react'
-import { PeopleDataTable } from '@/components/people/data-table'
-import { InitiativeDataTable } from '@/components/initiatives/data-table'
-import { TeamChildTeamsTable } from './team-child-teams-table'
-import { Team } from '@prisma/client'
+import { SimplePeopleList } from '@/components/people/person-list'
+import { SimpleInitiativeList } from '@/components/initiatives/initiative-list'
+import { SimpleTeamList } from './team-list'
 import { Person as PersonWithRelations } from '@/types/person'
-
-// Type for child team with relations needed by TeamChildTeamsTable
-type ChildTeamWithRelations = Team & {
-  people: Array<{
-    id: string
-    name: string
-  }>
-  initiatives: Array<{
-    id: string
-    title: string
-  }>
-}
 
 interface TeamDetailContentProps {
   team: {
@@ -36,7 +21,39 @@ interface TeamDetailContentProps {
       name: string
     } | null
     people: PersonWithRelations[]
-    children: ChildTeamWithRelations[]
+    children: Array<{
+      id: string
+      name: string
+      description?: string | null
+      avatar?: string | null
+      updatedAt: Date
+      people?: Array<{
+        id: string
+        name: string
+      }>
+      initiatives?: Array<{
+        id: string
+        title: string
+      }>
+    }>
+    initiatives: Array<{
+      id: string
+      title: string
+      description?: string | null
+      status: string
+      rag: string
+      team?: {
+        id: string
+        name: string
+      } | null
+      updatedAt: Date
+      createdAt: Date
+      _count?: {
+        tasks: number
+        checkIns: number
+        objectives: number
+      }
+    }>
   }
   isAdmin: boolean
 }
@@ -96,66 +113,50 @@ export function TeamDetailContent({ team, isAdmin }: TeamDetailContentProps) {
 
         <div className='space-y-6'>
           {/* Team Members */}
-          <div className='page-section'>
-            <div className='flex items-center justify-between mb-4'>
-              <h3 className='section-header font-bold flex items-center gap-2'>
-                <User className='w-4 h-4' />
-                Team Members ({team.people.length})
-              </h3>
-              <Button asChild variant='outline' size='sm'>
-                <Link href={`/people/new?teamId=${team.id}`}>Add Member</Link>
-              </Button>
-            </div>
-            <PeopleDataTable
-              hideFilters={true}
-              enablePagination={false}
-              limit={100}
-              immutableFilters={{
-                teamId: team.id,
-              }}
-              settingsId={`team-${team.id}-members`}
-            />
-          </div>
+          <SimplePeopleList
+            people={team.people}
+            title={`Team Members (${team.people.length})`}
+            variant='compact'
+            showAddButton={true}
+            addButtonHref={`/people/new?teamId=${team.id}`}
+            immutableFilters={{
+              teamId: team.id,
+            }}
+            emptyStateText='No team members yet.'
+            onPersonUpdate={() => {
+              window.location.reload()
+            }}
+          />
 
           {/* Team Initiatives */}
-          <div className='page-section'>
-            <div className='flex items-center justify-between mb-4'>
-              <h3 className='section-header font-bold flex items-center gap-2'>
-                <Rocket className='w-4 h-4' />
-                Team Initiatives
-              </h3>
-              <Button asChild variant='outline' size='sm'>
-                <Link href={`/initiatives/new?teamId=${team.id}`}>
-                  New Initiative
-                </Link>
-              </Button>
-            </div>
-            <InitiativeDataTable
-              hideFilters={true}
-              enablePagination={false}
-              limit={100}
-              immutableFilters={{
-                teamId: team.id,
-              }}
-              settingsId={`team-${team.id}-initiatives`}
-            />
-          </div>
+          <SimpleInitiativeList
+            initiatives={team.initiatives}
+            title={`Team Initiatives (${team.initiatives.length})`}
+            variant='compact'
+            showAddButton={true}
+            addButtonHref={`/initiatives/new?teamId=${team.id}`}
+            immutableFilters={{
+              teamId: team.id,
+            }}
+            emptyStateText='No initiatives found.'
+            onInitiativeUpdate={() => {
+              window.location.reload()
+            }}
+          />
 
           {/* Child Teams */}
-          <div className='page-section'>
-            <div className='flex items-center justify-between mb-4'>
-              <h3 className='section-header font-bold flex items-center gap-2'>
-                <Building2 className='w-4 h-4' />
-                Child Teams ({team.children.length})
-              </h3>
-              <Button asChild variant='outline' size='sm'>
-                <Link href={`/teams/new?parentId=${team.id}`}>
-                  Add Child Team
-                </Link>
-              </Button>
-            </div>
-            <TeamChildTeamsTable childTeams={team.children} />
-          </div>
+          <SimpleTeamList
+            teams={team.children}
+            title={`Child Teams (${team.children.length})`}
+            variant='compact'
+            showAddButton={true}
+            addButtonHref={`/teams/new?parentId=${team.id}`}
+            immutableFilters={{}}
+            emptyStateText='No child teams yet.'
+            onTeamUpdate={() => {
+              window.location.reload()
+            }}
+          />
         </div>
       </div>
 
