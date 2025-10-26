@@ -185,6 +185,24 @@ export interface UserSettings {
     }
   >
 
+  // Per-view job roles table settings
+  jobRolesTableSettings: Record<
+    string,
+    {
+      sorting: Array<{ id: string; desc: boolean }>
+      grouping: string
+      sort: {
+        field: string
+        direction: 'asc' | 'desc'
+      }
+      filters: {
+        search: string
+        levelId: string
+        domainId: string
+      }
+    }
+  >
+
   // Future expandable settings can be added here:
   // sidebarCollapsed: boolean
   // defaultPageSize: number
@@ -230,6 +248,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   oneOnOneTableSettings: {},
   meetingTableSettings: {},
   feedbackTableSettings: {},
+  jobRolesTableSettings: {},
   // When adding new settings, add their defaults here:
   // sidebarCollapsed: false
   // defaultPageSize: 25
@@ -814,6 +833,72 @@ export function updateFeedbackTableSettings(
     ...currentSettings,
     feedbackTableSettings: {
       ...currentSettings.feedbackTableSettings,
+      [settingsId]: updatedTableSettings,
+    },
+  }
+
+  saveUserSettings(userId, updatedSettings)
+}
+
+/**
+ * Get job roles table settings for a specific view
+ */
+export function getJobRolesTableSettings(
+  userId: string,
+  settingsId: string
+): UserSettings['jobRolesTableSettings'][string] {
+  const settings = loadUserSettings(userId)
+  return (
+    settings.jobRolesTableSettings[settingsId] || {
+      sorting: [],
+      grouping: 'none',
+      sort: {
+        field: '',
+        direction: 'asc',
+      },
+      filters: {
+        search: '',
+        levelId: '',
+        domainId: '',
+      },
+    }
+  )
+}
+
+/**
+ * Update job roles table settings for a specific view
+ */
+export function updateJobRolesTableSettings(
+  userId: string,
+  settingsId: string,
+  tableSettings: Partial<UserSettings['jobRolesTableSettings'][string]>
+): void {
+  const currentSettings = loadUserSettings(userId)
+  const currentTableSettings = currentSettings.jobRolesTableSettings[
+    settingsId
+  ] || {
+    sorting: [],
+    grouping: 'none',
+    sort: {
+      field: '',
+      direction: 'asc' as const,
+    },
+    filters: {
+      search: '',
+      levelId: '',
+      domainId: '',
+    },
+  }
+
+  const updatedTableSettings = {
+    ...currentTableSettings,
+    ...tableSettings,
+  }
+
+  const updatedSettings = {
+    ...currentSettings,
+    jobRolesTableSettings: {
+      ...currentSettings.jobRolesTableSettings,
       [settingsId]: updatedTableSettings,
     },
   }

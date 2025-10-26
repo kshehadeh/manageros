@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 import { updatePersonPartial } from '@/lib/actions/person'
 
 interface JobRole {
@@ -74,7 +75,7 @@ export function JobRoleEditModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className='sm:max-w-md'>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Job Role</DialogTitle>
           <DialogDescription>
@@ -84,12 +85,12 @@ export function JobRoleEditModal({
 
         <div className='space-y-4'>
           <div className='space-y-2'>
-            <label className='text-sm font-medium'>Job Role</label>
+            <Label htmlFor='job-role'>Job Role</Label>
             <Select
               value={selectedJobRoleId}
               onValueChange={setSelectedJobRoleId}
             >
-              <SelectTrigger>
+              <SelectTrigger id='job-role'>
                 <SelectValue placeholder='Select a job role' />
               </SelectTrigger>
               <SelectContent>

@@ -87,6 +87,15 @@ export async function getJobRole(id: string) {
             id: true,
             name: true,
             email: true,
+            avatar: true,
+            role: true,
+            status: true,
+            team: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
           },
         },
       },

@@ -1,12 +1,9 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import {
-  getJobRoles,
-  getJobLevels,
-  getJobDomains,
-} from '@/lib/actions/job-roles'
-import { JobRolesPageClient } from '@/components/jobs/job-roles-page-client'
+import { getJobLevels, getJobDomains } from '@/lib/actions/job-roles'
+import { JobRoleHeaderButton } from '@/components/jobs/job-role-header-button'
+import { JobRolesContent } from '@/components/jobs/job-roles-content'
 
 export default async function JobRoleManagementPage() {
   const session = await getServerSession(authOptions)
@@ -25,27 +22,27 @@ export default async function JobRoleManagementPage() {
     redirect('/organization/create')
   }
 
-  // Get job roles, levels, and domains for management
-  const [jobRoles, levels, domains] = await Promise.all([
-    getJobRoles(),
-    getJobLevels(),
-    getJobDomains(),
-  ])
+  // Get levels and domains for management
+  const [levels, domains] = await Promise.all([getJobLevels(), getJobDomains()])
 
   return (
     <div className='page-container'>
       <div className='page-header'>
-        <h1 className='page-title'>Job Role Management</h1>
-        <p className='page-subtitle'>
-          Configure job levels, domains, and roles for your organization
-        </p>
+        <div className='flex items-center justify-between'>
+          <div>
+            <h1 className='page-title'>Job Role Management</h1>
+            <p className='page-subtitle'>
+              Configure job levels, domains, and roles for your organization
+            </p>
+          </div>
+          <div className='flex gap-2'>
+            <JobRoleHeaderButton levels={levels} domains={domains} />
+          </div>
+        </div>
       </div>
-
-      <JobRolesPageClient
-        jobRoles={jobRoles}
-        levels={levels}
-        domains={domains}
-      />
+      <div className='page-section'>
+        <JobRolesContent levels={levels} domains={domains} />
+      </div>
     </div>
   )
 }

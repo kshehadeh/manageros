@@ -6,10 +6,10 @@ import { redirect } from 'next/navigation'
 import { JobRoleDetailClient } from '@/components/jobs/job-role-detail-client'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { JobRoleActionsDropdown } from '@/components/jobs/job-role-actions-dropdown'
+import { SimplePeopleList } from '@/components/people/person-list'
 import { SectionHeader } from '@/components/ui/section-header'
-import { PersonListItem } from '@/components/people/person-list-item'
 import { Building2, Users, Briefcase, FileText } from 'lucide-react'
-import Link from 'next/link'
+import type { Person } from '@/types/person'
 
 interface JobRoleDetailPageProps {
   params: Promise<{ id: string }>
@@ -95,28 +95,18 @@ export default async function JobRoleDetailPage({
               {/* People Section */}
               {jobRole.people.length > 0 && (
                 <div className='page-section'>
-                  <SectionHeader
-                    icon={Users}
+                  <SimplePeopleList
+                    people={jobRole.people as Person[]}
                     title={`People (${jobRole.people.length})`}
+                    variant='compact'
+                    showEmail={true}
+                    showRole={true}
+                    showTeam={true}
+                    showJobRole={false}
+                    showManager={false}
+                    showReportsCount={false}
+                    emptyStateText='No people assigned to this job role.'
                   />
-                  <div className='space-y-2'>
-                    {jobRole.people.map(person => (
-                      <Link
-                        key={person.id}
-                        href={`/people/${person.id}`}
-                        className='block'
-                      >
-                        <PersonListItem
-                          person={{
-                            id: person.id,
-                            name: person.name,
-                            email: person.email,
-                          }}
-                          showEmail={true}
-                        />
-                      </Link>
-                    ))}
-                  </div>
                 </div>
               )}
             </div>

@@ -9,9 +9,6 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { JobRoleDetailClient } from '@/components/jobs/job-role-detail-client'
 import { JobRoleEditForm } from '@/components/jobs/job-role-edit-form'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft } from 'lucide-react'
-import Link from 'next/link'
 
 interface JobRoleEditPageProps {
   params: Promise<{ id: string }>
@@ -47,37 +44,7 @@ export default async function JobRoleEditPage({
 
     return (
       <JobRoleDetailClient jobRoleTitle={jobRole.title} jobRoleId={jobRole.id}>
-        <div className='page-container'>
-          {/* Header */}
-          <div className='page-header'>
-            <div className='flex items-start justify-between'>
-              <div className='flex-1'>
-                <div className='flex items-center gap-3 mb-2'>
-                  <Button variant='ghost' size='sm' asChild>
-                    <Link href={`/job-roles/${jobRole.id}`}>
-                      <ArrowLeft className='h-4 w-4' />
-                    </Link>
-                  </Button>
-                  <h1 className='page-title'>Edit Job Role</h1>
-                </div>
-                <div className='page-section-subtitle'>
-                  Update job role details and description
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Main Content */}
-          <div className='main-layout'>
-            <div className='main-content'>
-              <JobRoleEditForm
-                jobRole={jobRole}
-                levels={levels}
-                domains={domains}
-              />
-            </div>
-          </div>
-        </div>
+        <JobRoleEditForm jobRole={jobRole} levels={levels} domains={domains} />
       </JobRoleDetailClient>
     )
   } catch (error) {

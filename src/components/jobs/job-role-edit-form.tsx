@@ -4,11 +4,18 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { MarkdownEditor } from '@/components/markdown-editor'
-
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
-  type JobRoleFormData,
-  updateJobRole,
-} from '@/lib/actions/job-roles'
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Briefcase } from 'lucide-react'
+
+import { type JobRoleFormData, updateJobRole } from '@/lib/actions/job-roles'
 
 interface JobRole {
   id: string
@@ -62,97 +69,113 @@ export function JobRoleEditForm({
     }
   }
 
+  const isFormValid =
+    formData.title.trim() && formData.levelId && formData.domainId
+
   return (
-    <div className='max-w-2xl'>
-      <form onSubmit={handleSubmit} className='space-y-6'>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div>
-            <label className='block text-sm font-medium mb-2'>
-              Job Title *
-            </label>
-            <input
-              type='text'
-              value={formData.title}
-              onChange={e =>
-                setFormData({ ...formData, title: e.target.value })
-              }
-              className='input'
-              placeholder='e.g., Senior Software Engineer'
-              required
-            />
-          </div>
-          <div>
-            <label className='block text-sm font-medium mb-2'>Level *</label>
-            <select
-              value={formData.levelId}
-              onChange={e =>
-                setFormData({ ...formData, levelId: e.target.value })
-              }
-              className='input'
-              required
-            >
-              <option value=''>Select a level</option>
-              {levels.map(level => (
-                <option key={level.id} value={level.id}>
-                  {level.name}
-                </option>
-              ))}
-            </select>
+    <div className='page-container'>
+      {/* Header */}
+      <div className='page-header'>
+        <div className='flex items-start justify-between'>
+          <div className='flex-1'>
+            <div className='flex items-center gap-3 mb-2'>
+              <Briefcase className='h-5 w-5 text-muted-foreground' />
+              <h1 className='page-title'>Edit Job Role</h1>
+            </div>
+            <div className='page-section-subtitle'>
+              Update job role details and description
+            </div>
           </div>
         </div>
+      </div>
 
-        <div>
-          <label className='block text-sm font-medium mb-2'>Domain *</label>
-          <select
-            value={formData.domainId}
-            onChange={e =>
-              setFormData({ ...formData, domainId: e.target.value })
-            }
-            className='input'
-            required
-          >
-            <option value=''>Select a domain</option>
-            {domains.map(domain => (
-              <option key={domain.id} value={domain.id}>
-                {domain.name}
-              </option>
-            ))}
-          </select>
-        </div>
+      {/* Main Content */}
+      <div className='main-layout'>
+        <div className='main-content'>
+          <form onSubmit={handleSubmit} className='space-y-6'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <div>
+                <Label htmlFor='title'>Job Title *</Label>
+                <Input
+                  id='title'
+                  type='text'
+                  value={formData.title}
+                  onChange={e =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
+                  placeholder='e.g., Senior Software Engineer'
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor='level'>Level *</Label>
+                <Select
+                  value={formData.levelId}
+                  onValueChange={value =>
+                    setFormData({ ...formData, levelId: value })
+                  }
+                  required
+                >
+                  <SelectTrigger id='level'>
+                    <SelectValue placeholder='Select a level' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {levels.map(level => (
+                      <SelectItem key={level.id} value={level.id}>
+                        {level.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
-        <div>
-          <label className='block text-sm font-medium mb-2'>
-            Description (Markdown)
-          </label>
-          <MarkdownEditor
-            value={formData.description || ''}
-            onChange={value => setFormData({ ...formData, description: value })}
-            placeholder='### Responsibilities...'
-          />
-        </div>
+            <div>
+              <Label htmlFor='domain'>Domain *</Label>
+              <Select
+                value={formData.domainId}
+                onValueChange={value =>
+                  setFormData({ ...formData, domainId: value })
+                }
+                required
+              >
+                <SelectTrigger id='domain'>
+                  <SelectValue placeholder='Select a domain' />
+                </SelectTrigger>
+                <SelectContent>
+                  {domains.map(domain => (
+                    <SelectItem key={domain.id} value={domain.id}>
+                      {domain.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-        <div className='flex gap-3'>
-          <Button
-            type='submit'
-            disabled={
-              isSubmitting ||
-              !formData.title.trim() ||
-              !formData.levelId ||
-              !formData.domainId
-            }
-          >
-            {isSubmitting ? 'Updating...' : 'Update Job Role'}
-          </Button>
-          <Button
-            type='button'
-            variant='outline'
-            onClick={() => router.push(`/job-roles/${jobRole.id}`)}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
+            <div>
+              <Label htmlFor='description'>Description (Markdown)</Label>
+              <MarkdownEditor
+                value={formData.description || ''}
+                onChange={value =>
+                  setFormData({ ...formData, description: value })
+                }
+                placeholder='### Responsibilities...'
+              />
+            </div>
+
+            {/* Submit Button */}
+            <div className='flex justify-end gap-2 pt-4'>
+              <Button
+                type='submit'
+                disabled={isSubmitting || !isFormValid}
+                className='min-w-[120px]'
+              >
+                {isSubmitting ? 'Updating...' : 'Update Job Role'}
+              </Button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   )
 }

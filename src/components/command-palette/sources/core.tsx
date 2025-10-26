@@ -12,6 +12,7 @@ import {
   CheckSquare,
   UserPlus,
   Calendar,
+  Briefcase,
 } from 'lucide-react'
 import { type CommandItemDescriptor, type CommandSource } from '../types'
 
@@ -262,6 +263,25 @@ function createStaticItems(
         group: 'Administration',
         perform: ({ closePalette, router }) => {
           router.push('/organization/settings')
+          closePalette()
+        },
+      },
+      {
+        id: 'nav.job-roles',
+        title: 'View Job Roles',
+        subtitle: 'Go to job role management',
+        icon: <Briefcase className='h-4 w-4' />,
+        keywords: [
+          'job roles',
+          'job role',
+          'roles',
+          'positions',
+          'jobs',
+          'job management',
+        ],
+        group: 'Administration',
+        perform: ({ closePalette, router }) => {
+          router.push('/organization/job-roles')
           closePalette()
         },
       }
