@@ -456,14 +456,21 @@ export const SlateTaskTextarea = forwardRef<
         </div>
 
         {/* Status area for detected dates and priorities - always reserve space */}
-        <div className='px-3 pb-2 min-h-[2rem] bg-muted/30'>
+        <div className='px-3  bg-muted/50'>
+          {!detectedDates.length && !detectedPriorities.length && (
+            <div className='text-xs text-muted-foreground py-1'>
+              When times or priorities are detected, they will be displayed
+              here.
+            </div>
+          )}
+
           {(detectedDates.length > 0 || detectedPriorities.length > 0) && (
             <div className='flex flex-wrap gap-2'>
               {/* Show detected dates */}
               {detectedDates.map((detectedDate, index) => (
                 <div
                   key={`detected-date-${index}`}
-                  className='flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-md text-sm'
+                  className='flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-md text-xs m-1'
                 >
                   <Calendar className='h-3 w-3' />
                   <span>{formatDetectedDate(detectedDate.date)}</span>
@@ -482,7 +489,7 @@ export const SlateTaskTextarea = forwardRef<
               {detectedPriorities.map((detectedPriority, index) => (
                 <div
                   key={`detected-priority-${index}`}
-                  className={`flex items-center gap-1 px-2 py-1 rounded-md text-sm ${getPriorityBadgeVariant(detectedPriority.priority)}`}
+                  className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs m-1 ${getPriorityBadgeVariant(detectedPriority.priority)}`}
                 >
                   <AlertTriangle className='h-3 w-3' />
                   <span>

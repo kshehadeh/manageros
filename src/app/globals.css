@@ -359,7 +359,7 @@ input[type='time']::-webkit-calendar-picker-indicator {
 }
 
 .page-header {
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: var(--spacing-md);
   margin-left: calc(-1 * var(--spacing-lg));
   margin-right: calc(-1 * var(--spacing-lg));
   padding-left: var(--spacing-lg);

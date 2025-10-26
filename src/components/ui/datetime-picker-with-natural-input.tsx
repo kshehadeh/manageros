@@ -131,6 +131,18 @@ export function DateTimePickerWithNaturalInput({
     }
   }
 
+  const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter' && inputValue) {
+      // Try to parse the current input value
+      const parsedDate = chrono.parseDate(inputValue)
+      if (parsedDate) {
+        // Date was successfully recognized, close the popup
+        setOpen(false)
+        setInputValue('') // Clear the input for next time
+      }
+    }
+  }
+
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
       setSelectedDate(date)
@@ -255,6 +267,7 @@ export function DateTimePickerWithNaturalInput({
               }
               value={inputValue}
               onChange={handleInputChange}
+              onKeyDown={handleInputKeyDown}
               className='text-sm mb-3'
             />
 
@@ -327,61 +340,157 @@ export function DateTimePickerWithNaturalInput({
                   </div>
 
                   {/* Quick time buttons */}
-                  <div className='grid grid-cols-2 gap-1'>
-                    {[
-                      {
-                        time: '9 AM',
-                        hours: '09',
-                        minutes: '00',
-                        period: 'AM',
-                      },
-                      {
-                        time: '12 PM',
-                        hours: '12',
-                        minutes: '00',
-                        period: 'PM',
-                      },
-                      {
-                        time: '2 PM',
-                        hours: '02',
-                        minutes: '00',
-                        period: 'PM',
-                      },
-                      {
-                        time: '4 PM',
-                        hours: '04',
-                        minutes: '00',
-                        period: 'PM',
-                      },
-                    ].map(({ time, hours, minutes, period }) => (
-                      <Button
-                        key={time}
-                        variant='outline'
-                        size='sm'
-                        className='h-7 text-xs'
-                        onClick={() => {
-                          setSelectedTime({
-                            hours,
-                            minutes,
-                            period: period as 'AM' | 'PM',
-                          })
-                          if (selectedDate) {
-                            const hours24 = convertTo24Hour(
-                              parseInt(hours),
-                              period as 'AM' | 'PM'
+                  <div className='space-y-3'>
+                    <div className='space-y-1'>
+                      <Label className='text-xs text-muted-foreground'>
+                        Quick Times
+                      </Label>
+                      <div className='grid grid-cols-2 gap-1'>
+                        {[
+                          {
+                            time: '9 AM',
+                            hours: '09',
+                            minutes: '00',
+                            period: 'AM',
+                          },
+                          {
+                            time: '12 PM',
+                            hours: '12',
+                            minutes: '00',
+                            period: 'PM',
+                          },
+                          {
+                            time: '2 PM',
+                            hours: '02',
+                            minutes: '00',
+                            period: 'PM',
+                          },
+                          {
+                            time: '4 PM',
+                            hours: '04',
+                            minutes: '00',
+                            period: 'PM',
+                          },
+                        ].map(({ time, hours, minutes, period }) => (
+                          <Button
+                            key={time}
+                            variant='outline'
+                            size='sm'
+                            className='h-7 text-xs'
+                            onClick={() => {
+                              setSelectedTime({
+                                hours,
+                                minutes,
+                                period: period as 'AM' | 'PM',
+                              })
+                              if (selectedDate) {
+                                const hours24 = convertTo24Hour(
+                                  parseInt(hours),
+                                  period as 'AM' | 'PM'
+                                )
+                                updateDateTime(
+                                  selectedDate,
+                                  hours24,
+                                  parseInt(minutes)
+                                )
+                              }
+                            }}
+                          >
+                            <Clock className='mr-1 h-3 w-3' />
+                            {time}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Quick date buttons */}
+                    <div className='space-y-1'>
+                      <Label className='text-xs text-muted-foreground'>
+                        Quick Dates
+                      </Label>
+                      <div className='grid grid-cols-1 gap-1'>
+                        <Button
+                          variant='outline'
+                          size='sm'
+                          className='h-7 text-xs justify-start'
+                          onClick={() => {
+                            // Tomorrow morning at 9am
+                            const tomorrow = new Date()
+                            tomorrow.setDate(tomorrow.getDate() + 1)
+                            setSelectedDate(tomorrow)
+                            setSelectedTime({
+                              hours: '09',
+                              minutes: '00',
+                              period: 'AM',
+                            })
+                            updateDateTime(tomorrow, 9, 0)
+                          }}
+                        >
+                          <CalendarIcon className='mr-1 h-3 w-3' />
+                          Tomorrow morning
+                        </Button>
+                        <Button
+                          variant='outline'
+                          size='sm'
+                          className='h-7 text-xs justify-start'
+                          onClick={() => {
+                            // Next week (Monday after current date at 9am)
+                            const today = new Date()
+                            const daysUntilNextMonday =
+                              (7 - today.getDay() + 1) % 7 || 7
+                            const nextMonday = new Date(today)
+                            nextMonday.setDate(
+                              today.getDate() + daysUntilNextMonday
                             )
-                            updateDateTime(
-                              selectedDate,
-                              hours24,
-                              parseInt(minutes)
+                            setSelectedDate(nextMonday)
+                            setSelectedTime({
+                              hours: '09',
+                              minutes: '00',
+                              period: 'AM',
+                            })
+                            updateDateTime(nextMonday, 9, 0)
+                          }}
+                        >
+                          <CalendarIcon className='mr-1 h-3 w-3' />
+                          Next week
+                        </Button>
+                        <Button
+                          variant='outline'
+                          size='sm'
+                          className='h-7 text-xs justify-start'
+                          onClick={() => {
+                            // First Monday of next month at 9am
+                            const today = new Date()
+                            const nextMonth = new Date(
+                              today.getFullYear(),
+                              today.getMonth() + 1,
+                              1
                             )
-                          }
-                        }}
-                      >
-                        <Clock className='mr-1 h-3 w-3' />
-                        {time}
-                      </Button>
-                    ))}
+                            // Find first Monday of the month
+                            const dayOfWeek = nextMonth.getDay()
+                            const daysUntilMonday =
+                              dayOfWeek === 0
+                                ? 1
+                                : dayOfWeek === 1
+                                  ? 0
+                                  : 8 - dayOfWeek
+                            nextMonth.setDate(
+                              nextMonth.getDate() + daysUntilMonday
+                            )
+                            setSelectedDate(nextMonth)
+                            setSelectedTime({
+                              hours: '09',
+                              minutes: '00',
+                              period: 'AM',
+                            })
+                            updateDateTime(nextMonth, 9, 0)
+                          }}
+                        >
+                          <CalendarIcon className='mr-1 h-3 w-3' />
+                          Next month
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
