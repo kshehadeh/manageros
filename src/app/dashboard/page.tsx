@@ -5,7 +5,7 @@ import { DashboardAssignedTasksServerSection } from '@/components/dashboard-sect
 import { DashboardOpenInitiativesServerSection } from '@/components/dashboard-sections/open-initiatives-section-server'
 import { DashboardDirectReportsSection } from '@/components/dashboard-sections/direct-reports-section'
 import { DashboardRelatedTeamsSection } from '@/components/dashboard-sections/related-teams-section'
-import { DashboardRecentOneOnOnesSection } from '@/components/dashboard-sections/recent-oneonones-section'
+import { DashboardRecentOneOnOnesServerSection } from '@/components/dashboard-sections/recent-oneonones-section-server'
 import { DashboardFeedbackCampaignsSection } from '@/components/dashboard-sections/feedback-campaigns-section'
 import { DashboardUpcomingMeetingsSection } from '@/components/dashboard-sections/upcoming-meetings-section'
 import {
@@ -49,7 +49,7 @@ export default async function Home() {
           </Suspense>
 
           <Suspense fallback={<RecentOneOnOnesSectionFallback />}>
-            <DashboardRecentOneOnOnesSection />
+            <DashboardRecentOneOnOnesServerSection personId={user.personId} />
           </Suspense>
 
           <Suspense fallback={<UpcomingMeetingsSectionFallback />}>

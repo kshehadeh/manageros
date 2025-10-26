@@ -194,9 +194,9 @@ export function ViewDropdown({
           <PopoverTrigger asChild>
             <Button
               variant='outline'
-              size='sm'
+              size='icon-lg'
               className={cn(
-                'flex items-center gap-2',
+                'flex items-center gap-2 px-2',
                 hasActiveSettings && 'border-primary bg-primary/5',
                 className
               )}
@@ -204,10 +204,7 @@ export function ViewDropdown({
               <Settings className='h-4 w-4' />
               {title}
               {hasActiveSettings && (
-                <Badge
-                  variant='secondary'
-                  className='h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center'
-                >
+                <Badge className='h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center bg-primary text-primary-foreground'>
                   {activeCount}
                 </Badge>
               )}
@@ -249,10 +246,7 @@ export function ViewDropdown({
               <Settings className='h-4 w-4' />
               {title}
               {hasActiveSettings && (
-                <Badge
-                  variant='secondary'
-                  className='h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center'
-                >
+                <Badge className='h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center bg-primary text-primary-foreground'>
                   {activeCount}
                 </Badge>
               )}

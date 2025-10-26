@@ -593,7 +593,7 @@ export function GenericDataTable<
             {/* Search Input - Takes up most space */}
             {!immutableFilters?.search && (
               <div className='relative flex-1 min-w-0'>
-                <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none' />
+                <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10' />
                 <Input
                   ref={searchInputRef}
                   key='search-input'
@@ -638,7 +638,7 @@ export function GenericDataTable<
                     })
                   : undefined
               }
-              className='flex-shrink-0 min-w-fit'
+              className='shrink-0 min-w-fit'
             />
           </div>
 
