@@ -231,8 +231,8 @@ export function SimplePeopleList({
 
   return (
     <>
-      <section className={`rounded-xl py-4 -mx-3 px-3 space-y-4 ${className}`}>
-        {renderSectionHeader()}
+      <section className={`space-y-4 ${className}`}>
+        {title && renderSectionHeader()}
 
         <div className='space-y-0 divide-y'>
           {visiblePeople.length === 0 ? (

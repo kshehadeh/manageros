@@ -34,6 +34,7 @@ interface PersonSelectProps {
   noneLabel?: string // Optional: label for "None" option (default: "No person")
   className?: string
   autoFocus?: boolean // Optional: whether to auto-open dropdown (default: false)
+  excludePersonIds?: string[] // Optional: list of person IDs to exclude from the list
 }
 
 export function PersonSelect({
@@ -47,6 +48,7 @@ export function PersonSelect({
   noneLabel = 'No person',
   className,
   autoFocus = false,
+  excludePersonIds = [],
 }: PersonSelectProps) {
   const { people, isLoading } = usePeopleForSelect()
   const [selectOpen, setSelectOpen] = useState(false)
@@ -56,9 +58,14 @@ export function PersonSelect({
     16
   )
 
+  // Filter out excluded people
+  const availablePeople = people.filter(
+    person => !excludePersonIds.includes(person.id)
+  )
+
   // Use keyboard search hook
   const { searchQuery, filteredItems: filteredPeople } = useKeyboardSearch({
-    items: people,
+    items: availablePeople,
     getItemText: person => person.name,
     onSelect: person => onValueChange?.(person.id),
     isOpen: selectOpen,
@@ -66,13 +73,13 @@ export function PersonSelect({
 
   // Auto-open dropdown if requested
   useEffect(() => {
-    if (autoFocus && !isLoading && people.length > 0) {
+    if (autoFocus && !isLoading && availablePeople.length > 0) {
       const timer = setTimeout(() => {
         setSelectOpen(true)
       }, 150)
       return () => clearTimeout(timer)
     }
-  }, [autoFocus, isLoading, people.length])
+  }, [autoFocus, isLoading, availablePeople.length])
 
   const renderPersonItem = (person: Person) => (
     <div className='flex items-center gap-2'>

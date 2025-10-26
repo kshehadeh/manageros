@@ -10,6 +10,7 @@ import { SimplePeopleList } from '@/components/people/person-list'
 import { SectionHeader } from '@/components/ui/section-header'
 import { Building2, Users, Briefcase, FileText } from 'lucide-react'
 import type { Person } from '@/types/person'
+import { AssignPersonButton } from '@/components/jobs/assign-person-button'
 
 interface JobRoleDetailPageProps {
   params: Promise<{ id: string }>
@@ -93,22 +94,32 @@ export default async function JobRoleDetailPage({
               )}
 
               {/* People Section */}
-              {jobRole.people.length > 0 && (
-                <div className='page-section'>
-                  <SimplePeopleList
-                    people={jobRole.people as Person[]}
-                    title={`People (${jobRole.people.length})`}
-                    variant='compact'
-                    showEmail={true}
-                    showRole={true}
-                    showTeam={true}
-                    showJobRole={false}
-                    showManager={false}
-                    showReportsCount={false}
-                    emptyStateText='No people assigned to this job role.'
-                  />
-                </div>
-              )}
+              <div className='page-section'>
+                <SectionHeader
+                  icon={Users}
+                  title={`People (${jobRole.people.length})`}
+                  action={
+                    <AssignPersonButton
+                      jobRoleId={jobRole.id}
+                      excludePersonIds={(jobRole.people as Person[]).map(
+                        p => p.id
+                      )}
+                    />
+                  }
+                />
+                <SimplePeopleList
+                  people={jobRole.people as Person[]}
+                  title={''}
+                  variant='compact'
+                  showEmail={true}
+                  showRole={true}
+                  showTeam={true}
+                  showJobRole={false}
+                  showManager={false}
+                  showReportsCount={false}
+                  emptyStateText='No people assigned to this job role.'
+                />
+              </div>
             </div>
           </div>
         </div>

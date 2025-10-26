@@ -412,6 +412,9 @@ export async function updatePersonPartial(
     ? new Date(validatedData.birthday + 'T00:00:00')
     : undefined
 
+  // Store old job role ID if it exists before update (for revalidation)
+  const oldJobRoleId = existingPerson.jobRoleId
+
   // Build update data object with only provided fields
   const updateFields: Partial<Prisma.PersonUpdateInput> = {}
   if (validatedData.name !== undefined) updateFields.name = validatedData.name
@@ -441,7 +444,7 @@ export async function updatePersonPartial(
   if (startedAt !== undefined) updateFields.startedAt = startedAt
 
   // Update the person
-  await prisma.person.update({
+  const updatedPerson = await prisma.person.update({
     where: { id },
     data: updateFields,
     include: {
@@ -458,6 +461,21 @@ export async function updatePersonPartial(
 
   // Revalidate the people page
   revalidatePath('/people')
+
+  // Revalidate the person detail page
+  revalidatePath(`/people/${id}`)
+
+  // Revalidate job roles if job role was updated
+  if (validatedData.jobRoleId !== undefined) {
+    // Revalidate the new job role if assigned
+    if (updatedPerson.jobRoleId) {
+      revalidatePath(`/job-roles/${updatedPerson.jobRoleId}`)
+    }
+    // Revalidate the old job role if it was changed
+    if (oldJobRoleId && oldJobRoleId !== updatedPerson.jobRoleId) {
+      revalidatePath(`/job-roles/${oldJobRoleId}`)
+    }
+  }
 }
 
 export async function deletePerson(id: string) {
