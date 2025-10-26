@@ -36,28 +36,32 @@ Users can upload avatar images directly from their computer:
 Avatars can be sourced from linked accounts:
 
 #### GitHub Avatar
+
 - Automatically generated from GitHub username
 - Format: `https://github.com/{username}.png`
 - Available when a person has a linked GitHub account
 
 #### Jira Avatar
+
 - Uses Jira account ID
 - Available when a person has a linked Jira account
 
 ### 3. Initials Fallback
 
 When no avatar is set, the system displays initials:
+
 - First letter of first name + first letter of last name
 - Example: "John Doe" → "JD"
 - Displayed in a circular badge with neutral background
 
 ## Components
 
-### AvatarEditor
+### PersonAvatarEditDialog
 
-**Path**: `src/components/people/avatar-editor.tsx`
+**Path**: `src/components/people/person-avatar-edit-dialog.tsx`
 
-A comprehensive avatar management component that provides:
+A dialog-based avatar management component that provides:
+
 - Current avatar display with initials fallback
 - Upload functionality
 - Option to use Jira avatar (if linked)
@@ -65,26 +69,32 @@ A comprehensive avatar management component that provides:
 - Remove avatar functionality
 
 **Props**:
+
 ```typescript
-interface AvatarEditorProps {
-  personId?: string           // Person ID (required for upload)
-  personName: string          // Name for initials fallback
+interface PersonAvatarEditDialogProps {
+  personId: string // Person ID (required for upload)
+  personName: string // Name for initials fallback
   currentAvatar?: string | null
   jiraAvatar?: string | null
   githubAvatar?: string | null
+  isOpen: boolean // Dialog open state
+  onOpenChange: (open: boolean) => void
   onAvatarChange?: (avatarUrl: string | null) => void
 }
 ```
 
 **Usage**:
+
 ```tsx
-<AvatarEditor
+<PersonAvatarEditDialog
   personId={person.id}
   personName={person.name}
   currentAvatar={person.avatar}
   jiraAvatar={linkedAvatars?.jiraAvatar}
   githubAvatar={linkedAvatars?.githubAvatar}
-  onAvatarChange={(url) => {
+  isOpen={isDialogOpen}
+  onOpenChange={setIsDialogOpen}
+  onAvatarChange={url => {
     // Handle avatar change
   }}
 />
@@ -97,22 +107,20 @@ interface AvatarEditorProps {
 A reusable avatar display component used throughout the app:
 
 **Props**:
+
 ```typescript
 interface PersonAvatarProps {
-  name: string                // Name for initials fallback
-  avatar?: string | null      // Avatar URL
+  name: string // Name for initials fallback
+  avatar?: string | null // Avatar URL
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   className?: string
 }
 ```
 
 **Usage**:
+
 ```tsx
-<PersonAvatar 
-  name={person.name} 
-  avatar={person.avatar} 
-  size="md" 
-/>
+<PersonAvatar name={person.name} avatar={person.avatar} size='md' />
 ```
 
 ## Server Actions
@@ -125,12 +133,13 @@ Uploads an avatar image to R2 storage.
 
 ```typescript
 async function uploadAvatar(
-  formData: FormData, 
+  formData: FormData,
   personId: string
 ): Promise<string>
 ```
 
 **Security**:
+
 - Requires admin role
 - Validates person belongs to user's organization
 - Enforces file size and type restrictions
@@ -143,12 +152,13 @@ Updates a person's avatar URL in the database.
 
 ```typescript
 async function updatePersonAvatar(
-  personId: string, 
+  personId: string,
   avatarUrl: string | null
 ): Promise<{ success: boolean }>
 ```
 
 **Security**:
+
 - Requires admin role
 - Validates person belongs to user's organization
 
@@ -159,42 +169,66 @@ async function updatePersonAvatar(
 Retrieves avatar URLs from linked Jira and GitHub accounts.
 
 ```typescript
-async function getLinkedAccountAvatars(
-  personId: string
-): Promise<{
+async function getLinkedAccountAvatars(personId: string): Promise<{
   jiraAvatar?: string
   githubAvatar?: string
 }>
 ```
 
 **Security**:
+
 - Validates person belongs to user's organization
 
 ## Form Integration
 
-The avatar editor is integrated into the Person Edit Form (`src/components/people/person-form.tsx`) in the **Basic Information** section:
+The avatar editor is integrated into the Person Edit Form (`src/components/people/person-form.tsx`) in the **Basic Information** section. A clickable avatar and button open the `PersonAvatarEditDialog`:
 
 ```tsx
-<div className='card'>
-  <h3 className='font-semibold mb-4'>Basic Information</h3>
-  <div className='space-y-4'>
-    {/* Avatar Editor */}
-    <div>
-      <label className='block text-sm font-medium mb-2'>Avatar</label>
-      <AvatarEditor
-        personId={person?.id}
-        personName={formData.name || 'New Person'}
-        currentAvatar={formData.avatar || null}
-        jiraAvatar={linkedAvatars?.jiraAvatar}
-        githubAvatar={linkedAvatars?.githubAvatar}
-        onAvatarChange={(avatarUrl) => {
-          setFormData({ ...formData, avatar: avatarUrl || '' })
-        }}
-      />
+;<div className='space-y-4'>
+  {/* Avatar Section - Only show when editing existing person */}
+  {person && (
+    <div className='space-y-2'>
+      <Label>Avatar</Label>
+      <div className='flex items-center gap-4'>
+        <PersonAvatar
+          name={formData.name || person.name}
+          avatar={formData.avatar || person.avatar}
+          size='lg'
+        />
+        <Button
+          type='button'
+          variant='outline'
+          size='sm'
+          onClick={() => setIsAvatarDialogOpen(true)}
+        >
+          <ImageIcon className='h-4 w-4 mr-2' />
+          {formData.avatar ? 'Change Avatar' : 'Add Avatar'}
+        </Button>
+      </div>
     </div>
-    {/* Other fields... */}
-  </div>
+  )}
+  {/* Other fields... */}
 </div>
+
+{
+  /* Avatar Edit Dialog */
+}
+{
+  person && (
+    <PersonAvatarEditDialog
+      personId={person.id}
+      personName={formData.name || person.name}
+      currentAvatar={formData.avatar || person.avatar}
+      jiraAvatar={linkedAvatars?.jiraAvatar}
+      githubAvatar={linkedAvatars?.githubAvatar}
+      isOpen={isAvatarDialogOpen}
+      onOpenChange={setIsAvatarDialogOpen}
+      onAvatarChange={avatarUrl => {
+        setFormData(prev => ({ ...prev, avatar: avatarUrl || '' }))
+      }}
+    />
+  )
+}
 ```
 
 ## Validation
@@ -266,11 +300,13 @@ Potential improvements for future releases:
 To apply the avatar feature to your database:
 
 1. Run the migration:
+
    ```bash
    bunx prisma migrate dev
    ```
 
 2. Regenerate Prisma client:
+
    ```bash
    bunx prisma generate
    ```

@@ -329,7 +329,7 @@ _Next Review: February 2025_
 
 - **Avatar Management** (Completed):
   - Extended Person model with optional `avatar` field for storing avatar URLs
-  - Created comprehensive `AvatarEditor` component integrated into person settings form (Basic Information section)
+  - Created comprehensive `PersonAvatarEditDialog` component integrated into person form (Basic Information section)
   - Implemented avatar upload functionality to Cloudflare R2 with 5MB size limit
   - Added support for using Jira and GitHub account avatars from linked accounts
   - Built reusable `PersonAvatar` component with automatic initials fallback

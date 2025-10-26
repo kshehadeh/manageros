@@ -12,10 +12,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Upload, X } from 'lucide-react'
 import { FaJira, FaGithub } from 'react-icons/fa'
-import {
-  uploadAvatar,
-  updatePersonAvatar,
-} from '@/lib/actions/avatar'
+import { uploadAvatar, updatePersonAvatar } from '@/lib/actions/avatar'
 import { useRef } from 'react'
 
 interface PersonAvatarEditDialogProps {
@@ -140,7 +137,7 @@ export function PersonAvatarEditDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-md'>
+      <DialogContent className='max-w-[50vw] max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>Edit Person Avatar</DialogTitle>
           <DialogDescription>
@@ -152,7 +149,7 @@ export function PersonAvatarEditDialog({
             {/* Current Avatar Display */}
             <div className='flex items-center gap-4'>
               <div className='relative'>
-                <Avatar className='h-20 w-20 flex-shrink-0'>
+                <Avatar className='h-20 w-20 shrink-0'>
                   {avatar && <AvatarImage src={avatar} alt={personName} />}
                   <AvatarFallback className='text-lg'>
                     {getInitials(personName)}
