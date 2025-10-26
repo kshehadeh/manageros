@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { SectionHeader } from '@/components/ui/section-header'
@@ -228,6 +228,32 @@ export function SimpleTaskList({
       completedTasks.has(task.id) || task.status === TASK_STATUS.DONE
     const isProcessing = processingTasks.has(task.id)
 
+    // Collect subheader items
+    const subheaderItems: React.ReactNode[] = [
+      <Badge key='status' variant={statusVariant} className='text-xs'>
+        {taskStatusUtils.getLabel(task.status as TaskStatus)}
+      </Badge>,
+    ]
+
+    if (task.initiative && variant === 'compact') {
+      subheaderItems.push(
+        <span key='initiative' className='truncate'>
+          {task.initiative.title}
+        </span>
+      )
+    }
+
+    if (task.dueDate) {
+      subheaderItems.push(
+        <span
+          key='dueDate'
+          className={task.dueDate < new Date() ? 'text-destructive' : ''}
+        >
+          Due {formatDistanceToNow(task.dueDate, { addSuffix: true })}
+        </span>
+      )
+    }
+
     return (
       <div
         key={task.id}
@@ -257,27 +283,12 @@ export function SimpleTaskList({
             </h3>
 
             <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-              <Badge variant={statusVariant} className='text-xs'>
-                {taskStatusUtils.getLabel(task.status as TaskStatus)}
-              </Badge>
-              {task.initiative && variant === 'compact' && (
-                <>
-                  <span className='truncate'>{task.initiative.title}</span>
-                  <span>•</span>
-                </>
-              )}
-              {task.dueDate && (
-                <span
-                  className={
-                    task.dueDate < new Date() ? 'text-destructive' : ''
-                  }
-                >
-                  Due{' '}
-                  {formatDistanceToNow(task.dueDate, {
-                    addSuffix: true,
-                  })}
-                </span>
-              )}
+              {subheaderItems.map((item, index) => (
+                <React.Fragment key={index}>
+                  {item}
+                  {index < subheaderItems.length - 1 && <span>•</span>}
+                </React.Fragment>
+              ))}
             </div>
           </div>
         </div>

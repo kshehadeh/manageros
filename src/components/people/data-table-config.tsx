@@ -50,6 +50,9 @@ export const peopleDataTableConfig: DataTableConfig<
   // Column definitions
   createColumns: ({ onButtonClick, grouping, visibleColumns }) => {
     const isGroupedByTeam = grouping && grouping.includes('team')
+    const isGroupedByManager = grouping && grouping.includes('manager')
+    const isGroupedByJobRole = grouping && grouping.includes('jobRole')
+    const isGroupedByStatus = grouping && grouping.includes('status')
     const getStatusBadgeVariant = (status: string): BadgeVariant => {
       switch (status) {
         case 'active':
@@ -165,7 +168,9 @@ export const peopleDataTableConfig: DataTableConfig<
         minSize: 120,
         maxSize: 200,
         meta: {
-          hidden: visibleColumns?.includes('manager') === false,
+          hidden:
+            visibleColumns?.includes('manager') === false ||
+            Boolean(isGroupedByManager),
         },
       },
       {
@@ -190,7 +195,9 @@ export const peopleDataTableConfig: DataTableConfig<
         minSize: 120,
         maxSize: 200,
         meta: {
-          hidden: visibleColumns?.includes('jobRole') === false,
+          hidden:
+            visibleColumns?.includes('jobRole') === false ||
+            Boolean(isGroupedByJobRole),
         },
       },
       {
@@ -209,7 +216,9 @@ export const peopleDataTableConfig: DataTableConfig<
         minSize: 100,
         maxSize: 150,
         meta: {
-          hidden: visibleColumns?.includes('status') === false,
+          hidden:
+            visibleColumns?.includes('status') === false ||
+            Boolean(isGroupedByStatus),
         },
       },
       {

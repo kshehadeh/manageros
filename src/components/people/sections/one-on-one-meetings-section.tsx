@@ -1,8 +1,8 @@
 import { prisma } from '@/lib/db'
-import { SectionHeader } from '@/components/ui/section-header'
-import { Button } from '@/components/ui/button'
-import { Handshake } from 'lucide-react'
-import Link from 'next/link'
+import {
+  SimpleOneOnOneList,
+  type OneOnOne,
+} from '@/components/oneonones/oneonone-list'
 
 interface OneOnOneMeetingsSectionProps {
   personId: string
@@ -33,102 +33,57 @@ export async function OneOnOneMeetingsSection({
     return null
   }
 
-  // Get 1:1 meetings as manager
-  const oneOnOnesAsManager = await prisma.oneOnOne.findMany({
-    where: {
-      managerId: personId,
-    },
-    include: {
-      report: true,
-    },
-    orderBy: { scheduledAt: 'desc' },
-  })
-
-  // Get 1:1 meetings as report
+  // Get 1:1 meetings where person is involved (as manager or report)
   const oneOnOnes = await prisma.oneOnOne.findMany({
     where: {
-      reportId: personId,
+      OR: [{ managerId: personId }, { reportId: personId }],
     },
     include: {
-      manager: true,
+      manager: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      report: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
     },
     orderBy: { scheduledAt: 'desc' },
+    take: 5, // Limit to 5 for the preview
   })
 
   // Only show if person has reports or a manager AND has 1:1s
   if (
     (person.reports.length === 0 && !person.manager) ||
-    (oneOnOnes.length === 0 && oneOnOnesAsManager.length === 0)
+    oneOnOnes.length === 0
   ) {
     return null
   }
 
-  return (
-    <section>
-      <SectionHeader icon={Handshake} title='1:1 Meetings' />
-      <div className='space-y-3'>
-        {/* As Manager */}
-        {oneOnOnesAsManager.length > 0 && (
-          <div>
-            <div className='text-sm font-medium mb-2'>
-              As Manager ({oneOnOnesAsManager.length})
-            </div>
-            {oneOnOnesAsManager.slice(0, 2).map(oneOnOne => (
-              <div key={oneOnOne.id} className='border rounded-xl p-3 mb-2'>
-                <div className='flex items-center justify-between'>
-                  <div>
-                    <Link
-                      href={`/people/${oneOnOne.report.id}`}
-                      className='font-medium hover:text-primary transition-colors'
-                    >
-                      {oneOnOne.report.name}
-                    </Link>
-                    <div className='text-xs text-muted-foreground mt-1'>
-                      {oneOnOne.scheduledAt
-                        ? new Date(oneOnOne.scheduledAt).toLocaleDateString()
-                        : 'TBD'}
-                    </div>
-                  </div>
-                  <Button asChild variant='outline' size='sm'>
-                    <Link href={`/oneonones/${oneOnOne.id}`}>View</Link>
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+  // Transform the data to match the OneOnOne interface
+  const transformedOneOnOnes: OneOnOne[] = oneOnOnes.map(oneOnOne => ({
+    id: oneOnOne.id,
+    managerId: oneOnOne.managerId,
+    reportId: oneOnOne.reportId,
+    scheduledAt: oneOnOne.scheduledAt,
+    notes: oneOnOne.notes,
+    manager: oneOnOne.manager,
+    report: oneOnOne.report,
+  }))
 
-        {/* As Report */}
-        {oneOnOnes.length > 0 && (
-          <div>
-            <div className='text-sm font-medium mb-2'>
-              1:1 Meetings ({oneOnOnes.length})
-            </div>
-            {oneOnOnes.slice(0, 2).map(oneOnOne => (
-              <div key={oneOnOne.id} className='border rounded-xl p-3 mb-2'>
-                <div className='flex items-center justify-between'>
-                  <div>
-                    <Link
-                      href={`/people/${oneOnOne.manager.id}`}
-                      className='font-medium hover:text-primary transition-colors'
-                    >
-                      {oneOnOne.manager.name}
-                    </Link>
-                    <div className='text-xs text-muted-foreground mt-1'>
-                      {oneOnOne.scheduledAt
-                        ? new Date(oneOnOne.scheduledAt).toLocaleDateString()
-                        : 'TBD'}
-                    </div>
-                  </div>
-                  <Button asChild variant='outline' size='sm'>
-                    <Link href={`/oneonones/${oneOnOne.id}`}>View</Link>
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
+  return (
+    <SimpleOneOnOneList
+      oneOnOnes={transformedOneOnOnes}
+      title='1:1 Meetings'
+      variant='compact'
+      viewAllHref='/oneonones'
+      emptyStateText='No 1-on-1s found.'
+    />
   )
 }

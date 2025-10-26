@@ -1,6 +1,8 @@
-import { InitiativeDataTable } from '@/components/initiatives/data-table'
-import { SectionHeader } from '@/components/ui/section-header'
-import { Rocket } from 'lucide-react'
+import { prisma } from '@/lib/db'
+import {
+  SimpleInitiativeList,
+  type Initiative,
+} from '@/components/initiatives/initiative-list'
 
 interface OwnedInitiativesSectionProps {
   personId: string
@@ -15,18 +17,57 @@ export async function OwnedInitiativesSection({
     return null
   }
 
+  // Get initiatives owned by this person
+  const initiatives = await prisma.initiative.findMany({
+    where: {
+      organizationId,
+      owners: {
+        some: { personId },
+      },
+    },
+    include: {
+      team: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      _count: {
+        select: {
+          objectives: true,
+          tasks: true,
+          checkIns: true,
+        },
+      },
+    },
+    orderBy: { updatedAt: 'desc' },
+  })
+
+  // Only show if person has initiatives
+  if (initiatives.length === 0) {
+    return null
+  }
+
+  // Transform the data to match the Initiative interface
+  const transformedInitiatives: Initiative[] = initiatives.map(initiative => ({
+    id: initiative.id,
+    title: initiative.title,
+    description: initiative.summary, // Map summary to description
+    status: initiative.status,
+    rag: initiative.rag,
+    team: initiative.team,
+    updatedAt: initiative.updatedAt,
+    createdAt: initiative.createdAt,
+    _count: initiative._count,
+  }))
+
   return (
-    <section>
-      <SectionHeader icon={Rocket} title='Owned Initiatives' />
-      <InitiativeDataTable
-        hideFilters={true}
-        enablePagination={false}
-        limit={100}
-        immutableFilters={{
-          ownerId: personId,
-        }}
-        settingsId={`person-${personId}-initiatives`}
-      />
-    </section>
+    <SimpleInitiativeList
+      initiatives={transformedInitiatives}
+      title='Owned Initiatives'
+      variant='compact'
+      viewAllHref='/initiatives'
+      emptyStateText='No initiatives found.'
+    />
   )
 }

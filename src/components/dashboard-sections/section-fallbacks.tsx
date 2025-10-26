@@ -1,5 +1,6 @@
 import { Skeleton } from '@/components/ui/loading'
 import { Users, Users2 } from 'lucide-react'
+import { SimpleTaskListSkeleton } from '@/components/common/simple-task-list-skeleton'
 
 function SectionHeader({
   title,
@@ -114,20 +115,11 @@ export function OpenInitiativesSectionFallback() {
 
 export function RecentOneOnOnesSectionFallback() {
   return (
-    <section className='bg-card/30 border border-border/50 rounded-xl p-4 space-y-4'>
-      <SectionHeader title='Recent 1:1s' />
-      <div className='grid gap-3'>
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className='card p-4 flex items-center justify-between'>
-            <div className='space-y-2'>
-              <Skeleton className='h-4 w-44' />
-              <Skeleton className='h-3 w-24' />
-            </div>
-            <Skeleton className='h-3 w-16' />
-          </div>
-        ))}
-      </div>
-    </section>
+    <SimpleTaskListSkeleton
+      title='Recent 1:1s'
+      itemCount={3}
+      variant='simple'
+    />
   )
 }
 
@@ -205,58 +197,20 @@ export function UpcomingMeetingsSectionFallback() {
 
 export function TasksServerSectionFallback() {
   return (
-    <section className='rounded-xl py-4 -mx-3 px-3 md:mx-0 md:px-4 space-y-4'>
-      <SectionHeader title='Assigned Tasks' />
-      <div className='space-y-3'>
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div
-            key={i}
-            className='flex items-center justify-between p-3 border rounded-lg'
-          >
-            <div className='flex-1 min-w-0'>
-              <div className='flex items-center gap-2 mb-1'>
-                <Skeleton className='h-4 w-48' />
-                <Skeleton className='h-5 w-16 rounded-full' />
-              </div>
-              <div className='flex items-center gap-2'>
-                <Skeleton className='h-3 w-32' />
-                <Skeleton className='h-3 w-2' />
-                <Skeleton className='h-3 w-24' />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
+    <SimpleTaskListSkeleton
+      title='Assigned Tasks'
+      itemCount={5}
+      variant='simple'
+    />
   )
 }
 
 export function OpenInitiativesServerSectionFallback() {
   return (
-    <section className='rounded-xl py-4 -mx-3 px-3 md:mx-0 md:px-4 space-y-4'>
-      <SectionHeader title='Your Initiatives' />
-      <div className='space-y-3'>
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className='p-4 border rounded-lg'>
-            <div className='flex items-start justify-between gap-3'>
-              <div className='flex-1 min-w-0'>
-                <div className='flex items-center gap-2 mb-2'>
-                  <Skeleton className='h-4 w-40' />
-                  <Skeleton className='h-3 w-3 rounded-full' />
-                </div>
-                <div className='flex items-center gap-2 mb-2'>
-                  <Skeleton className='h-5 w-20 rounded-full' />
-                </div>
-                <div className='flex items-center gap-2'>
-                  <Skeleton className='h-3 w-24' />
-                  <Skeleton className='h-3 w-2' />
-                  <Skeleton className='h-3 w-20' />
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
+    <SimpleTaskListSkeleton
+      title='Your Initiatives'
+      itemCount={5}
+      variant='detailed'
+    />
   )
 }
