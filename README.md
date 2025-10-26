@@ -190,6 +190,61 @@ bun run db:backup        # Create database backup
 bun run db:restore       # Restore database from backup
 ```
 
+## 🚀 Deployment
+
+ManagerOS uses Vercel for hosting and deployment with an intelligent build strategy:
+
+### Build Strategy
+
+**All Branches**: Vercel automatically builds all branches when pushed to remote (useful for previewing PRs and feature branches).
+
+**Production (`main` branch)**: Only builds when the commit message starts with `chore: release`. This prevents unnecessary production builds while allowing controlled deployments.
+
+### Deploying to Production
+
+#### Option 1: Automatic Deployment (Recommended)
+
+Simply merge a PR to `main`. The GitHub Action will automatically:
+
+- Create a release commit with a version bump
+- Tag the release
+- Push to the `main` branch, triggering a Vercel production build
+
+#### Option 2: Manual Deployment
+
+To manually trigger a production deployment, run locally:
+
+```bash
+bun run release
+```
+
+This will:
+
+- Bump the version (patch by default)
+- Create a commit starting with `chore: release`
+- Push to the `main` branch
+- Trigger a Vercel production build
+
+#### Version Control
+
+Available version bump scripts:
+
+```bash
+bun run version:patch   # 0.3.0 -> 0.3.1 (bug fixes)
+bun run version:minor   # 0.3.0 -> 0.4.0 (new features)
+bun run version:major  # 0.3.0 -> 1.0.0 (breaking changes)
+```
+
+### Build Configuration
+
+The build process is controlled by:
+
+- **Vercel config** (`vercel.json`): Defines custom build commands and cron jobs
+- **Build condition** (`vercel-build-condition.sh`): Determines when to build based on branch and commit message
+- **GitHub Action** (`.github/workflows/release.yml`): Automates releases on PR merge
+
+For more details on the release process, see [release-it documentation](release-it/README.md).
+
 ## 🔐 Authentication
 
 Currently, the application runs in demo mode with a simple manager-only authentication stub. For production deployment, integrate with:
