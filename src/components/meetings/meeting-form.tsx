@@ -21,7 +21,6 @@ import {
 import { type MeetingFormData, meetingSchema } from '@/lib/validations'
 import { Team } from '@prisma/client'
 import {
-  AlertCircle,
   Plus,
   X,
   Calendar,
@@ -35,11 +34,11 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 import { MarkdownEditor } from '@/components/markdown-editor'
-import { SectionHeader } from '@/components/ui/section-header'
 import { PersonSelect } from '@/components/ui/person-select'
 import { InitiativeSelect } from '@/components/ui/initiative-select'
 import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
 import { toast } from 'sonner'
+import { FormTemplate, type FormSection } from '@/components/ui/form-template'
 
 interface MeetingFormProps {
   teams: Team[]
@@ -263,6 +262,296 @@ export function MeetingForm({
   const getSelectValue = (value: string | undefined) => value || 'none'
   const getFormValue = (value: string) => (value === 'none' ? '' : value)
 
+  const sections: FormSection[] = [
+    {
+      title: 'Basic Information',
+      icon: CalendarDays,
+      content: (
+        <>
+          <div className='space-y-2'>
+            <Label htmlFor='title'>
+              Meeting Title <span className='text-destructive'>*</span>
+            </Label>
+            <Input
+              id='title'
+              type='text'
+              value={formData.title}
+              onChange={e => handleInputChange('title', e.target.value)}
+              placeholder='Enter meeting title'
+              className={errors.title ? 'border-destructive' : ''}
+              required
+            />
+            {errors.title && (
+              <p className='text-sm text-destructive'>{errors.title}</p>
+            )}
+          </div>
+
+          <div className='space-y-2'>
+            <Label htmlFor='description'>Description</Label>
+            <MarkdownEditor
+              value={formData.description}
+              onChange={value => handleInputChange('description', value)}
+              placeholder='Enter meeting description... Use Markdown for formatting!'
+            />
+          </div>
+        </>
+      ),
+    },
+    {
+      title: 'Schedule',
+      icon: Clock,
+      content: (
+        <>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <div className='space-y-2'>
+              <DateTimePickerWithNaturalInput
+                value={formData.scheduledAt}
+                onChange={value => handleInputChange('scheduledAt', value)}
+                label='Date & Time'
+                required
+                error={!!errors.scheduledAt}
+                placeholder='Pick a date and time'
+              />
+              {errors.scheduledAt && (
+                <p className='text-sm text-destructive'>{errors.scheduledAt}</p>
+              )}
+            </div>
+
+            <div className='space-y-2'>
+              <Label htmlFor='duration'>Duration (minutes)</Label>
+              <Input
+                id='duration'
+                type='number'
+                min='1'
+                max='480'
+                value={formData.duration || ''}
+                onChange={e =>
+                  handleInputChange(
+                    'duration',
+                    e.target.value ? parseInt(e.target.value) : undefined
+                  )
+                }
+                placeholder='60'
+              />
+            </div>
+          </div>
+
+          <div className='space-y-4'>
+            <div className='flex items-center space-x-2'>
+              <Checkbox
+                id='isRecurring'
+                checked={formData.isRecurring}
+                onCheckedChange={checked =>
+                  handleInputChange('isRecurring', checked)
+                }
+              />
+              <Label htmlFor='isRecurring'>This is a recurring meeting</Label>
+            </div>
+
+            {formData.isRecurring && (
+              <div className='space-y-2'>
+                <Label htmlFor='recurrenceType'>Recurrence</Label>
+                <Select
+                  value={formData.recurrenceType}
+                  onValueChange={value =>
+                    handleInputChange('recurrenceType', value)
+                  }
+                >
+                  <SelectTrigger
+                    className={
+                      errors.recurrenceType ? 'border-destructive' : ''
+                    }
+                  >
+                    <SelectValue placeholder='Select recurrence type' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='daily'>Daily</SelectItem>
+                    <SelectItem value='weekly'>Weekly</SelectItem>
+                    <SelectItem value='monthly'>Monthly</SelectItem>
+                    <SelectItem value='bi_monthly'>Bi-monthly</SelectItem>
+                    <SelectItem value='semi_annually'>Semi-annually</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.recurrenceType && (
+                  <p className='text-sm text-destructive'>
+                    {errors.recurrenceType}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </>
+      ),
+    },
+    {
+      title: 'Location',
+      icon: MapPin,
+      content: (
+        <div className='space-y-2'>
+          <Label htmlFor='location'>Location</Label>
+          <Input
+            id='location'
+            value={formData.location}
+            onChange={e => handleInputChange('location', e.target.value)}
+            placeholder='Physical location or meeting link'
+          />
+        </div>
+      ),
+    },
+    {
+      title: 'Participants',
+      icon: Users,
+      action: (
+        <div className='flex items-center gap-2'>
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            onClick={addParticipant}
+          >
+            <Plus className='h-4 w-4' />
+            Add Participant
+          </Button>
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            onClick={toggleAllParticipantAttendance}
+          >
+            <CheckCircle2 className='h-4 w-4' />
+            {formData.participants.every(p => p.status === 'accepted')
+              ? 'Mark All Invited'
+              : 'Mark All Accepted'}
+          </Button>
+        </div>
+      ),
+      content: (
+        <div className='space-y-4'>
+          <div className='space-y-2'>
+            <Label htmlFor='ownerId'>Meeting Owner</Label>
+            <PersonSelect
+              value={getSelectValue(formData.ownerId)}
+              onValueChange={value =>
+                handleInputChange('ownerId', getFormValue(value))
+              }
+              placeholder='Select meeting owner'
+              includeNone={true}
+              noneLabel='No owner'
+              showAvatar={true}
+              showRole={true}
+            />
+          </div>
+
+          {formData.participants.length > 0 && (
+            <div className='space-y-2'>
+              <Label>Additional Participants</Label>
+              <div className='space-y-2'>
+                {formData.participants.map((participant, index) => (
+                  <div key={index} className='flex items-center gap-2'>
+                    <PersonSelect
+                      value={participant.personId}
+                      onValueChange={value =>
+                        updateParticipant(index, 'personId', value)
+                      }
+                      placeholder='Select participant'
+                      showAvatar={true}
+                      showRole={true}
+                      className='flex-1'
+                    />
+
+                    <Select
+                      value={participant.status}
+                      onValueChange={value =>
+                        updateParticipant(index, 'status', value)
+                      }
+                    >
+                      <SelectTrigger className='w-32'>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='invited'>Invited</SelectItem>
+                        <SelectItem value='accepted'>Accepted</SelectItem>
+                        <SelectItem value='declined'>Declined</SelectItem>
+                        <SelectItem value='tentative'>Tentative</SelectItem>
+                        <SelectItem value='attended'>Attended</SelectItem>
+                        <SelectItem value='absent'>Absent</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <Button
+                      type='button'
+                      variant='outline'
+                      size='sm'
+                      onClick={() => removeParticipant(index)}
+                      className='px-2'
+                    >
+                      <X className='h-4 w-4' />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: 'Team & Initiative',
+      icon: Calendar,
+      content: (
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div className='space-y-2'>
+            <Label htmlFor='teamId'>Team</Label>
+            <Select
+              value={formData.teamId}
+              onValueChange={value => handleInputChange('teamId', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder='Select a team' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='none'>No team</SelectItem>
+                {teams.map(team => (
+                  <SelectItem key={team.id} value={team.id}>
+                    {team.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className='space-y-2'>
+            <Label htmlFor='initiativeId'>Initiative</Label>
+            <InitiativeSelect
+              value={getSelectValue(formData.initiativeId)}
+              onValueChange={value =>
+                handleInputChange('initiativeId', getFormValue(value))
+              }
+              placeholder='Select an initiative'
+              includeNone={true}
+              noneLabel='No initiative'
+              showStatus={true}
+              showTeam={false}
+            />
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'Notes',
+      icon: FileText,
+      content: (
+        <div className='space-y-2'>
+          <MarkdownEditor
+            value={formData.notes}
+            onChange={value => handleInputChange('notes', value)}
+            placeholder='Meeting notes and agenda items... Use Markdown for formatting!'
+          />
+        </div>
+      ),
+    },
+  ]
+
   return (
     <div className='space-y-6'>
       {/* Page Header with ICS Import Button */}
@@ -303,342 +592,29 @@ export function MeetingForm({
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className='space-y-6'>
-        {/* General Error Message */}
-        {errors.general && (
-          <div className='bg-destructive/10 border border-destructive/20 rounded-lg p-3 text-destructive text-sm flex items-center gap-2'>
-            <AlertCircle className='h-4 w-4' />
-            {errors.general}
-          </div>
-        )}
+      <FormTemplate
+        sections={sections}
+        onSubmit={handleSubmit}
+        submitButton={{
+          text: isEditing ? 'Update Meeting' : 'Create Meeting',
+          loadingText: 'Saving...',
+          icon: CalendarDays,
+        }}
+        generalError={errors.general}
+        isSubmitting={isSubmitting}
+      />
 
-        <div className='flex flex-col lg:flex-row gap-6'>
-          {/* Main Form Content */}
-          <div className='flex-1 space-y-6'>
-            {/* Basic Information */}
-            <div className='space-y-4'>
-              <SectionHeader icon={CalendarDays} title='Basic Information' />
-              <div className='space-y-4'>
-                <div className='space-y-2'>
-                  <Label htmlFor='title'>
-                    Meeting Title <span className='text-destructive'>*</span>
-                  </Label>
-                  <Input
-                    id='title'
-                    type='text'
-                    value={formData.title}
-                    onChange={e => handleInputChange('title', e.target.value)}
-                    placeholder='Enter meeting title'
-                    className={errors.title ? 'border-destructive' : ''}
-                    required
-                  />
-                  {errors.title && (
-                    <p className='text-sm text-destructive'>{errors.title}</p>
-                  )}
-                </div>
-
-                <div className='space-y-2'>
-                  <Label htmlFor='description'>Description</Label>
-                  <MarkdownEditor
-                    value={formData.description}
-                    onChange={value => handleInputChange('description', value)}
-                    placeholder='Enter meeting description... Use Markdown for formatting!'
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Schedule */}
-            <div className='space-y-4'>
-              <SectionHeader icon={Clock} title='Schedule' />
-              <div className='space-y-4'>
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                  <div className='space-y-2'>
-                    <DateTimePickerWithNaturalInput
-                      value={formData.scheduledAt}
-                      onChange={value =>
-                        handleInputChange('scheduledAt', value)
-                      }
-                      label='Date & Time'
-                      required
-                      error={!!errors.scheduledAt}
-                      placeholder='Pick a date and time'
-                    />
-                    {errors.scheduledAt && (
-                      <p className='text-sm text-destructive'>
-                        {errors.scheduledAt}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className='space-y-2'>
-                    <Label htmlFor='duration'>Duration (minutes)</Label>
-                    <Input
-                      id='duration'
-                      type='number'
-                      min='1'
-                      max='480'
-                      value={formData.duration || ''}
-                      onChange={e =>
-                        handleInputChange(
-                          'duration',
-                          e.target.value ? parseInt(e.target.value) : undefined
-                        )
-                      }
-                      placeholder='60'
-                    />
-                  </div>
-                </div>
-
-                <div className='space-y-4'>
-                  <div className='flex items-center space-x-2'>
-                    <Checkbox
-                      id='isRecurring'
-                      checked={formData.isRecurring}
-                      onCheckedChange={checked =>
-                        handleInputChange('isRecurring', checked)
-                      }
-                    />
-                    <Label htmlFor='isRecurring'>
-                      This is a recurring meeting
-                    </Label>
-                  </div>
-
-                  {formData.isRecurring && (
-                    <div className='space-y-2'>
-                      <Label htmlFor='recurrenceType'>Recurrence</Label>
-                      <Select
-                        value={formData.recurrenceType}
-                        onValueChange={value =>
-                          handleInputChange('recurrenceType', value)
-                        }
-                      >
-                        <SelectTrigger
-                          className={
-                            errors.recurrenceType ? 'border-destructive' : ''
-                          }
-                        >
-                          <SelectValue placeholder='Select recurrence type' />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value='daily'>Daily</SelectItem>
-                          <SelectItem value='weekly'>Weekly</SelectItem>
-                          <SelectItem value='monthly'>Monthly</SelectItem>
-                          <SelectItem value='bi_monthly'>Bi-monthly</SelectItem>
-                          <SelectItem value='semi_annually'>
-                            Semi-annually
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {errors.recurrenceType && (
-                        <p className='text-sm text-destructive'>
-                          {errors.recurrenceType}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Location */}
-            <div className='space-y-4'>
-              <SectionHeader icon={MapPin} title='Location' />
-              <div className='space-y-2'>
-                <Label htmlFor='location'>Location</Label>
-                <Input
-                  id='location'
-                  value={formData.location}
-                  onChange={e => handleInputChange('location', e.target.value)}
-                  placeholder='Physical location or meeting link'
-                />
-              </div>
-            </div>
-
-            {/* Participants */}
-            <div className='space-y-4'>
-              <SectionHeader
-                icon={Users}
-                title='Participants'
-                action={
-                  <div className='flex items-center gap-2'>
-                    <Button
-                      type='button'
-                      variant='outline'
-                      size='sm'
-                      onClick={addParticipant}
-                    >
-                      <Plus className='h-4 w-4' />
-                      Add Participant
-                    </Button>
-                    <Button
-                      type='button'
-                      variant='outline'
-                      size='sm'
-                      onClick={toggleAllParticipantAttendance}
-                    >
-                      <CheckCircle2 className='h-4 w-4' />
-                      {formData.participants.every(p => p.status === 'accepted')
-                        ? 'Mark All Invited'
-                        : 'Mark All Accepted'}
-                    </Button>
-                  </div>
-                }
-              />
-              <div className='space-y-4'>
-                <div className='space-y-2'>
-                  <Label htmlFor='ownerId'>Meeting Owner</Label>
-                  <PersonSelect
-                    value={getSelectValue(formData.ownerId)}
-                    onValueChange={value =>
-                      handleInputChange('ownerId', getFormValue(value))
-                    }
-                    placeholder='Select meeting owner'
-                    includeNone={true}
-                    noneLabel='No owner'
-                    showAvatar={true}
-                    showRole={true}
-                  />
-                </div>
-
-                {formData.participants.length > 0 && (
-                  <div className='space-y-2'>
-                    <Label>Additional Participants</Label>
-                    <div className='space-y-2'>
-                      {formData.participants.map((participant, index) => (
-                        <div key={index} className='flex items-center gap-2'>
-                          <PersonSelect
-                            value={participant.personId}
-                            onValueChange={value =>
-                              updateParticipant(index, 'personId', value)
-                            }
-                            placeholder='Select participant'
-                            showAvatar={true}
-                            showRole={true}
-                            className='flex-1'
-                          />
-
-                          <Select
-                            value={participant.status}
-                            onValueChange={value =>
-                              updateParticipant(index, 'status', value)
-                            }
-                          >
-                            <SelectTrigger className='w-32'>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value='invited'>Invited</SelectItem>
-                              <SelectItem value='accepted'>Accepted</SelectItem>
-                              <SelectItem value='declined'>Declined</SelectItem>
-                              <SelectItem value='tentative'>
-                                Tentative
-                              </SelectItem>
-                              <SelectItem value='attended'>Attended</SelectItem>
-                              <SelectItem value='absent'>Absent</SelectItem>
-                            </SelectContent>
-                          </Select>
-
-                          <Button
-                            type='button'
-                            variant='outline'
-                            size='sm'
-                            onClick={() => removeParticipant(index)}
-                            className='px-2'
-                          >
-                            <X className='h-4 w-4' />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Team & Initiative */}
-            <div className='space-y-4'>
-              <SectionHeader icon={Calendar} title='Team & Initiative' />
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <div className='space-y-2'>
-                  <Label htmlFor='teamId'>Team</Label>
-                  <Select
-                    value={formData.teamId}
-                    onValueChange={value => handleInputChange('teamId', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder='Select a team' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='none'>No team</SelectItem>
-                      {teams.map(team => (
-                        <SelectItem key={team.id} value={team.id}>
-                          {team.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className='space-y-2'>
-                  <Label htmlFor='initiativeId'>Initiative</Label>
-                  <InitiativeSelect
-                    value={getSelectValue(formData.initiativeId)}
-                    onValueChange={value =>
-                      handleInputChange('initiativeId', getFormValue(value))
-                    }
-                    placeholder='Select an initiative'
-                    includeNone={true}
-                    noneLabel='No initiative'
-                    showStatus={true}
-                    showTeam={false}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Notes */}
-            <div className='space-y-4'>
-              <SectionHeader icon={FileText} title='Notes' />
-              <div className='space-y-2'>
-                <MarkdownEditor
-                  value={formData.notes}
-                  onChange={value => handleInputChange('notes', value)}
-                  placeholder='Meeting notes and agenda items... Use Markdown for formatting!'
-                />
-              </div>
-            </div>
-
-            {/* Privacy Settings */}
-            <div className='space-y-4'>
-              <div className='flex items-center space-x-2'>
-                <Checkbox
-                  id='isPrivate'
-                  checked={formData.isPrivate}
-                  onCheckedChange={checked =>
-                    handleInputChange('isPrivate', checked)
-                  }
-                />
-                <Label htmlFor='isPrivate'>
-                  Private meeting (only visible to participants)
-                </Label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Submit Button */}
-        <div className='flex justify-end gap-3'>
-          <Button type='submit' disabled={isSubmitting}>
-            <CalendarDays className='w-4 h-4 mr-2' />
-            {isSubmitting
-              ? 'Saving...'
-              : isEditing
-                ? 'Update Meeting'
-                : 'Create Meeting'}
-          </Button>
-        </div>
-      </form>
+      {/* Privacy Settings - Outside of FormTemplate */}
+      <div className='flex items-center space-x-2 pt-4 border-t'>
+        <Checkbox
+          id='isPrivate'
+          checked={formData.isPrivate}
+          onCheckedChange={checked => handleInputChange('isPrivate', checked)}
+        />
+        <Label htmlFor='isPrivate'>
+          Private meeting (only visible to participants)
+        </Label>
+      </div>
     </div>
   )
 }

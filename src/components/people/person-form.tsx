@@ -1,6 +1,5 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
@@ -13,7 +12,6 @@ import {
 } from '@/components/ui/select'
 import { PersonSelect } from '@/components/ui/person-select'
 import { TeamSelect } from '@/components/ui/team-select'
-import { SectionHeader } from '@/components/ui/section-header'
 import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
 import { useState } from 'react'
 import { createPerson, updatePerson } from '@/lib/actions/person'
@@ -21,8 +19,9 @@ import { type PersonFormData, personSchema } from '@/lib/validations'
 import { UserLinkForm } from '@/components/user-link-form'
 import { JiraAccountLinker } from '@/components/jira-account-linker'
 import { GithubAccountLinker } from '@/components/github-account-linker'
-import { AlertCircle, User, Users, Calendar } from 'lucide-react'
+import { User, Users, Calendar } from 'lucide-react'
 import { FaJira, FaGithub } from 'react-icons/fa'
+import { FormTemplate, type FormSection } from '@/components/ui/form-template'
 
 interface PersonFormProps {
   jobRoles: Array<{
@@ -169,300 +168,283 @@ export function PersonForm({
   const getSelectValue = (value: string | undefined) => value || 'none'
   const getFormValue = (value: string) => (value === 'none' ? '' : value)
 
-  return (
-    <form onSubmit={handleSubmit} className='space-y-6'>
-      {/* General Error Message */}
-      {errors.general && (
-        <div className='bg-destructive/10 border border-destructive/20 rounded-lg p-3 text-destructive text-sm flex items-center gap-2'>
-          <AlertCircle className='h-4 w-4' />
-          {errors.general}
-        </div>
-      )}
-
-      <div className='flex flex-col lg:flex-row gap-6'>
-        {/* Main Form Content */}
-        <div className='flex-1 space-y-6'>
-          {/* Basic Information */}
-          <div className='space-y-4'>
-            <SectionHeader icon={User} title='Basic Information' />
-            <div className='space-y-4'>
-              <div className='space-y-2'>
-                <Label htmlFor='name'>
-                  Name <span className='text-destructive'>*</span>
-                </Label>
-                <Input
-                  id='name'
-                  type='text'
-                  value={formData.name}
-                  onChange={e => handleInputChange('name', e.target.value)}
-                  placeholder='Enter full name'
-                  className={errors.name ? 'border-destructive' : ''}
-                  required
-                />
-                {errors.name && (
-                  <p className='text-sm text-destructive'>{errors.name}</p>
-                )}
-              </div>
-
-              <div className='space-y-2'>
-                <Label htmlFor='email'>Email</Label>
-                <Input
-                  id='email'
-                  type='email'
-                  value={formData.email}
-                  onChange={e => handleInputChange('email', e.target.value)}
-                  placeholder='Enter email address'
-                  className={errors.email ? 'border-destructive' : ''}
-                />
-                {errors.email && (
-                  <p className='text-sm text-destructive'>{errors.email}</p>
-                )}
-              </div>
-
-              <div className='space-y-2'>
-                <Label htmlFor='role'>Title</Label>
-                <Input
-                  id='role'
-                  type='text'
-                  value={formData.role}
-                  onChange={e => handleInputChange('role', e.target.value)}
-                  placeholder='e.g., Senior Engineer, Product Manager'
-                  className={errors.role ? 'border-destructive' : ''}
-                />
-                {errors.role && (
-                  <p className='text-sm text-destructive'>{errors.role}</p>
-                )}
-              </div>
-
-              <div className='space-y-2'>
-                <Label htmlFor='jobRole'>Job Role</Label>
-                <Select
-                  value={getSelectValue(formData.jobRoleId)}
-                  onValueChange={value =>
-                    handleInputChange('jobRoleId', getFormValue(value))
-                  }
-                >
-                  <SelectTrigger
-                    className={errors.jobRoleId ? 'border-destructive' : ''}
-                  >
-                    <SelectValue placeholder='Select a job role' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='none'>No job role</SelectItem>
-                    {jobRoles.map(jobRole => (
-                      <SelectItem key={jobRole.id} value={jobRole.id}>
-                        {jobRole.title} - {jobRole.level.name} (
-                        {jobRole.domain.name})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.jobRoleId && (
-                  <p className='text-sm text-destructive'>{errors.jobRoleId}</p>
-                )}
-              </div>
-            </div>
+  // Define sections for the form template
+  const sections: FormSection[] = [
+    {
+      title: 'Basic Information',
+      icon: User,
+      content: (
+        <>
+          <div className='space-y-2'>
+            <Label htmlFor='name'>
+              Name <span className='text-destructive'>*</span>
+            </Label>
+            <Input
+              id='name'
+              type='text'
+              value={formData.name}
+              onChange={e => handleInputChange('name', e.target.value)}
+              placeholder='Enter full name'
+              className={errors.name ? 'border-destructive' : ''}
+              required
+            />
+            {errors.name && (
+              <p className='text-sm text-destructive'>{errors.name}</p>
+            )}
           </div>
 
-          {/* Team & Reporting */}
-          <div className='space-y-4'>
-            <SectionHeader icon={Users} title='Team & Reporting' />
-            <div className='space-y-4'>
-              <div className='space-y-2'>
-                <Label htmlFor='team'>Team</Label>
-                <TeamSelect
-                  value={getSelectValue(formData.teamId)}
-                  onValueChange={value =>
-                    handleInputChange('teamId', getFormValue(value))
-                  }
-                  placeholder='Select a team'
-                  includeNone={true}
-                  className={errors.teamId ? 'border-destructive' : ''}
-                />
-                {errors.teamId && (
-                  <p className='text-sm text-destructive'>{errors.teamId}</p>
-                )}
-              </div>
-
-              <div className='space-y-2'>
-                <Label htmlFor='manager'>Manager</Label>
-                <PersonSelect
-                  value={getSelectValue(formData.managerId)}
-                  onValueChange={value =>
-                    handleInputChange('managerId', getFormValue(value))
-                  }
-                  placeholder='Select a manager'
-                  includeNone={true}
-                  noneLabel='No manager'
-                  showAvatar={true}
-                  showRole={true}
-                  className={errors.managerId ? 'border-destructive' : ''}
-                />
-              </div>
-            </div>
+          <div className='space-y-2'>
+            <Label htmlFor='email'>Email</Label>
+            <Input
+              id='email'
+              type='email'
+              value={formData.email}
+              onChange={e => handleInputChange('email', e.target.value)}
+              placeholder='Enter email address'
+              className={errors.email ? 'border-destructive' : ''}
+            />
+            {errors.email && (
+              <p className='text-sm text-destructive'>{errors.email}</p>
+            )}
           </div>
 
-          {/* Status & Dates */}
-          <div className='space-y-4'>
-            <SectionHeader icon={Calendar} title='Status & Dates' />
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
-              <div className='space-y-2'>
-                <Label htmlFor='status'>Status</Label>
-                <Select
-                  value={formData.status}
-                  onValueChange={value =>
-                    handleInputChange(
-                      'status',
-                      value as PersonFormData['status']
-                    )
-                  }
-                >
-                  <SelectTrigger
-                    className={errors.status ? 'border-destructive' : ''}
-                  >
-                    <SelectValue placeholder='Select status' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='active'>Active</SelectItem>
-                    <SelectItem value='inactive'>Inactive</SelectItem>
-                    <SelectItem value='on_leave'>On Leave</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.status && (
-                  <p className='text-sm text-destructive'>{errors.status}</p>
-                )}
-              </div>
-
-              <div className='space-y-2'>
-                <Label htmlFor='employeeType'>Employee Type</Label>
-                <Select
-                  value={getSelectValue(formData.employeeType)}
-                  onValueChange={value =>
-                    handleInputChange('employeeType', getFormValue(value))
-                  }
-                >
-                  <SelectTrigger
-                    className={errors.employeeType ? 'border-destructive' : ''}
-                  >
-                    <SelectValue placeholder='Select employee type' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='none'>Not specified</SelectItem>
-                    <SelectItem value='FULL_TIME'>Full Time</SelectItem>
-                    <SelectItem value='PART_TIME'>Part Time</SelectItem>
-                    <SelectItem value='INTERN'>Intern</SelectItem>
-                    <SelectItem value='CONSULTANT'>Consultant</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.employeeType && (
-                  <p className='text-sm text-destructive'>
-                    {errors.employeeType}
-                  </p>
-                )}
-              </div>
-
-              <DateTimePickerWithNaturalInput
-                label='Birthday'
-                value={formData.birthday}
-                onChange={value => handleInputChange('birthday', value)}
-                placeholder='Pick birthday'
-                error={!!errors.birthday}
-                className={errors.birthday ? 'border-destructive' : ''}
-                dateOnly={true}
-              />
-              {errors.birthday && (
-                <p className='text-sm text-destructive'>{errors.birthday}</p>
-              )}
-
-              <DateTimePickerWithNaturalInput
-                label='Start Date'
-                value={formData.startedAt}
-                onChange={value => handleInputChange('startedAt', value)}
-                placeholder='Pick start date'
-                error={!!errors.startedAt}
-                className={errors.startedAt ? 'border-destructive' : ''}
-                dateOnly={true}
-              />
-              {errors.startedAt && (
-                <p className='text-sm text-destructive'>{errors.startedAt}</p>
-              )}
-            </div>
+          <div className='space-y-2'>
+            <Label htmlFor='role'>Title</Label>
+            <Input
+              id='role'
+              type='text'
+              value={formData.role}
+              onChange={e => handleInputChange('role', e.target.value)}
+              placeholder='e.g., Senior Engineer, Product Manager'
+              className={errors.role ? 'border-destructive' : ''}
+            />
+            {errors.role && (
+              <p className='text-sm text-destructive'>{errors.role}</p>
+            )}
           </div>
 
-          {/* Submit Button */}
-          <div className='flex justify-end gap-2'>
-            <Button
-              type='submit'
-              disabled={isSubmitting || !formData.name.trim()}
-              className='min-w-[120px]'
+          <div className='space-y-2'>
+            <Label htmlFor='jobRole'>Job Role</Label>
+            <Select
+              value={getSelectValue(formData.jobRoleId)}
+              onValueChange={value =>
+                handleInputChange('jobRoleId', getFormValue(value))
+              }
             >
-              {isSubmitting
-                ? person
-                  ? 'Updating...'
-                  : 'Creating...'
-                : person
-                  ? 'Update Person'
-                  : 'Create Person'}
-            </Button>
+              <SelectTrigger
+                className={errors.jobRoleId ? 'border-destructive' : ''}
+              >
+                <SelectValue placeholder='Select a job role' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='none'>No job role</SelectItem>
+                {jobRoles.map(jobRole => (
+                  <SelectItem key={jobRole.id} value={jobRole.id}>
+                    {jobRole.title} - {jobRole.level.name} (
+                    {jobRole.domain.name})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.jobRoleId && (
+              <p className='text-sm text-destructive'>{errors.jobRoleId}</p>
+            )}
           </div>
+        </>
+      ),
+    },
+    {
+      title: 'Team & Reporting',
+      icon: Users,
+      content: (
+        <>
+          <div className='space-y-2'>
+            <Label htmlFor='team'>Team</Label>
+            <TeamSelect
+              value={getSelectValue(formData.teamId)}
+              onValueChange={value =>
+                handleInputChange('teamId', getFormValue(value))
+              }
+              placeholder='Select a team'
+              includeNone={true}
+              className={errors.teamId ? 'border-destructive' : ''}
+            />
+            {errors.teamId && (
+              <p className='text-sm text-destructive'>{errors.teamId}</p>
+            )}
+          </div>
+
+          <div className='space-y-2'>
+            <Label htmlFor='manager'>Manager</Label>
+            <PersonSelect
+              value={getSelectValue(formData.managerId)}
+              onValueChange={value =>
+                handleInputChange('managerId', getFormValue(value))
+              }
+              placeholder='Select a manager'
+              includeNone={true}
+              noneLabel='No manager'
+              showAvatar={true}
+              showRole={true}
+              className={errors.managerId ? 'border-destructive' : ''}
+            />
+          </div>
+        </>
+      ),
+    },
+    {
+      title: 'Status & Dates',
+      icon: Calendar,
+      content: (
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+          <div className='space-y-2'>
+            <Label htmlFor='status'>Status</Label>
+            <Select
+              value={formData.status}
+              onValueChange={value =>
+                handleInputChange('status', value as PersonFormData['status'])
+              }
+            >
+              <SelectTrigger
+                className={errors.status ? 'border-destructive' : ''}
+              >
+                <SelectValue placeholder='Select status' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='active'>Active</SelectItem>
+                <SelectItem value='inactive'>Inactive</SelectItem>
+                <SelectItem value='on_leave'>On Leave</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.status && (
+              <p className='text-sm text-destructive'>{errors.status}</p>
+            )}
+          </div>
+
+          <div className='space-y-2'>
+            <Label htmlFor='employeeType'>Employee Type</Label>
+            <Select
+              value={getSelectValue(formData.employeeType)}
+              onValueChange={value =>
+                handleInputChange('employeeType', getFormValue(value))
+              }
+            >
+              <SelectTrigger
+                className={errors.employeeType ? 'border-destructive' : ''}
+              >
+                <SelectValue placeholder='Select employee type' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='none'>Not specified</SelectItem>
+                <SelectItem value='FULL_TIME'>Full Time</SelectItem>
+                <SelectItem value='PART_TIME'>Part Time</SelectItem>
+                <SelectItem value='INTERN'>Intern</SelectItem>
+                <SelectItem value='CONSULTANT'>Consultant</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.employeeType && (
+              <p className='text-sm text-destructive'>{errors.employeeType}</p>
+            )}
+          </div>
+
+          <DateTimePickerWithNaturalInput
+            label='Birthday'
+            value={formData.birthday}
+            onChange={value => handleInputChange('birthday', value)}
+            placeholder='Pick birthday'
+            error={!!errors.birthday}
+            className={errors.birthday ? 'border-destructive' : ''}
+            dateOnly={true}
+          />
+          {errors.birthday && (
+            <p className='text-sm text-destructive'>{errors.birthday}</p>
+          )}
+
+          <DateTimePickerWithNaturalInput
+            label='Start Date'
+            value={formData.startedAt}
+            onChange={value => handleInputChange('startedAt', value)}
+            placeholder='Pick start date'
+            error={!!errors.startedAt}
+            className={errors.startedAt ? 'border-destructive' : ''}
+            dateOnly={true}
+          />
+          {errors.startedAt && (
+            <p className='text-sm text-destructive'>{errors.startedAt}</p>
+          )}
         </div>
+      ),
+    },
+  ]
 
-        {/* Right Sidebar - Account Linking Sections */}
-        {person && (
-          <div className='w-full lg:w-80 space-y-6'>
-            {/* User Account Linking */}
-            <div className='space-y-3'>
-              <div>
-                <h3 className='text-lg font-semibold'>User Account</h3>
-                <p className='text-sm text-muted-foreground'>
-                  Link this person to a user account for system access. Changes
-                  are applied immediately.
-                </p>
-              </div>
-              <UserLinkForm personId={person!.id} linkedUser={person!.user} />
-            </div>
-
-            {/* Jira Account Linking */}
-            <div className='space-y-3'>
-              <div>
-                <h3 className='text-lg font-semibold flex items-center gap-2'>
-                  <FaJira className='h-5 w-5' />
-                  Jira Account
-                </h3>
-                <p className='text-sm text-muted-foreground'>
-                  Link this person to their Jira account for work activity
-                  tracking. Changes are applied immediately.
-                </p>
-              </div>
-              <JiraAccountLinker
-                personId={person!.id}
-                personName={formData.name || 'New Person'}
-                personEmail={formData.email || ''}
-                jiraAccount={jiraAccount}
-              />
-            </div>
-
-            {/* GitHub Account Linking */}
-            <div className='space-y-3'>
-              <div>
-                <h3 className='text-lg font-semibold flex items-center gap-2'>
-                  <FaGithub className='h-5 w-5' />
-                  GitHub Account
-                </h3>
-                <p className='text-sm text-muted-foreground'>
-                  Link this person to their GitHub account for PR activity
-                  tracking. Changes are applied immediately.
-                </p>
-              </div>
-              <GithubAccountLinker
-                personId={person!.id}
-                personName={formData.name || 'New Person'}
-                githubAccount={githubAccount}
-              />
-            </div>
-          </div>
-        )}
+  // Create sidebar content
+  const sidebar = person ? (
+    <>
+      {/* User Account Linking */}
+      <div className='space-y-3'>
+        <div>
+          <h3 className='text-lg font-semibold'>User Account</h3>
+          <p className='text-sm text-muted-foreground'>
+            Link this person to a user account for system access. Changes are
+            applied immediately.
+          </p>
+        </div>
+        <UserLinkForm personId={person.id} linkedUser={person.user} />
       </div>
-    </form>
+
+      {/* Jira Account Linking */}
+      <div className='space-y-3'>
+        <div>
+          <h3 className='text-lg font-semibold flex items-center gap-2'>
+            <FaJira className='h-5 w-5' />
+            Jira Account
+          </h3>
+          <p className='text-sm text-muted-foreground'>
+            Link this person to their Jira account for work activity tracking.
+            Changes are applied immediately.
+          </p>
+        </div>
+        <JiraAccountLinker
+          personId={person.id}
+          personName={formData.name || 'New Person'}
+          personEmail={formData.email || ''}
+          jiraAccount={jiraAccount}
+        />
+      </div>
+
+      {/* GitHub Account Linking */}
+      <div className='space-y-3'>
+        <div>
+          <h3 className='text-lg font-semibold flex items-center gap-2'>
+            <FaGithub className='h-5 w-5' />
+            GitHub Account
+          </h3>
+          <p className='text-sm text-muted-foreground'>
+            Link this person to their GitHub account for PR activity tracking.
+            Changes are applied immediately.
+          </p>
+        </div>
+        <GithubAccountLinker
+          personId={person.id}
+          personName={formData.name || 'New Person'}
+          githubAccount={githubAccount}
+        />
+      </div>
+    </>
+  ) : undefined
+
+  return (
+    <FormTemplate
+      sections={sections}
+      sidebar={sidebar}
+      onSubmit={handleSubmit}
+      submitButton={{
+        text: person ? 'Update Person' : 'Create Person',
+        loadingText: person ? 'Updating...' : 'Creating...',
+        disabled: !formData.name.trim(),
+      }}
+      generalError={errors.general}
+      isSubmitting={isSubmitting}
+    />
   )
 }

@@ -2,11 +2,15 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import { useRouter } from 'next/navigation'
 import { createFeedback, updateFeedback } from '@/lib/actions/feedback'
 import { type FeedbackFormData } from '@/lib/validations'
 import { type Person } from '@prisma/client'
 import { MarkdownEditor } from '@/components/markdown-editor'
+import { MessageSquare } from 'lucide-react'
+import { FormTemplate, type FormSection } from '@/components/ui/form-template'
 
 interface FeedbackFormProps {
   person: Person
@@ -70,71 +74,79 @@ export function FeedbackForm({
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
+  const sections: FormSection[] = [
+    {
+      title: 'Feedback Information',
+      icon: MessageSquare,
+      content: (
+        <>
+          <div className='space-y-2'>
+            <Label htmlFor='kind'>Feedback Type</Label>
+            <select
+              id='kind'
+              value={formData.kind}
+              onChange={e => handleChange('kind', e.target.value)}
+              className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
+            >
+              <option value='note'>General Note</option>
+              <option value='praise'>Praise</option>
+              <option value='concern'>Concern</option>
+            </select>
+          </div>
+
+          <div className='flex items-center space-x-2'>
+            <Checkbox
+              id='isPrivate'
+              checked={formData.isPrivate}
+              onCheckedChange={checked =>
+                handleChange('isPrivate', checked as boolean)
+              }
+            />
+            <Label
+              htmlFor='isPrivate'
+              className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+            >
+              Private feedback
+            </Label>
+          </div>
+          <p className='text-xs text-muted-foreground'>
+            Private feedback is only visible to you. Public feedback is visible
+            to everyone.
+          </p>
+
+          <div className='space-y-2'>
+            <Label htmlFor='body'>Feedback Content</Label>
+            <MarkdownEditor
+              value={formData.body}
+              onChange={value => handleChange('body', value)}
+              placeholder='Share your feedback... Use Markdown for formatting!'
+            />
+          </div>
+        </>
+      ),
+    },
+  ]
+
   return (
-    <form onSubmit={handleSubmit} className='space-y-4'>
-      {error && (
-        <div className='bg-destructive/10 border border-destructive/20 rounded-lg p-3 text-destructive text-sm'>
-          {error}
-        </div>
-      )}
-
-      <div>
-        <label htmlFor='kind' className='block text-sm font-medium mb-2'>
-          Feedback Type
-        </label>
-        <select
-          id='kind'
-          value={formData.kind}
-          onChange={e => handleChange('kind', e.target.value)}
-          className='input'
-        >
-          <option value='note'>General Note</option>
-          <option value='praise'>Praise</option>
-          <option value='concern'>Concern</option>
-        </select>
-      </div>
-
-      <div>
-        <label className='flex items-center space-x-2'>
-          <input
-            type='checkbox'
-            checked={formData.isPrivate}
-            onChange={e => handleChange('isPrivate', e.target.checked)}
-            className='rounded border-input bg-background text-primary focus:ring-ring'
-          />
-          <span className='text-sm font-medium'>Private feedback</span>
-        </label>
-        <p className='text-xs text-muted-foreground mt-1'>
-          Private feedback is only visible to you. Public feedback is visible to
-          everyone.
-        </p>
-      </div>
-
-      <div>
-        <label htmlFor='body' className='block text-sm font-medium mb-2'>
-          Feedback Content
-        </label>
-        <MarkdownEditor
-          value={formData.body}
-          onChange={value => handleChange('body', value)}
-          placeholder='Share your feedback... Use Markdown for formatting!'
-        />
-      </div>
-
-      <div className='flex gap-2 pt-4'>
-        <Button type='submit' disabled={isSubmitting || !formData.body.trim()}>
-          {isSubmitting
-            ? 'Saving...'
-            : feedback
-              ? 'Update Feedback'
-              : 'Add Feedback'}
-        </Button>
-        {onCancel && (
+    <div>
+      {onCancel && (
+        <div className='mb-4'>
           <Button type='button' onClick={onCancel} variant='outline'>
             Cancel
           </Button>
-        )}
-      </div>
-    </form>
+        </div>
+      )}
+      <FormTemplate
+        sections={sections}
+        onSubmit={handleSubmit}
+        submitButton={{
+          text: feedback ? 'Update Feedback' : 'Add Feedback',
+          loadingText: 'Saving...',
+          disabled: !formData.body.trim(),
+        }}
+        generalError={error || undefined}
+        isSubmitting={isSubmitting}
+      />
+    </div>
   )
 }

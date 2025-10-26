@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
 import { MarkdownEditor } from '@/components/markdown-editor'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -16,6 +15,7 @@ import {
 import { Briefcase } from 'lucide-react'
 
 import { type JobRoleFormData, updateJobRole } from '@/lib/actions/job-roles'
+import { FormTemplate, type FormSection } from '@/components/ui/form-template'
 
 interface JobRole {
   id: string
@@ -72,6 +72,92 @@ export function JobRoleEditForm({
   const isFormValid =
     formData.title.trim() && formData.levelId && formData.domainId
 
+  const sections: FormSection[] = [
+    {
+      title: 'Job Role Information',
+      icon: Briefcase,
+      content: (
+        <>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <div className='space-y-2'>
+              <Label htmlFor='title'>
+                Job Title <span className='text-destructive'>*</span>
+              </Label>
+              <Input
+                id='title'
+                type='text'
+                value={formData.title}
+                onChange={e =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
+                placeholder='e.g., Senior Software Engineer'
+                required
+              />
+            </div>
+            <div className='space-y-2'>
+              <Label htmlFor='level'>
+                Level <span className='text-destructive'>*</span>
+              </Label>
+              <Select
+                value={formData.levelId}
+                onValueChange={value =>
+                  setFormData({ ...formData, levelId: value })
+                }
+                required
+              >
+                <SelectTrigger id='level'>
+                  <SelectValue placeholder='Select a level' />
+                </SelectTrigger>
+                <SelectContent>
+                  {levels.map(level => (
+                    <SelectItem key={level.id} value={level.id}>
+                      {level.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className='space-y-2'>
+            <Label htmlFor='domain'>
+              Domain <span className='text-destructive'>*</span>
+            </Label>
+            <Select
+              value={formData.domainId}
+              onValueChange={value =>
+                setFormData({ ...formData, domainId: value })
+              }
+              required
+            >
+              <SelectTrigger id='domain'>
+                <SelectValue placeholder='Select a domain' />
+              </SelectTrigger>
+              <SelectContent>
+                {domains.map(domain => (
+                  <SelectItem key={domain.id} value={domain.id}>
+                    {domain.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className='space-y-2'>
+            <Label htmlFor='description'>Description (Markdown)</Label>
+            <MarkdownEditor
+              value={formData.description || ''}
+              onChange={value =>
+                setFormData({ ...formData, description: value })
+              }
+              placeholder='### Responsibilities...'
+            />
+          </div>
+        </>
+      ),
+    },
+  ]
+
   return (
     <div className='page-container'>
       {/* Header */}
@@ -92,88 +178,16 @@ export function JobRoleEditForm({
       {/* Main Content */}
       <div className='main-layout'>
         <div className='main-content'>
-          <form onSubmit={handleSubmit} className='space-y-6'>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <div>
-                <Label htmlFor='title'>Job Title *</Label>
-                <Input
-                  id='title'
-                  type='text'
-                  value={formData.title}
-                  onChange={e =>
-                    setFormData({ ...formData, title: e.target.value })
-                  }
-                  placeholder='e.g., Senior Software Engineer'
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor='level'>Level *</Label>
-                <Select
-                  value={formData.levelId}
-                  onValueChange={value =>
-                    setFormData({ ...formData, levelId: value })
-                  }
-                  required
-                >
-                  <SelectTrigger id='level'>
-                    <SelectValue placeholder='Select a level' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {levels.map(level => (
-                      <SelectItem key={level.id} value={level.id}>
-                        {level.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor='domain'>Domain *</Label>
-              <Select
-                value={formData.domainId}
-                onValueChange={value =>
-                  setFormData({ ...formData, domainId: value })
-                }
-                required
-              >
-                <SelectTrigger id='domain'>
-                  <SelectValue placeholder='Select a domain' />
-                </SelectTrigger>
-                <SelectContent>
-                  {domains.map(domain => (
-                    <SelectItem key={domain.id} value={domain.id}>
-                      {domain.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor='description'>Description (Markdown)</Label>
-              <MarkdownEditor
-                value={formData.description || ''}
-                onChange={value =>
-                  setFormData({ ...formData, description: value })
-                }
-                placeholder='### Responsibilities...'
-              />
-            </div>
-
-            {/* Submit Button */}
-            <div className='flex justify-end gap-2 pt-4'>
-              <Button
-                type='submit'
-                disabled={isSubmitting || !isFormValid}
-                className='min-w-[120px]'
-              >
-                {isSubmitting ? 'Updating...' : 'Update Job Role'}
-              </Button>
-            </div>
-          </form>
+          <FormTemplate
+            sections={sections}
+            onSubmit={handleSubmit}
+            submitButton={{
+              text: 'Update Job Role',
+              loadingText: 'Updating...',
+              disabled: !isFormValid,
+            }}
+            isSubmitting={isSubmitting}
+          />
         </div>
       </div>
     </div>

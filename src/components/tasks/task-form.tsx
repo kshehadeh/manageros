@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Button } from '@/components/ui/button'
 import {
   TaskSummaryInput,
   type TaskSummaryInputRef,
@@ -22,7 +21,6 @@ import {
 } from '@/lib/task-status'
 import { taskPriorityUtils, DEFAULT_TASK_PRIORITY } from '@/lib/task-priority'
 import {
-  AlertCircle,
   User,
   CheckCircle,
   Flag,
@@ -33,6 +31,7 @@ import {
 import { HelpIcon } from '@/components/help-icon'
 import { InitiativeSelect } from '@/components/ui/initiative-select'
 import { PersonSelect } from '@/components/ui/person-select'
+import { FormTemplate, type FormSection } from '@/components/ui/form-template'
 
 interface TaskFormProps {
   people: Person[]
@@ -126,7 +125,7 @@ function TaskFormContent({
     }
   }, [detectedPriority, errors.priority, originalPriority])
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setIsSubmitting(true)
     setErrors({})
@@ -198,51 +197,53 @@ function TaskFormContent({
     }
   }
 
-  return (
-    <form onSubmit={handleSubmit} className='space-y-6'>
-      {errors.general && (
-        <div className='flex items-center gap-2 p-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md'>
-          <AlertCircle className='h-4 w-4' />
-          <span>{errors.general}</span>
-        </div>
-      )}
+  const sections: FormSection[] = [
+    {
+      title: 'Task Details',
+      icon: CheckCircle,
+      content: (
+        <>
+          <div>
+            <TaskSummaryInput
+              ref={summaryInputRef}
+              value={formData.title}
+              inputClassName='text-2xl font-semibold'
+              onChange={() => {
+                // Let the provider handle all text updates
+              }}
+              onSubmit={() => {
+                // Create a minimal synthetic event for handleSubmit
+                const syntheticEvent = {
+                  preventDefault: () => {},
+                } as React.FormEvent<HTMLFormElement>
+                handleSubmit(syntheticEvent)
+              }}
+              placeholder='Enter task title and details...'
+              className={errors.title ? 'border-red-500' : ''}
+            />
+            {errors.title && (
+              <p className='text-sm text-red-500 mt-1'>{errors.title}</p>
+            )}
+          </div>
 
-      <div className='space-y-4'>
-        <div>
-          <TaskSummaryInput
-            ref={summaryInputRef}
-            value={formData.title}
-            inputClassName='text-2xl font-semibold'
-            onChange={() => {
-              // Let the provider handle all text updates
-            }}
-            onSubmit={() => {
-              // Create a minimal synthetic event for handleSubmit
-              const syntheticEvent = {
-                preventDefault: () => {},
-              } as React.FormEvent<HTMLFormElement>
-              handleSubmit(syntheticEvent)
-            }}
-            placeholder='Enter task title and details...'
-            className={errors.title ? 'border-red-500' : ''}
-          />
-          {errors.title && (
-            <p className='text-sm text-red-500 mt-1'>{errors.title}</p>
-          )}
-        </div>
-
-        <div>
-          <MarkdownEditor
-            value={formData.description || ''}
-            onChange={value => handleInputChange('description', value)}
-            placeholder='Enter task description... Use Markdown for formatting!'
-            className={errors.description ? 'border-red-500' : ''}
-          />
-          {errors.description && (
-            <p className='text-sm text-red-500 mt-1'>{errors.description}</p>
-          )}
-        </div>
-
+          <div>
+            <MarkdownEditor
+              value={formData.description || ''}
+              onChange={value => handleInputChange('description', value)}
+              placeholder='Enter task description... Use Markdown for formatting!'
+              className={errors.description ? 'border-red-500' : ''}
+            />
+            {errors.description && (
+              <p className='text-sm text-red-500 mt-1'>{errors.description}</p>
+            )}
+          </div>
+        </>
+      ),
+    },
+    {
+      title: 'Assignment & Status',
+      icon: User,
+      content: (
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div>
             <div className='flex items-center gap-2'>
@@ -291,7 +292,12 @@ function TaskFormContent({
             )}
           </div>
         </div>
-
+      ),
+    },
+    {
+      title: 'Priority & Due Date',
+      icon: Flag,
+      content: (
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div>
             <div className='flex items-center gap-2'>
@@ -339,7 +345,12 @@ function TaskFormContent({
             )}
           </div>
         </div>
-
+      ),
+    },
+    {
+      title: 'Initiative & Objective',
+      icon: Target,
+      content: (
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div>
             <div className='flex items-center gap-2'>
@@ -390,18 +401,21 @@ function TaskFormContent({
             )}
           </div>
         </div>
-      </div>
+      ),
+    },
+  ]
 
-      <div className='flex items-center gap-3'>
-        <Button type='submit' disabled={isSubmitting}>
-          {isSubmitting
-            ? 'Saving...'
-            : isEditing
-              ? 'Update Task'
-              : 'Create Task'}
-        </Button>
-      </div>
-    </form>
+  return (
+    <FormTemplate
+      sections={sections}
+      onSubmit={handleSubmit}
+      submitButton={{
+        text: isEditing ? 'Update Task' : 'Create Task',
+        loadingText: 'Saving...',
+      }}
+      generalError={errors.general}
+      isSubmitting={isSubmitting}
+    />
   )
 }
 

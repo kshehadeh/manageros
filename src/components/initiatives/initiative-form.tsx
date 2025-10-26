@@ -12,22 +12,14 @@ import {
 } from '@/components/ui/select'
 import { PersonSelect } from '@/components/ui/person-select'
 import { TeamSelect } from '@/components/ui/team-select'
-import { SectionHeader } from '@/components/ui/section-header'
 import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
 import { useState } from 'react'
 import { updateInitiative, createInitiative } from '@/lib/actions/initiative'
 import { type InitiativeFormData, initiativeSchema } from '@/lib/validations'
 import { Rag } from '@/components/rag'
 import { MarkdownEditor } from '@/components/markdown-editor'
-import {
-  AlertCircle,
-  Trash2,
-  Rocket,
-  Calendar,
-  Target,
-  Users,
-  Settings,
-} from 'lucide-react'
+import { Trash2, Rocket, Calendar, Target, Users, Settings } from 'lucide-react'
+import { FormTemplate, type FormSection } from '@/components/ui/form-template'
 
 interface InitiativeFormProps {
   initiative?: {
@@ -220,357 +212,325 @@ export function InitiativeForm({
   const getSelectValue = (value: string | undefined) => value || 'none'
   const getFormValue = (value: string) => (value === 'none' ? '' : value)
 
-  return (
-    <form onSubmit={handleSubmit} className='space-y-6'>
-      {/* General Error Message */}
-      {errors.general && (
-        <div className='bg-destructive/10 border border-destructive/20 rounded-lg p-3 text-destructive text-sm flex items-center gap-2'>
-          <AlertCircle className='h-4 w-4' />
-          {errors.general}
-        </div>
-      )}
-
-      <div className='flex flex-col lg:flex-row gap-6'>
-        {/* Main Form Content */}
-        <div className='flex-1 space-y-6'>
-          {/* Basic Information */}
-          <div className='space-y-4'>
-            <SectionHeader icon={Rocket} title='Basic Information' />
-            <div className='space-y-4'>
-              <div className='space-y-2'>
-                <Label htmlFor='title'>
-                  Title <span className='text-destructive'>*</span>
-                </Label>
-                <Input
-                  id='title'
-                  type='text'
-                  value={formData.title}
-                  onChange={e => handleInputChange('title', e.target.value)}
-                  placeholder='Enter initiative title'
-                  className={errors.title ? 'border-destructive' : ''}
-                  required
-                />
-                {errors.title && (
-                  <p className='text-sm text-destructive'>{errors.title}</p>
-                )}
-              </div>
-
-              <div className='space-y-2'>
-                <Label htmlFor='summary'>Summary</Label>
-                <MarkdownEditor
-                  value={formData.summary || ''}
-                  onChange={value => handleInputChange('summary', value)}
-                  placeholder='Brief description of the initiative... Use Markdown for formatting!'
-                />
-                {errors.summary && (
-                  <p className='text-sm text-destructive'>{errors.summary}</p>
-                )}
-              </div>
-
-              <div className='space-y-2'>
-                <Label htmlFor='outcome'>Expected Outcome</Label>
-                <MarkdownEditor
-                  value={formData.outcome || ''}
-                  onChange={value => handleInputChange('outcome', value)}
-                  placeholder='What success looks like... Use Markdown for formatting!'
-                />
-                {errors.outcome && (
-                  <p className='text-sm text-destructive'>{errors.outcome}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Timeline */}
-          <div className='space-y-4'>
-            <SectionHeader icon={Calendar} title='Timeline' />
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <DateTimePickerWithNaturalInput
-                label='Start Date'
-                value={formData.startDate}
-                onChange={value => handleInputChange('startDate', value)}
-                placeholder='Pick start date and time'
-                error={!!errors.startDate}
-                className={errors.startDate ? 'border-destructive' : ''}
-              />
-              {errors.startDate && (
-                <p className='text-sm text-destructive'>{errors.startDate}</p>
-              )}
-
-              <DateTimePickerWithNaturalInput
-                label='Target Date'
-                value={formData.targetDate}
-                onChange={value => handleInputChange('targetDate', value)}
-                placeholder='Pick target date and time'
-                error={!!errors.targetDate}
-                className={errors.targetDate ? 'border-destructive' : ''}
-              />
-              {errors.targetDate && (
-                <p className='text-sm text-destructive'>{errors.targetDate}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Status & Tracking */}
-          <div className='space-y-4'>
-            <SectionHeader icon={Settings} title='Status & Tracking' />
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-              <div className='space-y-2'>
-                <Label htmlFor='status'>Status</Label>
-                <Select
-                  value={formData.status}
-                  onValueChange={value =>
-                    handleInputChange(
-                      'status',
-                      value as InitiativeFormData['status']
-                    )
-                  }
-                >
-                  <SelectTrigger
-                    className={errors.status ? 'border-destructive' : ''}
-                  >
-                    <SelectValue placeholder='Select status' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='planned'>Planned</SelectItem>
-                    <SelectItem value='in_progress'>In Progress</SelectItem>
-                    <SelectItem value='paused'>Paused</SelectItem>
-                    <SelectItem value='done'>Done</SelectItem>
-                    <SelectItem value='canceled'>Canceled</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.status && (
-                  <p className='text-sm text-destructive'>{errors.status}</p>
-                )}
-              </div>
-
-              <div className='space-y-2'>
-                <Label htmlFor='rag'>RAG Status</Label>
-                <Select
-                  value={formData.rag}
-                  onValueChange={value =>
-                    handleInputChange('rag', value as InitiativeFormData['rag'])
-                  }
-                >
-                  <SelectTrigger
-                    className={errors.rag ? 'border-destructive' : ''}
-                  >
-                    <SelectValue placeholder='Select RAG status' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='green'>Green</SelectItem>
-                    <SelectItem value='amber'>Amber</SelectItem>
-                    <SelectItem value='red'>Red</SelectItem>
-                  </SelectContent>
-                </Select>
-                <div className='mt-2'>
-                  <Rag rag={formData.rag} />
-                </div>
-                {errors.rag && (
-                  <p className='text-sm text-destructive'>{errors.rag}</p>
-                )}
-              </div>
-
-              <div className='space-y-2'>
-                <Label htmlFor='confidence'>Confidence (%)</Label>
-                <Input
-                  id='confidence'
-                  type='number'
-                  min='0'
-                  max='100'
-                  value={formData.confidence}
-                  onChange={e =>
-                    handleInputChange(
-                      'confidence',
-                      parseInt(e.target.value) || 0
-                    )
-                  }
-                  className={errors.confidence ? 'border-destructive' : ''}
-                />
-                {errors.confidence && (
-                  <p className='text-sm text-destructive'>
-                    {errors.confidence}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Team Assignment */}
-          <div className='space-y-4'>
-            <SectionHeader icon={Users} title='Team Assignment' />
-            <div className='space-y-4'>
-              <div className='space-y-2'>
-                <Label htmlFor='team'>Team</Label>
-                <TeamSelect
-                  value={getSelectValue(formData.teamId)}
-                  onValueChange={value =>
-                    handleInputChange('teamId', getFormValue(value))
-                  }
-                  placeholder='Select a team'
-                  includeNone={true}
-                  className={errors.teamId ? 'border-destructive' : ''}
-                />
-                {errors.teamId && (
-                  <p className='text-sm text-destructive'>{errors.teamId}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Objectives */}
-          <div className='space-y-4'>
-            <SectionHeader
-              icon={Target}
-              title='Objectives'
-              action={
-                <Button
-                  type='button'
-                  onClick={addObjective}
-                  variant='outline'
-                  size='sm'
-                >
-                  Add Objective
-                </Button>
-              }
+  // Define sections for the form template
+  const sections: FormSection[] = [
+    {
+      title: 'Basic Information',
+      icon: Rocket,
+      content: (
+        <>
+          <div className='space-y-2'>
+            <Label htmlFor='title'>
+              Title <span className='text-destructive'>*</span>
+            </Label>
+            <Input
+              id='title'
+              type='text'
+              value={formData.title}
+              onChange={e => handleInputChange('title', e.target.value)}
+              placeholder='Enter initiative title'
+              className={errors.title ? 'border-destructive' : ''}
+              required
             />
-            <div className='space-y-4'>
-              {objectives.map((objective, index) => (
-                <div key={index}>
-                  <div className='space-y-2'>
-                    <div className='flex items-center gap-2'>
-                      <Input
-                        id={`objective-title-${index}`}
-                        type='text'
-                        value={objective.title}
-                        onChange={e =>
-                          updateObjective(index, 'title', e.target.value)
-                        }
-                        placeholder='Objective title'
-                        className='flex-1'
-                      />
-                      {objectives.length > 1 && (
-                        <Button
-                          type='button'
-                          onClick={() => removeObjective(index)}
-                          variant='outline'
-                          size='sm'
-                          className='h-10 w-10 p-0 text-destructive hover:text-destructive hover:bg-destructive/10'
-                        >
-                          <Trash2 className='h-4 w-4' />
-                        </Button>
-                      )}
-                    </div>
-                    <Input
-                      id={`objective-keyresult-${index}`}
-                      type='text'
-                      value={objective.keyResult}
-                      onChange={e =>
-                        updateObjective(index, 'keyResult', e.target.value)
-                      }
-                      placeholder='Key result (optional)'
-                    />
-                  </div>
-                  {index < objectives.length - 1 && (
-                    <div className='border-b border-muted mt-4' />
+            {errors.title && (
+              <p className='text-sm text-destructive'>{errors.title}</p>
+            )}
+          </div>
+
+          <div className='space-y-2'>
+            <Label htmlFor='summary'>Summary</Label>
+            <MarkdownEditor
+              value={formData.summary || ''}
+              onChange={value => handleInputChange('summary', value)}
+              placeholder='Brief description of the initiative... Use Markdown for formatting!'
+            />
+            {errors.summary && (
+              <p className='text-sm text-destructive'>{errors.summary}</p>
+            )}
+          </div>
+
+          <div className='space-y-2'>
+            <Label htmlFor='outcome'>Expected Outcome</Label>
+            <MarkdownEditor
+              value={formData.outcome || ''}
+              onChange={value => handleInputChange('outcome', value)}
+              placeholder='What success looks like... Use Markdown for formatting!'
+            />
+            {errors.outcome && (
+              <p className='text-sm text-destructive'>{errors.outcome}</p>
+            )}
+          </div>
+        </>
+      ),
+    },
+    {
+      title: 'Timeline',
+      icon: Calendar,
+      content: (
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <DateTimePickerWithNaturalInput
+            label='Start Date'
+            value={formData.startDate}
+            onChange={value => handleInputChange('startDate', value)}
+            placeholder='Pick start date and time'
+            error={!!errors.startDate}
+            className={errors.startDate ? 'border-destructive' : ''}
+          />
+          {errors.startDate && (
+            <p className='text-sm text-destructive'>{errors.startDate}</p>
+          )}
+
+          <DateTimePickerWithNaturalInput
+            label='Target Date'
+            value={formData.targetDate}
+            onChange={value => handleInputChange('targetDate', value)}
+            placeholder='Pick target date and time'
+            error={!!errors.targetDate}
+            className={errors.targetDate ? 'border-destructive' : ''}
+          />
+          {errors.targetDate && (
+            <p className='text-sm text-destructive'>{errors.targetDate}</p>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: 'Status & Tracking',
+      icon: Settings,
+      content: (
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+          <div className='space-y-2'>
+            <Label htmlFor='status'>Status</Label>
+            <Select
+              value={formData.status}
+              onValueChange={value =>
+                handleInputChange(
+                  'status',
+                  value as InitiativeFormData['status']
+                )
+              }
+            >
+              <SelectTrigger
+                className={errors.status ? 'border-destructive' : ''}
+              >
+                <SelectValue placeholder='Select status' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='planned'>Planned</SelectItem>
+                <SelectItem value='in_progress'>In Progress</SelectItem>
+                <SelectItem value='paused'>Paused</SelectItem>
+                <SelectItem value='done'>Done</SelectItem>
+                <SelectItem value='canceled'>Canceled</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.status && (
+              <p className='text-sm text-destructive'>{errors.status}</p>
+            )}
+          </div>
+
+          <div className='space-y-2'>
+            <Label htmlFor='rag'>RAG Status</Label>
+            <Select
+              value={formData.rag}
+              onValueChange={value =>
+                handleInputChange('rag', value as InitiativeFormData['rag'])
+              }
+            >
+              <SelectTrigger className={errors.rag ? 'border-destructive' : ''}>
+                <SelectValue placeholder='Select RAG status' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='green'>Green</SelectItem>
+                <SelectItem value='amber'>Amber</SelectItem>
+                <SelectItem value='red'>Red</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className='mt-2'>
+              <Rag rag={formData.rag} />
+            </div>
+            {errors.rag && (
+              <p className='text-sm text-destructive'>{errors.rag}</p>
+            )}
+          </div>
+
+          <div className='space-y-2'>
+            <Label htmlFor='confidence'>Confidence (%)</Label>
+            <Input
+              id='confidence'
+              type='number'
+              min='0'
+              max='100'
+              value={formData.confidence}
+              onChange={e =>
+                handleInputChange('confidence', parseInt(e.target.value) || 0)
+              }
+              className={errors.confidence ? 'border-destructive' : ''}
+            />
+            {errors.confidence && (
+              <p className='text-sm text-destructive'>{errors.confidence}</p>
+            )}
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'Team Assignment',
+      icon: Users,
+      content: (
+        <div className='space-y-2'>
+          <Label htmlFor='team'>Team</Label>
+          <TeamSelect
+            value={getSelectValue(formData.teamId)}
+            onValueChange={value =>
+              handleInputChange('teamId', getFormValue(value))
+            }
+            placeholder='Select a team'
+            includeNone={true}
+            className={errors.teamId ? 'border-destructive' : ''}
+          />
+          {errors.teamId && (
+            <p className='text-sm text-destructive'>{errors.teamId}</p>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: 'Objectives',
+      icon: Target,
+      action: (
+        <Button
+          type='button'
+          onClick={addObjective}
+          variant='outline'
+          size='sm'
+        >
+          Add Objective
+        </Button>
+      ),
+      content: (
+        <div className='space-y-4'>
+          {objectives.map((objective, index) => (
+            <div key={index}>
+              <div className='space-y-2'>
+                <div className='flex items-center gap-2'>
+                  <Input
+                    id={`objective-title-${index}`}
+                    type='text'
+                    value={objective.title}
+                    onChange={e =>
+                      updateObjective(index, 'title', e.target.value)
+                    }
+                    placeholder='Objective title'
+                    className='flex-1'
+                  />
+                  {objectives.length > 1 && (
+                    <Button
+                      type='button'
+                      onClick={() => removeObjective(index)}
+                      variant='outline'
+                      size='sm'
+                      className='h-10 w-10 p-0 text-destructive hover:text-destructive hover:bg-destructive/10'
+                    >
+                      <Trash2 className='h-4 w-4' />
+                    </Button>
                   )}
                 </div>
-              ))}
+                <Input
+                  id={`objective-keyresult-${index}`}
+                  type='text'
+                  value={objective.keyResult}
+                  onChange={e =>
+                    updateObjective(index, 'keyResult', e.target.value)
+                  }
+                  placeholder='Key result (optional)'
+                />
+              </div>
+              {index < objectives.length - 1 && (
+                <div className='border-b border-muted mt-4' />
+              )}
             </div>
-          </div>
-
-          {/* People */}
-          <div className='space-y-4'>
-            <SectionHeader
-              icon={Users}
-              title='People'
-              action={
-                <Button
-                  type='button'
-                  onClick={addOwner}
-                  variant='outline'
-                  size='sm'
-                >
-                  Add Person
-                </Button>
-              }
-            />
-            <div className='space-y-0'>
-              {owners.map((owner, index) => (
-                <div
-                  key={index}
-                  className={`p-3 ${index < owners.length - 1 ? 'border-b' : ''}`}
-                >
-                  <div className='flex items-end gap-2'>
-                    <div className='flex-1 grid grid-cols-1 md:grid-cols-2 gap-2'>
-                      <div className='space-y-2'>
-                        <PersonSelect
-                          value={getSelectValue(owner.personId)}
-                          onValueChange={value =>
-                            updateOwner(index, 'personId', getFormValue(value))
-                          }
-                          placeholder='Select person'
-                          includeNone={true}
-                          noneLabel='No person'
-                          showAvatar={true}
-                          showRole={true}
-                        />
-                      </div>
-                      <div className='space-y-2'>
-                        <Select
-                          value={owner.role}
-                          onValueChange={value =>
-                            updateOwner(index, 'role', value)
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder='Select role' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value='owner'>Owner</SelectItem>
-                            <SelectItem value='sponsor'>Sponsor</SelectItem>
-                            <SelectItem value='collaborator'>
-                              Collaborator
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    {owners.length > 1 && (
-                      <Button
-                        type='button'
-                        onClick={() => removeOwner(index)}
-                        variant='destructive'
-                        size='sm'
-                        className='h-10 w-10 p-0'
-                      >
-                        <Trash2 className='h-4 w-4' />
-                      </Button>
-                    )}
+          ))}
+        </div>
+      ),
+    },
+    {
+      title: 'People',
+      icon: Users,
+      action: (
+        <Button type='button' onClick={addOwner} variant='outline' size='sm'>
+          Add Person
+        </Button>
+      ),
+      content: (
+        <div className='space-y-0'>
+          {owners.map((owner, index) => (
+            <div
+              key={index}
+              className={`p-3 ${index < owners.length - 1 ? 'border-b' : ''}`}
+            >
+              <div className='flex items-end gap-2'>
+                <div className='flex-1 grid grid-cols-1 md:grid-cols-2 gap-2'>
+                  <div className='space-y-2'>
+                    <PersonSelect
+                      value={getSelectValue(owner.personId)}
+                      onValueChange={value =>
+                        updateOwner(index, 'personId', getFormValue(value))
+                      }
+                      placeholder='Select person'
+                      includeNone={true}
+                      noneLabel='No person'
+                      showAvatar={true}
+                      showRole={true}
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Select
+                      value={owner.role}
+                      onValueChange={value => updateOwner(index, 'role', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select role' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='owner'>Owner</SelectItem>
+                        <SelectItem value='sponsor'>Sponsor</SelectItem>
+                        <SelectItem value='collaborator'>
+                          Collaborator
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-              ))}
+                {owners.length > 1 && (
+                  <Button
+                    type='button'
+                    onClick={() => removeOwner(index)}
+                    variant='destructive'
+                    size='sm'
+                    className='h-10 w-10 p-0'
+                  >
+                    <Trash2 className='h-4 w-4' />
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
-
-          {/* Submit Button */}
-          <div className='flex justify-end gap-2'>
-            <Button
-              type='submit'
-              disabled={isSubmitting || !formData.title.trim()}
-              className='min-w-[120px]'
-            >
-              {isSubmitting
-                ? initiative
-                  ? 'Updating...'
-                  : 'Creating...'
-                : initiative
-                  ? 'Update Initiative'
-                  : 'Create Initiative'}
-            </Button>
-          </div>
+          ))}
         </div>
-      </div>
-    </form>
+      ),
+    },
+  ]
+
+  return (
+    <FormTemplate
+      sections={sections}
+      onSubmit={handleSubmit}
+      submitButton={{
+        text: initiative ? 'Update Initiative' : 'Create Initiative',
+        loadingText: initiative ? 'Updating...' : 'Creating...',
+        disabled: !formData.title.trim(),
+      }}
+      generalError={errors.general}
+      isSubmitting={isSubmitting}
+    />
   )
 }

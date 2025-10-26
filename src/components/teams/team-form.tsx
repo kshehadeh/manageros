@@ -1,6 +1,8 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Users } from 'lucide-react'
 
 import { useState, useEffect } from 'react'
 import {
@@ -9,6 +11,7 @@ import {
   getTeamsForSelection,
 } from '@/lib/actions/team'
 import { type TeamFormData } from '@/lib/validations'
+import { FormTemplate, type FormSection } from '@/components/ui/form-template'
 
 interface TeamFormProps {
   team?: {
@@ -64,52 +67,43 @@ export function TeamForm({ team, parentId }: TeamFormProps) {
     }
   }
 
-  return (
-    <form onSubmit={handleSubmit} className='space-y-6'>
-      {/* Error Display */}
-      {error && (
-        <div className='bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded'>
-          {error}
-        </div>
-      )}
-
-      {/* Basic Information */}
-      <div className='card'>
-        <h3 className='font-semibold mb-4'>Team Information</h3>
-        <div className='space-y-4'>
-          <div>
-            <label className='block text-sm font-medium mb-2'>
-              Team Name *
-            </label>
-            <input
+  const sections: FormSection[] = [
+    {
+      title: 'Team Information',
+      icon: Users,
+      content: (
+        <>
+          <div className='space-y-2'>
+            <Label htmlFor='name'>
+              Team Name <span className='text-destructive'>*</span>
+            </Label>
+            <Input
+              id='name'
               type='text'
               value={formData.name}
               onChange={e => setFormData({ ...formData, name: e.target.value })}
-              className='input'
               placeholder='Enter team name'
               required
             />
           </div>
 
-          <div>
-            <label className='block text-sm font-medium mb-2'>
-              Description
-            </label>
+          <div className='space-y-2'>
+            <Label htmlFor='description'>Description</Label>
             <textarea
+              id='description'
               value={formData.description}
               onChange={e =>
                 setFormData({ ...formData, description: e.target.value })
               }
-              className='input min-h-[100px] resize-none'
+              className='flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none'
               placeholder="Describe the team's purpose, responsibilities, or focus area"
             />
           </div>
 
-          <div>
-            <label className='block text-sm font-medium mb-2'>
-              Parent Team
-            </label>
+          <div className='space-y-2'>
+            <Label htmlFor='parentId'>Parent Team</Label>
             <select
+              id='parentId'
               value={formData.parentId || ''}
               onChange={e =>
                 setFormData({
@@ -117,7 +111,7 @@ export function TeamForm({ team, parentId }: TeamFormProps) {
                   parentId: e.target.value === '' ? undefined : e.target.value,
                 })
               }
-              className='input'
+              className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
             >
               <option value=''>No parent team (top-level team)</option>
               {availableTeams.map(availableTeam => (
@@ -131,25 +125,22 @@ export function TeamForm({ team, parentId }: TeamFormProps) {
               one parent but multiple children.
             </p>
           </div>
-        </div>
-      </div>
+        </>
+      ),
+    },
+  ]
 
-      {/* Submit Button */}
-      <div className='flex justify-end'>
-        <Button
-          type='submit'
-          disabled={isSubmitting || !formData.name.trim()}
-          variant='outline'
-        >
-          {isSubmitting
-            ? team
-              ? 'Updating...'
-              : 'Creating...'
-            : team
-              ? 'Update Team'
-              : 'Create Team'}
-        </Button>
-      </div>
-    </form>
+  return (
+    <FormTemplate
+      sections={sections}
+      onSubmit={handleSubmit}
+      submitButton={{
+        text: team ? 'Update Team' : 'Create Team',
+        loadingText: team ? 'Updating...' : 'Creating...',
+        disabled: !formData.name.trim(),
+      }}
+      generalError={error}
+      isSubmitting={isSubmitting}
+    />
   )
 }
