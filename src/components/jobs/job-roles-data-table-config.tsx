@@ -164,7 +164,9 @@ export const jobRolesDataTableConfig: DataTableConfig<
   },
 
   // Actions
-  deleteAction: deleteJobRole,
+  deleteAction: async (id: string) => {
+    await deleteJobRole(id)
+  },
 
   // UI configuration
   searchPlaceholder: 'Search job roles...',
@@ -183,7 +185,4 @@ export const jobRolesDataTableConfig: DataTableConfig<
     { value: 'level', label: 'Level' },
     { value: 'domain', label: 'Domain' },
   ],
-
-  // Global filter configuration
-  globalFilterFn: 'includesString',
 }
