@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { SimpleTaskList, type Task } from '@/components/tasks/task-list'
 
 interface DashboardAssignedTasksClientSectionProps {
@@ -11,9 +12,11 @@ export function DashboardAssignedTasksClientSection({
   tasks,
   personId,
 }: DashboardAssignedTasksClientSectionProps) {
+  const router = useRouter()
+
   const handleTaskUpdate = () => {
-    // Refresh the page to show updated data
-    window.location.reload()
+    // Refresh the server component data without a full page reload
+    router.refresh()
   }
 
   return (

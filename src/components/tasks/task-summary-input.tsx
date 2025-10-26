@@ -410,10 +410,14 @@ export const TaskSummaryInput = forwardRef<
       ]
     )
 
-    // Handle key events for Shift + Enter submission and Tab navigation
+    // Handle key events for Cmd/Ctrl + Enter submission and Tab navigation
     const handleKeyDown = useCallback(
       (event: React.KeyboardEvent) => {
-        if (event.key === 'Enter' && event.shiftKey && onSubmit) {
+        if (
+          event.key === 'Enter' &&
+          (event.metaKey || event.ctrlKey) &&
+          onSubmit
+        ) {
           event.preventDefault()
           onSubmit()
         }
