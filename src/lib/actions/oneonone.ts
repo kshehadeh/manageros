@@ -70,12 +70,14 @@ export async function getOneOnOnes() {
     throw new Error('User must belong to an organization')
   }
 
-  // Get the person record for the current user
-  const currentPerson = await prisma.person.findFirst({
+  // Get the person ID from the user session
+  if (!user.personId) {
+    throw new Error('No person record found for current user')
+  }
+
+  const currentPerson = await prisma.person.findUnique({
     where: {
-      user: {
-        id: user.id,
-      },
+      id: user.personId,
     },
   })
 
@@ -101,9 +103,13 @@ export async function getOneOnOneById(id: string) {
     throw new Error('User must belong to an organization')
   }
 
-  // Get the current user's person record
-  const currentPerson = await prisma.person.findFirst({
-    where: { user: { id: user.id } },
+  // Get the current user's person ID from session
+  if (!user.personId) {
+    throw new Error('No person record found for current user')
+  }
+
+  const currentPerson = await prisma.person.findUnique({
+    where: { id: user.personId },
   })
 
   if (!currentPerson) {
@@ -155,9 +161,13 @@ export async function updateOneOnOne(id: string, formData: OneOnOneFormData) {
   // Validate form data
   const validatedData = oneOnOneSchema.parse(formData)
 
-  // Get the current user's person record
-  const currentPerson = await prisma.person.findFirst({
-    where: { user: { id: user.id } },
+  // Get the current user's person ID from session
+  if (!user.personId) {
+    throw new Error('No person record found for current user')
+  }
+
+  const currentPerson = await prisma.person.findUnique({
+    where: { id: user.personId },
   })
 
   if (!currentPerson) {
@@ -226,9 +236,13 @@ export async function deleteOneOnOne(id: string) {
     throw new Error('User must belong to an organization')
   }
 
-  // Get the current user's person record
-  const currentPerson = await prisma.person.findFirst({
-    where: { user: { id: user.id } },
+  // Get the current user's person ID from session
+  if (!user.personId) {
+    throw new Error('No person record found for current user')
+  }
+
+  const currentPerson = await prisma.person.findUnique({
+    where: { id: user.personId },
   })
 
   if (!currentPerson) {

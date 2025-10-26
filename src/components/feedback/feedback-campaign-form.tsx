@@ -19,7 +19,9 @@ import {
 import { getFeedbackTemplates } from '@/lib/actions/feedback-template'
 import { type FeedbackCampaignFormData } from '@/lib/validations'
 import { type Person } from '@prisma/client'
-import { X, Plus } from 'lucide-react'
+import { X, Plus, Calendar, Mail, FileText } from 'lucide-react'
+import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
+import { FormTemplate, type FormSection } from '@/components/ui/form-template'
 
 interface FeedbackTemplate {
   id: string
@@ -162,95 +164,99 @@ export function FeedbackCampaignForm({
     }))
   }
 
-  return (
-    <form onSubmit={handleSubmit} className='space-y-6'>
-      {error && (
-        <div className='p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md'>
-          {error}
-        </div>
-      )}
-
-      <div className='page-section'>
-        <div className='space-y-2'>
-          <Label htmlFor='name'>Campaign Name (Optional)</Label>
-          <Input
-            id='name'
-            type='text'
-            placeholder='e.g., Performance Review 2026'
-            value={formData.name}
-            onChange={e =>
-              setFormData(prev => ({
-                ...prev,
-                name: e.target.value,
-              }))
-            }
-          />
-          <p className='text-sm text-muted-foreground'>
-            Give your campaign a descriptive name to help identify it later
-          </p>
-        </div>
-
-        <div className='space-y-2'>
-          <Label>Feedback Template</Label>
-          {isLoadingTemplates ? (
-            <div className='text-muted-foreground'>Loading templates...</div>
-          ) : (
-            <Select
-              value={formData.templateId}
-              onValueChange={value =>
-                setFormData(prev => ({ ...prev, templateId: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder='Select a template' />
-              </SelectTrigger>
-              <SelectContent>
-                {templates.map(template => (
-                  <SelectItem key={template.id} value={template.id}>
-                    {template.name}
-                    {template.isDefault && ' (Default)'}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-          {formData.templateId && (
-            <div className='text-sm text-muted-foreground'>
-              {templates.find(t => t.id === formData.templateId)?.description}
-            </div>
-          )}
-        </div>
-
-        <div className='grid grid-cols-2 gap-4'>
+  const sections: FormSection[] = [
+    {
+      title: 'Campaign Details',
+      icon: FileText,
+      content: (
+        <>
           <div className='space-y-2'>
-            <Label htmlFor='startDate'>Start Date</Label>
+            <Label htmlFor='name'>Campaign Name (Optional)</Label>
             <Input
-              id='startDate'
-              type='date'
-              value={formData.startDate}
+              id='name'
+              type='text'
+              placeholder='e.g., Performance Review 2026'
+              value={formData.name}
               onChange={e =>
                 setFormData(prev => ({
                   ...prev,
-                  startDate: e.target.value,
+                  name: e.target.value,
                 }))
               }
-              required
             />
+            <p className='text-sm text-muted-foreground'>
+              Give your campaign a descriptive name to help identify it later
+            </p>
           </div>
-          <div className='space-y-2'>
-            <Label htmlFor='endDate'>End Date</Label>
-            <Input
-              id='endDate'
-              type='date'
-              value={formData.endDate}
-              onChange={e =>
-                setFormData(prev => ({ ...prev, endDate: e.target.value }))
-              }
-              required
-            />
-          </div>
-        </div>
 
+          <div className='space-y-2'>
+            <Label>Feedback Template</Label>
+            {isLoadingTemplates ? (
+              <div className='text-muted-foreground'>Loading templates...</div>
+            ) : (
+              <Select
+                value={formData.templateId}
+                onValueChange={value =>
+                  setFormData(prev => ({ ...prev, templateId: value }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder='Select a template' />
+                </SelectTrigger>
+                <SelectContent>
+                  {templates.map(template => (
+                    <SelectItem key={template.id} value={template.id}>
+                      {template.name}
+                      {template.isDefault && ' (Default)'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            {formData.templateId && (
+              <div className='text-sm text-muted-foreground'>
+                {templates.find(t => t.id === formData.templateId)?.description}
+              </div>
+            )}
+          </div>
+        </>
+      ),
+    },
+    {
+      title: 'Timeline',
+      icon: Calendar,
+      content: (
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <DateTimePickerWithNaturalInput
+            label='Start Date'
+            value={formData.startDate}
+            onChange={value =>
+              setFormData(prev => ({ ...prev, startDate: value }))
+            }
+            placeholder="e.g., 'tomorrow', 'next Monday'"
+            error={false}
+            dateOnly={true}
+            required
+          />
+
+          <DateTimePickerWithNaturalInput
+            label='End Date'
+            value={formData.endDate}
+            onChange={value =>
+              setFormData(prev => ({ ...prev, endDate: value }))
+            }
+            placeholder="e.g., 'tomorrow', 'next Monday'"
+            error={false}
+            dateOnly={true}
+            required
+          />
+        </div>
+      ),
+    },
+    {
+      title: 'Invitations',
+      icon: Mail,
+      content: (
         <div className='space-y-2'>
           <Label>Invite Emails</Label>
           <div className='space-y-2'>
@@ -287,22 +293,29 @@ export function FeedbackCampaignForm({
             </Button>
           </div>
         </div>
-      </div>
+      ),
+    },
+  ]
 
-      <div className='flex gap-3 pt-4'>
-        <Button type='submit' disabled={isSubmitting}>
-          {isSubmitting
-            ? 'Saving...'
-            : campaign
-              ? 'Update Campaign'
-              : 'Create Campaign'}
-        </Button>
-        {onCancel && (
-          <Button type='button' variant='outline' onClick={onCancel}>
+  return (
+    <div>
+      {onCancel && (
+        <div className='mb-4'>
+          <Button type='button' onClick={onCancel} variant='outline'>
             Cancel
           </Button>
-        )}
-      </div>
-    </form>
+        </div>
+      )}
+      <FormTemplate
+        sections={sections}
+        onSubmit={handleSubmit}
+        submitButton={{
+          text: campaign ? 'Update Campaign' : 'Create Campaign',
+          loadingText: 'Saving...',
+        }}
+        generalError={error || undefined}
+        isSubmitting={isSubmitting}
+      />
+    </div>
   )
 }

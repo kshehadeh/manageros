@@ -42,6 +42,20 @@ export function ActiveFeedbackCampaigns({
     return null
   }
 
+  const isCampaignActive = (campaign: FeedbackCampaign) => {
+    const now = new Date()
+    return (
+      campaign.status === 'active' &&
+      now >= campaign.startDate &&
+      now <= campaign.endDate
+    )
+  }
+
+  const isCampaignPending = (campaign: FeedbackCampaign) => {
+    const now = new Date()
+    return campaign.status === 'active' && now < campaign.startDate
+  }
+
   return (
     <ExpandableSection
       title='Feedback Campaigns'
@@ -85,8 +99,12 @@ export function ActiveFeedbackCampaigns({
             </div>
 
             {/* Status Badge - Pinned to Right */}
-            <div className='ml-4 flex-shrink-0'>
-              <FeedbackCampaignStatusBadge status={campaign.status} />
+            <div className='ml-4 shrink-0'>
+              <FeedbackCampaignStatusBadge
+                status={campaign.status}
+                isCurrentlyActive={isCampaignActive(campaign)}
+                isPending={isCampaignPending(campaign)}
+              />
             </div>
           </div>
         ))}

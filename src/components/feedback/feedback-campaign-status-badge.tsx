@@ -1,5 +1,5 @@
 import { Badge } from '@/components/ui/badge'
-import { Calendar, Play, CheckCircle, Pause } from 'lucide-react'
+import { Calendar, Play, CheckCircle, Pause, Clock } from 'lucide-react'
 
 export type FeedbackCampaignStatus =
   | 'draft'
@@ -12,6 +12,7 @@ interface FeedbackCampaignStatusBadgeProps {
   showIcon?: boolean
   className?: string
   isCurrentlyActive?: boolean
+  isPending?: boolean
 }
 
 const statusConfig = {
@@ -35,6 +36,11 @@ const statusConfig = {
     label: 'CANCELLED',
     icon: Pause,
   },
+  pending: {
+    variant: 'warning' as const,
+    label: 'PENDING',
+    icon: Clock,
+  },
 }
 
 export function FeedbackCampaignStatusBadge({
@@ -42,7 +48,21 @@ export function FeedbackCampaignStatusBadge({
   showIcon = true,
   className,
   isCurrentlyActive = false,
+  isPending = false,
 }: FeedbackCampaignStatusBadgeProps) {
+  // If campaign is pending, use pending config
+  if (isPending && status === 'active') {
+    const IconComponent = statusConfig.pending.icon
+    return (
+      <Badge variant={statusConfig.pending.variant} className={className}>
+        {showIcon && <IconComponent className='h-4 w-4' />}
+        <span className={showIcon ? 'ml-1' : ''}>
+          {statusConfig.pending.label}
+        </span>
+      </Badge>
+    )
+  }
+
   const config =
     statusConfig[status as FeedbackCampaignStatus] || statusConfig.draft
   const IconComponent = config.icon

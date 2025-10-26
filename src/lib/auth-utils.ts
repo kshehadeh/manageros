@@ -1,6 +1,5 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/db'
 import { redirect } from 'next/navigation'
 
 /**
@@ -90,12 +89,11 @@ export async function canAccessSynopsesForPerson(
   }
 
   // Check if user is generating synopses for their own linked person
-  const currentPerson = await prisma.person.findFirst({
-    where: { user: { id: user.id } },
-    select: { id: true },
-  })
+  if (!user.personId) {
+    return false
+  }
 
-  return currentPerson?.id === personId
+  return user.personId === personId
 }
 
 /**

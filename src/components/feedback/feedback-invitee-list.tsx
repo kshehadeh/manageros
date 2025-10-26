@@ -31,21 +31,33 @@ export function FeedbackInviteeList({
     response: responseMap.get(email),
   }))
 
-  // Sort by response status (responded first) then by email
+  // Deterministic shuffle based on email for consistent randomization
+  // This ensures privacy by randomizing order while maintaining stability
+  const hashString = (str: string) => {
+    let hash = 0
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i)
+      hash = (hash << 5) - hash + char
+      hash = hash & hash // Convert to 32bit integer
+    }
+    return hash
+  }
+
+  // Sort by a hash of the email to randomize order deterministically
   inviteesWithStatus.sort((a, b) => {
-    if (a.hasResponded && !b.hasResponded) return -1
-    if (!a.hasResponded && b.hasResponded) return 1
-    return a.email.localeCompare(b.email)
+    const hashA = hashString(a.email)
+    const hashB = hashString(b.email)
+    return hashA - hashB
   })
 
   return (
     <div className='space-y-3'>
-      {inviteesWithStatus.map(({ email, hasResponded, response }) => (
+      {inviteesWithStatus.map(({ email, hasResponded, response }, index) => (
         <div key={email} className='p-3 border rounded-md'>
           <div className='flex items-center gap-3 mb-2'>
-            <Mail className='h-4 w-4 text-muted-foreground flex-shrink-0' />
-            <span className='text-sm font-medium truncate' title={email}>
-              {email}
+            <Mail className='h-4 w-4 text-muted-foreground shrink-0' />
+            <span className='text-sm font-medium truncate'>
+              Invitee {index + 1}
             </span>
           </div>
           <div className='flex items-center gap-2'>

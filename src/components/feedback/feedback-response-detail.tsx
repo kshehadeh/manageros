@@ -78,9 +78,7 @@ export function FeedbackResponseDetail({
     <Card>
       <CardHeader className='pb-3'>
         <div className='flex items-center justify-between'>
-          <CardTitle className='text-lg'>
-            Response from {response.responderEmail}
-          </CardTitle>
+          <CardTitle className='text-lg'>Anonymous Response</CardTitle>
           <Badge variant='outline' className='text-xs'>
             {formatDistanceToNow(response.submittedAt, { addSuffix: true })}
           </Badge>

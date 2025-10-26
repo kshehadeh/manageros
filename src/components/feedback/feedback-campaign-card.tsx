@@ -80,6 +80,11 @@ export function FeedbackCampaignCard({ campaign }: FeedbackCampaignCardProps) {
     )
   }
 
+  const isCampaignPending = () => {
+    const now = new Date()
+    return campaign.status === 'active' && now < campaign.startDate
+  }
+
   const formatDate = (date: Date) => {
     return format(date, 'MMM d, yyyy')
   }
@@ -104,6 +109,7 @@ export function FeedbackCampaignCard({ campaign }: FeedbackCampaignCardProps) {
               <FeedbackCampaignStatusBadge
                 status={campaign.status}
                 isCurrentlyActive={isCampaignActive()}
+                isPending={isCampaignPending()}
               />
               <div className='relative' ref={dropdownRef}>
                 <Button

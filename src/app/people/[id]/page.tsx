@@ -71,38 +71,38 @@ export default async function PersonDetailPage({
   }
 
   // Get the current user's person record to determine relationships
-  const currentPerson = await prisma.person.findFirst({
-    where: {
-      user: {
-        id: session.user.id,
-      },
-    },
-    include: {
-      team: true,
-      manager: {
+  const currentPerson = session.user.personId
+    ? await prisma.person.findUnique({
+        where: {
+          id: session.user.personId,
+        },
         include: {
+          team: true,
+          manager: {
+            include: {
+              reports: true,
+            },
+          },
           reports: true,
+          jobRole: {
+            include: {
+              level: true,
+              domain: true,
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+            },
+          },
+          jiraAccount: true,
+          githubAccount: true,
         },
-      },
-      reports: true,
-      jobRole: {
-        include: {
-          level: true,
-          domain: true,
-        },
-      },
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-        },
-      },
-      jiraAccount: true,
-      githubAccount: true,
-    },
-  })
+      })
+    : undefined
 
   // Add level field to currentPerson if it exists
   const currentPersonWithLevel = currentPerson

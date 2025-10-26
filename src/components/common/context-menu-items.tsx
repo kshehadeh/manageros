@@ -23,10 +23,10 @@ export function ContextMenuItem({
   className = '',
 }: ContextMenuItemProps) {
   const baseClass =
-    'w-full px-3 py-2 text-sm hover:bg-accent flex items-center gap-2 text-left'
+    'w-full px-3 py-2 text-sm hover:bg-accent flex items-center gap-2 text-left transition-colors'
   const variantClass =
     variant === 'destructive'
-      ? 'text-destructive-foreground bg-destructive'
+      ? 'text-destructive hover:bg-destructive/10 hover:text-destructive'
       : ''
 
   return (

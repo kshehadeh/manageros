@@ -14,16 +14,17 @@ export type { BreadcrumbItem }
  * @param breadcrumbs - Array of breadcrumb items
  */
 export function useSetBreadcrumbs(breadcrumbs: BreadcrumbItem[]) {
-  const { setBreadcrumbs } = useBreadcrumb()
+  const { setBreadcrumbs, setHasManualBreadcrumbs } = useBreadcrumb()
   const prevBreadcrumbsRef = useRef<string>('')
 
   useEffect(() => {
     const breadcrumbsString = JSON.stringify(breadcrumbs)
     if (breadcrumbsString !== prevBreadcrumbsRef.current) {
       setBreadcrumbs(breadcrumbs)
+      setHasManualBreadcrumbs(true)
       prevBreadcrumbsRef.current = breadcrumbsString
     }
-  }, [setBreadcrumbs, breadcrumbs])
+  }, [setBreadcrumbs, breadcrumbs, setHasManualBreadcrumbs])
 }
 
 /**

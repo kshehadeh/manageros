@@ -13,6 +13,7 @@ import {
   UserPlus,
   Calendar,
   Briefcase,
+  ClipboardList,
 } from 'lucide-react'
 import { type CommandItemDescriptor, type CommandSource } from '../types'
 
@@ -185,6 +186,23 @@ function createStaticItems(
       group: 'Navigation',
       perform: ({ closePalette, router }) => {
         router.push('/feedback')
+        closePalette()
+      },
+    },
+    {
+      id: 'nav.feedback-campaigns',
+      title: 'View Feedback Campaigns',
+      subtitle: 'Go to feedback campaigns',
+      icon: <ClipboardList className='h-4 w-4' />,
+      keywords: [
+        'feedback campaigns',
+        'campaigns',
+        'feedback request',
+        'survey',
+      ],
+      group: 'Navigation',
+      perform: ({ closePalette, router }) => {
+        router.push('/feedback-campaigns')
         closePalette()
       },
     },

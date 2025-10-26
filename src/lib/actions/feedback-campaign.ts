@@ -10,6 +10,7 @@ import {
 import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { generateInviteLinkToken } from '@/lib/utils/invite-link'
+import { checkIfManagerOrSelf } from '../utils/people-utils'
 
 export async function createFeedbackCampaign(
   formData: FeedbackCampaignFormData
@@ -51,7 +52,7 @@ export async function createFeedbackCampaign(
   }
 
   // Check if the current user is a manager (direct or indirect) of the target person
-  const isManager = await isDirectOrIndirectManager(
+  const isManager = await checkIfManagerOrSelf(
     currentPerson.id,
     targetPerson.id
   )
@@ -163,7 +164,7 @@ export async function updateFeedbackCampaign(
   }
 
   // Check if the current user is a manager (direct or indirect) of the target person
-  const isManager = await isDirectOrIndirectManager(
+  const isManager = await checkIfManagerOrSelf(
     currentPerson.id,
     targetPerson.id
   )
@@ -281,7 +282,7 @@ export async function getFeedbackCampaignsForPerson(personId: string) {
   }
 
   // Check if the current user is a manager (direct or indirect) of the person
-  const isManager = await isDirectOrIndirectManager(currentPerson.id, personId)
+  const isManager = await checkIfManagerOrSelf(currentPerson.id, personId)
 
   if (!isManager) {
     throw new Error(
@@ -387,7 +388,7 @@ export async function getFeedbackCampaignById(id: string) {
   }
 
   // Check if the current user is a manager (direct or indirect) of the target person
-  const isManager = await isDirectOrIndirectManager(
+  const isManager = await checkIfManagerOrSelf(
     currentPerson.id,
     campaign.targetPersonId
   )
@@ -553,43 +554,6 @@ export async function updateCampaignStatus(
   return campaign
 }
 
-// Helper function to check if a person is a direct or indirect manager of another person
-async function isDirectOrIndirectManager(
-  managerId: string,
-  reportId: string
-): Promise<boolean> {
-  // First check if it's a direct manager relationship
-  const directReport = await prisma.person.findFirst({
-    where: {
-      id: reportId,
-      managerId: managerId,
-    },
-  })
-
-  if (directReport) {
-    return true
-  }
-
-  // If not direct, check if it's an indirect relationship by traversing up the hierarchy
-  let currentPerson = await prisma.person.findUnique({
-    where: { id: reportId },
-    select: { managerId: true },
-  })
-
-  while (currentPerson?.managerId) {
-    if (currentPerson.managerId === managerId) {
-      return true
-    }
-
-    currentPerson = await prisma.person.findUnique({
-      where: { id: currentPerson.managerId },
-      select: { managerId: true },
-    })
-  }
-
-  return false
-}
-
 export async function getFeedbackCampaignByInviteLink(inviteLink: string) {
   const campaign = await prisma.feedbackCampaign.findFirst({
     where: {
@@ -621,7 +585,9 @@ export async function getFeedbackCampaignByInviteLink(inviteLink: string) {
   // Check if the campaign is currently active (within date range)
   const now = new Date()
   if (now < campaign.startDate || now > campaign.endDate) {
-    throw new Error('This feedback campaign is not currently active')
+    throw new Error(
+      'This feedback campaign is active but the start date has not been reached yet'
+    )
   }
 
   return campaign
@@ -737,7 +703,7 @@ export async function getAllFeedbackCampaignsForOrganization() {
   // Filter campaigns to only include those where the current user is a manager of the target person
   const filteredCampaigns = []
   for (const campaign of campaigns) {
-    const isManager = await isDirectOrIndirectManager(
+    const isManager = await checkIfManagerOrSelf(
       currentPerson.id,
       campaign.targetPersonId
     )

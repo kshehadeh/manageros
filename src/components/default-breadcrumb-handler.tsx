@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { useBreadcrumb, type BreadcrumbItem } from './breadcrumb-provider'
 
@@ -15,6 +15,7 @@ const routeMap: Record<string, string> = {
   '/meetings': 'Meetings',
   '/oneonones': '1:1s',
   '/feedback': 'Feedback',
+  '/feedback-campaigns': 'Feedback Campaigns',
   '/reports': 'Reports',
   '/direct-reports': 'Direct Reports',
   '/organization/invitations': 'Invitations',
@@ -30,7 +31,18 @@ const routeMap: Record<string, string> = {
  */
 export function DefaultBreadcrumbHandler() {
   const pathname = usePathname()
-  const { setBreadcrumbs } = useBreadcrumb()
+  const { setBreadcrumbs, hasManualBreadcrumbs, setHasManualBreadcrumbs } =
+    useBreadcrumb()
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const prevPathnameRef = useRef<string>('')
+
+  useEffect(() => {
+    // Reset manual breadcrumbs flag when pathname changes
+    if (pathname !== prevPathnameRef.current) {
+      setHasManualBreadcrumbs(false)
+      prevPathnameRef.current = pathname
+    }
+  }, [pathname, setHasManualBreadcrumbs])
 
   useEffect(() => {
     const generateBreadcrumbs = (): BreadcrumbItem[] => {
@@ -62,9 +74,14 @@ export function DefaultBreadcrumbHandler() {
             isLoading: true, // Mark ID segments as loading
           })
         } else {
-          const name =
-            routeMap[currentPath] ||
-            segment.charAt(0).toUpperCase() + segment.slice(1)
+          let name = routeMap[currentPath]
+          if (!name) {
+            // Handle kebab-case by capitalizing each word
+            name = segment
+              .split('-')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ')
+          }
           breadcrumbs.push({
             name,
             href: currentPath,
@@ -75,8 +92,26 @@ export function DefaultBreadcrumbHandler() {
       return breadcrumbs
     }
 
-    setBreadcrumbs(generateBreadcrumbs())
-  }, [pathname, setBreadcrumbs])
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
+
+    // Add a small delay to allow manual breadcrumb handlers to set breadcrumbs first
+    // This prevents the default handler from overwriting manually set breadcrumbs
+    timeoutRef.current = setTimeout(() => {
+      // Only set breadcrumbs if manual breadcrumbs haven't been set
+      if (!hasManualBreadcrumbs) {
+        setBreadcrumbs(generateBreadcrumbs())
+      }
+    }, 100)
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [pathname, setBreadcrumbs, hasManualBreadcrumbs])
 
   return null
 }

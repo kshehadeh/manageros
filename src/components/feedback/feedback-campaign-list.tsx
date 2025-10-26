@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -13,7 +14,6 @@ import {
   Calendar,
   Users,
   Mail,
-  Trash2,
   Play,
   Pause,
   CheckCircle,
@@ -25,6 +25,12 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 import Link from 'next/link'
+import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
+import {
+  ContextMenuItem,
+  DeleteMenuItem,
+} from '@/components/common/context-menu-items'
+import { DeleteModal } from '@/components/common/delete-modal'
 
 interface FeedbackCampaign {
   id: string
@@ -63,10 +69,13 @@ export function FeedbackCampaignList({
   campaigns,
   onCampaignUpdate,
 }: FeedbackCampaignListProps) {
+  const router = useRouter()
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null)
-  const [deletingCampaign, setDeletingCampaign] = useState<string | null>(null)
   const [copiedLink, setCopiedLink] = useState<string | null>(null)
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
+
+  const { handleButtonClick, ContextMenuComponent } = useDataTableContextMenu()
 
   const handleStatusUpdate = async (
     campaignId: string,
@@ -85,60 +94,30 @@ export function FeedbackCampaignList({
     }
   }
 
-  const handleDeleteCampaign = async (campaignId: string) => {
-    if (
-      !confirm(
-        'Are you sure you want to delete this campaign? This action cannot be undone.'
-      )
-    ) {
-      return
-    }
+  const handleDeleteCampaign = async () => {
+    if (!deleteTargetId) return
 
-    setDeletingCampaign(campaignId)
     try {
-      await deleteFeedbackCampaign(campaignId)
+      await deleteFeedbackCampaign(deleteTargetId)
       if (onCampaignUpdate) {
         onCampaignUpdate()
       }
     } catch (error) {
       console.error('Failed to delete campaign:', error)
-    } finally {
-      setDeletingCampaign(null)
     }
   }
 
-  const copyInviteLink = async (inviteLink: string) => {
+  const copyInviteLink = async (inviteLink: string, campaignId: string) => {
     try {
       const baseUrl = window.location.origin
       const fullUrl = `${baseUrl}/feedback-form/${inviteLink}`
       await navigator.clipboard.writeText(fullUrl)
-      setCopiedLink(inviteLink)
+      setCopiedLink(campaignId)
       setTimeout(() => setCopiedLink(null), 2000)
     } catch (error) {
       console.error('Failed to copy link:', error)
     }
   }
-
-  const handleDropdownClick = (e: React.MouseEvent, campaignId: string) => {
-    e.stopPropagation()
-    setOpenDropdown(openDropdown === campaignId ? null : campaignId)
-  }
-
-  const closeDropdown = () => {
-    setOpenDropdown(null)
-  }
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setOpenDropdown(null)
-    }
-
-    if (openDropdown) {
-      document.addEventListener('click', handleClickOutside)
-      return () => document.removeEventListener('click', handleClickOutside)
-    }
-  }, [openDropdown])
 
   const isCampaignActive = (campaign: FeedbackCampaign) => {
     const now = new Date()
@@ -147,6 +126,11 @@ export function FeedbackCampaignList({
       now >= campaign.startDate &&
       now <= campaign.endDate
     )
+  }
+
+  const isCampaignPending = (campaign: FeedbackCampaign) => {
+    const now = new Date()
+    return campaign.status === 'active' && now < campaign.startDate
   }
 
   if (campaigns.length === 0) {
@@ -183,115 +167,17 @@ export function FeedbackCampaignList({
                 <FeedbackCampaignStatusBadge
                   status={campaign.status}
                   isCurrentlyActive={isCampaignActive(campaign)}
+                  isPending={isCampaignPending(campaign)}
                 />
               </div>
-              <div className='relative'>
-                <Button
-                  variant='ghost'
-                  size='sm'
-                  className='h-8 w-8 p-0'
-                  onClick={e => handleDropdownClick(e, campaign.id)}
-                >
-                  <MoreHorizontal className='h-4 w-4' />
-                </Button>
-
-                {openDropdown === campaign.id && (
-                  <div
-                    className='absolute top-full right-0 mt-2 bg-popover text-popover-foreground border rounded-md shadow-lg z-10 min-w-48'
-                    onClick={e => e.stopPropagation()}
-                  >
-                    <div className='py-1'>
-                      <Link
-                        href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`}
-                        className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-                        onClick={closeDropdown}
-                      >
-                        <Eye className='w-4 h-4' />
-                        View Details
-                      </Link>
-                      {campaign.status === 'draft' && (
-                        <>
-                          <Link
-                            href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}/edit`}
-                            className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-                            onClick={closeDropdown}
-                          >
-                            <Edit className='w-4 h-4' />
-                            Edit
-                          </Link>
-                          <button
-                            className='w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
-                            onClick={() => {
-                              handleStatusUpdate(campaign.id, 'active')
-                              closeDropdown()
-                            }}
-                            disabled={updatingStatus === campaign.id}
-                          >
-                            <Play className='w-4 h-4' />
-                            {updatingStatus === campaign.id
-                              ? 'Activating...'
-                              : 'Activate'}
-                          </button>
-                        </>
-                      )}
-                      {campaign.status === 'active' && (
-                        <>
-                          <button
-                            className='w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
-                            onClick={() => {
-                              handleStatusUpdate(campaign.id, 'completed')
-                              closeDropdown()
-                            }}
-                            disabled={updatingStatus === campaign.id}
-                          >
-                            <CheckCircle className='w-4 h-4' />
-                            {updatingStatus === campaign.id
-                              ? 'Completing...'
-                              : 'Complete'}
-                          </button>
-                          <button
-                            className='w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
-                            onClick={() => {
-                              handleStatusUpdate(campaign.id, 'cancelled')
-                              closeDropdown()
-                            }}
-                            disabled={updatingStatus === campaign.id}
-                          >
-                            <Pause className='w-4 h-4' />
-                            {updatingStatus === campaign.id
-                              ? 'Cancelling...'
-                              : 'Cancel'}
-                          </button>
-                        </>
-                      )}
-                      {(campaign.status === 'active' ||
-                        campaign.status === 'completed') && (
-                        <Link
-                          href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}/responses`}
-                          className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-                          onClick={closeDropdown}
-                        >
-                          <Eye className='w-4 h-4' />
-                          View Responses
-                        </Link>
-                      )}
-                      <button
-                        className='w-full flex items-center gap-3 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors text-left'
-                        onClick={() => {
-                          handleDeleteCampaign(campaign.id)
-                          closeDropdown()
-                        }}
-                        disabled={deletingCampaign === campaign.id}
-                      >
-                        <Trash2 className='w-4 h-4' />
-                        {deletingCampaign === campaign.id
-                          ? 'Deleting...'
-                          : 'Delete'}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <Button
+                variant='ghost'
+                size='sm'
+                className='h-8 w-8 p-0'
+                onClick={e => handleButtonClick(e, campaign.id)}
+              >
+                <MoreHorizontal className='h-4 w-4' />
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -327,23 +213,39 @@ export function FeedbackCampaignList({
 
             <div className='mt-4'>
               <h4 className='font-medium text-sm text-muted-foreground mb-2'>
-                Invited Emails
+                Invitees
               </h4>
               <div className='flex flex-wrap gap-2'>
-                {campaign.inviteEmails.map((email, index) => {
-                  const hasResponded = campaign.responses.some(
-                    r => r.responderEmail === email
-                  )
-                  return (
-                    <Badge
-                      key={index}
-                      variant={hasResponded ? 'success' : 'outline'}
-                    >
-                      {email}
-                      {hasResponded && <CheckCircle className='h-3 w-3 ml-1' />}
-                    </Badge>
-                  )
-                })}
+                {campaign.inviteEmails
+                  .sort((a, b) => {
+                    // Deterministic shuffle based on email for consistent randomization
+                    const hashString = (str: string) => {
+                      let hash = 0
+                      for (let i = 0; i < str.length; i++) {
+                        const char = str.charCodeAt(i)
+                        hash = (hash << 5) - hash + char
+                        hash = hash & hash
+                      }
+                      return hash
+                    }
+                    return hashString(a) - hashString(b)
+                  })
+                  .map((email, index) => {
+                    const hasResponded = campaign.responses.some(
+                      r => r.responderEmail === email
+                    )
+                    return (
+                      <Badge
+                        key={email}
+                        variant={hasResponded ? 'success' : 'outline'}
+                      >
+                        Invitee {index + 1}
+                        {hasResponded && (
+                          <CheckCircle className='h-3 w-3 ml-1' />
+                        )}
+                      </Badge>
+                    )
+                  })}
               </div>
             </div>
 
@@ -360,10 +262,12 @@ export function FeedbackCampaignList({
                   <Button
                     size='sm'
                     variant='outline'
-                    onClick={() => copyInviteLink(campaign.inviteLink!)}
+                    onClick={() =>
+                      copyInviteLink(campaign.inviteLink!, campaign.id)
+                    }
                     className='shrink-0'
                   >
-                    {copiedLink === campaign.inviteLink ? (
+                    {copiedLink === campaign.id ? (
                       <>
                         <CheckCircle className='h-3 w-3 mr-1' />
                         Copied
@@ -398,6 +302,119 @@ export function FeedbackCampaignList({
           </CardContent>
         </Card>
       ))}
+
+      {/* Context Menu */}
+      <ContextMenuComponent>
+        {({ entityId, close }) => {
+          const campaign = campaigns.find(c => c.id === entityId)
+          if (!campaign) return null
+
+          return (
+            <>
+              <ContextMenuItem
+                onClick={() => {
+                  router.push(
+                    `/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`
+                  )
+                  close()
+                }}
+                icon={<Eye className='w-4 h-4' />}
+              >
+                View Details
+              </ContextMenuItem>
+
+              {campaign.status === 'draft' && (
+                <>
+                  <ContextMenuItem
+                    onClick={() => {
+                      router.push(
+                        `/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}/edit`
+                      )
+                      close()
+                    }}
+                    icon={<Edit className='w-4 h-4' />}
+                  >
+                    Edit
+                  </ContextMenuItem>
+                  <ContextMenuItem
+                    onClick={() => {
+                      handleStatusUpdate(campaign.id, 'active')
+                      close()
+                    }}
+                    icon={<Play className='w-4 h-4' />}
+                  >
+                    {updatingStatus === campaign.id
+                      ? 'Activating...'
+                      : 'Activate'}
+                  </ContextMenuItem>
+                </>
+              )}
+
+              {campaign.status === 'active' && (
+                <>
+                  <ContextMenuItem
+                    onClick={() => {
+                      handleStatusUpdate(campaign.id, 'completed')
+                      close()
+                    }}
+                    icon={<CheckCircle className='w-4 h-4' />}
+                  >
+                    {updatingStatus === campaign.id
+                      ? 'Completing...'
+                      : 'Complete'}
+                  </ContextMenuItem>
+                  <ContextMenuItem
+                    onClick={() => {
+                      handleStatusUpdate(campaign.id, 'cancelled')
+                      close()
+                    }}
+                    icon={<Pause className='w-4 h-4' />}
+                  >
+                    {updatingStatus === campaign.id
+                      ? 'Cancelling...'
+                      : 'Cancel'}
+                  </ContextMenuItem>
+                </>
+              )}
+
+              {(campaign.status === 'active' ||
+                campaign.status === 'completed') && (
+                <ContextMenuItem
+                  onClick={() => {
+                    router.push(
+                      `/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}/responses`
+                    )
+                    close()
+                  }}
+                  icon={<Eye className='w-4 h-4' />}
+                >
+                  View Responses
+                </ContextMenuItem>
+              )}
+
+              <DeleteMenuItem
+                onDelete={() => {
+                  setDeleteTargetId(entityId)
+                  setShowDeleteModal(true)
+                }}
+                close={close}
+              />
+            </>
+          )
+        }}
+      </ContextMenuComponent>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false)
+          setDeleteTargetId(null)
+        }}
+        onConfirm={handleDeleteCampaign}
+        title='Delete Campaign'
+        entityName='feedback campaign'
+      />
     </div>
   )
 }

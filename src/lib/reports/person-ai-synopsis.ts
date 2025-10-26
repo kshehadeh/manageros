@@ -291,11 +291,8 @@ export const PersonAiSynopsisReport: ReportDefinition<
     }> = []
 
     if (input.includeFeedback) {
-      // Get current person for access control
-      const currentPerson = await ctx.prisma.person.findFirst({
-        where: { user: { id: ctx.user.id } },
-        select: { id: true },
-      })
+      // Get current person ID from session for access control
+      const currentPersonId = ctx.user.personId
 
       const feedback = await ctx.prisma.feedback.findMany({
         where: {
@@ -306,8 +303,8 @@ export const PersonAiSynopsisReport: ReportDefinition<
           },
           OR: [
             { isPrivate: false },
-            currentPerson?.id
-              ? { AND: [{ isPrivate: true }, { fromId: currentPerson.id }] }
+            currentPersonId
+              ? { AND: [{ isPrivate: true }, { fromId: currentPersonId }] }
               : { id: { equals: '' } }, // no private feedback if no current person
           ],
         },

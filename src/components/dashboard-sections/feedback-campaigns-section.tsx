@@ -19,7 +19,7 @@ function FeedbackCampaignsSkeleton() {
               <Skeleton className='h-3 w-24' />
             </div>
           </div>
-          <div className='ml-4 flex-shrink-0'>
+          <div className='ml-4 shrink-0'>
             <Skeleton className='h-6 w-16' />
           </div>
         </div>

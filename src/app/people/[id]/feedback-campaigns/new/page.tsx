@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { FeedbackCampaignForm } from '@/components/feedback/feedback-campaign-form'
 import { NewFeedbackCampaignBreadcrumbClient } from '@/components/feedback/new-feedback-campaign-breadcrumb-client'
+import { checkIfManagerOrSelf } from '@/lib/utils/people-utils'
 
 interface NewFeedbackCampaignPageProps {
   params: Promise<{
@@ -38,12 +39,15 @@ export default async function NewFeedbackCampaignPage({
     notFound()
   }
 
-  // Get the current user's person record
-  const currentPerson = await prisma.person.findFirst({
+  // Get the current user's person ID from session
+  if (!session.user.personId) {
+    redirect('/people')
+  }
+
+  // Fetch the full person record
+  const currentPerson = await prisma.person.findUnique({
     where: {
-      user: {
-        id: session.user.id,
-      },
+      id: session.user.personId,
     },
   })
 
@@ -52,7 +56,7 @@ export default async function NewFeedbackCampaignPage({
   }
 
   // Check if the current user is a manager (direct or indirect) of the target person
-  const isManager = await checkIfManager(currentPerson.id, person.id)
+  const isManager = await checkIfManagerOrSelf(currentPerson.id, person.id)
 
   if (!isManager) {
     redirect('/people')
@@ -79,41 +83,4 @@ export default async function NewFeedbackCampaignPage({
       </div>
     </NewFeedbackCampaignBreadcrumbClient>
   )
-}
-
-// Helper function to check if a person is a direct or indirect manager of another person
-async function checkIfManager(
-  managerId: string,
-  reportId: string
-): Promise<boolean> {
-  // First check if it's a direct manager relationship
-  const directReport = await prisma.person.findFirst({
-    where: {
-      id: reportId,
-      managerId: managerId,
-    },
-  })
-
-  if (directReport) {
-    return true
-  }
-
-  // If not direct, check if it's an indirect relationship by traversing up the hierarchy
-  let currentPerson = await prisma.person.findUnique({
-    where: { id: reportId },
-    select: { managerId: true },
-  })
-
-  while (currentPerson?.managerId) {
-    if (currentPerson.managerId === managerId) {
-      return true
-    }
-
-    currentPerson = await prisma.person.findUnique({
-      where: { id: currentPerson.managerId },
-      select: { managerId: true },
-    })
-  }
-
-  return false
 }

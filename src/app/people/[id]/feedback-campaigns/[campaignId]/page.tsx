@@ -17,6 +17,7 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import { format } from 'date-fns'
+import { checkIfManagerOrSelf } from '@/lib/utils/people-utils'
 
 interface FeedbackCampaignDetailPageProps {
   params: Promise<{
@@ -71,7 +72,7 @@ export default async function FeedbackCampaignDetailPage({
   }
 
   // Check if the current user is a manager (direct or indirect) of the target person
-  const isManager = await checkIfManager(currentPerson.id, person.id)
+  const isManager = await checkIfManagerOrSelf(currentPerson.id, person.id)
 
   if (!isManager) {
     redirect('/people')
@@ -308,41 +309,4 @@ export default async function FeedbackCampaignDetailPage({
       </div>
     </FeedbackCampaignDetailBreadcrumbClient>
   )
-}
-
-// Helper function to check if a person is a direct or indirect manager of another person
-async function checkIfManager(
-  managerId: string,
-  reportId: string
-): Promise<boolean> {
-  // First check if it's a direct manager relationship
-  const directReport = await prisma.person.findFirst({
-    where: {
-      id: reportId,
-      managerId: managerId,
-    },
-  })
-
-  if (directReport) {
-    return true
-  }
-
-  // If not direct, check if it's an indirect relationship by traversing up the hierarchy
-  let currentPerson = await prisma.person.findUnique({
-    where: { id: reportId },
-    select: { managerId: true },
-  })
-
-  while (currentPerson?.managerId) {
-    if (currentPerson.managerId === managerId) {
-      return true
-    }
-
-    currentPerson = await prisma.person.findUnique({
-      where: { id: currentPerson.managerId },
-      select: { managerId: true },
-    })
-  }
-
-  return false
 }
