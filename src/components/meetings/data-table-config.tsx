@@ -4,6 +4,13 @@ import React from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
   MoreHorizontal,
   Calendar,
   CalendarCheck,
@@ -65,8 +72,12 @@ function getRelativeDateGroup(date: Date | string): string {
 
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const meetingDate = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate())
-  
+  const meetingDate = new Date(
+    dateObj.getFullYear(),
+    dateObj.getMonth(),
+    dateObj.getDate()
+  )
+
   const diffTime = today.getTime() - meetingDate.getTime()
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
 
@@ -74,27 +85,27 @@ function getRelativeDateGroup(date: Date | string): string {
   if (diffDays < 0) {
     return '0-today'
   }
-  
+
   // Today
   if (diffDays === 0) {
     return '0-today'
   }
-  
+
   // Yesterday
   if (diffDays === 1) {
     return '1-yesterday'
   }
-  
+
   // Last 7 days (excluding yesterday)
   if (diffDays <= 7) {
     return '2-last-week'
   }
-  
+
   // Last 30 days (excluding last week)
   if (diffDays <= 30) {
     return '3-last-month'
   }
-  
+
   // Everything else
   return '4-older'
 }
@@ -123,6 +134,7 @@ type MeetingFilters = {
   search?: string
   teamId?: string
   initiativeId?: string
+  meetingType?: string
 }
 
 export const meetingDataTableConfig: DataTableConfig<
@@ -285,7 +297,7 @@ export const meetingDataTableConfig: DataTableConfig<
           const scheduledAt = isInstance
             ? (row as MeetingInstanceWithRelations).scheduledAt
             : (row as MeetingWithRelations).scheduledAt
-          
+
           // When grouping by date, return the relative date group
           // Otherwise return the actual date for sorting
           if (grouping && grouping.includes('date')) {
@@ -458,6 +470,55 @@ export const meetingDataTableConfig: DataTableConfig<
     { value: 'scheduledAt', label: 'Date' },
     { value: 'duration', label: 'Duration' },
   ],
+
+  // Filter configuration
+  filterContent: ({ settings, updateFilters }) => (
+    <div className='space-y-3'>
+      <div className='space-y-2'>
+        <label className='text-sm font-medium'>Meeting Type</label>
+        <Select
+          value={settings.filters.meetingType || 'all'}
+          onValueChange={value => {
+            if (value === 'all') {
+              updateFilters({ meetingType: undefined })
+            } else {
+              updateFilters({ meetingType: value })
+            }
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder='All meetings' />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value='all'>All meetings</SelectItem>
+            <SelectItem value='non-recurring'>Non-recurring only</SelectItem>
+            <SelectItem value='recurring'>Recurring only</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  ),
+
+  hasActiveFiltersFn: filters => {
+    return (
+      filters.search !== '' ||
+      filters.teamId !== '' ||
+      filters.initiativeId !== '' ||
+      filters.meetingType !== '' ||
+      filters.meetingType !== undefined ||
+      filters.scheduledFrom !== '' ||
+      filters.scheduledTo !== ''
+    )
+  },
+
+  clearFiltersFn: () => ({
+    search: '',
+    teamId: '',
+    initiativeId: '',
+    meetingType: undefined,
+    scheduledFrom: '',
+    scheduledTo: '',
+  }),
 
   // Custom group label formatting
   getGroupLabel: (groupValue: string, groupingColumn: string) => {

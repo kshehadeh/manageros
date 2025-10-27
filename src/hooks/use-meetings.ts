@@ -21,6 +21,7 @@ interface MeetingFilters {
   search?: string
   teamId?: string
   initiativeId?: string
+  meetingType?: string
   [key: string]: string | undefined
 }
 
