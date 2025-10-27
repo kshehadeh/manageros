@@ -108,6 +108,12 @@ export default async function MarketingHome() {
             <Link href='#proof' className='transition-colors hover:text-white'>
               Outcomes
             </Link>
+            <Link
+              href='/initiatives/why'
+              className='transition-colors hover:text-white'
+            >
+              Why Initiatives
+            </Link>
             <Link href='#cta' className='transition-colors hover:text-white'>
               Get Started
             </Link>
@@ -167,7 +173,7 @@ export default async function MarketingHome() {
                 variant='outline'
                 className='border-white/20 bg-white/5 text-white/80 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/40 hover:text-white'
               >
-                <Link href='/auth/signin'>Explore the product</Link>
+                <Link href='/initiatives/why'>See why initiatives matter</Link>
               </Button>
             </div>
           </FadeInOnScroll>
