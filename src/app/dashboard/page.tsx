@@ -32,7 +32,16 @@ export default async function Home() {
     <div className='page-container'>
       <div className='flex flex-col lg:flex-row gap-6'>
         {/* Main Content Area */}
-        <div className='flex-1 space-y-6'>
+        <div
+          className='flex-1'
+          style={{
+            display: 'grid',
+            gridTemplateColumns:
+              'repeat(auto-fill, minmax(min(100%, 400px), 1fr))',
+            gap: '1.5rem',
+            alignItems: 'start',
+          }}
+        >
           <Suspense fallback={<TasksServerSectionFallback />}>
             <DashboardAssignedTasksServerSection personId={user.personId} />
           </Suspense>

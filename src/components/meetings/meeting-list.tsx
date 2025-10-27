@@ -147,7 +147,10 @@ export function MeetingList({
         key={meeting.id}
         className='flex items-center justify-between px-3 py-3 hover:bg-muted/50 transition-colors'
       >
-        <div className='flex items-start gap-3 flex-1 min-w-0'>
+        <Link
+          href={`/meetings/${meeting.id}`}
+          className='flex items-start gap-3 flex-1 min-w-0'
+        >
           <div className='flex-1 min-w-0'>
             <h3 className='font-medium text-sm truncate mb-1'>
               {meeting.title}
@@ -190,7 +193,7 @@ export function MeetingList({
               )}
             </div>
           </div>
-        </div>
+        </Link>
 
         <Button
           variant='ghost'
