@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { SectionHeader } from '@/components/ui/section-header'
 import { Handshake, Eye, MoreHorizontal, Plus, Calendar } from 'lucide-react'
@@ -60,6 +61,7 @@ export function SimpleOneOnOneList({
   className = '',
   immutableFilters,
 }: OneOnOneListProps) {
+  const router = useRouter()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
@@ -110,12 +112,12 @@ export function SimpleOneOnOneList({
     return (
       <div
         key={oneOnOne.id}
-        className='flex items-center justify-between px-3 py-3 hover:bg-muted/50 transition-colors'
+        className='flex items-center justify-between px-3 py-3 hover:bg-muted/50 transition-colors cursor-pointer group'
+        onClick={() => {
+          router.push(`/oneonones/${oneOnOne.id}`)
+        }}
       >
-        <Link
-          href={`/oneonones/${oneOnOne.id}`}
-          className='flex items-start gap-3 flex-1 min-w-0'
-        >
+        <div className='flex items-start gap-3 flex-1 min-w-0'>
           <div className='flex-1 min-w-0'>
             <h3 className='font-medium text-sm truncate mb-1 flex items-center gap-2'>
               <Link
@@ -156,13 +158,16 @@ export function SimpleOneOnOneList({
               )}
             </div>
           </div>
-        </Link>
+        </div>
 
         <Button
           variant='ghost'
           size='sm'
           className='h-8 w-8 p-0 hover:bg-muted shrink-0'
-          onClick={e => handleButtonClick(e, oneOnOne.id)}
+          onClick={e => {
+            e.stopPropagation()
+            handleButtonClick(e, oneOnOne.id)
+          }}
         >
           <MoreHorizontal className='h-4 w-4' />
         </Button>
