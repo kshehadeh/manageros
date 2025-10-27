@@ -88,7 +88,6 @@ export async function DashboardFeedbackCampaignsServerSection() {
     <SimpleFeedbackCampaignList
       campaigns={formattedCampaigns}
       title='Feedback Campaigns'
-      variant='compact'
       viewAllHref='/feedback-campaigns'
       emptyStateText='No active feedback campaigns.'
     />
