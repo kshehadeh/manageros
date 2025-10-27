@@ -8,7 +8,7 @@ export const personAiSynopsisInput = z.object({
   personId: z.string(),
   fromDate: z.string(),
   toDate: z.string(),
-  includeFeedback: z.boolean().optional().default(false),
+  includeFeedback: z.boolean().default(false),
 })
 
 type Output = {

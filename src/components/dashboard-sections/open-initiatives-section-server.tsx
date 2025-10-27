@@ -35,7 +35,6 @@ export async function DashboardOpenInitiativesServerSection({
       },
     },
     orderBy: { updatedAt: 'desc' },
-    take: 5,
     include: {
       team: {
         select: {

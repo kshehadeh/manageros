@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useBreadcrumb } from './breadcrumb-provider'
+import { usePageBreadcrumbs } from '@/lib/hooks/use-breadcrumb'
 
 interface ReportInstanceBreadcrumbClientProps {
   reportName: string
@@ -14,15 +13,10 @@ export function ReportInstanceBreadcrumbClient({
   instanceId,
   children,
 }: ReportInstanceBreadcrumbClientProps) {
-  const { setBreadcrumbs } = useBreadcrumb()
-
-  useEffect(() => {
-    setBreadcrumbs([
-      { name: 'Dashboard', href: '/dashboard' },
-      { name: 'Reports', href: '/reports' },
-      { name: reportName, href: `/reports/instances/${instanceId}` },
-    ])
-  }, [setBreadcrumbs, reportName, instanceId])
+  usePageBreadcrumbs([
+    { name: 'Reports', href: '/reports' },
+    { name: reportName, href: `/reports/instances/${instanceId}` },
+  ])
 
   return <>{children}</>
 }
