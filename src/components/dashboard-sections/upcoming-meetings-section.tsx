@@ -2,7 +2,6 @@
 
 import { useMemo } from 'react'
 import { DashboardUpcomingMeetings } from '@/components/meetings/dashboard-upcoming-meetings'
-import { ExpandableSection } from '@/components/expandable-section'
 import { useMeetings } from '@/hooks/use-meetings'
 import { useSession } from 'next-auth/react'
 
@@ -20,7 +19,7 @@ export function DashboardUpcomingMeetingsSection() {
     }
   }, []) // Empty deps array - only calculate once on mount
 
-  const { data, loading, error } = useMeetings({
+  const { data, loading, error, refetch } = useMeetings({
     immutableFilters: dateFilters,
     limit: 5,
     enabled: status !== 'loading',
@@ -28,11 +27,11 @@ export function DashboardUpcomingMeetingsSection() {
 
   if (loading || status === 'loading') {
     return (
-      <ExpandableSection title='Upcoming Meetings' viewAllHref='/meetings'>
+      <div className='card p-4 space-y-4'>
         <div className='flex items-center justify-center py-8'>
           <div className='text-muted-foreground'>Loading...</div>
         </div>
-      </ExpandableSection>
+      </div>
     )
   }
 
@@ -46,8 +45,9 @@ export function DashboardUpcomingMeetingsSection() {
   if (!allUpcomingMeetings || allUpcomingMeetings.length === 0) return null
 
   return (
-    <ExpandableSection title='Upcoming Meetings' viewAllHref='/meetings'>
-      <DashboardUpcomingMeetings meetings={allUpcomingMeetings} />
-    </ExpandableSection>
+    <DashboardUpcomingMeetings
+      meetings={allUpcomingMeetings}
+      onMeetingUpdate={refetch}
+    />
   )
 }

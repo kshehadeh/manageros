@@ -145,7 +145,7 @@ export function MeetingList({
     return (
       <div
         key={meeting.id}
-        className='flex items-center justify-between px-3 py-2 border rounded-lg hover:bg-muted/50 transition-colors'
+        className='flex items-center justify-between px-3 py-3 hover:bg-muted/50 transition-colors'
       >
         <div className='flex items-start gap-3 flex-1 min-w-0'>
           <div className='flex-1 min-w-0'>

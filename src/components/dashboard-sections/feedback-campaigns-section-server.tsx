@@ -84,6 +84,11 @@ export async function DashboardFeedbackCampaignsServerSection() {
     },
   }))
 
+  // Only show the section if there are active campaigns
+  if (formattedCampaigns.length === 0) {
+    return null
+  }
+
   return (
     <SimpleFeedbackCampaignList
       campaigns={formattedCampaigns}
