@@ -65,8 +65,6 @@ export interface MeetingListProps {
   onMeetingUpdate?: () => void
   className?: string
   immutableFilters?: Record<string, unknown>
-  people?: Array<{ id: string; name: string; email?: string | null }>
-  teams?: Array<{ id: string; name: string }>
   currentTeam?: { id: string; name: string } | null
 }
 
@@ -82,8 +80,6 @@ export function MeetingList({
   onMeetingUpdate,
   className = '',
   immutableFilters,
-  people = [],
-  teams = [],
   currentTeam,
 }: MeetingListProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -226,8 +222,6 @@ export function MeetingList({
         <CreateMeetingModal
           key='add-meeting'
           initiativeId={initiativeId}
-          people={people}
-          teams={teams}
           currentTeam={currentTeam}
         />
       )

@@ -23,24 +23,18 @@ type MeetingWithRelations = Meeting & {
 interface InitiativeMeetingsProps {
   meetings: MeetingWithRelations[]
   initiativeId: string
-  people: Array<{ id: string; name: string; email?: string | null }>
-  teams: Array<{ id: string; name: string }>
   currentTeam?: { id: string; name: string } | null
 }
 
 export function InitiativeMeetings({
   meetings,
   initiativeId,
-  people,
-  teams,
   currentTeam,
 }: InitiativeMeetingsProps) {
   return (
     <MeetingListWithData
       initiativeId={initiativeId}
       meetings={meetings}
-      people={people}
-      teams={teams}
       currentTeam={currentTeam}
     />
   )

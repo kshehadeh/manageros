@@ -541,3 +541,20 @@ input[type='time']::-webkit-calendar-picker-indicator {
 .react-flow__handle.connecting {
   background: var(--color-primary) !important;
 }
+
+.mirror {
+  display: inline-grid;
+  gap: 0;
+  overflow: visible;
+}
+
+.mirror img {
+  display: block;
+}
+
+.mirror-copy {
+  transform: scaleY(-1);
+  /* fade out the reflection */
+  mask-image: linear-gradient(to top, black 0%, transparent 60%);
+  -webkit-mask-image: linear-gradient(to top, black 0%, transparent 60%);
+}

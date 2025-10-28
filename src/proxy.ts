@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 // Define public routes in a single location to avoid duplication
 const PUBLIC_ROUTES = [
   '/',
+  '/landing/',
   '/feedback-form/',
   '/auth/signin',
   '/auth/signup',

@@ -12,22 +12,12 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Plus, Calendar } from 'lucide-react'
 import { createMeeting } from '@/lib/actions/meeting'
 import { toast } from 'sonner'
-
-interface Person {
-  id: string
-  name: string
-  email?: string | null
-}
+import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
+import { PersonSelect } from '@/components/ui/person-select'
+import { TeamSelect } from '@/components/ui/team-select'
 
 interface Team {
   id: string
@@ -36,15 +26,11 @@ interface Team {
 
 interface CreateMeetingModalProps {
   initiativeId: string
-  people: Person[]
-  teams: Team[]
   currentTeam?: Team | null
 }
 
 export function CreateMeetingModal({
   initiativeId,
-  people,
-  teams,
   currentTeam,
 }: CreateMeetingModalProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -129,7 +115,7 @@ export function CreateMeetingModal({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className='sm:max-w-md'>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle className='flex items-center gap-2'>
             <Calendar className='h-5 w-5' />
@@ -164,14 +150,13 @@ export function CreateMeetingModal({
 
           <div className='grid grid-cols-2 gap-4'>
             <div className='space-y-2'>
-              <Label htmlFor='scheduledAt'>Date & Time</Label>
-              <Input
-                id='scheduledAt'
-                type='datetime-local'
+              <DateTimePickerWithNaturalInput
                 value={formData.scheduledAt}
-                onChange={e => handleInputChange('scheduledAt', e.target.value)}
+                onChange={value => handleInputChange('scheduledAt', value)}
+                label='Date & Time'
                 required
                 disabled={isLoading}
+                placeholder='Pick a date and time'
               />
             </div>
 
@@ -203,45 +188,33 @@ export function CreateMeetingModal({
           </div>
 
           <div className='space-y-2'>
-            <Label htmlFor='team'>Team</Label>
-            <Select
-              value={formData.teamId}
-              onValueChange={value => handleInputChange('teamId', value)}
+            <Label>Team</Label>
+            <TeamSelect
+              value={formData.teamId === 'none' ? undefined : formData.teamId}
+              onValueChange={value =>
+                handleInputChange('teamId', value || 'none')
+              }
               disabled={isLoading}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder='Select a team' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='none'>No team</SelectItem>
-                {teams.map(team => (
-                  <SelectItem key={team.id} value={team.id}>
-                    {team.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              placeholder='Select a team'
+              includeNone={true}
+              noneLabel='No team'
+            />
           </div>
 
           <div className='space-y-2'>
-            <Label htmlFor='owner'>Meeting Owner</Label>
-            <Select
-              value={formData.ownerId}
-              onValueChange={value => handleInputChange('ownerId', value)}
+            <Label>Meeting Owner</Label>
+            <PersonSelect
+              value={formData.ownerId === 'none' ? undefined : formData.ownerId}
+              onValueChange={value =>
+                handleInputChange('ownerId', value || 'none')
+              }
               disabled={isLoading}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder='Select an owner' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='none'>No owner</SelectItem>
-                {people.map(person => (
-                  <SelectItem key={person.id} value={person.id}>
-                    {person.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              placeholder='Select an owner'
+              includeNone={true}
+              noneLabel='No owner'
+              showAvatar={true}
+              showRole={true}
+            />
           </div>
 
           <div className='flex justify-end gap-2'>
