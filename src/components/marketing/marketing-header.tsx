@@ -87,7 +87,7 @@ export function MarketingHeader() {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href='/auth/signup' className='text-black cursor-pointer'>
+              <Link href='/landing/tasks' className='text-black cursor-pointer'>
                 Tasks
               </Link>
             </DropdownMenuItem>

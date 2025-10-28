@@ -5,43 +5,48 @@ import { FadeInOnScroll } from '@/components/marketing/fade-in'
 import { Button } from '@/components/ui/button'
 
 export const metadata = {
-  title: 'Why meetings matter | ManagerOS',
+  title: 'Why tasks matter | ManagerOS',
   description:
-    'Discover how ManagerOS transforms meetings from disconnected calendar events into connected, productive sessions with context and follow-through.',
+    'Discover how ManagerOS makes task management simple, connected, and actionable with quick creation and seamless integration.',
 }
 
 const narrative = [
   {
-    id: 'meetings-with-context',
-    text: 'Most meeting tools treat each event as an isolated appointment. ManagerOS builds meetings into the fabric of your work. Link sessions to initiatives they discuss, track decisions, and connect outcomes to the people who need to follow through. Every meeting has purpose beyond the time slot.',
-    image: '/images/screenshots/ss-meeting-1.png',
+    id: 'tasks-with-purpose',
+    text: 'Tasks in ManagerOS are more than checkboxes. Assign ownership, set priorities, track status, and add estimates — all while keeping tasks connected to the bigger picture. Whether it is a quick follow-up or a multi-week deliverable, every task has clear ownership and purpose.',
+    image: '/images/screenshots/ss-tasks-1.png',
   },
   {
-    id: 'track-what-matters',
-    text: "From one-time sessions to recurring series, ManagerOS makes meeting management simple. Invite participants, track their responses, take notes that stay attached to the work, and generate instances automatically for recurring schedules. The meeting doesn't end when the call does — the context lives on.",
-    image: '/images/screenshots/ss-meeting-2.png',
+    id: 'connected-to-initiatives',
+    text: 'Tasks link directly to initiatives, bringing strategic work down to actionable steps. See which tasks move initiatives forward, track progress across objectives, and maintain clarity on what matters. When initiatives evolve, tasks stay aligned.',
+    image: '/images/screenshots/ss-tasks-3.png',
+  },
+  {
+    id: 'create-anywhere',
+    text: "Press Q from anywhere in ManagerOS and create a task instantly. Whether you are reviewing an initiative, in a meeting, or on someone's profile, capture work immediately — no context switching, no navigation. ManagerOS makes task creation as simple as remembering what needs to be done.",
+    image: '/images/screenshots/ss-tasks-2.png',
   },
 ]
 
-export default function MeetingsWhyPage() {
+export default function TasksWhyPage() {
   return (
     <>
       <section className='mx-auto flex w-full max-w-4xl flex-col items-center gap-10 px-6 pb-20 pt-16 text-center sm:px-8 md:pt-24'>
         <FadeInOnScroll>
           <span className='inline-flex items-center justify-center gap-2 self-center rounded-full border border-white/10 bg-white/5 px-4 py-1 text-xs uppercase tracking-[0.3em] text-white/60'>
-            WHY MEETINGS MATTER
+            TASKS ARE EVERYWHERE
           </span>
         </FadeInOnScroll>
         <FadeInOnScroll delay={100}>
           <h1 className='text-center text-4xl font-semibold tracking-tight text-white sm:text-5xl md:text-6xl'>
-            Turn meetings into connected, actionable sessions.
+            Turn plans into action, anywhere.
           </h1>
         </FadeInOnScroll>
         <FadeInOnScroll delay={200} className='w-full'>
           <p className='mx-auto text-center text-base text-white/70 sm:text-lg'>
-            ManagerOS transforms meetings from standalone events into
-            integrated, context-rich sessions that drive work forward and keep
-            everyone aligned.
+            ManagerOS makes task management simple, connected, and instant —
+            from strategic initiatives to quick follow-ups, capture and track
+            everything that matters.
           </p>
         </FadeInOnScroll>
       </section>
@@ -87,14 +92,14 @@ export default function MeetingsWhyPage() {
       >
         <FadeInOnScroll delay={100}>
           <h2 className='text-3xl font-semibold tracking-tight text-white sm:text-4xl'>
-            Make every meeting count.
+            Capture work instantly, track it everywhere.
           </h2>
         </FadeInOnScroll>
         <FadeInOnScroll delay={200}>
           <p className='max-w-[50vw] text-base text-white/70 sm:text-lg'>
-            Connect meetings to the work they discuss. ManagerOS ensures nothing
-            gets lost in translation, with context that outlives the call and
-            outcomes that become action.
+            From quick follow-ups to strategic deliverables, ManagerOS makes
+            task management seamless. Create tasks from anywhere, link them to
+            initiatives, and watch them become action.
           </p>
         </FadeInOnScroll>
         <FadeInOnScroll delay={300}>
@@ -104,9 +109,7 @@ export default function MeetingsWhyPage() {
               size='lg'
               className='bg-primary text-primary-foreground shadow-[0_18px_40px_rgba(79,70,229,0.45)] transition-all duration-200 hover:-translate-y-0.5'
             >
-              <Link href='/auth/signup'>
-                Start managing meetings in ManagerOS
-              </Link>
+              <Link href='/auth/signup'>Start managing tasks in ManagerOS</Link>
             </Button>
             <Button
               asChild
