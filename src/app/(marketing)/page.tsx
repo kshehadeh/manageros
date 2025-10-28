@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import {
   ArrowRight,
   BarChart3,
@@ -10,8 +9,6 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { FadeInOnScroll } from '@/components/marketing/fade-in'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 
 const featureHighlights = [
   {
@@ -65,12 +62,6 @@ export const metadata = {
 }
 
 export default async function MarketingHome() {
-  const session = await getServerSession(authOptions)
-
-  if (session?.user) {
-    redirect('/dashboard')
-  }
-
   return (
     <>
       <section className='mx-auto flex w-full max-w-5xl flex-col gap-12 px-6 pb-20 pt-16 text-center sm:px-8 md:pt-24'>
