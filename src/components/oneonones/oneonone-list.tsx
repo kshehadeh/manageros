@@ -64,6 +64,7 @@ export function SimpleOneOnOneList({
   const router = useRouter()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
+  const router = useRouter()
 
   const { handleButtonClick, ContextMenuComponent } = useDataTableContextMenu()
 
@@ -109,6 +110,12 @@ export function SimpleOneOnOneList({
   const visibleOneOnOnes = filterOneOnOnes(oneOnOnes)
 
   const renderOneOnOneItem = (oneOnOne: OneOnOne) => {
+    const handlePersonClick = (e: React.MouseEvent, personId: string) => {
+      e.preventDefault()
+      e.stopPropagation()
+      router.push(`/people/${personId}`)
+    }
+
     return (
       <div
         key={oneOnOne.id}
@@ -120,21 +127,19 @@ export function SimpleOneOnOneList({
         <div className='flex items-start gap-3 flex-1 min-w-0'>
           <div className='flex-1 min-w-0'>
             <h3 className='font-medium text-sm truncate mb-1 flex items-center gap-2'>
-              <Link
-                href={`/people/${oneOnOne.manager.id}`}
-                className='link-hover'
-                onClick={e => e.stopPropagation()}
+              <span
+                onClick={e => handlePersonClick(e, oneOnOne.manager.id)}
+                className='link-hover cursor-pointer'
               >
                 {oneOnOne.manager.name}
-              </Link>
+              </span>
               <span className='text-muted-foreground'>↔</span>
-              <Link
-                href={`/people/${oneOnOne.report.id}`}
-                className='link-hover'
-                onClick={e => e.stopPropagation()}
+              <span
+                onClick={e => handlePersonClick(e, oneOnOne.report.id)}
+                className='link-hover cursor-pointer'
               >
                 {oneOnOne.report.name}
-              </Link>
+              </span>
             </h3>
 
             <div className='flex items-center gap-2 text-xs text-muted-foreground'>

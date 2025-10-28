@@ -220,8 +220,6 @@ export default async function InitiativeDetail({
                 <InitiativeMeetings
                   meetings={meetings}
                   initiativeId={init.id}
-                  people={people}
-                  teams={teams}
                   currentTeam={init.team}
                 />
               </Suspense>

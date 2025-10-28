@@ -1,4 +1,3 @@
-import { headers } from 'next/headers'
 import { ReactNode } from 'react'
 import NetworkAwareSessionProvider from '@/components/network-aware-session-provider'
 import { BreadcrumbProvider } from '@/components/breadcrumb-provider'
@@ -22,6 +21,8 @@ import { getFilteredNavigation } from '@/lib/auth-utils'
 import type { User as NextAuthUser } from 'next-auth'
 import { getCurrentUserWithPerson } from '@/lib/actions/organization'
 import { prisma } from '@/lib/db'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 interface ServerConditionalLayoutProps {
   children: ReactNode
@@ -30,14 +31,12 @@ interface ServerConditionalLayoutProps {
 export default async function ServerConditionalLayout({
   children,
 }: ServerConditionalLayoutProps) {
-  const headersList = await headers()
+  // Check for server session to determine if user is authenticated
+  const session = await getServerSession(authOptions)
+  const isAuthenticated = !!session?.user
 
-  // Check the custom header set by middleware
-  const isPublicHeader = headersList.get('x-is-public')
-  const isPublic = isPublicHeader === 'true'
-
-  if (isPublic) {
-    // Render minimal layout for public routes
+  // If not authenticated, render the public/marketing layout
+  if (!isAuthenticated) {
     return (
       <NetworkAwareSessionProvider>
         <ThemeProvider
@@ -99,10 +98,23 @@ export default async function ServerConditionalLayout({
     }
   } catch {
     // If user is not authenticated, getFilteredNavigation will throw
-    // This should not happen due to middleware, but handle gracefully
-    filteredNavigation = []
-    serverSession = null
-    personData = null
+    // Fall back to public layout if authentication check fails
+    return (
+      <NetworkAwareSessionProvider>
+        <ThemeProvider
+          attribute='class'
+          defaultTheme='dark'
+          enableSystem={true}
+          storageKey='manageros-theme'
+          disableTransitionOnChange
+        >
+          <TooltipProvider>
+            <OfflineAwareLayout>{children}</OfflineAwareLayout>
+            <Toaster theme='system' />
+          </TooltipProvider>
+        </ThemeProvider>
+      </NetworkAwareSessionProvider>
+    )
   }
 
   // Render full layout for authenticated routes

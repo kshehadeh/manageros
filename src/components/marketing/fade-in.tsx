@@ -9,7 +9,11 @@ interface FadeInOnScrollProps {
   delay?: number
 }
 
-export function FadeInOnScroll({ children, className, delay = 0 }: FadeInOnScrollProps) {
+export function FadeInOnScroll({
+  children,
+  className,
+  delay = 0,
+}: FadeInOnScrollProps) {
   const ref = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
 

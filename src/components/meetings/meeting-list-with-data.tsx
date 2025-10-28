@@ -7,16 +7,12 @@ import { getMeetingsForInitiative } from '@/lib/actions/meeting'
 interface MeetingListWithDataProps {
   initiativeId: string
   meetings: Meeting[]
-  people?: Array<{ id: string; name: string; email?: string | null }>
-  teams?: Array<{ id: string; name: string }>
   currentTeam?: { id: string; name: string } | null
 }
 
 export function MeetingListWithData({
   initiativeId,
   meetings: initialMeetings,
-  people = [],
-  teams = [],
   currentTeam,
 }: MeetingListWithDataProps) {
   const [meetings, setMeetings] = useState<Meeting[]>(initialMeetings)
@@ -43,8 +39,6 @@ export function MeetingListWithData({
       emptyStateText='No meetings found for this initiative.'
       onMeetingUpdate={handleMeetingUpdate}
       immutableFilters={{ initiativeId }}
-      people={people}
-      teams={teams}
       currentTeam={currentTeam}
     />
   )
