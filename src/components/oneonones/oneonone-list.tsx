@@ -64,7 +64,6 @@ export function SimpleOneOnOneList({
   const router = useRouter()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
-  const router = useRouter()
 
   const { handleButtonClick, ContextMenuComponent } = useDataTableContextMenu()
 
