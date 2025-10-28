@@ -3,8 +3,7 @@
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { SectionHeader } from '@/components/ui/section-header'
-import { MoreHorizontal, Eye, Calendar } from 'lucide-react'
+import { MoreHorizontal } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
@@ -16,7 +15,6 @@ import {
 import { DeleteModal } from '@/components/common/delete-modal'
 import { deleteMeeting } from '@/lib/actions/meeting'
 import { toast } from 'sonner'
-import { CreateMeetingModal } from '@/components/initiatives/create-meeting-modal'
 
 export interface Meeting {
   id: string
@@ -70,17 +68,17 @@ export interface MeetingListProps {
 
 export function MeetingList({
   meetings,
-  title = 'Meetings',
+  title: _title = 'Meetings',
   variant = 'compact',
-  showAddButton = false,
-  initiativeId,
-  viewAllHref,
-  viewAllLabel = 'View All',
+  showAddButton: _showAddButton = false,
+  initiativeId: _initiativeId,
+  viewAllHref: _viewAllHref,
+  viewAllLabel: _viewAllLabel = 'View All',
   emptyStateText = 'No meetings found.',
   onMeetingUpdate,
   className = '',
   immutableFilters,
-  currentTeam,
+  currentTeam: _currentTeam,
 }: MeetingListProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
@@ -203,44 +201,9 @@ export function MeetingList({
     )
   }
 
-  const renderSectionHeader = () => {
-    const actions = []
-
-    if (viewAllHref) {
-      actions.push(
-        <Button asChild variant='outline' size='sm' key='view-all'>
-          <Link href={viewAllHref} className='flex items-center gap-2'>
-            <Eye className='w-4 h-4' />
-            {viewAllLabel}
-          </Link>
-        </Button>
-      )
-    }
-
-    if (showAddButton && initiativeId) {
-      actions.push(
-        <CreateMeetingModal
-          key='add-meeting'
-          initiativeId={initiativeId}
-          currentTeam={currentTeam}
-        />
-      )
-    }
-
-    return (
-      <SectionHeader
-        icon={Calendar}
-        title={title}
-        action={actions.length > 0 ? actions : undefined}
-      />
-    )
-  }
-
   return (
     <>
       <section className={`rounded-xl py-4 -mx-3 px-3 space-y-4 ${className}`}>
-        {renderSectionHeader()}
-
         <div className='space-y-3'>
           {visibleMeetings.length === 0 ? (
             <div className='text-neutral-400 text-sm'>{emptyStateText}</div>

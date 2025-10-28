@@ -495,3 +495,55 @@ export async function removeMeetingInstanceParticipant(
   revalidatePath('/meetings')
   revalidatePath(`/meetings/${meetingInstance.meetingId}`)
 }
+
+export interface ImportedMeetingInstanceData {
+  scheduledAt: string // ISO string format
+  notes?: string
+  participants: Array<{
+    personId: string
+    status:
+      | 'invited'
+      | 'accepted'
+      | 'declined'
+      | 'tentative'
+      | 'attended'
+      | 'absent'
+  }>
+}
+
+/**
+ * Import and parse an ICS file for a meeting instance
+ * This must be a server action because node-ical uses Node.js APIs
+ */
+export async function importMeetingInstanceFromICS(
+  fileContent: string
+): Promise<ImportedMeetingInstanceData> {
+  const user = await getCurrentUser()
+
+  if (!user.organizationId) {
+    throw new Error(
+      'User must belong to an organization to import meeting instances'
+    )
+  }
+
+  // Import parseICSFile dynamically only on server
+  const { parseICSFile } = await import('@/lib/utils/ics-parser')
+
+  // Parse the ICS file
+  const parsedData = await parseICSFile(fileContent)
+
+  // Import matchAttendeesToPeople from meeting actions
+  const { matchAttendeesToPeople } = await import('@/lib/actions/meeting')
+
+  // Match attendees to people in the organization
+  const matchedAttendees = await matchAttendeesToPeople(
+    parsedData.attendeeEmails,
+    parsedData.organizerEmail
+  )
+
+  return {
+    scheduledAt: parsedData.scheduledAt,
+    notes: parsedData.description,
+    participants: matchedAttendees.participants,
+  }
+}

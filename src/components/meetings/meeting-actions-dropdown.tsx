@@ -2,7 +2,14 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Edit, Trash2, Building2, Target, User } from 'lucide-react'
+import {
+  Edit,
+  Trash2,
+  Building2,
+  Target,
+  User,
+  CalendarPlus,
+} from 'lucide-react'
 import { deleteMeeting } from '@/lib/actions/meeting'
 import { ActionDropdown } from '@/components/common/action-dropdown'
 import { DeleteModal } from '@/components/common/delete-modal'
@@ -56,6 +63,15 @@ export function MeetingActionsDropdown({
             >
               <Edit className='w-4 h-4' />
               Edit Meeting
+            </Link>
+
+            <Link
+              href={`/meetings/${meetingId}/instances/new`}
+              className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+              onClick={close}
+            >
+              <CalendarPlus className='w-4 h-4' />
+              Create Instance
             </Link>
 
             {meeting.team && (

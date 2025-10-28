@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import { MeetingInstanceForm } from '@/components/meetings/meeting-instance-form'
+import { NewMeetingInstanceBreadcrumbClient } from '@/components/meetings/new-meeting-instance-breadcrumb-client'
 
 export default async function NewMeetingInstancePage({
   params,
@@ -45,27 +46,34 @@ export default async function NewMeetingInstancePage({
   todayWithParentTime.setSeconds(0)
   todayWithParentTime.setMilliseconds(0)
 
-  // Format as datetime-local input value (YYYY-MM-DDTHH:mm)
-  const defaultScheduledAt = todayWithParentTime.toISOString().slice(0, 16)
+  // Format as ISO string for the natural language date picker
+  const defaultScheduledAt = todayWithParentTime.toISOString()
 
   return (
-    <div className='space-y-6'>
-      <div>
-        <h1 className='text-2xl font-bold'>Create New Instance</h1>
-        <p className='text-muted-foreground'>
-          Add a new instance for &ldquo;{meeting.title}&rdquo;
-        </p>
-      </div>
+    <NewMeetingInstanceBreadcrumbClient
+      meetingTitle={meeting.title}
+      meetingId={meeting.id}
+    >
+      <div className='page-container'>
+        <div className='page-header'>
+          <div>
+            <h1 className='page-title'>Create New Instance</h1>
+            <p className='page-subtitle'>
+              Add a new instance for &ldquo;{meeting.title}&rdquo;
+            </p>
+          </div>
+        </div>
 
-      <div className='max-w-2xl'>
-        <MeetingInstanceForm
-          meetingId={meeting.id}
-          initialData={{
-            participants: initialParticipants,
-            scheduledAt: defaultScheduledAt,
-          }}
-        />
+        <div className='page-content'>
+          <MeetingInstanceForm
+            meetingId={meeting.id}
+            initialData={{
+              participants: initialParticipants,
+              scheduledAt: defaultScheduledAt,
+            }}
+          />
+        </div>
       </div>
-    </div>
+    </NewMeetingInstanceBreadcrumbClient>
   )
 }

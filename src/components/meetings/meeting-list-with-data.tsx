@@ -34,7 +34,7 @@ export function MeetingListWithData({
       meetings={meetings}
       title='Meetings'
       variant='full'
-      showAddButton={true}
+      showAddButton={false}
       initiativeId={initiativeId}
       emptyStateText='No meetings found for this initiative.'
       onMeetingUpdate={handleMeetingUpdate}

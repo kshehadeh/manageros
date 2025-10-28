@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Edit, Trash2 } from 'lucide-react'
+import { Edit, Trash2, CalendarPlus } from 'lucide-react'
 import { deleteMeetingInstance } from '@/lib/actions/meeting-instance'
 import { toast } from 'sonner'
 import { ActionDropdown } from '@/components/common/action-dropdown'
@@ -44,6 +44,15 @@ export function MeetingInstanceActionsDropdown({
           >
             <Edit className='w-4 h-4' />
             Edit Instance
+          </Link>
+
+          <Link
+            href={`/meetings/${meetingId}/instances/new`}
+            className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+            onClick={close}
+          >
+            <CalendarPlus className='w-4 h-4' />
+            Create Instance
           </Link>
 
           <div className='border-t border-border my-1' />

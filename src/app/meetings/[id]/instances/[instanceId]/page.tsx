@@ -4,7 +4,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
-import { Calendar, StickyNote } from 'lucide-react'
+import Link from 'next/link'
+import { Calendar, StickyNote, ChevronRight } from 'lucide-react'
 import { MeetingInstanceDetailBreadcrumbClient } from '@/components/meetings/meeting-instance-detail-breadcrumb-client'
 import { MeetingInstanceActionsDropdown } from '@/components/meetings/meeting-instance-actions-dropdown'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
@@ -75,6 +76,13 @@ export default async function MeetingInstanceDetailPage({
 
               {/* Instance details in header */}
               <div className='flex flex-wrap items-center gap-4 mt-3 text-xs text-muted-foreground'>
+                <Link
+                  href={`/meetings/${meetingInstance.meetingId}`}
+                  className='flex items-center gap-1 hover:text-foreground transition-colors'
+                >
+                  <span>Parent Meeting</span>
+                  <ChevronRight className='h-3 w-3' />
+                </Link>
                 <div className='flex items-center gap-1'>
                   <Calendar className='h-3 w-3' />
                   <span>{formatDateTime(scheduledDate)}</span>

@@ -1,9 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -15,13 +14,14 @@ import {
 import {
   createMeetingInstance,
   updateMeetingInstance,
+  importMeetingInstanceFromICS,
 } from '@/lib/actions/meeting-instance'
+import { toast } from 'sonner'
 import {
   type MeetingInstanceFormData,
   meetingInstanceSchema,
 } from '@/lib/validations'
 import {
-  AlertCircle,
   Plus,
   X,
   Calendar,
@@ -29,10 +29,13 @@ import {
   Users,
   CheckCircle2,
   Copy,
+  Upload,
+  Loader2,
 } from 'lucide-react'
 import { MarkdownEditor } from '@/components/markdown-editor'
 import { PersonSelect } from '@/components/ui/person-select'
-import { SectionHeader } from '@/components/ui/section-header'
+import { FormTemplate, type FormSection } from '@/components/ui/form-template'
+import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
 
 interface MeetingInstanceFormProps {
   meetingId: string
@@ -50,6 +53,9 @@ interface MeetingInstanceFormProps {
       avatar?: string | null
     }
   }>
+  onSubmit?: (formData: MeetingInstanceFormData) => void | Promise<void>
+  errors?: Record<string, string>
+  isSubmitting?: boolean
 }
 
 export function MeetingInstanceForm({
@@ -59,10 +65,25 @@ export function MeetingInstanceForm({
   instanceId,
   onSuccess,
   parentMeetingParticipants,
+  onSubmit: externalOnSubmit,
+  errors: externalErrors,
+  isSubmitting: externalIsSubmitting,
 }: MeetingInstanceFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [internalIsSubmitting, setInternalIsSubmitting] = useState(false)
+  const [internalErrors, setInternalErrors] = useState<Record<string, string>>(
+    {}
+  )
+  const [isImportingICS, setIsImportingICS] = useState(false)
+  const icsFileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
+
+  // Use external props if provided, otherwise use internal state
+  const isSubmitting = externalIsSubmitting ?? internalIsSubmitting
+  const errors = externalErrors ?? internalErrors
+  const setErrors = externalErrors ? () => {} : setInternalErrors
+  const setIsSubmitting = externalIsSubmitting
+    ? () => {}
+    : setInternalIsSubmitting
 
   // Form state to prevent clearing on errors
   const [formData, setFormData] = useState<MeetingInstanceFormData>({
@@ -74,6 +95,14 @@ export function MeetingInstanceForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // If external submit handler provided, use it
+    if (externalOnSubmit) {
+      await externalOnSubmit(formData)
+      return
+    }
+
+    // Otherwise use internal submission logic
     setIsSubmitting(true)
     setErrors({})
 
@@ -86,10 +115,13 @@ export function MeetingInstanceForm({
         // Redirect to the meeting instance detail page
         router.push(`/meetings/${meetingId}/instances/${instanceId}`)
       } else {
-        await createMeetingInstance(validatedData)
+        const createdInstance = await createMeetingInstance(validatedData)
         // Call success callback if provided (for dialog forms)
         if (onSuccess) {
           onSuccess()
+        } else {
+          // Redirect to the newly created instance detail page
+          router.push(`/meetings/${meetingId}/instances/${createdInstance.id}`)
         }
       }
     } catch (error) {
@@ -176,154 +208,228 @@ export function MeetingInstanceForm({
     })
   }
 
-  return (
-    <form onSubmit={handleSubmit} className='space-y-6'>
-      {errors.general && (
-        <div className='bg-destructive/10 border border-destructive/20 rounded-lg p-3 text-destructive text-sm flex items-center gap-2'>
-          <AlertCircle className='h-4 w-4' />
-          {errors.general}
-        </div>
-      )}
+  const handleICSImport = async (file: File) => {
+    setIsImportingICS(true)
+    setErrors({})
 
-      <div className='flex flex-col gap-6'>
-        {/* Schedule */}
-        <div className='space-y-4'>
-          <SectionHeader icon={Calendar} title='Schedule' />
-          <div className='space-y-4'>
-            <div className='space-y-2'>
-              <Label htmlFor='scheduledAt'>
-                Date & Time <span className='text-destructive'>*</span>
-              </Label>
-              <Input
-                id='scheduledAt'
-                type='datetime-local'
-                value={formData.scheduledAt}
-                onChange={e => handleInputChange('scheduledAt', e.target.value)}
-                className={errors.scheduledAt ? 'border-destructive' : ''}
-              />
-              {errors.scheduledAt && (
-                <p className='text-sm text-destructive'>{errors.scheduledAt}</p>
-              )}
-            </div>
-          </div>
-        </div>
+    try {
+      // Validate file extension
+      if (!file.name.toLowerCase().endsWith('.ics')) {
+        toast.error('Please select a valid ICS calendar file (.ics)')
+        return
+      }
 
-        {/* Notes */}
-        <div className='space-y-4'>
-          <SectionHeader icon={StickyNote} title='Notes' />
-          <div className='space-y-4'>
-            <MarkdownEditor
-              value={formData.notes || ''}
-              onChange={value => handleInputChange('notes', value)}
-              placeholder='Meeting notes and outcomes... Use Markdown for formatting!'
-            />
-          </div>
-        </div>
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024
+      if (file.size > maxSize) {
+        toast.error('ICS file is too large. Maximum size is 5MB')
+        return
+      }
 
-        {/* Participants */}
-        <div className='space-y-4'>
-          <SectionHeader
-            icon={Users}
-            title='Participants'
-            action={
-              <div className='flex items-center gap-2'>
-                <Button
-                  type='button'
-                  variant='outline'
-                  size='sm'
-                  onClick={addParticipant}
-                  className='flex items-center gap-2'
-                >
-                  <Plus className='h-4 w-4' />
-                  Add Participant
-                </Button>
-                {parentMeetingParticipants &&
-                  parentMeetingParticipants.length > 0 && (
-                    <Button
-                      type='button'
-                      variant='outline'
-                      size='sm'
-                      onClick={inheritParentParticipants}
-                      className='flex items-center gap-2'
-                    >
-                      <Copy className='h-4 w-4' />
-                      Inherit from Parent
-                    </Button>
-                  )}
-                <Button
-                  type='button'
-                  variant='outline'
-                  size='sm'
-                  onClick={toggleAllAttendance}
-                  className='flex items-center gap-2'
-                >
-                  <CheckCircle2 className='h-4 w-4' />
-                  {formData.participants.every(p => p.status === 'attended')
-                    ? 'Mark All Invited'
-                    : 'Mark All Attended'}
-                </Button>
-              </div>
-            }
-          />
+      // Read file content
+      const fileContent = await file.text()
 
-          <div className='space-y-2'>
-            {formData.participants.map((participant, index) => (
-              <div key={index} className='flex items-center gap-2'>
-                <div className='flex-1'>
-                  <PersonSelect
-                    value={participant.personId}
-                    onValueChange={value =>
-                      updateParticipant(index, 'personId', value)
-                    }
-                    placeholder='Select participant'
-                    showAvatar={true}
-                    showRole={true}
-                  />
-                </div>
+      // Call server action to parse and match attendees
+      const importedData = await importMeetingInstanceFromICS(fileContent)
 
-                <Select
-                  value={participant.status}
-                  onValueChange={value =>
-                    updateParticipant(index, 'status', value)
-                  }
-                >
-                  <SelectTrigger className='w-32'>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='invited'>Invited</SelectItem>
-                    <SelectItem value='accepted'>Accepted</SelectItem>
-                    <SelectItem value='declined'>Declined</SelectItem>
-                    <SelectItem value='tentative'>Tentative</SelectItem>
-                    <SelectItem value='attended'>Attended</SelectItem>
-                    <SelectItem value='absent'>Absent</SelectItem>
-                  </SelectContent>
-                </Select>
+      // Populate form with imported data
+      setFormData(prev => ({
+        ...prev,
+        scheduledAt: importedData.scheduledAt,
+        notes: importedData.notes || '',
+        participants: importedData.participants,
+      }))
 
-                <Button
-                  type='button'
-                  variant='outline'
-                  size='sm'
-                  onClick={() => removeParticipant(index)}
-                  className='px-2'
-                >
-                  <X className='h-4 w-4' />
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      toast.success(
+        `Meeting instance imported successfully! ${importedData.participants.length} participant(s) matched.`
+      )
+    } catch (error) {
+      console.error('Error importing ICS file:', error)
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to import ICS file. Please check the file format.'
+      )
+    } finally {
+      setIsImportingICS(false)
+      // Reset file input
+      if (icsFileInputRef.current) {
+        icsFileInputRef.current.value = ''
+      }
+    }
+  }
 
-      <div className='flex justify-end gap-3 pt-4'>
-        <Button type='submit' disabled={isSubmitting}>
-          {isSubmitting
-            ? 'Saving...'
-            : isEditing
-              ? 'Update Instance'
-              : 'Create Instance'}
+  const handleICSFileSelect = (files: FileList | null) => {
+    if (!files || files.length === 0) return
+    handleICSImport(files[0])
+  }
+
+  const sections: FormSection[] = [
+    {
+      title: 'Schedule',
+      icon: Calendar,
+      action: (
+        <Button
+          type='button'
+          variant='outline'
+          size='sm'
+          onClick={() => icsFileInputRef.current?.click()}
+          disabled={isImportingICS || isSubmitting}
+        >
+          {isImportingICS ? (
+            <>
+              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+              Importing...
+            </>
+          ) : (
+            <>
+              <Upload className='mr-2 h-4 w-4' />
+              Import from ICS
+            </>
+          )}
         </Button>
-      </div>
-    </form>
+      ),
+      content: (
+        <div className='space-y-2'>
+          <Label htmlFor='scheduledAt'>
+            Date & Time <span className='text-destructive'>*</span>
+          </Label>
+          <DateTimePickerWithNaturalInput
+            value={formData.scheduledAt}
+            onChange={value => handleInputChange('scheduledAt', value)}
+            placeholder="e.g., 'tomorrow at 3pm', 'next Monday', 'Jan 15 at 10am'"
+            error={!!errors.scheduledAt}
+            required
+          />
+          {errors.scheduledAt && (
+            <p className='text-sm text-destructive'>{errors.scheduledAt}</p>
+          )}
+          <input
+            ref={icsFileInputRef}
+            type='file'
+            accept='.ics'
+            onChange={e => handleICSFileSelect(e.target.files)}
+            className='hidden'
+            disabled={isImportingICS || isSubmitting}
+          />
+        </div>
+      ),
+    },
+    {
+      title: 'Notes',
+      icon: StickyNote,
+      content: (
+        <MarkdownEditor
+          value={formData.notes || ''}
+          onChange={value => handleInputChange('notes', value)}
+          placeholder='Meeting notes and outcomes... Use Markdown for formatting!'
+        />
+      ),
+    },
+    {
+      title: 'Participants',
+      icon: Users,
+      action: (
+        <div className='flex items-center gap-2'>
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            onClick={addParticipant}
+            className='flex items-center gap-2'
+          >
+            <Plus className='h-4 w-4' />
+            Add Participant
+          </Button>
+          {parentMeetingParticipants &&
+            parentMeetingParticipants.length > 0 && (
+              <Button
+                type='button'
+                variant='outline'
+                size='sm'
+                onClick={inheritParentParticipants}
+                className='flex items-center gap-2'
+              >
+                <Copy className='h-4 w-4' />
+                Inherit from Parent
+              </Button>
+            )}
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            onClick={toggleAllAttendance}
+            className='flex items-center gap-2'
+          >
+            <CheckCircle2 className='h-4 w-4' />
+            {formData.participants.every(p => p.status === 'attended')
+              ? 'Mark All Invited'
+              : 'Mark All Attended'}
+          </Button>
+        </div>
+      ),
+      content: (
+        <div className='space-y-2'>
+          {formData.participants.map((participant, index) => (
+            <div key={index} className='flex items-center gap-2'>
+              <div className='flex-1'>
+                <PersonSelect
+                  value={participant.personId}
+                  onValueChange={value =>
+                    updateParticipant(index, 'personId', value)
+                  }
+                  placeholder='Select participant'
+                  showAvatar={true}
+                  showRole={true}
+                />
+              </div>
+
+              <Select
+                value={participant.status}
+                onValueChange={value =>
+                  updateParticipant(index, 'status', value)
+                }
+              >
+                <SelectTrigger className='w-32'>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='invited'>Invited</SelectItem>
+                  <SelectItem value='accepted'>Accepted</SelectItem>
+                  <SelectItem value='declined'>Declined</SelectItem>
+                  <SelectItem value='tentative'>Tentative</SelectItem>
+                  <SelectItem value='attended'>Attended</SelectItem>
+                  <SelectItem value='absent'>Absent</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button
+                type='button'
+                variant='outline'
+                size='sm'
+                onClick={() => removeParticipant(index)}
+                className='px-2'
+              >
+                <X className='h-4 w-4' />
+              </Button>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+  ]
+
+  return (
+    <FormTemplate
+      sections={sections}
+      onSubmit={handleSubmit}
+      submitButton={{
+        text: isEditing ? 'Update Instance' : 'Create Instance',
+        loadingText: 'Saving...',
+        icon: CheckCircle2,
+      }}
+      generalError={errors.general}
+      isSubmitting={isSubmitting}
+    />
   )
 }

@@ -8,6 +8,9 @@ import {
   Person,
   User as PrismaUser,
 } from '@prisma/client'
+import { SectionHeader } from '@/components/ui/section-header'
+import { Calendar } from 'lucide-react'
+import { CreateMeetingModal } from '@/components/initiatives/create-meeting-modal'
 
 type MeetingWithRelations = Meeting & {
   team: Team | null
@@ -32,10 +35,22 @@ export function InitiativeMeetings({
   currentTeam,
 }: InitiativeMeetingsProps) {
   return (
-    <MeetingListWithData
-      initiativeId={initiativeId}
-      meetings={meetings}
-      currentTeam={currentTeam}
-    />
+    <div className='rounded-xl py-4 space-y-4'>
+      <SectionHeader
+        icon={Calendar}
+        title='Meetings'
+        action={
+          <CreateMeetingModal
+            initiativeId={initiativeId}
+            currentTeam={currentTeam}
+          />
+        }
+      />
+      <MeetingListWithData
+        initiativeId={initiativeId}
+        meetings={meetings}
+        currentTeam={currentTeam}
+      />
+    </div>
   )
 }
