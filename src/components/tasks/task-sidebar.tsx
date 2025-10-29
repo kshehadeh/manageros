@@ -1,6 +1,6 @@
 'use client'
 
-import { LinkManager } from '@/components/entity-links'
+import { SimpleLinkList } from '@/components/links/link-list'
 import { SectionHeader } from '@/components/ui/section-header'
 import { InlineEditableDropdown } from '@/components/common/inline-editable-dropdown'
 import { InlineEditableDate } from '@/components/common/inline-editable-date'
@@ -14,6 +14,7 @@ import {
   ListTodo,
 } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   updateTaskStatus,
   updateTaskPriority,
@@ -75,6 +76,7 @@ export function TaskSidebar({
   createdBy,
   updatedAt,
 }: TaskSidebarProps) {
+  const router = useRouter()
   const hasDetails =
     assignee || initiative || objective || estimate || dueDate || createdBy
 
@@ -267,7 +269,16 @@ export function TaskSidebar({
 
       {/* Links Section */}
       <div className='page-section'>
-        <LinkManager entityType='Task' entityId={entityId} links={links} />
+        <SimpleLinkList
+          links={links}
+          entityType='Task'
+          entityId={entityId}
+          title='Links'
+          variant='compact'
+          showAddButton={true}
+          emptyStateText='No links added yet.'
+          onLinksUpdate={() => router.refresh()}
+        />
       </div>
     </div>
   )

@@ -9,9 +9,9 @@ import { Calendar, StickyNote, ChevronRight } from 'lucide-react'
 import { MeetingInstanceDetailBreadcrumbClient } from '@/components/meetings/meeting-instance-detail-breadcrumb-client'
 import { MeetingInstanceActionsDropdown } from '@/components/meetings/meeting-instance-actions-dropdown'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
-import { LinkManager } from '@/components/entity-links'
+import { SimpleLinkList } from '@/components/links/link-list'
 import { HelpIcon } from '@/components/help-icon'
-import { MeetingParticipantsSidebar } from '@/components/meetings/meeting-participants-sidebar'
+import { SimplePeopleList } from '@/components/people/person-list'
 import { SectionHeader } from '@/components/ui/section-header'
 
 export default async function MeetingInstanceDetailPage({
@@ -118,17 +118,53 @@ export default async function MeetingInstanceDetailPage({
           </div>
 
           {/* Right Sidebar - Full width on mobile, fixed width on desktop */}
-          <div className='w-full lg:w-80 lg:flex-shrink-0'>
+          <div className='w-full lg:w-80 lg:shrink-0'>
             <div className='page-section'>
-              <MeetingParticipantsSidebar
-                participants={meetingInstance.participants}
+              <SimplePeopleList
+                people={meetingInstance.participants.map(p => ({
+                  ...p.person,
+                  team: null,
+                  jobRole: null,
+                  manager: null,
+                  reports: [],
+                  level: 0,
+                }))}
+                title={`Participants (${meetingInstance.participants.length})`}
+                variant='compact'
+                emptyStateText='No participants yet.'
+                showEmail={false}
+                showRole={false}
+                showTeam={false}
+                showJobRole={false}
+                showManager={false}
+                showReportsCount={false}
+                customSubtextMap={meetingInstance.participants.reduce(
+                  (acc, p) => {
+                    acc[p.person.id] =
+                      p.status.charAt(0).toUpperCase() + p.status.slice(1)
+                    return acc
+                  },
+                  {} as Record<string, string>
+                )}
               />
             </div>
             <div className='page-section mt-6'>
-              <LinkManager
+              <SimpleLinkList
+                links={entityLinks.map(link => ({
+                  id: link.id,
+                  url: link.url,
+                  title: link.title,
+                  description: link.description,
+                  createdAt: link.createdAt,
+                  updatedAt: link.updatedAt,
+                  createdBy: link.createdBy,
+                }))}
                 entityType='MeetingInstance'
                 entityId={meetingInstance.id}
-                links={entityLinks}
+                title='Links'
+                variant='compact'
+                showAddButton={true}
+                emptyStateText='No links added yet.'
               />
             </div>
           </div>

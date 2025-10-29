@@ -1,28 +1,15 @@
 'use client'
 
 import { SectionHeader } from '@/components/ui/section-header'
-import { LinkManager } from '@/components/entity-links'
+import { SimpleLinkList } from '@/components/links/link-list'
 import { ChangeTeamModal } from './change-team-modal'
 import { ManageOwnersModal } from './manage-owners-modal'
 import { Users } from 'lucide-react'
-import { PersonListItem } from '@/components/people/person-list-item'
+import { SimplePeopleList } from '@/components/people/person-list'
 import { TeamAvatar } from '@/components/teams/team-avatar'
 import Link from 'next/link'
-
-interface Person {
-  id: string
-  name: string
-  email?: string | null
-  avatar?: string | null
-  role?: string | null
-}
-
-interface InitiativeOwner {
-  initiativeId: string
-  personId: string
-  role: string
-  person: Person
-}
+import type { Person } from '@/types/person'
+import { useRouter } from 'next/navigation'
 
 interface Team {
   id: string
@@ -44,6 +31,13 @@ interface EntityLink {
   }
 }
 
+interface InitiativeOwner {
+  initiativeId: string
+  personId: string
+  role: string
+  person: Person
+}
+
 interface InitiativeSidebarProps {
   team: Team | null
   owners: InitiativeOwner[]
@@ -63,6 +57,8 @@ export function InitiativeSidebar({
   teams,
   people,
 }: InitiativeSidebarProps) {
+  const router = useRouter()
+
   return (
     <div className='w-full lg:w-80 space-y-6'>
       {/* Team Section */}
@@ -108,31 +104,46 @@ export function InitiativeSidebar({
           }
           className='mb-3'
         />
-        <div className='space-y-3'>
-          {owners.length === 0 ? (
-            <p className='text-sm text-muted-foreground'>
-              No people associated with this initiative yet.
-            </p>
-          ) : (
-            owners.map(owner => (
-              <PersonListItem
-                key={`${owner.initiativeId}-${owner.personId}`}
-                person={owner.person}
-                roleBadge={
-                  owner.role && owner.role !== 'owner' ? owner.role : undefined
-                }
-              />
-            ))
+        <SimplePeopleList
+          people={owners.map(owner => ({
+            ...owner.person,
+            level: 0, // Default level since it's not in the query
+          }))}
+          title=''
+          variant='compact'
+          emptyStateText='No people associated with this initiative yet.'
+          showEmail={false}
+          showRole={false}
+          showTeam={false}
+          showJobRole={false}
+          showManager={false}
+          showReportsCount={false}
+          customSubtextMap={owners.reduce(
+            (acc, owner) => {
+              if (owner.role) {
+                acc[owner.personId] =
+                  owner.role.charAt(0).toUpperCase() + owner.role.slice(1)
+              }
+              return acc
+            },
+            {} as Record<string, string>
           )}
-        </div>
+          className=''
+        />
       </div>
 
       {/* Links Section */}
       <div className='page-section'>
-        <LinkManager
+        <SimpleLinkList
+          links={links}
           entityType={entityType}
           entityId={entityId}
-          links={links}
+          title='Links'
+          variant='compact'
+          showAddButton={true}
+          emptyStateText='No links added yet.'
+          onLinksUpdate={() => router.refresh()}
+          className=''
         />
       </div>
     </div>

@@ -60,7 +60,23 @@ export default async function InitiativeDetail({
         team: true,
         owners: {
           include: {
-            person: true,
+            person: {
+              include: {
+                team: true,
+                jobRole: {
+                  include: {
+                    level: true,
+                    domain: true,
+                  },
+                },
+                manager: {
+                  include: {
+                    reports: true,
+                  },
+                },
+                reports: true,
+              },
+            },
           },
         },
       },
@@ -68,6 +84,21 @@ export default async function InitiativeDetail({
     prisma.person.findMany({
       where: {
         organizationId: session.user.organizationId,
+      },
+      include: {
+        team: true,
+        jobRole: {
+          include: {
+            level: true,
+            domain: true,
+          },
+        },
+        manager: {
+          include: {
+            reports: true,
+          },
+        },
+        reports: true,
       },
       orderBy: { name: 'asc' },
     }),
@@ -278,10 +309,52 @@ export default async function InitiativeDetail({
           </div>
 
           {/* Right Sidebar - Full width on mobile, fixed width on desktop */}
-          <div className='w-full lg:w-80 lg:flex-shrink-0'>
+          <div className='w-full lg:w-80 lg:shrink-0'>
             <InitiativeSidebar
               team={init.team}
-              owners={init.owners}
+              owners={init.owners.map(owner => ({
+                ...owner,
+                person: {
+                  ...owner.person,
+                  level: 0, // Default level
+                  team: owner.person.team
+                    ? {
+                        id: owner.person.team.id,
+                        name: owner.person.team.name,
+                      }
+                    : null,
+                  jobRole: owner.person.jobRole
+                    ? {
+                        id: owner.person.jobRole.id,
+                        title: owner.person.jobRole.title,
+                        level: owner.person.jobRole.level
+                          ? {
+                              id: owner.person.jobRole.level.id,
+                              name: owner.person.jobRole.level.name,
+                            }
+                          : { id: '', name: '' },
+                        domain: owner.person.jobRole.domain
+                          ? {
+                              id: owner.person.jobRole.domain.id,
+                              name: owner.person.jobRole.domain.name,
+                            }
+                          : { id: '', name: '' },
+                      }
+                    : null,
+                  manager: owner.person.manager
+                    ? {
+                        id: owner.person.manager.id,
+                        name: owner.person.manager.name,
+                        email: owner.person.manager.email,
+                        role: owner.person.manager.role,
+                        status: owner.person.manager.status,
+                        birthday: owner.person.manager.birthday,
+                        reports: owner.person.manager.reports || [],
+                      }
+                    : null,
+                  reports: owner.person.reports || [],
+                },
+              }))}
               links={entityLinks.map(link => ({
                 id: link.id,
                 url: link.url,
@@ -294,7 +367,53 @@ export default async function InitiativeDetail({
               entityType='Initiative'
               entityId={init.id}
               teams={teams}
-              people={people}
+              people={people.map(person => ({
+                ...person,
+                level: 0, // Default level
+                team: person.team
+                  ? {
+                      id: person.team.id,
+                      name: person.team.name,
+                    }
+                  : null,
+                jobRole: person.jobRole
+                  ? {
+                      id: person.jobRole.id,
+                      title: person.jobRole.title,
+                      level: person.jobRole.level
+                        ? {
+                            id: person.jobRole.level.id,
+                            name: person.jobRole.level.name,
+                          }
+                        : { id: '', name: '' },
+                      domain: person.jobRole.domain
+                        ? {
+                            id: person.jobRole.domain.id,
+                            name: person.jobRole.domain.name,
+                          }
+                        : { id: '', name: '' },
+                    }
+                  : null,
+                manager: person.manager
+                  ? {
+                      id: person.manager.id,
+                      name: person.manager.name,
+                      email: person.manager.email,
+                      role: person.manager.role,
+                      status: person.manager.status,
+                      birthday: person.manager.birthday,
+                      reports: person.manager.reports || [],
+                    }
+                  : null,
+                reports: person.reports.map(report => ({
+                  id: report.id,
+                  name: report.name,
+                  email: report.email,
+                  role: report.role,
+                  status: report.status,
+                  birthday: report.birthday,
+                })),
+              }))}
             />
           </div>
         </div>

@@ -36,6 +36,7 @@ export interface PersonListProps {
   showJobRole?: boolean
   showManager?: boolean
   showReportsCount?: boolean
+  customSubtextMap?: Record<string, string | React.ReactNode>
 }
 
 export function SimplePeopleList({
@@ -57,6 +58,7 @@ export function SimplePeopleList({
   showJobRole = true,
   showManager = true,
   showReportsCount = true,
+  customSubtextMap,
 }: PersonListProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
@@ -109,6 +111,15 @@ export function SimplePeopleList({
 
   const renderPersonItem = (person: Person) => {
     const subheaderItems: React.ReactNode[] = []
+
+    // Custom subtext takes precedence and is added first if provided
+    if (customSubtextMap && customSubtextMap[person.id]) {
+      subheaderItems.push(
+        <span key='custom' className='truncate'>
+          {customSubtextMap[person.id]}
+        </span>
+      )
+    }
 
     if (showRole && person.role) {
       subheaderItems.push(
