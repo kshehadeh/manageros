@@ -5,20 +5,21 @@ import { Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { FeedbackResponseDetail } from './feedback-response-detail'
 import { Users } from 'lucide-react'
+import { JsonValue } from '@prisma/client/runtime/library'
 
 interface FeedbackQuestion {
   id: string
   question: string
   type: string
   required: boolean
-  options: unknown
+  options: JsonValue
   sortOrder: number
 }
 
 interface FeedbackResponse {
   id: string
   responderEmail: string
-  responses: unknown | null
+  responses: JsonValue | null
   submittedAt: Date
 }
 
