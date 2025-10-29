@@ -14,8 +14,12 @@ export async function POST(
     const formData = await request.formData()
     const input: Record<string, unknown> = {}
 
-    // Convert FormData to object with proper type conversion
+    // Extract renderer (shared across all reports)
+    const renderer = formData.get('renderer')?.toString() || 'markdown'
+
+    // Convert FormData to object with proper type conversion (excluding renderer)
     for (const [key, value] of formData.entries()) {
+      if (key === 'renderer') continue // Skip renderer field
       const stringValue = value.toString()
 
       // Convert string representations of booleans to actual booleans
@@ -33,11 +37,19 @@ export async function POST(
       return NextResponse.json({ error: 'Report not found' }, { status: 404 })
     }
 
+    // Validate renderer is supported
+    if (!def.supportedRenderers.includes(renderer as 'markdown' | 'web')) {
+      return NextResponse.json(
+        { error: `Renderer '${renderer}' is not supported for this report` },
+        { status: 400 }
+      )
+    }
+
     try {
       const parsed = def.inputSchema.parse(input)
       const result = await runReport({
         codeId: def.codeId,
-        renderer: 'markdown',
+        renderer: renderer as 'markdown' | 'web',
         input: parsed,
       })
 

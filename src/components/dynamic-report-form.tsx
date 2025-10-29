@@ -8,8 +8,16 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { PersonSelect } from '@/components/ui/person-select'
 import { SectionHeader } from '@/components/ui/section-header'
 import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { AlertCircle, FileText, Settings } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import type { ReportRendererId } from '@/lib/reports/types'
 
 interface FormField {
   name: string
@@ -25,6 +33,7 @@ interface DynamicReportFormProps {
   schemaFields: FormField[]
   codeId: string
   initialData?: Record<string, unknown>
+  supportedRenderers: ReportRendererId[]
 }
 
 // Helper function to convert field names to human-friendly labels
@@ -67,8 +76,12 @@ export function DynamicReportForm({
   schemaFields,
   codeId,
   initialData = {},
+  supportedRenderers,
 }: DynamicReportFormProps) {
   const [formData, setFormData] = useState<Record<string, unknown>>(initialData)
+  const [renderer, setRenderer] = useState<ReportRendererId>(
+    supportedRenderers.includes('web') ? 'web' : 'markdown'
+  )
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
@@ -98,6 +111,9 @@ export function DynamicReportForm({
     try {
       // Create FormData from form state
       const submitData = new FormData()
+      // Add renderer selection (shared across all reports)
+      submitData.append('renderer', renderer)
+
       for (const [key, value] of Object.entries(formData)) {
         if (value !== undefined && value !== null) {
           // Handle boolean values properly
@@ -258,6 +274,35 @@ export function DynamicReportForm({
           <div className='bg-destructive/10 border border-destructive/20 rounded-lg p-3 text-destructive text-sm flex items-center gap-2'>
             <AlertCircle className='h-4 w-4' />
             {errors.submit}
+          </div>
+        )}
+
+        {/* Output Format Selection (shared across all reports) */}
+        {supportedRenderers.length > 1 && (
+          <div className='space-y-6'>
+            <SectionHeader icon={FileText} title='Output Format' />
+            <div className='space-y-2'>
+              <Label htmlFor='renderer'>Output Format</Label>
+              <Select
+                value={renderer}
+                onValueChange={setRenderer as (value: string) => void}
+              >
+                <SelectTrigger id='renderer'>
+                  <SelectValue placeholder='Select output format' />
+                </SelectTrigger>
+                <SelectContent>
+                  {supportedRenderers.includes('web') && (
+                    <SelectItem value='web'>Web (Rich UI)</SelectItem>
+                  )}
+                  {supportedRenderers.includes('markdown') && (
+                    <SelectItem value='markdown'>Markdown</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+              <p className='text-sm text-muted-foreground'>
+                Choose how you want the report results to be displayed
+              </p>
+            </div>
           </div>
         )}
 

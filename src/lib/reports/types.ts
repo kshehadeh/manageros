@@ -3,7 +3,7 @@
 import type { z } from 'zod'
 import type { PrismaClient } from '@prisma/client'
 
-export type ReportRendererId = 'markdown'
+export type ReportRendererId = 'markdown' | 'web'
 
 export interface ReportExecutionContext {
   prisma: PrismaClient

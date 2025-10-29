@@ -82,7 +82,7 @@ export const PersonOverviewReport: ReportDefinition<
   codeId: 'person-overview',
   name: 'Person Overview',
   description: "Overview of a person's activity between two dates",
-  supportedRenderers: ['markdown'],
+  supportedRenderers: ['markdown', 'web'],
   inputSchema: personOverviewInput,
   identifierFields: [
     {
@@ -426,6 +426,10 @@ export const PersonOverviewReport: ReportDefinition<
   renderers: {
     markdown: async output => {
       return await renderMarkdownFromJson(output)
+    },
+    web: async () => {
+      // Web renderer doesn't return a string - it's handled by the display component
+      return '__WEB_RENDERER__'
     },
   },
 }

@@ -3,6 +3,10 @@ import { requireAuth } from '@/lib/auth-utils'
 import ReactMarkdown from 'react-markdown'
 import { ReportInstanceBreadcrumbClient } from '@/components/report-instance-breadcrumb-client'
 import { DeleteReportButton } from '@/components/delete-report-button'
+import {
+  PersonOverviewWebRenderer,
+  type PersonOverviewWebRendererProps,
+} from '@/components/reports/person-overview-web-renderer'
 
 export default async function ReportInstancePage({
   params,
@@ -13,6 +17,7 @@ export default async function ReportInstancePage({
   const instance = await getReportInstance((await params).id)
 
   const markdown = (instance as { outputMarkdown?: string }).outputMarkdown
+  const isWebRenderer = instance.renderer === 'web'
 
   return (
     <ReportInstanceBreadcrumbClient
@@ -30,7 +35,11 @@ export default async function ReportInstancePage({
           <DeleteReportButton instanceId={instance.id} />
         </div>
 
-        {markdown ? (
+        {isWebRenderer && instance.reportCodeId === 'person-overview' ? (
+          <PersonOverviewWebRenderer
+            output={instance.output as PersonOverviewWebRendererProps['output']}
+          />
+        ) : markdown ? (
           <section className='prose max-w-none dark:prose-invert'>
             <ReactMarkdown>{markdown}</ReactMarkdown>
           </section>

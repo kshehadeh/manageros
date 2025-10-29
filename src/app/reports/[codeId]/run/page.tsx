@@ -42,6 +42,7 @@ export default async function RunReportPage({
           schemaFields={schemaFields}
           codeId={codeId}
           initialData={input}
+          supportedRenderers={def.supportedRenderers}
         />
       </div>
     </ReportRunBreadcrumbClient>
