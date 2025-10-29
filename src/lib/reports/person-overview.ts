@@ -2,6 +2,11 @@ import { z } from 'zod'
 import type { ReportDefinition, ReportExecutionContext } from './types'
 import { GithubApiService } from '@/lib/github-api'
 import { JiraApiService } from '@/lib/jira-api'
+import {
+  COMPLETED_STATUSES,
+  ACTIVE_STATUSES,
+  type TaskStatus,
+} from '@/lib/task-status'
 
 export const personOverviewInput = z.object({
   personId: z.string(),
@@ -13,7 +18,13 @@ export const personOverviewInput = z.object({
 type Output = {
   person: { id: string; name: string }
   period: { fromDate: string; toDate: string }
-  tasks: Array<{
+  metrics: {
+    completedTasksCount: number
+    initiativesCount: number
+    activeJiraTicketsCount: number
+    activePrsCount: number
+  }
+  completedTasks: Array<{
     id: string
     title: string
     status: string
@@ -24,8 +35,17 @@ type Output = {
   initiatives: Array<{
     id: string
     title: string
+    summary: string | null
     status: string
-    tasks: Array<{
+    openTasks: Array<{
+      id: string
+      title: string
+      status: string
+      updatedAt?: string | null
+      completedAt?: string | null
+      initiativeId?: string | null
+    }>
+    completedTasks: Array<{
       id: string
       title: string
       status: string
@@ -107,26 +127,24 @@ export const PersonOverviewReport: ReportDefinition<
     })
     if (!person) throw new Error('Person not found')
 
-    const tasks = await ctx.prisma.task.findMany({
+    const fromDate = new Date(input.fromDate)
+    const toDate = new Date(input.toDate)
+
+    // Calculate one week ago for Jira tickets
+    const oneWeekAgo = new Date()
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+
+    // Fetch all completed tasks for the person in the time period
+    const allCompletedTasks = await ctx.prisma.task.findMany({
       where: {
         assigneeId: person.id,
-        initiativeId: null, // Exclude tasks associated with initiatives
-        OR: [
-          {
-            updatedAt: {
-              gte: new Date(input.fromDate),
-              lte: new Date(input.toDate),
-            },
-          },
-          {
-            completedAt: {
-              gte: new Date(input.fromDate),
-              lte: new Date(input.toDate),
-            },
-          },
-        ],
+        status: { in: COMPLETED_STATUSES },
+        completedAt: {
+          gte: fromDate,
+          lte: toDate,
+        },
       },
-      orderBy: { updatedAt: 'desc' },
+      orderBy: { completedAt: 'desc' },
       select: {
         id: true,
         title: true,
@@ -137,32 +155,46 @@ export const PersonOverviewReport: ReportDefinition<
       },
     })
 
+    // Fetch all initiatives the person is involved in (as owner or through tasks)
     const initiatives = await ctx.prisma.initiative.findMany({
       where: {
         organizationId: ctx.user.organizationId,
-        owners: { some: { personId: person.id } },
+        OR: [
+          { owners: { some: { personId: person.id } } },
+          {
+            tasks: {
+              some: {
+                assigneeId: person.id,
+                OR: [
+                  {
+                    updatedAt: {
+                      gte: fromDate,
+                      lte: toDate,
+                    },
+                  },
+                  {
+                    completedAt: {
+                      gte: fromDate,
+                      lte: toDate,
+                    },
+                  },
+                  {
+                    status: { in: ACTIVE_STATUSES },
+                  },
+                ],
+              },
+            },
+          },
+        ],
       },
       select: {
         id: true,
         title: true,
+        summary: true,
         status: true,
         tasks: {
           where: {
             assigneeId: person.id,
-            OR: [
-              {
-                updatedAt: {
-                  gte: new Date(input.fromDate),
-                  lte: new Date(input.toDate),
-                },
-              },
-              {
-                completedAt: {
-                  gte: new Date(input.fromDate),
-                  lte: new Date(input.toDate),
-                },
-              },
-            ],
           },
           select: {
             id: true,
@@ -175,6 +207,43 @@ export const PersonOverviewReport: ReportDefinition<
           orderBy: { updatedAt: 'desc' },
         },
       },
+    })
+
+    // Separate tasks for each initiative into open and completed
+    const initiativesWithTasks = initiatives.map(init => {
+      const openTasks = init.tasks.filter(
+        t => !COMPLETED_STATUSES.includes(t.status as TaskStatus)
+      )
+      const completedTasksInPeriod = init.tasks.filter(
+        t =>
+          COMPLETED_STATUSES.includes(t.status as TaskStatus) &&
+          t.completedAt &&
+          new Date(t.completedAt) >= fromDate &&
+          new Date(t.completedAt) <= toDate
+      )
+
+      return {
+        id: init.id,
+        title: init.title,
+        summary: init.summary,
+        status: init.status,
+        openTasks: openTasks.map(t => ({
+          id: t.id,
+          title: t.title,
+          status: t.status,
+          updatedAt: t.updatedAt?.toISOString() ?? null,
+          completedAt: t.completedAt?.toISOString() ?? null,
+          initiativeId: t.initiativeId,
+        })),
+        completedTasks: completedTasksInPeriod.map(t => ({
+          id: t.id,
+          title: t.title,
+          status: t.status,
+          updatedAt: t.updatedAt?.toISOString() ?? null,
+          completedAt: t.completedAt?.toISOString() ?? null,
+          initiativeId: t.initiativeId,
+        })),
+      }
     })
 
     // Fetch GitHub activity if person has linked GitHub account
@@ -209,15 +278,37 @@ export const PersonOverviewReport: ReportDefinition<
             )
           )
 
-          const pullRequests = await githubService.getRecentPullRequests(
-            person.githubAccount.githubUsername,
-            daysBack
+          // Fetch PRs from a wider date range to catch all relevant ones
+          const widerDaysBack = Math.max(
+            daysBack,
+            Math.ceil(
+              (toDate.getTime() - oneWeekAgo.getTime()) / (1000 * 60 * 60 * 24)
+            )
           )
 
+          const pullRequests = await githubService.getRecentPullRequests(
+            person.githubAccount.githubUsername,
+            widerDaysBack
+          )
+
+          // Filter for completed (merged) OR in progress (open) PRs
           githubPrs = pullRequests
             .filter(pr => {
-              const prDate = new Date(pr.createdAt)
-              return prDate >= fromDate && prDate <= toDate
+              const state = pr.state.toLowerCase()
+              const isCompleted = state === 'merged' || state === 'closed'
+              const isInProgress = state === 'open'
+
+              // Include if in progress OR completed
+              if (isInProgress) return true
+              if (isCompleted) {
+                // Include merged PRs if they were merged in the time period or recently
+                if (pr.mergedAt) {
+                  const mergedDate = new Date(pr.mergedAt)
+                  return mergedDate >= oneWeekAgo
+                }
+                return true
+              }
+              return false
             })
             .map(pr => ({
               title: pr.title,
@@ -260,22 +351,39 @@ export const PersonOverviewReport: ReportDefinition<
             userCredentials.jiraBaseUrl
           )
 
+          // Get tickets from a wider date range to catch recently completed ones
+          const fromDateStr = oneWeekAgo.toISOString().split('T')[0]
+          const toDateStr = toDate.toISOString().split('T')[0]
+
           const assignedTickets = await jiraService.getUserAssignedTickets(
             person.jiraAccount.jiraAccountId,
-            input.fromDate,
-            input.toDate
+            fromDateStr,
+            toDateStr
           )
 
-          jiraTickets = assignedTickets.map(ticket => ({
-            key: ticket.issue.key,
-            title: ticket.issue.fields.summary,
-            status: ticket.issue.fields.status.name,
-            project: ticket.issue.fields.project.key,
-            issueType: ticket.issue.fields.issuetype.name,
-            priority: ticket.issue.fields.priority?.name,
-            lastUpdated: ticket.lastUpdated,
-            created: ticket.created,
-          }))
+          // Filter for active tickets OR tickets updated/completed in the last week
+          jiraTickets = assignedTickets
+            .filter(ticket => {
+              const status = ticket.issue.fields.status.name.toLowerCase()
+              const isCompleted =
+                status.includes('done') || status.includes('closed')
+              const lastUpdated = new Date(ticket.lastUpdated)
+
+              // Include if active OR (completed and updated in last week - likely just completed)
+              if (!isCompleted) return true
+              if (isCompleted && lastUpdated >= oneWeekAgo) return true
+              return false
+            })
+            .map(ticket => ({
+              key: ticket.issue.key,
+              title: ticket.issue.fields.summary,
+              status: ticket.issue.fields.status.name,
+              project: ticket.issue.fields.project.key,
+              issueType: ticket.issue.fields.issuetype.name,
+              priority: ticket.issue.fields.priority?.name,
+              lastUpdated: ticket.lastUpdated,
+              created: ticket.created,
+            }))
         }
       } catch (error) {
         console.error('Failed to fetch Jira activity:', error)
@@ -283,10 +391,24 @@ export const PersonOverviewReport: ReportDefinition<
       }
     }
 
+    // Calculate metrics
+    const completedTasksCount = allCompletedTasks.length
+    const initiativesCount = initiatives.length
+    // Count all Jira tickets (already filtered to active OR completed in last week)
+    const activeJiraTicketsCount = jiraTickets.length
+    // Count all PRs (already filtered to in progress OR completed)
+    const activePrsCount = githubPrs.length
+
     const output: Output = {
       person: { id: person.id, name: person.name },
       period: { fromDate: input.fromDate, toDate: input.toDate },
-      tasks: tasks.map(t => ({
+      metrics: {
+        completedTasksCount,
+        initiativesCount,
+        activeJiraTicketsCount,
+        activePrsCount,
+      },
+      completedTasks: allCompletedTasks.map(t => ({
         id: t.id,
         title: t.title,
         status: t.status,
@@ -294,19 +416,7 @@ export const PersonOverviewReport: ReportDefinition<
         completedAt: t.completedAt?.toISOString() ?? null,
         initiativeId: t.initiativeId,
       })),
-      initiatives: initiatives.map(init => ({
-        id: init.id,
-        title: init.title,
-        status: init.status,
-        tasks: init.tasks.map(t => ({
-          id: t.id,
-          title: t.title,
-          status: t.status,
-          updatedAt: t.updatedAt?.toISOString() ?? null,
-          completedAt: t.completedAt?.toISOString() ?? null,
-          initiativeId: t.initiativeId,
-        })),
-      })),
+      initiatives: initiativesWithTasks,
       ...(githubPrs.length > 0 && { githubPrs }),
       ...(jiraTickets.length > 0 && { jiraTickets }),
     }
@@ -345,73 +455,41 @@ async function renderMarkdownFromJson(json: unknown): Promise<string> {
     }
   }
 
-  // Tasks section - completed first
-  if (obj.tasks && Array.isArray(obj.tasks)) {
-    sections.push('## Tasks')
+  // Metrics section
+  if (obj.metrics && typeof obj.metrics === 'object') {
+    const metrics = obj.metrics as Record<string, unknown>
+    sections.push('## Metrics\n')
+    sections.push(`- **Completed Tasks:** ${metrics.completedTasksCount || 0}`)
+    sections.push(
+      `- **Initiatives Involved:** ${metrics.initiativesCount || 0}`
+    )
+    sections.push(
+      `- **Active Jira Tickets:** ${metrics.activeJiraTicketsCount || 0}`
+    )
+    sections.push(`- **Active PRs:** ${metrics.activePrsCount || 0}\n`)
+  }
 
-    if (obj.tasks.length === 0) {
-      sections.push('\n_No tasks found_\n')
+  // Completed Tasks section
+  if (obj.completedTasks && Array.isArray(obj.completedTasks)) {
+    sections.push('## Completed Tasks')
+
+    if (obj.completedTasks.length === 0) {
+      sections.push('\n_No completed tasks found_\n')
     } else {
-      // Separate completed and incomplete tasks
-      const completedTasks = obj.tasks.filter(
-        task =>
-          typeof task === 'object' &&
-          task !== null &&
-          (task as Record<string, unknown>).status &&
-          (String((task as Record<string, unknown>).status)
-            .toLowerCase()
-            .includes('completed') ||
-            String((task as Record<string, unknown>).status)
-              .toLowerCase()
-              .includes('done'))
-      )
-
-      const incompleteTasks = obj.tasks.filter(
-        task =>
-          typeof task === 'object' &&
-          task !== null &&
-          (task as Record<string, unknown>).status &&
-          !String((task as Record<string, unknown>).status)
-            .toLowerCase()
-            .includes('completed') &&
-          !String((task as Record<string, unknown>).status)
-            .toLowerCase()
-            .includes('done')
-      )
-
-      // Render completed tasks first
-      if (completedTasks.length > 0) {
-        sections.push('\n### Completed')
-        for (const task of completedTasks) {
-          if (typeof task === 'object' && task !== null) {
-            const taskObj = task as Record<string, unknown>
-            const completedAt = taskObj.completedAt
-              ? ` (${formatDate(taskObj.completedAt as string)})`
-              : ''
-            sections.push(`\n- ✅ **${taskObj.title}**${completedAt}`)
-          }
-        }
-      }
-
-      // Render incomplete tasks
-      if (incompleteTasks.length > 0) {
-        sections.push('\n### In Progress')
-        for (const task of incompleteTasks) {
-          if (typeof task === 'object' && task !== null) {
-            const taskObj = task as Record<string, unknown>
-            const status = taskObj.status as string
-            const statusIcon = status.toLowerCase().includes('in progress')
-              ? '🔄'
-              : '📋'
-            sections.push(`\n- ${statusIcon} **${taskObj.title}**`)
-          }
+      for (const task of obj.completedTasks) {
+        if (typeof task === 'object' && task !== null) {
+          const taskObj = task as Record<string, unknown>
+          const completedAt = taskObj.completedAt
+            ? ` (${formatDate(taskObj.completedAt as string)})`
+            : ''
+          sections.push(`\n- ✅ **${taskObj.title}**${completedAt}`)
         }
       }
       sections.push('\n')
     }
   }
 
-  // Initiatives section
+  // Initiatives section with cards
   if (obj.initiatives && Array.isArray(obj.initiatives)) {
     sections.push('## Initiatives')
 
@@ -429,53 +507,49 @@ async function renderMarkdownFromJson(json: unknown): Promise<string> {
               : status.toLowerCase().includes('in progress')
                 ? '🔄'
                 : '📋'
-          sections.push(`\n- ${statusIcon} **${initObj.title}**`)
 
-          // Show tasks associated with this initiative
+          sections.push(`\n### ${statusIcon} ${initObj.title}`)
+
+          // Show summary/description if available
+          if (initObj.summary && String(initObj.summary).trim()) {
+            sections.push(`\n${String(initObj.summary).trim()}\n`)
+          }
+
+          // Show open tasks
           if (
-            initObj.tasks &&
-            Array.isArray(initObj.tasks) &&
-            initObj.tasks.length > 0
+            initObj.openTasks &&
+            Array.isArray(initObj.openTasks) &&
+            initObj.openTasks.length > 0
           ) {
-            const tasks = initObj.tasks as Array<Record<string, unknown>>
-
-            // Separate completed and incomplete tasks
-            const completedTasks = tasks.filter(
-              task =>
-                task.status &&
-                (String(task.status).toLowerCase().includes('completed') ||
-                  String(task.status).toLowerCase().includes('done'))
-            )
-
-            const incompleteTasks = tasks.filter(
-              task =>
-                task.status &&
-                !String(task.status).toLowerCase().includes('completed') &&
-                !String(task.status).toLowerCase().includes('done')
-            )
-
-            // Render completed tasks first
-            if (completedTasks.length > 0) {
-              sections.push('\n  - **Completed Tasks:**')
-              for (const task of completedTasks) {
-                const completedAt = task.completedAt
-                  ? ` (${formatDate(task.completedAt as string)})`
-                  : ''
-                sections.push(`    - ✅ ${task.title}${completedAt}`)
+            sections.push('\n**Open Tasks:**')
+            for (const task of initObj.openTasks) {
+              if (typeof task === 'object' && task !== null) {
+                const taskObj = task as Record<string, unknown>
+                const taskStatus = String(taskObj.status || '').toLowerCase()
+                const taskStatusIcon = taskStatus.includes('doing')
+                  ? '🔄'
+                  : taskStatus.includes('blocked')
+                    ? '🚫'
+                    : '📋'
+                sections.push(`  - ${taskStatusIcon} ${taskObj.title}`)
               }
             }
+          }
 
-            // Render incomplete tasks
-            if (incompleteTasks.length > 0) {
-              sections.push('\n  - **In Progress Tasks:**')
-              for (const task of incompleteTasks) {
-                const taskStatus = task.status as string
-                const taskStatusIcon = taskStatus
-                  .toLowerCase()
-                  .includes('in progress')
-                  ? '🔄'
-                  : '📋'
-                sections.push(`    - ${taskStatusIcon} ${task.title}`)
+          // Show completed tasks in period
+          if (
+            initObj.completedTasks &&
+            Array.isArray(initObj.completedTasks) &&
+            initObj.completedTasks.length > 0
+          ) {
+            sections.push('\n**Completed Tasks (this period):**')
+            for (const task of initObj.completedTasks) {
+              if (typeof task === 'object' && task !== null) {
+                const taskObj = task as Record<string, unknown>
+                const completedAt = taskObj.completedAt
+                  ? ` (${formatDate(taskObj.completedAt as string)})`
+                  : ''
+                sections.push(`  - ✅ ${taskObj.title}${completedAt}`)
               }
             }
           }
