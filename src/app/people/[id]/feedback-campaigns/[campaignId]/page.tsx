@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db'
 import { notFound, redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import Link from 'next/link'
 import { FeedbackCampaignDetailBreadcrumbClient } from '@/components/feedback/feedback-campaign-detail-breadcrumb-client'
 import { FeedbackCampaignActionsDropdown } from '@/components/feedback/feedback-campaign-actions-dropdown'
 import { FeedbackResponseLink } from '@/components/feedback/feedback-response-link'
@@ -191,8 +192,14 @@ export default async function FeedbackCampaignDetailPage({
                 <div className='flex items-center gap-1'>
                   <Users className='w-4 h-4' />
                   <span>
-                    {totalInvites} invited, {totalResponses} responses (
-                    {responseRate}%)
+                    {totalInvites} invited,{' '}
+                    <Link
+                      href={`/people/${person.id}/feedback-campaigns/${campaign.id}/responses`}
+                      className='hover:underline text-foreground'
+                    >
+                      {totalResponses} responses
+                    </Link>{' '}
+                    ({responseRate}%)
                   </span>
                 </div>
               </div>

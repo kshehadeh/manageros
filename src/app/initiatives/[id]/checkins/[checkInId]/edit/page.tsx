@@ -2,7 +2,7 @@ import { prisma } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { CheckInForm } from '@/components/checkin-form'
+import { CheckInFormContent } from '@/components/checkin-form-content'
 import { InitiativeDetailClient } from '@/components/initiatives/initiative-detail-client'
 
 export default async function EditCheckInPage({
@@ -56,7 +56,7 @@ export default async function EditCheckInPage({
         </div>
 
         <div className='card'>
-          <CheckInForm
+          <CheckInFormContent
             initiativeId={checkIn.initiative.id}
             initiativeTitle={checkIn.initiative.title}
             checkIn={{

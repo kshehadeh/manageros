@@ -73,7 +73,7 @@ export function CreateObjectiveModal({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className='sm:max-w-md'>
+      <DialogContent className='md:max-w-[50vw]'>
         <DialogHeader>
           <DialogTitle className='flex items-center gap-2'>
             <Target className='h-5 w-5' />

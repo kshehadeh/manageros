@@ -1,38 +1,44 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
+import { useState, useEffect } from 'react'
 import { createCheckIn, updateCheckIn } from '@/lib/actions/checkin'
 import { Rag } from '@/components/rag'
 import type { CheckInFormData } from '@/lib/validations'
+import type { CheckInFormDataProps } from './checkin-modal'
 
-interface CheckInFormProps {
-  initiativeId: string
-  initiativeTitle: string
-  checkIn?: {
-    id: string
-    weekOf: string
-    rag: string
-    confidence: number
-    summary: string
-    blockers?: string | null
-    nextSteps?: string | null
-  }
-  onSuccess?: () => void
-}
-
-export function CheckInForm({
+export function CheckInFormContent({
   initiativeId,
   initiativeTitle,
   checkIn,
   onSuccess,
-}: CheckInFormProps) {
+  showTitle = false,
+}: CheckInFormDataProps & { showTitle?: boolean }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const isEditing = !!checkIn
+
+  // Convert date string to ISO format for datetime picker
+  const getWeekOfISO = (dateString?: string): string => {
+    if (!dateString) return ''
+    // If it's already a full ISO string, return it
+    if (dateString.includes('T')) return dateString
+    // If it's just a date (YYYY-MM-DD), convert to ISO at midnight
+    if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      return new Date(dateString + 'T00:00:00').toISOString()
+    }
+    // Otherwise try to parse it as a date
+    const date = new Date(dateString)
+    return isNaN(date.getTime()) ? '' : date.toISOString()
+  }
 
   // Form state to preserve values on error
   const [formData, setFormData] = useState({
-    weekOf: checkIn?.weekOf ? checkIn.weekOf.split('T')[0] : '',
+    weekOf: getWeekOfISO(checkIn?.weekOf),
     rag: checkIn?.rag ?? 'green',
     confidence: checkIn?.confidence ?? 80,
     summary: checkIn?.summary ?? '',
@@ -40,7 +46,18 @@ export function CheckInForm({
     nextSteps: checkIn?.nextSteps ?? '',
   })
 
-  const isEditing = !!checkIn
+  // Reset form when checkIn changes
+  useEffect(() => {
+    setFormData({
+      weekOf: getWeekOfISO(checkIn?.weekOf),
+      rag: checkIn?.rag ?? 'green',
+      confidence: checkIn?.confidence ?? 80,
+      summary: checkIn?.summary ?? '',
+      blockers: checkIn?.blockers ?? '',
+      nextSteps: checkIn?.nextSteps ?? '',
+    })
+    setError(null)
+  }, [checkIn])
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -62,15 +79,6 @@ export function CheckInForm({
         await updateCheckIn(checkIn.id, data)
       } else {
         await createCheckIn(data)
-        // Clear form for new check-ins
-        setFormData({
-          weekOf: '',
-          rag: 'green',
-          confidence: 80,
-          summary: '',
-          blockers: '',
-          nextSteps: '',
-        })
       }
 
       onSuccess?.()
@@ -83,14 +91,16 @@ export function CheckInForm({
 
   return (
     <form onSubmit={handleSubmit} className='space-y-4'>
-      <div className='mb-4'>
-        <h3 className='text-lg font-semibold mb-2'>
-          {isEditing ? 'Edit Check-in' : 'New Check-in'}
-        </h3>
-        <p className='text-sm text-muted-foreground'>
-          Initiative: {initiativeTitle}
-        </p>
-      </div>
+      {showTitle && (
+        <div className='mb-4'>
+          <h3 className='text-lg font-semibold mb-2'>
+            {isEditing ? 'Edit Check-in' : 'New Check-in'}
+          </h3>
+          <p className='text-sm text-muted-foreground'>
+            Initiative: {initiativeTitle}
+          </p>
+        </div>
+      )}
 
       {error && (
         <div className='bg-destructive/20 border border-destructive rounded-lg p-3 text-destructive text-sm'>
@@ -99,31 +109,22 @@ export function CheckInForm({
       )}
 
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-        <div>
-          <label htmlFor='weekOf' className='block text-sm font-medium mb-1'>
-            Week of *
-          </label>
-          <input
-            type='date'
-            id='weekOf'
-            name='weekOf'
-            required
+        <div className='space-y-2'>
+          <DateTimePickerWithNaturalInput
             value={formData.weekOf}
-            onChange={e =>
-              setFormData(prev => ({ ...prev, weekOf: e.target.value }))
+            onChange={value =>
+              setFormData(prev => ({ ...prev, weekOf: value }))
             }
-            className='input w-full'
+            label='Week of'
+            placeholder="e.g., 'next Monday', 'Jan 15', 'this week'"
+            required
+            dateOnly
           />
         </div>
 
-        <div>
-          <label
-            htmlFor='confidence'
-            className='block text-sm font-medium mb-1'
-          >
-            Confidence (%)
-          </label>
-          <input
+        <div className='space-y-2'>
+          <Label htmlFor='confidence'>Confidence (%)</Label>
+          <Input
             type='number'
             id='confidence'
             name='confidence'
@@ -136,15 +137,12 @@ export function CheckInForm({
                 confidence: parseInt(e.target.value) || 0,
               }))
             }
-            className='input w-full'
           />
         </div>
       </div>
 
-      <div>
-        <label htmlFor='rag' className='block text-sm font-medium mb-2'>
-          RAG Status
-        </label>
+      <div className='space-y-2'>
+        <Label htmlFor='rag'>RAG Status</Label>
         <div className='flex gap-2'>
           {(['green', 'amber', 'red'] as const).map(color => (
             <label
@@ -172,11 +170,9 @@ export function CheckInForm({
         </div>
       </div>
 
-      <div>
-        <label htmlFor='summary' className='block text-sm font-medium mb-1'>
-          Summary *
-        </label>
-        <textarea
+      <div className='space-y-2'>
+        <Label htmlFor='summary'>Summary *</Label>
+        <Textarea
           id='summary'
           name='summary'
           required
@@ -186,15 +182,12 @@ export function CheckInForm({
             setFormData(prev => ({ ...prev, summary: e.target.value }))
           }
           placeholder='What happened this week?'
-          className='input w-full resize-none'
         />
       </div>
 
-      <div>
-        <label htmlFor='blockers' className='block text-sm font-medium mb-1'>
-          Blockers
-        </label>
-        <textarea
+      <div className='space-y-2'>
+        <Label htmlFor='blockers'>Blockers</Label>
+        <Textarea
           id='blockers'
           name='blockers'
           rows={2}
@@ -203,15 +196,12 @@ export function CheckInForm({
             setFormData(prev => ({ ...prev, blockers: e.target.value }))
           }
           placeholder='Any blockers or challenges?'
-          className='input w-full resize-none'
         />
       </div>
 
-      <div>
-        <label htmlFor='nextSteps' className='block text-sm font-medium mb-1'>
-          Next Steps
-        </label>
-        <textarea
+      <div className='space-y-2'>
+        <Label htmlFor='nextSteps'>Next Steps</Label>
+        <Textarea
           id='nextSteps'
           name='nextSteps'
           rows={2}
@@ -220,11 +210,10 @@ export function CheckInForm({
             setFormData(prev => ({ ...prev, nextSteps: e.target.value }))
           }
           placeholder='What are the next steps?'
-          className='input w-full resize-none'
         />
       </div>
 
-      <div className='flex gap-2 pt-4'>
+      <div className='flex justify-end gap-2 pt-4'>
         <Button type='submit' disabled={isSubmitting}>
           {isSubmitting
             ? 'Saving...'
@@ -232,11 +221,6 @@ export function CheckInForm({
               ? 'Update Check-in'
               : 'Create Check-in'}
         </Button>
-        {onSuccess && (
-          <Button type='button' onClick={onSuccess} variant='outline'>
-            Cancel
-          </Button>
-        )}
       </div>
     </form>
   )

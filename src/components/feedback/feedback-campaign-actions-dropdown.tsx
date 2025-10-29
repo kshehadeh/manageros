@@ -114,7 +114,7 @@ export function FeedbackCampaignActionsDropdown({
           </Link>
 
           <Link
-            href={`/people/${personId}/feedback-campaigns/${campaignId}`}
+            href={`/people/${personId}/feedback-campaigns/${campaignId}/responses`}
             className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
             onClick={close}
           >

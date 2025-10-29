@@ -1,7 +1,6 @@
 'use client'
 
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { JsonValue } from '@prisma/client/runtime/library'
 import { formatDistanceToNow } from 'date-fns'
@@ -75,16 +74,14 @@ export function FeedbackResponseDetail({
   }
 
   return (
-    <Card>
-      <CardHeader className='pb-3'>
-        <div className='flex items-center justify-between'>
-          <CardTitle className='text-lg'>Anonymous Response</CardTitle>
-          <Badge variant='outline' className='text-xs'>
-            {formatDistanceToNow(response.submittedAt, { addSuffix: true })}
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent className='space-y-4'>
+    <div className='border rounded-lg p-6 space-y-4'>
+      <div className='flex items-center justify-between pb-3 border-b'>
+        <h3 className='text-lg font-semibold'>Anonymous Response</h3>
+        <Badge variant='outline' className='text-xs'>
+          {formatDistanceToNow(response.submittedAt, { addSuffix: true })}
+        </Badge>
+      </div>
+      <div className='space-y-4'>
         {questions.map((question, index) => {
           const responses = response.responses as Record<
             string,
@@ -114,7 +111,7 @@ export function FeedbackResponseDetail({
             </div>
           )
         })}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
