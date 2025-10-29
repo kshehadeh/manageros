@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -42,6 +42,13 @@ export function ChangeTeamModal({
   const [selectedTeamId, setSelectedTeamId] = useState(
     currentTeam?.id || 'none'
   )
+
+  // Sync selectedTeamId when currentTeam prop changes (only when dialog is closed)
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedTeamId(currentTeam?.id || 'none')
+    }
+  }, [currentTeam, isOpen])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
