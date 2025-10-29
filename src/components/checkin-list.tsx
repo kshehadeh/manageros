@@ -220,7 +220,11 @@ export function CheckInList({
         <DeleteModal
           isOpen={!!deleteModalOpen}
           onClose={() => setDeleteModalOpen(null)}
-          onConfirm={() => deleteModalOpen && handleDelete(deleteModalOpen)}
+          onConfirm={() => {
+            if (deleteModalOpen) {
+              void handleDelete(deleteModalOpen)
+            }
+          }}
           title='Delete Check-in'
           entityName='check-in'
           isLoading={isDeleting}
