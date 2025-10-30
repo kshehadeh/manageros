@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/db'
 import { oneOnOneSchema, type OneOnOneFormData } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
 
 export async function createOneOnOne(formData: OneOnOneFormData) {
