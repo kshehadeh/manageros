@@ -187,7 +187,7 @@ export async function createPerson(formData: PersonFormData) {
   }
 
   // Create the person
-  await prisma.person.create({
+  const createdPerson = await prisma.person.create({
     data: {
       name: validatedData.name,
       email: validatedData.email || null,
@@ -216,9 +216,11 @@ export async function createPerson(formData: PersonFormData) {
 
   // Revalidate the people page
   revalidatePath('/people')
+  // Revalidate the new person's detail page
+  revalidatePath(`/people/${createdPerson.id}`)
 
-  // Redirect to the people page
-  redirect('/people')
+  // Redirect to the new person's detail page
+  redirect(`/people/${createdPerson.id}`)
 }
 
 export async function updatePerson(id: string, formData: PersonFormData) {
