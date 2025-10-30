@@ -71,7 +71,11 @@ export function OneOnOneForm({
       if (existingOneOnOne) {
         await updateOneOnOne(existingOneOnOne.id, formData)
       } else {
-        await createOneOnOne(formData)
+        const created = await createOneOnOne(formData)
+        if (created && created.id) {
+          window.location.href = `/oneonones/${created.id}`
+          return
+        }
       }
     } catch (error) {
       console.error('Error submitting form:', error)

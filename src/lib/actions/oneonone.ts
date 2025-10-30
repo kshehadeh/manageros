@@ -3,7 +3,6 @@
 import { prisma } from '@/lib/db'
 import { oneOnOneSchema, type OneOnOneFormData } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
 
 export async function createOneOnOne(formData: OneOnOneFormData) {
@@ -42,7 +41,7 @@ export async function createOneOnOne(formData: OneOnOneFormData) {
 
   // Create the one-on-one record
   // Map participants to managerId and reportId for database compatibility
-  await prisma.oneOnOne.create({
+  const created = await prisma.oneOnOne.create({
     data: {
       managerId: validatedData.participant1Id,
       reportId: validatedData.participant2Id,
@@ -59,8 +58,8 @@ export async function createOneOnOne(formData: OneOnOneFormData) {
   revalidatePath(`/people/${participant1.id}`)
   revalidatePath(`/people/${participant2.id}`)
 
-  // Redirect to the one-on-ones page
-  redirect('/oneonones')
+  // Return created record id to allow client-side navigation to detail page
+  return { id: created.id }
 }
 
 export async function getOneOnOnes() {
