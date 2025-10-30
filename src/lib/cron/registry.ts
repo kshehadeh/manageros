@@ -10,6 +10,7 @@ import {
 } from './types'
 import { BirthdayNotificationJob } from './jobs/birthday-notification-job'
 import { ActivityMonitoringJob } from './jobs/activity-monitoring-job'
+import { OverdueTasksNotificationJob } from './jobs/overdue-tasks-notification-job'
 
 export class CronJobRegistry {
   private jobs: Map<string, CronJob> = new Map()
@@ -116,6 +117,7 @@ export class CronJobRegistry {
   private registerDefaultJobs(): void {
     this.register(new BirthdayNotificationJob())
     this.register(new ActivityMonitoringJob())
+    this.register(new OverdueTasksNotificationJob())
   }
 }
 

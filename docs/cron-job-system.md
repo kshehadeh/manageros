@@ -61,6 +61,26 @@ The ManagerOS cron job system provides an extensible framework for running sched
 }
 ```
 
+### 3. Overdue Tasks Notification (`overdue-tasks-notification`)
+
+**Schedule**: Daily at 9 AM (`0 9 * * *`)
+
+**Purpose**: Identifies tasks with past due dates and notifies the assigned users.
+
+**Features**:
+
+- Finds tasks with due dates that have passed
+- Only includes incomplete tasks (excludes 'done' and 'dropped' status)
+- Groups multiple overdue tasks per user into a single notification
+- Uses deduplication to prevent duplicate notifications within 24 hours
+- Respects organization boundaries and task access control
+
+**Configuration**:
+
+```json
+{}
+```
+
 ## Usage
 
 ### Running Jobs
@@ -74,6 +94,7 @@ bun run cron:run
 # Run specific job for all organizations
 bun run cron:birthdays
 bun run cron:activity
+bun run cron:overdue-tasks
 
 # Run with verbose output
 bun scripts/run-cron-jobs.ts --verbose
@@ -90,6 +111,7 @@ bun scripts/run-cron-jobs.ts --job birthday-notification --org org123
 - `cron:run` - Run all cron jobs
 - `cron:birthdays` - Run birthday notification job
 - `cron:activity` - Run activity monitoring job
+- `cron:overdue-tasks` - Run overdue tasks notification job
 
 ### Setting Up Automated Execution
 
@@ -102,6 +124,9 @@ crontab -e
 # Add entries for automated execution
 # Daily birthday notifications at 9 AM
 0 9 * * * cd /path/to/manageros && bun run cron:birthdays
+
+# Daily overdue tasks notifications at 9 AM
+0 9 * * * cd /path/to/manageros && bun run cron:overdue-tasks
 
 # Weekly activity monitoring on Monday at 10 AM
 0 10 * * 1 cd /path/to/manageros && bun run cron:activity
