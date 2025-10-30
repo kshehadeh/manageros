@@ -5,16 +5,10 @@ import { authOptions } from '@/lib/auth'
 import { FeedbackCampaignList } from '@/components/feedback/feedback-campaign-list'
 import { FeedbackCampaignsBreadcrumbClient } from '@/components/feedback/feedback-campaigns-breadcrumb-client'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
 import { checkIfManagerOrSelf } from '@/lib/utils/people-utils'
+import { HelpIcon } from '@/components/help-icon'
 
 interface FeedbackCampaignsPageProps {
   params: Promise<{
@@ -134,13 +128,14 @@ export default async function FeedbackCampaignsPage({
     >
       <div className='space-y-6'>
         <div className='flex items-center justify-between'>
-          <div className='flex items-center gap-4'>
-            <div>
+          <div className='flex flex-col gap-1'>
+            <div className='flex items-center gap-2'>
               <h1 className='text-2xl font-bold'>Feedback Campaigns</h1>
-              <p className='text-gray-600'>
-                Manage feedback campaigns for {person.name}
-              </p>
+              <HelpIcon helpId='feedback-campaigns' size='md' />
             </div>
+            <p className='text-gray-600'>
+              Manage feedback campaigns for {person.name}
+            </p>
           </div>
           <Button asChild>
             <Link
@@ -152,57 +147,8 @@ export default async function FeedbackCampaignsPage({
             </Link>
           </Button>
         </div>
-
-        <div className='grid gap-6 lg:grid-cols-3'>
-          <div className='lg:col-span-2'>
-            <FeedbackCampaignList campaigns={typedCampaigns} />
-          </div>
-
-          <div className='space-y-6'>
-            <Card>
-              <CardHeader>
-                <CardTitle>About Feedback Campaigns</CardTitle>
-                <CardDescription>
-                  Learn how feedback campaigns work
-                </CardDescription>
-              </CardHeader>
-              <CardContent className='space-y-4'>
-                <div>
-                  <h4 className='font-medium mb-2'>
-                    What are feedback campaigns?
-                  </h4>
-                  <p className='text-sm text-gray-600'>
-                    Feedback campaigns allow you to collect structured feedback
-                    from external stakeholders about a person in your
-                    organization. This is useful for performance reviews,
-                    360-degree feedback, or gathering input from customers and
-                    partners.
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className='font-medium mb-2'>How it works</h4>
-                  <ol className='text-sm text-gray-600 space-y-1'>
-                    <li>1. Create a campaign with start/end dates</li>
-                    <li>2. Add email addresses of people to invite</li>
-                    <li>3. Activate the campaign to send invitations</li>
-                    <li>4. Invitees receive email links to provide feedback</li>
-                    <li>5. Review responses and complete the campaign</li>
-                  </ol>
-                </div>
-
-                <div>
-                  <h4 className='font-medium mb-2'>
-                    Who can create campaigns?
-                  </h4>
-                  <p className='text-sm text-gray-600'>
-                    Only managers (direct or indirect) of the target person can
-                    create feedback campaigns for them.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        <div>
+          <FeedbackCampaignList campaigns={typedCampaigns} />
         </div>
       </div>
     </FeedbackCampaignsBreadcrumbClient>

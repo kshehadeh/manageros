@@ -135,17 +135,15 @@ export function FeedbackCampaignList({
 
   if (campaigns.length === 0) {
     return (
-      <Card>
-        <CardContent className='p-6 text-center'>
-          <Calendar className='h-12 w-12 mx-auto text-muted-foreground mb-4' />
-          <h3 className='text-lg font-medium text-foreground mb-2'>
-            No Feedback Campaigns
-          </h3>
-          <p className='text-muted-foreground'>
-            No feedback campaigns have been created for this person yet.
-          </p>
-        </CardContent>
-      </Card>
+      <div className='p-6 text-center border rounded-md'>
+        <Calendar className='h-12 w-12 mx-auto text-muted-foreground mb-4' />
+        <h3 className='text-lg font-medium text-foreground mb-2'>
+          No Feedback Campaigns
+        </h3>
+        <p className='text-muted-foreground'>
+          No feedback campaigns have been created for this person yet.
+        </p>
+      </div>
     )
   }
 

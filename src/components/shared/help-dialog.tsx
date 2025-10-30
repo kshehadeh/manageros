@@ -47,7 +47,7 @@ export function HelpDialog({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
-          'w-[95vw] max-w-[95vw] sm:w-full flex flex-col p-0',
+          'max-w-[95vw] sm:max-w-[50vw] sm:max-h-[90vh] flex flex-col p-0',
           className
         )}
       >
