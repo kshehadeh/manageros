@@ -22,6 +22,7 @@ import {
   Bot,
   CheckSquare,
   Keyboard,
+  BookOpen,
 } from 'lucide-react'
 import { useState } from 'react'
 import { HelpDialog } from '@/components/shared'
@@ -72,6 +73,7 @@ export default function Sidebar({
   const pathname = usePathname()
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useMobileMenu()
   const [isKeyboardShortcutsOpen, setIsKeyboardShortcutsOpen] = useState(false)
+  const [isGettingStartedOpen, setIsGettingStartedOpen] = useState(false)
   const { toggleAIChat } = useAIChat()
 
   // Use server session if available, otherwise fall back to client session
@@ -256,6 +258,16 @@ export default function Sidebar({
             <span>Keyboard Shortcuts</span>
           </button>
           <button
+            onClick={() => {
+              setIsMobileMenuOpen(false)
+              setIsGettingStartedOpen(true)
+            }}
+            className='flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors w-full'
+          >
+            <BookOpen className='h-5 w-5' />
+            <span>Help</span>
+          </button>
+          <button
             onClick={async () => {
               setIsMobileMenuOpen(false)
               await signOutWithCleanup()
@@ -294,6 +306,12 @@ export default function Sidebar({
         icon={Command}
         isOpen={isKeyboardShortcutsOpen}
         onOpenChange={setIsKeyboardShortcutsOpen}
+      />
+      <HelpDialog
+        helpId='getting-started'
+        icon={BookOpen}
+        isOpen={isGettingStartedOpen}
+        onOpenChange={setIsGettingStartedOpen}
       />
     </>
   )

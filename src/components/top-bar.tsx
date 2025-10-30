@@ -4,7 +4,6 @@ import Breadcrumb from './breadcrumb'
 import { ModeToggle } from '@/components/mode-toggle'
 import { BugReportButton } from '@/components/bug-report-button'
 import { Menu, X, Command as CommandIcon } from 'lucide-react'
-import { GettingStartedButton } from '@/components/getting-started-button'
 import { useMobileMenu } from '@/components/mobile-menu-provider'
 import { useCommandPalette } from '@/components/command-palette/provider'
 import { NotificationBell } from '@/components/notifications/notification-bell'
@@ -17,10 +16,9 @@ import {
   DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { Bell, Bug, BookOpen, Sun, Moon, MoreHorizontal } from 'lucide-react'
+import { Bell, Bug, Sun, Moon, MoreHorizontal } from 'lucide-react'
 import { useTheme } from '@/lib/hooks/use-theme'
 import { useState } from 'react'
-import { HelpDialog } from '@/components/shared'
 import { BugSubmissionModal } from '@/components/bug-submission-modal'
 import { useRouter } from 'next/navigation'
 
@@ -28,7 +26,6 @@ export default function TopBar() {
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useMobileMenu()
   const { toggle } = useCommandPalette()
   const { theme, setTheme } = useTheme()
-  const [isGettingStartedOpen, setIsGettingStartedOpen] = useState(false)
   const [isBugOpen, setIsBugOpen] = useState(false)
   const router = useRouter()
 
@@ -66,7 +63,6 @@ export default function TopBar() {
           {/* Desktop right-side actions */}
           <div className='hidden md:flex items-center gap-2'>
             <NotificationBell />
-            <GettingStartedButton />
             <BugReportButton />
             <ModeToggle />
           </div>
@@ -91,12 +87,7 @@ export default function TopBar() {
                   <Bell className='h-4 w-4' />
                   <span>Notifications</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onSelect={() => setIsGettingStartedOpen(true)}
-                >
-                  <BookOpen className='h-4 w-4' />
-                  <span>Getting Started</span>
-                </DropdownMenuItem>
+
                 <DropdownMenuItem onSelect={() => setIsBugOpen(true)}>
                   <Bug className='h-4 w-4' />
                   <span>Report a bug</span>
@@ -118,12 +109,6 @@ export default function TopBar() {
         </div>
       </div>
       {/* Mobile-only modals triggered from dropdown */}
-      <HelpDialog
-        helpId='getting-started'
-        icon={BookOpen}
-        isOpen={isGettingStartedOpen}
-        onOpenChange={setIsGettingStartedOpen}
-      />
       <BugSubmissionModal open={isBugOpen} onOpenChange={setIsBugOpen} />
     </header>
   )
