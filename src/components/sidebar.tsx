@@ -22,10 +22,12 @@ import {
   Bot,
   CheckSquare,
   Keyboard,
+  Bug,
   BookOpen,
 } from 'lucide-react'
 import { useState } from 'react'
 import { HelpDialog } from '@/components/shared'
+import { BugSubmissionModal } from '@/components/bug-submission-modal'
 import { useAIChat } from '@/components/ai-chat-provider'
 import { APP_VERSION } from '@/lib/version'
 import { PersonAvatar } from '@/components/people/person-avatar'
@@ -74,6 +76,7 @@ export default function Sidebar({
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useMobileMenu()
   const [isKeyboardShortcutsOpen, setIsKeyboardShortcutsOpen] = useState(false)
   const [isGettingStartedOpen, setIsGettingStartedOpen] = useState(false)
+  const [isBugOpen, setIsBugOpen] = useState(false)
   const { toggleAIChat } = useAIChat()
 
   // Use server session if available, otherwise fall back to client session
@@ -189,23 +192,16 @@ export default function Sidebar({
                   {personData?.email || session?.user?.email}
                 </div>
               ) : null}
-              {personData?.jobRoleId ? (
-                <Link
-                  href={`/job-roles/${personData.jobRoleId}`}
-                  className='text-xs text-muted-foreground truncate hover:underline'
-                >
-                  {personData.jobRoleTitle || 'Job Role'}
-                </Link>
-              ) : personData?.role || session?.user?.role ? (
-                <div className='text-xs text-muted-foreground truncate'>
-                  {personData?.role || session?.user?.role}
-                </div>
-              ) : null}
-              {serverSession?.role || session?.user?.role ? (
-                <div className='text-xs text-muted-foreground truncate'>
-                  {serverSession?.role || session?.user?.role}
-                </div>
-              ) : null}
+              <button
+                onClick={async () => {
+                  setIsMobileMenuOpen(false)
+                  await signOutWithCleanup()
+                  signOut({ callbackUrl: '/auth/signin' })
+                }}
+                className='text-xs text-muted-foreground hover:text-foreground underline'
+              >
+                Sign out
+              </button>
             </div>
           </div>
         </div>
@@ -243,9 +239,21 @@ export default function Sidebar({
             <Bot className='h-5 w-5' />
             <span>AI Chat</span>
           </button>
+
+          {/* Report a bug */}
+          <button
+            onClick={() => {
+              setIsMobileMenuOpen(false)
+              setIsBugOpen(true)
+            }} /**/
+            className='flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors w-full'
+          >
+            <Bug className='h-5 w-5' />
+            <span>Report a bug</span>
+          </button>
         </nav>
 
-        {/* Sign Out */}
+        {/* Footer Actions */}
         <div className='px-3 py-4 border-t space-y-1'>
           <button
             onClick={() => {
@@ -266,29 +274,6 @@ export default function Sidebar({
           >
             <BookOpen className='h-5 w-5' />
             <span>Help</span>
-          </button>
-          <button
-            onClick={async () => {
-              setIsMobileMenuOpen(false)
-              await signOutWithCleanup()
-              signOut({ callbackUrl: '/auth/signin' })
-            }}
-            className='flex items-center gap-3 px-3 py-2 text-sm text-badge-error-text hover:text-badge-error-text hover:bg-badge-error/20 rounded-lg transition-colors w-full'
-          >
-            <svg
-              className='h-5 w-5'
-              fill='none'
-              viewBox='0 0 24 24'
-              strokeWidth={1.5}
-              stroke='currentColor'
-            >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                d='M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75'
-              />
-            </svg>
-            Sign Out
           </button>
         </div>
 
@@ -313,6 +298,7 @@ export default function Sidebar({
         isOpen={isGettingStartedOpen}
         onOpenChange={setIsGettingStartedOpen}
       />
+      <BugSubmissionModal open={isBugOpen} onOpenChange={setIsBugOpen} />
     </>
   )
 }
