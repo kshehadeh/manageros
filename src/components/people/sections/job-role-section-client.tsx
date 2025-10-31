@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { SectionHeader } from '@/components/ui/section-header'
 import { Button } from '@/components/ui/button'
 import { Briefcase, Edit } from 'lucide-react'
@@ -26,6 +27,7 @@ export function JobRoleSectionClient({
   currentJobRole,
   availableJobRoles,
 }: JobRoleSectionClientProps) {
+  const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const handleModalClose = () => {
@@ -33,8 +35,9 @@ export function JobRoleSectionClient({
   }
 
   const handleSuccess = () => {
-    // Refresh the page to show the updated job role
-    window.location.reload()
+    // Refresh the page data to show the updated job role
+    router.refresh()
+    handleModalClose()
   }
 
   return (
@@ -56,7 +59,7 @@ export function JobRoleSectionClient({
 
       {currentJobRole ? (
         <div className='space-y-2'>
-          <div className='border rounded-lg p-3'>
+          <div className='p-2'>
             <div className='text-sm font-medium'>{currentJobRole.title}</div>
             <div className='text-xs text-muted-foreground mt-1'>
               {currentJobRole.level.name} • {currentJobRole.domain.name}
