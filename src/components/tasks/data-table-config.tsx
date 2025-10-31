@@ -36,6 +36,7 @@ import {
   EditMenuItem,
   DeleteMenuItem,
   MarkAsDoneMenuItem,
+  SetDueDateMenuItem,
 } from '@/components/common/context-menu-items'
 import { toast } from 'sonner'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
@@ -384,6 +385,7 @@ export const taskDataTableConfig: DataTableConfig<
         close={close}
         onSuccess={refetch}
       />
+      <SetDueDateMenuItem taskId={entityId} close={close} onSuccess={refetch} />
       <DeleteMenuItem onDelete={onDelete} close={close} />
     </>
   ),

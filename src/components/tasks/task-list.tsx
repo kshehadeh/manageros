@@ -22,6 +22,7 @@ import {
   EditMenuItem,
   MarkAsDoneMenuItem,
   DeleteMenuItem,
+  SetDueDateMenuItem,
 } from '@/components/common/context-menu-items'
 import { DeleteModal } from '@/components/common/delete-modal'
 
@@ -403,6 +404,11 @@ export function SimpleTaskList({
               <MarkAsDoneMenuItem
                 taskId={entityId}
                 currentStatus={task.status}
+                close={close}
+                onSuccess={refetch}
+              />
+              <SetDueDateMenuItem
+                taskId={entityId}
                 close={close}
                 onSuccess={refetch}
               />

@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { SectionHeader } from '@/components/ui/section-header'
 import { FeedbackCampaignStatusBadge } from '@/components/feedback/feedback-campaign-status-badge'
 import { format } from 'date-fns'
@@ -50,6 +51,7 @@ export function SimpleFeedbackCampaignList({
   emptyStateText = 'No active feedback campaigns.',
   className = '',
 }: FeedbackCampaignListProps) {
+  const router = useRouter()
   const { handleButtonClick, ContextMenuComponent } = useDataTableContextMenu()
 
   const isCampaignActive = (campaign: FeedbackCampaign) => {
@@ -69,16 +71,18 @@ export function SimpleFeedbackCampaignList({
   const renderCampaignItem = (campaign: FeedbackCampaign) => (
     <div
       key={campaign.id}
-      className='flex items-start justify-between py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors px-3 rounded'
+      className='flex items-start justify-between py-3 hover:bg-muted/50 transition-colors px-3 rounded cursor-pointer'
+      onClick={() => {
+        router.push(
+          `/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`
+        )
+      }}
     >
       <div className='flex-1 space-y-1'>
         {/* Campaign Title */}
-        <Link
-          href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`}
-          className='font-medium text-sm text-foreground hover:text-primary transition-colors block'
-        >
+        <div className='font-medium text-sm text-foreground'>
           {campaign.name || campaign.template?.name || 'Feedback Campaign'}
-        </Link>
+        </div>
 
         {/* Person Name */}
         <div className='text-sm text-muted-foreground'>
@@ -110,8 +114,11 @@ export function SimpleFeedbackCampaignList({
           isPending={isCampaignPending(campaign)}
         />
         <button
-          onClick={e => handleButtonClick(e, campaign.id)}
-          className='p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded'
+          onClick={e => {
+            e.stopPropagation()
+            handleButtonClick(e, campaign.id)
+          }}
+          className='p-1 hover:bg-muted rounded'
         >
           <MoreHorizontal className='h-4 w-4 text-muted-foreground' />
         </button>
