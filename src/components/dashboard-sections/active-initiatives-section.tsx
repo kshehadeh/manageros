@@ -1,0 +1,83 @@
+'use client'
+
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import Link from 'next/link'
+import { formatDistanceToNow } from 'date-fns'
+import { Rocket } from 'lucide-react'
+import type { Initiative } from '@/components/initiatives/initiative-list'
+import { initiativeStatusUtils } from '@/lib/initiative-status'
+import type { InitiativeStatus } from '@/lib/initiative-status'
+
+interface ActiveInitiativesSectionProps {
+  initiatives: Initiative[]
+}
+
+export function ActiveInitiativesSection({
+  initiatives,
+}: ActiveInitiativesSectionProps) {
+  if (initiatives.length === 0) {
+    return null
+  }
+
+  // Filter to only show active initiatives (in_progress, planned)
+  const activeInitiatives = initiatives.filter(
+    init => init.status === 'in_progress' || init.status === 'planned'
+  )
+
+  if (activeInitiatives.length === 0) {
+    return null
+  }
+
+  return (
+    <div className='space-y-4'>
+      <div>
+        <h2 className='text-lg font-semibold'>Active Initiatives</h2>
+        <div className='hidden md:flex items-center gap-2 text-[10px] text-muted-foreground mt-1'>
+          <Link href='/initiatives' className='hover:underline'>
+            View Initiatives
+          </Link>
+        </div>
+      </div>
+      <div className='flex flex-col gap-1.5'>
+        {activeInitiatives.slice(0, 5).map(initiative => (
+          <Link key={initiative.id} href={`/initiatives/${initiative.id}`} className='block'>
+            <Card className='p-3 bg-muted/20 border-0 rounded-md shadow-none hover:bg-muted/30 transition-colors cursor-pointer'>
+              <div className='flex items-center justify-between gap-3'>
+                <div className='flex items-center gap-3 flex-1 min-w-0'>
+                  <Rocket className='h-4 w-4 text-purple-500 shrink-0' />
+                  <div className='flex-1 min-w-0'>
+                    <div className='flex items-center gap-2 flex-wrap'>
+                      <span className='text-sm font-medium truncate'>
+                        {initiative.title}
+                      </span>
+                    </div>
+                    <div className='flex items-center gap-2 text-xs text-muted-foreground mt-1'>
+                      {initiative.team && (
+                        <>
+                          <span className='truncate'>{initiative.team.name}</span>
+                          <span>•</span>
+                        </>
+                      )}
+                      <span>Updated {formatDistanceToNow(initiative.updatedAt, { addSuffix: true })}</span>
+                    </div>
+                  </div>
+                </div>
+                <Badge
+                  variant={initiativeStatusUtils.getVariant(
+                    initiative.status as InitiativeStatus
+                  )}
+                  className='text-xs'
+                >
+                  {initiativeStatusUtils.getLabel(
+                    initiative.status as InitiativeStatus
+                  )}
+                </Badge>
+              </div>
+            </Card>
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
+}

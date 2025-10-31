@@ -1,0 +1,300 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { ListTodo, Calendar, Users, MessageSquare } from 'lucide-react'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import Link from 'next/link'
+import { format, isToday, isTomorrow, isPast, differenceInDays } from 'date-fns'
+import {
+  TaskQuickEditDialog,
+} from '@/components/tasks/task-quick-edit-dialog'
+import type { TaskStatus } from '@/lib/task-status'
+import { useRouter } from 'next/navigation'
+
+export type PriorityItemType = 'task' | 'meeting' | 'oneonone' | 'feedback'
+
+export interface PriorityItem {
+  id: string
+  type: PriorityItemType
+  title: string
+  date: Date | null
+  href: string
+  status?: string
+  metadata?: string
+  // Task-specific fields
+  description?: string | null
+  assigneeId?: string | null
+  priority?: number
+}
+
+interface TodaysPrioritiesSectionProps {
+  items: PriorityItem[]
+}
+
+function formatDate(date: Date | null | undefined): string {
+  if (!date) return ''
+
+  const dateObj = new Date(date)
+
+  if (isToday(dateObj)) {
+    const hours = dateObj.getHours()
+    const minutes = dateObj.getMinutes()
+    const ampm = hours >= 12 ? 'pm' : 'am'
+    const displayHours = hours % 12 || 12
+    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`
+  }
+
+  if (isTomorrow(dateObj)) {
+    return 'Tomorrow'
+  }
+
+  if (isPast(dateObj)) {
+    const daysPast = differenceInDays(new Date(), dateObj)
+    if (daysPast === 0) {
+      return 'Today'
+    }
+    return format(dateObj, 'MMM d')
+  }
+
+  return format(dateObj, 'MMM d')
+}
+
+function getPriorityIcon(item: PriorityItem) {
+  switch (item.type) {
+    case 'task':
+      if (item.status === 'done') {
+        return <ListTodo className='h-4 w-4 text-green-500' />
+      }
+      if (item.date && isPast(new Date(item.date)) && item.status !== 'done') {
+        return <ListTodo className='h-4 w-4 text-red-500' />
+      }
+      return <ListTodo className='h-4 w-4 text-muted-foreground' />
+    case 'meeting':
+      return <Calendar className='h-4 w-4 text-blue-500' />
+    case 'oneonone':
+      return <Users className='h-4 w-4 text-purple-500' />
+    case 'feedback':
+      return <MessageSquare className='h-4 w-4 text-teal-500' />
+    default:
+      return <ListTodo className='h-4 w-4 text-muted-foreground' />
+  }
+}
+
+function getPriorityBadge(item: PriorityItem) {
+  if (item.type === 'task') {
+    if (item.date && isPast(new Date(item.date)) && item.status !== 'done') {
+      return <Badge variant='destructive' className='text-xs'>Overdue</Badge>
+    }
+    if (item.status === 'done') {
+      return (
+        <Badge
+          variant='outline'
+          className='text-xs bg-green-500/10 text-green-500 border-green-500/20'
+        >
+          Complete
+        </Badge>
+      )
+    }
+  }
+  return null
+}
+
+function getPriorityLabel(item: PriorityItem): string {
+  switch (item.type) {
+    case 'task':
+      if (!item.date) return ''
+      if (isToday(new Date(item.date))) {
+        return `Due today`
+      }
+      if (isPast(new Date(item.date))) {
+        return 'Overdue'
+      }
+      return `Due ${formatDate(item.date)}`
+    case 'meeting':
+    case 'oneonone':
+      if (!item.date) return 'Scheduled'
+      return isToday(new Date(item.date))
+        ? `Today at ${formatDate(item.date)}`
+        : `${formatDate(item.date)}`
+    case 'feedback':
+      if (!item.date) return 'Active'
+      return `Due ${formatDate(item.date)}`
+    default:
+      return ''
+  }
+}
+
+export function TodaysPrioritiesSection({
+  items,
+}: TodaysPrioritiesSectionProps) {
+  const router = useRouter()
+  const [selectedTask, setSelectedTask] = useState<PriorityItem | null>(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+
+  // Sort items: overdue tasks first, then by date
+  const sortedItems = [...items].sort((a, b) => {
+    // Overdue tasks go to top
+    if (a.type === 'task' && a.date && isPast(new Date(a.date)) && a.status !== 'done') {
+      if (b.type !== 'task' || !b.date || !isPast(new Date(b.date)) || b.status === 'done') {
+        return -1
+      }
+    }
+    if (b.type === 'task' && b.date && isPast(new Date(b.date)) && b.status !== 'done') {
+      if (a.type !== 'task' || !a.date || !isPast(new Date(a.date)) || a.status === 'done') {
+        return 1
+      }
+    }
+
+    // Done tasks go to bottom
+    if (a.type === 'task' && a.status === 'done') return 1
+    if (b.type === 'task' && b.status === 'done') return -1
+
+    // Then sort by date
+    if (a.date && b.date) {
+      return new Date(a.date).getTime() - new Date(b.date).getTime()
+    }
+    if (a.date) return -1
+    if (b.date) return 1
+
+    return 0
+  })
+
+  // Limit to top 8 priorities
+  const priorities = sortedItems.slice(0, 8)
+
+  // Open dialog after selectedTask has been updated
+  useEffect(() => {
+    if (selectedTask) {
+      setIsDialogOpen(true)
+    }
+  }, [selectedTask])
+
+  // Reset selectedTask when dialog is closed
+  const handleDialogOpenChange = (open: boolean) => {
+    setIsDialogOpen(open)
+    if (!open) {
+      setSelectedTask(null)
+    }
+  }
+
+  const handleTaskClick = (e: React.MouseEvent, item: PriorityItem) => {
+    e.preventDefault()
+    if (item.type === 'task') {
+      setSelectedTask(item)
+    }
+  }
+
+  const handleTaskUpdate = () => {
+    router.refresh()
+  }
+
+  if (priorities.length === 0) {
+    return null
+  }
+
+  return (
+    <>
+      <div className='space-y-4'>
+        <div>
+          <h2 className='text-lg font-semibold'>Today's Priorities</h2>
+          <div className='hidden md:flex items-center gap-2 text-[10px] text-muted-foreground mt-1'>
+            <Link href='/my-tasks' className='hover:underline'>
+              View My Tasks
+            </Link>
+            <span>•</span>
+            <Link href='/oneonones' className='hover:underline'>
+              View 1:1s
+            </Link>
+            <span>•</span>
+            <Link href='/feedback-campaigns' className='hover:underline'>
+              View Feedback Campaigns
+            </Link>
+            <span>•</span>
+            <Link href='/meetings' className='hover:underline'>
+              View Meetings
+            </Link>
+          </div>
+        </div>
+        <div className='flex flex-col gap-1.5'>
+          {priorities.map(item => {
+            if (item.type === 'task') {
+              return (
+                <div
+                  key={`${item.type}-${item.id}`}
+                  onClick={e => handleTaskClick(e, item)}
+                  className='block cursor-pointer'
+                >
+                  <Card className='p-3 bg-muted/20 border-0 rounded-md shadow-none hover:bg-muted/30 transition-colors cursor-pointer'>
+                    <div className='flex items-center justify-between gap-3'>
+                      <div className='flex items-center gap-3 flex-1 min-w-0'>
+                        {getPriorityIcon(item)}
+                        <div className='flex-1 min-w-0'>
+                          <div className='flex items-center gap-2 flex-wrap'>
+                            <span className='text-sm font-medium truncate'>{item.title}</span>
+                            {getPriorityBadge(item)}
+                          </div>
+                          <div className='flex items-center gap-2 text-xs text-muted-foreground mt-1'>
+                            <span>{getPriorityLabel(item)}</span>
+                            {item.metadata && <span>• {item.metadata}</span>}
+                          </div>
+                        </div>
+                      </div>
+                      {item.date &&
+                        isPast(new Date(item.date)) &&
+                        item.status !== 'done' && (
+                          <Badge variant='destructive' className='text-xs shrink-0'>
+                            Overdue
+                          </Badge>
+                        )}
+                    </div>
+                  </Card>
+                </div>
+              )
+            }
+
+            return (
+              <Link key={`${item.type}-${item.id}`} href={item.href} className='block'>
+                <Card className='p-3 bg-muted/20 border-0 rounded-md shadow-none hover:bg-muted/30 transition-colors cursor-pointer'>
+                  <div className='flex items-center justify-between gap-3'>
+                    <div className='flex items-center gap-3 flex-1 min-w-0'>
+                      {getPriorityIcon(item)}
+                      <div className='flex-1 min-w-0'>
+                        <div className='flex items-center gap-2 flex-wrap'>
+                          <span className='text-sm font-medium truncate'>{item.title}</span>
+                          {getPriorityBadge(item)}
+                        </div>
+                        <div className='flex items-center gap-2 text-xs text-muted-foreground mt-1'>
+                          <span>{getPriorityLabel(item)}</span>
+                          {item.metadata && <span>• {item.metadata}</span>}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Task Quick Edit Dialog */}
+      {selectedTask && selectedTask.type === 'task' && (
+        <TaskQuickEditDialog
+          open={isDialogOpen}
+          onOpenChange={handleDialogOpenChange}
+          task={{
+            id: selectedTask.id,
+            title: selectedTask.title,
+            description: selectedTask.description || null,
+            assigneeId: selectedTask.assigneeId || null,
+            dueDate: selectedTask.date ? (selectedTask.date instanceof Date ? selectedTask.date : new Date(selectedTask.date)) : null,
+            priority: selectedTask.priority ?? 2,
+            status: (selectedTask.status || 'todo') as TaskStatus,
+          }}
+          onTaskUpdate={handleTaskUpdate}
+        />
+      )}
+    </>
+  )
+}
