@@ -10,14 +10,38 @@ export const peopleTool = {
       .string()
       .optional()
       .describe('Search query to filter people by name, role, or team'),
-    includeManager: z
+    hasManager: z
       .boolean()
       .optional()
-      .describe('Whether to include manager information'),
-    includeReports: z
+      .describe('Whether the person has a manager'),
+    hasReports: z
       .boolean()
       .optional()
       .describe('Whether to include direct reports'),
+    managerIs: z
+      .string()
+      .optional()
+      .describe('The person ID of the manager of the people to look up'),
+    teamIs: z
+      .string()
+      .optional()
+      .describe('The team ID of the people to look up'),
+    jobRoleIs: z
+      .string()
+      .optional()
+      .describe('The job role ID of the people to look up'),
+    jobLevelIs: z
+      .string()
+      .optional()
+      .describe('The job level ID of the people to look up'),
+    jobDomainIs: z
+      .string()
+      .optional()
+      .describe('The job domain ID of the people to look up'),
+    employeeTypeIs: z
+      .enum(['employee', 'contractor', 'vendor', 'partner'])
+      .optional()
+      .describe('The employee type of the people to look up'),
   }),
   execute: async ({
     query,

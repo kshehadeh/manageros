@@ -29,9 +29,7 @@ import {
   ActiveTasksSectionSkeleton,
   OneOnOneMeetingsSectionSkeleton,
   DirectReportsSectionSkeleton,
-  UserLinkingSectionSkeleton,
-  JiraLinkingSectionSkeleton,
-  GithubLinkingSectionSkeleton,
+  AccountLinkingSectionSkeleton,
   JobRoleSectionSkeleton,
 } from './person-detail-skeletons'
 
@@ -42,9 +40,7 @@ import { OwnedInitiativesSection } from './sections/owned-initiatives-section'
 import { ActiveTasksSection } from './sections/active-tasks-section'
 import { OneOnOneMeetingsSection } from './sections/one-on-one-meetings-section'
 import { DirectReportsSection } from './sections/direct-reports-section'
-import { UserLinkingSection } from './sections/user-linking-section'
-import { JiraLinkingSection } from './sections/jira-linking-section'
-import { GithubLinkingSection } from './sections/github-linking-section'
+import { AccountLinkingSection } from './sections/account-linking-section'
 import { JobRoleSection } from './sections/job-role-section'
 import { GithubPrsActivitySection } from '@/components/github-prs-activity-section'
 import { JiraWorkActivitySection } from '@/components/jira-work-activity-section'
@@ -257,23 +253,14 @@ export function PersonDetailContent({
             />
           </Suspense>
 
-          {/* User Account Link - Only show for admins */}
+          {/* Account Linking - Only show for admins */}
           {isAdmin && (
-            <Suspense fallback={<UserLinkingSectionSkeleton />}>
-              <UserLinkingSection
-                personId={person.id}
-                linkedUser={person.user as User | null}
-              />
-            </Suspense>
-          )}
-
-          {/* Jira Integration - Only show for admins */}
-          {isAdmin && (
-            <Suspense fallback={<JiraLinkingSectionSkeleton />}>
-              <JiraLinkingSection
+            <Suspense fallback={<AccountLinkingSectionSkeleton />}>
+              <AccountLinkingSection
                 personId={person.id}
                 personName={person.name}
                 personEmail={person.email}
+                linkedUser={person.user as User | null}
                 jiraAccount={
                   person.jiraAccount as unknown as {
                     id: string
@@ -285,16 +272,6 @@ export function PersonDetailContent({
                     updatedAt: Date
                   } | null
                 }
-              />
-            </Suspense>
-          )}
-
-          {/* GitHub Integration - Only show for admins */}
-          {isAdmin && (
-            <Suspense fallback={<GithubLinkingSectionSkeleton />}>
-              <GithubLinkingSection
-                personId={person.id}
-                personName={person.name}
                 githubAccount={
                   person.githubAccount as unknown as {
                     id: string

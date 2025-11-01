@@ -7,8 +7,8 @@ import {
   Rocket,
   ListTodo,
   Users,
-  User as UserIcon,
   Briefcase,
+  Link as LinkIcon,
 } from 'lucide-react'
 import { FaGithub, FaJira } from 'react-icons/fa'
 
@@ -225,42 +225,45 @@ export function DirectReportsSectionSkeleton() {
   )
 }
 
-export function UserLinkingSectionSkeleton() {
+export function AccountLinkingSectionSkeleton() {
   return (
     <section>
-      <SectionHeader icon={UserIcon} title='User Linking' />
-      <div className='border rounded-lg p-4'>
+      <SectionHeader icon={LinkIcon} title='Account Linking' />
+      <div className='space-y-6'>
+        {/* User Account Subsection Skeleton */}
         <div className='space-y-3'>
-          <Skeleton className='h-10 w-full' />
-          <Skeleton className='h-8 w-24' />
+          <div className='flex items-center gap-2 pb-2 border-b border-muted'>
+            <Skeleton className='h-4 w-4' />
+            <Skeleton className='h-4 w-24' />
+          </div>
+          <div className='space-y-3'>
+            <Skeleton className='h-10 w-full' />
+            <Skeleton className='h-8 w-24' />
+          </div>
         </div>
-      </div>
-    </section>
-  )
-}
 
-export function JiraLinkingSectionSkeleton() {
-  return (
-    <section>
-      <SectionHeader icon={FaJira} title='Jira Linking' />
-      <div className='border rounded-lg p-4'>
+        {/* Jira Account Subsection Skeleton */}
         <div className='space-y-3'>
-          <Skeleton className='h-10 w-full' />
-          <Skeleton className='h-8 w-24' />
+          <div className='flex items-center gap-2 pb-2 border-b border-muted'>
+            <Skeleton className='h-4 w-4' />
+            <Skeleton className='h-4 w-24' />
+          </div>
+          <div className='space-y-3'>
+            <Skeleton className='h-10 w-full' />
+            <Skeleton className='h-8 w-24' />
+          </div>
         </div>
-      </div>
-    </section>
-  )
-}
 
-export function GithubLinkingSectionSkeleton() {
-  return (
-    <section>
-      <SectionHeader icon={FaGithub} title='GitHub Linking' />
-      <div className='border rounded-lg p-4'>
+        {/* GitHub Account Subsection Skeleton */}
         <div className='space-y-3'>
-          <Skeleton className='h-10 w-full' />
-          <Skeleton className='h-8 w-24' />
+          <div className='flex items-center gap-2 pb-2 border-b border-muted'>
+            <Skeleton className='h-4 w-4' />
+            <Skeleton className='h-4 w-24' />
+          </div>
+          <div className='space-y-3'>
+            <Skeleton className='h-10 w-full' />
+            <Skeleton className='h-8 w-24' />
+          </div>
         </div>
       </div>
     </section>

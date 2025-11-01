@@ -175,80 +175,84 @@ export function PersonForm({
       icon: User,
       content: (
         <>
-          <div className='space-y-2'>
-            <Label htmlFor='name'>
-              Name <span className='text-destructive'>*</span>
-            </Label>
-            <Input
-              id='name'
-              type='text'
-              value={formData.name}
-              onChange={e => handleInputChange('name', e.target.value)}
-              placeholder='Enter full name'
-              className={errors.name ? 'border-destructive' : ''}
-              required
-            />
-            {errors.name && (
-              <p className='text-sm text-destructive'>{errors.name}</p>
-            )}
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <div className='space-y-2'>
+              <Label htmlFor='name'>
+                Name <span className='text-destructive'>*</span>
+              </Label>
+              <Input
+                id='name'
+                type='text'
+                value={formData.name}
+                onChange={e => handleInputChange('name', e.target.value)}
+                placeholder='Enter full name'
+                className={errors.name ? 'border-destructive' : ''}
+                required
+              />
+              {errors.name && (
+                <p className='text-sm text-destructive'>{errors.name}</p>
+              )}
+            </div>
+
+            <div className='space-y-2'>
+              <Label htmlFor='email'>Email</Label>
+              <Input
+                id='email'
+                type='email'
+                value={formData.email}
+                onChange={e => handleInputChange('email', e.target.value)}
+                placeholder='Enter email address'
+                className={errors.email ? 'border-destructive' : ''}
+              />
+              {errors.email && (
+                <p className='text-sm text-destructive'>{errors.email}</p>
+              )}
+            </div>
           </div>
 
-          <div className='space-y-2'>
-            <Label htmlFor='email'>Email</Label>
-            <Input
-              id='email'
-              type='email'
-              value={formData.email}
-              onChange={e => handleInputChange('email', e.target.value)}
-              placeholder='Enter email address'
-              className={errors.email ? 'border-destructive' : ''}
-            />
-            {errors.email && (
-              <p className='text-sm text-destructive'>{errors.email}</p>
-            )}
-          </div>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <div className='space-y-2'>
+              <Label htmlFor='role'>Title</Label>
+              <Input
+                id='role'
+                type='text'
+                value={formData.role}
+                onChange={e => handleInputChange('role', e.target.value)}
+                placeholder='e.g., Senior Engineer, Product Manager'
+                className={errors.role ? 'border-destructive' : ''}
+              />
+              {errors.role && (
+                <p className='text-sm text-destructive'>{errors.role}</p>
+              )}
+            </div>
 
-          <div className='space-y-2'>
-            <Label htmlFor='role'>Title</Label>
-            <Input
-              id='role'
-              type='text'
-              value={formData.role}
-              onChange={e => handleInputChange('role', e.target.value)}
-              placeholder='e.g., Senior Engineer, Product Manager'
-              className={errors.role ? 'border-destructive' : ''}
-            />
-            {errors.role && (
-              <p className='text-sm text-destructive'>{errors.role}</p>
-            )}
-          </div>
-
-          <div className='space-y-2'>
-            <Label htmlFor='jobRole'>Job Role</Label>
-            <Select
-              value={getSelectValue(formData.jobRoleId)}
-              onValueChange={value =>
-                handleInputChange('jobRoleId', getFormValue(value))
-              }
-            >
-              <SelectTrigger
-                className={errors.jobRoleId ? 'border-destructive' : ''}
+            <div className='space-y-2'>
+              <Label htmlFor='jobRole'>Job Role</Label>
+              <Select
+                value={getSelectValue(formData.jobRoleId)}
+                onValueChange={value =>
+                  handleInputChange('jobRoleId', getFormValue(value))
+                }
               >
-                <SelectValue placeholder='Select a job role' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='none'>No job role</SelectItem>
-                {jobRoles.map(jobRole => (
-                  <SelectItem key={jobRole.id} value={jobRole.id}>
-                    {jobRole.title} - {jobRole.level.name} (
-                    {jobRole.domain.name})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.jobRoleId && (
-              <p className='text-sm text-destructive'>{errors.jobRoleId}</p>
-            )}
+                <SelectTrigger
+                  className={errors.jobRoleId ? 'border-destructive' : ''}
+                >
+                  <SelectValue placeholder='Select a job role' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='none'>No job role</SelectItem>
+                  {jobRoles.map(jobRole => (
+                    <SelectItem key={jobRole.id} value={jobRole.id}>
+                      {jobRole.title} - {jobRole.level.name} (
+                      {jobRole.domain.name})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.jobRoleId && (
+                <p className='text-sm text-destructive'>{errors.jobRoleId}</p>
+              )}
+            </div>
           </div>
         </>
       ),
@@ -258,36 +262,38 @@ export function PersonForm({
       icon: Users,
       content: (
         <>
-          <div className='space-y-2'>
-            <Label htmlFor='team'>Team</Label>
-            <TeamSelect
-              value={getSelectValue(formData.teamId)}
-              onValueChange={value =>
-                handleInputChange('teamId', getFormValue(value))
-              }
-              placeholder='Select a team'
-              includeNone={true}
-              className={errors.teamId ? 'border-destructive' : ''}
-            />
-            {errors.teamId && (
-              <p className='text-sm text-destructive'>{errors.teamId}</p>
-            )}
-          </div>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <div className='space-y-2'>
+              <Label htmlFor='team'>Team</Label>
+              <TeamSelect
+                value={getSelectValue(formData.teamId)}
+                onValueChange={value =>
+                  handleInputChange('teamId', getFormValue(value))
+                }
+                placeholder='Select a team'
+                includeNone={true}
+                className={errors.teamId ? 'border-destructive' : ''}
+              />
+              {errors.teamId && (
+                <p className='text-sm text-destructive'>{errors.teamId}</p>
+              )}
+            </div>
 
-          <div className='space-y-2'>
-            <Label htmlFor='manager'>Manager</Label>
-            <PersonSelect
-              value={getSelectValue(formData.managerId)}
-              onValueChange={value =>
-                handleInputChange('managerId', getFormValue(value))
-              }
-              placeholder='Select a manager'
-              includeNone={true}
-              noneLabel='No manager'
-              showAvatar={true}
-              showRole={true}
-              className={errors.managerId ? 'border-destructive' : ''}
-            />
+            <div className='space-y-2'>
+              <Label htmlFor='manager'>Manager</Label>
+              <PersonSelect
+                value={getSelectValue(formData.managerId)}
+                onValueChange={value =>
+                  handleInputChange('managerId', getFormValue(value))
+                }
+                placeholder='Select a manager'
+                includeNone={true}
+                noneLabel='No manager'
+                showAvatar={true}
+                showRole={true}
+                className={errors.managerId ? 'border-destructive' : ''}
+              />
+            </div>
           </div>
         </>
       ),

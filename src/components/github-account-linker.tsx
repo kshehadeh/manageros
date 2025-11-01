@@ -1,8 +1,10 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { Link as LinkIcon } from 'lucide-react'
 import {
   linkPersonToGithubAccount,
   unlinkPersonFromGithubAccount,
@@ -141,20 +143,29 @@ export function GithubAccountLinker({
   return (
     <div className='space-y-4'>
       <form onSubmit={handleLink} className='space-y-3'>
-        <div>
-          <input
+        <div className='flex items-center gap-2'>
+          <Input
             type='text'
             value={githubUsername}
             onChange={e => setGithubUsername(e.target.value)}
             placeholder='github-username'
-            className='input'
+            className='flex-1'
             required
           />
+          <Button
+            type='submit'
+            disabled={isLoading || !githubUsername.trim()}
+            variant='outline'
+            size='icon'
+            title='Link Account'
+          >
+            {isLoading ? (
+              <span className='text-sm'>...</span>
+            ) : (
+              <LinkIcon className='h-4 w-4' />
+            )}
+          </Button>
         </div>
-
-        <Button type='submit' disabled={isLoading}>
-          {isLoading ? 'Linking...' : 'Link Account'}
-        </Button>
       </form>
     </div>
   )

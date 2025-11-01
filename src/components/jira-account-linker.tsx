@@ -1,8 +1,10 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { Link as LinkIcon } from 'lucide-react'
 import {
   linkPersonToJiraAccount,
   unlinkPersonFromJiraAccount,
@@ -138,20 +140,29 @@ export function JiraAccountLinker({
   return (
     <div className='space-y-4'>
       <form onSubmit={handleLink} className='space-y-3'>
-        <div>
-          <input
+        <div className='flex items-center gap-2'>
+          <Input
             type='email'
             value={jiraEmail}
             onChange={e => setJiraEmail(e.target.value)}
             placeholder='person@company.com'
-            className='input'
+            className='flex-1'
             required
           />
+          <Button
+            type='submit'
+            disabled={isLoading}
+            variant='outline'
+            size='icon'
+            title='Link Account'
+          >
+            {isLoading ? (
+              <span className='text-sm'>...</span>
+            ) : (
+              <LinkIcon className='h-4 w-4' />
+            )}
+          </Button>
         </div>
-
-        <Button type='submit' disabled={isLoading}>
-          {isLoading ? 'Linking...' : 'Link Account'}
-        </Button>
       </form>
     </div>
   )

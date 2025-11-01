@@ -2,7 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { toast } from 'sonner'
+import { Link as LinkIcon } from 'lucide-react'
 import {
   linkUserToPerson,
   unlinkUserFromPerson,
@@ -141,30 +149,39 @@ export function UserLinkForm({
         </div>
       ) : (
         <div className='space-y-4'>
-          <div>
-            <select
+          <div className='flex items-center gap-2'>
+            <Select
               value={selectedUserId}
-              onChange={e => setSelectedUserId(e.target.value)}
-              className='input'
+              onValueChange={setSelectedUserId}
+              disabled={availableUsers.length === 0}
             >
-              <option value=''>Choose a user...</option>
-              {availableUsers.map(user => (
-                <option key={user.id} value={user.id}>
-                  {user.name} ({user.email}) - {user.role}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className='flex-1'>
+                <SelectValue placeholder='Choose a user...' />
+              </SelectTrigger>
+              <SelectContent>
+                {availableUsers.map(user => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {user.name} ({user.email}) - {user.role}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              onClick={handleLink}
+              disabled={
+                isLoading || !selectedUserId || availableUsers.length === 0
+              }
+              variant='outline'
+              size='icon'
+              title='Link User Account'
+            >
+              {isLoading ? (
+                <span className='text-sm'>...</span>
+              ) : (
+                <LinkIcon className='h-4 w-4' />
+              )}
+            </Button>
           </div>
-
-          <Button
-            onClick={handleLink}
-            disabled={
-              isLoading || !selectedUserId || availableUsers.length === 0
-            }
-            variant='outline'
-          >
-            {isLoading ? 'Linking...' : 'Link User Account'}
-          </Button>
         </div>
       )}
     </div>
