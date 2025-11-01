@@ -11,6 +11,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -21,6 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import * as chrono from 'chrono-node'
+import { useIsMobile } from '@/lib/hooks/use-media-query'
 
 interface DateTimePickerWithNaturalInputProps {
   value?: string // ISO string format
@@ -233,6 +235,253 @@ export function DateTimePickerWithNaturalInput({
     return options
   }
 
+  const isMobile = useIsMobile()
+
+  const triggerButton = (
+    <Button
+      variant='outline'
+      className={cn(
+        'w-full justify-start text-left font-normal',
+        !selectedDate && 'text-muted-foreground',
+        error && 'border-destructive'
+      )}
+      disabled={disabled}
+    >
+      <CalendarIcon className='mr-2 h-4 w-4' />
+      {formatDisplayValue()}
+    </Button>
+  )
+
+  const pickerContent = (
+    <div className='p-3 flex flex-col'>
+      {/* Natural language input */}
+      <Input
+        placeholder={
+          dateOnly
+            ? "e.g., 'tomorrow', 'next Monday'"
+            : "e.g., 'tomorrow at 2pm', 'next Monday'"
+        }
+        value={inputValue}
+        onChange={handleInputChange}
+        onKeyDown={handleInputKeyDown}
+        className='text-sm mb-3'
+      />
+
+      {/* Calendar and Time selection side by side on desktop, stacked on mobile */}
+      <div className='flex flex-col md:flex-row gap-4 flex-1 md:flex-initial'>
+        {/* Calendar */}
+        <Calendar
+          mode='single'
+          captionLayout='dropdown'
+          selected={selectedDate}
+          onSelect={handleDateSelect}
+          className='rounded-md border [--cell-size:1.5rem] mx-auto md:mx-0'
+        />
+
+        {/* Time selection - only show if not in dateOnly mode */}
+        {selectedDate && !dateOnly && (
+          <div className='flex flex-col gap-3 w-full md:w-auto md:min-w-[200px]'>
+            <div className='space-y-2'>
+              <Label className='text-xs text-muted-foreground'>Time</Label>
+              <div className='flex gap-2'>
+                <div className='flex-1'>
+                  <Select
+                    value={selectedTime.hours}
+                    onValueChange={value => handleTimeChange('hours', value)}
+                  >
+                    <SelectTrigger className='h-8'>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {generateTimeOptions('hours')}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className='flex-1'>
+                  <Select
+                    value={selectedTime.minutes}
+                    onValueChange={value => handleTimeChange('minutes', value)}
+                  >
+                    <SelectTrigger className='h-8'>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {generateTimeOptions('minutes')}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className='flex-1'>
+                  <Select
+                    value={selectedTime.period}
+                    onValueChange={value => handleTimeChange('period', value)}
+                  >
+                    <SelectTrigger className='h-8'>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='AM'>AM</SelectItem>
+                      <SelectItem value='PM'>PM</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick time buttons */}
+            <div className='space-y-3'>
+              <div className='space-y-1'>
+                <Label className='text-xs text-muted-foreground'>
+                  Quick Times
+                </Label>
+                <div className='grid grid-cols-2 gap-1'>
+                  {[
+                    {
+                      time: '9 AM',
+                      hours: '09',
+                      minutes: '00',
+                      period: 'AM',
+                    },
+                    {
+                      time: '12 PM',
+                      hours: '12',
+                      minutes: '00',
+                      period: 'PM',
+                    },
+                    {
+                      time: '2 PM',
+                      hours: '02',
+                      minutes: '00',
+                      period: 'PM',
+                    },
+                    {
+                      time: '4 PM',
+                      hours: '04',
+                      minutes: '00',
+                      period: 'PM',
+                    },
+                  ].map(({ time, hours, minutes, period }) => (
+                    <Button
+                      key={time}
+                      variant='outline'
+                      size='sm'
+                      className='h-7 text-xs'
+                      onClick={() => {
+                        setSelectedTime({
+                          hours,
+                          minutes,
+                          period: period as 'AM' | 'PM',
+                        })
+                        if (selectedDate) {
+                          const hours24 = convertTo24Hour(
+                            parseInt(hours),
+                            period as 'AM' | 'PM'
+                          )
+                          updateDateTime(
+                            selectedDate,
+                            hours24,
+                            parseInt(minutes)
+                          )
+                        }
+                      }}
+                    >
+                      <Clock className='mr-1 h-3 w-3' />
+                      {time}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quick date buttons */}
+              <div className='space-y-1'>
+                <Label className='text-xs text-muted-foreground'>
+                  Quick Dates
+                </Label>
+                <div className='grid grid-cols-1 gap-1'>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    className='h-7 text-xs justify-start'
+                    onClick={() => {
+                      // Tomorrow morning at 9am
+                      const tomorrow = new Date()
+                      tomorrow.setDate(tomorrow.getDate() + 1)
+                      setSelectedDate(tomorrow)
+                      setSelectedTime({
+                        hours: '09',
+                        minutes: '00',
+                        period: 'AM',
+                      })
+                      updateDateTime(tomorrow, 9, 0)
+                    }}
+                  >
+                    <CalendarIcon className='mr-1 h-3 w-3' />
+                    Tomorrow morning
+                  </Button>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    className='h-7 text-xs justify-start'
+                    onClick={() => {
+                      // Next week (Monday after current date at 9am)
+                      const today = new Date()
+                      const daysUntilNextMonday =
+                        (7 - today.getDay() + 1) % 7 || 7
+                      const nextMonday = new Date(today)
+                      nextMonday.setDate(today.getDate() + daysUntilNextMonday)
+                      setSelectedDate(nextMonday)
+                      setSelectedTime({
+                        hours: '09',
+                        minutes: '00',
+                        period: 'AM',
+                      })
+                      updateDateTime(nextMonday, 9, 0)
+                    }}
+                  >
+                    <CalendarIcon className='mr-1 h-3 w-3' />
+                    Next week
+                  </Button>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    className='h-7 text-xs justify-start'
+                    onClick={() => {
+                      // First Monday of next month at 9am
+                      const today = new Date()
+                      const nextMonth = new Date(
+                        today.getFullYear(),
+                        today.getMonth() + 1,
+                        1
+                      )
+                      // Find first Monday of the month
+                      const dayOfWeek = nextMonth.getDay()
+                      const daysUntilMonday =
+                        dayOfWeek === 0
+                          ? 1
+                          : dayOfWeek === 1
+                            ? 0
+                            : 8 - dayOfWeek
+                      nextMonth.setDate(nextMonth.getDate() + daysUntilMonday)
+                      setSelectedDate(nextMonth)
+                      setSelectedTime({
+                        hours: '09',
+                        minutes: '00',
+                        period: 'AM',
+                      })
+                      updateDateTime(nextMonth, 9, 0)
+                    }}
+                  >
+                    <CalendarIcon className='mr-1 h-3 w-3' />
+                    Next month
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
   return (
     <div className={cn('space-y-2', className)}>
       {label && (
@@ -241,263 +490,21 @@ export function DateTimePickerWithNaturalInput({
         </Label>
       )}
 
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant='outline'
-            className={cn(
-              'w-full justify-start text-left font-normal',
-              !selectedDate && 'text-muted-foreground',
-              error && 'border-destructive'
-            )}
-            disabled={disabled}
-          >
-            <CalendarIcon className='mr-2 h-4 w-4' />
-            {formatDisplayValue()}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className='w-auto p-0' align='start'>
-          <div className='p-3'>
-            {/* Natural language input */}
-            <Input
-              placeholder={
-                dateOnly
-                  ? "e.g., 'tomorrow', 'next Monday'"
-                  : "e.g., 'tomorrow at 2pm', 'next Monday'"
-              }
-              value={inputValue}
-              onChange={handleInputChange}
-              onKeyDown={handleInputKeyDown}
-              className='text-sm mb-3'
-            />
-
-            {/* Calendar and Time selection side by side */}
-            <div className='flex gap-4'>
-              {/* Calendar */}
-              <Calendar
-                mode='single'
-                captionLayout='dropdown'
-                selected={selectedDate}
-                onSelect={handleDateSelect}
-                className='rounded-md border [--cell-size:1.5rem]'
-              />
-
-              {/* Time selection - only show if not in dateOnly mode */}
-              {selectedDate && !dateOnly && (
-                <div className='flex flex-col gap-3 min-w-[200px]'>
-                  <div className='space-y-2'>
-                    <Label className='text-xs text-muted-foreground'>
-                      Time
-                    </Label>
-                    <div className='flex gap-2'>
-                      <div className='flex-1'>
-                        <Select
-                          value={selectedTime.hours}
-                          onValueChange={value =>
-                            handleTimeChange('hours', value)
-                          }
-                        >
-                          <SelectTrigger className='h-8'>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {generateTimeOptions('hours')}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className='flex-1'>
-                        <Select
-                          value={selectedTime.minutes}
-                          onValueChange={value =>
-                            handleTimeChange('minutes', value)
-                          }
-                        >
-                          <SelectTrigger className='h-8'>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {generateTimeOptions('minutes')}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className='flex-1'>
-                        <Select
-                          value={selectedTime.period}
-                          onValueChange={value =>
-                            handleTimeChange('period', value)
-                          }
-                        >
-                          <SelectTrigger className='h-8'>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value='AM'>AM</SelectItem>
-                            <SelectItem value='PM'>PM</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Quick time buttons */}
-                  <div className='space-y-3'>
-                    <div className='space-y-1'>
-                      <Label className='text-xs text-muted-foreground'>
-                        Quick Times
-                      </Label>
-                      <div className='grid grid-cols-2 gap-1'>
-                        {[
-                          {
-                            time: '9 AM',
-                            hours: '09',
-                            minutes: '00',
-                            period: 'AM',
-                          },
-                          {
-                            time: '12 PM',
-                            hours: '12',
-                            minutes: '00',
-                            period: 'PM',
-                          },
-                          {
-                            time: '2 PM',
-                            hours: '02',
-                            minutes: '00',
-                            period: 'PM',
-                          },
-                          {
-                            time: '4 PM',
-                            hours: '04',
-                            minutes: '00',
-                            period: 'PM',
-                          },
-                        ].map(({ time, hours, minutes, period }) => (
-                          <Button
-                            key={time}
-                            variant='outline'
-                            size='sm'
-                            className='h-7 text-xs'
-                            onClick={() => {
-                              setSelectedTime({
-                                hours,
-                                minutes,
-                                period: period as 'AM' | 'PM',
-                              })
-                              if (selectedDate) {
-                                const hours24 = convertTo24Hour(
-                                  parseInt(hours),
-                                  period as 'AM' | 'PM'
-                                )
-                                updateDateTime(
-                                  selectedDate,
-                                  hours24,
-                                  parseInt(minutes)
-                                )
-                              }
-                            }}
-                          >
-                            <Clock className='mr-1 h-3 w-3' />
-                            {time}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Quick date buttons */}
-                    <div className='space-y-1'>
-                      <Label className='text-xs text-muted-foreground'>
-                        Quick Dates
-                      </Label>
-                      <div className='grid grid-cols-1 gap-1'>
-                        <Button
-                          variant='outline'
-                          size='sm'
-                          className='h-7 text-xs justify-start'
-                          onClick={() => {
-                            // Tomorrow morning at 9am
-                            const tomorrow = new Date()
-                            tomorrow.setDate(tomorrow.getDate() + 1)
-                            setSelectedDate(tomorrow)
-                            setSelectedTime({
-                              hours: '09',
-                              minutes: '00',
-                              period: 'AM',
-                            })
-                            updateDateTime(tomorrow, 9, 0)
-                          }}
-                        >
-                          <CalendarIcon className='mr-1 h-3 w-3' />
-                          Tomorrow morning
-                        </Button>
-                        <Button
-                          variant='outline'
-                          size='sm'
-                          className='h-7 text-xs justify-start'
-                          onClick={() => {
-                            // Next week (Monday after current date at 9am)
-                            const today = new Date()
-                            const daysUntilNextMonday =
-                              (7 - today.getDay() + 1) % 7 || 7
-                            const nextMonday = new Date(today)
-                            nextMonday.setDate(
-                              today.getDate() + daysUntilNextMonday
-                            )
-                            setSelectedDate(nextMonday)
-                            setSelectedTime({
-                              hours: '09',
-                              minutes: '00',
-                              period: 'AM',
-                            })
-                            updateDateTime(nextMonday, 9, 0)
-                          }}
-                        >
-                          <CalendarIcon className='mr-1 h-3 w-3' />
-                          Next week
-                        </Button>
-                        <Button
-                          variant='outline'
-                          size='sm'
-                          className='h-7 text-xs justify-start'
-                          onClick={() => {
-                            // First Monday of next month at 9am
-                            const today = new Date()
-                            const nextMonth = new Date(
-                              today.getFullYear(),
-                              today.getMonth() + 1,
-                              1
-                            )
-                            // Find first Monday of the month
-                            const dayOfWeek = nextMonth.getDay()
-                            const daysUntilMonday =
-                              dayOfWeek === 0
-                                ? 1
-                                : dayOfWeek === 1
-                                  ? 0
-                                  : 8 - dayOfWeek
-                            nextMonth.setDate(
-                              nextMonth.getDate() + daysUntilMonday
-                            )
-                            setSelectedDate(nextMonth)
-                            setSelectedTime({
-                              hours: '09',
-                              minutes: '00',
-                              period: 'AM',
-                            })
-                            updateDateTime(nextMonth, 9, 0)
-                          }}
-                        >
-                          <CalendarIcon className='mr-1 h-3 w-3' />
-                          Next month
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </PopoverContent>
-      </Popover>
+      {isMobile ? (
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>{triggerButton}</DialogTrigger>
+          <DialogContent className='max-w-[100vw] w-full p-0 h-[100vh] max-h-[100vh] flex flex-col overflow-y-auto rounded-none left-0 top-0 translate-x-0 translate-y-0'>
+            {pickerContent}
+          </DialogContent>
+        </Dialog>
+      ) : (
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
+          <PopoverContent className='w-auto p-0' align='start'>
+            {pickerContent}
+          </PopoverContent>
+        </Popover>
+      )}
     </div>
   )
 }

@@ -6,10 +6,9 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { format, isToday, isTomorrow, isPast, differenceInDays } from 'date-fns'
-import {
-  TaskQuickEditDialog,
-} from '@/components/tasks/task-quick-edit-dialog'
+import { TaskQuickEditDialog } from '@/components/tasks/task-quick-edit-dialog'
 import type { TaskStatus } from '@/lib/task-status'
+import { taskStatusUtils } from '@/lib/task-status'
 import { useRouter } from 'next/navigation'
 
 export type PriorityItemType = 'task' | 'meeting' | 'oneonone' | 'feedback'
@@ -84,7 +83,11 @@ function getPriorityIcon(item: PriorityItem) {
 function getPriorityBadge(item: PriorityItem) {
   if (item.type === 'task') {
     if (item.date && isPast(new Date(item.date)) && item.status !== 'done') {
-      return <Badge variant='destructive' className='text-xs'>Overdue</Badge>
+      return (
+        <Badge variant='destructive' className='text-xs'>
+          Overdue
+        </Badge>
+      )
     }
     if (item.status === 'done') {
       return (
@@ -135,13 +138,33 @@ export function TodaysPrioritiesSection({
   // Sort items: overdue tasks first, then by date
   const sortedItems = [...items].sort((a, b) => {
     // Overdue tasks go to top
-    if (a.type === 'task' && a.date && isPast(new Date(a.date)) && a.status !== 'done') {
-      if (b.type !== 'task' || !b.date || !isPast(new Date(b.date)) || b.status === 'done') {
+    if (
+      a.type === 'task' &&
+      a.date &&
+      isPast(new Date(a.date)) &&
+      a.status !== 'done'
+    ) {
+      if (
+        b.type !== 'task' ||
+        !b.date ||
+        !isPast(new Date(b.date)) ||
+        b.status === 'done'
+      ) {
         return -1
       }
     }
-    if (b.type === 'task' && b.date && isPast(new Date(b.date)) && b.status !== 'done') {
-      if (a.type !== 'task' || !a.date || !isPast(new Date(a.date)) || a.status === 'done') {
+    if (
+      b.type === 'task' &&
+      b.date &&
+      isPast(new Date(b.date)) &&
+      b.status !== 'done'
+    ) {
+      if (
+        a.type !== 'task' ||
+        !a.date ||
+        !isPast(new Date(a.date)) ||
+        a.status === 'done'
+      ) {
         return 1
       }
     }
@@ -231,8 +254,9 @@ export function TodaysPrioritiesSection({
                         {getPriorityIcon(item)}
                         <div className='flex-1 min-w-0'>
                           <div className='flex items-center gap-2 flex-wrap'>
-                            <span className='text-sm font-medium truncate'>{item.title}</span>
-                            {getPriorityBadge(item)}
+                            <span className='text-sm font-medium truncate'>
+                              {item.title}
+                            </span>
                           </div>
                           <div className='flex items-center gap-2 text-xs text-muted-foreground mt-1'>
                             <span>{getPriorityLabel(item)}</span>
@@ -240,13 +264,16 @@ export function TodaysPrioritiesSection({
                           </div>
                         </div>
                       </div>
-                      {item.date &&
-                        isPast(new Date(item.date)) &&
-                        item.status !== 'done' && (
-                          <Badge variant='destructive' className='text-xs shrink-0'>
-                            Overdue
-                          </Badge>
-                        )}
+                      {item.status && (
+                        <Badge
+                          variant={taskStatusUtils.getVariant(
+                            item.status as TaskStatus
+                          )}
+                          className='text-xs shrink-0'
+                        >
+                          {taskStatusUtils.getLabel(item.status as TaskStatus)}
+                        </Badge>
+                      )}
                     </div>
                   </Card>
                 </div>
@@ -254,14 +281,20 @@ export function TodaysPrioritiesSection({
             }
 
             return (
-              <Link key={`${item.type}-${item.id}`} href={item.href} className='block'>
+              <Link
+                key={`${item.type}-${item.id}`}
+                href={item.href}
+                className='block'
+              >
                 <Card className='p-3 bg-muted/20 border-0 rounded-md shadow-none hover:bg-muted/30 transition-colors cursor-pointer'>
                   <div className='flex items-center justify-between gap-3'>
                     <div className='flex items-center gap-3 flex-1 min-w-0'>
                       {getPriorityIcon(item)}
                       <div className='flex-1 min-w-0'>
                         <div className='flex items-center gap-2 flex-wrap'>
-                          <span className='text-sm font-medium truncate'>{item.title}</span>
+                          <span className='text-sm font-medium truncate'>
+                            {item.title}
+                          </span>
                           {getPriorityBadge(item)}
                         </div>
                         <div className='flex items-center gap-2 text-xs text-muted-foreground mt-1'>
@@ -288,7 +321,11 @@ export function TodaysPrioritiesSection({
             title: selectedTask.title,
             description: selectedTask.description || null,
             assigneeId: selectedTask.assigneeId || null,
-            dueDate: selectedTask.date ? (selectedTask.date instanceof Date ? selectedTask.date : new Date(selectedTask.date)) : null,
+            dueDate: selectedTask.date
+              ? selectedTask.date instanceof Date
+                ? selectedTask.date
+                : new Date(selectedTask.date)
+              : null,
             priority: selectedTask.priority ?? 2,
             status: (selectedTask.status || 'todo') as TaskStatus,
           }}
