@@ -2,6 +2,7 @@ import { requireAuth } from '@/lib/auth-utils'
 import { MyTasksPageClient } from '@/components/tasks/my-tasks-page-client'
 import { CreateTaskButton } from '@/components/tasks/create-task-button'
 import { CheckSquare } from 'lucide-react'
+import { PageSection } from '@/components/ui/page-section'
 
 export default async function MyTasksPage() {
   const user = await requireAuth({ requireOrganization: true })
@@ -23,9 +24,9 @@ export default async function MyTasksPage() {
         </div>
       </div>
 
-      <div className='page-section'>
+      <PageSection>
         <MyTasksPageClient personId={user.personId} />
-      </div>
+      </PageSection>
     </div>
   )
 }

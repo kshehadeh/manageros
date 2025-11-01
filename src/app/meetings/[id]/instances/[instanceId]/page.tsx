@@ -13,6 +13,7 @@ import { SimpleLinkList } from '@/components/links/link-list'
 import { HelpIcon } from '@/components/help-icon'
 import { SimplePeopleList } from '@/components/people/person-list'
 import { SectionHeader } from '@/components/ui/section-header'
+import { PageSection } from '@/components/ui/page-section'
 
 export default async function MeetingInstanceDetailPage({
   params,
@@ -106,20 +107,21 @@ export default async function MeetingInstanceDetailPage({
           <div className='flex-1 min-w-0'>
             <div className='space-y-6'>
               {/* Notes section */}
-              <div className='page-section'>
-                <SectionHeader icon={StickyNote} title='Notes' />
+              <PageSection
+                header={<SectionHeader icon={StickyNote} title='Notes' />}
+              >
                 <ReadonlyNotesField
                   content={meetingInstance.notes || ''}
                   variant='default'
                   emptyStateText='No notes for this meeting instance'
                 />
-              </div>
+              </PageSection>
             </div>
           </div>
 
           {/* Right Sidebar - Full width on mobile, fixed width on desktop */}
           <div className='w-full lg:w-80 lg:shrink-0'>
-            <div className='page-section'>
+            <PageSection>
               <SimplePeopleList
                 people={meetingInstance.participants.map(p => ({
                   ...p.person,
@@ -147,8 +149,8 @@ export default async function MeetingInstanceDetailPage({
                   {} as Record<string, string>
                 )}
               />
-            </div>
-            <div className='page-section mt-6'>
+            </PageSection>
+            <PageSection className='mt-6'>
               <SimpleLinkList
                 links={entityLinks.map(link => ({
                   id: link.id,
@@ -166,7 +168,7 @@ export default async function MeetingInstanceDetailPage({
                 showAddButton={true}
                 emptyStateText='No links added yet.'
               />
-            </div>
+            </PageSection>
           </div>
         </div>
       </div>

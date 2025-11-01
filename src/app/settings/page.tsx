@@ -6,6 +6,7 @@ import { JiraCredentialsForm } from '@/components/jira-credentials-form'
 import { GithubCredentialsForm } from '@/components/github-credentials-form'
 import { PersonLinkForm } from '@/components/people/person-link-form'
 import { SectionHeader } from '@/components/ui/section-header'
+import { PageSection } from '@/components/ui/page-section'
 import { User, Settings } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
@@ -41,7 +42,7 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <div className='page-section space-y-12'>
+      <PageSection className='space-y-12'>
         {/* Person Linking Section */}
         <div className='space-y-4'>
           <SectionHeader
@@ -60,7 +61,7 @@ export default function SettingsPage() {
             <GithubCredentialsForm initialCredentials={githubCredentials} />
           </div>
         </div>
-      </div>
+      </PageSection>
     </div>
   )
 }

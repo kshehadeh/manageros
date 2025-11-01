@@ -3,6 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { PeopleDataTable } from '@/components/people/data-table'
+import { PageSection } from '@/components/ui/page-section'
 import { useSession } from 'next-auth/react'
 import { isAdmin } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
@@ -54,9 +55,9 @@ export function PeoplePageClient() {
         </div>
       </div>
 
-      <div className='page-section -mx-3 md:mx-0'>
+      <PageSection className='-mx-3 md:mx-0'>
         <PeopleDataTable enablePagination={true} limit={100} />
-      </div>
+      </PageSection>
     </div>
   )
 }

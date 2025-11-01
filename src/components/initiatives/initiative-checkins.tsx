@@ -1,4 +1,5 @@
 import { CheckInList } from '@/components/checkin-list'
+import { PageSection } from '@/components/ui/page-section'
 
 interface InitiativeCheckInsProps {
   initiativeId: string
@@ -25,7 +26,7 @@ export function InitiativeCheckIns({
   checkIns,
 }: InitiativeCheckInsProps) {
   return (
-    <div className='page-section'>
+    <PageSection>
       <CheckInList
         initiativeId={initiativeId}
         initiativeTitle={initiativeTitle}
@@ -34,6 +35,6 @@ export function InitiativeCheckIns({
           summary: ci.summary || '',
         }))}
       />
-    </div>
+    </PageSection>
   )
 }

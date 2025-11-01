@@ -2,6 +2,7 @@ import { PeopleDataTable } from '@/components/people/data-table'
 import { requireAuth } from '@/lib/auth-utils'
 import { Users } from 'lucide-react'
 import { HelpIcon } from '@/components/help-icon'
+import { PageSection } from '@/components/ui/page-section'
 
 export default async function DirectReportsPage() {
   const user = await requireAuth({ requireOrganization: true })
@@ -17,11 +18,11 @@ export default async function DirectReportsPage() {
             <HelpIcon helpId='direct-reports' size='md' />
           </div>
         </div>
-        <div className='page-section'>
+        <PageSection>
           <div className='text-muted-foreground text-sm text-center py-8'>
             You need to be linked to a person record to view direct reports.
           </div>
-        </div>
+        </PageSection>
       </div>
     )
   }
@@ -36,7 +37,7 @@ export default async function DirectReportsPage() {
         </div>
       </div>
 
-      <div className='page-section'>
+      <PageSection>
         <PeopleDataTable
           settingsId='direct-reports'
           immutableFilters={{
@@ -44,7 +45,7 @@ export default async function DirectReportsPage() {
             status: 'active',
           }}
         />
-      </div>
+      </PageSection>
     </div>
   )
 }

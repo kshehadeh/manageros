@@ -109,18 +109,25 @@ Entity detail pages follow a standardized layout pattern with a header section, 
 #### Main Content Sections
 
 ```tsx
-<section>
-  <h3 className='section-title'>Section Title ({items.length})</h3>
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
+
+;<PageSection
+  header={
+    <SectionHeader icon={FileText} title={`Section Title (${items.length})`} />
+  }
+>
   <div className='section-content'>{/* Section content */}</div>
-</section>
+</PageSection>
 ```
 
 **Section Guidelines**:
 
-- Use `<section>` elements for semantic structure
-- Section titles: semibold font with bottom margin
-- Include count in parentheses when applicable
-- Content spacing: 12px between items
+- **Always use `PageSection` component** for all page sections
+- Use `SectionHeader` component for section titles via the `header` prop
+- Include count in parentheses when applicable in the title
+- Content spacing: Automatically handled by `PageSection` component
+- The component applies consistent spacing and styling
 
 #### Content Cards
 

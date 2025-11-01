@@ -8,6 +8,7 @@ import { OneOnOneDetailClient } from '@/components/oneonone-detail-client'
 import { EditIconButton } from '@/components/edit-icon-button'
 import { MessageCircle, Info, StickyNote } from 'lucide-react'
 import { SectionHeader } from '@/components/ui/section-header'
+import { PageSection } from '@/components/ui/page-section'
 import { PersonListItem } from '@/components/people/person-list-item'
 
 interface OneOnOneViewPageProps {
@@ -66,8 +67,11 @@ export default async function OneOnOneViewPage({
             <div className='flex-1 min-w-0'>
               <div className='space-y-6'>
                 {/* Meeting Notes */}
-                <div className='page-section'>
-                  <SectionHeader icon={StickyNote} title='Meeting Notes' />
+                <PageSection
+                  header={
+                    <SectionHeader icon={StickyNote} title='Meeting Notes' />
+                  }
+                >
                   <div className='text-sm text-neutral-400'>
                     {oneOnOne.notes ? (
                       <ReadonlyNotesField
@@ -81,14 +85,15 @@ export default async function OneOnOneViewPage({
                       </div>
                     )}
                   </div>
-                </div>
+                </PageSection>
               </div>
             </div>
 
             {/* Right Sidebar */}
             <div className='w-full lg:w-80 lg:flex-shrink-0'>
-              <div className='page-section'>
-                <SectionHeader icon={Info} title='Meeting Details' />
+              <PageSection
+                header={<SectionHeader icon={Info} title='Meeting Details' />}
+              >
                 <div className='space-y-4'>
                   <div>
                     <h4 className='text-sm font-medium mb-2'>Participant 1</h4>
@@ -129,7 +134,7 @@ export default async function OneOnOneViewPage({
                     </div>
                   </div>
                 </div>
-              </div>
+              </PageSection>
             </div>
           </div>
         </div>

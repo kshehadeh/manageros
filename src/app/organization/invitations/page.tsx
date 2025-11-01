@@ -5,6 +5,7 @@ import { getOrganizationInvitations } from '@/lib/actions/organization'
 import InvitationForm from '@/components/invitation-form'
 import InvitationList from '@/components/invitation-list'
 import { InvitationsBreadcrumbClient } from '@/components/organization/invitations-breadcrumb-client'
+import { PageSection } from '@/components/ui/page-section'
 
 export default async function OrganizationInvitationsPage() {
   const session = await getServerSession(authOptions)
@@ -36,10 +37,10 @@ export default async function OrganizationInvitationsPage() {
           </p>
         </div>
 
-        <div className='page-section'>
+        <PageSection>
           <InvitationForm />
           <InvitationList invitations={invitations} />
-        </div>
+        </PageSection>
       </div>
     </InvitationsBreadcrumbClient>
   )

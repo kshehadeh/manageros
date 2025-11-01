@@ -7,6 +7,7 @@ import {
 } from '@/lib/actions/organization'
 import OrganizationMembersList from '@/components/organization-members-list'
 import OrganizationInvitationsSection from '@/components/organization-invitations-section'
+import { PageSection } from '@/components/ui/page-section'
 import { UserCheck } from 'lucide-react'
 
 export default async function OrganizationMembersPage() {
@@ -44,12 +45,12 @@ export default async function OrganizationMembersPage() {
       <div className='flex flex-col lg:flex-row gap-6'>
         {/* Main Content */}
         <div className='flex-1'>
-          <div className='page-section'>
+          <PageSection>
             <OrganizationMembersList
               members={members}
               currentUserId={session.user.id}
             />
-          </div>
+          </PageSection>
         </div>
 
         {/* Right Sidebar */}

@@ -2,6 +2,7 @@ import { requireAuth } from '@/lib/auth-utils'
 import { CreateTaskButton } from '@/components/tasks/create-task-button'
 import { ListTodo } from 'lucide-react'
 import { TaskDataTable } from '../../components/tasks/data-table'
+import { PageSection } from '@/components/ui/page-section'
 
 export default async function TasksPage() {
   await requireAuth({ requireOrganization: true })
@@ -23,9 +24,9 @@ export default async function TasksPage() {
         </div>
       </div>
 
-      <div className='page-section'>
+      <PageSection>
         <TaskDataTable enablePagination={true} />
-      </div>
+      </PageSection>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { SectionHeader } from '@/components/ui/section-header'
+import { PageSection } from '@/components/ui/page-section'
 import { SimpleLinkList } from '@/components/links/link-list'
 import { ChangeTeamModal } from './change-team-modal'
 import { ManageOwnersModal } from './manage-owners-modal'
@@ -62,19 +63,22 @@ export function InitiativeSidebar({
   return (
     <div className='w-full lg:w-80 space-y-6'>
       {/* Team Section */}
-      <div className='page-section'>
-        <SectionHeader
-          icon={Users}
-          title='Team'
-          action={
-            <ChangeTeamModal
-              initiativeId={entityId}
-              currentTeam={team}
-              teams={teams}
-            />
-          }
-          className='mb-3'
-        />
+      <PageSection
+        header={
+          <SectionHeader
+            icon={Users}
+            title='Team'
+            action={
+              <ChangeTeamModal
+                initiativeId={entityId}
+                currentTeam={team}
+                teams={teams}
+              />
+            }
+            className='mb-3'
+          />
+        }
+      >
         {team ? (
           <div className='flex items-center gap-3'>
             <TeamAvatar name={team.name} avatar={team.avatar} size='sm' />
@@ -88,22 +92,25 @@ export function InitiativeSidebar({
         ) : (
           <p className='text-sm text-muted-foreground'>No team assigned</p>
         )}
-      </div>
+      </PageSection>
 
       {/* Associated People Section */}
-      <div className='page-section'>
-        <SectionHeader
-          icon={Users}
-          title='Associated People'
-          action={
-            <ManageOwnersModal
-              initiativeId={entityId}
-              owners={owners}
-              people={people}
-            />
-          }
-          className='mb-3'
-        />
+      <PageSection
+        header={
+          <SectionHeader
+            icon={Users}
+            title='Associated People'
+            action={
+              <ManageOwnersModal
+                initiativeId={entityId}
+                owners={owners}
+                people={people}
+              />
+            }
+            className='mb-3'
+          />
+        }
+      >
         <SimplePeopleList
           people={owners.map(owner => ({
             ...owner.person,
@@ -130,10 +137,10 @@ export function InitiativeSidebar({
           )}
           className=''
         />
-      </div>
+      </PageSection>
 
       {/* Links Section */}
-      <div className='page-section'>
+      <PageSection>
         <SimpleLinkList
           links={links}
           entityType={entityType}
@@ -145,7 +152,7 @@ export function InitiativeSidebar({
           onLinksUpdate={() => router.refresh()}
           className=''
         />
-      </div>
+      </PageSection>
     </div>
   )
 }

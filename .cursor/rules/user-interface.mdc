@@ -8,7 +8,11 @@ Entities like meetings, initiatives, people, etc. should follow these rules:
 
 * The layout of the page should use available horizontal space
 * When creating a series of action buttons for the entity detail page, prefer use an action drop down with an ellipsis button instead of separate buttons.
-* Avoid using cards to surround groups of information.  Instead, use a page section with a header and appropriate spacing.
+* Avoid using cards to surround groups of information.  Instead, use the `PageSection` component with a `SectionHeader` and appropriate spacing.
+* Always use the `PageSection` component for all page sections to ensure consistent styling across the application. The component accepts:
+  * `header` prop (optional): Use `SectionHeader` component for section titles
+  * `children`: The main content of the section
+  * `className` (optional): Additional CSS classes if needed
 * Use breadcrumbs to navigate between pages using the useBreadcrumb hook and the Breadcrumb component with the client specific component.
 * When displaying a list of entities, use the shadcn table component instead of a list of cards.  Limit the columns to those that are necessary and relevant to the entity.
 * When creating a new table list, add support for filtering using the same UI as the persons table.  Use the search bar and the filter button to filter the table. The filter button will popup a modal with the filters.
@@ -39,3 +43,26 @@ Only use cards when there is more than one section.  Each section can be in a ca
 
 * Reuse components whenever possible.
 * Look for other places where similar component are used and modify them to fit the new use case and reuse.  But weigh that against the complexity being introduced to satisfy this constraint.  If the complexity is too high, then create a new component.
+
+## PageSection Component
+
+* **Always use `PageSection` component** instead of manually applying `page-section` class
+* Import from `@/components/ui/page-section`
+* Use `SectionHeader` component for section titles via the `header` prop
+* Example:
+  ```tsx
+  import { PageSection } from '@/components/ui/page-section'
+  import { SectionHeader } from '@/components/ui/section-header'
+  
+  <PageSection
+    header={<SectionHeader icon={FileText} title='Section Title' />}
+  >
+    {/* Section content */}
+  </PageSection>
+  ```
+* For sections without headers, simply wrap content:
+  ```tsx
+  <PageSection>
+    {/* Content */}
+  </PageSection>
+  ```

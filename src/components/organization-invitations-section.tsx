@@ -28,6 +28,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { SectionHeader } from '@/components/ui/section-header'
+import { PageSection } from '@/components/ui/page-section'
 import {
   UserPlus,
   MoreHorizontal,
@@ -208,8 +209,8 @@ export default function OrganizationInvitationsSection({
 
   return (
     <>
-      <div className='page-section'>
-        <div className='space-y-4'>
+      <PageSection
+        header={
           <SectionHeader
             icon={Mail}
             title={`Invitations (${invitations.length})`}
@@ -274,91 +275,91 @@ export default function OrganizationInvitationsSection({
               </Dialog>
             }
           />
-
-          {invitations.length === 0 ? (
-            <div className='flex flex-col items-center justify-center py-8 text-center'>
-              <Mail className='h-8 w-8 text-muted-foreground mb-2' />
-              <p className='text-muted-foreground text-sm mb-4'>
-                No invitations have been sent yet
-              </p>
-              <p className='text-xs text-muted-foreground'>
-                Click &quot;Invite User&quot; to send your first invitation.
-              </p>
-            </div>
-          ) : (
-            <div className='space-y-3'>
-              {sortedInvitations.map(invitation => (
-                <div
-                  key={invitation.id}
-                  className='flex items-start justify-between p-3 border rounded-lg'
-                >
-                  <div className='flex-1 min-w-0'>
-                    <div className='font-medium text-sm truncate'>
-                      {invitation.email}
-                    </div>
-                    <div className='mt-1'>
-                      {getStatusBadge(invitation.status)}
-                    </div>
-                    {invitation.status === 'pending' && (
-                      <div className='text-xs text-muted-foreground mt-1'>
-                        Expires{' '}
-                        {isExpired(invitation.expiresAt) ? (
-                          <span className='text-red-600'>Expired</span>
-                        ) : (
-                          formatDate(invitation.expiresAt)
-                        )}
-                      </div>
-                    )}
+        }
+      >
+        {invitations.length === 0 ? (
+          <div className='flex flex-col items-center justify-center py-8 text-center'>
+            <Mail className='h-8 w-8 text-muted-foreground mb-2' />
+            <p className='text-muted-foreground text-sm mb-4'>
+              No invitations have been sent yet
+            </p>
+            <p className='text-xs text-muted-foreground'>
+              Click &quot;Invite User&quot; to send your first invitation.
+            </p>
+          </div>
+        ) : (
+          <div className='space-y-3'>
+            {sortedInvitations.map(invitation => (
+              <div
+                key={invitation.id}
+                className='flex items-start justify-between p-3 border rounded-lg'
+              >
+                <div className='flex-1 min-w-0'>
+                  <div className='font-medium text-sm truncate'>
+                    {invitation.email}
                   </div>
-                  <div className='ml-3'>
-                    {(invitation.status === 'pending' ||
-                      invitation.status === 'expired') && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant='ghost'
-                            size='sm'
-                            disabled={
-                              isRevoking === invitation.id ||
-                              isReactivating === invitation.id
-                            }
-                          >
-                            <MoreHorizontal className='h-4 w-4' />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align='end'>
-                          {invitation.status === 'pending' && (
-                            <DropdownMenuItem
-                              onClick={() => setInvitationToRevoke(invitation)}
-                              className='text-red-600 focus:text-red-600'
-                              disabled={isRevoking === invitation.id}
-                            >
-                              <Trash2 className='h-4 w-4 mr-2' />
-                              Revoke Invitation
-                            </DropdownMenuItem>
-                          )}
-                          {invitation.status === 'expired' && (
-                            <DropdownMenuItem
-                              onClick={() =>
-                                setInvitationToReactivate(invitation)
-                              }
-                              className='text-green-600 focus:text-green-600'
-                              disabled={isReactivating === invitation.id}
-                            >
-                              <UserPlus className='h-4 w-4 mr-2' />
-                              Reactivate Invitation
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
+                  <div className='mt-1'>
+                    {getStatusBadge(invitation.status)}
                   </div>
+                  {invitation.status === 'pending' && (
+                    <div className='text-xs text-muted-foreground mt-1'>
+                      Expires{' '}
+                      {isExpired(invitation.expiresAt) ? (
+                        <span className='text-red-600'>Expired</span>
+                      ) : (
+                        formatDate(invitation.expiresAt)
+                      )}
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+                <div className='ml-3'>
+                  {(invitation.status === 'pending' ||
+                    invitation.status === 'expired') && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          disabled={
+                            isRevoking === invitation.id ||
+                            isReactivating === invitation.id
+                          }
+                        >
+                          <MoreHorizontal className='h-4 w-4' />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align='end'>
+                        {invitation.status === 'pending' && (
+                          <DropdownMenuItem
+                            onClick={() => setInvitationToRevoke(invitation)}
+                            className='text-red-600 focus:text-red-600'
+                            disabled={isRevoking === invitation.id}
+                          >
+                            <Trash2 className='h-4 w-4 mr-2' />
+                            Revoke Invitation
+                          </DropdownMenuItem>
+                        )}
+                        {invitation.status === 'expired' && (
+                          <DropdownMenuItem
+                            onClick={() =>
+                              setInvitationToReactivate(invitation)
+                            }
+                            className='text-green-600 focus:text-green-600'
+                            disabled={isReactivating === invitation.id}
+                          >
+                            <UserPlus className='h-4 w-4 mr-2' />
+                            Reactivate Invitation
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </PageSection>
 
       <AlertDialog
         open={!!invitationToRevoke}

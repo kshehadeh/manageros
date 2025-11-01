@@ -99,7 +99,7 @@ The application now includes standardized page layout classes to ensure consiste
 - `.page-header`: Header section with bottom margin (`mb-6`)
 - `.page-title`: Standardized h1 styling (`text-2xl font-bold text-foreground mb-2`)
 - `.page-subtitle`: Subtitle text styling (`text-muted-foreground`)
-- `.page-section`: Content sections with consistent spacing (`space-y-4`)
+- `.page-section`: Content sections with consistent spacing (`space-y-4`) - **Use the `PageSection` component instead of applying this class directly**
 - `.page-section-title`: Section headings (`text-lg font-semibold text-foreground`)
 - `.page-section-subtitle`: Section descriptions (`text-sm text-muted-foreground`)
 
@@ -113,19 +113,21 @@ The application now includes standardized page layout classes to ensure consiste
 
 ```tsx
 // Standard page structure
-<div className='page-container'>
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
+
+;<div className='page-container'>
   <div className='page-header'>
     <h1 className='page-title'>Page Title</h1>
     <p className='page-subtitle'>Page description</p>
   </div>
 
-  <div className='page-section'>
-    <h2 className='page-section-title'>Section Title</h2>
+  <PageSection header={<SectionHeader icon={FileText} title='Section Title' />}>
     <div className='card-grid'>
       <div className='card'>Content</div>
       <div className='card'>Content</div>
     </div>
-  </div>
+  </PageSection>
 </div>
 ```
 

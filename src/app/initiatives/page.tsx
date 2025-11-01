@@ -4,6 +4,7 @@ import { InitiativeDataTable } from '@/components/initiatives/data-table'
 import { requireAuth } from '@/lib/auth-utils'
 import { Rocket, Plus } from 'lucide-react'
 import { HelpIcon } from '../../components/help-icon'
+import { PageSection } from '@/components/ui/page-section'
 
 export default async function InitiativesPage() {
   await requireAuth({ requireOrganization: true })
@@ -27,9 +28,9 @@ export default async function InitiativesPage() {
           </Button>
         </div>
       </div>
-      <div className='page-section'>
+      <PageSection>
         <InitiativeDataTable enablePagination={true} />
-      </div>
+      </PageSection>
     </div>
   )
 }

@@ -3,6 +3,7 @@
 import { Suspense, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { NotificationsList } from '@/components/notifications/notifications-list'
+import { PageSection } from '@/components/ui/page-section'
 import { NotificationsHeader } from '@/components/notifications/notifications-header'
 import { useSession } from 'next-auth/react'
 
@@ -36,14 +37,14 @@ export default function NotificationsPage() {
         />
       </div>
 
-      <div className='page-section'>
+      <PageSection>
         <Suspense fallback={<NotificationsSkeleton />}>
           <NotificationsList
             showAllOrganizationNotifications={showAllNotifications}
             isAdmin={isAdmin}
           />
         </Suspense>
-      </div>
+      </PageSection>
     </div>
   )
 }

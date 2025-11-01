@@ -5,6 +5,7 @@ import { getJobLevels, getJobDomains } from '@/lib/actions/job-roles'
 import { JobRoleHeaderButton } from '@/components/jobs/job-role-header-button'
 import { JobRolesContent } from '@/components/jobs/job-roles-content'
 import { JobRolesBreadcrumbClient } from '@/components/jobs/job-roles-breadcrumb-client'
+import { PageSection } from '@/components/ui/page-section'
 
 export default async function JobRoleManagementPage() {
   const session = await getServerSession(authOptions)
@@ -42,9 +43,9 @@ export default async function JobRoleManagementPage() {
             </div>
           </div>
         </div>
-        <div className='page-section'>
+        <PageSection>
           <JobRolesContent levels={levels} domains={domains} />
-        </div>
+        </PageSection>
       </div>
     </JobRolesBreadcrumbClient>
   )

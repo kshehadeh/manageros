@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-utils'
 import { Button } from '@/components/ui/button'
 import { Upload, Plus, Workflow, Users2 } from 'lucide-react'
 import { TeamsDataTable } from '@/components/teams/data-table'
+import { PageSection } from '@/components/ui/page-section'
 
 export default async function TeamsPage() {
   await requireAuth({ requireOrganization: true })
@@ -42,9 +43,9 @@ export default async function TeamsPage() {
           </div>
         </div>
       </div>
-      <div className='page-section'>
+      <PageSection>
         <TeamsDataTable enablePagination={true} limit={100} />
-      </div>
+      </PageSection>
     </div>
   )
 }

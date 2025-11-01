@@ -10,6 +10,7 @@ import { TaskActionsDropdown } from '@/components/tasks/task-actions-dropdown'
 import { InlineEditableText } from '@/components/common/inline-editable-text'
 import { TaskSidebar } from '@/components/tasks/task-sidebar'
 import { SectionHeader } from '@/components/ui/section-header'
+import { PageSection } from '@/components/ui/page-section'
 import { Calendar, User, Clock, FileText, ListTodo } from 'lucide-react'
 import { type TaskStatus } from '@/lib/task-status'
 import { type TaskPriority } from '@/lib/task-priority'
@@ -127,8 +128,9 @@ export default async function TaskDetailPage({
           <div className='flex-1 min-w-0'>
             <div className='space-y-6'>
               {/* Task Description */}
-              <div className='page-section'>
-                <SectionHeader icon={FileText} title='Description' />
+              <PageSection
+                header={<SectionHeader icon={FileText} title='Description' />}
+              >
                 <InlineEditableText
                   value={task.description || ''}
                   onValueChange={async newDescription => {
@@ -139,7 +141,7 @@ export default async function TaskDetailPage({
                   multiline={true}
                   emptyStateText='Click to add description'
                 />
-              </div>
+              </PageSection>
             </div>
           </div>
 

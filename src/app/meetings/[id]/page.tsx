@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { SectionHeader } from '@/components/ui/section-header'
+import { PageSection } from '@/components/ui/page-section'
 import { notFound } from 'next/navigation'
 import { MeetingDetailBreadcrumbClient } from '@/components/meetings/meeting-detail-breadcrumb-client'
 import { MeetingInstanceList } from '@/components/meetings/meeting-instance-list'
@@ -140,29 +141,31 @@ export default async function MeetingDetailPage({
             <div className='space-y-6'>
               {/* Description */}
               {meeting.description && (
-                <div className='page-section'>
-                  <SectionHeader icon={FileText} title='Description' />
+                <PageSection
+                  header={<SectionHeader icon={FileText} title='Description' />}
+                >
                   <ReadonlyNotesField
                     content={meeting.description}
                     variant='default'
                     showEmptyState={false}
                   />
-                </div>
+                </PageSection>
               )}
 
               {/* Notes */}
-              <div className='page-section'>
-                <SectionHeader icon={StickyNote} title='Notes' />
+              <PageSection
+                header={<SectionHeader icon={StickyNote} title='Notes' />}
+              >
                 <ReadonlyNotesField
                   content={meeting.notes || ''}
                   variant='default'
                   emptyStateText='No notes for this meeting'
                 />
-              </div>
+              </PageSection>
 
               {/* Meeting Instances - Only show for recurring meetings */}
               {meeting.isRecurring && (
-                <div className='page-section'>
+                <PageSection>
                   <MeetingInstanceList
                     instances={meeting.instances}
                     meetingId={meeting.id}
@@ -172,14 +175,14 @@ export default async function MeetingDetailPage({
                     }))}
                     parentScheduledAt={meeting.scheduledAt}
                   />
-                </div>
+                </PageSection>
               )}
             </div>
           </div>
 
           {/* Right Sidebar - Full width on mobile, fixed width on desktop */}
           <div className='w-full lg:w-80 lg:shrink-0'>
-            <div className='page-section'>
+            <PageSection>
               <SimplePeopleList
                 people={meeting.participants.map(p => ({
                   ...p.person,
@@ -207,8 +210,8 @@ export default async function MeetingDetailPage({
                   {} as Record<string, string>
                 )}
               />
-            </div>
-            <div className='page-section mt-6'>
+            </PageSection>
+            <PageSection className='mt-6'>
               <SimpleLinkList
                 links={entityLinks.map(link => ({
                   id: link.id,
@@ -226,7 +229,7 @@ export default async function MeetingDetailPage({
                 showAddButton={true}
                 emptyStateText='No links added yet.'
               />
-            </div>
+            </PageSection>
           </div>
         </div>
       </div>

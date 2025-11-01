@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { MeetingDataTable } from '@/components/meetings/data-table'
+import { PageSection } from '@/components/ui/page-section'
 import { Button } from '@/components/ui/button'
 import { Plus, Calendar } from 'lucide-react'
 import { HelpIcon } from '@/components/help-icon'
@@ -30,13 +31,13 @@ export function MeetingsPageClient() {
         </div>
       </div>
 
-      <div className='page-section'>
+      <PageSection>
         <MeetingDataTable
           settingsId='meetings-list'
           enablePagination={true}
           limit={20}
         />
-      </div>
+      </PageSection>
     </div>
   )
 }

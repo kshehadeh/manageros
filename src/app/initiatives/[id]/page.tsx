@@ -11,6 +11,7 @@ import { InitiativeMeetings } from '@/components/initiatives/initiative-meetings
 import { InitiativeSidebar } from '@/components/initiatives/initiative-sidebar'
 import { NotesSection } from '@/components/notes/notes-section'
 import { SectionHeader } from '@/components/ui/section-header'
+import { PageSection } from '@/components/ui/page-section'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { Suspense } from 'react'
 import { Loading } from '@/components/ui/loading'
@@ -189,26 +190,27 @@ export default async function InitiativeDetail({
             <div className='space-y-6'>
               {/* Summary Section */}
               {init.summary && (
-                <div className='page-section'>
-                  <SectionHeader icon={FileText} title='Summary' />
+                <PageSection
+                  header={<SectionHeader icon={FileText} title='Summary' />}
+                >
                   <ReadonlyNotesField
                     content={init.summary}
                     variant='default'
                     emptyStateText='No summary provided'
                   />
-                </div>
+                </PageSection>
               )}
 
               <Suspense
                 fallback={
-                  <div className='page-section'>
+                  <PageSection>
                     <div className='flex items-center justify-center py-8'>
                       <Loading size='md' />
                       <span className='ml-2 text-sm text-muted-foreground'>
                         Loading tasks...
                       </span>
                     </div>
-                  </div>
+                  </PageSection>
                 }
               >
                 <InitiativeTasks
@@ -220,14 +222,14 @@ export default async function InitiativeDetail({
 
               <Suspense
                 fallback={
-                  <div className='page-section'>
+                  <PageSection>
                     <div className='flex items-center justify-center py-8'>
                       <Loading size='md' />
                       <span className='ml-2 text-sm text-muted-foreground'>
                         Loading objectives...
                       </span>
                     </div>
-                  </div>
+                  </PageSection>
                 }
               >
                 <InitiativeObjectives
@@ -238,14 +240,14 @@ export default async function InitiativeDetail({
 
               <Suspense
                 fallback={
-                  <div className='page-section'>
+                  <PageSection>
                     <div className='flex items-center justify-center py-8'>
                       <Loading size='md' />
                       <span className='ml-2 text-sm text-muted-foreground'>
                         Loading meetings...
                       </span>
                     </div>
-                  </div>
+                  </PageSection>
                 }
               >
                 <InitiativeMeetings
@@ -257,14 +259,14 @@ export default async function InitiativeDetail({
 
               <Suspense
                 fallback={
-                  <div className='page-section'>
+                  <PageSection>
                     <div className='flex items-center justify-center py-8'>
                       <Loading size='md' />
                       <span className='ml-2 text-sm text-muted-foreground'>
                         Loading notes...
                       </span>
                     </div>
-                  </div>
+                  </PageSection>
                 }
               >
                 <NotesSection
@@ -276,14 +278,14 @@ export default async function InitiativeDetail({
 
               <Suspense
                 fallback={
-                  <div className='page-section'>
+                  <PageSection>
                     <div className='flex items-center justify-center py-8'>
                       <Loading size='md' />
                       <span className='ml-2 text-sm text-muted-foreground'>
                         Loading check-ins...
                       </span>
                     </div>
-                  </div>
+                  </PageSection>
                 }
               >
                 <InitiativeCheckIns

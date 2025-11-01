@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { TaskForm } from '@/components/tasks/task-form'
+import { PageSection } from '@/components/ui/page-section'
 
 export default async function NewTaskPage() {
   const session = await getServerSession(authOptions)
@@ -44,11 +45,11 @@ export default async function NewTaskPage() {
         </div>
       </div>
 
-      <div className='page-section'>
+      <PageSection>
         <div className='card'>
           <TaskForm people={people} objectives={objectives} />
         </div>
-      </div>
+      </PageSection>
     </div>
   )
 }

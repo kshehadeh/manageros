@@ -2,6 +2,7 @@
 
 import { SimpleLinkList } from '@/components/links/link-list'
 import { SectionHeader } from '@/components/ui/section-header'
+import { PageSection } from '@/components/ui/page-section'
 import { InlineEditableDropdown } from '@/components/common/inline-editable-dropdown'
 import { InlineEditableDate } from '@/components/common/inline-editable-date'
 import {
@@ -109,8 +110,7 @@ export function TaskSidebar({
     <div className='w-full lg:w-80 space-y-6'>
       {/* Details Section */}
       {hasDetails && (
-        <div className='page-section'>
-          <SectionHeader icon={Clock} title='Details' />
+        <PageSection header={<SectionHeader icon={Clock} title='Details' />}>
           <div className='text-sm'>
             <table className='w-full'>
               <tbody>
@@ -264,11 +264,11 @@ export function TaskSidebar({
               </tbody>
             </table>
           </div>
-        </div>
+        </PageSection>
       )}
 
       {/* Links Section */}
-      <div className='page-section'>
+      <PageSection>
         <SimpleLinkList
           links={links}
           entityType='Task'
@@ -279,7 +279,7 @@ export function TaskSidebar({
           emptyStateText='No links added yet.'
           onLinksUpdate={() => router.refresh()}
         />
-      </div>
+      </PageSection>
     </div>
   )
 }

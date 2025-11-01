@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import { TaskForm } from '@/components/tasks/task-form'
 import { TaskDetailBreadcrumbClient } from '@/components/tasks/task-detail-breadcrumb-client'
+import { PageSection } from '@/components/ui/page-section'
 import { type TaskStatus } from '@/lib/task-status'
 
 export default async function EditTaskPage({
@@ -72,7 +73,7 @@ export default async function EditTaskPage({
           </div>
         </div>
 
-        <div className='page-section'>
+        <PageSection>
           <TaskForm
             people={people}
             objectives={objectives}
@@ -80,7 +81,7 @@ export default async function EditTaskPage({
             isEditing={true}
             taskId={task.id}
           />
-        </div>
+        </PageSection>
       </div>
     </TaskDetailBreadcrumbClient>
   )

@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { SectionHeader } from '@/components/ui/section-header'
+import { PageSection } from '@/components/ui/page-section'
 import {
   MoreHorizontal,
   Shield,
@@ -167,12 +168,15 @@ export default function OrganizationMembersList({
 
   if (members.length === 0) {
     return (
-      <div className='page-section'>
-        <div className='space-y-4'>
+      <PageSection
+        header={
           <SectionHeader
             icon={Users}
             title={`Organization Members (${members.length})`}
           />
+        }
+      >
+        <div className='space-y-4'>
           <div className='flex flex-col items-center justify-center py-8 text-center'>
             <Users className='h-8 w-8 text-muted-foreground mb-2' />
             <p className='text-muted-foreground text-sm mb-4'>
@@ -180,13 +184,13 @@ export default function OrganizationMembersList({
             </p>
           </div>
         </div>
-      </div>
+      </PageSection>
     )
   }
 
   return (
     <>
-      <div className='page-section'>
+      <PageSection>
         <div className='space-y-4'>
           <Table>
             <TableHeader>
@@ -293,7 +297,7 @@ export default function OrganizationMembersList({
             </TableBody>
           </Table>
         </div>
-      </div>
+      </PageSection>
 
       <AlertDialog
         open={!!userToRemove}

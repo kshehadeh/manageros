@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Handshake } from 'lucide-react'
 import { OneOnOneDataTable } from '@/components/oneonones/data-table'
+import { PageSection } from '@/components/ui/page-section'
 
 export default async function OneOnOnesPage() {
   const session = await getServerSession(authOptions)
@@ -32,14 +33,14 @@ export default async function OneOnOnesPage() {
           </Button>
         </div>
       </div>
-      <div className='page-section'>
+      <PageSection>
         <OneOnOneDataTable
           settingsId='oneonones-list'
           limit={50}
           enablePagination={false}
           hideFilters={false}
         />
-      </div>
+      </PageSection>
     </div>
   )
 }

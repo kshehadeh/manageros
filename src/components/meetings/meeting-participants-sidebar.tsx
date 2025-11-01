@@ -2,6 +2,7 @@
 
 import { Badge } from '@/components/ui/badge'
 import { SectionHeader } from '@/components/ui/section-header'
+import { PageSection } from '@/components/ui/page-section'
 import { PersonAvatar } from '@/components/people/person-avatar'
 import { Users, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
@@ -50,11 +51,14 @@ export function MeetingParticipantsSidebar({
   }
 
   return (
-    <div className='page-section'>
-      <SectionHeader
-        icon={Users}
-        title={`Participants (${participants.length})`}
-      />
+    <PageSection
+      header={
+        <SectionHeader
+          icon={Users}
+          title={`Participants (${participants.length})`}
+        />
+      }
+    >
       <div className='space-y-3'>
         {visibleParticipants.map(participant => (
           <div
@@ -98,6 +102,6 @@ export function MeetingParticipantsSidebar({
           </button>
         )}
       </div>
-    </div>
+    </PageSection>
   )
 }
