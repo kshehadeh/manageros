@@ -8,7 +8,7 @@ import {
   type ReactNode,
   type MouseEvent as ReactMouseEvent,
 } from 'react'
-import { MoreHorizontal } from 'lucide-react'
+import { ChevronDown, Pickaxe } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -91,10 +91,12 @@ export function ActionDropdown({
         <Button
           variant='ghost'
           size={size}
-          className={cn('h-8 w-8 p-0', triggerClassName)}
+          className={cn('flex items-center gap-2', triggerClassName)}
           onClick={toggle}
         >
-          <MoreHorizontal className='h-4 w-4' />
+          <Pickaxe className='h-4 w-4' />
+          <span className='hidden md:block'>Actions</span>
+          <ChevronDown className='h-4 w-4' />
         </Button>
       )}
 
