@@ -1,5 +1,6 @@
 import { JiraAccountLinker } from '@/components/jira-account-linker'
 import { SectionHeader } from '@/components/ui/section-header'
+import { PageSection } from '@/components/ui/page-section'
 import { FaJira } from 'react-icons/fa'
 
 interface JiraLinkingSectionProps {
@@ -24,14 +25,13 @@ export function JiraLinkingSection({
   jiraAccount,
 }: JiraLinkingSectionProps) {
   return (
-    <section>
-      <SectionHeader icon={FaJira} title='Jira Linking' />
+    <PageSection header={<SectionHeader icon={FaJira} title='Jira Linking' />}>
       <JiraAccountLinker
         personId={personId}
         personName={personName}
         personEmail={personEmail}
         jiraAccount={jiraAccount}
       />
-    </section>
+    </PageSection>
   )
 }

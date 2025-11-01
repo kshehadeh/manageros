@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { SynopsisSectionClient } from './synopsis-section-client'
 import { canAccessSynopsesForPerson } from '@/lib/auth-utils'
+import { PageSection } from '@/components/ui/page-section'
 import { Button } from '@/components/ui/button'
 import { Eye } from 'lucide-react'
 import Link from 'next/link'
@@ -18,7 +19,10 @@ export async function SynopsisSection({
 }: SynopsisSectionProps) {
   const session = await getServerSession(authOptions)
 
-  if (!session?.user?.organizationId || session.user.organizationId !== organizationId) {
+  if (
+    !session?.user?.organizationId ||
+    session.user.organizationId !== organizationId
+  ) {
     return null
   }
 
@@ -47,7 +51,7 @@ export async function SynopsisSection({
   })
 
   return (
-    <section>
+    <PageSection>
       <SynopsisSectionClient
         personId={personId}
         personName={person.name}
@@ -86,6 +90,6 @@ export async function SynopsisSection({
           </div>
         )}
       </SynopsisSectionClient>
-    </section>
+    </PageSection>
   )
 }

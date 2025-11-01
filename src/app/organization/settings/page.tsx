@@ -9,7 +9,18 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
-import { Building, Shield, Bell, Briefcase, Calendar } from 'lucide-react'
+import {
+  Building,
+  Shield,
+  Bell,
+  Briefcase,
+  Calendar,
+  UserCheck,
+  User,
+  Users2,
+  ListTodo,
+  Rocket,
+} from 'lucide-react'
 import { CreateNotificationModal } from '@/components/notifications/create-notification-modal'
 import { OrganizationSettingsBreadcrumbClient } from '@/components/organization/organization-settings-breadcrumb-client'
 
@@ -50,11 +61,14 @@ export default async function OrganizationSettingsPage() {
         <div className='grid gap-6 md:grid-cols-2'>
           {/* Organization Info */}
           <PageSection
-            header={<SectionHeader icon={Building} title='Organization Info' />}
+            header={
+              <SectionHeader
+                icon={Building}
+                title='Organization Info'
+                description='Basic information about your organization'
+              />
+            }
           >
-            <p className='text-sm text-muted-foreground mb-4'>
-              Basic information about your organization
-            </p>
             <div className='space-y-2'>
               <div>
                 <p className='text-sm font-medium'>Name</p>
@@ -73,94 +87,118 @@ export default async function OrganizationSettingsPage() {
 
           {/* User Management */}
           <PageSection
-            header={<SectionHeader icon={Shield} title='User Management' />}
+            header={
+              <SectionHeader
+                icon={Shield}
+                title='User Management'
+                description='Change user roles and remove users from your organization'
+              />
+            }
           >
-            <p className='text-sm text-muted-foreground mb-4'>
-              Manage user roles and permissions
-            </p>
-            <div className='space-y-3'>
-              <Button asChild variant='outline' className='w-full'>
-                <Link href='/organization/members'>Manage Users</Link>
+            <div className='flex flex-wrap gap-3'>
+              <Button asChild variant='outline'>
+                <Link
+                  href='/organization/members'
+                  className='flex items-center gap-2'
+                >
+                  <UserCheck className='w-4 h-4' />
+                  Manage Users
+                </Link>
               </Button>
-              <Button asChild variant='outline' className='w-full'>
-                <Link href='/people'>People</Link>
+              <Button asChild variant='outline'>
+                <Link href='/people' className='flex items-center gap-2'>
+                  <User className='w-4 h-4' />
+                  People
+                </Link>
               </Button>
-              <Button asChild variant='outline' className='w-full'>
-                <Link href='/teams'>Teams</Link>
+              <Button asChild variant='outline'>
+                <Link href='/teams' className='flex items-center gap-2'>
+                  <Users2 className='w-4 h-4' />
+                  Teams
+                </Link>
               </Button>
-              <p className='text-sm text-muted-foreground'>
-                Change user roles and remove users from your organization
-              </p>
             </div>
           </PageSection>
 
           {/* Job Role Management */}
           <PageSection
             header={
-              <SectionHeader icon={Briefcase} title='Job Role Management' />
+              <SectionHeader
+                icon={Briefcase}
+                title='Job Role Management'
+                description='Set up job levels, domains, and roles to organize your team structure'
+              />
             }
           >
-            <p className='text-sm text-muted-foreground mb-4'>
-              Configure job levels, domains, and roles for your organization
-            </p>
-            <div className='space-y-3'>
-              <Button asChild variant='outline' className='w-full'>
-                <Link href='/organization/job-roles'>Manage Job Roles</Link>
+            <div className='flex flex-wrap gap-3'>
+              <Button asChild variant='outline'>
+                <Link
+                  href='/organization/job-roles'
+                  className='flex items-center gap-2'
+                >
+                  <Briefcase className='w-4 h-4' />
+                  Manage Job Roles
+                </Link>
               </Button>
-              <p className='text-sm text-muted-foreground'>
-                Set up job levels, domains, and roles to organize your team
-                structure
-              </p>
             </div>
           </PageSection>
 
           {/* Planning */}
           <PageSection
-            header={<SectionHeader icon={Calendar} title='Planning' />}
+            header={
+              <SectionHeader
+                icon={Calendar}
+                title='Planning'
+                description='Organize and track work across your organization'
+              />
+            }
           >
-            <p className='text-sm text-muted-foreground mb-4'>
-              Manage tasks, meetings, and initiatives for your organization
-            </p>
-            <div className='space-y-3'>
-              <Button asChild variant='outline' className='w-full'>
-                <Link href='/tasks'>Tasks</Link>
+            <div className='flex flex-wrap gap-3'>
+              <Button asChild variant='outline'>
+                <Link href='/tasks' className='flex items-center gap-2'>
+                  <ListTodo className='w-4 h-4' />
+                  Tasks
+                </Link>
               </Button>
-              <Button asChild variant='outline' className='w-full'>
-                <Link href='/meetings'>Meetings</Link>
+              <Button asChild variant='outline'>
+                <Link href='/meetings' className='flex items-center gap-2'>
+                  <Calendar className='w-4 h-4' />
+                  Meetings
+                </Link>
               </Button>
-              <Button asChild variant='outline' className='w-full'>
-                <Link href='/initiatives'>Initiatives</Link>
+              <Button asChild variant='outline'>
+                <Link href='/initiatives' className='flex items-center gap-2'>
+                  <Rocket className='w-4 h-4' />
+                  Initiatives
+                </Link>
               </Button>
-              <p className='text-sm text-muted-foreground'>
-                Organize and track work across your organization
-              </p>
             </div>
           </PageSection>
 
           {/* Notifications */}
           <PageSection
-            header={<SectionHeader icon={Bell} title='Notifications' />}
+            header={
+              <SectionHeader
+                icon={Bell}
+                title='Notifications'
+                description='Send notifications to specific users or broadcast to all organization members'
+              />
+            }
           >
-            <p className='text-sm text-muted-foreground mb-4'>
-              Create and manage organization notifications
-            </p>
-            <div className='space-y-3'>
-              <div className='flex gap-2'>
-                <CreateNotificationModal
-                  organizationMembers={members.map(member => ({
-                    id: member.id,
-                    name: member.name,
-                    email: member.email,
-                  }))}
-                />
-                <Button asChild variant='outline' className='flex-1'>
-                  <Link href='/notifications'>View Notifications</Link>
-                </Button>
-              </div>
-              <p className='text-sm text-muted-foreground'>
-                Send notifications to specific users or broadcast to all
-                organization members
-              </p>
+            <div className='flex flex-wrap gap-3'>
+              <CreateNotificationModal
+                organizationMembers={members.map(member => ({
+                  id: member.id,
+                  name: member.name,
+                  email: member.email,
+                }))}
+              />
+              <Button asChild variant='outline'>
+                <Link href='/notifications' className='flex items-center gap-2'>
+                  <Bell className='w-4 h-4' />
+                  View Notifications
+                </Link>
+              </Button>
             </div>
           </PageSection>
         </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { GithubPrsActivityTable } from './github-prs-activity-table'
 import { fetchGithubPullRequests } from '@/lib/actions/github'
 import { SectionHeader } from '@/components/ui/section-header'
+import { PageSection } from '@/components/ui/page-section'
 import { Button } from '@/components/ui/button'
 import { FaGithub } from 'react-icons/fa'
 
@@ -88,12 +89,15 @@ export function GithubPrsActivitySection({
   ]
 
   return (
-    <section>
-      <SectionHeader
-        icon={FaGithub}
-        title='GitHub Activity'
-        action={headerActions}
-      />
+    <PageSection
+      header={
+        <SectionHeader
+          icon={FaGithub}
+          title='GitHub Activity'
+          action={headerActions}
+        />
+      }
+    >
       <GithubPrsActivityTable
         personId={personId}
         personName={personName}
@@ -101,6 +105,6 @@ export function GithubPrsActivitySection({
         daysBack={daysBack}
         refreshTrigger={refreshTrigger}
       />
-    </section>
+    </PageSection>
   )
 }

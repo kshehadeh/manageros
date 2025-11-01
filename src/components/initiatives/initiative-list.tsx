@@ -3,8 +3,7 @@
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { SectionHeader } from '@/components/ui/section-header'
-import { Eye, MoreHorizontal, Plus, Rocket } from 'lucide-react'
+import { MoreHorizontal } from 'lucide-react'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { initiativeStatusUtils } from '@/lib/initiative-status'
@@ -17,6 +16,9 @@ import {
 } from '@/components/common/context-menu-items'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { RagCircle } from '@/components/rag'
+import { SimpleListContainer } from '@/components/common/simple-list-container'
+import { SimpleListItem } from '@/components/common/simple-list-item'
+import { SimpleListItemsContainer } from '@/components/common/simple-list-items-container'
 
 export interface Initiative {
   id: string
@@ -39,13 +41,7 @@ export interface Initiative {
 
 export interface InitiativeListProps {
   initiatives: Initiative[]
-  title?: string
   variant?: 'compact' | 'full'
-  showAddButton?: boolean
-  addButtonHref?: string
-  addButtonLabel?: string
-  viewAllHref?: string
-  viewAllLabel?: string
   emptyStateText?: string
   onInitiativeUpdate?: () => void
   className?: string
@@ -54,13 +50,7 @@ export interface InitiativeListProps {
 
 export function SimpleInitiativeList({
   initiatives,
-  title = 'Initiatives',
   variant = 'compact',
-  showAddButton = false,
-  addButtonHref,
-  addButtonLabel = 'Add Initiative',
-  viewAllHref,
-  viewAllLabel = 'View All',
   emptyStateText = 'No initiatives found.',
   onInitiativeUpdate,
   className = '',
@@ -121,10 +111,7 @@ export function SimpleInitiativeList({
     )
 
     return (
-      <div
-        key={initiative.id}
-        className='flex items-center justify-between px-3 py-3 hover:bg-muted/50 transition-colors'
-      >
+      <SimpleListItem key={initiative.id}>
         <Link
           href={`/initiatives/${initiative.id}`}
           className='flex items-start gap-3 flex-1 min-w-0'
@@ -175,59 +162,20 @@ export function SimpleInitiativeList({
         >
           <MoreHorizontal className='h-4 w-4' />
         </Button>
-      </div>
-    )
-  }
-
-  const renderSectionHeader = () => {
-    const actions = []
-
-    if (viewAllHref) {
-      actions.push(
-        <Button asChild variant='outline' size='sm' key='view-all'>
-          <Link href={viewAllHref} className='flex items-center gap-2'>
-            <Eye className='w-4 h-4' />
-            {viewAllLabel}
-          </Link>
-        </Button>
-      )
-    }
-
-    if (showAddButton && addButtonHref) {
-      actions.push(
-        <Button asChild variant='outline' size='sm' key='add-initiative'>
-          <Link href={addButtonHref} className='flex items-center gap-2'>
-            <Plus className='w-4 h-4' />
-            {addButtonLabel}
-          </Link>
-        </Button>
-      )
-    }
-
-    return (
-      <SectionHeader
-        icon={Rocket}
-        title={title}
-        action={actions.length > 0 ? actions : undefined}
-      />
+      </SimpleListItem>
     )
   }
 
   return (
     <>
-      <section className={`rounded-xl py-4 -mx-3 px-3 space-y-4 ${className}`}>
-        {renderSectionHeader()}
-
-        <div className='space-y-0 divide-y'>
-          {visibleInitiatives.length === 0 ? (
-            <div className='text-neutral-400 text-sm px-3 py-3'>
-              {emptyStateText}
-            </div>
-          ) : (
-            visibleInitiatives.map(renderInitiativeItem)
-          )}
-        </div>
-      </section>
+      <SimpleListContainer withSection={false} className={className}>
+        <SimpleListItemsContainer
+          isEmpty={visibleInitiatives.length === 0}
+          emptyStateText={emptyStateText}
+        >
+          {visibleInitiatives.map(renderInitiativeItem)}
+        </SimpleListItemsContainer>
+      </SimpleListContainer>
 
       {/* Context Menu */}
       <ContextMenuComponent>

@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { SectionHeader } from '@/components/ui/section-header'
-import { Eye, MoreHorizontal, Plus, User } from 'lucide-react'
+import { MoreHorizontal } from 'lucide-react'
 import Link from 'next/link'
 import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
 import {
@@ -16,16 +15,13 @@ import { PersonAvatar } from './person-avatar'
 import type { Person } from '@/types/person'
 import { deletePerson } from '@/lib/actions/person'
 import { toast } from 'sonner'
+import { SimpleListContainer } from '@/components/common/simple-list-container'
+import { SimpleListItem } from '@/components/common/simple-list-item'
+import { SimpleListItemsContainer } from '@/components/common/simple-list-items-container'
 
 export interface PersonListProps {
   people: Person[]
-  title?: string
   variant?: 'compact' | 'full'
-  showAddButton?: boolean
-  addButtonHref?: string
-  addButtonLabel?: string
-  viewAllHref?: string
-  viewAllLabel?: string
   emptyStateText?: string
   onPersonUpdate?: () => void
   className?: string
@@ -41,13 +37,7 @@ export interface PersonListProps {
 
 export function SimplePeopleList({
   people,
-  title = 'People',
   variant = 'compact',
-  showAddButton = false,
-  addButtonHref,
-  addButtonLabel = 'Add Member',
-  viewAllHref,
-  viewAllLabel = 'View All',
   emptyStateText = 'No people found.',
   onPersonUpdate,
   className = '',
@@ -164,10 +154,7 @@ export function SimplePeopleList({
     }
 
     return (
-      <div
-        key={person.id}
-        className='flex items-center justify-between px-3 py-3 hover:bg-muted/50 transition-colors'
-      >
+      <SimpleListItem key={person.id}>
         <Link
           href={`/people/${person.id}`}
           className='flex items-start gap-3 flex-1 min-w-0'
@@ -202,59 +189,20 @@ export function SimplePeopleList({
         >
           <MoreHorizontal className='h-4 w-4' />
         </Button>
-      </div>
-    )
-  }
-
-  const renderSectionHeader = () => {
-    const actions = []
-
-    if (viewAllHref) {
-      actions.push(
-        <Button asChild variant='outline' size='sm' key='view-all'>
-          <Link href={viewAllHref} className='flex items-center gap-2'>
-            <Eye className='w-4 h-4' />
-            {viewAllLabel}
-          </Link>
-        </Button>
-      )
-    }
-
-    if (showAddButton && addButtonHref) {
-      actions.push(
-        <Button asChild variant='outline' size='sm' key='add-person'>
-          <Link href={addButtonHref} className='flex items-center gap-2'>
-            <Plus className='w-4 h-4' />
-            {addButtonLabel}
-          </Link>
-        </Button>
-      )
-    }
-
-    return (
-      <SectionHeader
-        icon={User}
-        title={title}
-        action={actions.length > 0 ? actions : undefined}
-      />
+      </SimpleListItem>
     )
   }
 
   return (
     <>
-      <section className={`space-y-4 ${className}`}>
-        {title && renderSectionHeader()}
-
-        <div className='space-y-0 divide-y'>
-          {visiblePeople.length === 0 ? (
-            <div className='text-neutral-400 text-sm px-3 py-3'>
-              {emptyStateText}
-            </div>
-          ) : (
-            visiblePeople.map(renderPersonItem)
-          )}
-        </div>
-      </section>
+      <SimpleListContainer withSection={false} className={className}>
+        <SimpleListItemsContainer
+          isEmpty={visiblePeople.length === 0}
+          emptyStateText={emptyStateText}
+        >
+          {visiblePeople.map(renderPersonItem)}
+        </SimpleListItemsContainer>
+      </SimpleListContainer>
 
       {/* Context Menu */}
       <ContextMenuComponent>

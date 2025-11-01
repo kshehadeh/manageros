@@ -4,6 +4,7 @@ import { LucideIcon } from 'lucide-react'
 interface SectionHeaderProps {
   icon: LucideIcon | React.ElementType
   title: string
+  description?: string
   action?: ReactNode | ReactNode[]
   className?: string
 }
@@ -11,6 +12,7 @@ interface SectionHeaderProps {
 export function SectionHeader({
   icon: Icon,
   title,
+  description,
   action,
   className = '',
 }: SectionHeaderProps) {
@@ -32,12 +34,17 @@ export function SectionHeader({
 
   return (
     <div
-      className={`flex items-center justify-between border-b border-muted pb-3 mb-3 -mx-3 px-3 md:mx-0 md:px-0 ${className}`}
+      className={`flex items-start justify-between md:mx-0 md:px-0 ${className}`}
     >
-      <h3 className='font-bold flex items-center gap-2'>
-        <Icon className='w-4 h-4' />
-        {title}
-      </h3>
+      <div className='flex-1'>
+        <h3 className='text-2xl font-bold flex items-center gap-2'>
+          <Icon className='w-6 h-6' />
+          {title}
+        </h3>
+        {description && (
+          <p className='text-sm text-muted-foreground mt-1'>{description}</p>
+        )}
+      </div>
       {renderActions()}
     </div>
   )

@@ -1,10 +1,15 @@
 'use client'
 
 import { useMemo } from 'react'
+import Link from 'next/link'
 import { SimplePeopleList } from '@/components/people/person-list'
 import { SimpleTaskListSkeleton } from '@/components/common/simple-task-list-skeleton'
+import { SectionHeader } from '@/components/ui/section-header'
+import { PageSection } from '@/components/ui/page-section'
+import { Button } from '@/components/ui/button'
 import { usePeople } from '@/hooks/use-people'
 import { useSession } from 'next-auth/react'
+import { Users, Eye } from 'lucide-react'
 import type { Person } from '@/types/person'
 
 export function DashboardDirectReportsSection() {
@@ -70,18 +75,33 @@ export function DashboardDirectReportsSection() {
   }))
 
   return (
-    <SimplePeopleList
-      people={formattedReports}
-      title='Direct Reports'
-      variant='compact'
-      viewAllHref='/direct-reports'
-      emptyStateText='No direct reports.'
-      showEmail={true}
-      showRole={false}
-      showTeam={false}
-      showJobRole={false}
-      showManager={false}
-      showReportsCount={false}
-    />
+    <PageSection
+      header={
+        <SectionHeader
+          icon={Users}
+          title='Direct Reports'
+          action={
+            <Button asChild variant='outline' size='sm'>
+              <Link href='/direct-reports' className='flex items-center gap-2'>
+                <Eye className='w-4 h-4' />
+                View All
+              </Link>
+            </Button>
+          }
+        />
+      }
+    >
+      <SimplePeopleList
+        people={formattedReports}
+        variant='compact'
+        emptyStateText='No direct reports.'
+        showEmail={true}
+        showRole={false}
+        showTeam={false}
+        showJobRole={false}
+        showManager={false}
+        showReportsCount={false}
+      />
+    </PageSection>
   )
 }

@@ -116,7 +116,6 @@ export function InitiativeSidebar({
             ...owner.person,
             level: 0, // Default level since it's not in the query
           }))}
-          title=''
           variant='compact'
           emptyStateText='No people associated with this initiative yet.'
           showEmail={false}

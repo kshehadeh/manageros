@@ -9,6 +9,10 @@ import { SimplePeopleList } from '@/components/people/person-list'
 import { SimpleInitiativeList } from '@/components/initiatives/initiative-list'
 import { SimpleTeamList } from './team-list'
 import { Person as PersonWithRelations } from '@/types/person'
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
+import { Rocket, Plus, Eye, Users } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 interface TeamDetailContentProps {
   team: {
@@ -113,36 +117,81 @@ export function TeamDetailContent({ team, isAdmin }: TeamDetailContentProps) {
 
         <div className='space-y-6'>
           {/* Team Members */}
-          <SimplePeopleList
-            people={team.people}
-            title={`Team Members (${team.people.length})`}
-            variant='compact'
-            showAddButton={true}
-            addButtonHref={`/people/new?teamId=${team.id}`}
-            immutableFilters={{
-              teamId: team.id,
-            }}
-            emptyStateText='No team members yet.'
-            onPersonUpdate={() => {
-              window.location.reload()
-            }}
-          />
+          <PageSection
+            header={
+              <SectionHeader
+                icon={Users}
+                title={`Team Members (${team.people.length})`}
+                action={
+                  <Button asChild variant='outline' size='sm'>
+                    <Link
+                      href={`/people/new?teamId=${team.id}`}
+                      className='flex items-center gap-2'
+                    >
+                      <Plus className='w-4 h-4' />
+                      Add Member
+                    </Link>
+                  </Button>
+                }
+              />
+            }
+          >
+            <SimplePeopleList
+              people={team.people}
+              variant='compact'
+              immutableFilters={{
+                teamId: team.id,
+              }}
+              emptyStateText='No team members yet.'
+              onPersonUpdate={() => {
+                window.location.reload()
+              }}
+            />
+          </PageSection>
 
           {/* Team Initiatives */}
-          <SimpleInitiativeList
-            initiatives={team.initiatives}
-            title={`Team Initiatives (${team.initiatives.length})`}
-            variant='compact'
-            showAddButton={true}
-            addButtonHref={`/initiatives/new?teamId=${team.id}`}
-            immutableFilters={{
-              teamId: team.id,
-            }}
-            emptyStateText='No initiatives found.'
-            onInitiativeUpdate={() => {
-              window.location.reload()
-            }}
-          />
+          <PageSection
+            header={
+              <SectionHeader
+                icon={Rocket}
+                title={`Team Initiatives (${team.initiatives.length})`}
+                action={
+                  <div className='flex items-center gap-2'>
+                    <Button asChild variant='outline' size='sm'>
+                      <Link
+                        href={`/initiatives/new?teamId=${team.id}`}
+                        className='flex items-center gap-2'
+                      >
+                        <Plus className='w-4 h-4' />
+                        Add Initiative
+                      </Link>
+                    </Button>
+                    <Button asChild variant='outline' size='sm'>
+                      <Link
+                        href='/initiatives'
+                        className='flex items-center gap-2'
+                      >
+                        <Eye className='w-4 h-4' />
+                        View All
+                      </Link>
+                    </Button>
+                  </div>
+                }
+              />
+            }
+          >
+            <SimpleInitiativeList
+              initiatives={team.initiatives}
+              variant='compact'
+              immutableFilters={{
+                teamId: team.id,
+              }}
+              emptyStateText='No initiatives found.'
+              onInitiativeUpdate={() => {
+                window.location.reload()
+              }}
+            />
+          </PageSection>
 
           {/* Child Teams */}
           <SimpleTeamList

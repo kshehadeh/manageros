@@ -16,6 +16,9 @@ import {
 import { DeleteModal } from '@/components/common/delete-modal'
 import { deleteOneOnOne } from '@/lib/actions/oneonone'
 import { toast } from 'sonner'
+import { SimpleListContainer } from '@/components/common/simple-list-container'
+import { SimpleListItem } from '@/components/common/simple-list-item'
+import { SimpleListItemsContainer } from '@/components/common/simple-list-items-container'
 
 export interface OneOnOne {
   id: string
@@ -116,9 +119,8 @@ export function SimpleOneOnOneList({
     }
 
     return (
-      <div
+      <SimpleListItem
         key={oneOnOne.id}
-        className='flex items-center justify-between px-3 py-3 hover:bg-muted/50 transition-colors cursor-pointer group'
         onClick={() => {
           router.push(`/oneonones/${oneOnOne.id}`)
         }}
@@ -175,7 +177,7 @@ export function SimpleOneOnOneList({
         >
           <MoreHorizontal className='h-4 w-4' />
         </Button>
-      </div>
+      </SimpleListItem>
     )
   }
 
@@ -221,19 +223,16 @@ export function SimpleOneOnOneList({
 
   return (
     <>
-      <section className={`rounded-xl py-4 -mx-3 px-3 space-y-4 ${className}`}>
+      <SimpleListContainer className={className}>
         {renderSectionHeader()}
 
-        <div className='space-y-0 divide-y'>
-          {visibleOneOnOnes.length === 0 ? (
-            <div className='text-neutral-400 text-sm px-3 py-3'>
-              {emptyStateText}
-            </div>
-          ) : (
-            visibleOneOnOnes.map(renderOneOnOneItem)
-          )}
-        </div>
-      </section>
+        <SimpleListItemsContainer
+          isEmpty={visibleOneOnOnes.length === 0}
+          emptyStateText={emptyStateText}
+        >
+          {visibleOneOnOnes.map(renderOneOnOneItem)}
+        </SimpleListItemsContainer>
+      </SimpleListContainer>
 
       {/* Context Menu */}
       <ContextMenuComponent>

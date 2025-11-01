@@ -8,6 +8,9 @@ import Link from 'next/link'
 import { MessageSquare, Eye, MoreHorizontal, Calendar } from 'lucide-react'
 import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
 import { ContextMenuItem } from '@/components/common/context-menu-items'
+import { SimpleListContainer } from '@/components/common/simple-list-container'
+import { SimpleListItem } from '@/components/common/simple-list-item'
+import { SimpleListItemsContainer } from '@/components/common/simple-list-items-container'
 
 export interface FeedbackCampaign {
   id: string
@@ -69,9 +72,9 @@ export function SimpleFeedbackCampaignList({
   }
 
   const renderCampaignItem = (campaign: FeedbackCampaign) => (
-    <div
+    <SimpleListItem
       key={campaign.id}
-      className='flex items-start justify-between py-3 hover:bg-muted/50 transition-colors px-3 rounded cursor-pointer'
+      className='py-3'
       onClick={() => {
         router.push(
           `/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`
@@ -123,7 +126,7 @@ export function SimpleFeedbackCampaignList({
           <MoreHorizontal className='h-4 w-4 text-muted-foreground' />
         </button>
       </div>
-    </div>
+    </SimpleListItem>
   )
 
   // Build actions for the section header
@@ -142,23 +145,20 @@ export function SimpleFeedbackCampaignList({
 
   return (
     <>
-      <section className={`rounded-xl py-4 -mx-3 px-3 space-y-4 ${className}`}>
+      <SimpleListContainer className={className}>
         <SectionHeader
           icon={MessageSquare}
           title={title}
           action={actions.length > 0 ? actions : undefined}
         />
 
-        <div className='space-y-0 divide-y'>
-          {campaigns.length === 0 ? (
-            <div className='text-neutral-400 text-sm px-3 py-3'>
-              {emptyStateText}
-            </div>
-          ) : (
-            campaigns.map(renderCampaignItem)
-          )}
-        </div>
-      </section>
+        <SimpleListItemsContainer
+          isEmpty={campaigns.length === 0}
+          emptyStateText={emptyStateText}
+        >
+          {campaigns.map(renderCampaignItem)}
+        </SimpleListItemsContainer>
+      </SimpleListContainer>
 
       {/* Context Menu */}
       <ContextMenuComponent>

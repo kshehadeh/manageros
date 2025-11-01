@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/db'
 import { PersonFeedbackCampaigns } from '@/components/people/person-feedback-campaigns'
 import { SectionHeader } from '@/components/ui/section-header'
+import { PageSection } from '@/components/ui/page-section'
 import { Button } from '@/components/ui/button'
 import { MessageCircle, Eye, Plus } from 'lucide-react'
 import Link from 'next/link'
@@ -64,37 +65,40 @@ export async function FeedbackCampaignsSection({
 
   return (
     <div className='flex-1 min-w-[300px] max-w-[500px]'>
-      <section>
-        <SectionHeader
-          icon={MessageCircle}
-          title={`Feedback Campaigns (${feedbackCampaigns.length})`}
-          action={
-            <div className='flex items-center gap-2'>
-              <Button
-                asChild
-                variant='outline'
-                size='sm'
-                title='View All Feedback Campaigns'
-              >
-                <Link href={`/people/${personId}/feedback-campaigns`}>
-                  <Eye className='w-4 h-4' />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant='outline'
-                size='sm'
-                title='Create New Feedback Campaign'
-              >
-                <Link href={`/people/${personId}/feedback-campaigns/new`}>
-                  <Plus className='w-4 h-4' />
-                </Link>
-              </Button>
-            </div>
-          }
-        />
+      <PageSection
+        header={
+          <SectionHeader
+            icon={MessageCircle}
+            title={`Feedback Campaigns (${feedbackCampaigns.length})`}
+            action={
+              <div className='flex items-center gap-2'>
+                <Button
+                  asChild
+                  variant='outline'
+                  size='sm'
+                  title='View All Feedback Campaigns'
+                >
+                  <Link href={`/people/${personId}/feedback-campaigns`}>
+                    <Eye className='w-4 h-4' />
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant='outline'
+                  size='sm'
+                  title='Create New Feedback Campaign'
+                >
+                  <Link href={`/people/${personId}/feedback-campaigns/new`}>
+                    <Plus className='w-4 h-4' />
+                  </Link>
+                </Button>
+              </div>
+            }
+          />
+        }
+      >
         <PersonFeedbackCampaigns campaigns={feedbackCampaigns} />
-      </section>
+      </PageSection>
     </div>
   )
 }

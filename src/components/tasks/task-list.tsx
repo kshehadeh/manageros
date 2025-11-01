@@ -25,6 +25,9 @@ import {
   SetDueDateMenuItem,
 } from '@/components/common/context-menu-items'
 import { DeleteModal } from '@/components/common/delete-modal'
+import { SimpleListContainer } from '@/components/common/simple-list-container'
+import { SimpleListItem } from '@/components/common/simple-list-item'
+import { SimpleListItemsContainer } from '@/components/common/simple-list-items-container'
 
 export interface Task {
   id: string
@@ -256,11 +259,9 @@ export function SimpleTaskList({
     }
 
     return (
-      <div
+      <SimpleListItem
         key={task.id}
-        className={`flex items-center justify-between px-3 py-3 hover:bg-muted/50 transition-colors ${
-          isProcessing ? 'opacity-75' : ''
-        }`}
+        className={isProcessing ? 'opacity-75' : ''}
       >
         <div
           onClick={() => handleTaskClick(task)}
@@ -302,7 +303,7 @@ export function SimpleTaskList({
         >
           <MoreHorizontal className='h-4 w-4' />
         </Button>
-      </div>
+      </SimpleListItem>
     )
   }
 
@@ -345,19 +346,16 @@ export function SimpleTaskList({
 
   return (
     <>
-      <section className={`rounded-xl py-4 -mx-3 px-3 space-y-4 ${className}`}>
+      <SimpleListContainer className={className}>
         {renderSectionHeader()}
 
-        <div className='space-y-0 divide-y'>
-          {visibleTasks.length === 0 ? (
-            <div className='text-neutral-400 text-sm px-3 py-3'>
-              {emptyStateText}
-            </div>
-          ) : (
-            visibleTasks.map(renderTaskItem)
-          )}
-        </div>
-      </section>
+        <SimpleListItemsContainer
+          isEmpty={visibleTasks.length === 0}
+          emptyStateText={emptyStateText}
+        >
+          {visibleTasks.map(renderTaskItem)}
+        </SimpleListItemsContainer>
+      </SimpleListContainer>
 
       {/* Task Quick Edit Dialog */}
       {selectedTask && (

@@ -29,6 +29,9 @@ import {
   DeleteMenuItem,
   ContextMenuItem,
 } from '@/components/common/context-menu-items'
+import { SimpleListContainer } from '@/components/common/simple-list-container'
+import { SimpleListItem } from '@/components/common/simple-list-item'
+import { SimpleListItemsContainer } from '@/components/common/simple-list-items-container'
 
 export interface EntityLink {
   id: string
@@ -146,10 +149,7 @@ export function SimpleLinkList({
     const urlTitle = link.title || getUrlTitle(link.url)
 
     return (
-      <div
-        key={link.id}
-        className='flex items-center justify-between px-3 py-3 hover:bg-muted/50 transition-colors'
-      >
+      <SimpleListItem key={link.id}>
         <a
           href={link.url}
           target='_blank'
@@ -193,7 +193,7 @@ export function SimpleLinkList({
         >
           <MoreHorizontal className='h-4 w-4' />
         </Button>
-      </div>
+      </SimpleListItem>
     )
   }
 
@@ -236,19 +236,19 @@ export function SimpleLinkList({
 
   return (
     <>
-      <section className={`space-y-4 ${className}`}>
+      <SimpleListContainer
+        withSection={!!title}
+        className={!title ? className : ''}
+      >
         {title && renderSectionHeader()}
 
-        <div className='space-y-0 divide-y'>
-          {visibleLinks.length === 0 ? (
-            <div className='text-neutral-400 text-sm px-3 py-3'>
-              {emptyStateText}
-            </div>
-          ) : (
-            visibleLinks.map(renderLinkItem)
-          )}
-        </div>
-      </section>
+        <SimpleListItemsContainer
+          isEmpty={visibleLinks.length === 0}
+          emptyStateText={emptyStateText}
+        >
+          {visibleLinks.map(renderLinkItem)}
+        </SimpleListItemsContainer>
+      </SimpleListContainer>
 
       {/* Context Menu */}
       <ContextMenuComponent>

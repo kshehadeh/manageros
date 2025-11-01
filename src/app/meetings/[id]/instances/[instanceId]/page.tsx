@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Calendar, StickyNote, ChevronRight } from 'lucide-react'
+import { Calendar, StickyNote, ChevronRight, Users } from 'lucide-react'
 import { MeetingInstanceDetailBreadcrumbClient } from '@/components/meetings/meeting-instance-detail-breadcrumb-client'
 import { MeetingInstanceActionsDropdown } from '@/components/meetings/meeting-instance-actions-dropdown'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
@@ -121,7 +121,14 @@ export default async function MeetingInstanceDetailPage({
 
           {/* Right Sidebar - Full width on mobile, fixed width on desktop */}
           <div className='w-full lg:w-80 lg:shrink-0'>
-            <PageSection>
+            <PageSection
+              header={
+                <SectionHeader
+                  icon={Users}
+                  title={`Participants (${meetingInstance.participants.length})`}
+                />
+              }
+            >
               <SimplePeopleList
                 people={meetingInstance.participants.map(p => ({
                   ...p.person,
@@ -131,7 +138,6 @@ export default async function MeetingInstanceDetailPage({
                   reports: [],
                   level: 0,
                 }))}
-                title={`Participants (${meetingInstance.participants.length})`}
                 variant='compact'
                 emptyStateText='No participants yet.'
                 showEmail={false}

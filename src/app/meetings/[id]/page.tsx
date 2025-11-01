@@ -182,7 +182,14 @@ export default async function MeetingDetailPage({
 
           {/* Right Sidebar - Full width on mobile, fixed width on desktop */}
           <div className='w-full lg:w-80 lg:shrink-0'>
-            <PageSection>
+            <PageSection
+              header={
+                <SectionHeader
+                  icon={Users}
+                  title={`Participants (${meeting.participants.length})`}
+                />
+              }
+            >
               <SimplePeopleList
                 people={meeting.participants.map(p => ({
                   ...p.person,
@@ -192,7 +199,6 @@ export default async function MeetingDetailPage({
                   reports: [],
                   level: 0,
                 }))}
-                title={`Participants (${meeting.participants.length})`}
                 variant='compact'
                 emptyStateText='No participants yet.'
                 showEmail={false}

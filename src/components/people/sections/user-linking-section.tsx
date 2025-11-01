@@ -1,5 +1,6 @@
 import { UserLinkForm } from '@/components/user-link-form'
 import { SectionHeader } from '@/components/ui/section-header'
+import { PageSection } from '@/components/ui/page-section'
 import { User as UserIcon } from 'lucide-react'
 import type { User } from '@prisma/client'
 
@@ -13,9 +14,10 @@ export function UserLinkingSection({
   linkedUser,
 }: UserLinkingSectionProps) {
   return (
-    <section>
-      <SectionHeader icon={UserIcon} title='User Linking' />
+    <PageSection
+      header={<SectionHeader icon={UserIcon} title='User Linking' />}
+    >
       <UserLinkForm personId={personId} linkedUser={linkedUser} />
-    </section>
+    </PageSection>
   )
 }

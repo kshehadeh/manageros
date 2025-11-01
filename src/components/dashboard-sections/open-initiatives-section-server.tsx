@@ -3,6 +3,11 @@ import {
   SimpleInitiativeList,
   type Initiative,
 } from '@/components/initiatives/initiative-list'
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
+import { Rocket, Eye } from 'lucide-react'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
 interface DashboardOpenInitiativesServerSectionProps {
   organizationId: string
@@ -16,13 +21,28 @@ export async function DashboardOpenInitiativesServerSection({
   // If user doesn't have a linked person record, return empty state
   if (!personId) {
     return (
-      <SimpleInitiativeList
-        initiatives={[]}
-        title='Your Initiatives'
-        variant='compact'
-        viewAllHref='/initiatives'
-        emptyStateText='Please link your account to a person record to see your initiatives.'
-      />
+      <PageSection
+        header={
+          <SectionHeader
+            icon={Rocket}
+            title='Your Initiatives'
+            action={
+              <Button asChild variant='outline' size='sm'>
+                <Link href='/initiatives' className='flex items-center gap-2'>
+                  <Eye className='w-4 h-4' />
+                  View All
+                </Link>
+              </Button>
+            }
+          />
+        }
+      >
+        <SimpleInitiativeList
+          initiatives={[]}
+          variant='compact'
+          emptyStateText='Please link your account to a person record to see your initiatives.'
+        />
+      </PageSection>
     )
   }
 
@@ -65,12 +85,27 @@ export async function DashboardOpenInitiativesServerSection({
   }))
 
   return (
-    <SimpleInitiativeList
-      initiatives={transformedInitiatives}
-      title='Your Initiatives'
-      variant='compact'
-      viewAllHref='/initiatives'
-      emptyStateText='No initiatives assigned to you.'
-    />
+    <PageSection
+      header={
+        <SectionHeader
+          icon={Rocket}
+          title='Your Initiatives'
+          action={
+            <Button asChild variant='outline' size='sm'>
+              <Link href='/initiatives' className='flex items-center gap-2'>
+                <Eye className='w-4 h-4' />
+                View All
+              </Link>
+            </Button>
+          }
+        />
+      }
+    >
+      <SimpleInitiativeList
+        initiatives={transformedInitiatives}
+        variant='compact'
+        emptyStateText='No initiatives assigned to you.'
+      />
+    </PageSection>
   )
 }

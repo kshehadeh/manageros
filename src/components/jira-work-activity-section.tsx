@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { JiraWorkActivityTable } from './jira-work-activity-table'
 import { fetchJiraAssignedTickets } from '@/lib/actions/jira'
 import { SectionHeader } from '@/components/ui/section-header'
+import { PageSection } from '@/components/ui/page-section'
 import { Button } from '@/components/ui/button'
 import { FaJira } from 'react-icons/fa'
 
@@ -88,12 +89,15 @@ export function JiraWorkActivitySection({
   ]
 
   return (
-    <section>
-      <SectionHeader
-        icon={FaJira}
-        title='Jira Activity'
-        action={headerActions}
-      />
+    <PageSection
+      header={
+        <SectionHeader
+          icon={FaJira}
+          title='Jira Activity'
+          action={headerActions}
+        />
+      }
+    >
       <JiraWorkActivityTable
         personId={personId}
         personName={personName}
@@ -101,6 +105,6 @@ export function JiraWorkActivitySection({
         daysBack={daysBack}
         refreshTrigger={refreshTrigger}
       />
-    </section>
+    </PageSection>
   )
 }

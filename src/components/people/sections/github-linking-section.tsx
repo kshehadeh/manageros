@@ -1,5 +1,6 @@
 import { GithubAccountLinker } from '@/components/github-account-linker'
 import { SectionHeader } from '@/components/ui/section-header'
+import { PageSection } from '@/components/ui/page-section'
 import { FaGithub } from 'react-icons/fa'
 
 interface GithubLinkingSectionProps {
@@ -22,13 +23,14 @@ export function GithubLinkingSection({
   githubAccount,
 }: GithubLinkingSectionProps) {
   return (
-    <section>
-      <SectionHeader icon={FaGithub} title='GitHub Linking' />
+    <PageSection
+      header={<SectionHeader icon={FaGithub} title='GitHub Linking' />}
+    >
       <GithubAccountLinker
         personId={personId}
         personName={personName}
         githubAccount={githubAccount}
       />
-    </section>
+    </PageSection>
   )
 }

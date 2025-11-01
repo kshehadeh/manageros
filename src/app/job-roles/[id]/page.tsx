@@ -109,7 +109,6 @@ export default async function JobRoleDetailPage({
                 />
                 <SimplePeopleList
                   people={jobRole.people as Person[]}
-                  title={''}
                   variant='compact'
                   showEmail={true}
                   showRole={true}

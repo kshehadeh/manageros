@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { JobRoleSectionClient } from './job-role-section-client'
+import { PageSection } from '@/components/ui/page-section'
 
 interface JobRoleSectionProps {
   personId: string
@@ -76,13 +77,13 @@ export async function JobRoleSection({
   })
 
   return (
-    <section>
+    <PageSection>
       <JobRoleSectionClient
         personId={personId}
         personName={personNameToUse}
         currentJobRole={personJobRole}
         availableJobRoles={jobRoles}
       />
-    </section>
+    </PageSection>
   )
 }

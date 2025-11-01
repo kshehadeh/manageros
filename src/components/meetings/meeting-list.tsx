@@ -15,6 +15,9 @@ import {
 import { DeleteModal } from '@/components/common/delete-modal'
 import { deleteMeeting } from '@/lib/actions/meeting'
 import { toast } from 'sonner'
+import { SimpleListContainer } from '@/components/common/simple-list-container'
+import { SimpleListItem } from '@/components/common/simple-list-item'
+import { SimpleListItemsContainer } from '@/components/common/simple-list-items-container'
 
 export interface Meeting {
   id: string
@@ -137,10 +140,7 @@ export function MeetingList({
     const isPast = new Date(meeting.scheduledAt) < new Date()
 
     return (
-      <div
-        key={meeting.id}
-        className='flex items-center justify-between px-3 py-3 hover:bg-muted/50 transition-colors'
-      >
+      <SimpleListItem key={meeting.id}>
         <Link
           href={`/meetings/${meeting.id}`}
           className='flex items-start gap-3 flex-1 min-w-0'
@@ -197,21 +197,20 @@ export function MeetingList({
         >
           <MoreHorizontal className='h-4 w-4' />
         </Button>
-      </div>
+      </SimpleListItem>
     )
   }
 
   return (
     <>
-      <section className={`rounded-xl py-4 -mx-3 px-3 space-y-4 ${className}`}>
-        <div className='space-y-3'>
-          {visibleMeetings.length === 0 ? (
-            <div className='text-neutral-400 text-sm'>{emptyStateText}</div>
-          ) : (
-            visibleMeetings.map(renderMeetingItem)
-          )}
-        </div>
-      </section>
+      <SimpleListContainer className={className}>
+        <SimpleListItemsContainer
+          isEmpty={visibleMeetings.length === 0}
+          emptyStateText={emptyStateText}
+        >
+          {visibleMeetings.map(renderMeetingItem)}
+        </SimpleListItemsContainer>
+      </SimpleListContainer>
 
       {/* Context Menu */}
       <ContextMenuComponent>

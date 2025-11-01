@@ -17,6 +17,9 @@ import { Users, Target } from 'lucide-react'
 import { deleteTeam } from '@/lib/actions/team'
 import { toast } from 'sonner'
 import { formatDistanceToNow } from 'date-fns'
+import { SimpleListContainer } from '@/components/common/simple-list-container'
+import { SimpleListItem } from '@/components/common/simple-list-item'
+import { SimpleListItemsContainer } from '@/components/common/simple-list-items-container'
 
 export interface Team {
   id: string
@@ -162,10 +165,7 @@ export function SimpleTeamList({
     }
 
     return (
-      <div
-        key={team.id}
-        className='flex items-center justify-between px-3 py-3 hover:bg-muted/50 transition-colors'
-      >
+      <SimpleListItem key={team.id}>
         <Link
           href={`/teams/${team.id}`}
           className='flex items-start gap-3 flex-1 min-w-0'
@@ -200,7 +200,7 @@ export function SimpleTeamList({
         >
           <MoreHorizontal className='h-4 w-4' />
         </Button>
-      </div>
+      </SimpleListItem>
     )
   }
 
@@ -240,19 +240,16 @@ export function SimpleTeamList({
 
   return (
     <>
-      <section className={`rounded-xl py-4 -mx-3 px-3 space-y-4 ${className}`}>
+      <SimpleListContainer className={className}>
         {renderSectionHeader()}
 
-        <div className='space-y-0 divide-y'>
-          {visibleTeams.length === 0 ? (
-            <div className='text-neutral-400 text-sm px-3 py-3'>
-              {emptyStateText}
-            </div>
-          ) : (
-            visibleTeams.map(renderTeamItem)
-          )}
-        </div>
-      </section>
+        <SimpleListItemsContainer
+          isEmpty={visibleTeams.length === 0}
+          emptyStateText={emptyStateText}
+        >
+          {visibleTeams.map(renderTeamItem)}
+        </SimpleListItemsContainer>
+      </SimpleListContainer>
 
       {/* Context Menu */}
       <ContextMenuComponent>
