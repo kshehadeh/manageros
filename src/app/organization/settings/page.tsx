@@ -14,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Building, Shield, Bell, Briefcase } from 'lucide-react'
+import { Building, Shield, Bell, Briefcase, Calendar } from 'lucide-react'
 import { CreateNotificationModal } from '@/components/notifications/create-notification-modal'
 
 export default async function OrganizationSettingsPage() {
@@ -94,6 +94,12 @@ export default async function OrganizationSettingsPage() {
               <Button asChild variant='outline' className='w-full'>
                 <Link href='/organization/members'>Manage Users</Link>
               </Button>
+              <Button asChild variant='outline' className='w-full'>
+                <Link href='/people'>People</Link>
+              </Button>
+              <Button asChild variant='outline' className='w-full'>
+                <Link href='/teams'>Teams</Link>
+              </Button>
               <p className='text-sm text-muted-foreground'>
                 Change user roles and remove users from your organization
               </p>
@@ -120,6 +126,35 @@ export default async function OrganizationSettingsPage() {
               <p className='text-sm text-muted-foreground'>
                 Set up job levels, domains, and roles to organize your team
                 structure
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Planning Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className='flex items-center gap-2'>
+              <Calendar className='h-5 w-5' />
+              Planning
+            </CardTitle>
+            <CardDescription>
+              Manage tasks, meetings, and initiatives for your organization
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className='space-y-3'>
+              <Button asChild variant='outline' className='w-full'>
+                <Link href='/tasks'>Tasks</Link>
+              </Button>
+              <Button asChild variant='outline' className='w-full'>
+                <Link href='/meetings'>Meetings</Link>
+              </Button>
+              <Button asChild variant='outline' className='w-full'>
+                <Link href='/initiatives'>Initiatives</Link>
+              </Button>
+              <p className='text-sm text-muted-foreground'>
+                Organize and track work across your organization
               </p>
             </div>
           </CardContent>

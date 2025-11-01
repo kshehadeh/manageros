@@ -192,16 +192,27 @@ export default function Sidebar({
                   {personData?.email || session?.user?.email}
                 </div>
               ) : null}
-              <button
-                onClick={async () => {
-                  setIsMobileMenuOpen(false)
-                  await signOutWithCleanup()
-                  signOut({ callbackUrl: '/auth/signin' })
-                }}
-                className='text-xs text-muted-foreground hover:text-foreground underline'
-              >
-                Sign out
-              </button>
+              <div className='flex items-center gap-2 mt-1'>
+                <Link
+                  href='/settings'
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className='flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground underline'
+                >
+                  <Settings className='h-3 w-3' />
+                  <span>Settings</span>
+                </Link>
+                <span className='text-xs text-muted-foreground'>|</span>
+                <button
+                  onClick={async () => {
+                    setIsMobileMenuOpen(false)
+                    await signOutWithCleanup()
+                    signOut({ callbackUrl: '/auth/signin' })
+                  }}
+                  className='text-xs text-muted-foreground hover:text-foreground underline cursor-pointer'
+                >
+                  Sign out
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -239,18 +250,6 @@ export default function Sidebar({
             <Bot className='h-5 w-5' />
             <span>AI Chat</span>
           </button>
-
-          {/* Report a bug */}
-          <button
-            onClick={() => {
-              setIsMobileMenuOpen(false)
-              setIsBugOpen(true)
-            }} /**/
-            className='flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors w-full'
-          >
-            <Bug className='h-5 w-5' />
-            <span>Report a bug</span>
-          </button>
         </nav>
 
         {/* Footer Actions */}
@@ -274,6 +273,16 @@ export default function Sidebar({
           >
             <BookOpen className='h-5 w-5' />
             <span>Help</span>
+          </button>
+          <button
+            onClick={() => {
+              setIsMobileMenuOpen(false)
+              setIsBugOpen(true)
+            }}
+            className='flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors w-full'
+          >
+            <Bug className='h-5 w-5' />
+            <span>Report a bug</span>
           </button>
         </div>
 

@@ -1,15 +1,29 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ListTodo, Calendar, Users, MessageSquare } from 'lucide-react'
+import {
+  ListTodo,
+  Calendar,
+  Users,
+  MessageSquare,
+  MoreHorizontal,
+} from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { format, isToday, isTomorrow, isPast, differenceInDays } from 'date-fns'
 import { TaskQuickEditDialog } from '@/components/tasks/task-quick-edit-dialog'
 import type { TaskStatus } from '@/lib/task-status'
 import { taskStatusUtils } from '@/lib/task-status'
 import { useRouter } from 'next/navigation'
+import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
+import {
+  ViewDetailsMenuItem,
+  EditMenuItem,
+  MarkAsDoneMenuItem,
+  SetDueDateMenuItem,
+} from '@/components/common/context-menu-items'
 
 export type PriorityItemType = 'task' | 'meeting' | 'oneonone' | 'feedback'
 
@@ -134,6 +148,7 @@ export function TodaysPrioritiesSection({
   const router = useRouter()
   const [selectedTask, setSelectedTask] = useState<PriorityItem | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const { handleButtonClick, ContextMenuComponent } = useDataTableContextMenu()
 
   // Sort items: overdue tasks first, then by date
   const sortedItems = [...items].sort((a, b) => {
@@ -212,6 +227,12 @@ export function TodaysPrioritiesSection({
     router.refresh()
   }
 
+  const handleTaskActionClick = (e: React.MouseEvent, taskId: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    handleButtonClick(e, taskId)
+  }
+
   if (priorities.length === 0) {
     return null
   }
@@ -264,16 +285,28 @@ export function TodaysPrioritiesSection({
                           </div>
                         </div>
                       </div>
-                      {item.status && (
-                        <Badge
-                          variant={taskStatusUtils.getVariant(
-                            item.status as TaskStatus
-                          )}
-                          className='text-xs shrink-0'
+                      <div className='flex items-center gap-2 shrink-0'>
+                        {item.status && (
+                          <Badge
+                            variant={taskStatusUtils.getVariant(
+                              item.status as TaskStatus
+                            )}
+                            className='text-xs shrink-0'
+                          >
+                            {taskStatusUtils.getLabel(
+                              item.status as TaskStatus
+                            )}
+                          </Badge>
+                        )}
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          className='h-8 w-8 p-0 hover:bg-muted shrink-0'
+                          onClick={e => handleTaskActionClick(e, item.id)}
                         >
-                          {taskStatusUtils.getLabel(item.status as TaskStatus)}
-                        </Badge>
-                      )}
+                          <MoreHorizontal className='h-4 w-4' />
+                        </Button>
+                      </div>
                     </div>
                   </Card>
                 </div>
@@ -310,6 +343,42 @@ export function TodaysPrioritiesSection({
           })}
         </div>
       </div>
+
+      {/* Context Menu */}
+      <ContextMenuComponent>
+        {({ entityId, close }) => {
+          const task = priorities.find(
+            item => item.type === 'task' && item.id === entityId
+          )
+          if (!task || task.type !== 'task') return null
+
+          return (
+            <>
+              <ViewDetailsMenuItem
+                entityId={entityId}
+                entityType='tasks'
+                close={close}
+              />
+              <EditMenuItem
+                entityId={entityId}
+                entityType='tasks'
+                close={close}
+              />
+              <MarkAsDoneMenuItem
+                taskId={entityId}
+                currentStatus={task.status || 'todo'}
+                close={close}
+                onSuccess={handleTaskUpdate}
+              />
+              <SetDueDateMenuItem
+                taskId={entityId}
+                close={close}
+                onSuccess={handleTaskUpdate}
+              />
+            </>
+          )
+        }}
+      </ContextMenuComponent>
 
       {/* Task Quick Edit Dialog */}
       {selectedTask && selectedTask.type === 'task' && (

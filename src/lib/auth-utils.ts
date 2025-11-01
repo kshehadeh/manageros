@@ -40,12 +40,7 @@ export async function getFilteredNavigation() {
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: 'Home' },
-    { name: 'Initiatives', href: '/initiatives', icon: 'Rocket' },
-    { name: 'People', href: '/people', icon: 'User' },
-    { name: 'Teams', href: '/teams', icon: 'Users2' },
-    { name: 'Tasks', href: '/tasks', icon: 'ListTodo' },
     { name: 'My Tasks', href: '/my-tasks', icon: 'CheckSquare' },
-    { name: 'Meetings', href: '/meetings', icon: 'Calendar' },
     { name: 'Reports', href: '/reports', icon: 'BarChart3' },
     {
       name: 'Org Settings',
@@ -53,7 +48,6 @@ export async function getFilteredNavigation() {
       icon: 'Building',
       adminOnly: true,
     },
-    { name: 'Your Settings', href: '/settings', icon: 'Settings' },
   ]
 
   // Filter navigation based on organization membership and admin role

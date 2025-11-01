@@ -56,9 +56,10 @@ export default function TopBar() {
               <TooltipTrigger asChild>
                 <button
                   onClick={toggle}
-                  className='hidden md:inline-flex items-center justify-center p-2 bg-secondary border rounded-lg text-secondary-foreground hover:bg-secondary/80 transition-colors'
+                  className='hidden md:inline-flex items-center gap-2 px-3 py-2 bg-secondary border rounded-lg text-secondary-foreground hover:bg-secondary/80 transition-colors'
                 >
                   <CommandIcon className='h-4 w-4' />
+                  <span>Command Palette</span>
                 </button>
               </TooltipTrigger>
               <TooltipContent>
