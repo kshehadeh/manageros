@@ -33,8 +33,9 @@ export function JiraAccountLinker({
   )
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleLink = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleLink = async () => {
+    if (!jiraEmail.trim()) return
+
     setIsLoading(true)
 
     try {
@@ -137,21 +138,29 @@ export function JiraAccountLinker({
     )
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && jiraEmail.trim()) {
+      e.preventDefault()
+      handleLink()
+    }
+  }
+
   return (
     <div className='space-y-4'>
-      <form onSubmit={handleLink} className='space-y-3'>
+      <div className='space-y-3'>
         <div className='flex items-center gap-2'>
           <Input
             type='email'
             value={jiraEmail}
             onChange={e => setJiraEmail(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder='person@company.com'
             className='flex-1'
-            required
           />
           <Button
-            type='submit'
-            disabled={isLoading}
+            type='button'
+            onClick={handleLink}
+            disabled={isLoading || !jiraEmail.trim()}
             variant='outline'
             size='icon'
             title='Link Account'
@@ -163,7 +172,7 @@ export function JiraAccountLinker({
             )}
           </Button>
         </div>
-      </form>
+      </div>
     </div>
   )
 }

@@ -9,6 +9,7 @@ export { githubTool } from './tools/github-tool'
 export { jiraTool } from './tools/jira-tool'
 export { dateTimeTool } from './tools/date-time-tool'
 export { personLookupTool } from './tools/person-lookup-tool'
+export { jobRoleLookupTool } from './tools/job-role-lookup-tool'
 export { feedbackTool } from './tools/feedback-tool'
 
 // Import tools for the aiTools object
@@ -22,19 +23,22 @@ import { githubTool } from './tools/github-tool'
 import { jiraTool } from './tools/jira-tool'
 import { dateTimeTool } from './tools/date-time-tool'
 import { personLookupTool } from './tools/person-lookup-tool'
+import { jobRoleLookupTool } from './tools/job-role-lookup-tool'
 import { feedbackTool } from './tools/feedback-tool'
+import { toolIds } from './tool-ids'
 
 // Export all tools as a single object for easy access
 export const aiTools = {
-  people: peopleTool,
-  initiatives: initiativesTool,
-  tasks: tasksTool,
-  meetings: meetingsTool,
-  teams: teamsTool,
-  currentUser: currentUserTool,
-  github: githubTool,
-  jira: jiraTool,
-  dateTime: dateTimeTool,
-  personLookup: personLookupTool,
-  feedback: feedbackTool,
+  [toolIds.people]: peopleTool,
+  [toolIds.initiatives]: initiativesTool,
+  [toolIds.tasks]: tasksTool,
+  [toolIds.meetings]: meetingsTool,
+  [toolIds.teams]: teamsTool,
+  [toolIds.currentUser]: currentUserTool,
+  [toolIds.github]: githubTool,
+  [toolIds.jira]: jiraTool,
+  [toolIds.dateTime]: dateTimeTool,
+  [toolIds.personLookup]: personLookupTool,
+  [toolIds.jobRoleLookup]: jobRoleLookupTool,
+  [toolIds.feedback]: feedbackTool,
 }

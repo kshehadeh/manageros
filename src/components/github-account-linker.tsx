@@ -32,8 +32,9 @@ export function GithubAccountLinker({
   )
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleLink = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleLink = async () => {
+    if (!githubUsername.trim()) return
+
     setIsLoading(true)
 
     try {
@@ -140,20 +141,28 @@ export function GithubAccountLinker({
     )
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && githubUsername.trim()) {
+      e.preventDefault()
+      handleLink()
+    }
+  }
+
   return (
     <div className='space-y-4'>
-      <form onSubmit={handleLink} className='space-y-3'>
+      <div className='space-y-3'>
         <div className='flex items-center gap-2'>
           <Input
             type='text'
             value={githubUsername}
             onChange={e => setGithubUsername(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder='github-username'
             className='flex-1'
-            required
           />
           <Button
-            type='submit'
+            type='button'
+            onClick={handleLink}
             disabled={isLoading || !githubUsername.trim()}
             variant='outline'
             size='icon'
@@ -166,7 +175,7 @@ export function GithubAccountLinker({
             )}
           </Button>
         </div>
-      </form>
+      </div>
     </div>
   )
 }

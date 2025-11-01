@@ -17,14 +17,28 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
   // Note: Scroll locking is handled by Radix UI components (Dialog, etc.)
   // No custom scroll locking needed here
 
-  // Handle Escape key to close the AI chat
+  // Handle Escape key to close the AI chat (only when not typing in input)
   useEffect(() => {
     if (!isOpen) return
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
-        event.preventDefault()
-        onClose()
+        // Check if the user is currently typing in an input field
+        const target = event.target as HTMLElement
+        const isInputElement =
+          target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.contentEditable === 'true' ||
+          target.getAttribute('role') === 'textbox' ||
+          target.closest('[role="textbox"]') !== null ||
+          target.closest('textarea') !== null ||
+          target.closest('input') !== null
+
+        // Only close if not typing in an input field
+        if (!isInputElement) {
+          event.preventDefault()
+          onClose()
+        }
       }
     }
 
@@ -32,21 +46,34 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, onClose])
 
-  // Focus input when opened via keyboard
+  // Focus input when opened via keyboard or when sidebar becomes open
   useEffect(() => {
-    if (isOpen && openedViaKeyboard) {
-      // Small delay to ensure the sidebar is fully rendered
-      const timeoutId = setTimeout(() => {
-        // Focus the composer input in the assistant-ui thread
-        const composerInput = document.querySelector(
-          '[aria-label="Message input"]'
-        ) as HTMLTextAreaElement
-        composerInput?.focus()
-        setOpenedViaKeyboard(false) // Reset the flag
-      }, 100)
+    if (!isOpen) return
 
-      return () => clearTimeout(timeoutId)
-    }
+    // Focus the input when sidebar opens (either via keyboard or otherwise)
+    const timeoutId = setTimeout(() => {
+      const composerInput = document.querySelector(
+        '[aria-label="Message input"]'
+      ) as HTMLTextAreaElement
+
+      if (composerInput) {
+        // Only focus if not already focused and if not disabled
+        if (
+          document.activeElement !== composerInput &&
+          !composerInput.disabled &&
+          composerInput.offsetParent !== null // Check if element is visible
+        ) {
+          composerInput.focus()
+        }
+      }
+
+      // Reset the keyboard flag after focusing
+      if (openedViaKeyboard) {
+        setOpenedViaKeyboard(false)
+      }
+    }, 150) // Slightly longer delay to ensure DOM is ready
+
+    return () => clearTimeout(timeoutId)
   }, [isOpen, openedViaKeyboard, setOpenedViaKeyboard])
 
   const exampleQuestions = [

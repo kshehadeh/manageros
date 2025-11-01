@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
-import type { Prisma } from '@prisma/client'
+import type { Prisma, EmployeeType } from '@prisma/client'
 
 export const peopleTool = {
   description: 'Get information about people in the organization',
@@ -39,21 +39,45 @@ export const peopleTool = {
       .optional()
       .describe('The job domain ID of the people to look up'),
     employeeTypeIs: z
-      .enum(['employee', 'contractor', 'vendor', 'partner'])
+      .enum(['FULL_TIME', 'PART_TIME', 'INTERN', 'CONSULTANT'])
       .optional()
       .describe('The employee type of the people to look up'),
   }),
   execute: async ({
     query,
+    hasManager,
+    hasReports,
+    managerIs,
+    teamIs,
+    jobRoleIs,
+    jobLevelIs,
+    jobDomainIs,
+    employeeTypeIs,
     includeManager = false,
     includeReports = false,
   }: {
     query?: string
+    hasManager?: boolean
+    hasReports?: boolean
+    managerIs?: string
+    teamIs?: string
+    jobRoleIs?: string
+    jobLevelIs?: string
+    jobDomainIs?: string
+    employeeTypeIs?: EmployeeType
     includeManager?: boolean
     includeReports?: boolean
   }) => {
     console.log('🔧 peopleTool called with parameters:', {
       query,
+      hasManager,
+      hasReports,
+      managerIs,
+      teamIs,
+      jobRoleIs,
+      jobLevelIs,
+      jobDomainIs,
+      employeeTypeIs,
       includeManager,
       includeReports,
     })
@@ -74,6 +98,49 @@ export const peopleTool = {
           { role: { contains: query, mode: 'insensitive' } },
           { email: { contains: query, mode: 'insensitive' } },
         ]
+      }
+
+      if (managerIs) {
+        // Specific manager ID takes precedence
+        whereClause.managerId = managerIs
+      } else if (hasManager !== undefined) {
+        // Fall back to hasManager filter if managerIs not provided
+        if (hasManager) {
+          whereClause.managerId = { not: null }
+        } else {
+          whereClause.managerId = null
+        }
+      }
+
+      if (hasReports !== undefined) {
+        if (hasReports) {
+          whereClause.reports = { some: {} }
+        } else {
+          whereClause.reports = { none: {} }
+        }
+      }
+
+      if (teamIs) {
+        whereClause.teamId = teamIs
+      }
+
+      if (jobRoleIs) {
+        whereClause.jobRoleId = jobRoleIs
+      }
+
+      if (jobLevelIs || jobDomainIs) {
+        const jobRoleFilter: Prisma.JobRoleWhereInput = {}
+        if (jobLevelIs) {
+          jobRoleFilter.levelId = jobLevelIs
+        }
+        if (jobDomainIs) {
+          jobRoleFilter.domainId = jobDomainIs
+        }
+        whereClause.jobRole = jobRoleFilter
+      }
+
+      if (employeeTypeIs) {
+        whereClause.employeeType = employeeTypeIs
       }
 
       const people = await prisma.person.findMany({

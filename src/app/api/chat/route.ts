@@ -10,7 +10,9 @@ import { githubTool } from '@/lib/ai/tools/github-tool'
 import { jiraTool } from '@/lib/ai/tools/jira-tool'
 import { dateTimeTool } from '@/lib/ai/tools/date-time-tool'
 import { personLookupTool } from '@/lib/ai/tools/person-lookup-tool'
+import { jobRoleLookupTool } from '@/lib/ai/tools/job-role-lookup-tool'
 import { feedbackTool } from '@/lib/ai/tools/feedback-tool'
+import { toolIds } from '../../../lib/ai/tool-ids'
 
 export async function POST(req: Request) {
   try {
@@ -28,57 +30,62 @@ export async function POST(req: Request) {
       messages: convertedMessages,
 
       tools: {
-        people: {
+        [toolIds.people]: {
           description: peopleTool.description,
           inputSchema: peopleTool.parameters,
           execute: peopleTool.execute,
         },
-        initiatives: {
+        [toolIds.initiatives]: {
           description: initiativesTool.description,
           inputSchema: initiativesTool.parameters,
           execute: initiativesTool.execute,
         },
-        tasks: {
+        [toolIds.tasks]: {
           description: tasksTool.description,
           inputSchema: tasksTool.parameters,
           execute: tasksTool.execute,
         },
-        meetings: {
+        [toolIds.meetings]: {
           description: meetingsTool.description,
           inputSchema: meetingsTool.parameters,
           execute: meetingsTool.execute,
         },
-        teams: {
+        [toolIds.teams]: {
           description: teamsTool.description,
           inputSchema: teamsTool.parameters,
           execute: teamsTool.execute,
         },
-        currentUser: {
+        [toolIds.currentUser]: {
           description: currentUserTool.description,
           inputSchema: currentUserTool.parameters,
           execute: currentUserTool.execute,
         },
-        github: {
+        [toolIds.github]: {
           description: githubTool.description,
           inputSchema: githubTool.parameters,
           execute: githubTool.execute,
         },
-        jira: {
+        [toolIds.jira]: {
           description: jiraTool.description,
           inputSchema: jiraTool.parameters,
           execute: jiraTool.execute,
         },
-        dateTime: {
+        [toolIds.dateTime]: {
           description: dateTimeTool.description,
           inputSchema: dateTimeTool.parameters,
           execute: dateTimeTool.execute,
         },
-        personLookup: {
+        [toolIds.personLookup]: {
           description: personLookupTool.description,
           inputSchema: personLookupTool.parameters,
           execute: personLookupTool.execute,
         },
-        feedback: {
+        [toolIds.jobRoleLookup]: {
+          description: jobRoleLookupTool.description,
+          inputSchema: jobRoleLookupTool.parameters,
+          execute: jobRoleLookupTool.execute,
+        },
+        [toolIds.feedback]: {
           description: feedbackTool.description,
           inputSchema: feedbackTool.parameters,
           execute: feedbackTool.execute,
@@ -92,6 +99,7 @@ Key guidelines:
 - Always use the available tools to fetch current data from the database
 - When asked about relative time periods (like "last week", "this month", "yesterday"), FIRST call the dateTime tool to get the current date and helpful date ranges
 - When asked about a specific person by name (e.g., "John", "Sarah Smith"), use the personLookup tool to find their person ID. If multiple matches are found, ask the user to clarify which person they mean.
+- When asked about a specific job role by title (e.g., "Software Engineer", "Engineering Manager"), use the jobRoleLookup tool to find the job role ID. If multiple matches are found, ask the user to clarify which job role they mean.
 - When asked about the CURRENT USER'S OWN GitHub activity (e.g., "my PRs", "my pull requests"), call the github tool WITHOUT providing a personId - it will automatically use the current user's linked account.
 - When asked about ANOTHER PERSON'S GitHub activity (e.g., "John's pull requests", "GitHub contributions for Sarah"), FIRST use personLookup to get their person ID, then use the github tool with that personId parameter.
 - When asked about the CURRENT USER'S OWN Jira activity (e.g., "my tickets", "my Jira issues"), call the jira tool WITHOUT providing a personId - it will automatically use the current user's linked account.

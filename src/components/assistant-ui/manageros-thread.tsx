@@ -8,12 +8,18 @@ import {
   PencilIcon,
   RefreshCwIcon,
   Square,
-  Bot,
   Users,
   Rocket,
   ListTodo,
   Calendar,
   Building2,
+  BriefcaseIcon,
+  MessageCircle,
+  BotIcon,
+  UserIcon,
+  GitPullRequestIcon,
+  BugIcon,
+  ClockIcon,
 } from 'lucide-react'
 
 import {
@@ -36,37 +42,66 @@ import { TooltipIconButton } from '@/components/assistant-ui/tooltip-icon-button
 import { UserMessageAttachments } from '@/components/assistant-ui/attachment'
 
 import { cn } from '@/lib/utils'
+import { toolIds } from '../../lib/ai/tool-ids'
 
 // Map tool names to their corresponding icons
 const getToolIcon = (toolName: string) => {
   switch (toolName) {
-    case 'people':
+    case toolIds.people:
       return Users
-    case 'initiatives':
+    case toolIds.initiatives:
       return Rocket
-    case 'tasks':
+    case toolIds.tasks:
       return ListTodo
-    case 'meetings':
+    case toolIds.meetings:
       return Calendar
-    case 'teams':
+    case toolIds.teams:
       return Building2
+    case toolIds.jobRoleLookup:
+      return BriefcaseIcon
+    case toolIds.feedback:
+      return MessageCircle
+    case toolIds.currentUser:
+      return UserIcon
+    case toolIds.github:
+      return GitPullRequestIcon
+    case toolIds.jira:
+      return BugIcon
+    case toolIds.dateTime:
+      return ClockIcon
+    case toolIds.personLookup:
+      return UserIcon
     default:
-      return Bot // fallback icon
+      return BotIcon
   }
 }
 
 const getToolDescription = (toolName: string) => {
   switch (toolName) {
-    case 'people':
-      return 'Searching people in the organization'
-    case 'initiatives':
-      return 'Searching initiatives in the organization'
-    case 'tasks':
-      return 'Searching tasks in the organization'
-    case 'meetings':
-      return 'Searching meetings in the organization'
-    case 'teams':
-      return 'Searching teams in the organization'
+    case toolIds.people:
+      return 'Searching people'
+    case toolIds.initiatives:
+      return 'Searching initiatives'
+    case toolIds.tasks:
+      return 'Searching tasks'
+    case toolIds.meetings:
+      return 'Searching meetings'
+    case toolIds.teams:
+      return 'Searching teams'
+    case toolIds.jobRoleLookup:
+      return 'Searching job roles'
+    case toolIds.feedback:
+      return 'Searching feedback'
+    case toolIds.currentUser:
+      return 'Searching information about the current user'
+    case toolIds.github:
+      return 'Searching GitHub activity'
+    case toolIds.jira:
+      return 'Searching Jira activity'
+    case toolIds.dateTime:
+      return 'Searching date and time'
+    case toolIds.personLookup:
+      return 'Searching people'
     default:
       return 'Searching the organization'
   }
@@ -196,8 +231,34 @@ const ThreadSuggestions: FC<{ exampleQuestions: string[] }> = ({
 }
 
 const Composer: FC = () => {
+  // Handle clicks on the composer wrapper to ensure input is focused
+  const handleComposerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only focus if clicking on the wrapper itself, not on buttons or other interactive elements
+    const target = e.target as HTMLElement
+    if (
+      target.tagName !== 'BUTTON' &&
+      target.tagName !== 'INPUT' &&
+      target.tagName !== 'TEXTAREA' &&
+      !target.closest('button')
+    ) {
+      const composerInput = document.querySelector(
+        '[aria-label="Message input"]'
+      ) as HTMLTextAreaElement
+      if (
+        composerInput &&
+        !composerInput.disabled &&
+        composerInput.offsetParent !== null
+      ) {
+        composerInput.focus()
+      }
+    }
+  }
+
   return (
-    <div className='aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col gap-4 overflow-visible rounded-t-3xl bg-background pb-4 md:pb-6'>
+    <div
+      className='aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col gap-4 overflow-visible rounded-t-3xl bg-background pb-4 md:pb-6'
+      onClick={handleComposerClick}
+    >
       <ThreadScrollToBottom />
       <ComposerPrimitive.Root className='aui-composer-root relative flex w-full flex-col rounded-3xl border border-border bg-muted px-1 pt-2 shadow-[0_9px_9px_0px_rgba(0,0,0,0.01),0_2px_5px_0px_rgba(0,0,0,0.06)] dark:border-muted-foreground/15'>
         <ComposerPrimitive.Input
