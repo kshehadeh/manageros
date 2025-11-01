@@ -416,6 +416,38 @@ export async function getMeetingsForInitiative(initiativeId: string) {
   return meetings
 }
 
+/**
+ * Get meetings for an initiative with basic relations (for initiative detail page)
+ * This is a simpler version that doesn't filter by privacy or include instances
+ */
+export async function getMeetingsForInitiativeSimple(initiativeId: string) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to view meetings')
+  }
+
+  return await prisma.meeting.findMany({
+    where: {
+      initiativeId,
+      organizationId: user.organizationId,
+    },
+    include: {
+      team: true,
+      initiative: true,
+      owner: true,
+      createdBy: true,
+      participants: {
+        include: {
+          person: true,
+        },
+      },
+    },
+    orderBy: { scheduledAt: 'asc' },
+  })
+}
+
 export async function getMeeting(id: string) {
   const user = await getCurrentUser()
 

@@ -3,14 +3,54 @@
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { SimpleLinkList } from '@/components/links/link-list'
+import { AddLinkModal } from '@/components/links/add-link-modal'
 import { ChangeTeamModal } from './change-team-modal'
 import { ManageOwnersModal } from './manage-owners-modal'
-import { Users } from 'lucide-react'
+import { Users, Link as LinkIcon, User } from 'lucide-react'
 import { SimplePeopleList } from '@/components/people/person-list'
 import { TeamAvatar } from '@/components/teams/team-avatar'
 import Link from 'next/link'
 import type { Person } from '@/types/person'
 import { useRouter } from 'next/navigation'
+import type { Prisma } from '@prisma/client'
+
+// Raw Prisma types with includes
+type PersonWithRelations = Prisma.PersonGetPayload<{
+  include: {
+    team: true
+    jobRole: {
+      include: {
+        level: true
+        domain: true
+      }
+    }
+    manager: {
+      include: {
+        reports: true
+      }
+    }
+    reports: true
+  }
+}>
+
+type OwnerWithRelations = {
+  initiativeId: string
+  personId: string
+  role: string
+  person: PersonWithRelations
+}
+
+type EntityLinkWithRelations = Prisma.EntityLinkGetPayload<{
+  include: {
+    createdBy: {
+      select: {
+        id: true
+        name: true
+        email: true
+      }
+    }
+  }
+}>
 
 interface Team {
   id: string
@@ -18,7 +58,73 @@ interface Team {
   avatar?: string | null
 }
 
-interface EntityLink {
+interface InitiativeSidebarProps {
+  team: Team | null
+  owners: OwnerWithRelations[]
+  links: EntityLinkWithRelations[]
+  entityType: string
+  entityId: string
+  teams: Team[]
+  people: PersonWithRelations[]
+}
+
+/**
+ * Transforms a Prisma person with relations into the Person type expected by components
+ */
+function mapPersonToPersonType(person: PersonWithRelations): Person {
+  return {
+    ...person,
+    level: 0, // Default level
+    team: person.team
+      ? {
+          id: person.team.id,
+          name: person.team.name,
+        }
+      : null,
+    jobRole: person.jobRole
+      ? {
+          id: person.jobRole.id,
+          title: person.jobRole.title,
+          level: person.jobRole.level
+            ? {
+                id: person.jobRole.level.id,
+                name: person.jobRole.level.name,
+              }
+            : { id: '', name: '' },
+          domain: person.jobRole.domain
+            ? {
+                id: person.jobRole.domain.id,
+                name: person.jobRole.domain.name,
+              }
+            : { id: '', name: '' },
+        }
+      : null,
+    manager: person.manager
+      ? {
+          id: person.manager.id,
+          name: person.manager.name,
+          email: person.manager.email,
+          role: person.manager.role,
+          status: person.manager.status,
+          birthday: person.manager.birthday,
+          reports: person.manager.reports || [],
+        }
+      : null,
+    reports: person.reports.map(report => ({
+      id: report.id,
+      name: report.name,
+      email: report.email,
+      role: report.role,
+      status: report.status,
+      birthday: report.birthday,
+    })),
+  }
+}
+
+/**
+ * Transforms a Prisma entity link with relations into the EntityLink type expected by components
+ */
+function mapEntityLinkToLinkType(link: EntityLinkWithRelations): {
   id: string
   url: string
   title: string | null
@@ -30,23 +136,16 @@ interface EntityLink {
     name: string
     email: string
   }
-}
-
-interface InitiativeOwner {
-  initiativeId: string
-  personId: string
-  role: string
-  person: Person
-}
-
-interface InitiativeSidebarProps {
-  team: Team | null
-  owners: InitiativeOwner[]
-  links: EntityLink[]
-  entityType: string
-  entityId: string
-  teams: Team[]
-  people: Person[]
+} {
+  return {
+    id: link.id,
+    url: link.url,
+    title: link.title,
+    description: link.description,
+    createdAt: link.createdAt,
+    updatedAt: link.updatedAt,
+    createdBy: link.createdBy,
+  }
 }
 
 export function InitiativeSidebar({
@@ -59,6 +158,20 @@ export function InitiativeSidebar({
   people,
 }: InitiativeSidebarProps) {
   const router = useRouter()
+
+  // Transform the data
+  const mappedOwners: Array<{
+    initiativeId: string
+    personId: string
+    role: string
+    person: Person
+  }> = owners.map(owner => ({
+    ...owner,
+    person: mapPersonToPersonType(owner.person),
+  }))
+
+  const mappedLinks = links.map(mapEntityLinkToLinkType)
+  const mappedPeople = people.map(mapPersonToPersonType)
 
   return (
     <div className='w-full lg:w-80 space-y-6'>
@@ -98,13 +211,13 @@ export function InitiativeSidebar({
       <PageSection
         header={
           <SectionHeader
-            icon={Users}
-            title='Associated People'
+            icon={User}
+            title='People'
             action={
               <ManageOwnersModal
                 initiativeId={entityId}
-                owners={owners}
-                people={people}
+                owners={mappedOwners}
+                people={mappedPeople}
               />
             }
             className='mb-3'
@@ -112,10 +225,7 @@ export function InitiativeSidebar({
         }
       >
         <SimplePeopleList
-          people={owners.map(owner => ({
-            ...owner.person,
-            level: 0, // Default level since it's not in the query
-          }))}
+          people={mappedOwners.map(owner => owner.person)}
           variant='compact'
           emptyStateText='No people associated with this initiative yet.'
           showEmail={false}
@@ -124,7 +234,7 @@ export function InitiativeSidebar({
           showJobRole={false}
           showManager={false}
           showReportsCount={false}
-          customSubtextMap={owners.reduce(
+          customSubtextMap={mappedOwners.reduce(
             (acc, owner) => {
               if (owner.role) {
                 acc[owner.personId] =
@@ -139,14 +249,26 @@ export function InitiativeSidebar({
       </PageSection>
 
       {/* Links Section */}
-      <PageSection>
+      <PageSection
+        header={
+          <SectionHeader
+            icon={LinkIcon}
+            title='Links'
+            action={
+              <AddLinkModal
+                entityType={entityType}
+                entityId={entityId}
+                onLinkAdded={() => router.refresh()}
+              />
+            }
+          />
+        }
+      >
         <SimpleLinkList
-          links={links}
+          links={mappedLinks}
           entityType={entityType}
           entityId={entityId}
-          title='Links'
           variant='compact'
-          showAddButton={true}
           emptyStateText='No links added yet.'
           onLinksUpdate={() => router.refresh()}
           className=''

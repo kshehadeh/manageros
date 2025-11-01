@@ -6,10 +6,10 @@ import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Calendar, StickyNote, ChevronRight, Users } from 'lucide-react'
+import { LinkListSection } from '@/components/links/link-list-section'
 import { MeetingInstanceDetailBreadcrumbClient } from '@/components/meetings/meeting-instance-detail-breadcrumb-client'
 import { MeetingInstanceActionsDropdown } from '@/components/meetings/meeting-instance-actions-dropdown'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
-import { SimpleLinkList } from '@/components/links/link-list'
 import { HelpIcon } from '@/components/help-icon'
 import { SimplePeopleList } from '@/components/people/person-list'
 import { SectionHeader } from '@/components/ui/section-header'
@@ -156,25 +156,22 @@ export default async function MeetingInstanceDetailPage({
                 )}
               />
             </PageSection>
-            <PageSection className='mt-6'>
-              <SimpleLinkList
-                links={entityLinks.map(link => ({
-                  id: link.id,
-                  url: link.url,
-                  title: link.title,
-                  description: link.description,
-                  createdAt: link.createdAt,
-                  updatedAt: link.updatedAt,
-                  createdBy: link.createdBy,
-                }))}
-                entityType='MeetingInstance'
-                entityId={meetingInstance.id}
-                title='Links'
-                variant='compact'
-                showAddButton={true}
-                emptyStateText='No links added yet.'
-              />
-            </PageSection>
+            <LinkListSection
+              links={entityLinks.map(link => ({
+                id: link.id,
+                url: link.url,
+                title: link.title,
+                description: link.description,
+                createdAt: link.createdAt,
+                updatedAt: link.updatedAt,
+                createdBy: link.createdBy,
+              }))}
+              entityType='MeetingInstance'
+              entityId={meetingInstance.id}
+              title='Links'
+              emptyStateText='No links added yet.'
+              className='mt-6'
+            />
           </div>
         </div>
       </div>

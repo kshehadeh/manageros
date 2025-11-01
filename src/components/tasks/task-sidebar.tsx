@@ -1,6 +1,8 @@
 'use client'
 
+import React from 'react'
 import { SimpleLinkList } from '@/components/links/link-list'
+import { AddLinkModal } from '@/components/links/add-link-modal'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { InlineEditableDropdown } from '@/components/common/inline-editable-dropdown'
@@ -13,6 +15,7 @@ import {
   Target,
   Flag,
   ListTodo,
+  Link as LinkIcon,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -268,14 +271,26 @@ export function TaskSidebar({
       )}
 
       {/* Links Section */}
-      <PageSection>
+      <PageSection
+        header={
+          <SectionHeader
+            icon={LinkIcon}
+            title='Links'
+            action={
+              <AddLinkModal
+                entityType='Task'
+                entityId={entityId}
+                onLinkAdded={() => router.refresh()}
+              />
+            }
+          />
+        }
+      >
         <SimpleLinkList
           links={links}
           entityType='Task'
           entityId={entityId}
-          title='Links'
           variant='compact'
-          showAddButton={true}
           emptyStateText='No links added yet.'
           onLinksUpdate={() => router.refresh()}
         />

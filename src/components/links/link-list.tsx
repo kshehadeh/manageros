@@ -2,14 +2,7 @@
 
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { SectionHeader } from '@/components/ui/section-header'
-import {
-  MoreHorizontal,
-  Plus,
-  Link as LinkIcon,
-  ExternalLink,
-  Edit,
-} from 'lucide-react'
+import { MoreHorizontal, ExternalLink, Edit } from 'lucide-react'
 import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { getIconForUrl, getUrlTitle } from '@/lib/utils/link-icons'
@@ -49,13 +42,9 @@ export interface EntityLink {
 
 export interface LinkListProps {
   links: EntityLink[]
-  title?: string
   variant?: 'compact' | 'full'
-  showAddButton?: boolean
   entityType: string
   entityId: string
-  viewAllHref?: string
-  viewAllLabel?: string
   emptyStateText?: string
   onLinksUpdate?: () => void
   className?: string
@@ -64,13 +53,9 @@ export interface LinkListProps {
 
 export function SimpleLinkList({
   links,
-  title = 'Links',
   variant = 'compact',
-  showAddButton = false,
   entityType,
   entityId,
-  viewAllHref,
-  viewAllLabel = 'View All',
   emptyStateText = 'No links found.',
   onLinksUpdate,
   className = '',
@@ -78,7 +63,6 @@ export function SimpleLinkList({
 }: LinkListProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [editingLink, setEditingLink] = useState<EntityLink | null>(null)
   const router = useRouter()
 
@@ -104,16 +88,11 @@ export function SimpleLinkList({
     }
   }
 
-  const handleAddLink = () => {
-    setIsAddDialogOpen(true)
-  }
-
   const handleEditLink = (link: EntityLink) => {
     setEditingLink(link)
   }
 
   const handleFormSuccess = () => {
-    setIsAddDialogOpen(false)
     setEditingLink(null)
     if (onLinksUpdate) {
       onLinksUpdate()
@@ -123,7 +102,6 @@ export function SimpleLinkList({
   }
 
   const handleFormCancel = () => {
-    setIsAddDialogOpen(false)
     setEditingLink(null)
   }
 
@@ -197,51 +175,9 @@ export function SimpleLinkList({
     )
   }
 
-  const renderSectionHeader = () => {
-    const actions = []
-
-    if (viewAllHref) {
-      actions.push(
-        <Button asChild variant='outline' size='sm' key='view-all'>
-          <a href={viewAllHref} className='flex items-center gap-2'>
-            <ExternalLink className='w-4 h-4' />
-            {viewAllLabel}
-          </a>
-        </Button>
-      )
-    }
-
-    if (showAddButton) {
-      actions.push(
-        <Button
-          variant='outline'
-          size='sm'
-          key='add-link'
-          onClick={handleAddLink}
-        >
-          <Plus className='w-4 h-4 mr-2' />
-          Add Link
-        </Button>
-      )
-    }
-
-    return (
-      <SectionHeader
-        icon={LinkIcon}
-        title={title}
-        action={actions.length > 0 ? actions : undefined}
-      />
-    )
-  }
-
   return (
     <>
-      <SimpleListContainer
-        withSection={!!title}
-        className={!title ? className : ''}
-      >
-        {title && renderSectionHeader()}
-
+      <SimpleListContainer className={className}>
         <SimpleListItemsContainer
           isEmpty={visibleLinks.length === 0}
           emptyStateText={emptyStateText}
@@ -290,25 +226,6 @@ export function SimpleLinkList({
         title='Delete Link'
         entityName='link'
       />
-
-      {/* Add Link Dialog */}
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Link</DialogTitle>
-            <DialogDescription>
-              Add a link to provide additional context and resources for this{' '}
-              {entityType.toLowerCase()}.
-            </DialogDescription>
-          </DialogHeader>
-          <LinkForm
-            entityType={entityType}
-            entityId={entityId}
-            onSuccess={handleFormSuccess}
-            onCancel={handleFormCancel}
-          />
-        </DialogContent>
-      </Dialog>
 
       {/* Edit Link Dialog */}
       <Dialog open={!!editingLink} onOpenChange={() => setEditingLink(null)}>

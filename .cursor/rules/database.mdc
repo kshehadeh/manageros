@@ -6,6 +6,10 @@ alwaysApply: true
 
 # Database Interactions
 
+## Code Organization
+
+when adding new queries, do not put the orm queries in a component.  Instead, either use an existing function that does the same thing or create a new function in the appropriate lib folder that does the query.
+
 ## FORBIDDEN ACTIONS
 
 Never do a database reset.  Always use the prisma schema to make changes to the database.

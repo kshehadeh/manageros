@@ -168,7 +168,7 @@ export function SimpleInitiativeList({
 
   return (
     <>
-      <SimpleListContainer withSection={false} className={className}>
+      <SimpleListContainer className={className}>
         <SimpleListItemsContainer
           isEmpty={visibleInitiatives.length === 0}
           emptyStateText={emptyStateText}

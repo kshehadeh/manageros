@@ -195,7 +195,7 @@ export function SimplePeopleList({
 
   return (
     <>
-      <SimpleListContainer withSection={false} className={className}>
+      <SimpleListContainer className={className}>
         <SimpleListItemsContainer
           isEmpty={visiblePeople.length === 0}
           emptyStateText={emptyStateText}

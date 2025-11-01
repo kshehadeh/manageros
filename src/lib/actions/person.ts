@@ -12,6 +12,39 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { Prisma } from '@prisma/client'
 
+/**
+ * Get all people for an organization with relations needed for components
+ */
+export async function getPeopleForOrganization() {
+  const user = await getCurrentUser()
+
+  if (!user.organizationId) {
+    return []
+  }
+
+  return await prisma.person.findMany({
+    where: {
+      organizationId: user.organizationId,
+    },
+    include: {
+      team: true,
+      jobRole: {
+        include: {
+          level: true,
+          domain: true,
+        },
+      },
+      manager: {
+        include: {
+          reports: true,
+        },
+      },
+      reports: true,
+    },
+    orderBy: { name: 'asc' },
+  })
+}
+
 export async function getPeopleHierarchy() {
   try {
     const user = await getCurrentUser()

@@ -466,3 +466,62 @@ export async function removeInitiativeOwner(
   // Revalidate the initiative page
   revalidatePath(`/initiatives/${initiativeId}`)
 }
+
+/**
+ * Get an initiative by ID with all necessary relations for the detail page
+ */
+export async function getInitiativeById(id: string) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to view initiatives')
+  }
+
+  return await prisma.initiative.findFirst({
+    where: {
+      id,
+      organizationId: user.organizationId,
+    },
+    include: {
+      objectives: true,
+      tasks: {
+        include: {
+          assignee: true,
+          createdBy: true,
+          objective: true,
+          initiative: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      },
+      checkIns: {
+        orderBy: { createdAt: 'desc' },
+        include: {
+          createdBy: true,
+        },
+      },
+      team: true,
+      owners: {
+        include: {
+          person: {
+            include: {
+              team: true,
+              jobRole: {
+                include: {
+                  level: true,
+                  domain: true,
+                },
+              },
+              manager: {
+                include: {
+                  reports: true,
+                },
+              },
+              reports: true,
+            },
+          },
+        },
+      },
+    },
+  })
+}

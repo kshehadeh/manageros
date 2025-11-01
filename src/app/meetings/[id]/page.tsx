@@ -11,7 +11,6 @@ import { MeetingDetailBreadcrumbClient } from '@/components/meetings/meeting-det
 import { MeetingInstanceList } from '@/components/meetings/meeting-instance-list'
 import { MeetingActionsDropdown } from '@/components/meetings/meeting-actions-dropdown'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
-import { SimpleLinkList } from '@/components/links/link-list'
 import { SimplePeopleList } from '@/components/people/person-list'
 import {
   Clock,
@@ -23,6 +22,7 @@ import {
   StickyNote,
   Calendar,
 } from 'lucide-react'
+import { LinkListSection } from '@/components/links/link-list-section'
 
 export default async function MeetingDetailPage({
   params,
@@ -217,25 +217,22 @@ export default async function MeetingDetailPage({
                 )}
               />
             </PageSection>
-            <PageSection className='mt-6'>
-              <SimpleLinkList
-                links={entityLinks.map(link => ({
-                  id: link.id,
-                  url: link.url,
-                  title: link.title,
-                  description: link.description,
-                  createdAt: link.createdAt,
-                  updatedAt: link.updatedAt,
-                  createdBy: link.createdBy,
-                }))}
-                entityType='Meeting'
-                entityId={meeting.id}
-                title='Links'
-                variant='compact'
-                showAddButton={true}
-                emptyStateText='No links added yet.'
-              />
-            </PageSection>
+            <LinkListSection
+              links={entityLinks.map(link => ({
+                id: link.id,
+                url: link.url,
+                title: link.title,
+                description: link.description,
+                createdAt: link.createdAt,
+                updatedAt: link.updatedAt,
+                createdBy: link.createdBy,
+              }))}
+              entityType='Meeting'
+              entityId={meeting.id}
+              title='Links'
+              emptyStateText='No links added yet.'
+              className='mt-6'
+            />
           </div>
         </div>
       </div>
