@@ -1,6 +1,9 @@
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
 import { SimpleFeedbackCampaignList } from '@/components/feedback/feedback-campaign-simple-list'
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
+import { MessageSquare } from 'lucide-react'
 
 export async function DashboardFeedbackCampaignsServerSection() {
   const user = await getCurrentUser()
@@ -90,11 +93,13 @@ export async function DashboardFeedbackCampaignsServerSection() {
   }
 
   return (
-    <SimpleFeedbackCampaignList
-      campaigns={formattedCampaigns}
-      title='Feedback Campaigns'
-      viewAllHref='/feedback-campaigns'
-      emptyStateText='No active feedback campaigns.'
-    />
+    <PageSection
+      header={<SectionHeader icon={MessageSquare} title='Feedback Campaigns' />}
+    >
+      <SimpleFeedbackCampaignList
+        campaigns={formattedCampaigns}
+        emptyStateText='No active feedback campaigns.'
+      />
+    </PageSection>
   )
 }

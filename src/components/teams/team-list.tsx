@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { SectionHeader } from '@/components/ui/section-header'
-import { Eye, MoreHorizontal, Plus, Building2 } from 'lucide-react'
+import { MoreHorizontal } from 'lucide-react'
 import Link from 'next/link'
 import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
 import {
@@ -58,13 +57,7 @@ export interface TeamListProps {
 
 export function SimpleTeamList({
   teams,
-  title = 'Teams',
   variant = 'compact',
-  showAddButton = false,
-  addButtonHref,
-  addButtonLabel = 'Add Team',
-  viewAllHref,
-  viewAllLabel = 'View All',
   emptyStateText = 'No teams found.',
   onTeamUpdate,
   className = '',
@@ -204,45 +197,9 @@ export function SimpleTeamList({
     )
   }
 
-  const renderSectionHeader = () => {
-    const actions = []
-
-    if (viewAllHref) {
-      actions.push(
-        <Button asChild variant='outline' size='sm' key='view-all'>
-          <Link href={viewAllHref} className='flex items-center gap-2'>
-            <Eye className='w-4 h-4' />
-            {viewAllLabel}
-          </Link>
-        </Button>
-      )
-    }
-
-    if (showAddButton && addButtonHref) {
-      actions.push(
-        <Button asChild variant='outline' size='sm' key='add-team'>
-          <Link href={addButtonHref} className='flex items-center gap-2'>
-            <Plus className='w-4 h-4' />
-            {addButtonLabel}
-          </Link>
-        </Button>
-      )
-    }
-
-    return (
-      <SectionHeader
-        icon={Building2}
-        title={title}
-        action={actions.length > 0 ? actions : undefined}
-      />
-    )
-  }
-
   return (
     <>
       <SimpleListContainer className={className}>
-        {renderSectionHeader()}
-
         <SimpleListItemsContainer
           isEmpty={visibleTeams.length === 0}
           emptyStateText={emptyStateText}

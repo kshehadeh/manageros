@@ -1,11 +1,9 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { SectionHeader } from '@/components/ui/section-header'
 import { FeedbackCampaignStatusBadge } from '@/components/feedback/feedback-campaign-status-badge'
 import { format } from 'date-fns'
-import Link from 'next/link'
-import { MessageSquare, Eye, MoreHorizontal, Calendar } from 'lucide-react'
+import { MoreHorizontal, Calendar, Eye } from 'lucide-react'
 import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
 import { ContextMenuItem } from '@/components/common/context-menu-items'
 import { SimpleListContainer } from '@/components/common/simple-list-container'
@@ -48,9 +46,6 @@ export interface FeedbackCampaignListProps {
 
 export function SimpleFeedbackCampaignList({
   campaigns,
-  title = 'Feedback Campaigns',
-  viewAllHref,
-  viewAllLabel = 'View All',
   emptyStateText = 'No active feedback campaigns.',
   className = '',
 }: FeedbackCampaignListProps) {
@@ -129,29 +124,9 @@ export function SimpleFeedbackCampaignList({
     </SimpleListItem>
   )
 
-  // Build actions for the section header
-  const actions = []
-  if (viewAllHref) {
-    actions.push(
-      <Link
-        key='view-all'
-        href={viewAllHref}
-        className='text-sm text-muted-foreground hover:text-foreground transition-colors'
-      >
-        {viewAllLabel}
-      </Link>
-    )
-  }
-
   return (
     <>
       <SimpleListContainer className={className}>
-        <SectionHeader
-          icon={MessageSquare}
-          title={title}
-          action={actions.length > 0 ? actions : undefined}
-        />
-
         <SimpleListItemsContainer
           isEmpty={campaigns.length === 0}
           emptyStateText={emptyStateText}

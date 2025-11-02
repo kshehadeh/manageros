@@ -1,5 +1,10 @@
 import { prisma } from '@/lib/db'
 import { SimpleTaskList, type Task } from '@/components/tasks/task-list'
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
+import { Button } from '@/components/ui/button'
+import { ListTodo, Eye } from 'lucide-react'
+import Link from 'next/link'
 
 interface ActiveTasksSectionProps {
   personId: string
@@ -72,12 +77,27 @@ export async function ActiveTasksSection({
   }))
 
   return (
-    <SimpleTaskList
-      tasks={transformedTasks}
-      title='Active Tasks'
-      variant='compact'
-      viewAllHref='/my-tasks'
-      emptyStateText='No active tasks found.'
-    />
+    <PageSection
+      header={
+        <SectionHeader
+          icon={ListTodo}
+          title='Active Tasks'
+          action={
+            <Button asChild variant='outline' size='sm'>
+              <Link href='/my-tasks' className='flex items-center gap-2'>
+                <Eye className='w-4 h-4' />
+                View All
+              </Link>
+            </Button>
+          }
+        />
+      }
+    >
+      <SimpleTaskList
+        tasks={transformedTasks}
+        variant='compact'
+        emptyStateText='No active tasks found.'
+      />
+    </PageSection>
   )
 }

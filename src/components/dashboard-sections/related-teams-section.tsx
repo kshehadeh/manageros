@@ -5,6 +5,11 @@ import { SimpleTeamList } from '@/components/teams/team-list'
 import { SimpleTaskListSkeleton } from '@/components/common/simple-task-list-skeleton'
 import { useTeams } from '@/hooks/use-teams'
 import { useSession } from 'next-auth/react'
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
+import { Button } from '@/components/ui/button'
+import { Building2, Eye } from 'lucide-react'
+import Link from 'next/link'
 
 export function DashboardRelatedTeamsSection() {
   const { status } = useSession()
@@ -61,16 +66,31 @@ export function DashboardRelatedTeamsSection() {
   }))
 
   return (
-    <SimpleTeamList
-      teams={formattedTeams}
-      title='Related Teams'
-      variant='compact'
-      viewAllHref='/teams'
-      emptyStateText='No related teams found.'
-      showDescription={false}
-      showMembers={true}
-      showInitiatives={false}
-      showUpdatedAt={false}
-    />
+    <PageSection
+      header={
+        <SectionHeader
+          icon={Building2}
+          title='Related Teams'
+          action={
+            <Button asChild variant='outline' size='sm'>
+              <Link href='/teams' className='flex items-center gap-2'>
+                <Eye className='w-4 h-4' />
+                View All
+              </Link>
+            </Button>
+          }
+        />
+      }
+    >
+      <SimpleTeamList
+        teams={formattedTeams}
+        variant='compact'
+        emptyStateText='No related teams found.'
+        showDescription={false}
+        showMembers={true}
+        showInitiatives={false}
+        showUpdatedAt={false}
+      />
+    </PageSection>
   )
 }

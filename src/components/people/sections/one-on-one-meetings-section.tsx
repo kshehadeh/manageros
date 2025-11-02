@@ -3,6 +3,11 @@ import {
   SimpleOneOnOneList,
   type OneOnOne,
 } from '@/components/oneonones/oneonone-list'
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
+import { Button } from '@/components/ui/button'
+import { Handshake, Eye } from 'lucide-react'
+import Link from 'next/link'
 
 interface OneOnOneMeetingsSectionProps {
   personId: string
@@ -78,12 +83,27 @@ export async function OneOnOneMeetingsSection({
   }))
 
   return (
-    <SimpleOneOnOneList
-      oneOnOnes={transformedOneOnOnes}
-      title='1:1 Meetings'
-      variant='compact'
-      viewAllHref='/oneonones'
-      emptyStateText='No 1-on-1s found.'
-    />
+    <PageSection
+      header={
+        <SectionHeader
+          icon={Handshake}
+          title='1:1 Meetings'
+          action={
+            <Button asChild variant='outline' size='sm'>
+              <Link href='/oneonones' className='flex items-center gap-2'>
+                <Eye className='w-4 h-4' />
+                View All
+              </Link>
+            </Button>
+          }
+        />
+      }
+    >
+      <SimpleOneOnOneList
+        oneOnOnes={transformedOneOnOnes}
+        variant='compact'
+        emptyStateText='No 1-on-1s found.'
+      />
+    </PageSection>
   )
 }

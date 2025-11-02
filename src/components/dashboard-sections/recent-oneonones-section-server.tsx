@@ -4,6 +4,11 @@ import {
   SimpleOneOnOneList,
   type OneOnOne,
 } from '@/components/oneonones/oneonone-list'
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
+import { Button } from '@/components/ui/button'
+import { Handshake, Eye } from 'lucide-react'
+import Link from 'next/link'
 
 interface DashboardRecentOneOnOnesServerSectionProps {
   personId: string | null
@@ -17,26 +22,56 @@ export async function DashboardRecentOneOnOnesServerSection({
   // Check if user belongs to an organization
   if (!user.organizationId) {
     return (
-      <SimpleOneOnOneList
-        oneOnOnes={[]}
-        title='Recent 1:1s'
-        variant='compact'
-        viewAllHref='/oneonones'
-        emptyStateText='No 1-on-1s found.'
-      />
+      <PageSection
+        header={
+          <SectionHeader
+            icon={Handshake}
+            title='Recent 1:1s'
+            action={
+              <Button asChild variant='outline' size='sm'>
+                <Link href='/oneonones' className='flex items-center gap-2'>
+                  <Eye className='w-4 h-4' />
+                  View All
+                </Link>
+              </Button>
+            }
+          />
+        }
+      >
+        <SimpleOneOnOneList
+          oneOnOnes={[]}
+          variant='compact'
+          emptyStateText='No 1-on-1s found.'
+        />
+      </PageSection>
     )
   }
 
   // If user doesn't have a linked person record, return empty state
   if (!personId) {
     return (
-      <SimpleOneOnOneList
-        oneOnOnes={[]}
-        title='Recent 1:1s'
-        variant='compact'
-        viewAllHref='/oneonones'
-        emptyStateText='Please link your account to a person record to see your 1-on-1s.'
-      />
+      <PageSection
+        header={
+          <SectionHeader
+            icon={Handshake}
+            title='Recent 1:1s'
+            action={
+              <Button asChild variant='outline' size='sm'>
+                <Link href='/oneonones' className='flex items-center gap-2'>
+                  <Eye className='w-4 h-4' />
+                  View All
+                </Link>
+              </Button>
+            }
+          />
+        }
+      >
+        <SimpleOneOnOneList
+          oneOnOnes={[]}
+          variant='compact'
+          emptyStateText='Please link your account to a person record to see your 1-on-1s.'
+        />
+      </PageSection>
     )
   }
 
@@ -77,12 +112,27 @@ export async function DashboardRecentOneOnOnesServerSection({
   }))
 
   return (
-    <SimpleOneOnOneList
-      oneOnOnes={transformedOneOnOnes}
-      title='Recent 1:1s'
-      variant='compact'
-      viewAllHref='/oneonones'
-      emptyStateText='No recent 1-on-1s found.'
-    />
+    <PageSection
+      header={
+        <SectionHeader
+          icon={Handshake}
+          title='Recent 1:1s'
+          action={
+            <Button asChild variant='outline' size='sm'>
+              <Link href='/oneonones' className='flex items-center gap-2'>
+                <Eye className='w-4 h-4' />
+                View All
+              </Link>
+            </Button>
+          }
+        />
+      }
+    >
+      <SimpleOneOnOneList
+        oneOnOnes={transformedOneOnOnes}
+        variant='compact'
+        emptyStateText='No recent 1-on-1s found.'
+      />
+    </PageSection>
   )
 }

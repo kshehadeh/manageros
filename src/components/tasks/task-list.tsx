@@ -1,16 +1,11 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { SectionHeader } from '@/components/ui/section-header'
 import { Checkbox } from '@/components/ui/checkbox'
-import { ListTodo, Eye, MoreHorizontal, Plus } from 'lucide-react'
-import Link from 'next/link'
-import {
-  TaskQuickEditDialog,
-  type TaskQuickEditDialogRef,
-} from '@/components/tasks/task-quick-edit-dialog'
+import { MoreHorizontal } from 'lucide-react'
+import { TaskQuickEditDialog } from '@/components/tasks/task-quick-edit-dialog'
 import { taskStatusUtils, TASK_STATUS } from '@/lib/task-status'
 import type { TaskStatus } from '@/lib/task-status'
 import { formatDistanceToNow } from 'date-fns'
@@ -59,8 +54,6 @@ export interface TaskListProps {
   tasks: Task[]
   title?: string
   variant?: 'compact' | 'full'
-  showAddButton?: boolean
-  initiativeId?: string
   viewAllHref?: string
   viewAllLabel?: string
   emptyStateText?: string
@@ -71,12 +64,10 @@ export interface TaskListProps {
 
 export function SimpleTaskList({
   tasks,
-  title = 'Tasks',
+  title: _title = 'Tasks',
   variant = 'compact',
-  showAddButton = false,
-  initiativeId,
-  viewAllHref,
-  viewAllLabel = 'View All',
+  viewAllHref: _viewAllHref,
+  viewAllLabel: _viewAllLabel = 'View All',
   emptyStateText = 'No tasks found.',
   onTaskUpdate,
   className = '',
@@ -88,8 +79,6 @@ export function SimpleTaskList({
   const [processingTasks, setProcessingTasks] = useState<Set<string>>(new Set())
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const taskDialogRef = useRef<TaskQuickEditDialogRef>(null)
 
   const { handleButtonClick, ContextMenuComponent } = useDataTableContextMenu()
 
@@ -180,11 +169,6 @@ export function SimpleTaskList({
       console.error('Error deleting task:', error)
       toast.error('Failed to delete task')
     }
-  }
-
-  const handleTaskCreated = () => {
-    setIsAddModalOpen(false)
-    onTaskUpdate?.()
   }
 
   const refetch = () => {
@@ -307,48 +291,9 @@ export function SimpleTaskList({
     )
   }
 
-  const renderSectionHeader = () => {
-    const actions = []
-
-    if (viewAllHref) {
-      actions.push(
-        <Button asChild variant='outline' size='sm' key='view-all'>
-          <Link href={viewAllHref} className='flex items-center gap-2'>
-            <Eye className='w-4 h-4' />
-            {viewAllLabel}
-          </Link>
-        </Button>
-      )
-    }
-
-    if (showAddButton && initiativeId) {
-      actions.push(
-        <Button
-          onClick={() => setIsAddModalOpen(true)}
-          variant='outline'
-          size='sm'
-          key='add-task'
-        >
-          <Plus className='h-4 w-4 mr-2' />
-          Add Task
-        </Button>
-      )
-    }
-
-    return (
-      <SectionHeader
-        icon={ListTodo}
-        title={title}
-        action={actions.length > 0 ? actions : undefined}
-      />
-    )
-  }
-
   return (
     <>
       <SimpleListContainer className={className}>
-        {renderSectionHeader()}
-
         <SimpleListItemsContainer
           isEmpty={visibleTasks.length === 0}
           emptyStateText={emptyStateText}
@@ -367,17 +312,6 @@ export function SimpleTaskList({
             status: selectedTask.status as TaskStatus,
           }}
           onTaskUpdate={handleTaskUpdate}
-        />
-      )}
-
-      {/* Add Task Dialog */}
-      {showAddButton && initiativeId && (
-        <TaskQuickEditDialog
-          ref={taskDialogRef}
-          open={isAddModalOpen}
-          onOpenChange={setIsAddModalOpen}
-          initiativeId={initiativeId}
-          onSuccess={handleTaskCreated}
         />
       )}
 

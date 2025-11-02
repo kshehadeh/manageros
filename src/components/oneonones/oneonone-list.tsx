@@ -3,9 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { SectionHeader } from '@/components/ui/section-header'
-import { Handshake, Eye, MoreHorizontal, Plus, Calendar } from 'lucide-react'
-import Link from 'next/link'
+import { MoreHorizontal, Calendar } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
 import {
@@ -44,9 +42,6 @@ export interface OneOnOneListProps {
   oneOnOnes: OneOnOne[]
   title?: string
   variant?: 'compact' | 'full'
-  showAddButton?: boolean
-  viewAllHref?: string
-  viewAllLabel?: string
   emptyStateText?: string
   onOneOnOneUpdate?: () => void
   className?: string
@@ -55,10 +50,6 @@ export interface OneOnOneListProps {
 
 export function SimpleOneOnOneList({
   oneOnOnes,
-  title = '1-on-1s',
-  showAddButton = false,
-  viewAllHref,
-  viewAllLabel = 'View All',
   emptyStateText = 'No 1-on-1s found.',
   onOneOnOneUpdate,
   className = '',
@@ -181,51 +172,9 @@ export function SimpleOneOnOneList({
     )
   }
 
-  const renderSectionHeader = () => {
-    const actions = []
-
-    if (viewAllHref) {
-      actions.push(
-        <Button asChild variant='outline' size='sm' key='view-all'>
-          <Link href={viewAllHref} className='flex items-center gap-2'>
-            <Eye className='w-4 h-4' />
-            {viewAllLabel}
-          </Link>
-        </Button>
-      )
-    }
-
-    if (showAddButton) {
-      actions.push(
-        <Button
-          onClick={() => {
-            // TODO: Implement add 1-on-1 modal
-            console.log('Add 1-on-1 clicked')
-          }}
-          variant='outline'
-          size='sm'
-          key='add-1-on-1'
-        >
-          <Plus className='h-4 w-4 mr-2' />
-          Add 1-on-1
-        </Button>
-      )
-    }
-
-    return (
-      <SectionHeader
-        icon={Handshake}
-        title={title}
-        action={actions.length > 0 ? actions : undefined}
-      />
-    )
-  }
-
   return (
     <>
       <SimpleListContainer className={className}>
-        {renderSectionHeader()}
-
         <SimpleListItemsContainer
           isEmpty={visibleOneOnOnes.length === 0}
           emptyStateText={emptyStateText}

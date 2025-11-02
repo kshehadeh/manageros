@@ -11,7 +11,7 @@ import { SimpleTeamList } from './team-list'
 import { Person as PersonWithRelations } from '@/types/person'
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
-import { Rocket, Plus, Eye, Users } from 'lucide-react'
+import { Rocket, Plus, Eye, Users, Building2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface TeamDetailContentProps {
@@ -194,18 +194,35 @@ export function TeamDetailContent({ team, isAdmin }: TeamDetailContentProps) {
           </PageSection>
 
           {/* Child Teams */}
-          <SimpleTeamList
-            teams={team.children}
-            title={`Child Teams (${team.children.length})`}
-            variant='compact'
-            showAddButton={true}
-            addButtonHref={`/teams/new?parentId=${team.id}`}
-            immutableFilters={{}}
-            emptyStateText='No child teams yet.'
-            onTeamUpdate={() => {
-              window.location.reload()
-            }}
-          />
+          <PageSection
+            header={
+              <SectionHeader
+                icon={Building2}
+                title={`Child Teams (${team.children.length})`}
+                action={
+                  <Button asChild variant='outline' size='sm'>
+                    <Link
+                      href={`/teams/new?parentId=${team.id}`}
+                      className='flex items-center gap-2'
+                    >
+                      <Plus className='w-4 h-4' />
+                      Add Team
+                    </Link>
+                  </Button>
+                }
+              />
+            }
+          >
+            <SimpleTeamList
+              teams={team.children}
+              variant='compact'
+              immutableFilters={{}}
+              emptyStateText='No child teams yet.'
+              onTeamUpdate={() => {
+                window.location.reload()
+              }}
+            />
+          </PageSection>
         </div>
       </div>
 
