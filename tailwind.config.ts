@@ -8,8 +8,39 @@ export default {
   theme: {
     extend: {
       colors: {
-        destructive: 'var(--color-destructive)',
-        'destructive-foreground': 'var(--color-destructive-foreground)',
+        background: 'var(--color-background)',
+        foreground: 'var(--color-foreground)',
+        card: {
+          DEFAULT: 'var(--color-card)',
+          foreground: 'var(--color-card-foreground)',
+        },
+        popover: {
+          DEFAULT: 'var(--color-popover)',
+          foreground: 'var(--color-popover-foreground)',
+        },
+        primary: {
+          DEFAULT: 'var(--color-primary)',
+          foreground: 'var(--color-primary-foreground)',
+        },
+        secondary: {
+          DEFAULT: 'var(--color-secondary)',
+          foreground: 'var(--color-secondary-foreground)',
+        },
+        muted: {
+          DEFAULT: 'var(--color-muted)',
+          foreground: 'var(--color-muted-foreground)',
+        },
+        accent: {
+          DEFAULT: 'var(--color-accent)',
+          foreground: 'var(--color-accent-foreground)',
+        },
+        destructive: {
+          DEFAULT: 'var(--color-destructive)',
+          foreground: 'var(--color-destructive-foreground)',
+        },
+        border: 'var(--color-border)',
+        input: 'var(--color-input)',
+        ring: 'var(--color-ring)',
         badge: {
           success: 'hsl(var(--badge-success))',
           'success-foreground': 'hsl(var(--badge-success-foreground))',
@@ -32,6 +63,51 @@ export default {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+      },
+      typography: {
+        DEFAULT: {
+          css: {
+            '--tw-prose-body': 'var(--color-foreground)',
+            '--tw-prose-headings': 'var(--color-foreground)',
+            '--tw-prose-lead': 'var(--color-muted-foreground)',
+            '--tw-prose-links': 'var(--color-primary)',
+            '--tw-prose-bold': 'var(--color-foreground)',
+            '--tw-prose-counters': 'var(--color-muted-foreground)',
+            '--tw-prose-bullets': 'var(--color-muted-foreground)',
+            '--tw-prose-hr': 'var(--color-border)',
+            '--tw-prose-quotes': 'var(--color-foreground)',
+            '--tw-prose-quote-borders': 'var(--color-border)',
+            '--tw-prose-captions': 'var(--color-muted-foreground)',
+            '--tw-prose-code': 'var(--color-foreground)',
+            '--tw-prose-pre-code': 'var(--color-foreground)',
+            '--tw-prose-pre-bg': 'var(--color-muted)',
+            '--tw-prose-th-borders': 'var(--color-border)',
+            '--tw-prose-td-borders': 'var(--color-border)',
+            color: 'var(--color-foreground)',
+            maxWidth: 'none',
+          },
+        },
+        invert: {
+          css: {
+            '--tw-prose-body': 'var(--color-foreground)',
+            '--tw-prose-headings': 'var(--color-foreground)',
+            '--tw-prose-lead': 'var(--color-muted-foreground)',
+            '--tw-prose-links': 'var(--color-primary)',
+            '--tw-prose-bold': 'var(--color-foreground)',
+            '--tw-prose-counters': 'var(--color-muted-foreground)',
+            '--tw-prose-bullets': 'var(--color-muted-foreground)',
+            '--tw-prose-hr': 'var(--color-border)',
+            '--tw-prose-quotes': 'var(--color-foreground)',
+            '--tw-prose-quote-borders': 'var(--color-border)',
+            '--tw-prose-captions': 'var(--color-muted-foreground)',
+            '--tw-prose-code': 'var(--color-foreground)',
+            '--tw-prose-pre-code': 'var(--color-foreground)',
+            '--tw-prose-pre-bg': 'var(--color-muted)',
+            '--tw-prose-th-borders': 'var(--color-border)',
+            '--tw-prose-td-borders': 'var(--color-border)',
+            color: 'var(--color-foreground)',
+          },
+        },
       },
     },
   },
