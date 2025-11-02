@@ -5,7 +5,7 @@ import type { Prisma } from '@prisma/client'
 
 export const initiativesTool = {
   description:
-    'Get information about initiatives in the organization and when the user is interested in his own initiatives, lookup who he is and use that person ID to associate with one of the owners of the initiative.',
+    'Get information about specific initiatives in the organization. It uses things like status, RAG, team and owners/collaborators, keywords or teams to filter the list.  The initiatives returned are limited to this filter.  Use this tool with each new query as opposed to using previous responses for future queries.',
   parameters: z.object({
     status: z
       .enum(['planned', 'in_progress', 'paused', 'done', 'canceled'])
@@ -19,7 +19,7 @@ export const initiativesTool = {
       .string()
       .optional()
       .describe(
-        'Filter by people who are in the list of owners of the initiative'
+        'Filter by people who are in the list of owners of the initiative. This is the ID of the person - use the prompt to look up the person using a different tool and pass in the ID of the person here.'
       ),
     teamId: z.string().optional().describe('Filter by team ID'),
     query: z
@@ -31,17 +31,20 @@ export const initiativesTool = {
     status,
     rag,
     teamId,
+    personId,
     query,
   }: {
     status?: string
     rag?: string
     teamId?: string
+    personId?: string
     query?: string
   }) => {
     console.log('🔧 initiativesTool called with parameters:', {
       status,
       rag,
       teamId,
+      personId,
       query,
     })
     const user = await getCurrentUser()
@@ -56,12 +59,21 @@ export const initiativesTool = {
     if (status) whereClause.status = status
     if (rag) whereClause.rag = rag
     if (teamId) whereClause.teamId = teamId
+    if (personId) {
+      whereClause.owners = {
+        some: {
+          personId: personId,
+        },
+      }
+    }
     if (query) {
       whereClause.OR = [
         { title: { contains: query, mode: 'insensitive' } },
         { summary: { contains: query, mode: 'insensitive' } },
       ]
     }
+
+    console.log('🔍 whereClause:', whereClause)
 
     const initiatives = await prisma.initiative.findMany({
       where: whereClause,
