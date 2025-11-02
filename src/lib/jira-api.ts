@@ -34,6 +34,10 @@ export interface JiraIssue {
     }
     status: {
       name: string
+      statusCategory?: {
+        key: string
+        name: string
+      }
     }
     priority?: {
       name: string
@@ -43,7 +47,6 @@ export interface JiraIssue {
       name: string
     }
     assignee?: JiraUser
-    statusCategory?: string[]
   }
 }
 
@@ -194,6 +197,10 @@ export class JiraApiService {
           }
           status: {
             name: string
+            statusCategory?: {
+              key: string
+              name: string
+            }
           }
           priority?: {
             name: string
@@ -210,7 +217,7 @@ export class JiraApiService {
     }>('search/jql', {
       jql,
       fields:
-        'summary,issuetype,status,priority,project,assignee,updated,created',
+        'summary,issuetype,status,statuscategory,priority,project,assignee,updated,created',
       maxResults: '100',
     })
 

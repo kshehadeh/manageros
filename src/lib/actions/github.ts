@@ -311,3 +311,92 @@ export async function fetchGithubPullRequests(
     }
   }
 }
+
+export async function fetchGithubMetrics(
+  personId: string,
+  daysBack: number = 30
+) {
+  const user = await getCurrentUser()
+
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization')
+  }
+
+  // Verify person belongs to user's organization
+  const person = await prisma.person.findFirst({
+    where: {
+      id: personId,
+      organizationId: user.organizationId,
+    },
+    include: {
+      githubAccount: true,
+    },
+  })
+
+  if (!person) {
+    throw new Error('Person not found or access denied')
+  }
+
+  if (!person.githubAccount) {
+    throw new Error('Person is not linked to a GitHub account')
+  }
+
+  // Get user's GitHub credentials
+  const credentials = await prisma.userGithubCredentials.findUnique({
+    where: { userId: user.id },
+  })
+
+  if (!credentials) {
+    throw new Error('GitHub credentials not configured')
+  }
+
+  try {
+    // Fetch recent pull requests
+    const githubService = GithubApiService.fromEncryptedCredentials(
+      credentials.githubUsername,
+      credentials.encryptedPat
+    )
+
+    const pullRequests = await githubService.getRecentPullRequests(
+      person.githubAccount.githubUsername,
+      daysBack
+    )
+
+    // Calculate date threshold for merged PRs (last 30 days)
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - daysBack)
+
+    // Categorize PRs
+    let openPrs = 0
+    let mergedPrs = 0
+
+    for (const pr of pullRequests) {
+      // Count open PRs (state === 'open')
+      if (pr.state === 'open') {
+        openPrs++
+      }
+      // Count merged PRs that were merged in the last 30 days
+      // mergedAt is set when a PR is merged, regardless of state
+      if (pr.mergedAt) {
+        const mergedDate = new Date(pr.mergedAt)
+        if (mergedDate >= thirtyDaysAgo) {
+          mergedPrs++
+        }
+      }
+    }
+
+    return {
+      success: true,
+      metrics: {
+        openPrs,
+        mergedPrs,
+        total: pullRequests.length,
+      },
+    }
+  } catch (error) {
+    console.error('Failed to fetch GitHub metrics:', error)
+    throw error instanceof Error
+      ? error
+      : new Error('Failed to fetch GitHub metrics')
+  }
+}

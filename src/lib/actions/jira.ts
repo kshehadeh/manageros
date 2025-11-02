@@ -276,3 +276,109 @@ export async function fetchJiraAssignedTickets(
 
   return { success: true, tickets: ticketData }
 }
+
+export async function fetchJiraMetrics(
+  personId: string,
+  daysBack: number = 30
+) {
+  const user = await getCurrentUser()
+
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization')
+  }
+
+  // Verify person belongs to user's organization
+  const person = await prisma.person.findFirst({
+    where: {
+      id: personId,
+      organizationId: user.organizationId,
+    },
+    include: {
+      jiraAccount: true,
+    },
+  })
+
+  if (!person) {
+    throw new Error('Person not found or access denied')
+  }
+
+  if (!person.jiraAccount) {
+    throw new Error('Person is not linked to a Jira account')
+  }
+
+  // Get user's Jira credentials
+  const credentials = await prisma.userJiraCredentials.findUnique({
+    where: { userId: user.id },
+  })
+
+  if (!credentials) {
+    throw new Error('Jira credentials not configured')
+  }
+
+  // Calculate date range for last 30 days
+  const toDate = new Date()
+  const fromDate = new Date()
+  fromDate.setDate(fromDate.getDate() - daysBack)
+
+  const fromDateStr = fromDate.toISOString().split('T')[0]
+  const toDateStr = toDate.toISOString().split('T')[0]
+
+  // Fetch assigned tickets from Jira
+  const jiraService = JiraApiService.fromEncryptedCredentials(
+    credentials.jiraUsername,
+    credentials.encryptedApiKey,
+    credentials.jiraBaseUrl
+  )
+
+  const assignedTickets = await jiraService.getUserAssignedTickets(
+    person.jiraAccount.jiraAccountId,
+    fromDateStr,
+    toDateStr
+  )
+
+  // Categorize tickets based on status
+  let completed = 0
+  let inProgress = 0
+  let notStarted = 0
+
+  for (const ticket of assignedTickets) {
+    const statusName = ticket.issue.fields.status.name.toLowerCase()
+    const statusCategory =
+      ticket.issue.fields.status.statusCategory?.key?.toLowerCase()
+
+    // Check if completed (status category "done" or status name indicates completion)
+    if (
+      statusCategory === 'done' ||
+      statusName.includes('done') ||
+      statusName.includes('closed') ||
+      statusName.includes('resolved') ||
+      statusName.includes('complete')
+    ) {
+      completed++
+    }
+    // Check if in progress (status category "in_progress" or status name indicates progress)
+    else if (
+      statusCategory === 'in_progress' ||
+      statusName.includes('progress') ||
+      statusName.includes('review') ||
+      statusName.includes('testing') ||
+      statusName.includes('in review')
+    ) {
+      inProgress++
+    }
+    // Everything else is considered not started
+    else {
+      notStarted++
+    }
+  }
+
+  return {
+    success: true,
+    metrics: {
+      completed,
+      inProgress,
+      notStarted,
+      total: assignedTickets.length,
+    },
+  }
+}

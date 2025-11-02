@@ -42,8 +42,8 @@ import { OneOnOneMeetingsSection } from './sections/one-on-one-meetings-section'
 import { DirectReportsSection } from './sections/direct-reports-section'
 import { AccountLinkingSection } from './sections/account-linking-section'
 import { JobRoleSection } from './sections/job-role-section'
-import { GithubPrsActivitySection } from '@/components/github-prs-activity-section'
-import { JiraWorkActivitySection } from '@/components/jira-work-activity-section'
+import { GithubMetricsSection } from '@/components/github-metrics-section'
+import { JiraMetricsSection } from '@/components/jira-metrics-section'
 
 interface PersonDetailContentProps {
   person: PersonWithDetailRelations
@@ -207,18 +207,18 @@ export function PersonDetailContent({
             />
           </Suspense>
 
-          {/* Jira Work Activity - Show if person has Jira account */}
+          {/* Jira Metrics - Show if person has Jira account */}
           {Boolean(person.jiraAccount) && (
-            <JiraWorkActivitySection
+            <JiraMetricsSection
               personId={person.id}
               personName={person.name}
               hasJiraAccount={true}
             />
           )}
 
-          {/* GitHub PR Activity - Show if person has GitHub account */}
+          {/* GitHub Metrics - Show if person has GitHub account */}
           {Boolean(person.githubAccount) && (
-            <GithubPrsActivitySection
+            <GithubMetricsSection
               personId={person.id}
               personName={person.name}
               hasGithubAccount={true}
