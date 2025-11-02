@@ -124,7 +124,8 @@ export class GithubApiService {
 
   async getRecentPullRequests(
     username: string,
-    daysBack: number = 30
+    daysBack: number = 30,
+    allowedOrganizations?: string[]
   ): Promise<GithubPullRequest[]> {
     const since = new Date()
     since.setDate(since.getDate() - daysBack)
@@ -158,6 +159,10 @@ export class GithubApiService {
     const data = (await response.json()) as Record<string, unknown>
     const issues = data.items as Record<string, unknown>[]
 
+    // Normalize allowed organizations to lowercase for comparison
+    const normalizedAllowedOrgs =
+      allowedOrganizations?.map(org => org.toLowerCase()) || []
+
     // Fetch detailed PR information for each issue
     const pullRequests: GithubPullRequest[] = []
 
@@ -170,6 +175,17 @@ export class GithubApiService {
         if (!repoMatch) continue
 
         const [, owner, repo] = repoMatch
+
+        // Filter by allowed organizations if configured
+        // If no organizations are configured, allow all PRs (backward compatibility)
+        if (
+          normalizedAllowedOrgs.length > 0 &&
+          !normalizedAllowedOrgs.includes(owner.toLowerCase())
+        ) {
+          // Skip PRs from organizations not in the allowed list
+          continue
+        }
+
         const pr = (await this.makeRequest(
           `/repos/${owner}/${repo}/pulls/${prNumber}`
         )) as Record<string, unknown>

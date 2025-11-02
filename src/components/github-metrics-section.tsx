@@ -58,17 +58,18 @@ export function GithubMetricsSection({
     return null
   }
 
+  const header = (
+    <SectionHeader
+      icon={FaGithub}
+      title='GitHub Activity'
+      description='Last 30 days'
+    />
+  )
+
   // Don't render if there's an error
   if (error) {
     return (
-      <PageSection
-        header={
-          <SectionHeader
-            icon={FaGithub}
-            title='GitHub Activity (Last 30 Days)'
-          />
-        }
-      >
+      <PageSection header={header}>
         <div className='rounded-md bg-badge-error/20 border-badge-error p-3'>
           <div className='text-sm text-badge-error-text'>{error}</div>
         </div>
@@ -79,14 +80,7 @@ export function GithubMetricsSection({
   // Show loading state
   if (isLoading || metrics === null) {
     return (
-      <PageSection
-        header={
-          <SectionHeader
-            icon={FaGithub}
-            title='GitHub Activity (Last 30 Days)'
-          />
-        }
-      >
+      <PageSection header={header}>
         <div className='flex justify-center py-4'>
           <div className='text-sm text-muted-foreground'>
             Loading GitHub metrics...
@@ -102,11 +96,7 @@ export function GithubMetricsSection({
   }
 
   return (
-    <PageSection
-      header={
-        <SectionHeader icon={FaGithub} title='GitHub Activity (Last 30 Days)' />
-      }
-    >
+    <PageSection header={header}>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         <Card className='bg-muted/40 border-0 rounded-md'>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>

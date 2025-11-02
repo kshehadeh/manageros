@@ -59,14 +59,18 @@ export function JiraMetricsSection({
     return null
   }
 
+  const header = (
+    <SectionHeader
+      icon={FaJira}
+      title='Jira Activity'
+      description='Last 30 days'
+    />
+  )
+
   // Don't render if there's an error or no data
   if (error) {
     return (
-      <PageSection
-        header={
-          <SectionHeader icon={FaJira} title='Jira Activity (Last 30 Days)' />
-        }
-      >
+      <PageSection header={header}>
         <div className='rounded-md bg-badge-error/20 border-badge-error p-3'>
           <div className='text-sm text-badge-error-text'>{error}</div>
         </div>
@@ -77,11 +81,7 @@ export function JiraMetricsSection({
   // Show loading state
   if (isLoading || metrics === null) {
     return (
-      <PageSection
-        header={
-          <SectionHeader icon={FaJira} title='Jira Activity (Last 30 Days)' />
-        }
-      >
+      <PageSection header={header}>
         <div className='flex justify-center py-4'>
           <div className='text-sm text-muted-foreground'>
             Loading Jira metrics...
@@ -97,11 +97,7 @@ export function JiraMetricsSection({
   }
 
   return (
-    <PageSection
-      header={
-        <SectionHeader icon={FaJira} title='Jira Activity (Last 30 Days)' />
-      }
-    >
+    <PageSection header={header}>
       <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
         <Card className='bg-muted/40 border-0 rounded-md'>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>

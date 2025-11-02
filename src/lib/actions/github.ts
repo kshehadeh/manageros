@@ -287,6 +287,21 @@ export async function fetchGithubPullRequests(
     throw new Error('GitHub credentials not configured')
   }
 
+  // Get allowed GitHub organizations for filtering
+  const githubOrgs = await prisma.organizationGithubOrg.findMany({
+    where: {
+      organizationId: user.organizationId,
+    },
+    select: {
+      githubOrgName: true,
+    },
+  })
+
+  const allowedOrganizations =
+    githubOrgs.length > 0
+      ? githubOrgs.map((org: { githubOrgName: string }) => org.githubOrgName)
+      : undefined
+
   try {
     // Fetch recent pull requests
     const githubService = GithubApiService.fromEncryptedCredentials(
@@ -296,7 +311,8 @@ export async function fetchGithubPullRequests(
 
     const pullRequests = await githubService.getRecentPullRequests(
       person.githubAccount.githubUsername,
-      daysBack
+      daysBack,
+      allowedOrganizations
     )
 
     return { success: true, pullRequests }
@@ -350,6 +366,21 @@ export async function fetchGithubMetrics(
     throw new Error('GitHub credentials not configured')
   }
 
+  // Get allowed GitHub organizations for filtering
+  const githubOrgs = await prisma.organizationGithubOrg.findMany({
+    where: {
+      organizationId: user.organizationId,
+    },
+    select: {
+      githubOrgName: true,
+    },
+  })
+
+  const allowedOrganizations =
+    githubOrgs.length > 0
+      ? githubOrgs.map((org: { githubOrgName: string }) => org.githubOrgName)
+      : undefined
+
   try {
     // Fetch recent pull requests
     const githubService = GithubApiService.fromEncryptedCredentials(
@@ -359,7 +390,8 @@ export async function fetchGithubMetrics(
 
     const pullRequests = await githubService.getRecentPullRequests(
       person.githubAccount.githubUsername,
-      daysBack
+      daysBack,
+      allowedOrganizations
     )
 
     // Calculate date threshold for merged PRs (last 30 days)

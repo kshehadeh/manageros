@@ -41,6 +41,7 @@ model Organization {
   cronJobExecutions CronJobExecution[]
   notes          Note[]
   fileAttachments FileAttachment[]
+  githubOrgs  OrganizationGithubOrg[]
 }
 
 model User {
@@ -762,5 +763,18 @@ model FileAttachment {
   @@index([organizationId])
   @@index([uploadedById])
   @@index([createdAt])
+}
+
+model OrganizationGithubOrg {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  githubOrgName  String       // GitHub organization name (e.g., "acme-corp")
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@unique([organizationId, githubOrgName])
+  @@index([organizationId])
+  @@index([githubOrgName])
 }
 

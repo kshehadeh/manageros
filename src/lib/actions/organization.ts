@@ -841,3 +841,161 @@ export async function getCurrentUserWithPerson() {
     person,
   }
 }
+
+// GitHub Organization Settings Actions
+
+export async function getGithubOrganizations() {
+  const user = await getCurrentUser()
+
+  // Check if user is admin
+  if (user.role !== 'ADMIN') {
+    throw new Error(
+      'Only organization admins can view GitHub organization settings'
+    )
+  }
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    return []
+  }
+
+  try {
+    return await prisma.organizationGithubOrg.findMany({
+      where: {
+        organizationId: user.organizationId,
+      },
+      orderBy: { githubOrgName: 'asc' },
+    })
+  } catch (error) {
+    // If table doesn't exist yet or model isn't available, return empty array
+    if (
+      error instanceof Error &&
+      (error.message.includes('does not exist') ||
+        error.message.includes('Unknown model') ||
+        error.message.includes('Cannot read properties') ||
+        error.message.includes('undefined'))
+    ) {
+      console.warn(
+        'OrganizationGithubOrg model/table not available. Please restart the dev server and run database migrations.'
+      )
+      return []
+    }
+    throw error
+  }
+}
+
+export async function addGithubOrganization(githubOrgName: string) {
+  const user = await getCurrentUser()
+
+  // Check if user is admin
+  if (user.role !== 'ADMIN') {
+    throw new Error('Only organization admins can add GitHub organizations')
+  }
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error(
+      'User must belong to an organization to manage GitHub organizations'
+    )
+  }
+
+  // Validate GitHub org name (alphanumeric, hyphens, underscores only)
+  const sanitizedOrgName = githubOrgName.trim().toLowerCase()
+  if (!/^[a-zA-Z0-9_-]+$/.test(sanitizedOrgName)) {
+    throw new Error(
+      'GitHub organization name can only contain letters, numbers, hyphens, and underscores'
+    )
+  }
+
+  try {
+    // Check if already exists
+    const existing = await prisma.organizationGithubOrg.findUnique({
+      where: {
+        // eslint-disable-next-line camelcase
+        organizationId_githubOrgName: {
+          organizationId: user.organizationId,
+          githubOrgName: sanitizedOrgName,
+        },
+      },
+    })
+
+    if (existing) {
+      throw new Error(
+        'This GitHub organization is already configured for your organization'
+      )
+    }
+
+    // Create the GitHub organization association
+    await prisma.organizationGithubOrg.create({
+      data: {
+        organizationId: user.organizationId,
+        githubOrgName: sanitizedOrgName,
+      },
+    })
+
+    revalidatePath('/organization/settings')
+  } catch (error) {
+    // If model isn't available, provide helpful error message
+    if (
+      error instanceof Error &&
+      (error.message.includes('Cannot read properties') ||
+        error.message.includes('undefined') ||
+        error.message.includes('does not exist'))
+    ) {
+      throw new Error(
+        'GitHub organizations feature is not available yet. Please restart your dev server to load the database changes.'
+      )
+    }
+    throw error
+  }
+}
+
+export async function removeGithubOrganization(githubOrgId: string) {
+  const user = await getCurrentUser()
+
+  // Check if user is admin
+  if (user.role !== 'ADMIN') {
+    throw new Error('Only organization admins can remove GitHub organizations')
+  }
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error(
+      'User must belong to an organization to manage GitHub organizations'
+    )
+  }
+
+  try {
+    // Verify the GitHub org belongs to user's organization
+    const githubOrg = await prisma.organizationGithubOrg.findFirst({
+      where: {
+        id: githubOrgId,
+        organizationId: user.organizationId,
+      },
+    })
+
+    if (!githubOrg) {
+      throw new Error('GitHub organization not found or access denied')
+    }
+
+    // Delete the GitHub organization association
+    await prisma.organizationGithubOrg.delete({
+      where: { id: githubOrgId },
+    })
+
+    revalidatePath('/organization/settings')
+  } catch (error) {
+    // If model isn't available, provide helpful error message
+    if (
+      error instanceof Error &&
+      (error.message.includes('Cannot read properties') ||
+        error.message.includes('undefined') ||
+        error.message.includes('does not exist'))
+    ) {
+      throw new Error(
+        'GitHub organizations feature is not available yet. Please restart your dev server to load the database changes.'
+      )
+    }
+    throw error
+  }
+}

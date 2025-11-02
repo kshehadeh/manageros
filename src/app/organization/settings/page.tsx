@@ -20,9 +20,11 @@ import {
   Users2,
   ListTodo,
   Rocket,
+  Github,
 } from 'lucide-react'
 import { CreateNotificationModal } from '@/components/notifications/create-notification-modal'
 import { OrganizationSettingsBreadcrumbClient } from '@/components/organization/organization-settings-breadcrumb-client'
+import { GithubOrganizationsManager } from '@/components/organization/github-organizations-manager'
 
 export default async function OrganizationSettingsPage() {
   const session = await getServerSession(authOptions)
@@ -200,6 +202,19 @@ export default async function OrganizationSettingsPage() {
                 </Link>
               </Button>
             </div>
+          </PageSection>
+
+          {/* GitHub Organizations */}
+          <PageSection
+            header={
+              <SectionHeader
+                icon={Github}
+                title='GitHub Organizations'
+                description='Configure which GitHub organizations are associated with your ManagerOS organization'
+              />
+            }
+          >
+            <GithubOrganizationsManager />
           </PageSection>
         </div>
       </div>
