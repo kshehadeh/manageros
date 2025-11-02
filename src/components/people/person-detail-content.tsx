@@ -209,18 +209,13 @@ export function PersonDetailContent({
 
           {/* Jira Metrics - Show if person has Jira account */}
           {Boolean(person.jiraAccount) && (
-            <JiraMetricsSection
-              personId={person.id}
-              personName={person.name}
-              hasJiraAccount={true}
-            />
+            <JiraMetricsSection personId={person.id} hasJiraAccount={true} />
           )}
 
           {/* GitHub Metrics - Show if person has GitHub account */}
           {Boolean(person.githubAccount) && (
             <GithubMetricsSection
               personId={person.id}
-              personName={person.name}
               hasGithubAccount={true}
             />
           )}
