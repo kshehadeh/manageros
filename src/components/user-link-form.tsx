@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { Link as LinkIcon } from 'lucide-react'
+import { Link as LinkIcon, Unlink } from 'lucide-react'
 import {
   linkUserToPerson,
   unlinkUserFromPerson,
@@ -123,29 +123,26 @@ export function UserLinkForm({
   return (
     <div className='space-y-4'>
       {linkedUser ? (
-        <div className='bg-secondary/30 border rounded-lg p-4'>
-          <div className='space-y-3'>
-            <div>
-              <div className='font-medium text-foreground'>
-                {linkedUser.name}
-              </div>
-              <div className='text-sm text-muted-foreground'>
-                {linkedUser.email}
-              </div>
-              <div className='text-sm text-muted-foreground'>
-                {linkedUser.role}
-              </div>
+        <div className='flex items-start justify-between gap-3'>
+          <div className='flex flex-col flex-1'>
+            <div className='font-medium text-foreground'>{linkedUser.name}</div>
+            <div className='text-sm text-muted-foreground'>
+              {linkedUser.email}
             </div>
-            <Button
-              onClick={handleUnlink}
-              disabled={isLoading}
-              variant='outline'
-              size='sm'
-              className='w-full'
-            >
-              {isLoading ? 'Unlinking...' : 'Unlink'}
-            </Button>
           </div>
+          <Button
+            onClick={handleUnlink}
+            disabled={isLoading}
+            variant='outline'
+            size='icon'
+            title='Unlink'
+          >
+            {isLoading ? (
+              <span className='text-sm'>...</span>
+            ) : (
+              <Unlink className='h-4 w-4' />
+            )}
+          </Button>
         </div>
       ) : (
         <div className='space-y-4'>
