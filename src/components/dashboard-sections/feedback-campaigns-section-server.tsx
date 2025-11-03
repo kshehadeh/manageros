@@ -1,9 +1,12 @@
 import { getCurrentUser } from '@/lib/auth-utils'
-import { prisma } from '@/lib/db'
 import { SimpleFeedbackCampaignList } from '@/components/feedback/feedback-campaign-simple-list'
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
 import { MessageSquare } from 'lucide-react'
+import {
+  getActiveFeedbackCampaignsForUser,
+  getFeedbackResponseCountsByCampaign,
+} from '@/lib/data/feedback-campaigns'
 
 export async function DashboardFeedbackCampaignsServerSection() {
   const user = await getCurrentUser()
@@ -14,51 +17,28 @@ export async function DashboardFeedbackCampaignsServerSection() {
   }
 
   // Fetch active feedback campaigns created by the current user
-  const campaigns = await prisma.feedbackCampaign.findMany({
-    where: {
-      userId: user.id,
-      status: 'active',
-      targetPerson: {
-        organizationId: user.organizationId,
-      },
-    },
-    include: {
-      targetPerson: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
-      template: {
-        select: {
-          id: true,
-          name: true,
-          description: true,
-        },
-      },
-      _count: {
-        select: {
-          responses: true,
-        },
-      },
-    },
-    orderBy: { createdAt: 'desc' },
-    take: 100,
-  })
+  const campaignsResult = await getActiveFeedbackCampaignsForUser(
+    user.id,
+    user.organizationId,
+    {
+      limit: 100,
+      includeTargetPerson: true,
+      includeTemplate: true,
+      includeResponseCount: true,
+    }
+  )
+
+  // Type assertion: when includeTemplate and includeTargetPerson are true, they will be included
+  const campaigns = campaignsResult as Array<
+    (typeof campaignsResult)[0] & {
+      template: { id: string; name: string; description: string | null } | null
+      targetPerson: { id: string; name: string; email: string | null }
+    }
+  >
 
   // Get response counts for each campaign
   const campaignIds = campaigns.map(c => c.id)
-  const responseCounts =
-    campaignIds.length > 0
-      ? await prisma.feedbackResponse.groupBy({
-          by: ['campaignId'],
-          where: {
-            campaignId: { in: campaignIds },
-          },
-          _count: true,
-        })
-      : []
+  const responseCounts = await getFeedbackResponseCountsByCampaign(campaignIds)
 
   const responseCountMap = new Map(
     responseCounts.map(r => [r.campaignId, Number(r._count)])

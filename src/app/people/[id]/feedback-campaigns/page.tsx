@@ -1,4 +1,3 @@
-import { prisma } from '@/lib/db'
 import { notFound, redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -9,6 +8,8 @@ import { Plus } from 'lucide-react'
 import Link from 'next/link'
 import { checkIfManagerOrSelf } from '@/lib/utils/people-utils'
 import { HelpIcon } from '@/components/help-icon'
+import { getPersonById, getPersonByUserId } from '@/lib/data/people'
+import { getFeedbackCampaignsForPerson } from '@/lib/data/feedback-campaigns'
 
 interface FeedbackCampaignsPageProps {
   params: Promise<{
@@ -32,32 +33,20 @@ export default async function FeedbackCampaignsPage({
   }
 
   // Get the person
-  const person = await prisma.person.findFirst({
-    where: {
-      id,
-      organizationId: session.user.organizationId,
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-    },
-  })
+  const person = await getPersonById(id, session.user.organizationId)
 
-  if (!person) {
+  if (!person || !('id' in person) || typeof person.id !== 'string') {
     notFound()
   }
 
   // Get the current user's person record
-  const currentPerson = await prisma.person.findFirst({
-    where: {
-      user: {
-        id: session.user.id,
-      },
-    },
-  })
+  const currentPerson = await getPersonByUserId(session.user.id)
 
-  if (!currentPerson) {
+  if (
+    !currentPerson ||
+    !('id' in currentPerson) ||
+    typeof currentPerson.id !== 'string'
+  ) {
     redirect('/people')
   }
 
@@ -69,57 +58,46 @@ export default async function FeedbackCampaignsPage({
   }
 
   // Get feedback campaigns for this person created by the current user
-  const campaigns = await prisma.feedbackCampaign.findMany({
-    where: {
-      targetPersonId: person.id,
-      userId: session.user.id,
-    },
-    include: {
-      targetPerson: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
-      template: {
-        select: {
-          id: true,
-          name: true,
-          description: true,
-        },
-      },
-      responses: {
-        select: {
-          id: true,
-          responderEmail: true,
-          submittedAt: true,
-        },
-      },
-    },
-    orderBy: { createdAt: 'desc' },
-  })
+  const campaigns = await getFeedbackCampaignsForPerson(
+    person.id,
+    session.user.id,
+    {
+      includeTargetPerson: true,
+      includeUser: true,
+      includeTemplate: true,
+      includeResponses: true,
+    }
+  )
 
   // Type the campaigns with proper status typing
-  const typedCampaigns = campaigns.map(campaign => ({
-    ...campaign,
-    status: campaign.status as 'draft' | 'active' | 'completed' | 'cancelled',
-    inviteLink: campaign.inviteLink || undefined,
-    template: campaign.template
-      ? {
-          id: campaign.template.id,
-          name: campaign.template.name,
-          description: campaign.template.description || undefined,
-        }
-      : undefined,
-  }))
+  const typedCampaigns = campaigns.map(campaign => {
+    const campaignWithTemplate = campaign as typeof campaign & {
+      template?: { id: string; name: string; description: string | null } | null
+      user?: { id: string; name: string; email: string } | null
+      targetPerson?: { id: string; name: string; email: string | null } | null
+      responses?: Array<{
+        id: string
+        responderEmail: string
+        submittedAt: Date
+      }>
+    }
+
+    return {
+      ...campaignWithTemplate,
+      status: campaign.status as 'draft' | 'active' | 'completed' | 'cancelled',
+      inviteLink: campaign.inviteLink || undefined,
+      template: campaignWithTemplate.template
+        ? {
+            id: campaignWithTemplate.template.id,
+            name: campaignWithTemplate.template.name,
+            description: campaignWithTemplate.template.description || undefined,
+          }
+        : undefined,
+      user: campaignWithTemplate.user!,
+      targetPerson: campaignWithTemplate.targetPerson!,
+      responses: campaignWithTemplate.responses || [],
+    }
+  })
 
   return (
     <FeedbackCampaignsBreadcrumbClient

@@ -3,8 +3,9 @@ import Link from 'next/link'
 
 import { FadeInOnScroll } from '@/components/marketing/fade-in'
 import { Button } from '@/components/ui/button'
+import { Metadata } from 'next'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Why initiatives matter | ManagerOS',
   description:
     'Discover how ManagerOS keeps strategic initiatives visible, connected, and moving forward with clarity for every stakeholder.',

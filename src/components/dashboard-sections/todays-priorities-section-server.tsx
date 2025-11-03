@@ -1,10 +1,15 @@
 import { getCurrentUser } from '@/lib/auth-utils'
-import { prisma } from '@/lib/db'
-import { getTaskAccessWhereClause } from '@/lib/task-access-utils'
 import {
   TodaysPrioritiesSection,
   type PriorityItem,
 } from './todays-priorities-section'
+import { getTasksForAssignee } from '@/lib/data/tasks'
+import {
+  getUpcomingMeetingInstancesForPerson,
+  getUpcomingNonRecurringMeetingsForPerson,
+} from '@/lib/data/meetings'
+import { getUpcomingOneOnOnesForPerson } from '@/lib/data/one-on-ones'
+import { getActiveFeedbackCampaignsForUser } from '@/lib/data/feedback-campaigns'
 
 export async function TodaysPrioritiesSectionServer() {
   const user = await getCurrentUser()
@@ -19,17 +24,15 @@ export async function TodaysPrioritiesSectionServer() {
   const priorityItems: PriorityItem[] = []
 
   // Fetch incomplete tasks assigned to the current user
-  const tasks = await prisma.task.findMany({
-    where: {
-      assigneeId: user.personId,
-      status: {
-        notIn: ['done', 'dropped'],
-      },
-      ...getTaskAccessWhereClause(user.organizationId, user.id, user.personId),
-    },
-    orderBy: [{ dueDate: { sort: 'asc', nulls: 'last' } }],
-    take: 10,
-  })
+  const tasks = await getTasksForAssignee(
+    user.personId,
+    user.organizationId,
+    user.id,
+    {
+      excludeStatus: ['done', 'dropped'],
+      limit: 10,
+    }
+  )
 
   tasks.forEach(task => {
     priorityItems.push({
@@ -46,46 +49,23 @@ export async function TodaysPrioritiesSectionServer() {
   })
 
   // Fetch upcoming meeting instances where user is a participant
-  const meetingInstances = await prisma.meetingInstance.findMany({
-    where: {
-      scheduledAt: {
-        gte: now,
-        lte: oneWeekFromNow,
-      },
-      OR: [
-        {
-          meeting: {
-            participants: {
-              some: {
-                personId: user.personId,
-              },
-            },
-          },
-        },
-        {
-          participants: {
-            some: {
-              personId: user.personId,
-            },
-          },
-        },
-      ],
-      meeting: {
-        organizationId: user.organizationId,
-      },
-    },
-    include: {
-      meeting: {
-        select: {
-          title: true,
-        },
-      },
-    },
-    orderBy: {
-      scheduledAt: 'asc',
-    },
-    take: 5,
-  })
+  const meetingInstancesResult = await getUpcomingMeetingInstancesForPerson(
+    user.personId,
+    user.organizationId,
+    now,
+    oneWeekFromNow,
+    {
+      limit: 5,
+      includeMeeting: true,
+    }
+  )
+
+  // Type assertion: when includeMeeting is true, meeting will be included
+  const meetingInstances = meetingInstancesResult as Array<
+    (typeof meetingInstancesResult)[0] & {
+      meeting: { title: string }
+    }
+  >
 
   meetingInstances.forEach(instance => {
     priorityItems.push({
@@ -98,37 +78,16 @@ export async function TodaysPrioritiesSectionServer() {
   })
 
   // Fetch non-recurring meetings where user is a participant
-  const nonRecurringMeetings = await prisma.meeting.findMany({
-    where: {
-      isRecurring: false,
-      scheduledAt: {
-        gte: now,
-        lte: oneWeekFromNow,
-      },
-      organizationId: user.organizationId,
-      OR: [
-        {
-          participants: {
-            some: {
-              personId: user.personId,
-            },
-          },
-        },
-        {
-          createdById: user.id,
-        },
-      ],
-    },
-    select: {
-      id: true,
-      title: true,
-      scheduledAt: true,
-    },
-    orderBy: {
-      scheduledAt: 'asc',
-    },
-    take: 5,
-  })
+  const nonRecurringMeetings = await getUpcomingNonRecurringMeetingsForPerson(
+    user.personId,
+    user.organizationId,
+    user.id,
+    now,
+    oneWeekFromNow,
+    {
+      limit: 5,
+    }
+  )
 
   nonRecurringMeetings.forEach(meeting => {
     priorityItems.push({
@@ -141,35 +100,29 @@ export async function TodaysPrioritiesSectionServer() {
   })
 
   // Fetch upcoming 1:1s
-  const oneOnOnes = await prisma.oneOnOne.findMany({
-    where: {
-      OR: [{ managerId: user.personId }, { reportId: user.personId }],
-      scheduledAt: {
-        gte: now,
-        lte: oneWeekFromNow,
-      },
-    },
-    include: {
-      manager: {
-        select: {
-          name: true,
-        },
-      },
-      report: {
-        select: {
-          name: true,
-        },
-      },
-    },
-    orderBy: {
-      scheduledAt: 'asc',
-    },
-    take: 5,
-  })
+  const oneOnOnesResult = await getUpcomingOneOnOnesForPerson(
+    user.personId,
+    now,
+    oneWeekFromNow,
+    {
+      limit: 5,
+      includeManager: true,
+      includeReport: true,
+    }
+  )
+
+  // Type assertion: when includeManager and includeReport are true, they will be included
+  const oneOnOnes = oneOnOnesResult as Array<
+    (typeof oneOnOnesResult)[0] & {
+      manager: { name: string } | null
+      report: { name: string } | null
+    }
+  >
 
   oneOnOnes.forEach(ooo => {
     const otherPerson =
       user.personId === ooo.managerId ? ooo.report : ooo.manager
+    if (!otherPerson) return
     priorityItems.push({
       id: ooo.id,
       type: 'oneonone',
@@ -180,29 +133,22 @@ export async function TodaysPrioritiesSectionServer() {
   })
 
   // Fetch active feedback campaigns created by user (ending within a week, or all active if none ending soon)
-  const feedbackCampaigns = await prisma.feedbackCampaign.findMany({
-    where: {
-      userId: user.id,
-      status: 'active',
-      endDate: {
-        gte: now,
-      },
-      targetPerson: {
-        organizationId: user.organizationId,
-      },
-    },
-    include: {
-      targetPerson: {
-        select: {
-          name: true,
-        },
-      },
-    },
-    orderBy: {
-      endDate: 'asc',
-    },
-    take: 5,
-  })
+  const feedbackCampaignsResult = await getActiveFeedbackCampaignsForUser(
+    user.id,
+    user.organizationId,
+    {
+      endDateAfter: now,
+      limit: 5,
+      includeTargetPerson: true,
+    }
+  )
+
+  // Type assertion: when includeTargetPerson is true, targetPerson will be included
+  const feedbackCampaigns = feedbackCampaignsResult as Array<
+    (typeof feedbackCampaignsResult)[0] & {
+      targetPerson: { id: string; name: string; email: string | null }
+    }
+  >
 
   feedbackCampaigns.forEach(campaign => {
     priorityItems.push({

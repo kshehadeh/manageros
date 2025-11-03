@@ -1,10 +1,10 @@
-import { prisma } from '@/lib/db'
 import { TeamDetailClient } from '@/components/teams/team-detail-client'
 import { TeamDetailContent } from '@/components/teams/team-detail-content'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import { getTeamById } from '@/lib/data/teams'
 
 interface TeamDetailPageProps {
   params: Promise<{
@@ -24,65 +24,52 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
   }
 
   const { id } = await params
-  const team = await prisma.team.findFirst({
-    where: {
-      id,
-      organizationId: session.user.organizationId,
-    },
-    include: {
-      parent: true,
-      children: {
-        include: {
-          people: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          initiatives: {
-            select: {
-              id: true,
-              title: true,
-            },
-          },
-        },
-        orderBy: { updatedAt: 'desc' },
-        take: 100,
-      },
-      people: {
-        include: {
-          manager: {
-            include: {
-              reports: true,
-            },
-          },
-          team: true,
-          jobRole: {
-            include: {
-              level: true,
-              domain: true,
-            },
-          },
-          reports: true,
-        },
-        orderBy: { name: 'asc' },
-      },
-      initiatives: {
-        include: {
-          team: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-        orderBy: { updatedAt: 'desc' },
-      },
-    },
+  const teamResult = await getTeamById(id, session.user.organizationId, {
+    includeParent: true,
+    includeChildren: true,
+    includePeople: true,
+    includeInitiatives: true,
   })
 
-  if (!team) {
+  if (!teamResult) {
     notFound()
+  }
+
+  // Type assertion: when options are provided, relations will be included
+  const team = teamResult as typeof teamResult & {
+    people: Array<{
+      id: string
+      name: string
+      email: string | null
+      role: string | null
+      status: string
+      birthday: Date | null
+      avatar: string | null
+      manager?: {
+        id: string
+        name: string
+        reports: Array<{ id: string; name: string }>
+      } | null
+      team?: unknown
+      jobRole?: {
+        id: string
+        level: { id: string; name: string }
+        domain: { id: string; name: string }
+      } | null
+      reports?: Array<{ id: string; name: string }>
+    }>
+    parent?: { id: string; name: string } | null
+    children?: Array<{
+      id: string
+      name: string
+      people?: Array<{ id: string; name: string }>
+      initiatives?: Array<{ id: string; title: string }>
+    }>
+    initiatives?: Array<{
+      id: string
+      title: string
+      team?: { id: string; name: string }
+    }>
   }
 
   // Add level field to people to match Person type requirements
@@ -92,6 +79,8 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
       ...person,
       level: 0, // Default level, can be calculated based on hierarchy if needed
     })),
+  } as typeof team & {
+    people: Array<(typeof team.people)[0] & { level: number }>
   }
 
   return (
@@ -102,7 +91,11 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
       isAdmin={session.user.role === 'ADMIN'}
     >
       <TeamDetailContent
-        team={teamWithLevels}
+        team={
+          teamWithLevels as unknown as Parameters<
+            typeof TeamDetailContent
+          >[0]['team']
+        }
         isAdmin={session.user.role === 'ADMIN'}
       />
     </TeamDetailClient>

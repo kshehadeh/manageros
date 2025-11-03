@@ -1,7 +1,10 @@
 import { getCurrentUser } from '@/lib/auth-utils'
-import { prisma } from '@/lib/db'
 import { TeamPulseSection } from './team-pulse-section'
-import { format, isFuture, differenceInDays } from 'date-fns'
+import { isFuture } from 'date-fns'
+import { getDirectReports } from '@/lib/data/people'
+import { getOneOnOnesForManagerAndReports } from '@/lib/data/one-on-ones'
+import { getTasksForAssignee } from '@/lib/data/tasks'
+import { getActiveFeedbackCampaignsForUser } from '@/lib/data/feedback-campaigns'
 
 interface TeamPulseMember {
   id: string
@@ -20,74 +23,65 @@ export async function TeamPulseSectionServer() {
     return null
   }
 
+  // Type guard: ensure these are strings after the check
+  const organizationId: string = user.organizationId
+  const personId: string = user.personId
+  const userId: string = user.id
+
   // Get current person's direct reports
-  const directReports = await prisma.person.findMany({
-    where: {
-      managerId: user.personId,
-      organizationId: user.organizationId,
-      status: 'active',
-    },
-    select: {
-      id: true,
-      name: true,
-      avatar: true,
-    },
-    orderBy: { name: 'asc' },
-    take: 10,
+  const directReportsResult = await getDirectReports(personId, organizationId, {
+    limit: 10,
+    includeOnlyFields: true,
   })
 
-  if (directReports.length === 0) {
+  if (directReportsResult.length === 0) {
     return null
   }
 
+  // Type assertion: when includeOnlyFields is true, id will be a string
+  const directReports = directReportsResult as Array<{
+    id: string
+    name: string
+    avatar: string | null
+  }>
+
   // Get 1:1 meetings for each report
-  const reportIds = directReports.map(r => r.id)
-  const oneOnOnes = await prisma.oneOnOne.findMany({
-    where: {
-      OR: [
-        { managerId: user.personId, reportId: { in: reportIds } },
-        { managerId: { in: reportIds }, reportId: user.personId },
-      ],
-    },
-    select: {
-      managerId: true,
-      reportId: true,
-      scheduledAt: true,
-    },
-    orderBy: { scheduledAt: 'desc' },
-  })
+  const reportIds: string[] = directReports.map(r => r.id)
+  const oneOnOnes = await getOneOnOnesForManagerAndReports(
+    personId,
+    reportIds,
+    {
+      includeScheduledAt: true,
+    }
+  )
 
   // Get task counts for each report
-  const tasks = await prisma.task.findMany({
-    where: {
-      assigneeId: { in: reportIds },
-      status: { notIn: ['done', 'dropped'] },
-    },
-    select: {
-      assigneeId: true,
-    },
-  })
+  const allTasks = await Promise.all(
+    reportIds.map((reportId: string) =>
+      getTasksForAssignee(reportId, organizationId, userId, {
+        excludeStatus: ['done', 'dropped'],
+      })
+    )
+  )
+  const tasks = allTasks.flat()
 
   // Get pending feedback campaigns
-  const feedbackCampaigns = await prisma.feedbackCampaign.findMany({
-    where: {
-      userId: user.id,
-      status: 'active',
-      targetPersonId: { in: reportIds },
-      endDate: { gte: new Date() },
-    },
-    select: {
-      targetPersonId: true,
-    },
-  })
+  const feedbackCampaigns = await getActiveFeedbackCampaignsForUser(
+    userId,
+    organizationId,
+    {
+      targetPersonIds: reportIds,
+      endDateAfter: new Date(),
+    }
+  )
 
   // Build the team pulse data
   const teamMembers: TeamPulseMember[] = directReports.map(report => {
     // Find upcoming 1:1
     const upcomingOneOnOne = oneOnOnes.find(
       ooo =>
-        ((ooo.managerId === user.personId && ooo.reportId === report.id) ||
-          (ooo.reportId === user.personId && ooo.managerId === report.id)) &&
+        ((ooo.managerId === personId && ooo.reportId === report.id) ||
+          (ooo.reportId === personId && ooo.managerId === report.id)) &&
         ooo.scheduledAt &&
         isFuture(new Date(ooo.scheduledAt))
     )
@@ -96,14 +90,16 @@ export async function TeamPulseSectionServer() {
     const pastOneOnOnes = oneOnOnes
       .filter(
         ooo =>
-          ((ooo.managerId === user.personId && ooo.reportId === report.id) ||
-            (ooo.reportId === user.personId && ooo.managerId === report.id)) &&
+          ((ooo.managerId === personId && ooo.reportId === report.id) ||
+            (ooo.reportId === personId && ooo.managerId === report.id)) &&
           ooo.scheduledAt &&
           !isFuture(new Date(ooo.scheduledAt))
       )
       .sort((a, b) => {
         if (!a.scheduledAt || !b.scheduledAt) return 0
-        return new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime()
+        return (
+          new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime()
+        )
       })
 
     const lastOneOnOne = pastOneOnOnes[0]?.scheduledAt || null

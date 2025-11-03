@@ -1,5 +1,4 @@
 import { getTask } from '@/lib/actions/task'
-import { prisma } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -39,23 +38,22 @@ export default async function TaskDetailPage({
   }
 
   // Get entity links for this task
-  const entityLinks = await prisma.entityLink.findMany({
-    where: {
-      entityType: 'Task',
-      entityId: id,
-      organizationId: session.user.organizationId,
-    },
-    include: {
-      createdBy: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
-    },
-    orderBy: { createdAt: 'desc' },
-  })
+  const { getEntityLinks } = await import('@/lib/data/entity-links')
+  const entityLinksResult = await getEntityLinks(
+    'Task',
+    id,
+    session.user.organizationId,
+    {
+      includeCreatedBy: true,
+    }
+  )
+
+  // Type assertion: when includeCreatedBy is true, createdBy will be included
+  const entityLinks = entityLinksResult as Array<
+    (typeof entityLinksResult)[0] & {
+      createdBy: { id: string; name: string; email: string }
+    }
+  >
 
   return (
     <TaskDetailBreadcrumbClient taskTitle={task.title} taskId={task.id}>

@@ -1,4 +1,3 @@
-import { prisma } from '@/lib/db'
 import {
   SimpleOneOnOneList,
   type OneOnOne,
@@ -8,6 +7,8 @@ import { SectionHeader } from '@/components/ui/section-header'
 import { Button } from '@/components/ui/button'
 import { Handshake, Eye } from 'lucide-react'
 import Link from 'next/link'
+import { getPersonWithReportsAndManager } from '@/lib/data/people'
+import { getOneOnOnesForPerson } from '@/lib/data/one-on-ones'
 
 interface OneOnOneMeetingsSectionProps {
   personId: string
@@ -23,45 +24,26 @@ export async function OneOnOneMeetingsSection({
   }
 
   // Get person with reports and manager info
-  const person = await prisma.person.findFirst({
-    where: {
-      id: personId,
-      organizationId,
-    },
-    include: {
-      reports: true,
-      manager: true,
-    },
-  })
+  const person = await getPersonWithReportsAndManager(personId, organizationId)
 
   if (!person) {
     return null
   }
 
   // Get 1:1 meetings where person is involved (as manager or report)
-  const oneOnOnes = await prisma.oneOnOne.findMany({
-    where: {
-      OR: [{ managerId: personId }, { reportId: personId }],
-    },
-    include: {
-      manager: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
-      report: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
-    },
-    orderBy: { scheduledAt: 'desc' },
-    take: 5, // Limit to 5 for the preview
+  const oneOnOnesResult = await getOneOnOnesForPerson(personId, {
+    limit: 5,
+    includeManager: true,
+    includeReport: true,
   })
+
+  // Type assertion: when includeManager and includeReport are true, they will be included
+  const oneOnOnes = oneOnOnesResult as Array<
+    (typeof oneOnOnesResult)[0] & {
+      manager: { id: string; name: string; email: string } | null
+      report: { id: string; name: string; email: string } | null
+    }
+  >
 
   // Only show if person has reports or a manager AND has 1:1s
   if (
@@ -72,15 +54,17 @@ export async function OneOnOneMeetingsSection({
   }
 
   // Transform the data to match the OneOnOne interface
-  const transformedOneOnOnes: OneOnOne[] = oneOnOnes.map(oneOnOne => ({
-    id: oneOnOne.id,
-    managerId: oneOnOne.managerId,
-    reportId: oneOnOne.reportId,
-    scheduledAt: oneOnOne.scheduledAt,
-    notes: oneOnOne.notes,
-    manager: oneOnOne.manager,
-    report: oneOnOne.report,
-  }))
+  const transformedOneOnOnes: OneOnOne[] = oneOnOnes
+    .filter(ooo => ooo.manager && ooo.report)
+    .map(oneOnOne => ({
+      id: oneOnOne.id,
+      managerId: oneOnOne.managerId,
+      reportId: oneOnOne.reportId,
+      scheduledAt: oneOnOne.scheduledAt,
+      notes: oneOnOne.notes,
+      manager: oneOnOne.manager!,
+      report: oneOnOne.report!,
+    }))
 
   return (
     <PageSection

@@ -1,10 +1,11 @@
-import { prisma } from '@/lib/db'
 import { SimpleTaskList, type Task } from '@/components/tasks/task-list'
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
 import { Button } from '@/components/ui/button'
 import { ListTodo, Eye } from 'lucide-react'
 import Link from 'next/link'
+import { getTasksForAssignee } from '@/lib/data/tasks'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 interface ActiveTasksSectionProps {
   personId: string
@@ -19,42 +20,33 @@ export async function ActiveTasksSection({
     return null
   }
 
+  const user = await getCurrentUser()
+
   // Get active tasks for this person
-  const tasks = await prisma.task.findMany({
-    where: {
-      assigneeId: personId,
-      status: {
-        in: ['todo', 'in_progress'],
+  const tasksResult = await getTasksForAssignee(
+    personId,
+    organizationId,
+    user.id,
+    {
+      statusFilter: ['todo', 'in_progress'],
+      include: {
+        assignee: true,
+        initiative: true,
+        objective: true,
+        createdBy: true,
       },
-    },
-    include: {
-      assignee: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      initiative: {
-        select: {
-          id: true,
-          title: true,
-        },
-      },
-      objective: {
-        select: {
-          id: true,
-          title: true,
-        },
-      },
-      createdBy: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-    },
-    orderBy: { updatedAt: 'desc' },
-  })
+    }
+  )
+
+  // Type assertion: when include options are true, relations will be included
+  const tasks = tasksResult as Array<
+    (typeof tasksResult)[0] & {
+      assignee: { id: string; name: string } | null
+      initiative: { id: string; title: string } | null
+      objective: { id: string; title: string } | null
+      createdBy: { id: string; name: string } | null
+    }
+  >
 
   // Only show if person has active tasks
   if (tasks.length === 0) {

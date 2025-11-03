@@ -1,9 +1,10 @@
-import { prisma } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { TaskForm } from '@/components/tasks/task-form'
 import { PageSection } from '@/components/ui/page-section'
+import { getPeopleForOrganization } from '@/lib/data/people'
+import { getObjectivesForOrganization } from '@/lib/data/objectives'
 
 export default async function NewTaskPage() {
   const session = await getServerSession(authOptions)
@@ -18,20 +19,8 @@ export default async function NewTaskPage() {
 
   // Get all people and objectives for the form
   const [people, objectives] = await Promise.all([
-    prisma.person.findMany({
-      where: {
-        organizationId: session.user.organizationId,
-      },
-      orderBy: { name: 'asc' },
-    }),
-    prisma.objective.findMany({
-      where: {
-        initiative: {
-          organizationId: session.user.organizationId,
-        },
-      },
-      orderBy: { title: 'asc' },
-    }),
+    getPeopleForOrganization(session.user.organizationId),
+    getObjectivesForOrganization(session.user.organizationId),
   ])
 
   return (

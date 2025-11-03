@@ -44,10 +44,9 @@ export async function OverviewSection({
   }
 
   // Get person name
-  const { prisma } = await import('@/lib/db')
-  const person = await prisma.person.findFirst({
-    where: { id: personId, organizationId },
-    select: { name: true },
+  const { getPersonById } = await import('@/lib/data/people')
+  const person = await getPersonById(personId, organizationId, {
+    includeNameOnly: true,
   })
 
   if (!person) {

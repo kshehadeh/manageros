@@ -14,7 +14,7 @@ import type { User, Person as PrismaPerson, Team } from '@prisma/client'
 import { Person } from '@/types/person'
 
 // Type for person with all the relations needed by PersonDetailContent
-type PersonWithDetailRelations = Person & {
+export type PersonWithDetailRelations = Person & {
   avatar?: string | null
   startedAt?: Date | null
   jiraAccount?: unknown
