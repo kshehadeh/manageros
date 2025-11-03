@@ -6,6 +6,7 @@ import { taskDataTableConfig } from './data-table-config'
 interface TaskDataTableProps {
   onTaskUpdate?: () => void
   hideFilters?: boolean
+  hideHeaders?: boolean
   settingsId?: string
   page?: number
   limit?: number
@@ -15,6 +16,15 @@ interface TaskDataTableProps {
   onRowClick?: (_id: string, _extra?: unknown) => void
 }
 
-export function TaskDataTable(props: TaskDataTableProps) {
-  return <GenericDataTable config={taskDataTableConfig} {...props} />
+export function TaskDataTable({
+  hideHeaders = true,
+  ...props
+}: TaskDataTableProps) {
+  return (
+    <GenericDataTable
+      config={taskDataTableConfig}
+      hideHeaders={hideHeaders}
+      {...props}
+    />
+  )
 }

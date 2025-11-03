@@ -81,7 +81,6 @@ export const taskDataTableConfig: DataTableConfig<
     refetch,
     applyOptimisticUpdate,
     removeOptimisticUpdate,
-    grouping,
   }) => {
     const getPriorityVariant = (priority: number) => {
       return taskPriorityUtils.getVariant(priority as TaskPriority)
@@ -90,13 +89,6 @@ export const taskDataTableConfig: DataTableConfig<
     const getPriorityLabel = (priority: number) => {
       return taskPriorityUtils.getLabel(priority as TaskPriority)
     }
-
-    // Check which column is being grouped by to hide it
-    const isGroupedByAssignee = grouping && grouping.includes('assignee')
-    const isGroupedByStatus = grouping && grouping.includes('status')
-    const isGroupedByPriority = grouping && grouping.includes('priority')
-    const isGroupedByInitiative = grouping && grouping.includes('initiative')
-    const isGroupedByDueDate = grouping && grouping.includes('dueDate')
 
     const handleCheckboxToggle = async (
       taskId: string,
@@ -179,6 +171,7 @@ export const taskDataTableConfig: DataTableConfig<
         },
         meta: {
           hidden: visibleColumns?.includes('title') === false,
+          // Title column remains visible - this is the main content
         },
       },
       {
@@ -209,9 +202,7 @@ export const taskDataTableConfig: DataTableConfig<
         minSize: 120,
         maxSize: 200,
         meta: {
-          hidden:
-            visibleColumns?.includes('assignee') === false ||
-            isGroupedByAssignee,
+          hidden: true, // Hidden from UI but still functional for sorting/grouping
         },
       },
       {
@@ -242,8 +233,7 @@ export const taskDataTableConfig: DataTableConfig<
         minSize: 100,
         maxSize: 150,
         meta: {
-          hidden:
-            visibleColumns?.includes('status') === false || isGroupedByStatus,
+          hidden: true, // Hidden from UI but still functional for sorting/grouping
         },
       },
       {
@@ -265,9 +255,7 @@ export const taskDataTableConfig: DataTableConfig<
         minSize: 80,
         maxSize: 120,
         meta: {
-          hidden:
-            visibleColumns?.includes('priority') === false ||
-            isGroupedByPriority,
+          hidden: true, // Hidden from UI but still functional for sorting/grouping
         },
       },
       {
@@ -298,9 +286,7 @@ export const taskDataTableConfig: DataTableConfig<
         minSize: 150,
         maxSize: 300,
         meta: {
-          hidden:
-            visibleColumns?.includes('initiative') === false ||
-            isGroupedByInitiative,
+          hidden: true, // Hidden from UI but still functional for sorting/grouping
         },
       },
       {
@@ -331,8 +317,7 @@ export const taskDataTableConfig: DataTableConfig<
         minSize: 100,
         maxSize: 150,
         meta: {
-          hidden:
-            visibleColumns?.includes('dueDate') === false || isGroupedByDueDate,
+          hidden: true, // Hidden from UI but still functional for sorting/grouping
         },
       },
       {

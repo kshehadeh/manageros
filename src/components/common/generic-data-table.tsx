@@ -193,6 +193,7 @@ interface GenericDataTableProps<
   config: DataTableConfig<TData, TFilters>
   onEntityUpdate?: () => void
   hideFilters?: boolean
+  hideHeaders?: boolean
   settingsId?: string
   page?: number
   limit?: number
@@ -209,6 +210,7 @@ export function GenericDataTable<
   config,
   onEntityUpdate: _onEntityUpdate,
   hideFilters = false,
+  hideHeaders = false,
   settingsId,
   limit = 20,
   enablePagination = false,
@@ -687,35 +689,37 @@ export function GenericDataTable<
           </div>
         )}
         <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map(headerGroup => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map(header => {
-                  const meta = header.column.columnDef.meta as
-                    | ColumnMeta
-                    | undefined
-                  if (meta?.hidden) return null
+          {!hideHeaders && (
+            <TableHeader>
+              {table.getHeaderGroups().map(headerGroup => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map(header => {
+                    const meta = header.column.columnDef.meta as
+                      | ColumnMeta
+                      | undefined
+                    if (meta?.hidden) return null
 
-                  return (
-                    <TableHead
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      style={{
-                        width: header.getSize(),
-                      }}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
+                    return (
+                      <TableHead
+                        key={header.id}
+                        colSpan={header.colSpan}
+                        style={{
+                          width: header.getSize(),
+                        }}
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    )
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+          )}
           <TableBody>
             {loading && entities.length === 0 ? (
               <TableRow>

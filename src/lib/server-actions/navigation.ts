@@ -22,6 +22,7 @@ export async function getFilteredNavigation() {
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: 'Home' },
     { name: 'My Tasks', href: '/my-tasks', icon: 'CheckSquare' },
+    { name: 'Initiatives', href: '/initiatives', icon: 'Rocket' },
     { name: 'Reports', href: '/reports', icon: 'BarChart3' },
     {
       name: 'Org Settings',

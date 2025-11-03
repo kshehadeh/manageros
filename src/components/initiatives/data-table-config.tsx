@@ -84,13 +84,15 @@ export const initiativeDataTableConfig: DataTableConfig<
         maxSize: 1000,
         cell: ({ row }) => {
           const initiative = row.original
+          const teamName = initiative.team?.name || 'No team'
+          const statusLabel = initiativeStatusUtils.getLabel(
+            initiative.status as InitiativeStatus
+          )
           return (
             <div className='space-y-0.5 flex-1'>
               <div className='font-medium'>{initiative.title}</div>
               <div className='text-xs text-muted-foreground'>
-                {initiative.objectives.length} objectives •{' '}
-                {initiative._count.tasks} tasks • {initiative._count.checkIns}{' '}
-                check-ins
+                {teamName} • {statusLabel}
               </div>
             </div>
           )
@@ -115,7 +117,7 @@ export const initiativeDataTableConfig: DataTableConfig<
         minSize: 100,
         maxSize: 200,
         meta: {
-          hidden: visibleColumns?.includes('teamName') === false,
+          hidden: true, // Hidden from UI but still functional for sorting/grouping
         },
       },
       {
@@ -146,7 +148,7 @@ export const initiativeDataTableConfig: DataTableConfig<
         minSize: 100,
         maxSize: 200,
         meta: {
-          hidden: visibleColumns?.includes('owners') === false,
+          hidden: true, // Hidden from UI but still functional for sorting/grouping
         },
       },
       {
@@ -170,7 +172,7 @@ export const initiativeDataTableConfig: DataTableConfig<
         minSize: 100,
         maxSize: 150,
         meta: {
-          hidden: visibleColumns?.includes('status') === false,
+          hidden: true, // Hidden from UI but still functional for sorting/grouping
         },
       },
       {
@@ -199,7 +201,7 @@ export const initiativeDataTableConfig: DataTableConfig<
         minSize: 100,
         maxSize: 150,
         meta: {
-          hidden: visibleColumns?.includes('completion') === false,
+          hidden: true, // Hidden from UI but still functional for sorting/grouping
         },
       },
       {

@@ -6,6 +6,7 @@ import { initiativeDataTableConfig } from './data-table-config'
 interface InitiativeDataTableProps {
   onInitiativeUpdate?: () => void
   hideFilters?: boolean
+  hideHeaders?: boolean
   settingsId?: string
   page?: number
   limit?: number
@@ -22,6 +23,15 @@ interface InitiativeDataTableProps {
   }
 }
 
-export function InitiativeDataTable(props: InitiativeDataTableProps) {
-  return <GenericDataTable config={initiativeDataTableConfig} {...props} />
+export function InitiativeDataTable({
+  hideHeaders = true,
+  ...props
+}: InitiativeDataTableProps) {
+  return (
+    <GenericDataTable
+      config={initiativeDataTableConfig}
+      hideHeaders={hideHeaders}
+      {...props}
+    />
+  )
 }

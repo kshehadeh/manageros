@@ -8,6 +8,7 @@ import {
   useRef,
 } from 'react'
 import { useRouter } from 'next/navigation'
+import { useIsMobile } from '@/lib/hooks/use-media-query'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -313,22 +314,36 @@ const TaskQuickEditDialogContent = forwardRef<
       }
     }
 
+    const isMobile = useIsMobile()
+
     const handleOpenFullEditor = () => {
       if (!task) return
       onOpenChange(false)
       router.push(`/tasks/${task.id}/edit`)
     }
 
+    // Full screen on mobile, regular dialog on desktop
+    const dialogContentClassName = isMobile
+      ? 'max-w-[100vw] w-full p-0 h-[100vh] max-h-[100vh] flex flex-col overflow-y-auto rounded-none left-0 top-0 translate-x-0 translate-y-0'
+      : 'md:max-w-[50vw] max-w-full'
+
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className='md:max-w-[50vw] max-w-full'>
-          <DialogHeader>
+        <DialogContent className={dialogContentClassName}>
+          <DialogHeader className={isMobile ? 'px-6 pt-6 pb-0' : ''}>
             <DialogTitle>
               {isCreateMode ? 'Create Task' : 'Quick Edit Task'}
             </DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className='space-y-4'>
+          <form
+            onSubmit={handleSubmit}
+            className={
+              isMobile
+                ? 'space-y-4 px-6 pb-6 flex-1 overflow-y-auto'
+                : 'space-y-4'
+            }
+          >
             {errors.general && (
               <div className='flex items-center gap-2 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md'>
                 <AlertCircle className='h-4 w-4' />
@@ -336,7 +351,7 @@ const TaskQuickEditDialogContent = forwardRef<
               </div>
             )}
 
-            <div className='space-y-4'>
+            <div className='space-y-4 mt-4 md:mt-0'>
               {/* Summary Field */}
               <div className='space-y-2'>
                 <TaskSummaryInput
