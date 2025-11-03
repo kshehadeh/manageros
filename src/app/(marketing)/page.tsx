@@ -64,7 +64,7 @@ export const metadata = {
 export default async function MarketingHome() {
   return (
     <>
-      <section className='mx-auto flex w-full max-w-5xl flex-col gap-12 px-6 pb-20 pt-16 text-center sm:px-8 md:pt-24'>
+      <section className='mx-auto flex w-full max-w-5xl flex-col gap-12 px-6 pb-20 pt-6 text-center sm:px-8 md:pt-24'>
         <FadeInOnScroll>
           <span className='inline-flex items-center justify-center gap-2 self-center rounded-full border border-white/10 bg-white/5 px-4 py-1 text-xs uppercase tracking-[0.3em] text-white/60'>
             ENGINEERING MANAGEMENT, ELEVATED

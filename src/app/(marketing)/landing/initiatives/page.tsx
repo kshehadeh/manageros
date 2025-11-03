@@ -31,7 +31,7 @@ const narrative = [
 export default function InitiativesWhyPage() {
   return (
     <>
-      <section className='mx-auto flex w-full max-w-4xl flex-col items-center gap-10 px-6 pb-20 pt-16 text-center sm:px-8 md:pt-24'>
+      <section className='mx-auto flex w-full max-w-4xl flex-col items-center gap-10 px-6 pb-20 pt-6 text-center sm:px-8 md:pt-24'>
         <FadeInOnScroll>
           <span className='inline-flex items-center justify-center gap-2 self-center rounded-full border border-white/10 bg-white/5 px-4 py-1 text-xs uppercase tracking-[0.3em] text-white/60'>
             WHY INITIATIVES MATTER
