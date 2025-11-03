@@ -23,7 +23,7 @@ type PersonWithDetailRelations = Person & {
 
 // Import skeleton components
 import {
-  SynopsisSectionSkeleton,
+  OverviewSectionSkeleton,
   FeedbackCampaignsSectionSkeleton,
   OwnedInitiativesSectionSkeleton,
   ActiveTasksSectionSkeleton,
@@ -34,7 +34,7 @@ import {
 } from './person-detail-skeletons'
 
 // Import section components
-import { SynopsisSection } from './sections/synopsis-section'
+import { OverviewSection } from './sections/overview-section'
 import { FeedbackCampaignsSection } from './sections/feedback-campaigns-section'
 import { OwnedInitiativesSection } from './sections/owned-initiatives-section'
 import { ActiveTasksSection } from './sections/active-tasks-section'
@@ -223,9 +223,9 @@ export function PersonDetailContent({
 
         {/* Right Sidebar */}
         <div className='w-full lg:w-80 space-y-6'>
-          {/* Synopsis Section */}
-          <Suspense fallback={<SynopsisSectionSkeleton />}>
-            <SynopsisSection
+          {/* Overview Section */}
+          <Suspense fallback={<OverviewSectionSkeleton />}>
+            <OverviewSection
               personId={person.id}
               organizationId={organizationId}
             />

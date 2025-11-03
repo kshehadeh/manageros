@@ -686,3 +686,167 @@ export async function getDirectReports() {
     return []
   }
 }
+
+/**
+ * Get person data with all relations needed for overview generation
+ */
+export async function getPersonForOverview(
+  personId: string,
+  organizationId: string,
+  currentPersonId: string | null,
+  lookbackMs: number
+) {
+  const person = await prisma.person.findFirst({
+    where: { id: personId, organizationId },
+    include: {
+      team: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      manager: {
+        select: {
+          id: true,
+          name: true,
+          role: true,
+        },
+      },
+      jobRole: {
+        include: {
+          level: true,
+          domain: true,
+        },
+      },
+      reports: {
+        where: {
+          status: 'active',
+        },
+        select: {
+          id: true,
+          name: true,
+          role: true,
+        },
+        orderBy: {
+          name: 'asc',
+        },
+      },
+      initiativeOwners: {
+        include: {
+          initiative: {
+            select: {
+              id: true,
+              title: true,
+              summary: true,
+              status: true,
+              rag: true,
+            },
+          },
+        },
+      },
+      tasks: {
+        where: {
+          OR: [
+            { status: 'todo' },
+            { status: 'doing' },
+            { status: 'blocked' },
+            {
+              AND: [
+                { status: 'done' },
+                {
+                  completedAt: {
+                    gte: new Date(Date.now() - lookbackMs),
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        orderBy: {
+          updatedAt: 'desc',
+        },
+        take: 20,
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          priority: true,
+          completedAt: true,
+        },
+      },
+      feedback: {
+        where: {
+          createdAt: {
+            gte: new Date(Date.now() - lookbackMs),
+          },
+          OR: [
+            { isPrivate: false },
+            currentPersonId
+              ? { AND: [{ isPrivate: true }, { fromId: currentPersonId }] }
+              : { id: { equals: '' } }, // no private feedback if no current person
+          ],
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        select: {
+          kind: true,
+          body: true,
+          createdAt: true,
+          isPrivate: true,
+        },
+      },
+      feedbackCampaigns: {
+        where: {
+          status: 'completed',
+          endDate: {
+            gte: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000), // Last 6 months
+          },
+        },
+        include: {
+          responses: true,
+        },
+      },
+    },
+  })
+
+  if (!person) {
+    return null
+  }
+
+  // Fetch one-on-ones between the target person and their manager (if they have a manager)
+  let oneOnOnesWithManager: Array<{
+    id: string
+    scheduledAt: Date | null
+    notes: string | null
+  }> = []
+
+  if (person.managerId) {
+    // Fetch one-on-ones where the target person is the report and their manager is the manager
+    const oneOnOnes = await prisma.oneOnOne.findMany({
+      where: {
+        reportId: personId,
+        managerId: person.managerId,
+        scheduledAt: {
+          gte: new Date(Date.now() - lookbackMs),
+        },
+      },
+      select: {
+        id: true,
+        scheduledAt: true,
+        notes: true,
+      },
+      orderBy: {
+        scheduledAt: 'desc',
+      },
+      take: 20, // Limit to most recent 20
+    })
+
+    oneOnOnesWithManager = oneOnOnes
+  }
+
+  return {
+    ...person,
+    oneOnOnesWithManager,
+  }
+}

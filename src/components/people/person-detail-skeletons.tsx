@@ -1,7 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton'
 import { SectionHeader } from '@/components/ui/section-header'
 import {
-  FileText,
   Handshake,
   MessageCircle,
   Rocket,
@@ -43,23 +42,16 @@ export function PersonDetailHeaderSkeleton() {
   )
 }
 
-export function SynopsisSectionSkeleton() {
+export function OverviewSectionSkeleton() {
   return (
     <section>
       <SectionHeader
-        icon={FileText}
-        title='Synopsis'
-        action={
-          <div className='flex items-center gap-2'>
-            <Skeleton className='h-8 w-8' />
-            <Skeleton className='h-8 w-8' />
-          </div>
-        }
+        icon={Users}
+        title='AI Overview'
+        action={<Skeleton className='h-8 w-8' />}
       />
       <div className='space-y-3'>
-        <Skeleton className='h-16 w-full' />
-        <Skeleton className='h-16 w-full' />
-        <Skeleton className='h-16 w-full' />
+        <Skeleton className='h-32 w-full' />
       </div>
     </section>
   )

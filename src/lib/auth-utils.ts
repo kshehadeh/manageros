@@ -64,31 +64,28 @@ export async function getFilteredNavigation() {
 }
 
 /**
- * Check if the current user can generate/view synopses for a specific person
- * Returns true if:
- * 1. The user is generating synopses for their own linked person
- * 2. The user is an organization admin
+ * Check if the current user can access overviews/synopses for a person.
+ * Access is granted if:
+ * 1. The user is linked to the person themselves
+ * 2. The user is a manager (direct or indirect) of that person
  */
 export async function canAccessSynopsesForPerson(
   personId: string
 ): Promise<boolean> {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.organizationId || !user.personId) {
     return false
   }
 
-  // Check if user is an organization admin
-  if (user.role === 'ADMIN') {
+  // Check if user is linked to the person themselves
+  if (user.personId === personId) {
     return true
   }
 
-  // Check if user is generating synopses for their own linked person
-  if (!user.personId) {
-    return false
-  }
-
-  return user.personId === personId
+  // Check if user is a manager (direct or indirect) of that person
+  const { checkIfManagerOrSelf } = await import('@/lib/utils/people-utils')
+  return await checkIfManagerOrSelf(user.personId, personId)
 }
 
 /**
