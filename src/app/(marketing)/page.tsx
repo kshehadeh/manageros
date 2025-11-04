@@ -9,6 +9,8 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { FadeInOnScroll } from '@/components/marketing/fade-in'
+import { CurrentYear } from '@/components/marketing/current-year'
+import { Metadata } from 'next'
 
 const featureHighlights = [
   {
@@ -55,7 +57,7 @@ const proofPoints = [
   },
 ]
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Lead high-performing engineering teams | ManagerOS',
   description:
     'ManagerOS gives engineering managers a unified operating system for clarity, coaching, and continuous improvement across their teams.',
@@ -241,8 +243,7 @@ export default async function MarketingHome() {
       <footer className='border-t border-white/10 bg-black/20'>
         <div className='mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 text-sm text-white/50 sm:flex-row sm:px-8'>
           <p>
-            © {new Date().getFullYear()} ManagerOS. Designed for engineering
-            leaders.
+            © <CurrentYear /> ManagerOS. Designed for engineering leaders.
           </p>
           <div className='flex items-center gap-6'>
             <Link

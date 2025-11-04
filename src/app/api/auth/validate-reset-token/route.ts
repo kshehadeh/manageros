@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { validatePasswordResetToken } from '@/lib/actions/password-reset'
 
 export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const token = searchParams.get('token')
+  const searchParams = request.nextUrl.searchParams
+  const token = searchParams.get('token')
 
+  try {
     if (!token) {
       return NextResponse.json({ error: 'Token is required' }, { status: 400 })
     }

@@ -20,9 +20,12 @@ import { InputJsonValue } from '@prisma/client/runtime/library'
  */
 
 export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams
+  const authHeader = searchParams.get('authorization')
+
   try {
     // Verify cron secret for security
-    const authHeader = request.headers.get('authorization')
+
     const cronSecret = process.env.CRON_SECRET
 
     if (!cronSecret) {
@@ -39,7 +42,6 @@ export async function GET(request: NextRequest) {
     }
 
     // Parse query parameters
-    const { searchParams } = new URL(request.url)
     const jobId = searchParams.get('job')
     const organizationId = searchParams.get('org')
     const verbose = searchParams.get('verbose') === 'true'

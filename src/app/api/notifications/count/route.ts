@@ -3,8 +3,9 @@ import { getCurrentUser } from '@/lib/auth-utils'
 import { getUnreadNotificationCount } from '@/lib/actions/notification'
 
 export async function GET() {
+  const user = await getCurrentUser()
+
   try {
-    const user = await getCurrentUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

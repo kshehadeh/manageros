@@ -109,9 +109,9 @@ function buildOrderByClause(sortParam: string) {
 }
 
 export async function GET(request: NextRequest) {
-  try {
-    const user = await getCurrentUser()
+  const user = await getCurrentUser()
 
+  try {
     // Check if user belongs to an organization
     if (!user.organizationId) {
       return NextResponse.json(

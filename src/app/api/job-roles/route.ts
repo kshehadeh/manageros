@@ -4,9 +4,9 @@ import { getCurrentUser } from '@/lib/auth-utils'
 import { Prisma } from '@prisma/client'
 
 export async function GET(request: NextRequest) {
-  try {
-    const user = await getCurrentUser()
+  const user = await getCurrentUser()
 
+  try {
     // Check if user belongs to an organization
     if (!user.organizationId) {
       return NextResponse.json(

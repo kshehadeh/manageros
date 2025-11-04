@@ -7,9 +7,8 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ codeId: string }> }
 ) {
+  await requireAuth({ requireOrganization: true })
   try {
-    await requireAuth({ requireOrganization: true })
-
     const { codeId } = await params
     const formData = await request.formData()
     const input: Record<string, unknown> = {}

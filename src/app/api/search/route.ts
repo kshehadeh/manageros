@@ -3,11 +3,13 @@ import { prisma } from '@/lib/db'
 import { getCurrentUser } from '@/lib/auth-utils'
 
 export async function GET(request: Request) {
+  const user = await getCurrentUser()
+
+  const { searchParams } = new URL(request.url)
+
   try {
-    const { searchParams } = new URL(request.url)
     const q = (searchParams.get('q') || '').trim()
 
-    const user = await getCurrentUser()
     if (!user.organizationId) {
       return NextResponse.json({ results: [] })
     }
