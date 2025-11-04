@@ -208,6 +208,9 @@ export default async function FeedbackCampaignDetailPage({
               campaignId={campaign.id}
               campaign={campaign}
               personId={person.id}
+              campaignName={campaignTitle}
+              targetPersonName={person.name}
+              totalResponses={totalResponses}
             />
           </div>
         </div>

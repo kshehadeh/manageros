@@ -11,6 +11,7 @@ import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { generateInviteLinkToken } from '@/lib/utils/invite-link'
 import { checkIfManagerOrSelf } from '../utils/people-utils'
+import { generateText } from '@/lib/ai'
 
 export async function createFeedbackCampaign(
   formData: FeedbackCampaignFormData
@@ -713,4 +714,126 @@ export async function getAllFeedbackCampaignsForOrganization() {
   }
 
   return filteredCampaigns
+}
+
+export interface GenerateFeedbackCampaignSummaryResponse {
+  success: boolean
+  summary: string
+}
+
+export async function generateFeedbackCampaignSummary(
+  campaignId: string
+): Promise<GenerateFeedbackCampaignSummaryResponse> {
+  const user = await getCurrentUser()
+  if (!user) {
+    throw new Error('Unauthorized')
+  }
+
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization')
+  }
+
+  // Get the campaign with responses and template
+  const campaign = await prisma.feedbackCampaign.findFirst({
+    where: {
+      id: campaignId,
+      userId: user.id, // Only allow the campaign creator to generate summaries
+    },
+    include: {
+      targetPerson: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      template: {
+        include: {
+          questions: {
+            orderBy: { sortOrder: 'asc' },
+          },
+        },
+      },
+      responses: {
+        orderBy: { submittedAt: 'desc' },
+      },
+    },
+  })
+
+  if (!campaign) {
+    throw new Error(
+      'Campaign not found or you do not have permission to generate summaries'
+    )
+  }
+
+  // Check if there are any responses
+  if (campaign.responses.length === 0) {
+    throw new Error('No feedback responses available to summarize')
+  }
+
+  // Build structured data for AI
+  const summaryData = {
+    campaign: {
+      name: campaign.name || `${campaign.targetPerson.name} Feedback Campaign`,
+      targetPerson: campaign.targetPerson.name,
+      startDate: campaign.startDate.toISOString(),
+      endDate: campaign.endDate.toISOString(),
+      totalResponses: campaign.responses.length,
+      totalInvites: campaign.inviteEmails.length,
+    },
+    template: campaign.template
+      ? {
+          name: campaign.template.name,
+          description: campaign.template.description,
+          questions: campaign.template.questions.map(q => ({
+            id: q.id,
+            question: q.question,
+            type: q.type,
+            required: q.required,
+          })),
+        }
+      : null,
+    responses: campaign.responses.map(response => ({
+      responderEmail: response.responderEmail,
+      submittedAt: response.submittedAt.toISOString(),
+      answers: response.responses as Record<string, unknown>,
+    })),
+  }
+
+  // Generate AI summary
+  const system = `You are an engieering manager of the person being reviewed creating summaries of feedback campaign responses.
+Write in a professional but conversational tone. Focus on synthesizing themes and patterns across multiple responses.
+Create a clear, structured summary that:
+- Identifies common themes and patterns across responses
+- Highlights both strengths and areas for improvement
+- Provides specific examples when relevant
+- Maintains anonymity by not mentioning specific responder emails
+- Organizes information logically (e.g., strengths, areas for growth, key themes)
+Be concise, specific, and actionable. Do not fabricate information not provided in the data.  Keep the response to 2-3 paragraphs.`
+
+  const prompt = `Create a professional summary of feedback received for ${campaign.targetPerson.name} based on the following feedback campaign data:
+
+${JSON.stringify(summaryData, null, 2)}
+
+Guidelines:
+- Start with a brief overview of the campaign (target person, dates, response rate)
+- Identify and group common themes and patterns across responses
+- Highlight both strengths and areas for improvement
+- Use specific examples from the responses when relevant
+- Maintain anonymity - do not mention specific responder emails
+- Organize the summary logically (e.g., strengths first, then areas for growth, then key themes)
+- Keep it professional, factual, and well-structured
+- Keep the response to 2-3 paragraphs`
+
+  const summary = await generateText({
+    system,
+    prompt,
+    temperature: 0.3,
+    maxTokens: 800,
+  })
+
+  return {
+    success: true,
+    summary,
+  }
 }
