@@ -5,31 +5,19 @@ import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { Link as LinkIcon, User as UserIcon } from 'lucide-react'
 import { FaJira, FaGithub } from 'react-icons/fa'
-import type { User } from '@prisma/client'
+import type {
+  User,
+  PersonJiraAccount,
+  PersonGithubAccount,
+} from '@prisma/client'
 
 interface AccountLinkingSectionProps {
   personId: string
   personName: string
   personEmail: string | null
   linkedUser: User | null
-  jiraAccount: {
-    id: string
-    personId: string
-    jiraAccountId: string
-    jiraEmail: string
-    jiraDisplayName: string | null
-    createdAt: Date
-    updatedAt: Date
-  } | null
-  githubAccount: {
-    id: string
-    personId: string
-    githubUsername: string
-    githubDisplayName: string | null
-    githubEmail: string | null
-    createdAt: Date
-    updatedAt: Date
-  } | null
+  jiraAccount: PersonJiraAccount | null
+  githubAccount: PersonGithubAccount | null
 }
 
 export function AccountLinkingSection({

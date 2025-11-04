@@ -27,7 +27,7 @@ interface PersonActionsDropdownProps {
     reports?: Person[]
     manager?: Person | null
   }
-  currentPerson?: Person | null
+  currentPersonId?: string | null
   isAdmin: boolean
   onFeedbackAdded?: () => void
   size?: 'sm' | 'default'
@@ -35,7 +35,7 @@ interface PersonActionsDropdownProps {
 
 export function PersonActionsDropdown({
   person,
-  currentPerson,
+  currentPersonId,
   isAdmin,
   onFeedbackAdded,
   size = 'default',
@@ -51,11 +51,11 @@ export function PersonActionsDropdown({
     setShowFeedbackForm(false)
   }
 
-  const canCreateOneOnOne = currentPerson && currentPerson.id !== person.id
+  const canCreateOneOnOne = currentPersonId && currentPersonId !== person.id
 
   const canCreateFeedbackCampaign =
-    person.managerId === currentPerson?.id ||
-    (currentPerson?.id === person.id && (person.reports?.length ?? 0) > 0)
+    person.managerId === currentPersonId ||
+    (currentPersonId === person.id && (person.reports?.length ?? 0) > 0)
 
   return (
     <>
@@ -123,7 +123,7 @@ export function PersonActionsDropdown({
 
             {canCreateOneOnOne && (
               <Link
-                href={`/oneonones/new?participant1Id=${currentPerson?.id || ''}&participant2Id=${person.id}`}
+                href={`/oneonones/new?participant1Id=${currentPersonId || ''}&participant2Id=${person.id}`}
                 className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
                 onClick={close}
               >

@@ -6,7 +6,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { getLinkedAccountAvatars } from '@/lib/actions/avatar'
-import { getPersonById, getPersonByUserPersonId } from '@/lib/data/people'
+import { getPersonById } from '@/lib/data/people'
 import { getFeedbackCountForPerson } from '@/lib/data/feedback'
 
 interface PersonDetailPageProps {
@@ -48,23 +48,11 @@ export default async function PersonDetailPage({
     notFound()
   }
 
-  // Get the current user's person record to determine relationships
-  const currentPersonResult = session.user.personId
-    ? await getPersonByUserPersonId(session.user.personId, {
-        includeTeam: true,
-        includeManager: true,
-        includeReports: true,
-        includeJobRole: true,
-        includeUser: true,
-        includeJiraAccount: true,
-        includeGithubAccount: true,
-      })
-    : undefined
-
   // Get feedback count for this person (respecting privacy rules)
+  // Use session.user.personId directly - no need to fetch from database
   const feedbackCount = await getFeedbackCountForPerson(
     personResult.id,
-    currentPersonResult?.id
+    session.user.personId || undefined
   )
 
   // Add level field to match Person type requirements
@@ -73,14 +61,6 @@ export default async function PersonDetailPage({
     ...personResult,
     level: 0, // Default level, can be calculated based on hierarchy if needed
   } as unknown as typeof personResult & { level: number }
-
-  // Add level field to currentPerson if it exists
-  const currentPersonWithLevel = currentPersonResult
-    ? ({
-        ...currentPersonResult,
-        level: 0, // Default level, can be calculated based on hierarchy if needed
-      } as unknown as typeof currentPersonResult & { level: number })
-    : undefined
 
   // Get linked account avatars
   let linkedAvatars: { jiraAvatar?: string; githubAvatar?: string } = {}
@@ -99,9 +79,7 @@ export default async function PersonDetailPage({
         person={personWithLevel as PersonWithDetailRelations}
         linkedAvatars={linkedAvatars}
         isAdmin={isAdmin(session.user)}
-        currentPerson={
-          currentPersonWithLevel as PersonWithDetailRelations | undefined
-        }
+        currentPersonId={session.user.personId || undefined}
         organizationId={session.user.organizationId}
         currentUserId={session.user.id}
         feedbackCount={feedbackCount}

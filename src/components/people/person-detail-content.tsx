@@ -11,14 +11,37 @@ import {
 } from 'lucide-react'
 import { Suspense } from 'react'
 import type { User, Person as PrismaPerson, Team } from '@prisma/client'
-import { Person } from '@/types/person'
+import type { Prisma } from '@prisma/client'
 
-// Type for person with all the relations needed by PersonDetailContent
-export type PersonWithDetailRelations = Person & {
-  avatar?: string | null
-  startedAt?: Date | null
-  jiraAccount?: unknown
-  githubAccount?: unknown
+// Use Prisma's generated type based on the includes used in getPersonById
+export type PersonWithDetailRelations = Prisma.PersonGetPayload<{
+  include: {
+    team: true
+    manager: {
+      include: {
+        reports: true
+      }
+    }
+    reports: true
+    jobRole: {
+      include: {
+        level: true
+        domain: true
+      }
+    }
+    user: {
+      select: {
+        id: true
+        name: true
+        email: true
+        role: true
+      }
+    }
+    jiraAccount: true
+    githubAccount: true
+  }
+}> & {
+  level: number // Add level field for compatibility with Person type
 }
 
 // Import skeleton components
@@ -52,7 +75,7 @@ interface PersonDetailContentProps {
     githubAvatar?: string | null
   } | null
   isAdmin: boolean
-  currentPerson?: PersonWithDetailRelations
+  currentPersonId?: string | null
   organizationId: string
   currentUserId: string
   feedbackCount: number
@@ -62,7 +85,7 @@ export function PersonDetailContent({
   person,
   linkedAvatars,
   isAdmin,
-  currentPerson,
+  currentPersonId,
   organizationId,
   currentUserId,
   feedbackCount,
@@ -165,7 +188,7 @@ export function PersonDetailContent({
                 manager?: PrismaPerson | null
               }
             }
-            currentPerson={currentPerson as unknown as PrismaPerson | null}
+            currentPersonId={currentPersonId}
             isAdmin={isAdmin}
           />
         </div>
@@ -256,28 +279,8 @@ export function PersonDetailContent({
                 personName={person.name}
                 personEmail={person.email}
                 linkedUser={person.user as User | null}
-                jiraAccount={
-                  person.jiraAccount as unknown as {
-                    id: string
-                    personId: string
-                    jiraAccountId: string
-                    jiraEmail: string
-                    jiraDisplayName: string | null
-                    createdAt: Date
-                    updatedAt: Date
-                  } | null
-                }
-                githubAccount={
-                  person.githubAccount as unknown as {
-                    id: string
-                    personId: string
-                    githubUsername: string
-                    githubDisplayName: string | null
-                    githubEmail: string | null
-                    createdAt: Date
-                    updatedAt: Date
-                  } | null
-                }
+                jiraAccount={person.jiraAccount}
+                githubAccount={person.githubAccount}
               />
             </Suspense>
           )}

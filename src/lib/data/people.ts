@@ -149,67 +149,6 @@ export const getPersonByUserId = cache(
   }
 )
 
-export const getPersonByUserPersonId = cache(
-  async (
-    personId: string,
-    options?: {
-      includeTeam?: boolean
-      includeManager?: boolean
-      includeReports?: boolean
-      includeJobRole?: boolean
-      includeUser?: boolean
-      includeJiraAccount?: boolean
-      includeGithubAccount?: boolean
-    }
-  ) => {
-    const include: Record<string, unknown> = {}
-    if (options?.includeTeam) {
-      include.team = true
-    }
-    if (options?.includeManager) {
-      include.manager = {
-        include: {
-          reports: true,
-        },
-      }
-    }
-    if (options?.includeReports) {
-      include.reports = true
-    }
-    if (options?.includeJobRole) {
-      include.jobRole = {
-        include: {
-          level: true,
-          domain: true,
-        },
-      }
-    }
-    if (options?.includeUser) {
-      include.user = {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-        },
-      }
-    }
-    if (options?.includeJiraAccount) {
-      include.jiraAccount = true
-    }
-    if (options?.includeGithubAccount) {
-      include.githubAccount = true
-    }
-
-    return prisma.person.findUnique({
-      where: {
-        id: personId,
-      },
-      include: Object.keys(include).length > 0 ? include : undefined,
-    })
-  }
-)
-
 export const getDirectReports = cache(
   async (
     managerId: string,

@@ -315,20 +315,7 @@ export function useTeamsCache() {
 
 ### Cache Test Component
 
-Use the provided test component to debug cache behavior:
-
-```tsx
-import { CacheTestComponent } from '@/components/cache-test-component'
-
-function DebugPage() {
-  return (
-    <div>
-      <h1>Debug Page</h1>
-      <CacheTestComponent />
-    </div>
-  )
-}
-```
+To debug cache behavior, you can use browser DevTools to inspect the cache state or add temporary logging in your components using the cache hooks directly.
 
 ### Browser DevTools
 

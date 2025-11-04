@@ -189,3 +189,43 @@ export const getFeedbackCampaignById = cache(
     })
   }
 )
+
+export const getActiveAndDraftFeedbackCampaignsForPerson = cache(
+  async (personId: string, organizationId: string, currentUserId: string) => {
+    return prisma.feedbackCampaign.findMany({
+      where: {
+        status: {
+          in: ['active', 'draft'],
+        },
+        userId: currentUserId,
+        targetPersonId: personId,
+        targetPerson: {
+          organizationId,
+        },
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        template: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        responses: {
+          select: {
+            id: true,
+            responderEmail: true,
+            submittedAt: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+  }
+)

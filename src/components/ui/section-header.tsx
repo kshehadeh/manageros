@@ -34,7 +34,7 @@ export function SectionHeader({
 
   return (
     <div
-      className={`flex items-start justify-between md:mx-0 md:px-0 ${className}`}
+      className={`flex items-start justify-between md:mx-0 md:px-0 ${className} mb-2`}
     >
       <div className='flex-1'>
         <h3 className='text-2xl font-bold flex items-center gap-2'>
