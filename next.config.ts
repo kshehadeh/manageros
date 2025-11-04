@@ -7,7 +7,6 @@ const nextConfig: NextConfig = {
       { hostname: 'pub-56cc58f3bbba47f99bfd16db7875a540.r2.dev' },
     ],
   },
-  cacheComponents: true,
   experimental: {
     serverActions: {
       allowedOrigins:
