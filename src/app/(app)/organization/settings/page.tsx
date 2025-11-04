@@ -29,17 +29,13 @@ import { GithubOrganizationsManager } from '@/components/organization/github-org
 export default async function OrganizationSettingsPage() {
   const session = await getServerSession(authOptions)
 
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
-
   // Check if user is admin
-  if (session.user.role !== 'ADMIN') {
+  if (session?.user.role !== 'ADMIN') {
     redirect('/dashboard')
   }
 
   // Check if user belongs to an organization
-  if (!session.user.organizationId) {
+  if (!session?.user.organizationId) {
     redirect('/organization/create')
   }
 

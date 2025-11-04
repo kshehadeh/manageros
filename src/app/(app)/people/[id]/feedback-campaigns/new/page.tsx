@@ -17,13 +17,9 @@ export default async function NewFeedbackCampaignPage({
 }: NewFeedbackCampaignPageProps) {
   const session = await getServerSession(authOptions)
 
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
-
   const { id } = await params
 
-  if (!session.user.organizationId) {
+  if (!session?.user.organizationId) {
     redirect('/organization/create')
   }
 
@@ -40,7 +36,7 @@ export default async function NewFeedbackCampaignPage({
   }
 
   // Get the current user's person ID from session
-  if (!session.user.personId) {
+  if (!session?.user.personId) {
     redirect('/people')
   }
 

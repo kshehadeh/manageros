@@ -18,13 +18,9 @@ export default async function EditFeedbackCampaignPage({
 }: EditFeedbackCampaignPageProps) {
   const session = await getServerSession(authOptions)
 
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
-
   const { id, campaignId } = await params
 
-  if (!session.user.organizationId) {
+  if (!session?.user.organizationId) {
     redirect('/organization/create')
   }
 

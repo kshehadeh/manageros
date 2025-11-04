@@ -1,9 +1,6 @@
 import { getOneOnOneById } from '@/lib/actions/oneonone'
 import { OneOnOneForm } from '@/components/oneonone-form'
 import { OneOnOneDetailClient } from '@/components/oneonone-detail-client'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Handshake } from 'lucide-react'
@@ -17,12 +14,7 @@ interface EditOneOnOnePageProps {
 export default async function EditOneOnOnePage({
   params,
 }: EditOneOnOnePageProps) {
-  const session = await getServerSession(authOptions)
   const { id } = await params
-
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
 
   try {
     const oneOnOne = await getOneOnOneById(id)

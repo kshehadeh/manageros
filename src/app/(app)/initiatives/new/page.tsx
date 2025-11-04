@@ -1,7 +1,4 @@
 import { InitiativeForm } from '@/components/initiatives/initiative-form'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { redirect } from 'next/navigation'
 import { Rocket } from 'lucide-react'
 import { HelpIcon } from '@/components/help-icon'
 
@@ -15,12 +12,6 @@ interface NewInitiativePageProps {
 export default async function NewInitiativePage({
   searchParams,
 }: NewInitiativePageProps) {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
-
   const { ownerId, teamId } = await searchParams
 
   return (

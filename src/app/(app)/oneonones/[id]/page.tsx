@@ -1,7 +1,4 @@
 import { getOneOnOneById } from '@/lib/actions/oneonone'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { OneOnOneDetailClient } from '@/components/oneonone-detail-client'
@@ -20,12 +17,6 @@ interface OneOnOneViewPageProps {
 export default async function OneOnOneViewPage({
   params,
 }: OneOnOneViewPageProps) {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
-
   const { id } = await params
 
   try {

@@ -3,9 +3,6 @@ import { TeamEditHeader } from '@/components/teams/team-edit-header'
 import { TeamEditClient } from '@/components/teams/team-edit-client'
 import { getTeam } from '@/lib/actions/team'
 import { notFound } from 'next/navigation'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { redirect } from 'next/navigation'
 
 interface EditTeamPageProps {
   params: Promise<{
@@ -14,12 +11,6 @@ interface EditTeamPageProps {
 }
 
 export default async function EditTeamPage({ params }: EditTeamPageProps) {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
-
   const { id } = await params
   const team = await getTeam(id)
 

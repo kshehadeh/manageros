@@ -20,13 +20,9 @@ export default async function PersonDetailPage({
 }: PersonDetailPageProps) {
   const session = await getServerSession(authOptions)
 
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
-
   const { id } = await params
 
-  if (!session.user.organizationId) {
+  if (!session?.user.organizationId) {
     redirect('/organization/create')
   }
 

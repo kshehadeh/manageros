@@ -18,13 +18,9 @@ export default async function FeedbackEditPage({
 }: FeedbackEditPageProps) {
   const session = await getServerSession(authOptions)
 
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
-
   const { id, feedbackId } = await params
 
-  if (!session.user.organizationId) {
+  if (!session?.user.organizationId) {
     redirect('/organization/create')
   }
 

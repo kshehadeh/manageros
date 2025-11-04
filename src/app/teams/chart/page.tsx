@@ -7,11 +7,7 @@ import { getTeamHierarchyOptimized } from '@/lib/actions/team'
 export default async function TeamsFlowPage() {
   const session = await getServerSession(authOptions)
 
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
-
-  if (!session.user.organizationId) {
+  if (!session?.user.organizationId) {
     redirect('/organization/create')
   }
 

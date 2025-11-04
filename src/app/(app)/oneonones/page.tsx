@@ -1,19 +1,10 @@
 import { Button } from '@/components/ui/button'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Handshake } from 'lucide-react'
 import { OneOnOneDataTable } from '@/components/oneonones/data-table'
 import { PageSection } from '@/components/ui/page-section'
 
 export default async function OneOnOnesPage() {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
-
   return (
     <div className='page-container'>
       <div className='page-header'>

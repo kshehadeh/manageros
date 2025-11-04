@@ -1,7 +1,4 @@
 import { getFeedbackById } from '@/lib/actions/feedback'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { FeedbackDetailClient } from '@/components/feedback/feedback-detail-client'
@@ -17,12 +14,6 @@ interface FeedbackDetailPageProps {
 export default async function FeedbackDetailPage({
   params,
 }: FeedbackDetailPageProps) {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
-
   const { id } = await params
 
   try {

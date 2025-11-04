@@ -13,17 +13,13 @@ import { UserCheck } from 'lucide-react'
 export default async function OrganizationMembersPage() {
   const session = await getServerSession(authOptions)
 
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
-
   // Check if user is admin
-  if (session.user.role !== 'ADMIN') {
+  if (session?.user.role !== 'ADMIN') {
     redirect('/dashboard')
   }
 
   // Check if user belongs to an organization
-  if (!session.user.organizationId) {
+  if (!session?.user.organizationId) {
     redirect('/organization/create')
   }
 

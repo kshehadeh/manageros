@@ -1,7 +1,4 @@
 import { TeamForm } from '@/components/teams/team-form'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { redirect } from 'next/navigation'
 import { Users2 } from 'lucide-react'
 
 interface NewTeamPageProps {
@@ -11,12 +8,6 @@ interface NewTeamPageProps {
 }
 
 export default async function NewTeamPage({ searchParams }: NewTeamPageProps) {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
-
   const { parentId } = await searchParams
 
   return (

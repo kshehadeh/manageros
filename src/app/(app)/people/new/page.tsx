@@ -16,12 +16,8 @@ export default async function NewPersonPage({
 }: NewPersonPageProps) {
   const session = await getServerSession(authOptions)
 
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
-
   // Check if user is admin
-  if (!isAdmin(session.user)) {
+  if (!session?.user || !isAdmin(session.user)) {
     redirect('/people')
   }
 

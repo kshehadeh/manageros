@@ -21,12 +21,8 @@ export default async function JobRoleDetailPage({
 }: JobRoleDetailPageProps) {
   const session = await getServerSession(authOptions)
 
-  if (!session?.user) {
-    redirect('/auth/signin')
-  }
-
   // Check if user belongs to an organization
-  if (!session.user.organizationId) {
+  if (!session?.user.organizationId) {
     redirect('/organization/create')
   }
 
