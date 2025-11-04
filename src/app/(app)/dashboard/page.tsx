@@ -1,16 +1,17 @@
-import { requireAuth } from '@/lib/auth-utils'
 import { DashboardOrganizationSetup } from '@/components/dashboard-organization-setup'
 import { Suspense } from 'react'
 import { HighlightsSectionServer } from '@/components/dashboard-sections/highlights-section-server'
 import { TodaysPrioritiesSectionServer } from '@/components/dashboard-sections/todays-priorities-section-server'
 import { ActiveInitiativesSectionServer } from '@/components/dashboard-sections/active-initiatives-section-server'
 import { TeamPulseSectionServer } from '@/components/dashboard-sections/team-pulse-section-server'
+import { RequireAuthServer } from '@/components/auth/require-auth-server'
+import { getOptionalUser } from '@/lib/auth-utils'
 
-export default async function Home() {
-  const user = await requireAuth()
+async function DashboardContent() {
+  const user = await getOptionalUser()
 
   // If user doesn't have an organization, show organization setup cards
-  if (!user.organizationId) {
+  if (!user?.organizationId) {
     return <DashboardOrganizationSetup />
   }
 
@@ -41,7 +42,7 @@ export default async function Home() {
             }
           >
             <ActiveInitiativesSectionServer
-              organizationId={user.organizationId!}
+              organizationId={user.organizationId}
               personId={user.personId}
             />
           </Suspense>
@@ -59,5 +60,15 @@ export default async function Home() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className='page-container'>Loading...</div>}>
+      <RequireAuthServer>
+        <DashboardContent />
+      </RequireAuthServer>
+    </Suspense>
   )
 }

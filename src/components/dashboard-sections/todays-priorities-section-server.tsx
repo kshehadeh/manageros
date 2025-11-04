@@ -1,4 +1,4 @@
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getOptionalUser } from '@/lib/auth-utils'
 import {
   TodaysPrioritiesSection,
   type PriorityItem,
@@ -12,9 +12,9 @@ import { getUpcomingOneOnOnesForPerson } from '@/lib/data/one-on-ones'
 import { getActiveFeedbackCampaignsForUser } from '@/lib/data/feedback-campaigns'
 
 export async function TodaysPrioritiesSectionServer() {
-  const user = await getCurrentUser()
+  const user = await getOptionalUser()
 
-  if (!user.organizationId || !user.personId) {
+  if (!user || !user.organizationId || !user.personId) {
     return null
   }
 

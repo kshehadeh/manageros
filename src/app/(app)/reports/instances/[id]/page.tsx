@@ -1,5 +1,4 @@
 import { getReportInstance } from '@/lib/actions/report'
-import { requireAuth } from '@/lib/auth-utils'
 import ReactMarkdown from 'react-markdown'
 import { ReportInstanceBreadcrumbClient } from '@/components/report-instance-breadcrumb-client'
 import { DeleteReportButton } from '@/components/delete-report-button'
@@ -7,14 +6,11 @@ import {
   PersonOverviewWebRenderer,
   type PersonOverviewWebRendererProps,
 } from '@/components/reports/person-overview-web-renderer'
+import { Suspense } from 'react'
+import { RequireAuthServer } from '@/components/auth/require-auth-server'
 
-export default async function ReportInstancePage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  await requireAuth({ requireOrganization: true })
-  const instance = await getReportInstance((await params).id)
+async function ReportInstancePageContent({ id }: { id: string }) {
+  const instance = await getReportInstance(id)
 
   const markdown = (instance as { outputMarkdown?: string }).outputMarkdown
   const isWebRenderer = instance.renderer === 'web'
@@ -46,5 +42,21 @@ export default async function ReportInstancePage({
         ) : null}
       </div>
     </ReportInstanceBreadcrumbClient>
+  )
+}
+
+export default async function ReportInstancePage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+
+  return (
+    <Suspense fallback={<div className='page-container'>Loading...</div>}>
+      <RequireAuthServer requireOrganization={true}>
+        <ReportInstancePageContent id={id} />
+      </RequireAuthServer>
+    </Suspense>
   )
 }

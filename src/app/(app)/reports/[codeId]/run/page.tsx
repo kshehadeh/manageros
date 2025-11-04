@@ -1,21 +1,19 @@
 import { notFound } from 'next/navigation'
 import { getReport } from '@/lib/reports/registry'
-import { requireAuth } from '@/lib/auth-utils'
 import { DynamicReportForm } from '@/components/dynamic-report-form'
 import { ReportRunBreadcrumbClient } from '@/components/report-run-breadcrumb-client'
 import { extractSchemaFields } from '@/lib/utils/schema-extraction'
 import { z } from 'zod'
+import { Suspense } from 'react'
+import { RequireAuthServer } from '@/components/auth/require-auth-server'
 
-export default async function RunReportPage({
-  params,
-  searchParams,
+async function RunReportPageContent({
+  codeId,
+  searchParamsFinal,
 }: {
-  params: Promise<{ codeId: string }>
-  searchParams: Promise<Record<string, string | string[] | undefined>>
+  codeId: string
+  searchParamsFinal: Record<string, string | string[] | undefined>
 }) {
-  await requireAuth({ requireOrganization: true })
-  const { codeId } = await params
-  const searchParamsFinal = await searchParams
   const def = await getReport(codeId)
   if (!def) return notFound()
 
@@ -46,5 +44,27 @@ export default async function RunReportPage({
         />
       </div>
     </ReportRunBreadcrumbClient>
+  )
+}
+
+export default async function RunReportPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ codeId: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const { codeId } = await params
+  const searchParamsFinal = await searchParams
+
+  return (
+    <Suspense fallback={<div className='page-container'>Loading...</div>}>
+      <RequireAuthServer requireOrganization={true}>
+        <RunReportPageContent
+          codeId={codeId}
+          searchParamsFinal={searchParamsFinal}
+        />
+      </RequireAuthServer>
+    </Suspense>
   )
 }

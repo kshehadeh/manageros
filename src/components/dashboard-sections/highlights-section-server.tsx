@@ -1,4 +1,4 @@
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getOptionalUser } from '@/lib/auth-utils'
 import { HighlightsSection } from './highlights-section'
 import { getOverdueTasksForAssignee } from '@/lib/data/tasks'
 import { getUpcomingOneOnOnesForPerson } from '@/lib/data/one-on-ones'
@@ -9,9 +9,9 @@ import {
 import { getActiveFeedbackCampaignsForUser } from '@/lib/data/feedback-campaigns'
 
 export async function HighlightsSectionServer() {
-  const user = await getCurrentUser()
+  const user = await getOptionalUser()
 
-  if (!user.organizationId || !user.personId) {
+  if (!user || !user.organizationId || !user.personId) {
     return (
       <HighlightsSection
         overdueTasksCount={0}

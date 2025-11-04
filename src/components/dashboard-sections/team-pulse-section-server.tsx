@@ -1,4 +1,4 @@
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getOptionalUser } from '@/lib/auth-utils'
 import { TeamPulseSection } from './team-pulse-section'
 import { isFuture } from 'date-fns'
 import { getDirectReports } from '@/lib/data/people'
@@ -17,9 +17,9 @@ interface TeamPulseMember {
 }
 
 export async function TeamPulseSectionServer() {
-  const user = await getCurrentUser()
+  const user = await getOptionalUser()
 
-  if (!user.organizationId || !user.personId) {
+  if (!user || !user.organizationId || !user.personId) {
     return null
   }
 

@@ -1,4 +1,4 @@
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getOptionalUser } from '@/lib/auth-utils'
 import { SimpleFeedbackCampaignList } from '@/components/feedback/feedback-campaign-simple-list'
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
@@ -9,10 +9,10 @@ import {
 } from '@/lib/data/feedback-campaigns'
 
 export async function DashboardFeedbackCampaignsServerSection() {
-  const user = await getCurrentUser()
+  const user = await getOptionalUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user || !user.organizationId) {
     return null
   }
 

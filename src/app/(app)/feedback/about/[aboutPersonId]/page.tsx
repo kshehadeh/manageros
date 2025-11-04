@@ -1,7 +1,9 @@
-import { requireAuth } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
 import { notFound } from 'next/navigation'
 import { PersonFeedbackPageClient } from '@/components/feedback/person-feedback-page-client'
+import { Suspense } from 'react'
+import { RequireAuthServer } from '@/components/auth/require-auth-server'
+import { getOptionalUser } from '@/lib/auth-utils'
 
 interface PersonFeedbackPageProps {
   params: Promise<{
@@ -9,17 +11,17 @@ interface PersonFeedbackPageProps {
   }>
 }
 
-export default async function PersonFeedbackPage({
-  params,
-}: PersonFeedbackPageProps) {
-  const user = await requireAuth({ requireOrganization: true })
+async function PersonFeedbackPageContent({
+  aboutPersonId,
+}: {
+  aboutPersonId: string
+}) {
+  const user = await getOptionalUser()
 
-  // requireAuth with requireOrganization ensures organizationId exists
-  if (!user.organizationId) {
+  // RequireAuthServer ensures organizationId exists, but we check again for type safety
+  if (!user?.organizationId) {
     notFound()
   }
-
-  const { aboutPersonId } = await params
 
   // Get the person and verify they belong to the current user's organization
   const person = await prisma.person.findFirst({
@@ -44,5 +46,19 @@ export default async function PersonFeedbackPage({
       aboutPersonId={aboutPersonId}
       personName={person.name}
     />
+  )
+}
+
+export default async function PersonFeedbackPage({
+  params,
+}: PersonFeedbackPageProps) {
+  const { aboutPersonId } = await params
+
+  return (
+    <Suspense fallback={<div className='page-container'>Loading...</div>}>
+      <RequireAuthServer requireOrganization={true}>
+        <PersonFeedbackPageContent aboutPersonId={aboutPersonId} />
+      </RequireAuthServer>
+    </Suspense>
   )
 }

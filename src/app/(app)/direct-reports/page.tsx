@@ -1,14 +1,16 @@
 import { PeopleDataTable } from '@/components/people/data-table'
-import { requireAuth } from '@/lib/auth-utils'
 import { Users } from 'lucide-react'
 import { HelpIcon } from '@/components/help-icon'
 import { PageSection } from '@/components/ui/page-section'
+import { Suspense } from 'react'
+import { RequireAuthServer } from '@/components/auth/require-auth-server'
+import { getOptionalUser } from '@/lib/auth-utils'
 
-export default async function DirectReportsPage() {
-  const user = await requireAuth({ requireOrganization: true })
+async function DirectReportsPageContent() {
+  const user = await getOptionalUser()
 
   // If user doesn't have a personId, they can't have direct reports
-  if (!user.personId) {
+  if (!user?.personId) {
     return (
       <div className='page-container'>
         <div className='page-header'>
@@ -47,5 +49,15 @@ export default async function DirectReportsPage() {
         />
       </PageSection>
     </div>
+  )
+}
+
+export default function DirectReportsPage() {
+  return (
+    <Suspense fallback={<div className='page-container'>Loading...</div>}>
+      <RequireAuthServer requireOrganization={true}>
+        <DirectReportsPageContent />
+      </RequireAuthServer>
+    </Suspense>
   )
 }

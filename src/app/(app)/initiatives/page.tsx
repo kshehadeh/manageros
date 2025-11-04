@@ -1,14 +1,13 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { InitiativeDataTable } from '@/components/initiatives/data-table'
-import { requireAuth } from '@/lib/auth-utils'
 import { Rocket, Plus } from 'lucide-react'
 import { HelpIcon } from '../../../components/help-icon'
 import { PageSection } from '@/components/ui/page-section'
+import { Suspense } from 'react'
+import { RequireAuthServer } from '@/components/auth/require-auth-server'
 
-export default async function InitiativesPage() {
-  await requireAuth({ requireOrganization: true })
-
+function InitiativesPageContent() {
   return (
     <div className='page-container'>
       <div className='page-header'>
@@ -32,5 +31,15 @@ export default async function InitiativesPage() {
         <InitiativeDataTable enablePagination={true} />
       </PageSection>
     </div>
+  )
+}
+
+export default function InitiativesPage() {
+  return (
+    <Suspense fallback={<div className='page-container'>Loading...</div>}>
+      <RequireAuthServer requireOrganization={true}>
+        <InitiativesPageContent />
+      </RequireAuthServer>
+    </Suspense>
   )
 }

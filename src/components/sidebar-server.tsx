@@ -1,11 +1,21 @@
 import Sidebar from './sidebar'
 import type { User as NextAuthUser } from 'next-auth'
-import { getFilteredNavigation } from '@/lib/auth-utils'
+import { getFilteredNavigation, getOptionalUser } from '@/lib/auth-utils'
 import { getCurrentUserWithPerson } from '@/lib/actions/organization'
 import { prisma } from '@/lib/db'
 
 export default async function SidebarServer() {
   // Get filtered navigation and server session for authenticated routes
+  // Use optional auth to enable static rendering
+  const user = await getOptionalUser()
+
+  if (!user) {
+    // Render sidebar without user data when not authenticated
+    // The middleware will handle redirects
+    return <Sidebar navigation={[]} serverSession={null} personData={null} />
+  }
+
+  // User is authenticated, fetch full data
   let filteredNavigation: Array<{
     name: string
     href: string
@@ -22,6 +32,7 @@ export default async function SidebarServer() {
     jobRoleId: string | null
     jobRoleTitle: string | null
   } | null = null
+
   try {
     filteredNavigation = await getFilteredNavigation()
     const userWithPerson = await getCurrentUserWithPerson()
@@ -47,9 +58,8 @@ export default async function SidebarServer() {
       }
     }
   } catch {
-    // If user is not authenticated, getFilteredNavigation will throw
-    // Fall back to public layout if authentication check fails
-    return <div>Error loading sidebar</div>
+    // Fallback if there's an error fetching user data
+    return <Sidebar navigation={[]} serverSession={null} personData={null} />
   }
 
   return (

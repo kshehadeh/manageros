@@ -1,4 +1,4 @@
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getOptionalUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
 import { getTaskAccessWhereClause } from '@/lib/task-access-utils'
 import { DashboardAssignedTasksClientSection } from './assigned-tasks-section-client'
@@ -10,10 +10,10 @@ interface DashboardAssignedTasksServerSectionProps {
 export async function DashboardAssignedTasksServerSection({
   personId,
 }: DashboardAssignedTasksServerSectionProps) {
-  const user = await getCurrentUser()
+  const user = await getOptionalUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user || !user.organizationId) {
     return null
   }
 

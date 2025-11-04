@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 /**
  * Get the current authenticated user from the session
  * Throws an error if no user is authenticated
+ * Use this for server actions and components that must have authentication
  */
 export async function getCurrentUser() {
   const session = await getServerSession(authOptions)
@@ -12,6 +13,16 @@ export async function getCurrentUser() {
     throw new Error('Unauthorized')
   }
   return session.user
+}
+
+/**
+ * Get the current authenticated user from the session
+ * Returns null if no user is authenticated (does not throw)
+ * Use this for server components wrapped in Suspense to enable static rendering
+ */
+export async function getOptionalUser() {
+  const session = await getServerSession(authOptions)
+  return session?.user ?? null
 }
 
 /**
@@ -34,9 +45,14 @@ export async function requireAuth(options?: {
 /**
  * Get navigation items filtered by user permissions
  * This ensures server-side security for navigation filtering
+ * Returns empty array if user is not authenticated (for use in Suspense boundaries)
  */
 export async function getFilteredNavigation() {
-  const user = await getCurrentUser()
+  const user = await getOptionalUser()
+
+  if (!user) {
+    return []
+  }
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: 'Home' },

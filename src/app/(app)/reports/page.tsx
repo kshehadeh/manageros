@@ -1,5 +1,4 @@
 import { listAvailableReports, listReportInstances } from '@/lib/actions/report'
-import { requireAuth } from '@/lib/auth-utils'
 import Link from 'next/link'
 import { BarChart3 } from 'lucide-react'
 import {
@@ -19,6 +18,8 @@ import {
   TableCell,
 } from '@/components/ui/table'
 import { HelpIcon } from '@/components/help-icon'
+import { Suspense } from 'react'
+import { RequireAuthServer } from '@/components/auth/require-auth-server'
 
 // Map report codeId to help documentation ID
 const reportHelpMap: Record<string, string> = {
@@ -26,9 +27,7 @@ const reportHelpMap: Record<string, string> = {
   'person-ai-synopsis': 'ai-synopsis-report',
 }
 
-export default async function ReportsPage() {
-  await requireAuth({ requireOrganization: true })
-
+async function ReportsPageContent() {
   const [reports, recent] = await Promise.all([
     listAvailableReports(),
     listReportInstances(10),
@@ -140,5 +139,15 @@ export default async function ReportsPage() {
         )}
       </section>
     </div>
+  )
+}
+
+export default function ReportsPage() {
+  return (
+    <Suspense fallback={<div className='page-container'>Loading...</div>}>
+      <RequireAuthServer requireOrganization={true}>
+        <ReportsPageContent />
+      </RequireAuthServer>
+    </Suspense>
   )
 }

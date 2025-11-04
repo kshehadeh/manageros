@@ -1,18 +1,8 @@
-import { redirect } from 'next/navigation'
 import { PersonImportForm } from '@/components/people/person-import-form'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { Suspense } from 'react'
+import { RequireAuthServer } from '@/components/auth/require-auth-server'
 
-export default async function ImportPeoplePage() {
-  const user = await getCurrentUser()
-
-  if (!user) {
-    redirect('/auth/signin')
-  }
-
-  if (!user.organizationId) {
-    redirect('/organization/create')
-  }
-
+function ImportPeoplePageContent() {
   return (
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
@@ -21,5 +11,15 @@ export default async function ImportPeoplePage() {
 
       <PersonImportForm />
     </div>
+  )
+}
+
+export default function ImportPeoplePage() {
+  return (
+    <Suspense fallback={<div className='page-container'>Loading...</div>}>
+      <RequireAuthServer requireOrganization={true}>
+        <ImportPeoplePageContent />
+      </RequireAuthServer>
+    </Suspense>
   )
 }

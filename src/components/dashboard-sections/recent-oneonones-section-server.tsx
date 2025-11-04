@@ -1,4 +1,4 @@
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getOptionalUser } from '@/lib/auth-utils'
 import {
   SimpleOneOnOneList,
   type OneOnOne,
@@ -17,10 +17,10 @@ interface DashboardRecentOneOnOnesServerSectionProps {
 export async function DashboardRecentOneOnOnesServerSection({
   personId,
 }: DashboardRecentOneOnOnesServerSectionProps) {
-  const user = await getCurrentUser()
+  const user = await getOptionalUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user || !user.organizationId) {
     return (
       <PageSection
         header={

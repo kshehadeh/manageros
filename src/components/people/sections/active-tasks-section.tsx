@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { ListTodo, Eye } from 'lucide-react'
 import Link from 'next/link'
 import { getTasksForAssignee } from '@/lib/data/tasks'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getOptionalUser } from '@/lib/auth-utils'
 
 interface ActiveTasksSectionProps {
   personId: string
@@ -20,7 +20,11 @@ export async function ActiveTasksSection({
     return null
   }
 
-  const user = await getCurrentUser()
+  const user = await getOptionalUser()
+
+  if (!user) {
+    return null
+  }
 
   // Get active tasks for this person
   const tasksResult = await getTasksForAssignee(
