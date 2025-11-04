@@ -1,25 +1,17 @@
 import './globals.css'
-import ServerConditionalLayout from '@/components/server-conditional-layout'
 import type { ReactNode } from 'react'
 import '@/lib/reports/register-all'
+import { Metadata } from 'next'
 
-export const metadata = {
-  title: 'ManagerOS',
-  description: 'Manager-only MVP',
-  manifest: '/manifest.json',
+export const metadata: Metadata = {
+  title: {
+    default: 'ManagerOS',
+    template: '%s | ManagerOS',
+  },
+  description: 'The ultimate productivity tool for managers',
+  applicationName: 'ManagerOS',
+  keywords: ['ManagerOS', 'Manager', 'MVP', 'Productivity', 'Business'],
   icons: {
-    icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/favicon-white.ico', media: '(prefers-color-scheme: dark)' },
-      { url: '/favicon-black.ico', media: '(prefers-color-scheme: light)' },
-      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
-    ],
-    shortcut: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/favicon-white.ico', media: '(prefers-color-scheme: dark)' },
-      { url: '/favicon-black.ico', media: '(prefers-color-scheme: light)' },
-    ],
     apple: [
       { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
@@ -44,7 +36,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang='en' suppressHydrationWarning>
       <body className='min-h-screen bg-background text-foreground antialiased'>
-        <ServerConditionalLayout>{children}</ServerConditionalLayout>
+        {children}
       </body>
     </html>
   )

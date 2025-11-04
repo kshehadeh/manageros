@@ -19,15 +19,27 @@ export default async function Home() {
       <div className='flex flex-col lg:flex-row gap-6'>
         {/* Main Content Area */}
         <div className='flex-1 space-y-6'>
-          <Suspense fallback={<div className='h-24 bg-muted/50 rounded-lg animate-pulse' />}>
+          <Suspense
+            fallback={
+              <div className='h-24 bg-muted/50 rounded-lg animate-pulse' />
+            }
+          >
             <HighlightsSectionServer />
           </Suspense>
 
-          <Suspense fallback={<div className='h-64 bg-muted/50 rounded-lg animate-pulse' />}>
+          <Suspense
+            fallback={
+              <div className='h-64 bg-muted/50 rounded-lg animate-pulse' />
+            }
+          >
             <TodaysPrioritiesSectionServer />
           </Suspense>
 
-          <Suspense fallback={<div className='h-64 bg-muted/50 rounded-lg animate-pulse' />}>
+          <Suspense
+            fallback={
+              <div className='h-64 bg-muted/50 rounded-lg animate-pulse' />
+            }
+          >
             <ActiveInitiativesSectionServer
               organizationId={user.organizationId!}
               personId={user.personId}
@@ -37,7 +49,11 @@ export default async function Home() {
 
         {/* Right Sidebar */}
         <div className='w-full lg:w-80'>
-          <Suspense fallback={<div className='h-96 bg-muted/50 rounded-lg animate-pulse' />}>
+          <Suspense
+            fallback={
+              <div className='h-96 bg-muted/50 rounded-lg animate-pulse' />
+            }
+          >
             <TeamPulseSectionServer />
           </Suspense>
         </div>

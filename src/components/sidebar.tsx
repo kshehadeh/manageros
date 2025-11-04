@@ -31,6 +31,7 @@ import { BugSubmissionModal } from '@/components/bug-submission-modal'
 import { useAIChat } from '@/components/ai-chat-provider'
 import { APP_VERSION } from '@/lib/version'
 import { PersonAvatar } from '@/components/people/person-avatar'
+import { SidebarSkeleton } from '@/components/sidebar-skeleton'
 
 interface NavItem {
   name: string
@@ -84,25 +85,7 @@ export default function Sidebar({
 
   // Only show loading if we don't have a server session and client session is loading
   if (status === 'loading' && !serverSession) {
-    return (
-      <div className='hidden lg:flex h-screen w-64 flex-col bg-card border-r'>
-        <div className='flex h-16 items-center px-6'>
-          <div className='flex items-center gap-3'>
-            <IndigoIcon width={32} height={26} color='currentColor' />
-            <h1 className='text-xl font-semibold text-foreground'>ManagerOS</h1>
-          </div>
-        </div>
-        <div className='flex-1 px-6 py-4'>
-          <div className='text-sm text-muted-foreground'>Loading...</div>
-        </div>
-        {/* Version Footer */}
-        <div className='px-3 py-2 border-t'>
-          <div className='text-xs text-muted-foreground text-center'>
-            v{APP_VERSION}
-          </div>
-        </div>
-      </div>
-    )
+    return <SidebarSkeleton />
   }
 
   if (!effectiveSession) {

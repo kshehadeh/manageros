@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { InitiativeDataTable } from '@/components/initiatives/data-table'
 import { requireAuth } from '@/lib/auth-utils'
 import { Rocket, Plus } from 'lucide-react'
-import { HelpIcon } from '../../components/help-icon'
+import { HelpIcon } from '../../../components/help-icon'
 import { PageSection } from '@/components/ui/page-section'
 
 export default async function InitiativesPage() {

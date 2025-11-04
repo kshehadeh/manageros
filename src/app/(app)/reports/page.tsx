@@ -1,7 +1,4 @@
-import {
-  listAvailableReports,
-  listReportInstances,
-} from '@/lib/actions/report'
+import { listAvailableReports, listReportInstances } from '@/lib/actions/report'
 import { requireAuth } from '@/lib/auth-utils'
 import Link from 'next/link'
 import { BarChart3 } from 'lucide-react'
