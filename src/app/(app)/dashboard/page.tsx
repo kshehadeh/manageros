@@ -4,7 +4,6 @@ import { HighlightsSectionServer } from '@/components/dashboard-sections/highlig
 import { TodaysPrioritiesSectionServer } from '@/components/dashboard-sections/todays-priorities-section-server'
 import { ActiveInitiativesSectionServer } from '@/components/dashboard-sections/active-initiatives-section-server'
 import { TeamPulseSectionServer } from '@/components/dashboard-sections/team-pulse-section-server'
-import { RequireAuthServer } from '@/components/auth/require-auth-server'
 import { getOptionalUser } from '@/lib/auth-utils'
 
 async function DashboardContent() {
@@ -64,11 +63,5 @@ async function DashboardContent() {
 }
 
 export default function Home() {
-  return (
-    <Suspense fallback={<div className='page-container'>Loading...</div>}>
-      <RequireAuthServer>
-        <DashboardContent />
-      </RequireAuthServer>
-    </Suspense>
-  )
+  return <DashboardContent />
 }

@@ -18,8 +18,6 @@ import {
   TableCell,
 } from '@/components/ui/table'
 import { HelpIcon } from '@/components/help-icon'
-import { Suspense } from 'react'
-import { RequireAuthServer } from '@/components/auth/require-auth-server'
 
 // Map report codeId to help documentation ID
 const reportHelpMap: Record<string, string> = {
@@ -27,7 +25,7 @@ const reportHelpMap: Record<string, string> = {
   'person-ai-synopsis': 'ai-synopsis-report',
 }
 
-async function ReportsPageContent() {
+export default async function ReportsPage() {
   const [reports, recent] = await Promise.all([
     listAvailableReports(),
     listReportInstances(10),
@@ -139,15 +137,5 @@ async function ReportsPageContent() {
         )}
       </section>
     </div>
-  )
-}
-
-export default function ReportsPage() {
-  return (
-    <Suspense fallback={<div className='page-container'>Loading...</div>}>
-      <RequireAuthServer requireOrganization={true}>
-        <ReportsPageContent />
-      </RequireAuthServer>
-    </Suspense>
   )
 }

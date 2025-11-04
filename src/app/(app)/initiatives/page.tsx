@@ -4,10 +4,8 @@ import { InitiativeDataTable } from '@/components/initiatives/data-table'
 import { Rocket, Plus } from 'lucide-react'
 import { HelpIcon } from '../../../components/help-icon'
 import { PageSection } from '@/components/ui/page-section'
-import { Suspense } from 'react'
-import { RequireAuthServer } from '@/components/auth/require-auth-server'
 
-function InitiativesPageContent() {
+export default function InitiativesPage() {
   return (
     <div className='page-container'>
       <div className='page-header'>
@@ -31,15 +29,5 @@ function InitiativesPageContent() {
         <InitiativeDataTable enablePagination={true} />
       </PageSection>
     </div>
-  )
-}
-
-export default function InitiativesPage() {
-  return (
-    <Suspense fallback={<div className='page-container'>Loading...</div>}>
-      <RequireAuthServer requireOrganization={true}>
-        <InitiativesPageContent />
-      </RequireAuthServer>
-    </Suspense>
   )
 }

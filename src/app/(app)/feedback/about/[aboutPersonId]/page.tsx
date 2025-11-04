@@ -1,8 +1,6 @@
 import { prisma } from '@/lib/db'
 import { notFound } from 'next/navigation'
 import { PersonFeedbackPageClient } from '@/components/feedback/person-feedback-page-client'
-import { Suspense } from 'react'
-import { RequireAuthServer } from '@/components/auth/require-auth-server'
 import { getOptionalUser } from '@/lib/auth-utils'
 
 interface PersonFeedbackPageProps {
@@ -11,14 +9,13 @@ interface PersonFeedbackPageProps {
   }>
 }
 
-async function PersonFeedbackPageContent({
-  aboutPersonId,
-}: {
-  aboutPersonId: string
-}) {
+export default async function PersonFeedbackPage({
+  params,
+}: PersonFeedbackPageProps) {
+  const { aboutPersonId } = await params
   const user = await getOptionalUser()
 
-  // RequireAuthServer ensures organizationId exists, but we check again for type safety
+  // Middleware ensures authentication, but we check organizationId for type safety
   if (!user?.organizationId) {
     notFound()
   }
@@ -46,19 +43,5 @@ async function PersonFeedbackPageContent({
       aboutPersonId={aboutPersonId}
       personName={person.name}
     />
-  )
-}
-
-export default async function PersonFeedbackPage({
-  params,
-}: PersonFeedbackPageProps) {
-  const { aboutPersonId } = await params
-
-  return (
-    <Suspense fallback={<div className='page-container'>Loading...</div>}>
-      <RequireAuthServer requireOrganization={true}>
-        <PersonFeedbackPageContent aboutPersonId={aboutPersonId} />
-      </RequireAuthServer>
-    </Suspense>
   )
 }

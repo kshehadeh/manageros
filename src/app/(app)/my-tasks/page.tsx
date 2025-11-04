@@ -2,11 +2,9 @@ import { MyTasksPageClient } from '@/components/tasks/my-tasks-page-client'
 import { CreateTaskButton } from '@/components/tasks/create-task-button'
 import { CheckSquare } from 'lucide-react'
 import { PageSection } from '@/components/ui/page-section'
-import { Suspense } from 'react'
-import { RequireAuthServer } from '@/components/auth/require-auth-server'
 import { getOptionalUser } from '@/lib/auth-utils'
 
-async function MyTasksPageContent() {
+export default async function MyTasksPage() {
   const user = await getOptionalUser()
 
   return (
@@ -30,15 +28,5 @@ async function MyTasksPageContent() {
         <MyTasksPageClient personId={user?.personId ?? null} />
       </PageSection>
     </div>
-  )
-}
-
-export default function MyTasksPage() {
-  return (
-    <Suspense fallback={<div className='page-container'>Loading...</div>}>
-      <RequireAuthServer requireOrganization={true}>
-        <MyTasksPageContent />
-      </RequireAuthServer>
-    </Suspense>
   )
 }

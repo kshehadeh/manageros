@@ -1,8 +1,6 @@
 import { PersonImportForm } from '@/components/people/person-import-form'
-import { Suspense } from 'react'
-import { RequireAuthServer } from '@/components/auth/require-auth-server'
 
-function ImportPeoplePageContent() {
+export default function ImportPeoplePage() {
   return (
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
@@ -11,15 +9,5 @@ function ImportPeoplePageContent() {
 
       <PersonImportForm />
     </div>
-  )
-}
-
-export default function ImportPeoplePage() {
-  return (
-    <Suspense fallback={<div className='page-container'>Loading...</div>}>
-      <RequireAuthServer requireOrganization={true}>
-        <ImportPeoplePageContent />
-      </RequireAuthServer>
-    </Suspense>
   )
 }

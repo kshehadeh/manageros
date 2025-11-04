@@ -6,10 +6,13 @@ import {
   PersonOverviewWebRenderer,
   type PersonOverviewWebRendererProps,
 } from '@/components/reports/person-overview-web-renderer'
-import { Suspense } from 'react'
-import { RequireAuthServer } from '@/components/auth/require-auth-server'
 
-async function ReportInstancePageContent({ id }: { id: string }) {
+export default async function ReportInstancePage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
   const instance = await getReportInstance(id)
 
   const markdown = (instance as { outputMarkdown?: string }).outputMarkdown
@@ -42,21 +45,5 @@ async function ReportInstancePageContent({ id }: { id: string }) {
         ) : null}
       </div>
     </ReportInstanceBreadcrumbClient>
-  )
-}
-
-export default async function ReportInstancePage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const { id } = await params
-
-  return (
-    <Suspense fallback={<div className='page-container'>Loading...</div>}>
-      <RequireAuthServer requireOrganization={true}>
-        <ReportInstancePageContent id={id} />
-      </RequireAuthServer>
-    </Suspense>
   )
 }

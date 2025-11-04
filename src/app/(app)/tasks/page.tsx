@@ -2,10 +2,8 @@ import { CreateTaskButton } from '@/components/tasks/create-task-button'
 import { ListTodo } from 'lucide-react'
 import { TaskDataTable } from '../../../components/tasks/data-table'
 import { PageSection } from '@/components/ui/page-section'
-import { Suspense } from 'react'
-import { RequireAuthServer } from '@/components/auth/require-auth-server'
 
-function TasksPageContent() {
+export default function TasksPage() {
   return (
     <div className='page-container'>
       <div className='page-header'>
@@ -27,15 +25,5 @@ function TasksPageContent() {
         <TaskDataTable enablePagination={true} />
       </PageSection>
     </div>
-  )
-}
-
-export default function TasksPage() {
-  return (
-    <Suspense fallback={<div className='page-container'>Loading...</div>}>
-      <RequireAuthServer requireOrganization={true}>
-        <TasksPageContent />
-      </RequireAuthServer>
-    </Suspense>
   )
 }
