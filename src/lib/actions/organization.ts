@@ -824,14 +824,8 @@ export async function getCurrentUserWithPerson() {
   const person = currentUser.personId
     ? await prisma.person.findUnique({
         where: { id: currentUser.personId },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          status: true,
-          avatar: true,
-          jobRoleId: true,
+        include: {
+          jobRole: true,
         },
       })
     : null

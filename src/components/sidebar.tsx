@@ -32,6 +32,7 @@ import { useAIChat } from '@/components/ai-chat-provider'
 import { APP_VERSION } from '@/lib/version'
 import { PersonAvatar } from '@/components/people/person-avatar'
 import { SidebarSkeleton } from '@/components/sidebar-skeleton'
+import { Person } from '@prisma/client'
 
 interface NavItem {
   name: string
@@ -43,15 +44,7 @@ interface NavItem {
 interface SidebarProps {
   navigation?: NavItem[]
   serverSession?: NextAuthUser | null
-  personData?: {
-    id: string
-    name: string
-    avatar: string | null
-    email: string | null
-    role: string | null
-    jobRoleId: string | null
-    jobRoleTitle: string | null
-  } | null
+  personData?: Person | null
 }
 
 const iconMap = {

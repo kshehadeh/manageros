@@ -124,8 +124,8 @@ export async function getCompleteTeamHierarchy(): Promise<TeamWithHierarchy[]> {
 export async function getTeamHierarchyOptimized(): Promise<
   TeamWithHierarchy[]
 > {
+  const user = await getCurrentUser()
   try {
-    const user = await getCurrentUser()
     if (!user.organizationId) {
       return []
     }

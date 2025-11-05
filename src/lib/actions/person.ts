@@ -46,8 +46,9 @@ export async function getPeopleForOrganization() {
 }
 
 export async function getPeopleHierarchy() {
+  const user = await getCurrentUser()
+
   try {
-    const user = await getCurrentUser()
     if (!user.organizationId) {
       return []
     }
