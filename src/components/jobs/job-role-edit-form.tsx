@@ -160,21 +160,6 @@ export function JobRoleEditForm({
 
   return (
     <div className='page-container'>
-      {/* Header */}
-      <div className='page-header'>
-        <div className='flex items-start justify-between'>
-          <div className='flex-1'>
-            <div className='flex items-center gap-3 mb-2'>
-              <Briefcase className='h-5 w-5 text-muted-foreground' />
-              <h1 className='page-title'>Edit Job Role</h1>
-            </div>
-            <div className='page-section-subtitle'>
-              Update job role details and description
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className='main-layout'>
         <div className='main-content'>
@@ -187,6 +172,11 @@ export function JobRoleEditForm({
               disabled: !isFormValid,
             }}
             isSubmitting={isSubmitting}
+            header={{
+              icon: Briefcase,
+              title: 'Edit Job Role',
+              subtitle: 'Update job role details and description',
+            }}
           />
         </div>
       </div>

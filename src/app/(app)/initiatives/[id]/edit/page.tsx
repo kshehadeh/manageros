@@ -4,7 +4,6 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { InitiativeForm } from '@/components/initiatives/initiative-form'
 import { InitiativeDetailClient } from '@/components/initiatives/initiative-detail-client'
-import { Rocket } from 'lucide-react'
 
 export default async function EditInitiative({
   params,
@@ -49,16 +48,7 @@ export default async function EditInitiative({
       initiativeId={initiative.id}
     >
       <div className='px-4 lg:px-0'>
-        <div className='space-y-6'>
-          <div className='flex items-center justify-between'>
-            <div className='flex items-center gap-3'>
-              <Rocket className='h-6 w-6 text-muted-foreground' />
-              <h1 className='text-xl font-semibold'>Edit Initiative</h1>
-            </div>
-          </div>
-
-          <InitiativeForm initiative={initiative} />
-        </div>
+        <InitiativeForm initiative={initiative} />
       </div>
     </InitiativeDetailClient>
   )

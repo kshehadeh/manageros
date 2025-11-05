@@ -18,7 +18,15 @@ import { updateInitiative, createInitiative } from '@/lib/actions/initiative'
 import { type InitiativeFormData, initiativeSchema } from '@/lib/validations'
 import { Rag } from '@/components/rag'
 import { MarkdownEditor } from '@/components/markdown-editor'
-import { Trash2, Rocket, Calendar, Target, Users, Settings } from 'lucide-react'
+import {
+  Trash2,
+  Rocket,
+  Calendar,
+  Target,
+  Users,
+  Settings,
+  SettingsIcon,
+} from 'lucide-react'
 import { FormTemplate, type FormSection } from '@/components/ui/form-template'
 
 interface InitiativeFormProps {
@@ -216,7 +224,7 @@ export function InitiativeForm({
   const sections: FormSection[] = [
     {
       title: 'Basic Information',
-      icon: Rocket,
+      icon: SettingsIcon,
       content: (
         <>
           <div className='space-y-2'>
@@ -531,6 +539,10 @@ export function InitiativeForm({
       }}
       generalError={errors.general}
       isSubmitting={isSubmitting}
+      header={{
+        icon: Rocket,
+        title: initiative ? 'Edit Initiative' : 'Create Initiative',
+      }}
     />
   )
 }

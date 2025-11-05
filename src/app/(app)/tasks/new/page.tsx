@@ -21,18 +21,16 @@ export default async function NewTaskPage() {
 
   return (
     <div className='page-container'>
-      <div className='page-header'>
-        <div>
-          <h1 className='page-title'>Create New Task</h1>
-          <p className='page-subtitle'>
-            Create a new task for your organization
-          </p>
-        </div>
-      </div>
-
       <PageSection>
         <div className='card'>
-          <TaskForm people={people} objectives={objectives} />
+          <TaskForm
+            people={people}
+            objectives={objectives}
+            header={{
+              title: 'Create New Task',
+              subtitle: 'Create a new task for your organization',
+            }}
+          />
         </div>
       </PageSection>
     </div>

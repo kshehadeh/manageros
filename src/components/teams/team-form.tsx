@@ -19,9 +19,19 @@ interface TeamFormProps {
     parentId?: string | null
   }
   parentId?: string
+  header?: {
+    icon?: React.ComponentType<{ className?: string }>
+    title: string
+    subtitle?: string
+    action?: React.ReactNode
+  }
 }
 
-export function TeamForm({ team, parentId }: TeamFormProps) {
+export function TeamForm({
+  team,
+  parentId,
+  header: externalHeader,
+}: TeamFormProps) {
   const [formData, setFormData] = useState<TeamFormData>({
     name: team?.name || '',
     description: team?.description || '',
@@ -115,6 +125,11 @@ export function TeamForm({ team, parentId }: TeamFormProps) {
     },
   ]
 
+  const formHeader = externalHeader || {
+    icon: Users,
+    title: team ? 'Edit Team' : 'Create Team',
+  }
+
   return (
     <FormTemplate
       sections={sections}
@@ -126,6 +141,7 @@ export function TeamForm({ team, parentId }: TeamFormProps) {
       }}
       generalError={error}
       isSubmitting={isSubmitting}
+      header={formHeader}
     />
   )
 }

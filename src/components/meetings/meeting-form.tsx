@@ -49,6 +49,12 @@ interface MeetingFormProps {
   isEditing?: boolean
   meetingId?: string
   showHeader?: boolean
+  header?: {
+    icon?: React.ComponentType<{ className?: string }>
+    title: string
+    subtitle?: string
+    action?: React.ReactNode
+  }
 }
 
 export function MeetingForm({
@@ -60,6 +66,7 @@ export function MeetingForm({
   isEditing = false,
   meetingId,
   showHeader = false,
+  header: externalHeader,
 }: MeetingFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -552,46 +559,52 @@ export function MeetingForm({
     },
   ]
 
+  // Build header for FormTemplate
+  const formHeader = externalHeader
+    ? {
+        ...externalHeader,
+        icon: externalHeader.icon || CalendarDays,
+      }
+    : showHeader && !isEditing
+      ? {
+          icon: CalendarDays,
+          title: 'Create New Meeting',
+          subtitle: 'Schedule a new meeting for your organization',
+          action: (
+            <>
+              <Button
+                type='button'
+                variant='outline'
+                onClick={() => icsFileInputRef.current?.click()}
+                disabled={isImportingICS || isSubmitting}
+              >
+                {isImportingICS ? (
+                  <>
+                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                    Importing...
+                  </>
+                ) : (
+                  <>
+                    <Upload className='mr-2 h-4 w-4' />
+                    Import from ICS
+                  </>
+                )}
+              </Button>
+              <input
+                ref={icsFileInputRef}
+                type='file'
+                accept='.ics'
+                onChange={e => handleICSFileSelect(e.target.files)}
+                className='hidden'
+                disabled={isImportingICS || isSubmitting}
+              />
+            </>
+          ),
+        }
+      : undefined
+
   return (
     <div className='space-y-6'>
-      {/* Page Header with ICS Import Button */}
-      {showHeader && !isEditing && (
-        <div className='flex items-start justify-between gap-4'>
-          <div>
-            <h1 className='text-2xl font-bold'>Create New Meeting</h1>
-            <p className='text-muted-foreground'>
-              Schedule a new meeting for your organization
-            </p>
-          </div>
-          <Button
-            type='button'
-            variant='outline'
-            onClick={() => icsFileInputRef.current?.click()}
-            disabled={isImportingICS || isSubmitting}
-          >
-            {isImportingICS ? (
-              <>
-                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                Importing...
-              </>
-            ) : (
-              <>
-                <Upload className='mr-2 h-4 w-4' />
-                Import from ICS
-              </>
-            )}
-          </Button>
-          <input
-            ref={icsFileInputRef}
-            type='file'
-            accept='.ics'
-            onChange={e => handleICSFileSelect(e.target.files)}
-            className='hidden'
-            disabled={isImportingICS || isSubmitting}
-          />
-        </div>
-      )}
-
       <FormTemplate
         sections={sections}
         onSubmit={handleSubmit}
@@ -602,6 +615,7 @@ export function MeetingForm({
         }}
         generalError={errors.general}
         isSubmitting={isSubmitting}
+        header={formHeader}
       />
 
       {/* Privacy Settings - Outside of FormTemplate */}

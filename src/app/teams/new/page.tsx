@@ -1,5 +1,4 @@
 import { TeamForm } from '@/components/teams/team-form'
-import { Users2 } from 'lucide-react'
 
 interface NewTeamPageProps {
   searchParams: Promise<{
@@ -12,13 +11,6 @@ export default async function NewTeamPage({ searchParams }: NewTeamPageProps) {
 
   return (
     <div className='space-y-6'>
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-3'>
-          <Users2 className='h-6 w-6 text-muted-foreground' />
-          <h2 className='text-lg font-semibold'>New Team</h2>
-        </div>
-      </div>
-
       <TeamForm parentId={parentId} />
     </div>
   )

@@ -42,6 +42,12 @@ interface TaskFormProps {
   initialData?: Partial<TaskFormData>
   isEditing?: boolean
   taskId?: string
+  header?: {
+    icon?: React.ComponentType<{ className?: string }>
+    title: string
+    subtitle?: string
+    action?: React.ReactNode
+  }
 }
 
 function TaskFormContent({
@@ -53,6 +59,7 @@ function TaskFormContent({
   initialData,
   isEditing = false,
   taskId,
+  header: externalHeader,
 }: TaskFormProps) {
   const { getCleanedText, detectedDate, detectedPriority } =
     useTaskSummaryInput()
@@ -405,6 +412,19 @@ function TaskFormContent({
     },
   ]
 
+  const formHeader = externalHeader
+    ? {
+        ...externalHeader,
+        icon: externalHeader.icon || CheckCircle,
+      }
+    : {
+        icon: CheckCircle,
+        title: isEditing ? 'Edit Task' : 'Create Task',
+        subtitle: isEditing
+          ? 'Update task details and assignments'
+          : 'Create a new task for your organization',
+      }
+
   return (
     <FormTemplate
       sections={sections}
@@ -415,6 +435,7 @@ function TaskFormContent({
       }}
       generalError={errors.general}
       isSubmitting={isSubmitting}
+      header={formHeader}
     />
   )
 }

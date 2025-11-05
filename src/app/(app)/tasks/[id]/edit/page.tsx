@@ -62,13 +62,6 @@ export default async function EditTaskPage({
   return (
     <TaskDetailBreadcrumbClient taskTitle={task.title} taskId={task.id}>
       <div className='page-container'>
-        <div className='page-header'>
-          <div>
-            <h1 className='page-title'>Edit Task</h1>
-            <p className='page-subtitle'>Update task details and assignments</p>
-          </div>
-        </div>
-
         <PageSection>
           <TaskForm
             people={people}
@@ -76,6 +69,10 @@ export default async function EditTaskPage({
             initialData={initialData}
             isEditing={true}
             taskId={task.id}
+            header={{
+              title: 'Edit Task',
+              subtitle: 'Update task details and assignments',
+            }}
           />
         </PageSection>
       </div>

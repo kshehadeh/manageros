@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import 'react-day-picker/dist/style.css';
+@import '../styles/tiptap.css';
 
 @theme {
   --color-background: hsl(0 0% 100%);
@@ -777,5 +778,16 @@ input[type='time']::-webkit-calendar-picker-indicator {
   100% {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+/* Form header border fade animation */
+@keyframes fadeInOut {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
   }
 }

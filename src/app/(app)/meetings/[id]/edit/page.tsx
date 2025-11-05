@@ -52,18 +52,15 @@ export default async function EditMeetingPage({
 
   return (
     <div className='space-y-6'>
-      <div>
-        <h1 className='text-2xl font-bold'>Edit Meeting</h1>
-        <p className='text-muted-foreground'>
-          Update meeting details and participants
-        </p>
-      </div>
-
       <MeetingForm
         teams={teams}
         initialData={initialData}
         isEditing={true}
         meetingId={meeting.id}
+        header={{
+          title: 'Edit Meeting',
+          subtitle: 'Update meeting details and participants',
+        }}
       />
     </div>
   )
