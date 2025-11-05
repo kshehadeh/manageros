@@ -94,3 +94,9 @@
 .ProseMirror p {
   margin: 0.5rem 0;
 }
+
+/* Ensure TipTap editor respects scrollable container constraints */
+[data-scrollable-editor] .ProseMirror {
+  height: auto;
+  max-height: none;
+}

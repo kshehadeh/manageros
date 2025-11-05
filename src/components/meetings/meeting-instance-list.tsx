@@ -7,14 +7,6 @@ import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { SectionHeader } from '@/components/ui/section-header'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import { MeetingInstanceForm } from '@/components/meetings/meeting-instance-form'
 import { deleteMeetingInstance } from '@/lib/actions/meeting-instance'
 import { toast } from 'sonner'
 import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
@@ -48,21 +40,15 @@ interface MeetingInstanceListProps {
 export function MeetingInstanceList({
   instances,
   meetingId,
-  parentParticipants = [],
-  parentScheduledAt,
+  parentParticipants: _parentParticipants = [],
+  parentScheduledAt: _parentScheduledAt,
 }: MeetingInstanceListProps) {
-  const [open, setOpen] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const router = useRouter()
   const [, startTransition] = useTransition()
 
   const { handleButtonClick, ContextMenuComponent } = useDataTableContextMenu()
-
-  const handleSuccess = () => {
-    setOpen(false)
-    router.refresh()
-  }
 
   const handleDeleteInstance = async () => {
     if (!deleteTargetId) return
@@ -79,26 +65,6 @@ export function MeetingInstanceList({
       console.error('Error deleting meeting instance:', error)
       toast.error('Failed to delete meeting instance')
     }
-  }
-
-  // Transform parent participants to initial data format (reset status to invited)
-  const initialParticipants = parentParticipants.map(p => ({
-    personId: p.personId,
-    status: 'invited' as const,
-  }))
-
-  // Set default date to today with time from parent meeting
-  let defaultScheduledAt = ''
-  if (parentScheduledAt) {
-    const parentMeetingDate = new Date(parentScheduledAt)
-    const todayWithParentTime = new Date()
-    todayWithParentTime.setHours(parentMeetingDate.getHours())
-    todayWithParentTime.setMinutes(parentMeetingDate.getMinutes())
-    todayWithParentTime.setSeconds(0)
-    todayWithParentTime.setMilliseconds(0)
-
-    // Format as ISO string for DateTimePickerWithNaturalInput
-    defaultScheduledAt = todayWithParentTime.toISOString()
   }
 
   const getAttendanceSummary = (instance: MeetingInstanceWithRelations) => {
@@ -171,27 +137,12 @@ export function MeetingInstanceList({
         icon={Calendar}
         title='Meeting Instances'
         action={
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button className='flex items-center gap-2'>
-                <Plus className='h-4 w-4' />
-                Add Instance
-              </Button>
-            </DialogTrigger>
-            <DialogContent className='max-w-2xl'>
-              <DialogHeader>
-                <DialogTitle>Create New Instance</DialogTitle>
-              </DialogHeader>
-              <MeetingInstanceForm
-                meetingId={meetingId}
-                initialData={{
-                  participants: initialParticipants,
-                  scheduledAt: defaultScheduledAt,
-                }}
-                onSuccess={handleSuccess}
-              />
-            </DialogContent>
-          </Dialog>
+          <Button asChild className='flex items-center gap-2'>
+            <Link href={`/meetings/${meetingId}/instances/new`}>
+              <Plus className='h-4 w-4' />
+              Add Instance
+            </Link>
+          </Button>
         }
       />
 
@@ -201,27 +152,12 @@ export function MeetingInstanceList({
           <p className='text-sm text-muted-foreground mb-4'>
             No meeting instances yet
           </p>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button className='flex items-center gap-2'>
-                <Plus className='h-4 w-4' />
-                Create First Instance
-              </Button>
-            </DialogTrigger>
-            <DialogContent className='max-w-2xl'>
-              <DialogHeader>
-                <DialogTitle>Create New Instance</DialogTitle>
-              </DialogHeader>
-              <MeetingInstanceForm
-                meetingId={meetingId}
-                initialData={{
-                  participants: initialParticipants,
-                  scheduledAt: defaultScheduledAt,
-                }}
-                onSuccess={handleSuccess}
-              />
-            </DialogContent>
-          </Dialog>
+          <Button asChild className='flex items-center gap-2'>
+            <Link href={`/meetings/${meetingId}/instances/new`}>
+              <Plus className='h-4 w-4' />
+              Create First Instance
+            </Link>
+          </Button>
         </div>
       ) : (
         <section className='rounded-xl py-4 -mx-3 px-3 space-y-4'>

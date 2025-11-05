@@ -267,7 +267,9 @@ export function MarkdownEditor({
       </div>
 
       {/* Editor */}
-      <EditorContent editor={editor} />
+      <div className='max-h-[90vh] overflow-y-auto' data-scrollable-editor>
+        <EditorContent editor={editor} />
+      </div>
 
       {/* Character count */}
       <div className='px-4 py-2 border-t text-xs text-muted-foreground bg-accent'>

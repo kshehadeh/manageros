@@ -42,7 +42,6 @@ interface MeetingInstanceFormProps {
   initialData?: Partial<MeetingInstanceFormData>
   isEditing?: boolean
   instanceId?: string
-  onSuccess?: () => void
   parentMeetingParticipants?: Array<{
     id: string
     personId: string
@@ -63,7 +62,6 @@ export function MeetingInstanceForm({
   initialData,
   isEditing = false,
   instanceId,
-  onSuccess,
   parentMeetingParticipants,
   onSubmit: externalOnSubmit,
   errors: externalErrors,
@@ -116,13 +114,8 @@ export function MeetingInstanceForm({
         router.push(`/meetings/${meetingId}/instances/${instanceId}`)
       } else {
         const createdInstance = await createMeetingInstance(validatedData)
-        // Call success callback if provided (for dialog forms)
-        if (onSuccess) {
-          onSuccess()
-        } else {
-          // Redirect to the newly created instance detail page
-          router.push(`/meetings/${meetingId}/instances/${createdInstance.id}`)
-        }
+        // Redirect to the newly created instance detail page
+        router.push(`/meetings/${meetingId}/instances/${createdInstance.id}`)
       }
     } catch (error) {
       if (error instanceof Error) {
