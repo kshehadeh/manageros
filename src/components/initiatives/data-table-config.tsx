@@ -73,7 +73,7 @@ export const initiativeDataTableConfig: DataTableConfig<
         minSize: 50,
         maxSize: 80,
         meta: {
-          hidden: visibleColumns?.includes('rag') === false,
+          hidden: true, // Hidden from UI but still functional for grouping
         },
       },
       {
@@ -89,10 +89,15 @@ export const initiativeDataTableConfig: DataTableConfig<
             initiative.status as InitiativeStatus
           )
           return (
-            <div className='space-y-0.5 flex-1'>
-              <div className='font-medium'>{initiative.title}</div>
-              <div className='text-xs text-muted-foreground'>
-                {teamName} • {statusLabel}
+            <div className='flex items-start gap-2'>
+              <div className='pt-1'>
+                <RagCircle rag={initiative.rag} />
+              </div>
+              <div className='space-y-0.5 flex-1'>
+                <div className='font-medium'>{initiative.title}</div>
+                <div className='text-xs text-muted-foreground'>
+                  {teamName} • {statusLabel}
+                </div>
               </div>
             </div>
           )
