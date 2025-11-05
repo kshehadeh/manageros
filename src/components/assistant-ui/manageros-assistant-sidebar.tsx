@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import { AssistantRuntimeProvider } from '@assistant-ui/react'
 import { useChatRuntime } from '@assistant-ui/react-ai-sdk'
 import { AssistantChatTransport } from '@assistant-ui/react-ai-sdk'
-import { useCallback } from 'react'
+import { useCallback, useEffect, useState, useMemo, useRef } from 'react'
 
 import { ManagerOSThread } from '@/components/assistant-ui/manageros-thread'
 import { AssistantErrorBoundary } from '@/components/assistant-ui/assistant-error-boundary'
@@ -25,12 +25,58 @@ export const ManagerOSAssistantSidebar: FC<ManagerOSAssistantSidebarProps> = ({
   onToggleFullscreen,
   exampleQuestions,
 }) => {
+  // Memoize the transport to prevent recreating it on every render
+  const transport = useMemo(
+    () =>
+      new AssistantChatTransport({
+        api: '/api/chat',
+      }),
+    []
+  )
+
   // Configure the chat runtime for assistant-ui
   const runtime = useChatRuntime({
-    transport: new AssistantChatTransport({
-      api: '/api/chat',
-    }),
+    transport,
   })
+
+  // Track thread state reactively
+  const [threadState, setThreadState] = useState(() =>
+    runtime.thread.getState()
+  )
+
+  // Use a ref to store the runtime to avoid dependency issues
+  const runtimeRef = useRef(runtime)
+  runtimeRef.current = runtime
+
+  // Subscribe to thread state changes (only once on mount)
+  useEffect(() => {
+    let mounted = true
+
+    const unsubscribe = runtimeRef.current.thread.subscribe(() => {
+      if (!mounted) return
+
+      const newState = runtimeRef.current.thread.getState()
+
+      // Only update if the state actually changed (compare messages length and isRunning)
+      setThreadState(prevState => {
+        // Skip update if component is unmounted
+        if (!mounted) return prevState
+
+        if (
+          prevState.isRunning !== newState.isRunning ||
+          prevState.messages.length !== newState.messages.length
+        ) {
+          return newState
+        }
+        return prevState
+      })
+    })
+
+    return () => {
+      mounted = false
+      unsubscribe()
+    }
+  }, []) // Empty deps - only subscribe once, runtimeRef is updated on each render
 
   // Handler to start a new chat
   const handleNewChat = useCallback(() => {
@@ -66,8 +112,7 @@ export const ManagerOSAssistantSidebar: FC<ManagerOSAssistantSidebarProps> = ({
               size='sm'
               onClick={handleNewChat}
               disabled={
-                runtime.thread.getState().isRunning ||
-                runtime.thread.getState().messages.length === 0
+                threadState.isRunning || threadState.messages.length === 0
               }
               title='Start a new chat'
             >

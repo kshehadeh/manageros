@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useUserSettings } from '@/lib/hooks/use-user-settings'
 import { useAIChat } from '@/components/ai-chat-provider'
 import { ManagerOSAssistantSidebar } from '@/components/assistant-ui/manageros-assistant-sidebar'
+import { DEFAULT_EXAMPLE_QUESTIONS } from '@/lib/ai/constants'
 
 interface AIChatSidebarProps {
   isOpen: boolean
@@ -76,13 +77,6 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
     return () => clearTimeout(timeoutId)
   }, [isOpen, openedViaKeyboard, setOpenedViaKeyboard])
 
-  const exampleQuestions = [
-    'List initiatives that are currently in progress',
-    'Show me all high priority tasks',
-    'What teams do we have?',
-    'Find meetings scheduled for this week',
-  ]
-
   return (
     <>
       {/* Mobile overlay - blocks interaction with page behind chat */}
@@ -104,7 +98,7 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
             isFullscreen: !settings.chatWindowSettings.isFullscreen,
           })
         }
-        exampleQuestions={exampleQuestions}
+        exampleQuestions={DEFAULT_EXAMPLE_QUESTIONS}
       />
     </>
   )

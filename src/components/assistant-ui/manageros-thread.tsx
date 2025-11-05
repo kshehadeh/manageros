@@ -43,6 +43,7 @@ import { UserMessageAttachments } from '@/components/assistant-ui/attachment'
 
 import { cn } from '@/lib/utils'
 import { toolIds } from '../../lib/ai/tool-ids'
+import { DEFAULT_EXAMPLE_QUESTIONS } from '@/lib/ai/constants'
 
 // Map tool names to their corresponding icons
 const getToolIcon = (toolName: string) => {
@@ -112,13 +113,7 @@ interface ManagerOSThreadProps {
 }
 
 export const ManagerOSThread: FC<ManagerOSThreadProps> = ({
-  exampleQuestions = [
-    'List initiatives that are currently in progress',
-    'Who manages Karim Shehadeh?',
-    'Show me all high priority tasks',
-    'What teams do we have?',
-    'Find meetings scheduled for this week',
-  ],
+  exampleQuestions = DEFAULT_EXAMPLE_QUESTIONS,
 }) => {
   return (
     <LazyMotion features={domAnimation}>
@@ -216,7 +211,7 @@ const ThreadSuggestions: FC<{ exampleQuestions: string[] }> = ({
           <ThreadPrimitive.Suggestion prompt={question} send asChild>
             <Button
               variant='ghost'
-              className='aui-thread-welcome-suggestion h-auto w-full flex-1 flex-wrap items-start justify-start gap-1 rounded-3xl border px-5 py-4 text-left text-sm @md:flex-col dark:hover:bg-accent/60'
+              className='aui-thread-welcome-suggestion h-auto w-full flex-1 flex-wrap items-start justify-start gap-1 rounded-sm border px-5 py-4 text-left text-sm @md:flex-col dark:hover:bg-accent/60'
               aria-label={question}
             >
               <span className='aui-thread-welcome-suggestion-text-1 font-medium'>
@@ -256,11 +251,11 @@ const Composer: FC = () => {
 
   return (
     <div
-      className='aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col gap-4 overflow-visible rounded-t-3xl bg-background pb-4 md:pb-6'
+      className='aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-(--thread-max-width) flex-col gap-4 overflow-visible rounded-t-3xl bg-background pb-4 md:pb-6'
       onClick={handleComposerClick}
     >
       <ThreadScrollToBottom />
-      <ComposerPrimitive.Root className='aui-composer-root relative flex w-full flex-col rounded-3xl border border-border bg-muted px-1 pt-2 shadow-[0_9px_9px_0px_rgba(0,0,0,0.01),0_2px_5px_0px_rgba(0,0,0,0.06)] dark:border-muted-foreground/15'>
+      <ComposerPrimitive.Root className='aui-composer-root relative flex w-full flex-col rounded-sm border border-border bg-muted px-1 pt-2 shadow-[0_9px_9px_0px_rgba(0,0,0,0.01),0_2px_5px_0px_rgba(0,0,0,0.06)] dark:border-muted-foreground/15'>
         <ComposerPrimitive.Input
           placeholder='Ask about your organization...'
           className='aui-composer-input mb-1 max-h-32 min-h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-3 text-sm outline-none placeholder:text-muted-foreground focus:outline-none'
