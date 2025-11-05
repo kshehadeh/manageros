@@ -767,3 +767,15 @@ input[type='time']::-webkit-calendar-picker-indicator {
   animation: line-move-diagonal-2 41s ease-in-out infinite 4s;
   transform-origin: center;
 }
+
+/* Logo fade-in and scale animation for loading page */
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

@@ -48,7 +48,7 @@ export function ReadonlyNotesField({
         components={{
           // Paragraphs
           p: ({ children }) => (
-            <p className='mb-3 text-foreground leading-relaxed break-words'>
+            <p className='mb-3 text-muted-foreground leading-relaxed break-words'>
               {children}
             </p>
           ),

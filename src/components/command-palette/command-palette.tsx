@@ -95,7 +95,7 @@ export function CommandPalette() {
 
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
-      <DialogContent className='p-0 overflow-hidden sm:max-w-[640px] inset-0 w-full h-full max-w-none translate-x-0 translate-y-0 rounded-none sm:inset-auto sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:w-[95vw] sm:max-w-[95vw] sm:h-auto'>
+      <DialogContent className='p-0 overflow-hidden sm:max-w-[50vh] inset-0 w-full h-full translate-x-0 translate-y-0 rounded-none sm:inset-auto sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:h-auto'>
         <VisuallyHidden>
           <DialogTitle>Command Palette</DialogTitle>
         </VisuallyHidden>
