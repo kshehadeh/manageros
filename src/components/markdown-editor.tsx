@@ -6,7 +6,7 @@ import Placeholder from '@tiptap/extension-placeholder'
 import CharacterCount from '@tiptap/extension-character-count'
 import { Markdown } from 'tiptap-markdown'
 import { useTheme } from '@/lib/hooks/use-theme'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import {
   Bold,
   Italic,
@@ -37,6 +37,7 @@ export function MarkdownEditor({
   className = '',
 }: MarkdownEditorProps) {
   const { theme } = useTheme()
+  const editorRef = useRef<ReturnType<typeof useEditor> | null>(null)
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -64,12 +65,97 @@ export function MarkdownEditor({
           theme === 'dark' ? 'prose-invert' : ''
         ),
       },
+      handlePaste: (view, event) => {
+        const text = event.clipboardData?.getData('text/plain') || ''
+
+        // Check if the pasted text contains markdown syntax patterns
+        const hasMarkdownSyntax =
+          /^[\s\S]*(#{1,6}\s+|[-*+]\s+|^\d+\.\s+|>\s+|```|`|\[.*\]\(.*\)|!\[.*\]\(.*\)|^\|.*\|$|^---+\s*$)[\s\S]*$/m.test(
+            text
+          )
+
+        if (hasMarkdownSyntax && text.trim() && editorRef.current) {
+          // Prevent default paste behavior
+          event.preventDefault()
+
+          // Get current selection
+          const { from, to } = view.state.selection
+
+          // Get the text content around the cursor from ProseMirror
+          const selectedText = view.state.doc.textBetween(from, to)
+
+          // Get current markdown content
+          const currentMarkdown =
+            editorRef.current.storage.markdown?.getMarkdown() || ''
+
+          // Find the insertion point in markdown by finding the selected text
+          // If there's a selection, find it in the markdown string
+          let insertPosition = currentMarkdown.length
+
+          if (selectedText && from < to) {
+            // Try to find the selected text in markdown (might be slightly different due to formatting)
+            const index = currentMarkdown.indexOf(selectedText)
+            if (index !== -1) {
+              insertPosition = index
+            } else {
+              // Fallback: approximate position based on document structure
+              // Try to find approximate position in markdown
+              const beforeText = currentMarkdown.slice(
+                0,
+                Math.min(from, currentMarkdown.length)
+              )
+              insertPosition = beforeText.length
+            }
+          } else {
+            // No selection - insert at cursor position
+            // Approximate cursor position in markdown by using text length before cursor
+            const textBeforeCursor = view.state.doc.textBetween(0, from)
+            // Use the length of text before cursor as approximation for markdown position
+            insertPosition = Math.min(
+              textBeforeCursor.length,
+              currentMarkdown.length
+            )
+          }
+
+          // Insert the markdown text
+          const beforeSelection = currentMarkdown.slice(0, insertPosition)
+          const afterSelection = currentMarkdown.slice(
+            insertPosition + (from < to ? selectedText.length : 0)
+          )
+          const newMarkdown = beforeSelection + text + afterSelection
+
+          // Set the new content as markdown - TipTap's Markdown extension will parse it
+          editorRef.current.commands.setContent(newMarkdown)
+
+          // Set cursor position after the pasted content
+          // Approximate new position in ProseMirror document
+          const newTextBefore = newMarkdown.slice(
+            0,
+            insertPosition + text.length
+          )
+          const approximatePosition = Math.min(
+            newTextBefore.length,
+            editorRef.current.state.doc.content.size
+          )
+          editorRef.current.commands.setTextSelection(approximatePosition)
+
+          return true
+        }
+
+        // Let TipTap handle the paste normally for non-markdown content
+        return false
+      },
     },
     onUpdate: ({ editor }) => {
       const markdown = editor.storage.markdown?.getMarkdown() || ''
       onChange(markdown)
     },
   })
+
+  // Store editor reference for use in paste handler
+  useEffect(() => {
+    editorRef.current = editor
+  }, [editor])
 
   useEffect(() => {
     if (editor) {
