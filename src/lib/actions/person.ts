@@ -11,6 +11,9 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { Prisma } from '@prisma/client'
+import { getTasksForAssignee } from '@/lib/data/tasks'
+import { getLinkedAccountAvatars } from '@/lib/actions/avatar'
+import { getFeedbackForPerson } from '@/lib/actions/feedback'
 
 /**
  * Get all people for an organization with relations needed for components
@@ -691,6 +694,173 @@ export async function getDirectReports() {
 /**
  * Get person data with all relations needed for overview generation
  */
+/**
+ * Get person summary data for modal display
+ * Includes: name, email, role, title, initiatives, and tasks
+ */
+export async function getPersonSummaryForModal(personId: string) {
+  try {
+    const user = await getCurrentUser()
+    if (!user.organizationId) {
+      return null
+    }
+
+    // Get person basic info
+    const person = await prisma.person.findFirst({
+      where: {
+        id: personId,
+        organizationId: user.organizationId,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        status: true,
+        avatar: true,
+        jobRole: {
+          select: {
+            title: true,
+          },
+        },
+      },
+    })
+
+    if (!person) {
+      return null
+    }
+
+    // Get linked account avatars
+    let linkedAvatars: { jiraAvatar?: string; githubAvatar?: string } = {}
+    try {
+      linkedAvatars = await getLinkedAccountAvatars(personId)
+    } catch (error) {
+      console.error('Error fetching linked account avatars:', error)
+      // Continue without linked avatars
+    }
+
+    // Get initiatives owned by this person
+    const initiatives = await prisma.initiative.findMany({
+      where: {
+        organizationId: user.organizationId,
+        owners: {
+          some: { personId },
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        rag: true,
+        team: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        updatedAt: true,
+        createdAt: true,
+        _count: {
+          select: {
+            objectives: true,
+            tasks: true,
+            checkIns: true,
+          },
+        },
+      },
+      orderBy: { updatedAt: 'desc' },
+      take: 10, // Limit to 10 most recent
+    })
+
+    // Get active tasks for this person
+    const tasks = await getTasksForAssignee(
+      personId,
+      user.organizationId,
+      user.id,
+      {
+        statusFilter: ['todo', 'in_progress'],
+        include: {
+          assignee: true,
+          initiative: true,
+          objective: true,
+          createdBy: true,
+        },
+        limit: 10, // Limit to 10 most recent
+      }
+    )
+
+    // Get feedback for this person (respects privacy rules)
+    let feedback: Array<{
+      id: string
+      kind: string
+      isPrivate: boolean
+      body: string
+      createdAt: Date
+      about: { id: string; name: string }
+      from: { id: string; name: string }
+      fromId?: string
+    }> = []
+    try {
+      const feedbackData = await getFeedbackForPerson(personId)
+      feedback = feedbackData.map(fb => ({
+        id: fb.id,
+        kind: fb.kind,
+        isPrivate: fb.isPrivate,
+        body: fb.body,
+        createdAt: fb.createdAt,
+        about: fb.about,
+        from: fb.from,
+        fromId: (fb as { fromId?: string }).fromId,
+      }))
+      // Limit to 5 most recent feedback items
+      feedback = feedback.slice(0, 5)
+    } catch (error) {
+      console.error('Error fetching feedback:', error)
+      // Continue without feedback
+    }
+
+    return {
+      id: person.id,
+      name: person.name,
+      email: person.email,
+      role: person.role,
+      title: person.jobRole?.title || null,
+      status: person.status,
+      avatar: person.avatar,
+      jiraAvatar: linkedAvatars.jiraAvatar,
+      githubAvatar: linkedAvatars.githubAvatar,
+      initiatives: initiatives.map(initiative => ({
+        id: initiative.id,
+        title: initiative.title,
+        description: null,
+        status: initiative.status,
+        rag: initiative.rag,
+        team: initiative.team,
+        updatedAt: initiative.updatedAt,
+        createdAt: initiative.createdAt,
+        _count: initiative._count,
+      })),
+      tasks: tasks.map(task => ({
+        id: task.id,
+        title: task.title,
+        description: task.description,
+        assigneeId: task.assigneeId,
+        assignee: task.assignee,
+        dueDate: task.dueDate,
+        priority: task.priority,
+        status: task.status,
+        initiative: task.initiative,
+        objective: task.objective,
+        createdBy: task.createdBy,
+      })),
+      feedback,
+    }
+  } catch (error) {
+    console.error('Error fetching person summary:', error)
+    return null
+  }
+}
+
 export async function getPersonForOverview(
   personId: string,
   organizationId: string,

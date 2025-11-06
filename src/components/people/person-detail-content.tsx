@@ -48,6 +48,7 @@ export type PersonWithDetailRelations = Prisma.PersonGetPayload<{
 import {
   OverviewSectionSkeleton,
   FeedbackCampaignsSectionSkeleton,
+  FeedbackSectionSkeleton,
   OwnedInitiativesSectionSkeleton,
   ActiveTasksSectionSkeleton,
   OneOnOneMeetingsSectionSkeleton,
@@ -59,6 +60,7 @@ import {
 // Import section components
 import { OverviewSection } from './sections/overview-section'
 import { FeedbackCampaignsSection } from './sections/feedback-campaigns-section'
+import { FeedbackSection } from './sections/feedback-section'
 import { OwnedInitiativesSection } from './sections/owned-initiatives-section'
 import { ActiveTasksSection } from './sections/active-tasks-section'
 import { OneOnOneMeetingsSection } from './sections/one-on-one-meetings-section'
@@ -203,6 +205,14 @@ export function PersonDetailContent({
               personId={person.id}
               organizationId={organizationId}
               currentUserId={currentUserId}
+            />
+          </Suspense>
+
+          {/* Feedback Section */}
+          <Suspense fallback={<FeedbackSectionSkeleton />}>
+            <FeedbackSection
+              personId={person.id}
+              organizationId={organizationId}
             />
           </Suspense>
 

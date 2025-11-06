@@ -79,6 +79,39 @@ export function FeedbackCampaignsSectionSkeleton() {
   )
 }
 
+export function FeedbackSectionSkeleton() {
+  return (
+    <section className='rounded-xl py-4 -mx-3 px-3 space-y-4'>
+      <div className='flex items-center justify-between border-b border-muted pb-3 mb-3 -mx-3 px-3 md:mx-0 md:px-0'>
+        <h3 className='font-bold flex items-center gap-2'>
+          <MessageCircle className='w-4 h-4' />
+          Recent Feedback
+        </h3>
+        <Skeleton className='h-8 w-20' />
+      </div>
+      <div className='space-y-0 divide-y'>
+        {[1, 2, 3].map(i => (
+          <div key={i} className='flex items-start gap-3 px-3 py-3'>
+            <div className='flex-1 min-w-0'>
+              <div className='flex items-center gap-2 mb-1'>
+                <Skeleton className='h-3 w-16' />
+                <Skeleton className='h-4 w-12 rounded-full' />
+              </div>
+              <Skeleton className='h-4 w-full mb-2' />
+              <Skeleton className='h-4 w-3/4 mb-1' />
+              <div className='flex items-center gap-2'>
+                <Skeleton className='h-3 w-24' />
+                <Skeleton className='h-3 w-2' />
+                <Skeleton className='h-3 w-32' />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 export function OwnedInitiativesSectionSkeleton() {
   return (
     <section className='rounded-xl py-4 -mx-3 px-3 space-y-4'>

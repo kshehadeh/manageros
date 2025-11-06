@@ -3,7 +3,6 @@
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { MoreHorizontal } from 'lucide-react'
-import Link from 'next/link'
 import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
 import {
   ViewDetailsMenuItem,
@@ -12,6 +11,7 @@ import {
 } from '@/components/common/context-menu-items'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { PersonAvatar } from './person-avatar'
+import { PersonDetailModal } from './person-detail-modal'
 import type { Person } from '@/types/person'
 import { deletePerson } from '@/lib/actions/person'
 import { toast } from 'sonner'
@@ -52,6 +52,8 @@ export function SimplePeopleList({
 }: PersonListProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
+  const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const { handleButtonClick, ContextMenuComponent } = useDataTableContextMenu()
 
@@ -66,6 +68,16 @@ export function SimplePeopleList({
       console.error('Error deleting person:', error)
       toast.error('Failed to delete person')
     }
+  }
+
+  const handlePersonClick = (personId: string) => {
+    setSelectedPersonId(personId)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedPersonId(null)
   }
 
   // Filter people based on immutable filters
@@ -155,9 +167,9 @@ export function SimplePeopleList({
 
     return (
       <SimpleListItem key={person.id}>
-        <Link
-          href={`/people/${person.id}`}
-          className='flex items-start gap-3 flex-1 min-w-0'
+        <div
+          onClick={() => handlePersonClick(person.id)}
+          className='flex items-start gap-3 flex-1 min-w-0 cursor-pointer'
         >
           <PersonAvatar
             name={person.name}
@@ -179,13 +191,16 @@ export function SimplePeopleList({
               </div>
             )}
           </div>
-        </Link>
+        </div>
 
         <Button
           variant='ghost'
           size='sm'
           className='h-8 w-8 p-0 hover:bg-muted shrink-0'
-          onClick={e => handleButtonClick(e, person.id)}
+          onClick={e => {
+            e.stopPropagation()
+            handleButtonClick(e, person.id)
+          }}
         >
           <MoreHorizontal className='h-4 w-4' />
         </Button>
@@ -203,6 +218,15 @@ export function SimplePeopleList({
           {visiblePeople.map(renderPersonItem)}
         </SimpleListItemsContainer>
       </SimpleListContainer>
+
+      {/* Person Detail Modal */}
+      {selectedPersonId && (
+        <PersonDetailModal
+          personId={selectedPersonId}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
+      )}
 
       {/* Context Menu */}
       <ContextMenuComponent>
