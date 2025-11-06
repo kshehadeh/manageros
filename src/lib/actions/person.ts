@@ -773,7 +773,7 @@ export async function getPersonSummaryForModal(personId: string) {
     })
 
     // Get active tasks for this person
-    const tasks = await getTasksForAssignee(
+    const tasksResult = await getTasksForAssignee(
       personId,
       user.organizationId,
       user.id,
@@ -788,6 +788,16 @@ export async function getPersonSummaryForModal(personId: string) {
         limit: 10, // Limit to 10 most recent
       }
     )
+
+    // Type assertion: when include options are true, relations will be included
+    const tasks = tasksResult as Array<
+      (typeof tasksResult)[0] & {
+        assignee: { id: string; name: string } | null
+        initiative: { id: string; title: string } | null
+        objective: { id: string; title: string } | null
+        createdBy: { id: string; name: string } | null
+      }
+    >
 
     // Get feedback for this person (respects privacy rules)
     let feedback: Array<{

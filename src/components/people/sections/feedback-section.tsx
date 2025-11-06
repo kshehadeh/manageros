@@ -70,7 +70,6 @@ export async function FeedbackSection({
     >
       <SimpleFeedbackList
         feedback={feedback}
-        variant='compact'
         emptyStateText='No feedback found.'
         maxTextLength={150}
       />
