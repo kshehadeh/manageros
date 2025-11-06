@@ -120,7 +120,7 @@ export default function LoadingPage() {
               </h3>
             </div>
             <div className='space-y-0 divide-y'>
-              {Array.from({ length: 3 }).map(i => (
+              {Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
                   className='flex items-center justify-between px-3 py-3'
@@ -152,9 +152,9 @@ export default function LoadingPage() {
               </h3>
             </div>
             <div className='space-y-0 divide-y'>
-              {Array.from({ length: 3 }).map(i => (
+              {Array.from({ length: 3 }).map((_, i) => (
                 <div
-                  key={i}
+                  key={i.toString()}
                   className='flex items-center justify-between px-3 py-3'
                 >
                   <div className='flex-1 min-w-0'>
@@ -184,9 +184,9 @@ export default function LoadingPage() {
               </h3>
             </div>
             <div className='space-y-0 divide-y'>
-              {Array.from({ length: 3 }).map(i => (
+              {Array.from({ length: 3 }).map((_, i) => (
                 <div
-                  key={i}
+                  key={i.toString()}
                   className='flex items-center justify-between px-3 py-3'
                 >
                   <div className='flex-1 min-w-0'>
@@ -238,8 +238,8 @@ export default function LoadingPage() {
           <section>
             <SectionHeader icon={Users} title='Direct Reports (0)' />
             <div className='space-y-3 mt-2'>
-              {Array.from({ length: 2 }).map(i => (
-                <div key={i} className='flex items-center gap-3'>
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div key={i.toString()} className='flex items-center gap-3'>
                   <Skeleton className='h-10 w-10 rounded-full' />
                   <div className='flex-1 space-y-1'>
                     <Skeleton className='h-4 w-32' />

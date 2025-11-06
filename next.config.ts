@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
   },
   cacheComponents: true,
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   experimental: {
     serverActions: {

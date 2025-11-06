@@ -118,13 +118,13 @@ export default function SignUpPage() {
           <form onSubmit={handleSubmit} className='space-y-4'>
             {error && (
               <div className='flex items-center gap-2 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 text-sm'>
-                <AlertCircle className='h-4 w-4 flex-shrink-0' />
+                <AlertCircle className='h-4 w-4 shrink-0' />
                 <span>{error}</span>
               </div>
             )}
             {success && (
               <div className='flex items-center gap-2 rounded-lg bg-secondary/30 border text-foreground px-4 py-3 text-sm'>
-                <CheckCircle2 className='h-4 w-4 flex-shrink-0' />
+                <CheckCircle2 className='h-4 w-4 shrink-0' />
                 <span>{success}</span>
               </div>
             )}

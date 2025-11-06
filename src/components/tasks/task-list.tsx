@@ -60,6 +60,7 @@ export interface TaskListProps {
   onTaskUpdate?: () => void
   className?: string
   immutableFilters?: Record<string, unknown>
+  interactive?: boolean // If false, hides action buttons and disables interactions
 }
 
 export function SimpleTaskList({
@@ -72,6 +73,7 @@ export function SimpleTaskList({
   onTaskUpdate,
   className = '',
   immutableFilters,
+  interactive = true,
 }: TaskListProps) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -248,15 +250,19 @@ export function SimpleTaskList({
         className={isProcessing ? 'opacity-75' : ''}
       >
         <div
-          onClick={() => handleTaskClick(task)}
-          className='flex items-start gap-3 flex-1 min-w-0 cursor-pointer'
+          onClick={interactive ? () => handleTaskClick(task) : undefined}
+          className={`flex items-start gap-3 flex-1 min-w-0 ${
+            interactive ? 'cursor-pointer' : ''
+          }`}
         >
-          <Checkbox
-            checked={isCompleted || isProcessing}
-            onClick={e => handleTaskComplete(task.id, e)}
-            className='shrink-0 mt-0.5'
-            disabled={isProcessing}
-          />
+          {interactive && (
+            <Checkbox
+              checked={isCompleted || isProcessing}
+              onClick={e => handleTaskComplete(task.id, e)}
+              className='shrink-0 mt-0.5'
+              disabled={isProcessing}
+            />
+          )}
           <div className='flex-1 min-w-0'>
             <h3
               className={`font-medium text-sm truncate mb-1 ${
@@ -279,14 +285,16 @@ export function SimpleTaskList({
           </div>
         </div>
 
-        <Button
-          variant='ghost'
-          size='sm'
-          className='h-8 w-8 p-0 hover:bg-muted shrink-0'
-          onClick={e => handleButtonClick(e, task.id)}
-        >
-          <MoreHorizontal className='h-4 w-4' />
-        </Button>
+        {interactive && (
+          <Button
+            variant='ghost'
+            size='sm'
+            className='h-8 w-8 p-0 hover:bg-muted shrink-0'
+            onClick={e => handleButtonClick(e, task.id)}
+          >
+            <MoreHorizontal className='h-4 w-4' />
+          </Button>
+        )}
       </SimpleListItem>
     )
   }
@@ -303,7 +311,7 @@ export function SimpleTaskList({
       </SimpleListContainer>
 
       {/* Task Quick Edit Dialog */}
-      {selectedTask && (
+      {interactive && selectedTask && (
         <TaskQuickEditDialog
           open={isDialogOpen}
           onOpenChange={handleDialogOpenChange}
@@ -316,57 +324,61 @@ export function SimpleTaskList({
       )}
 
       {/* Context Menu */}
-      <ContextMenuComponent>
-        {({ entityId, close }) => {
-          const task = tasks.find(t => t.id === entityId)
-          if (!task) return null
+      {interactive && (
+        <ContextMenuComponent>
+          {({ entityId, close }) => {
+            const task = tasks.find(t => t.id === entityId)
+            if (!task) return null
 
-          return (
-            <>
-              <ViewDetailsMenuItem
-                entityId={entityId}
-                entityType='tasks'
-                close={close}
-              />
-              <EditMenuItem
-                entityId={entityId}
-                entityType='tasks'
-                close={close}
-              />
-              <MarkAsDoneMenuItem
-                taskId={entityId}
-                currentStatus={task.status}
-                close={close}
-                onSuccess={refetch}
-              />
-              <SetDueDateMenuItem
-                taskId={entityId}
-                close={close}
-                onSuccess={refetch}
-              />
-              <DeleteMenuItem
-                onDelete={() => {
-                  setDeleteTargetId(entityId)
-                  setShowDeleteModal(true)
-                }}
-                close={close}
-              />
-            </>
-          )
-        }}
-      </ContextMenuComponent>
+            return (
+              <>
+                <ViewDetailsMenuItem
+                  entityId={entityId}
+                  entityType='tasks'
+                  close={close}
+                />
+                <EditMenuItem
+                  entityId={entityId}
+                  entityType='tasks'
+                  close={close}
+                />
+                <MarkAsDoneMenuItem
+                  taskId={entityId}
+                  currentStatus={task.status}
+                  close={close}
+                  onSuccess={refetch}
+                />
+                <SetDueDateMenuItem
+                  taskId={entityId}
+                  close={close}
+                  onSuccess={refetch}
+                />
+                <DeleteMenuItem
+                  onDelete={() => {
+                    setDeleteTargetId(entityId)
+                    setShowDeleteModal(true)
+                  }}
+                  close={close}
+                />
+              </>
+            )
+          }}
+        </ContextMenuComponent>
+      )}
 
       {/* Delete Confirmation Modal */}
-      <DeleteModal
-        isOpen={showDeleteModal}
-        onClose={() => {
-          setShowDeleteModal(false)
-          setDeleteTargetId(null)
-        }}
-        onConfirm={handleDeleteTask}
-        title='Delete Task'
-        entityName='task'
-      />
+      {interactive && (
+        <DeleteModal
+          isOpen={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false)
+            setDeleteTargetId(null)
+          }}
+          onConfirm={handleDeleteTask}
+          title='Delete Task'
+          entityName='task'
+        />
+      )}
     </>
   )
 }

@@ -46,6 +46,7 @@ export interface InitiativeListProps {
   onInitiativeUpdate?: () => void
   className?: string
   immutableFilters?: Record<string, unknown>
+  interactive?: boolean // If false, hides action buttons and disables interactions
 }
 
 export function SimpleInitiativeList({
@@ -55,6 +56,7 @@ export function SimpleInitiativeList({
   onInitiativeUpdate,
   className = '',
   immutableFilters,
+  interactive = true,
 }: InitiativeListProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
@@ -154,14 +156,16 @@ export function SimpleInitiativeList({
           </div>
         </Link>
 
-        <Button
-          variant='ghost'
-          size='sm'
-          className='h-8 w-8 p-0 hover:bg-muted shrink-0'
-          onClick={e => handleButtonClick(e, initiative.id)}
-        >
-          <MoreHorizontal className='h-4 w-4' />
-        </Button>
+        {interactive && (
+          <Button
+            variant='ghost'
+            size='sm'
+            className='h-8 w-8 p-0 hover:bg-muted shrink-0'
+            onClick={e => handleButtonClick(e, initiative.id)}
+          >
+            <MoreHorizontal className='h-4 w-4' />
+          </Button>
+        )}
       </SimpleListItem>
     )
   }
@@ -178,46 +182,50 @@ export function SimpleInitiativeList({
       </SimpleListContainer>
 
       {/* Context Menu */}
-      <ContextMenuComponent>
-        {({ entityId, close }) => {
-          const initiative = initiatives.find(i => i.id === entityId)
-          if (!initiative) return null
+      {interactive && (
+        <ContextMenuComponent>
+          {({ entityId, close }) => {
+            const initiative = initiatives.find(i => i.id === entityId)
+            if (!initiative) return null
 
-          return (
-            <>
-              <ViewDetailsMenuItem
-                entityId={entityId}
-                entityType='initiatives'
-                close={close}
-              />
-              <EditMenuItem
-                entityId={entityId}
-                entityType='initiatives'
-                close={close}
-              />
-              <DeleteMenuItem
-                onDelete={() => {
-                  setDeleteTargetId(entityId)
-                  setShowDeleteModal(true)
-                }}
-                close={close}
-              />
-            </>
-          )
-        }}
-      </ContextMenuComponent>
+            return (
+              <>
+                <ViewDetailsMenuItem
+                  entityId={entityId}
+                  entityType='initiatives'
+                  close={close}
+                />
+                <EditMenuItem
+                  entityId={entityId}
+                  entityType='initiatives'
+                  close={close}
+                />
+                <DeleteMenuItem
+                  onDelete={() => {
+                    setDeleteTargetId(entityId)
+                    setShowDeleteModal(true)
+                  }}
+                  close={close}
+                />
+              </>
+            )
+          }}
+        </ContextMenuComponent>
+      )}
 
       {/* Delete Confirmation Modal */}
-      <DeleteModal
-        isOpen={showDeleteModal}
-        onClose={() => {
-          setShowDeleteModal(false)
-          setDeleteTargetId(null)
-        }}
-        onConfirm={handleDeleteInitiative}
-        title='Delete Initiative'
-        entityName='initiative'
-      />
+      {interactive && (
+        <DeleteModal
+          isOpen={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false)
+            setDeleteTargetId(null)
+          }}
+          onConfirm={handleDeleteInitiative}
+          title='Delete Initiative'
+          entityName='initiative'
+        />
+      )}
     </>
   )
 }

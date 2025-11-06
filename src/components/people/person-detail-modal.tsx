@@ -109,13 +109,16 @@ export function PersonDetailModal({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent size='md' className='max-h-[90vh] overflow-y-auto'>
-        {loading ? (
-          <div className='flex items-center justify-center py-12'>
-            <Loader2 className='w-8 h-8 animate-spin text-muted-foreground' />
-          </div>
-        ) : personData ? (
-          <>
-            <DialogHeader>
+        <DialogHeader>
+          {loading ? (
+            <>
+              <DialogTitle>Loading person details...</DialogTitle>
+              <div className='flex items-center justify-center py-12'>
+                <Loader2 className='w-8 h-8 animate-spin text-muted-foreground' />
+              </div>
+            </>
+          ) : personData ? (
+            <>
               <div className='flex items-start gap-4'>
                 <PersonAvatarWrapper
                   personId={personData.id}
@@ -152,74 +155,77 @@ export function PersonDetailModal({
                   </div>
                 </div>
               </div>
-            </DialogHeader>
+            </>
+          ) : null}
+        </DialogHeader>
 
-            <div className='space-y-6 mt-4'>
-              {/* Initiatives Section */}
-              {personData.initiatives.length > 0 && (
-                <div>
-                  <h3 className='text-sm font-semibold mb-3'>Initiatives</h3>
-                  <SimpleInitiativeList
-                    initiatives={personData.initiatives}
-                    variant='compact'
-                    emptyStateText='No initiatives found.'
-                  />
-                </div>
-              )}
-
-              {/* Tasks Section */}
-              {personData.tasks.length > 0 && (
-                <div>
-                  <h3 className='text-sm font-semibold mb-3'>Active Tasks</h3>
-                  <SimpleTaskList
-                    tasks={personData.tasks}
-                    variant='compact'
-                    emptyStateText='No active tasks found.'
-                  />
-                </div>
-              )}
-
-              {/* Feedback Section */}
-              {personData.feedback.length > 0 && (
-                <div>
-                  <h3 className='text-sm font-semibold mb-3 flex items-center gap-2'>
-                    <MessageCircle className='w-4 h-4' />
-                    Recent Feedback
-                  </h3>
-                  <SimpleFeedbackList
-                    feedback={personData.feedback}
-                    variant='compact'
-                    emptyStateText='No feedback found.'
-                    maxTextLength={120}
-                  />
-                </div>
-              )}
-
-              {/* Empty State */}
-              {personData.initiatives.length === 0 &&
-                personData.tasks.length === 0 &&
-                personData.feedback.length === 0 && (
-                  <div className='text-center py-8 text-sm text-muted-foreground'>
-                    No initiatives, tasks, or feedback found.
-                  </div>
-                )}
-
-              {/* View Full Details Button */}
-              <div className='pt-4 border-t'>
-                <Button asChild variant='outline' className='w-full'>
-                  <Link
-                    href={`/people/${personData.id}`}
-                    onClick={onClose}
-                    className='flex items-center justify-center gap-2'
-                  >
-                    <ExternalLink className='w-4 h-4' />
-                    View Full Profile
-                  </Link>
-                </Button>
+        {personData && (
+          <div className='space-y-6 mt-4'>
+            {/* Initiatives Section */}
+            {personData.initiatives.length > 0 && (
+              <div>
+                <h3 className='text-sm font-semibold mb-3'>Initiatives</h3>
+                <SimpleInitiativeList
+                  initiatives={personData.initiatives}
+                  variant='compact'
+                  emptyStateText='No initiatives found.'
+                  interactive={false}
+                />
               </div>
+            )}
+
+            {/* Tasks Section */}
+            {personData.tasks.length > 0 && (
+              <div>
+                <h3 className='text-sm font-semibold mb-3'>Active Tasks</h3>
+                <SimpleTaskList
+                  tasks={personData.tasks}
+                  variant='compact'
+                  emptyStateText='No active tasks found.'
+                  interactive={false}
+                />
+              </div>
+            )}
+
+            {/* Feedback Section */}
+            {personData.feedback.length > 0 && (
+              <div>
+                <h3 className='text-sm font-semibold mb-3 flex items-center gap-2'>
+                  <MessageCircle className='w-4 h-4' />
+                  Recent Feedback
+                </h3>
+                <SimpleFeedbackList
+                  feedback={personData.feedback}
+                  emptyStateText='No feedback found.'
+                  maxTextLength={120}
+                />
+              </div>
+            )}
+
+            {/* Empty State */}
+            {personData.initiatives.length === 0 &&
+              personData.tasks.length === 0 &&
+              personData.feedback.length === 0 && (
+                <div className='text-center py-8 text-sm text-muted-foreground'>
+                  No initiatives, tasks, or feedback found.
+                </div>
+              )}
+
+            {/* View Full Details Button */}
+            <div className='pt-4 border-t'>
+              <Button asChild variant='outline' className='w-full'>
+                <Link
+                  href={`/people/${personData.id}`}
+                  onClick={onClose}
+                  className='flex items-center justify-center gap-2'
+                >
+                  <ExternalLink className='w-4 h-4' />
+                  View Full Profile
+                </Link>
+              </Button>
             </div>
-          </>
-        ) : null}
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   )
