@@ -81,6 +81,8 @@ export default async function InitiativeDetail({
                     content={init.summary}
                     variant='default'
                     emptyStateText='No summary provided'
+                    truncateMode={true}
+                    maxHeight='200px'
                   />
                 </PageSection>
               )}

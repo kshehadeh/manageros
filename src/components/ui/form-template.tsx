@@ -6,8 +6,8 @@ import { type ReactNode } from 'react'
 type LucideIcon = React.ComponentType<{ className?: string }>
 
 export interface FormSection {
-  title: string
-  icon: LucideIcon
+  title?: string
+  icon?: LucideIcon
   action?: ReactNode
   content: ReactNode
 }
@@ -87,11 +87,13 @@ export function FormTemplate({
         <div className='flex-1 space-y-6'>
           {sections.map((section, index) => (
             <div key={index} className='space-y-4'>
-              <SectionHeader
-                icon={section.icon}
-                title={section.title}
-                action={section.action}
-              />
+              {section.title && section.icon && (
+                <SectionHeader
+                  icon={section.icon}
+                  title={section.title}
+                  action={section.action}
+                />
+              )}
               <div className='space-y-4'>{section.content}</div>
             </div>
           ))}

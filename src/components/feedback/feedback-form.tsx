@@ -4,13 +4,24 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { useRouter } from 'next/navigation'
 import { createFeedback, updateFeedback } from '@/lib/actions/feedback'
 import { type FeedbackFormData } from '@/lib/validations'
 import { type Person } from '@prisma/client'
 import { MarkdownEditor } from '@/components/markdown-editor'
-import { MessageSquare } from 'lucide-react'
-import { FormTemplate, type FormSection } from '@/components/ui/form-template'
+import { MessageSquare, Edit } from 'lucide-react'
+import {
+  FormTemplate,
+  type FormSection,
+  type FormHeader,
+} from '@/components/ui/form-template'
 
 interface FeedbackFormProps {
   person: Person
@@ -23,6 +34,7 @@ interface FeedbackFormProps {
   redirectTo?: string
   onSuccess?: () => void
   onCancel?: () => void
+  header?: FormHeader
 }
 
 export function FeedbackForm({
@@ -31,6 +43,7 @@ export function FeedbackForm({
   redirectTo,
   onSuccess,
   onCancel,
+  header: externalHeader,
 }: FeedbackFormProps) {
   const router = useRouter()
   const [formData, setFormData] = useState<FeedbackFormData>({
@@ -76,22 +89,23 @@ export function FeedbackForm({
 
   const sections: FormSection[] = [
     {
-      title: 'Feedback Information',
-      icon: MessageSquare,
       content: (
         <>
           <div className='space-y-2'>
             <Label htmlFor='kind'>Feedback Type</Label>
-            <select
-              id='kind'
+            <Select
               value={formData.kind}
-              onChange={e => handleChange('kind', e.target.value)}
-              className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
+              onValueChange={value => handleChange('kind', value)}
             >
-              <option value='note'>General Note</option>
-              <option value='praise'>Praise</option>
-              <option value='concern'>Concern</option>
-            </select>
+              <SelectTrigger id='kind'>
+                <SelectValue placeholder='Select feedback type' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='note'>General Note</SelectItem>
+                <SelectItem value='praise'>Praise</SelectItem>
+                <SelectItem value='concern'>Concern</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className='flex items-center space-x-2'>
@@ -127,6 +141,13 @@ export function FeedbackForm({
     },
   ]
 
+  const formHeader = externalHeader
+    ? {
+        ...externalHeader,
+        icon: externalHeader.icon || (feedback ? Edit : MessageSquare),
+      }
+    : undefined
+
   return (
     <div>
       {onCancel && (
@@ -146,6 +167,7 @@ export function FeedbackForm({
         }}
         generalError={error || undefined}
         isSubmitting={isSubmitting}
+        header={formHeader}
       />
     </div>
   )

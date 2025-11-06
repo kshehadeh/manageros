@@ -64,6 +64,8 @@ export default async function FeedbackDetailPage({
                   content={feedback.body}
                   variant='default'
                   emptyStateText='No content recorded'
+                  truncateMode={true}
+                  maxHeight='200px'
                 />
               ) : (
                 <div className='text-center py-8 text-neutral-500'>

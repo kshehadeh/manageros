@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import { PageSection } from '@/components/ui/page-section'
 
 interface FeedbackEditPageProps {
   params: Promise<{
@@ -82,17 +83,8 @@ export default async function FeedbackEditPage({
       personId={person.id}
       feedbackId={feedback.id}
     >
-      <div className='space-y-6'>
-        <div className='flex items-center justify-between'>
-          <div>
-            <h2 className='text-lg font-semibold'>Edit Feedback</h2>
-            <div className='text-sm text-neutral-400'>
-              Editing feedback for {person.name}
-            </div>
-          </div>
-        </div>
-
-        <div className='card'>
+      <div className='page-container'>
+        <PageSection>
           <FeedbackForm
             person={person}
             feedback={{
@@ -102,8 +94,12 @@ export default async function FeedbackEditPage({
               body: feedback.body,
             }}
             redirectTo={`/people/${id}`}
+            header={{
+              title: 'Edit Feedback',
+              subtitle: `Editing feedback for ${person.name}`,
+            }}
           />
-        </div>
+        </PageSection>
       </div>
     </EditFeedbackBreadcrumbClient>
   )

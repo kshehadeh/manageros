@@ -102,7 +102,7 @@ export function ReadonlyNotesField({
 
   return (
     <div className={className}>
-      <div className='relative border border-muted rounded-md p-4'>
+      <div className='relative border border-muted rounded-[var(--radius-sm)] p-4'>
         <div
           ref={contentRef}
           className={`${getVariantClasses()} text-muted-foreground break-words`}
