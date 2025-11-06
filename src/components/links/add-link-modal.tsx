@@ -46,7 +46,7 @@ export function AddLinkModal({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className='sm:max-w-[50vh]'>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle className='flex items-center gap-2'>
             <LinkIcon className='h-5 w-5' />

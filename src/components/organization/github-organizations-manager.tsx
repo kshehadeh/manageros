@@ -141,7 +141,7 @@ export function GithubOrganizationsManager() {
                   Add GitHub Organization
                 </Button>
               </DialogTrigger>
-              <DialogContent className='sm:max-w-[50vh]'>
+              <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Add GitHub Organization</DialogTitle>
                   <DialogDescription>
@@ -208,7 +208,7 @@ export function GithubOrganizationsManager() {
                   Add Organization
                 </Button>
               </DialogTrigger>
-              <DialogContent className='sm:max-w-[50vh]'>
+              <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Add GitHub Organization</DialogTitle>
                   <DialogDescription>

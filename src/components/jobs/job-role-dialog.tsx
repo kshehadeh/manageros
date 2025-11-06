@@ -105,7 +105,7 @@ export function JobRoleDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='max-w-[50vw] max-h-[90vh] overflow-y-auto'>
+      <DialogContent className='max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>
             {jobRoleId ? 'Edit Job Role' : 'Create Job Role'}

@@ -1,4 +1,4 @@
-import { getServerSession } from 'next-auth'
+import { getServerSession, Session } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 
@@ -47,9 +47,7 @@ export async function requireAuth(options?: {
  * This ensures server-side security for navigation filtering
  * Returns empty array if user is not authenticated (for use in Suspense boundaries)
  */
-export async function getFilteredNavigation() {
-  const user = await getOptionalUser()
-
+export async function getFilteredNavigation(user: Session['user'] | null) {
   if (!user) {
     return []
   }
@@ -58,6 +56,7 @@ export async function getFilteredNavigation() {
     { name: 'Dashboard', href: '/dashboard', icon: 'Home' },
     { name: 'My Tasks', href: '/my-tasks', icon: 'CheckSquare' },
     { name: 'Initiatives', href: '/initiatives', icon: 'Rocket' },
+    { name: 'Meetings', href: '/meetings', icon: 'Calendar' },
     { name: 'Reports', href: '/reports', icon: 'BarChart3' },
     {
       name: 'Org Settings',

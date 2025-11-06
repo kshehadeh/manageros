@@ -98,7 +98,7 @@ export function TeamAvatarEditDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className='max-w-[50vw] max-h-[90vh] overflow-y-auto'>
+      <DialogContent className='max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>Edit Team Avatar</DialogTitle>
           <DialogDescription>

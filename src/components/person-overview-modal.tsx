@@ -73,7 +73,7 @@ export function PersonOverviewModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className='max-w-full sm:max-w-[50vh]'>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle className='flex items-center gap-2'>
             <Sparkles className='w-5 h-5' />

@@ -156,7 +156,7 @@ export function PersonActionsDropdown({
       </ActionDropdown>
 
       <Dialog open={showFeedbackForm} onOpenChange={setShowFeedbackForm}>
-        <DialogContent className='max-w-md'>
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Add New Feedback</DialogTitle>
           </DialogHeader>

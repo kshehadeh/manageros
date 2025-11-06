@@ -253,7 +253,7 @@ export function ViewDropdown({
               <ChevronDown className='h-4 w-4' />
             </Button>
           </DialogTrigger>
-          <DialogContent className='max-h-[90vh] overflow-y-auto max-w-[95vw]'>
+          <DialogContent className='max-h-[90vh] overflow-y-auto'>
             <DialogHeader>
               <DialogTitle>View Settings</DialogTitle>
             </DialogHeader>

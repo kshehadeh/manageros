@@ -46,7 +46,7 @@ export function CheckInModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='md:max-w-[50vw] max-h-[90vh] overflow-y-auto'>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>
             {isEditing ? 'Edit Check-in' : 'New Check-in'}

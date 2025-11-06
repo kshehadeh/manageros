@@ -75,7 +75,7 @@ export function JobRoleEditModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className='md:max-w-[50vw]'>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Job Role</DialogTitle>
           <DialogDescription>

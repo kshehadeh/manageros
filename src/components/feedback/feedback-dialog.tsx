@@ -89,7 +89,7 @@ export function FeedbackDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='max-w-2xl max-h-[90vh] flex flex-col p-0'>
+      <DialogContent className='max-h-[90vh] flex flex-col p-0'>
         <DialogHeader className='sticky top-0 z-0 bg-background border-b px-6 py-4 rounded-t-lg pr-12'>
           <DialogTitle className='flex items-center gap-2'>
             {isEditing ? (

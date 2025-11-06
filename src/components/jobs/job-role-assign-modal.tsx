@@ -75,7 +75,7 @@ export function JobRoleAssignModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className='max-w-full md:max-w-[350px] max-h-[90vh] overflow-y-auto'>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Assign Person to Job Role</DialogTitle>
         </DialogHeader>

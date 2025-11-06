@@ -472,7 +472,7 @@ export function NotesSection({
 
       {/* Create Note Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className='sm:max-w-[600px]'>
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Note</DialogTitle>
             <DialogDescription>
@@ -598,7 +598,7 @@ export function NotesSection({
 
       {/* Edit Note Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className='sm:max-w-[600px]'>
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Note</DialogTitle>
             <DialogDescription>Update the note content</DialogDescription>
@@ -645,7 +645,7 @@ export function NotesSection({
 
       {/* Image Lightbox */}
       <Dialog open={!!lightboxImage} onOpenChange={closeLightbox}>
-        <DialogContent className='sm:max-w-[90vw] sm:max-h-[90vh] p-0 bg-transparent border-none'>
+        <DialogContent className='max-h-[90vh] p-0 bg-transparent border-none'>
           <VisuallyHidden>
             <DialogTitle>Image Preview</DialogTitle>
           </VisuallyHidden>

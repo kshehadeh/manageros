@@ -137,7 +137,7 @@ export function PersonAvatarEditDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className='max-w-[50vw] max-h-[90vh] overflow-y-auto'>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Person Avatar</DialogTitle>
           <DialogDescription>

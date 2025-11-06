@@ -123,7 +123,7 @@ export function JiraCredentialsForm({
                     Update Credentials
                   </Button>
                 </DialogTrigger>
-                <DialogContent className='sm:max-w-md'>
+                <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Update Jira Credentials</DialogTitle>
                     <DialogDescription>
@@ -300,7 +300,7 @@ export function JiraCredentialsForm({
                   Add Credentials
                 </Button>
               </DialogTrigger>
-              <DialogContent className='sm:max-w-md'>
+              <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Add Jira Credentials</DialogTitle>
                   <DialogDescription>

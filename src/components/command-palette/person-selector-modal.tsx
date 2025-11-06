@@ -41,7 +41,7 @@ export function PersonSelectorModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className='sm:max-w-md'>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle className='flex items-center gap-2'>
             <MessageCircle className='h-5 w-5' />

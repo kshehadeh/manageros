@@ -493,7 +493,7 @@ export function DateTimePickerWithNaturalInput({
       {isMobile ? (
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>{triggerButton}</DialogTrigger>
-          <DialogContent className='max-w-[100vw] w-full p-0 h-[100vh] max-h-[100vh] flex flex-col overflow-y-auto rounded-none left-0 top-0 translate-x-0 translate-y-0'>
+          <DialogContent className='p-0 h-[100vh] max-h-[100vh] flex flex-col overflow-y-auto rounded-none left-0 top-0 translate-x-0 translate-y-0'>
             {pickerContent}
           </DialogContent>
         </Dialog>

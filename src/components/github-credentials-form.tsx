@@ -124,7 +124,7 @@ export function GithubCredentialsForm({
                     Update Credentials
                   </Button>
                 </DialogTrigger>
-                <DialogContent className='sm:max-w-md'>
+                <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Update GitHub Credentials</DialogTitle>
                     <DialogDescription>
@@ -276,7 +276,7 @@ export function GithubCredentialsForm({
                   Add Credentials
                 </Button>
               </DialogTrigger>
-              <DialogContent className='sm:max-w-md'>
+              <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Add GitHub Credentials</DialogTitle>
                   <DialogDescription>

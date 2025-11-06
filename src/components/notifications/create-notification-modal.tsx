@@ -87,7 +87,7 @@ export function CreateNotificationModal({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className='sm:max-w-md'>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle className='flex items-center gap-2'>
             <Bell className='h-5 w-5' />
