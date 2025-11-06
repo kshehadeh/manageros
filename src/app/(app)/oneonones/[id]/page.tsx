@@ -69,6 +69,8 @@ export default async function OneOnOneViewPage({
                         content={oneOnOne.notes}
                         variant='default'
                         emptyStateText='No notes recorded yet'
+                        truncateMode={true}
+                        maxHeight='200px'
                       />
                     ) : (
                       <div className='text-center py-8 text-neutral-500'>
