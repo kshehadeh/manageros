@@ -169,6 +169,8 @@ export default async function MeetingDetailPage({
                   content={meeting.notes || ''}
                   variant='default'
                   emptyStateText='No notes for this meeting'
+                  truncateMode={true}
+                  maxHeight='200px'
                 />
               </PageSection>
 

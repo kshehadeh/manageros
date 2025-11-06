@@ -5,6 +5,7 @@
 @theme {
   --color-background: hsl(0 0% 100%);
   --color-foreground: hsl(222.2 84% 4.9%);
+  --color-large-text-block-foreground: hsl(222.2 84% 4.9%);
   --color-card: hsl(0 0% 100%);
   --color-card-foreground: hsl(222.2 84% 4.9%);
   --color-popover: hsl(0 0% 100%);
@@ -70,6 +71,7 @@
 .dark {
   --color-background: hsl(240 10% 3.9%);
   --color-foreground: hsl(210 40% 98%);
+  --color-large-text-block-foreground: hsl(0, 0%, 87%);
   --color-card: hsl(222.2 47.4% 11.2%);
   --color-card-foreground: hsl(210 40% 98%);
   --color-popover: hsl(222.2 47.4% 11.2%);
@@ -210,7 +212,8 @@
 
 /* Markdown prose styling */
 .prose {
-  color: var(--color-foreground);
+  color: var(--color-large-text-block-foreground);
+  font-size: 0.875rem;
 }
 
 .prose h1,
@@ -219,7 +222,7 @@
 .prose h4,
 .prose h5,
 .prose h6 {
-  color: var(--color-foreground);
+  color: var(--color-large-text-block-foreground);
   font-weight: 600;
 }
 
@@ -249,7 +252,7 @@
 
 .prose strong {
   font-weight: 600;
-  color: var(--color-foreground);
+  color: var(--color-large-text-block-foreground);
 }
 
 .prose em {
@@ -264,7 +267,7 @@
   font-family:
     ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo,
     monospace;
-  color: var(--color-foreground);
+  color: var(--color-large-text-block-foreground);
 }
 
 .prose pre {
@@ -272,14 +275,14 @@
   padding: var(--spacing-md);
   border-radius: var(--radius-sm);
   overflow-x: auto;
-  color: var(--color-foreground);
+  color: var(--color-large-text-block-foreground);
 }
 
 .prose blockquote {
   border-left: 2px solid var(--color-border);
   padding-left: var(--spacing-lg);
   font-style: italic;
-  color: var(--color-muted-foreground);
+  color: var(--color-large-text-block-foreground);
 }
 
 /* React Day Picker theming overrides */
