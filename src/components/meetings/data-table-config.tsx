@@ -175,14 +175,12 @@ export const meetingDataTableConfig: DataTableConfig<
   onRowClick: (router, entityId, _extra) => {
     // For meetings, we need to handle the navigation manually since meeting instances
     // have a different route structure than regular meetings
-    if (typeof window !== 'undefined') {
-      // Check if this is a composite ID (meetingId-instanceId)
-      if (entityId.includes('-')) {
-        const [meetingId, instanceId] = entityId.split('-')
-        window.location.href = `/meetings/${meetingId}/instances/${instanceId}`
-      } else {
-        window.location.href = `/meetings/${entityId}`
-      }
+    // Check if this is a composite ID (meetingId-instanceId)
+    if (entityId.includes('-')) {
+      const [meetingId, instanceId] = entityId.split('-')
+      router.push(`/meetings/${meetingId}/instances/${instanceId}`)
+    } else {
+      router.push(`/meetings/${entityId}`)
     }
   },
 

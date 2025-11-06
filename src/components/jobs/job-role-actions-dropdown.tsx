@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Edit, Trash2 } from 'lucide-react'
 import { ActionDropdown } from '@/components/common/action-dropdown'
@@ -18,11 +19,12 @@ export function JobRoleActionsDropdown({
   jobRoleTitle,
   size = 'default',
 }: JobRoleActionsDropdownProps) {
+  const router = useRouter()
   const handleDelete = async () => {
     try {
       await deleteJobRole(jobRoleId)
       toast.success('Job role deleted successfully')
-      window.location.href = '/organization/job-roles'
+      router.push('/organization/job-roles')
     } catch (error) {
       console.error('Error deleting job role:', error)
       toast.error(

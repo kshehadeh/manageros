@@ -1,5 +1,5 @@
 import { getMeeting } from '@/lib/actions/meeting'
-import { getEntityLinks } from '@/lib/actions/entity-links'
+import { getEntityLinks } from '@/lib/data/entity-links'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -23,6 +23,7 @@ import {
   Calendar,
 } from 'lucide-react'
 import { LinkListSection } from '@/components/links/link-list-section'
+import { MeetingStatusBadge } from '@/components/meetings/meeting-status-badge'
 
 export default async function MeetingDetailPage({
   params,
@@ -36,17 +37,28 @@ export default async function MeetingDetailPage({
   }
 
   const { id } = await params
-  const [meeting, entityLinks] = await Promise.all([
-    getMeeting(id),
-    getEntityLinks('Meeting', id),
-  ])
+  const meeting = await getMeeting(id)
 
   if (!meeting) {
     notFound()
   }
 
-  const scheduledDate = new Date(meeting.scheduledAt)
-  const isPast = scheduledDate < new Date()
+  // Get entity links for this meeting
+  const entityLinksResult = await getEntityLinks(
+    'Meeting',
+    id,
+    session.user.organizationId,
+    {
+      includeCreatedBy: true,
+    }
+  )
+
+  // Type assertion: when includeCreatedBy is true, createdBy will be included
+  const entityLinks = entityLinksResult as Array<
+    (typeof entityLinksResult)[0] & {
+      createdBy: { id: string; name: string; email: string }
+    }
+  >
 
   const formatDuration = (minutes: number | null) => {
     if (!minutes) return 'No duration set'
@@ -121,9 +133,10 @@ export default async function MeetingDetailPage({
                     </Link>
                   </div>
                 )}
-                {isPast && !meeting.isRecurring && (
-                  <span className='text-muted-foreground'>Past Meeting</span>
-                )}
+                <MeetingStatusBadge
+                  scheduledAt={meeting.scheduledAt}
+                  isRecurring={meeting.isRecurring}
+                />
               </div>
             </div>
             <MeetingActionsDropdown meetingId={meeting.id} meeting={meeting} />

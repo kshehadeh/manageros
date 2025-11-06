@@ -16,7 +16,7 @@ import { EditFormNavigator } from '@/components/edit-form-navigator'
 import { OfflineAwareLayout } from '@/components/offline-aware-layout'
 import { AIChatSidebarWrapper } from '@/components/ai-chat-sidebar-wrapper'
 import { CacheProvider } from '@/components/cache-provider'
-import SidebarServer from '@/components/sidebar-server'
+import SidebarClient from '@/components/sidebar-client'
 
 interface AppLayoutProps {
   children: ReactNode
@@ -42,9 +42,7 @@ export default async function AppLayout({ children }: AppLayoutProps) {
                     <DefaultBreadcrumbHandler />
                     <OfflineAwareLayout>
                       <div className='flex min-h-screen'>
-                        <SidebarServer />
-                        {/* <Suspense fallback={<Sidebar />}>
-                        </Suspense> */}
+                        <SidebarClient />
                         <div className='flex-1 flex flex-col overflow-hidden lg:ml-0'>
                           <TopBar />
                           <main className='flex-1 overflow-auto p-3 md:p-6'>

@@ -136,7 +136,7 @@ export function MeetingForm({
       } else {
         const meeting = await createMeeting(validatedData)
         // Redirect to the new meeting detail page
-        window.location.href = `/meetings/${meeting.id}`
+        router.push(`/meetings/${meeting.id}`)
       }
     } catch (error) {
       if (error instanceof Error) {

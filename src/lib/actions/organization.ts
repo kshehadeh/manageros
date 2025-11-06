@@ -836,6 +836,40 @@ export async function getCurrentUserWithPerson() {
   }
 }
 
+export async function getSidebarData() {
+  const currentUser = await getCurrentUser()
+  const { getFilteredNavigation } = await import('@/lib/auth-utils')
+
+  const navigation = await getFilteredNavigation(currentUser)
+
+  if (!currentUser.organizationId) {
+    return {
+      user: currentUser,
+      person: null,
+      navigation,
+    }
+  }
+
+  // Get the linked person if it exists
+  const person = currentUser.personId
+    ? await prisma.person.findUnique({
+        where: { id: currentUser.personId },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          avatar: true,
+        },
+      })
+    : null
+
+  return {
+    user: currentUser,
+    person,
+    navigation,
+  }
+}
+
 // GitHub Organization Settings Actions
 
 export async function getGithubOrganizations() {

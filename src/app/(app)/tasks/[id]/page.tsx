@@ -1,4 +1,5 @@
 import { getTask } from '@/lib/actions/task'
+import { getEntityLinks } from '@/lib/data/entity-links'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -34,7 +35,6 @@ export default async function TaskDetailPage({
   }
 
   // Get entity links for this task
-  const { getEntityLinks } = await import('@/lib/data/entity-links')
   const entityLinksResult = await getEntityLinks(
     'Task',
     id,

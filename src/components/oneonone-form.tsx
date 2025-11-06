@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createOneOnOne, updateOneOnOne } from '@/lib/actions/oneonone'
 import { type OneOnOneFormData } from '@/lib/validations'
 import Link from 'next/link'
@@ -39,6 +40,7 @@ export function OneOnOneForm({
   existingOneOnOne,
   onCancel,
 }: OneOnOneFormProps) {
+  const router = useRouter()
   // Use the people cache to get people data
   const { people, isLoading, error } = usePeopleCache()
 
@@ -73,7 +75,7 @@ export function OneOnOneForm({
       } else {
         const created = await createOneOnOne(formData)
         if (created && created.id) {
-          window.location.href = `/oneonones/${created.id}`
+          router.push(`/oneonones/${created.id}`)
           return
         }
       }

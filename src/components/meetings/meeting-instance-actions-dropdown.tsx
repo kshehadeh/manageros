@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Edit, Trash2, CalendarPlus } from 'lucide-react'
 import { deleteMeetingInstance } from '@/lib/actions/meeting-instance'
@@ -18,11 +19,12 @@ export function MeetingInstanceActionsDropdown({
   instanceId,
   size = 'default',
 }: MeetingInstanceActionsDropdownProps) {
+  const router = useRouter()
   const handleDelete = async () => {
     try {
       await deleteMeetingInstance(instanceId)
       toast.success('Meeting instance deleted successfully')
-      window.location.href = `/meetings/${meetingId}`
+      router.push(`/meetings/${meetingId}`)
     } catch (error) {
       console.error('Error deleting meeting instance:', error)
       toast.error(

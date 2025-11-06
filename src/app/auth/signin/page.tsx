@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -18,6 +19,7 @@ import {
 import { AlertCircle } from 'lucide-react'
 
 export default function SignInPage() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -87,7 +89,7 @@ export default function SignInPage() {
         }
       } else if (result?.ok) {
         // Success - redirect manually
-        window.location.href = result.url || '/'
+        router.push(result.url || '/')
       }
     } catch (error) {
       console.error('Error signing in:', error)

@@ -1,12 +1,5 @@
-import { Loading } from '@/components/ui/loading'
+import { AnimatedLoadingPage } from '../../../../components/ui/animated-loading-page'
 
 export default function LoadingPage() {
-  return (
-    <div className='flex items-center justify-center min-h-[400px]'>
-      <div className='flex flex-col items-center space-y-4'>
-        <Loading size='lg' />
-        <p className='text-sm text-muted-foreground'>Loading initiative...</p>
-      </div>
-    </div>
-  )
+  return <AnimatedLoadingPage text='Loading initiative...' />
 }

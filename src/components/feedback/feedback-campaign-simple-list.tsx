@@ -145,7 +145,9 @@ export function SimpleFeedbackCampaignList({
             <>
               <ContextMenuItem
                 onClick={() => {
-                  window.location.href = `/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`
+                  router.push(
+                    `/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`
+                  )
                   close()
                 }}
               >

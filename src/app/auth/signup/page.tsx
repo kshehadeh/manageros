@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -17,6 +18,7 @@ import {
 import { AlertCircle, CheckCircle2 } from 'lucide-react'
 
 export default function SignUpPage() {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -77,7 +79,7 @@ export default function SignUpPage() {
           setSuccess(responseData.message)
           // Redirect after a short delay to show the success message
           setTimeout(() => {
-            window.location.href = '/'
+            router.push('/')
           }, 2000)
         }
         // If not invited, NextAuth will handle the redirect automatically

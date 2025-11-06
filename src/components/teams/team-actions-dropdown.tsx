@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Edit, Trash2 } from 'lucide-react'
 import { deleteTeam } from '@/lib/actions/team'
@@ -16,11 +17,12 @@ export function TeamActionsDropdown({
   teamId,
   size = 'default',
 }: TeamActionsDropdownProps) {
+  const router = useRouter()
   const handleDelete = async () => {
     try {
       await deleteTeam(teamId)
       toast.success('Team deleted successfully')
-      window.location.href = '/teams'
+      router.push('/teams')
     } catch (error) {
       console.error('Error deleting team:', error)
       toast.error(
