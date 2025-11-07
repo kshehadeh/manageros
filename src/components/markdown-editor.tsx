@@ -27,6 +27,7 @@ interface MarkdownEditorProps {
   placeholder?: string
   maxLength?: number
   className?: string
+  heightClassName?: string
 }
 
 export function MarkdownEditor({
@@ -35,6 +36,7 @@ export function MarkdownEditor({
   placeholder = 'Start typing...',
   maxLength,
   className = '',
+  heightClassName = 'max-h-[300px]',
 }: MarkdownEditorProps) {
   const { theme } = useTheme()
   const editorRef = useRef<ReturnType<typeof useEditor> | null>(null)
@@ -267,7 +269,10 @@ export function MarkdownEditor({
       </div>
 
       {/* Editor */}
-      <div className='max-h-[90vh] overflow-y-auto' data-scrollable-editor>
+      <div
+        className={cn(heightClassName, 'overflow-y-auto')}
+        data-scrollable-editor
+      >
         <EditorContent editor={editor} />
       </div>
 

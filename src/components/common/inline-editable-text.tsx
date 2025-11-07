@@ -97,6 +97,7 @@ export function InlineEditableText({
             value={editValue}
             onChange={setEditValue}
             placeholder={placeholder}
+            heightClassName='max-h-[200px]'
           />
         ) : (
           <div className='flex items-center gap-2 w-full'>

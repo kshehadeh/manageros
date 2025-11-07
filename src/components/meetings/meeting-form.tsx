@@ -553,6 +553,7 @@ export function MeetingForm({
             value={formData.notes}
             onChange={value => handleInputChange('notes', value)}
             placeholder='Meeting notes and agenda items... Use Markdown for formatting!'
+            heightClassName='max-h-[300px]'
           />
         </div>
       ),

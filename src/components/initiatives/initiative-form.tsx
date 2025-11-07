@@ -251,6 +251,7 @@ export function InitiativeForm({
               value={formData.summary || ''}
               onChange={value => handleInputChange('summary', value)}
               placeholder='Brief description of the initiative... Use Markdown for formatting!'
+              heightClassName='max-h-[200px]'
             />
             {errors.summary && (
               <p className='text-sm text-destructive'>{errors.summary}</p>
@@ -263,6 +264,7 @@ export function InitiativeForm({
               value={formData.outcome || ''}
               onChange={value => handleInputChange('outcome', value)}
               placeholder='What success looks like... Use Markdown for formatting!'
+              heightClassName='max-h-[200px]'
             />
             {errors.outcome && (
               <p className='text-sm text-destructive'>{errors.outcome}</p>
@@ -476,38 +478,33 @@ export function InitiativeForm({
               key={index}
               className={`p-3 ${index < owners.length - 1 ? 'border-b' : ''}`}
             >
-              <div className='flex items-end gap-2'>
-                <div className='flex-1 grid grid-cols-1 md:grid-cols-2 gap-2'>
-                  <div className='space-y-2'>
-                    <PersonSelect
-                      value={getSelectValue(owner.personId)}
-                      onValueChange={value =>
-                        updateOwner(index, 'personId', getFormValue(value))
-                      }
-                      placeholder='Select person'
-                      includeNone={true}
-                      noneLabel='No person'
-                      showAvatar={true}
-                      showRole={true}
-                    />
-                  </div>
-                  <div className='space-y-2'>
-                    <Select
-                      value={owner.role}
-                      onValueChange={value => updateOwner(index, 'role', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder='Select role' />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value='owner'>Owner</SelectItem>
-                        <SelectItem value='sponsor'>Sponsor</SelectItem>
-                        <SelectItem value='collaborator'>
-                          Collaborator
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+              <div className='flex items-center gap-2'>
+                <div className='flex-1 grid grid-cols-1 md:grid-cols-2 gap-2 items-center'>
+                  <PersonSelect
+                    value={getSelectValue(owner.personId)}
+                    onValueChange={value =>
+                      updateOwner(index, 'personId', getFormValue(value))
+                    }
+                    placeholder='Select person'
+                    includeNone={true}
+                    noneLabel='No person'
+                    showAvatar={true}
+                    showRole={true}
+                    className='h-10'
+                  />
+                  <Select
+                    value={owner.role}
+                    onValueChange={value => updateOwner(index, 'role', value)}
+                  >
+                    <SelectTrigger className='h-10'>
+                      <SelectValue placeholder='Select role' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='owner'>Owner</SelectItem>
+                      <SelectItem value='sponsor'>Sponsor</SelectItem>
+                      <SelectItem value='collaborator'>Collaborator</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 {owners.length > 1 && (
                   <Button
@@ -515,7 +512,7 @@ export function InitiativeForm({
                     onClick={() => removeOwner(index)}
                     variant='destructive'
                     size='sm'
-                    className='h-10 w-10 p-0'
+                    className='h-10 w-10 p-0 shrink-0 self-center'
                   >
                     <Trash2 className='h-4 w-4' />
                   </Button>

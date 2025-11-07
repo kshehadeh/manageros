@@ -82,20 +82,25 @@ export function PersonSelect({
   }, [autoFocus, isLoading, availablePeople.length])
 
   const renderPersonItem = (person: Person) => (
-    <div className='flex items-center gap-2'>
+    <div className='flex items-center gap-3'>
       {showAvatar && (
-        <PersonAvatar name={person.name} avatar={person.avatar} size='sm' />
+        <PersonAvatar name={person.name} avatar={person.avatar} size='xs' />
       )}
-      <div className='text-left'>
-        <div className='font-medium'>{person.name}</div>
+      <div className='flex items-center gap-2 flex-1 min-w-0'>
+        <span className='font-medium whitespace-nowrap'>{person.name}</span>
         {showRole && person.role && (
-          <div className='text-xs text-muted-foreground'>{person.role}</div>
+          <span className='text-xs text-muted-foreground truncate'>
+            {person.role}
+          </span>
         )}
       </div>
     </div>
   )
 
   const renderPersonText = (person: Person) => {
+    if (showRole && person.role) {
+      return `${person.name} • ${person.role}`
+    }
     return person.name
   }
 
