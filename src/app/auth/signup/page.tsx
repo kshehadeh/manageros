@@ -7,15 +7,9 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { AlertCircle, CheckCircle2 } from 'lucide-react'
+import { AnimatedGeometricPattern } from '@/components/marketing/animated-geometric-pattern'
+import { AuthMarketingPanel } from '@/components/auth/auth-marketing-panel'
 
 export default function SignUpPage() {
   const router = useRouter()
@@ -104,104 +98,138 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className='p-4'>
-      <Card className='w-full'>
-        <CardHeader className='space-y-1'>
-          <CardTitle className='text-2xl font-bold text-center'>
-            Create an account
-          </CardTitle>
-          <CardDescription className='text-center'>
-            Enter your information to get started
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className='space-y-4'>
-            {error && (
-              <div className='flex items-center gap-2 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 text-sm'>
-                <AlertCircle className='h-4 w-4 shrink-0' />
-                <span>{error}</span>
+    <div className='relative min-h-screen overflow-hidden bg-[#05070f]'>
+      {/* Animated background */}
+      <div className='pointer-events-none absolute inset-0 overflow-hidden'>
+        <AnimatedGeometricPattern />
+        {/* Additional gradient overlay */}
+        <div
+          className='absolute inset-0'
+          style={{
+            background: `radial-gradient(circle at center, var(--color-primary) 0%, transparent 70%)`,
+            opacity: 0.1,
+          }}
+        />
+        <div className='absolute inset-0 bg-[#05070f]/50' />
+      </div>
+
+      {/* Content */}
+      <div className='relative z-10 flex min-h-screen flex-col lg:flex-row'>
+        {/* Left side - Marketing content */}
+        <div className='hidden lg:flex lg:w-1/2 lg:flex-col'>
+          <AuthMarketingPanel />
+        </div>
+
+        {/* Right side - Sign up form */}
+        <div className='flex w-full items-start justify-center p-4 lg:w-1/2 lg:p-8'>
+          <div className='w-full space-y-6'>
+            <div className='space-y-2 text-center'>
+              <h1 className='text-2xl font-bold text-white'>
+                Create an account
+              </h1>
+              <p className='text-sm text-white/70'>
+                Enter your information to get started
+              </p>
+            </div>
+            <form onSubmit={handleSubmit} className='space-y-4'>
+              {error && (
+                <div className='flex items-center gap-2 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 text-sm'>
+                  <AlertCircle className='h-4 w-4 shrink-0' />
+                  <span>{error}</span>
+                </div>
+              )}
+              {success && (
+                <div className='flex items-center gap-2 rounded-lg bg-secondary/30 border text-foreground px-4 py-3 text-sm'>
+                  <CheckCircle2 className='h-4 w-4 shrink-0' />
+                  <span>{success}</span>
+                </div>
+              )}
+
+              <div className='space-y-2'>
+                <Label htmlFor='name' className='text-white'>
+                  Full Name
+                </Label>
+                <Input
+                  id='name'
+                  name='name'
+                  type='text'
+                  required
+                  placeholder='John Doe'
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className=''
+                />
               </div>
-            )}
-            {success && (
-              <div className='flex items-center gap-2 rounded-lg bg-secondary/30 border text-foreground px-4 py-3 text-sm'>
-                <CheckCircle2 className='h-4 w-4 shrink-0' />
-                <span>{success}</span>
+
+              <div className='space-y-2'>
+                <Label htmlFor='email' className='text-white'>
+                  Email Address
+                </Label>
+                <Input
+                  id='email'
+                  name='email'
+                  type='email'
+                  autoComplete='email'
+                  required
+                  placeholder='john@example.com'
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className=''
+                />
               </div>
-            )}
 
-            <div className='space-y-2'>
-              <Label htmlFor='name'>Full Name</Label>
-              <Input
-                id='name'
-                name='name'
-                type='text'
-                required
-                placeholder='John Doe'
-                value={formData.name}
-                onChange={handleInputChange}
-                className=''
-              />
+              <div className='space-y-2'>
+                <Label htmlFor='password' className='text-white'>
+                  Password
+                </Label>
+                <Input
+                  id='password'
+                  name='password'
+                  type='password'
+                  autoComplete='new-password'
+                  required
+                  placeholder='Create a strong password'
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className=''
+                />
+              </div>
+
+              <div className='space-y-2'>
+                <Label htmlFor='confirmPassword' className='text-white'>
+                  Confirm Password
+                </Label>
+                <Input
+                  id='confirmPassword'
+                  name='confirmPassword'
+                  type='password'
+                  autoComplete='new-password'
+                  required
+                  placeholder='Confirm your password'
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  className=''
+                />
+              </div>
+
+              <Button type='submit' disabled={isLoading} className='w-full'>
+                {isLoading ? 'Creating account...' : 'Create account'}
+              </Button>
+            </form>
+            <div className='flex flex-col space-y-2'>
+              <div className='text-sm text-white/70 text-center'>
+                Already have an account?{' '}
+                <Link
+                  href='/auth/signin'
+                  className='underline underline-offset-4'
+                >
+                  Sign in
+                </Link>
+              </div>
             </div>
-
-            <div className='space-y-2'>
-              <Label htmlFor='email'>Email Address</Label>
-              <Input
-                id='email'
-                name='email'
-                type='email'
-                autoComplete='email'
-                required
-                placeholder='john@example.com'
-                value={formData.email}
-                onChange={handleInputChange}
-                className=''
-              />
-            </div>
-
-            <div className='space-y-2'>
-              <Label htmlFor='password'>Password</Label>
-              <Input
-                id='password'
-                name='password'
-                type='password'
-                autoComplete='new-password'
-                required
-                placeholder='Create a strong password'
-                value={formData.password}
-                onChange={handleInputChange}
-                className=''
-              />
-            </div>
-
-            <div className='space-y-2'>
-              <Label htmlFor='confirmPassword'>Confirm Password</Label>
-              <Input
-                id='confirmPassword'
-                name='confirmPassword'
-                type='password'
-                autoComplete='new-password'
-                required
-                placeholder='Confirm your password'
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                className=''
-              />
-            </div>
-
-            <Button type='submit' disabled={isLoading} className='w-full'>
-              {isLoading ? 'Creating account...' : 'Create account'}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className='flex flex-col space-y-2'>
-          <div className='text-sm text-muted-foreground text-center'>
-            Already have an account?{' '}
-            <Link href='/auth/signin' className='underline underline-offset-4'>
-              Sign in
-            </Link>
           </div>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }

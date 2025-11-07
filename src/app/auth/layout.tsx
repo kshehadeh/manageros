@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { IndigoIcon } from '@/components/indigo-icon'
 import { ThemeProvider } from 'next-themes'
+import Link from 'next/link'
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
@@ -13,7 +14,9 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
     >
       <div className='bg-background text-foreground flex flex-col items-center justify-center p-4 min-h-screen'>
         <div className='mb-8'>
-          <IndigoIcon width={60} height={50} color='currentColor' />
+          <Link href='/' className='flex items-center gap-3'>
+            <IndigoIcon width={60} height={50} color='currentColor' />
+          </Link>
         </div>
         {children}
       </div>
