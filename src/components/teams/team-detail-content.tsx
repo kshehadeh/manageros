@@ -50,17 +50,17 @@ export function TeamDetailContent({ team, isAdmin }: TeamDetailContentProps) {
       <PageContainer>
         <PageHeader
           title={team.name}
+          iconComponent={
+            <ClickableTeamAvatar
+              name={team.name}
+              avatar={currentAvatar}
+              size='lg'
+              isAdmin={isAdmin}
+              onClick={handleAvatarClick}
+            />
+          }
           subtitle={
             <>
-              <div className='flex items-center gap-3 mb-2'>
-                <ClickableTeamAvatar
-                  name={team.name}
-                  avatar={currentAvatar}
-                  size='lg'
-                  isAdmin={isAdmin}
-                  onClick={handleAvatarClick}
-                />
-              </div>
               {team.description && (
                 <p className='page-section-subtitle'>{team.description}</p>
               )}
