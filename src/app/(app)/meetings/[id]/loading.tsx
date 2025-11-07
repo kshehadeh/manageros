@@ -21,42 +21,36 @@ import {
 export default function LoadingPage() {
   return (
     <PageContainer>
-      <PageHeader>
-        <div className='flex items-start justify-between'>
-          <div className='flex-1'>
-            <div className='flex items-center gap-3 mb-2'>
-              <Calendar className='h-6 w-6 text-muted-foreground' />
-              <Skeleton className='h-8 w-64' />
+      <PageHeader
+        title='Loading meeting...'
+        titleIcon={Calendar}
+        subtitle={
+          <div className='flex flex-wrap items-center gap-4 mt-3'>
+            <div className='flex items-center gap-1'>
+              <Clock className='h-4 w-4 text-muted-foreground' />
+              <Skeleton className='h-4 w-24' />
             </div>
-
-            {/* Meeting details skeleton */}
-            <div className='flex flex-wrap items-center gap-4 mt-3'>
-              <div className='flex items-center gap-1'>
-                <Clock className='h-4 w-4 text-muted-foreground' />
-                <Skeleton className='h-4 w-24' />
-              </div>
-              <div className='flex items-center gap-1'>
-                <Users className='h-4 w-4 text-muted-foreground' />
-                <Skeleton className='h-4 w-32' />
-              </div>
-              <div className='flex items-center gap-1'>
-                <Repeat className='h-4 w-4 text-muted-foreground' />
-                <Skeleton className='h-4 w-20' />
-              </div>
-              <div className='flex items-center gap-1'>
-                <User className='h-4 w-4 text-muted-foreground' />
-                <Skeleton className='h-4 w-28' />
-              </div>
-              <div className='flex items-center gap-1'>
-                <Building2 className='h-4 w-4 text-muted-foreground' />
-                <Skeleton className='h-4 w-24' />
-              </div>
-              <Skeleton className='h-5 w-20 rounded-full' />
+            <div className='flex items-center gap-1'>
+              <Users className='h-4 w-4 text-muted-foreground' />
+              <Skeleton className='h-4 w-32' />
             </div>
+            <div className='flex items-center gap-1'>
+              <Repeat className='h-4 w-4 text-muted-foreground' />
+              <Skeleton className='h-4 w-20' />
+            </div>
+            <div className='flex items-center gap-1'>
+              <User className='h-4 w-4 text-muted-foreground' />
+              <Skeleton className='h-4 w-28' />
+            </div>
+            <div className='flex items-center gap-1'>
+              <Building2 className='h-4 w-4 text-muted-foreground' />
+              <Skeleton className='h-4 w-24' />
+            </div>
+            <Skeleton className='h-5 w-20 rounded-full' />
           </div>
-          <Skeleton className='h-9 w-9 rounded-md' />
-        </div>
-      </PageHeader>
+        }
+        actions={<Skeleton className='h-9 w-9 rounded-md' />}
+      />
 
       <PageContent>
         <PageMain>

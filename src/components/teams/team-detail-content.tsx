@@ -48,9 +48,10 @@ export function TeamDetailContent({ team, isAdmin }: TeamDetailContentProps) {
   return (
     <>
       <PageContainer>
-        <PageHeader>
-          <div className='flex items-center justify-between'>
-            <div>
+        <PageHeader
+          title={team.name}
+          subtitle={
+            <>
               <div className='flex items-center gap-3 mb-2'>
                 <ClickableTeamAvatar
                   name={team.name}
@@ -59,7 +60,6 @@ export function TeamDetailContent({ team, isAdmin }: TeamDetailContentProps) {
                   isAdmin={isAdmin}
                   onClick={handleAvatarClick}
                 />
-                <h1 className='page-title'>{team.name}</h1>
               </div>
               {team.description && (
                 <p className='page-section-subtitle'>{team.description}</p>
@@ -75,10 +75,10 @@ export function TeamDetailContent({ team, isAdmin }: TeamDetailContentProps) {
                   </Link>
                 </div>
               )}
-            </div>
-            <TeamActionsDropdown teamId={team.id} />
-          </div>
-        </PageHeader>
+            </>
+          }
+          actions={<TeamActionsDropdown teamId={team.id} />}
+        />
 
         <PageContent>
           <PageMain>

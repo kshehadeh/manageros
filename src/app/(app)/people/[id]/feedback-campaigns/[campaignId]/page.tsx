@@ -164,11 +164,11 @@ export default async function FeedbackCampaignDetailPage({
       campaignId={campaign.id}
     >
       <PageContainer>
-        <PageHeader>
-          <div className='flex items-start justify-between'>
-            <div className='flex-1'>
-              <div className='flex items-center gap-3 mb-2'>
-                <h1 className='page-title'>{campaignTitle}</h1>
+        <PageHeader
+          title={campaignTitle}
+          subtitle={
+            <>
+              <div className='flex items-center gap-2 mb-2'>
                 <Badge
                   variant={statusInfo.variant}
                   className='flex items-center gap-1'
@@ -208,7 +208,9 @@ export default async function FeedbackCampaignDetailPage({
                   </span>
                 </div>
               </div>
-            </div>
+            </>
+          }
+          actions={
             <FeedbackCampaignActionsDropdown
               campaignId={campaign.id}
               campaign={campaign}
@@ -217,8 +219,8 @@ export default async function FeedbackCampaignDetailPage({
               targetPersonName={person.name}
               totalResponses={totalResponses}
             />
-          </div>
-        </PageHeader>
+          }
+        />
 
         <PageContent>
           <PageMain>

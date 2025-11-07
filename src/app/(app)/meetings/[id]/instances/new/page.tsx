@@ -5,6 +5,9 @@ import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import { MeetingInstanceForm } from '@/components/meetings/meeting-instance-form'
 import { NewMeetingInstanceBreadcrumbClient } from '@/components/meetings/new-meeting-instance-breadcrumb-client'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
 
 export default async function NewMeetingInstancePage({
   params,
@@ -50,17 +53,13 @@ export default async function NewMeetingInstancePage({
       meetingTitle={meeting.title}
       meetingId={meeting.id}
     >
-      <div className='page-container'>
-        <div className='page-header'>
-          <div>
-            <h1 className='page-title'>Create New Instance</h1>
-            <p className='page-subtitle'>
-              Add a new instance for &ldquo;{meeting.title}&rdquo;
-            </p>
-          </div>
-        </div>
+      <PageContainer>
+        <PageHeader
+          title='Create New Instance'
+          subtitle={`Add a new instance for "${meeting.title}"`}
+        />
 
-        <div className='page-content'>
+        <PageContent>
           <MeetingInstanceForm
             meetingId={meeting.id}
             initialData={{
@@ -68,8 +67,8 @@ export default async function NewMeetingInstancePage({
               scheduledAt: defaultScheduledAt,
             }}
           />
-        </div>
-      </div>
+        </PageContent>
+      </PageContainer>
     </NewMeetingInstanceBreadcrumbClient>
   )
 }

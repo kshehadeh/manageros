@@ -4,6 +4,9 @@ import { Suspense, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { NotificationsList } from '@/components/notifications/notifications-list'
 import { PageSection } from '@/components/ui/page-section'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
 import { NotificationsHeader } from '@/components/notifications/notifications-header'
 import { useSession } from 'next-auth/react'
 
@@ -21,31 +24,31 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className='page-container'>
-      <div className='page-header flex justify-between items-start'>
-        <div>
-          <h1 className='page-title'>Notifications</h1>
-          <p className='page-subtitle'>
-            View and manage all your notifications
-          </p>
-        </div>
-        <NotificationsHeader
-          onRefresh={handleRefresh}
-          isAdmin={isAdmin}
-          showAllNotifications={showAllNotifications}
-          onToggleView={handleToggleView}
-        />
-      </div>
-
-      <PageSection>
-        <Suspense fallback={<NotificationsSkeleton />}>
-          <NotificationsList
-            showAllOrganizationNotifications={showAllNotifications}
+    <PageContainer>
+      <PageHeader
+        title='Notifications'
+        subtitle='View and manage all your notifications'
+        actions={
+          <NotificationsHeader
+            onRefresh={handleRefresh}
             isAdmin={isAdmin}
+            showAllNotifications={showAllNotifications}
+            onToggleView={handleToggleView}
           />
-        </Suspense>
-      </PageSection>
-    </div>
+        }
+      />
+
+      <PageContent>
+        <PageSection>
+          <Suspense fallback={<NotificationsSkeleton />}>
+            <NotificationsList
+              showAllOrganizationNotifications={showAllNotifications}
+              isAdmin={isAdmin}
+            />
+          </Suspense>
+        </PageSection>
+      </PageContent>
+    </PageContainer>
   )
 }
 

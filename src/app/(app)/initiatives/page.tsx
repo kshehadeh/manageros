@@ -12,13 +12,13 @@ export default function InitiativesPage() {
   return (
     <PageContainer>
       <PageHeader
-        title={
+        title='Initiatives'
+        titleIcon={Rocket}
+        subtitle={
           <div className='flex items-center gap-2'>
-            Initiatives
             <HelpIcon helpId='initiatives' size='md' />
           </div>
         }
-        titleIcon={Rocket}
         actions={
           <Button asChild className='flex items-center gap-2'>
             <Link href='/initiatives/new'>

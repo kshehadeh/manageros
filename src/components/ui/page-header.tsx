@@ -1,13 +1,13 @@
 import { ReactNode } from 'react'
 import { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { PageTitle } from './page-title'
 
 interface PageHeaderProps {
-  title?: string | ReactNode
+  title?: string
   titleIcon?: LucideIcon | React.ElementType
   subtitle?: string | ReactNode
   actions?: ReactNode
-  children?: ReactNode
   className?: string
 }
 
@@ -16,30 +16,16 @@ export function PageHeader({
   titleIcon: TitleIcon,
   subtitle,
   actions,
-  children,
   className = '',
 }: PageHeaderProps) {
-  // If children are provided, use them directly for maximum flexibility
-  // Note: When using children, include actions within the children if needed
-  if (children) {
-    return <div className={cn('page-header', className)}>{children}</div>
-  }
-
   return (
     <div className={cn('page-header', className)}>
       <div className='flex items-start justify-between'>
         <div className='flex-1'>
           {title && (
-            <div className='flex items-center gap-3 mb-2'>
-              {TitleIcon && (
-                <TitleIcon className='h-6 w-6 text-muted-foreground hidden md:block' />
-              )}
-              {typeof title === 'string' ? (
-                <h1 className='page-title'>{title}</h1>
-              ) : (
-                title
-              )}
-            </div>
+            <PageTitle icon={TitleIcon} className='mb-2'>
+              {title}
+            </PageTitle>
           )}
           {subtitle && (
             <div className='page-section-subtitle'>

@@ -99,9 +99,10 @@ export function PersonDetailContent({
 }: PersonDetailContentProps) {
   return (
     <PageContainer>
-      <PageHeader>
-        <div className='flex items-start justify-between'>
-          <div className='flex-1'>
+      <PageHeader
+        title={person.name}
+        subtitle={
+          <>
             <div className='flex items-center gap-3 mb-2'>
               <PersonAvatarWrapper
                 personId={person.id}
@@ -111,10 +112,7 @@ export function PersonDetailContent({
                 githubAvatar={linkedAvatars?.githubAvatar}
                 isAdmin={isAdmin}
               />
-              <div className='flex items-center gap-3'>
-                <h1 className='page-title'>{person.name}</h1>
-                <PersonStatusBadge status={person.status} />
-              </div>
+              <PersonStatusBadge status={person.status} />
             </div>
             <div className='page-section-subtitle'>{person.role ?? ''}</div>
             <div className='text-xs text-muted-foreground'>{person.email}</div>
@@ -186,7 +184,9 @@ export function PersonDetailContent({
                 </Link>
               </div>
             </div>
-          </div>
+          </>
+        }
+        actions={
           <PersonActionsDropdown
             person={
               person as unknown as PrismaPerson & {
@@ -198,8 +198,8 @@ export function PersonDetailContent({
             currentPersonId={currentPersonId}
             isAdmin={isAdmin}
           />
-        </div>
-      </PageHeader>
+        }
+      />
 
       <PageContent>
         <PageMain>

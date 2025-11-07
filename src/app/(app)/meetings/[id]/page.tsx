@@ -83,70 +83,66 @@ export default async function MeetingDetailPage({
       meetingId={meeting.id}
     >
       <PageContainer>
-        <PageHeader>
-          <div className='flex items-start justify-between'>
-            <div className='flex-1'>
-              <div className='flex items-center gap-3 mb-2'>
-                <Calendar className='h-6 w-6 hidden md:block' />
-                <h1 className='page-title'>{meeting.title}</h1>
+        <PageHeader
+          title={meeting.title}
+          titleIcon={Calendar}
+          subtitle={
+            <div className='flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground'>
+              <div className='flex items-center gap-1'>
+                <Clock className='h-4 w-4' />
+                <span>{formatDuration(meeting.duration)}</span>
               </div>
-
-              {/* Meeting details in small text */}
-              <div className='flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground'>
-                <div className='flex items-center gap-1'>
-                  <Clock className='h-4 w-4' />
-                  <span>{formatDuration(meeting.duration)}</span>
-                </div>
-                <div className='flex items-center gap-1'>
-                  <Users className='h-4 w-4' />
-                  <span>
-                    {meeting.participants.length} participant
-                    {meeting.participants.length !== 1 ? 's' : ''}
-                  </span>
-                </div>
-                {meeting.isRecurring && (
-                  <div className='flex items-center gap-1'>
-                    <Repeat className='h-4 w-4' />
-                    <span>{meeting.recurrenceType?.replace('_', '-')}</span>
-                  </div>
-                )}
-                {meeting.isRecurring && meeting.instances.length > 0 && (
-                  <span>
-                    {meeting.instances.length} instance
-                    {meeting.instances.length !== 1 ? 's' : ''}
-                  </span>
-                )}
-                {meeting.owner && (
-                  <div className='flex items-center gap-1'>
-                    <User className='h-4 w-4' />
-                    <Link
-                      href={`/people/${meeting.owner.id}`}
-                      className='hover:text-primary transition-colors'
-                    >
-                      {meeting.owner.name}
-                    </Link>
-                  </div>
-                )}
-                {meeting.team && (
-                  <div className='flex items-center gap-1'>
-                    <Building2 className='h-4 w-4' />
-                    <Link
-                      href={`/teams/${meeting.team.id}`}
-                      className='hover:text-primary transition-colors'
-                    >
-                      {meeting.team.name}
-                    </Link>
-                  </div>
-                )}
-                <MeetingStatusBadge
-                  scheduledAt={meeting.scheduledAt}
-                  isRecurring={meeting.isRecurring}
-                />
+              <div className='flex items-center gap-1'>
+                <Users className='h-4 w-4' />
+                <span>
+                  {meeting.participants.length} participant
+                  {meeting.participants.length !== 1 ? 's' : ''}
+                </span>
               </div>
+              {meeting.isRecurring && (
+                <div className='flex items-center gap-1'>
+                  <Repeat className='h-4 w-4' />
+                  <span>{meeting.recurrenceType?.replace('_', '-')}</span>
+                </div>
+              )}
+              {meeting.isRecurring && meeting.instances.length > 0 && (
+                <span>
+                  {meeting.instances.length} instance
+                  {meeting.instances.length !== 1 ? 's' : ''}
+                </span>
+              )}
+              {meeting.owner && (
+                <div className='flex items-center gap-1'>
+                  <User className='h-4 w-4' />
+                  <Link
+                    href={`/people/${meeting.owner.id}`}
+                    className='hover:text-primary transition-colors'
+                  >
+                    {meeting.owner.name}
+                  </Link>
+                </div>
+              )}
+              {meeting.team && (
+                <div className='flex items-center gap-1'>
+                  <Building2 className='h-4 w-4' />
+                  <Link
+                    href={`/teams/${meeting.team.id}`}
+                    className='hover:text-primary transition-colors'
+                  >
+                    {meeting.team.name}
+                  </Link>
+                </div>
+              )}
+              <MeetingStatusBadge
+                scheduledAt={meeting.scheduledAt}
+                isRecurring={meeting.isRecurring}
+              />
             </div>
+          }
+          actions={
             <MeetingActionsDropdown meetingId={meeting.id} meeting={meeting} />
-          </div>
-        </PageHeader>
+          }
+        />
 
         <PageContent>
           <PageMain>

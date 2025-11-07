@@ -6,6 +6,9 @@ import InvitationForm from '@/components/invitation-form'
 import InvitationList from '@/components/invitation-list'
 import { InvitationsBreadcrumbClient } from '@/components/organization/invitations-breadcrumb-client'
 import { PageSection } from '@/components/ui/page-section'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
 
 export default async function OrganizationInvitationsPage() {
   const session = await getServerSession(authOptions)
@@ -24,20 +27,19 @@ export default async function OrganizationInvitationsPage() {
 
   return (
     <InvitationsBreadcrumbClient>
-      <div className='page-container'>
-        <div className='page-header'>
-          <h1 className='page-title'>Organization Invitations</h1>
-          <p className='page-subtitle'>
-            Invite users to join your organization. They will be automatically
-            added when they create their account.
-          </p>
-        </div>
+      <PageContainer>
+        <PageHeader
+          title='Organization Invitations'
+          subtitle='Invite users to join your organization. They will be automatically added when they create their account.'
+        />
 
-        <PageSection>
-          <InvitationForm />
-          <InvitationList invitations={invitations} />
-        </PageSection>
-      </div>
+        <PageContent>
+          <PageSection>
+            <InvitationForm />
+            <InvitationList invitations={invitations} />
+          </PageSection>
+        </PageContent>
+      </PageContainer>
     </InvitationsBreadcrumbClient>
   )
 }

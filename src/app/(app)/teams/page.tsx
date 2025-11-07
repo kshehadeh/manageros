@@ -4,23 +4,20 @@ import { Button } from '@/components/ui/button'
 import { Upload, Plus, Workflow, Users2 } from 'lucide-react'
 import { TeamsDataTable } from '@/components/teams/data-table'
 import { PageSection } from '@/components/ui/page-section'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
 
 export default async function TeamsPage() {
   await requireAuth({ requireOrganization: true })
 
   return (
-    <div className='page-container'>
-      <div className='page-header'>
-        <div className='flex items-center justify-between'>
-          <div>
-            <div className='flex items-center gap-2'>
-              <Users2 className='h-6 w-6 text-muted-foreground' />
-              <h1 className='page-title'>Teams</h1>
-            </div>
-            <p className='page-subtitle'>
-              Manage your organization&apos;s team structure
-            </p>
-          </div>
+    <PageContainer>
+      <PageHeader
+        title='Teams'
+        titleIcon={Users2}
+        subtitle="Manage your organization's team structure"
+        actions={
           <div className='flex gap-2'>
             <Button asChild variant='outline'>
               <Link href='/teams/chart'>
@@ -41,11 +38,13 @@ export default async function TeamsPage() {
               </Link>
             </Button>
           </div>
-        </div>
-      </div>
-      <PageSection>
-        <TeamsDataTable enablePagination={true} limit={100} />
-      </PageSection>
-    </div>
+        }
+      />
+      <PageContent>
+        <PageSection>
+          <TeamsDataTable enablePagination={true} limit={100} />
+        </PageSection>
+      </PageContent>
+    </PageContainer>
   )
 }

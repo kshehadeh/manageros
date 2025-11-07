@@ -8,6 +8,11 @@ import {
 import OrganizationMembersList from '@/components/organization-members-list'
 import OrganizationInvitationsSection from '@/components/organization-invitations-section'
 import { PageSection } from '@/components/ui/page-section'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
+import { PageMain } from '@/components/ui/page-main'
+import { PageSidebar } from '@/components/ui/page-sidebar'
 import { UserCheck } from 'lucide-react'
 
 export default async function OrganizationMembersPage() {
@@ -27,33 +32,27 @@ export default async function OrganizationMembersPage() {
   const invitations = await getOrganizationInvitations()
 
   return (
-    <div className='page-container'>
-      <div className='page-header'>
-        <h1 className='page-title flex items-center gap-2'>
-          <UserCheck className='h-6 w-6' />
-          Organization Members ({members.length})
-        </h1>
-        <p className='page-subtitle'>
-          Manage member roles and remove users from your organization.
-        </p>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title={`Organization Members (${members.length})`}
+        titleIcon={UserCheck}
+        subtitle='Manage member roles and remove users from your organization.'
+      />
 
-      <div className='flex flex-col lg:flex-row gap-6'>
-        {/* Main Content */}
-        <div className='flex-1'>
+      <PageContent>
+        <PageMain>
           <PageSection>
             <OrganizationMembersList
               members={members}
               currentUserId={session.user.id}
             />
           </PageSection>
-        </div>
+        </PageMain>
 
-        {/* Right Sidebar */}
-        <div className='w-full lg:w-80'>
+        <PageSidebar>
           <OrganizationInvitationsSection invitations={invitations} />
-        </div>
-      </div>
-    </div>
+        </PageSidebar>
+      </PageContent>
+    </PageContainer>
   )
 }

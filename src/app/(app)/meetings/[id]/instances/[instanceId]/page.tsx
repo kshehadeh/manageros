@@ -14,6 +14,11 @@ import { HelpIcon } from '@/components/help-icon'
 import { SimplePeopleList } from '@/components/people/person-list'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
+import { PageMain } from '@/components/ui/page-main'
+import { PageSidebar } from '@/components/ui/page-sidebar'
 
 export default async function MeetingInstanceDetailPage({
   params,
@@ -61,16 +66,15 @@ export default async function MeetingInstanceDetailPage({
       meetingId={meetingInstance.meetingId}
       instanceId={meetingInstance.id}
     >
-      <div className='page-container'>
-        <div className='page-header'>
-          <div className='flex items-center justify-between'>
-            <div className='flex-1'>
-              <div className='flex items-center gap-2'>
-                <h1 className='page-title'>{meetingInstance.meeting.title}</h1>
+      <PageContainer>
+        <PageHeader
+          title={meetingInstance.meeting.title}
+          subtitle={
+            <>
+              <div className='flex items-center gap-2 mb-1'>
                 <HelpIcon helpId='meeting-instances' size='md' />
               </div>
-              <p className='page-subtitle'>Meeting Instance</p>
-
+              <p className='page-section-subtitle'>Meeting Instance</p>
               {/* Instance details in header */}
               <div className='flex flex-wrap items-center gap-4 mt-3 text-xs text-muted-foreground'>
                 <Link
@@ -89,18 +93,18 @@ export default async function MeetingInstanceDetailPage({
                   {attendedCount}/{totalParticipants} attended
                 </span>
               </div>
-            </div>
+            </>
+          }
+          actions={
             <MeetingInstanceActionsDropdown
               meetingId={meetingInstance.meetingId}
               instanceId={meetingInstance.id}
             />
-          </div>
-        </div>
+          }
+        />
 
-        {/* Main Content and Sidebar */}
-        <div className='flex flex-col lg:flex-row gap-6'>
-          {/* Main Content */}
-          <div className='flex-1 min-w-0'>
+        <PageContent>
+          <PageMain>
             <div className='space-y-6'>
               {/* Notes section */}
               <PageSection
@@ -115,10 +119,9 @@ export default async function MeetingInstanceDetailPage({
                 />
               </PageSection>
             </div>
-          </div>
+          </PageMain>
 
-          {/* Right Sidebar - Full width on mobile, fixed width on desktop */}
-          <div className='w-full lg:w-80 lg:shrink-0'>
+          <PageSidebar>
             <PageSection
               header={
                 <SectionHeader
@@ -170,9 +173,9 @@ export default async function MeetingInstanceDetailPage({
               emptyStateText='No links added yet.'
               className='mt-6'
             />
-          </div>
-        </div>
-      </div>
+          </PageSidebar>
+        </PageContent>
+      </PageContainer>
     </MeetingInstanceDetailBreadcrumbClient>
   )
 }

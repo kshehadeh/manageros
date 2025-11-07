@@ -59,11 +59,11 @@ export default async function TaskDetailPage({
   return (
     <TaskDetailBreadcrumbClient taskTitle={task.title} taskId={task.id}>
       <PageContainer>
-        <PageHeader>
-          <div className='flex items-start justify-between'>
-            <div className='flex-1'>
+        <PageHeader
+          titleIcon={ListTodo}
+          subtitle={
+            <>
               <div className='flex items-center gap-3 mb-2'>
-                <ListTodo className='h-6 w-6 text-muted-foreground hidden md:block' />
                 <InlineEditableText
                   value={task.title}
                   onValueChange={async newTitle => {
@@ -71,10 +71,9 @@ export default async function TaskDetailPage({
                     await updateTaskTitle(task.id, newTitle)
                   }}
                   placeholder='Enter task title'
-                  className='text-2xl font-bold flex-1'
+                  className='page-title'
                 />
               </div>
-
               {/* Created Date, Assignee, and Completion Date in subheader */}
               <div className='flex flex-wrap items-center gap-3 mt-2 mb-3'>
                 <div className='flex items-center gap-1 text-sm text-muted-foreground'>
@@ -104,7 +103,9 @@ export default async function TaskDetailPage({
                   </div>
                 )}
               </div>
-            </div>
+            </>
+          }
+          actions={
             <TaskActionsDropdown
               taskId={task.id}
               task={{
@@ -115,8 +116,8 @@ export default async function TaskDetailPage({
                 initiative: task.initiative,
               }}
             />
-          </div>
-        </PageHeader>
+          }
+        />
 
         <PageContent>
           <PageMain>

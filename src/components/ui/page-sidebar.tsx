@@ -13,3 +13,5 @@ export function PageSidebar({ children, className = '' }: PageSidebarProps) {
     </div>
   )
 }
+
+PageSidebar.displayName = 'PageSidebar'

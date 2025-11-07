@@ -106,14 +106,16 @@ export default async function FeedbackCampaignsPage({
     >
       <PageContainer>
         <PageHeader
-          title={
-            <div className='flex items-center gap-2'>
-              Feedback Campaigns
-              <HelpIcon helpId='feedback-campaigns' size='md' />
-            </div>
-          }
+          title='Feedback Campaigns'
           titleIcon={MessageSquare}
-          subtitle={`Manage feedback campaigns for ${person.name}`}
+          subtitle={
+            <>
+              <div className='flex items-center gap-2 mb-1'>
+                <HelpIcon helpId='feedback-campaigns' size='md' />
+              </div>
+              <p>Manage feedback campaigns for {person.name}</p>
+            </>
+          }
           actions={
             <Button asChild>
               <Link

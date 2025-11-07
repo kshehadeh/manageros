@@ -14,14 +14,16 @@ export function MeetingsPageClient() {
   return (
     <PageContainer>
       <PageHeader
-        title={
-          <div className='flex items-center gap-2'>
-            Meetings
-            <HelpIcon helpId='meetings' size='md' />
-          </div>
-        }
+        title='Meetings'
         titleIcon={Calendar}
-        subtitle="Manage and track your organization's meetings"
+        subtitle={
+          <>
+            <div className='flex items-center gap-2 mb-1'>
+              <HelpIcon helpId='meetings' size='md' />
+            </div>
+            <p>Manage and track your organization&apos;s meetings</p>
+          </>
+        }
         actions={
           <Button asChild className='flex items-center gap-2'>
             <Link href='/meetings/new'>

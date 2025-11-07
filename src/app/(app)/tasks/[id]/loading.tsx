@@ -21,33 +21,27 @@ import {
 export default function LoadingPage() {
   return (
     <PageContainer>
-      <PageHeader>
-        <div className='flex items-start justify-between'>
-          <div className='flex-1'>
-            <div className='flex items-center gap-3 mb-2'>
-              <ListTodo className='h-6 w-6 text-muted-foreground hidden md:block' />
-              <Skeleton className='h-8 w-96' />
+      <PageHeader
+        title='Loading task...'
+        titleIcon={ListTodo}
+        subtitle={
+          <div className='flex flex-wrap items-center gap-3 mt-2 mb-3'>
+            <div className='flex items-center gap-1'>
+              <Calendar className='w-4 h-4 text-muted-foreground' />
+              <Skeleton className='h-4 w-32' />
             </div>
-
-            {/* Created Date, Assignee, and Completion Date skeleton */}
-            <div className='flex flex-wrap items-center gap-3 mt-2 mb-3'>
-              <div className='flex items-center gap-1'>
-                <Calendar className='w-4 h-4 text-muted-foreground' />
-                <Skeleton className='h-4 w-32' />
-              </div>
-              <div className='flex items-center gap-1'>
-                <User className='w-4 h-4 text-muted-foreground' />
-                <Skeleton className='h-4 w-28' />
-              </div>
-              <div className='flex items-center gap-1'>
-                <Clock className='w-4 h-4 text-muted-foreground' />
-                <Skeleton className='h-4 w-36' />
-              </div>
+            <div className='flex items-center gap-1'>
+              <User className='w-4 h-4 text-muted-foreground' />
+              <Skeleton className='h-4 w-28' />
+            </div>
+            <div className='flex items-center gap-1'>
+              <Clock className='w-4 h-4 text-muted-foreground' />
+              <Skeleton className='h-4 w-36' />
             </div>
           </div>
-          <Skeleton className='h-9 w-9 rounded-md' />
-        </div>
-      </PageHeader>
+        }
+        actions={<Skeleton className='h-9 w-9 rounded-md' />}
+      />
 
       <PageContent>
         <PageMain>

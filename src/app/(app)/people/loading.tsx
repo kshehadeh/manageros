@@ -17,15 +17,11 @@ import {
 export default function LoadingPage() {
   return (
     <PageContainer>
-      <PageHeader>
-        <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
-          <div>
-            <div className='flex items-center gap-2'>
-              <User className='h-6 w-6 text-muted-foreground' />
-              <h1 className='page-title'>People</h1>
-              <Skeleton className='h-5 w-5 rounded' />
-            </div>
-          </div>
+      <PageHeader
+        title='People'
+        titleIcon={User}
+        subtitle={<Skeleton className='h-5 w-5 rounded' />}
+        actions={
           <div className='flex flex-wrap items-center gap-3'>
             <Button
               disabled
@@ -48,8 +44,8 @@ export default function LoadingPage() {
               <span className='hidden sm:inline'>Create Person</span>
             </Button>
           </div>
-        </div>
-      </PageHeader>
+        }
+      />
 
       <PageContent>
         <PageSection className='-mx-3 md:mx-0'>

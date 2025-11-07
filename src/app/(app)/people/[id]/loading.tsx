@@ -6,9 +6,7 @@ import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
 import { PageSidebar } from '@/components/ui/page-sidebar'
 import {
-  CalendarDays,
   User as UserIcon,
-  Building2,
   Briefcase,
   MessageCircle,
   Handshake,
@@ -20,47 +18,11 @@ import {
 export default function LoadingPage() {
   return (
     <PageContainer>
-      <PageHeader>
-        <div className='flex items-start justify-between'>
-          <div className='flex-1'>
-            <div className='flex items-center gap-3 mb-2'>
-              <Skeleton className='h-16 w-16 rounded-full' />
-              <div className='flex items-center gap-3'>
-                <Skeleton className='h-8 w-48' />
-                <Skeleton className='h-6 w-20 rounded-full' />
-              </div>
-            </div>
-            <Skeleton className='h-5 w-32 mb-2' />
-            <Skeleton className='h-4 w-40 mb-3' />
-
-            {/* Basic Information with Icons */}
-            <div className='flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground'>
-              <div className='flex items-center gap-1'>
-                <Building2 className='w-4 h-4' />
-                <Skeleton className='h-4 w-24' />
-              </div>
-              <div className='flex items-center gap-1'>
-                <UserIcon className='w-4 h-4' />
-                <Skeleton className='h-4 w-28' />
-              </div>
-              <div className='flex items-center gap-1'>
-                <Briefcase className='w-4 h-4' />
-                <Skeleton className='h-4 w-20' />
-              </div>
-              <div className='flex items-center gap-1'>
-                <CalendarDays className='w-4 h-4' />
-                <Skeleton className='h-4 w-32' />
-              </div>
-              <div className='flex items-center gap-1'>
-                <MessageCircle className='w-4 h-4' />
-                <Skeleton className='h-4 w-24' />
-              </div>
-            </div>
-          </div>
-          <Skeleton className='h-9 w-9 rounded-md' />
-        </div>
-      </PageHeader>
-
+      <PageHeader
+        title='Loading person...'
+        titleIcon={UserIcon}
+        subtitle='Loading person details...'
+      />
       <PageContent>
         <PageMain>
           {/* Feedback Campaigns Section */}

@@ -17,21 +17,17 @@ import {
 export default function LoadingPage() {
   return (
     <PageContainer>
-      <PageHeader>
-        <div className='flex items-center justify-between'>
-          <div>
-            <div className='flex items-center gap-2'>
-              <Rocket className='h-6 w-6 text-muted-foreground' />
-              <h1 className='page-title'>Initiatives</h1>
-              <Skeleton className='h-5 w-5 rounded' />
-            </div>
-          </div>
+      <PageHeader
+        title='Initiatives'
+        titleIcon={Rocket}
+        subtitle={<Skeleton className='h-5 w-5 rounded' />}
+        actions={
           <Button disabled className='flex items-center gap-2'>
             <Plus className='h-4 w-4' />
             Create Initiative
           </Button>
-        </div>
-      </PageHeader>
+        }
+      />
 
       <PageContent>
         <PageSection>

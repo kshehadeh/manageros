@@ -8,6 +8,11 @@ import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { JobRoleActionsDropdown } from '@/components/jobs/job-role-actions-dropdown'
 import { SimplePeopleList } from '@/components/people/person-list'
 import { SectionHeader } from '@/components/ui/section-header'
+import { PageSection } from '@/components/ui/page-section'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
+import { PageMain } from '@/components/ui/page-main'
 import { Building2, Users, Briefcase, FileText } from 'lucide-react'
 import type { Person } from '@/types/person'
 import { AssignPersonButton } from '@/components/jobs/assign-person-button'
@@ -33,91 +38,93 @@ export default async function JobRoleDetailPage({
 
     return (
       <JobRoleDetailClient jobRoleTitle={jobRole.title} jobRoleId={jobRole.id}>
-        <div className='space-y-6'>
-          {/* Header */}
-          <div className='px-4 lg:px-6'>
-            <div className='page-header'>
-              <div className='flex items-start justify-between'>
-                <div className='flex-1'>
-                  <h1 className='page-title'>{jobRole.title}</h1>
-                  <div className='page-section-subtitle'>
-                    {jobRole.level.name} • {jobRole.domain.name}
+        <PageContainer>
+          <PageHeader
+            title={jobRole.title}
+            subtitle={
+              <>
+                <div className='page-section-subtitle'>
+                  {jobRole.level.name} • {jobRole.domain.name}
+                </div>
+                <div className='flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground'>
+                  <div className='flex items-center gap-1'>
+                    <Briefcase className='w-4 h-4' />
+                    <span>{jobRole.level.name} Level</span>
                   </div>
-
-                  {/* Basic Information with Icons */}
-                  <div className='flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground'>
-                    <div className='flex items-center gap-1'>
-                      <Briefcase className='w-4 h-4' />
-                      <span>{jobRole.level.name} Level</span>
-                    </div>
-                    <div className='flex items-center gap-1'>
-                      <Building2 className='w-4 h-4' />
-                      <span>{jobRole.domain.name} Domain</span>
-                    </div>
-                    <div className='flex items-center gap-1'>
-                      <Users className='w-4 h-4' />
-                      <span>
-                        {jobRole.people.length}{' '}
-                        {jobRole.people.length === 1 ? 'person' : 'people'}{' '}
-                        assigned
-                      </span>
-                    </div>
+                  <div className='flex items-center gap-1'>
+                    <Building2 className='w-4 h-4' />
+                    <span>{jobRole.domain.name} Domain</span>
+                  </div>
+                  <div className='flex items-center gap-1'>
+                    <Users className='w-4 h-4' />
+                    <span>
+                      {jobRole.people.length}{' '}
+                      {jobRole.people.length === 1 ? 'person' : 'people'}{' '}
+                      assigned
+                    </span>
                   </div>
                 </div>
-                <div className='flex items-center gap-2'>
-                  <JobRoleActionsDropdown
-                    jobRoleId={jobRole.id}
-                    jobRoleTitle={jobRole.title}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+              </>
+            }
+            actions={
+              <JobRoleActionsDropdown
+                jobRoleId={jobRole.id}
+                jobRoleTitle={jobRole.title}
+              />
+            }
+          />
 
-          {/* Main Content */}
-          <div className='px-4 lg:px-6'>
-            <div className='space-y-6'>
-              {/* Description Section */}
-              {jobRole.description && (
-                <div className='page-section'>
-                  <SectionHeader icon={FileText} title='Description' />
-                  <ReadonlyNotesField
-                    content={jobRole.description}
-                    variant='detailed'
-                    showEmptyState={false}
-                  />
-                </div>
-              )}
+          <PageContent>
+            <PageMain>
+              <div className='space-y-6'>
+                {/* Description Section */}
+                {jobRole.description && (
+                  <PageSection
+                    header={
+                      <SectionHeader icon={FileText} title='Description' />
+                    }
+                  >
+                    <ReadonlyNotesField
+                      content={jobRole.description}
+                      variant='detailed'
+                      showEmptyState={false}
+                    />
+                  </PageSection>
+                )}
 
-              {/* People Section */}
-              <div className='page-section'>
-                <SectionHeader
-                  icon={Users}
-                  title={`People (${jobRole.people.length})`}
-                  action={
-                    <AssignPersonButton
-                      jobRoleId={jobRole.id}
-                      excludePersonIds={(jobRole.people as Person[]).map(
-                        p => p.id
-                      )}
+                {/* People Section */}
+                <PageSection
+                  header={
+                    <SectionHeader
+                      icon={Users}
+                      title={`People (${jobRole.people.length})`}
+                      action={
+                        <AssignPersonButton
+                          jobRoleId={jobRole.id}
+                          excludePersonIds={(jobRole.people as Person[]).map(
+                            p => p.id
+                          )}
+                        />
+                      }
                     />
                   }
-                />
-                <SimplePeopleList
-                  people={jobRole.people as Person[]}
-                  variant='compact'
-                  showEmail={true}
-                  showRole={true}
-                  showTeam={true}
-                  showJobRole={false}
-                  showManager={false}
-                  showReportsCount={false}
-                  emptyStateText='No people assigned to this job role.'
-                />
+                >
+                  <SimplePeopleList
+                    people={jobRole.people as Person[]}
+                    variant='compact'
+                    showEmail={true}
+                    showRole={true}
+                    showTeam={true}
+                    showJobRole={false}
+                    showManager={false}
+                    showReportsCount={false}
+                    emptyStateText='No people assigned to this job role.'
+                  />
+                </PageSection>
               </div>
-            </div>
-          </div>
-        </div>
+            </PageMain>
+          </PageContent>
+        </PageContainer>
       </JobRoleDetailClient>
     )
   } catch (error) {

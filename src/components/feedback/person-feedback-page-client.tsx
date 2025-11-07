@@ -2,6 +2,9 @@
 
 import { MessageCircle } from 'lucide-react'
 import { GenericDataTable } from '@/components/common/generic-data-table'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
 import { feedbackDataTableConfig } from './data-table-config'
 import { usePageBreadcrumbs } from '@/lib/hooks/use-breadcrumb'
 import { useRouter } from 'next/navigation'
@@ -39,26 +42,23 @@ export function PersonFeedbackPageClient({
   }
 
   return (
-    <div className='page-container'>
-      <div className='page-header'>
-        <div className='flex items-center gap-3 mb-2'>
-          <MessageCircle className='h-6 w-6 text-muted-foreground' />
-          <h1 className='page-title'>Feedback for {personName}</h1>
-        </div>
-        <p className='page-subtitle'>
-          View all feedback about {personName}. You can see all public feedback
-          and any private feedback you&apos;ve written.
-        </p>
-      </div>
-
-      <GenericDataTable
-        config={feedbackDataTableConfig}
-        settingsId={`person-feedback-${aboutPersonId}`}
-        immutableFilters={{
-          aboutPersonId: aboutPersonId,
-        }}
-        onRowClick={handleRowClick} // Custom row click behavior
+    <PageContainer>
+      <PageHeader
+        title={`Feedback for ${personName}`}
+        titleIcon={MessageCircle}
+        subtitle={`View all feedback about ${personName}. You can see all public feedback and any private feedback you've written.`}
       />
-    </div>
+
+      <PageContent>
+        <GenericDataTable
+          config={feedbackDataTableConfig}
+          settingsId={`person-feedback-${aboutPersonId}`}
+          immutableFilters={{
+            aboutPersonId: aboutPersonId,
+          }}
+          onRowClick={handleRowClick} // Custom row click behavior
+        />
+      </PageContent>
+    </PageContainer>
   )
 }

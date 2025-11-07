@@ -19,13 +19,13 @@ export function PeoplePageClient() {
   return (
     <PageContainer className='px-3 md:px-0'>
       <PageHeader
-        title={
+        title='People'
+        titleIcon={User}
+        subtitle={
           <div className='flex items-center gap-2'>
-            People
             <HelpIcon helpId='people' size='md' />
           </div>
         }
-        titleIcon={User}
         actions={
           <div className='flex flex-wrap items-center gap-3'>
             <Button asChild variant='outline'>

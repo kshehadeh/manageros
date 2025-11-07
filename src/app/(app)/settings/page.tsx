@@ -7,6 +7,9 @@ import { GithubCredentialsForm } from '@/components/github-credentials-form'
 import { PersonLinkForm } from '@/components/people/person-link-form'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
 import { User, Settings } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
@@ -34,34 +37,34 @@ export default function SettingsPage() {
   }, [])
 
   return (
-    <div className='page-container'>
-      <div className='page-header'>
-        <h1 className='page-title'>Settings</h1>
-        <p className='page-subtitle'>
-          Manage your account settings and integrations.
-        </p>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title='Settings'
+        subtitle='Manage your account settings and integrations.'
+      />
 
-      <PageSection className='space-y-12'>
-        {/* Person Linking Section */}
-        <div className='space-y-4'>
-          <SectionHeader
-            icon={User}
-            title='Account Linking'
-            action={accountLinkingButton}
-          />
-          <PersonLinkForm onButtonRender={setAccountLinkingButton} />
-        </div>
-
-        {/* Integration Settings */}
-        <div className='space-y-4'>
-          <SectionHeader icon={Settings} title='Integration Settings' />
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-            <JiraCredentialsForm initialCredentials={jiraCredentials} />
-            <GithubCredentialsForm initialCredentials={githubCredentials} />
+      <PageContent>
+        <PageSection className='space-y-12'>
+          {/* Person Linking Section */}
+          <div className='space-y-4'>
+            <SectionHeader
+              icon={User}
+              title='Account Linking'
+              action={accountLinkingButton}
+            />
+            <PersonLinkForm onButtonRender={setAccountLinkingButton} />
           </div>
-        </div>
-      </PageSection>
-    </div>
+
+          {/* Integration Settings */}
+          <div className='space-y-4'>
+            <SectionHeader icon={Settings} title='Integration Settings' />
+            <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+              <JiraCredentialsForm initialCredentials={jiraCredentials} />
+              <GithubCredentialsForm initialCredentials={githubCredentials} />
+            </div>
+          </div>
+        </PageSection>
+      </PageContent>
+    </PageContainer>
   )
 }
