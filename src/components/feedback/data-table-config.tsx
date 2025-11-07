@@ -9,6 +9,7 @@ import { useFeedback } from '@/hooks/use-feedback'
 import { useFeedbackTableSettings } from '@/hooks/use-feedback-table-settings'
 import { deleteFeedback } from '@/lib/actions/feedback'
 import type { DataTableConfig } from '@/components/common/generic-data-table'
+import { formatDistanceToNow } from 'date-fns'
 
 export const feedbackDataTableConfig: DataTableConfig<FeedbackListItem> = {
   // Entity identification
@@ -60,9 +61,12 @@ export const feedbackDataTableConfig: DataTableConfig<FeedbackListItem> = {
                 <span className='text-xs text-muted-foreground'>
                   {getKindLabel(feedback.kind)}
                 </span>
-                {feedback.isPrivate && (
-                  <span className='text-xs text-muted-foreground'>Private</span>
-                )}
+                <span className='text-xs text-muted-foreground whitespace-nowrap'>
+                  {feedback.from.name}
+                </span>
+                <span className='text-xs text-muted-foreground whitespace-nowrap'>
+                  {formatDistanceToNow(feedback.createdAt)}
+                </span>
               </div>
             </div>
           )
@@ -93,7 +97,7 @@ export const feedbackDataTableConfig: DataTableConfig<FeedbackListItem> = {
         minSize: 120,
         maxSize: 250,
         meta: {
-          hidden: visibleColumns?.includes('from') === false,
+          hidden: true,
         },
       },
       {
@@ -117,7 +121,7 @@ export const feedbackDataTableConfig: DataTableConfig<FeedbackListItem> = {
         minSize: 100,
         maxSize: 150,
         meta: {
-          hidden: visibleColumns?.includes('createdAt') === false,
+          hidden: true,
         },
       },
       {
@@ -138,7 +142,7 @@ export const feedbackDataTableConfig: DataTableConfig<FeedbackListItem> = {
         minSize: 200,
         maxSize: 500,
         meta: {
-          hidden: visibleColumns?.includes('content') === false,
+          hidden: true,
         },
       },
       {

@@ -39,10 +39,10 @@ const DialogContent = React.forwardRef<
   DialogContentProps
 >(({ className, children, size = 'auto', ...props }, ref) => {
   const sizeClasses = {
-    auto: 'sm:w-fit sm:max-w-[90vw]',
-    sm: 'sm:max-w-[50vw]',
-    md: 'sm:max-w-[70vw]',
-    lg: 'sm:max-w-[90vw]',
+    auto: 'sm:w-fit sm:max-w-[90vw] max-w-full',
+    sm: 'sm:max-w-[50vw] max-w-full',
+    md: 'sm:max-w-[70vw] max-w-full',
+    lg: 'sm:max-w-[90vw] max-w-full',
   }
 
   return (
@@ -51,7 +51,7 @@ const DialogContent = React.forwardRef<
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          'fixed left-[50%] top-[50%] z-50 grid w-full translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg',
+          'fixed left-[50%] top-0 z-50 flex flex-col w-full h-screen translate-x-[-50%] translate-y-0 gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-0 data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-0 sm:top-[50%] sm:h-auto sm:translate-y-[-50%] sm:data-[state=closed]:slide-out-to-top-[48%] sm:data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg',
           sizeClasses[size],
           className
         )}

@@ -2,7 +2,7 @@ import { getOneOnOneById } from '@/lib/actions/oneonone'
 import { notFound } from 'next/navigation'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { OneOnOneDetailClient } from '@/components/oneonone-detail-client'
-import { EditIconButton } from '@/components/edit-icon-button'
+import { OneOnOneActionsDropdown } from '@/components/oneonones/oneonone-actions-dropdown'
 import { MessageCircle, Info, StickyNote } from 'lucide-react'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
@@ -30,30 +30,24 @@ export default async function OneOnOneViewPage({
       >
         <div className='space-y-6'>
           {/* Header - Full Width */}
-          <div className='px-4 lg:px-6'>
-            <div className='page-header'>
-              <div className='flex items-start justify-between'>
-                <div className='flex-1'>
-                  <div className='flex items-center gap-3 mb-2'>
-                    <MessageCircle className='h-6 w-6 text-muted-foreground' />
-                    <h1 className='page-title'>1:1 Meeting</h1>
-                  </div>
-                  <p className='page-subtitle'>
-                    Meeting between {oneOnOne.manager.name} and{' '}
-                    {oneOnOne.report.name}
-                  </p>
+          <div className='page-header'>
+            <div className='flex items-start justify-between'>
+              <div className='flex-1'>
+                <div className='flex items-center gap-3 mb-2'>
+                  <MessageCircle className='h-6 w-6 text-muted-foreground' />
+                  <h1 className='page-title'>1:1 Meeting</h1>
                 </div>
-                <EditIconButton
-                  href={`/oneonones/${oneOnOne.id}/edit`}
-                  variant='outline'
-                  size='default'
-                />
+                <p className='page-subtitle'>
+                  Meeting between {oneOnOne.manager.name} and{' '}
+                  {oneOnOne.report.name}
+                </p>
               </div>
+              <OneOnOneActionsDropdown oneOnOneId={oneOnOne.id} />
             </div>
           </div>
 
           {/* Main Content and Sidebar */}
-          <div className='flex flex-col lg:flex-row gap-6 px-4 lg:px-6'>
+          <div className='flex flex-col lg:flex-row gap-6 px-0 lg:px-6'>
             {/* Main Content */}
             <div className='flex-1 min-w-0'>
               <div className='space-y-6'>
@@ -83,7 +77,7 @@ export default async function OneOnOneViewPage({
             </div>
 
             {/* Right Sidebar */}
-            <div className='w-full lg:w-80 lg:flex-shrink-0'>
+            <div className='w-full lg:w-80 lg:shrink-0'>
               <PageSection
                 header={<SectionHeader icon={Info} title='Meeting Details' />}
               >

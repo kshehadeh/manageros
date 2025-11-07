@@ -16,26 +16,24 @@ export default function LoadingPage() {
   return (
     <div className='space-y-6'>
       {/* Header - Full Width */}
-      <div className='px-4 lg:px-6'>
-        <div className='page-header'>
-          <div className='flex items-center justify-between'>
-            <div className='flex-1'>
-              <div className='flex items-center gap-3 mb-2'>
-                <Rocket className='h-6 w-6 text-muted-foreground' />
-                <Skeleton className='h-8 w-64' />
-                <div className='flex items-center gap-2'>
-                  <Skeleton className='h-6 w-16 rounded-full' />
-                  <Skeleton className='h-6 w-24 rounded-full' />
-                </div>
+      <div className='page-header'>
+        <div className='flex items-center justify-between'>
+          <div className='flex-1'>
+            <div className='flex items-center gap-3 mb-2'>
+              <Rocket className='h-6 w-6 text-muted-foreground' />
+              <Skeleton className='h-8 w-64' />
+              <div className='flex items-center gap-2'>
+                <Skeleton className='h-6 w-16 rounded-full' />
+                <Skeleton className='h-6 w-24 rounded-full' />
               </div>
             </div>
-            <Skeleton className='h-9 w-9 rounded-md' />
           </div>
+          <Skeleton className='h-9 w-9 rounded-md' />
         </div>
       </div>
 
       {/* Main Content and Sidebar */}
-      <div className='flex flex-col lg:flex-row gap-6 px-4 lg:px-6'>
+      <div className='flex flex-col lg:flex-row gap-6 px-0 lg:px-6'>
         {/* Main Content */}
         <div className='flex-1 min-w-0'>
           <div className='space-y-6'>

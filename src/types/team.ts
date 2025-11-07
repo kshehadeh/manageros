@@ -1,4 +1,5 @@
 import { Team, Person, Initiative } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 
 /**
  * Recursive type for hierarchical team structure
@@ -35,3 +36,62 @@ export type TeamWithCounts = Team & {
     children: number
   }
 }
+
+/**
+ * Type for team with all detail relations as returned by getTeamById
+ * when all include options are set to true
+ */
+export type TeamWithDetailRelations = Prisma.TeamGetPayload<{
+  include: {
+    parent: {
+      select: {
+        id: true
+        name: true
+        avatar: true
+      }
+    }
+    children: {
+      include: {
+        people: {
+          select: {
+            id: true
+            name: true
+          }
+        }
+        initiatives: {
+          select: {
+            id: true
+            title: true
+          }
+        }
+      }
+    }
+    people: {
+      include: {
+        manager: {
+          include: {
+            reports: true
+          }
+        }
+        team: true
+        jobRole: {
+          include: {
+            level: true
+            domain: true
+          }
+        }
+        reports: true
+      }
+    }
+    initiatives: {
+      include: {
+        team: {
+          select: {
+            id: true
+            name: true
+          }
+        }
+      }
+    }
+  }
+}>

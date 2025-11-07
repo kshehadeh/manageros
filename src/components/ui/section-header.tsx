@@ -34,10 +34,10 @@ export function SectionHeader({
 
   return (
     <div
-      className={`flex items-start justify-between md:mx-0 md:px-0 ${className} mb-2`}
+      className={`flex items-start justify-between md:mx-0 md:px-2 ${className} mb-2 bg-card p-2 rounded-[var(--radius-md)]`}
     >
       <div className='flex-1'>
-        <h3 className='text-2xl font-bold flex items-center gap-2'>
+        <h3 className='text-xl font-bold flex items-center gap-2'>
           <Icon className='w-6 h-6' />
           {title}
         </h3>

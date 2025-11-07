@@ -10,15 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  MoreHorizontal,
-  Calendar,
-  CalendarCheck,
-  Target,
-  Building2,
-  Clock,
-  Users,
-} from 'lucide-react'
+import { MoreHorizontal, Target, Building2, Clock } from 'lucide-react'
 import type {
   UpcomingMeeting,
   MeetingWithRelations,
@@ -186,11 +178,6 @@ export const meetingDataTableConfig: DataTableConfig<
 
   // Column definitions
   createColumns: ({ onButtonClick, grouping, visibleColumns }) => {
-    // Check if we're grouped by team to hide the team column
-    const isGroupedByTeam = grouping && grouping.includes('team')
-    // Check if we're grouped by initiative to hide the initiative column
-    const isGroupedByInitiative = grouping && grouping.includes('initiative')
-
     return [
       {
         accessorKey: 'title',
@@ -212,28 +199,41 @@ export const meetingDataTableConfig: DataTableConfig<
             ? (meeting as MeetingInstanceWithRelations).meeting
             : (meeting as MeetingWithRelations)
 
-          const participantCount = isInstance
-            ? Math.max(
-                (meeting as MeetingInstanceWithRelations).participants.length,
-                (meeting as MeetingInstanceWithRelations).meeting.participants
-                  .length
-              )
-            : (meeting as MeetingWithRelations).participants.length
+          const scheduledAt = isInstance
+            ? (meeting as MeetingInstanceWithRelations).scheduledAt
+            : (meeting as MeetingWithRelations).scheduledAt
 
-          const MeetingIcon = isInstance ? CalendarCheck : Calendar
+          const duration = isInstance
+            ? (meeting as MeetingInstanceWithRelations).meeting.duration
+            : (meeting as MeetingWithRelations).duration
+
+          const initiative = isInstance
+            ? (meeting as MeetingInstanceWithRelations).meeting.initiative
+            : (meeting as MeetingWithRelations).initiative
+
+          // Build subheader text with date, duration, and initiative
+          const subheaderParts: string[] = []
+
+          // Add date and time
+          subheaderParts.push(
+            `${formatDate(scheduledAt)} at ${formatTime(scheduledAt)}`
+          )
+
+          // Add duration if available
+          if (duration) {
+            subheaderParts.push(formatDuration(duration))
+          }
+
+          // Add initiative if available
+          if (initiative) {
+            subheaderParts.push(initiative.title)
+          }
 
           return (
             <div className='space-y-0.5 flex-1'>
-              <div className='flex items-center gap-2'>
-                <MeetingIcon className='h-4 w-4 text-muted-foreground' />
-                <div className='font-medium'>{meetingData.title}</div>
-              </div>
-              <div className='flex items-center gap-4 text-xs text-muted-foreground'>
-                <div className='flex items-center gap-1'>
-                  <Users className='h-3 w-3' />
-                  {participantCount} participant
-                  {participantCount !== 1 ? 's' : ''}
-                </div>
+              <div className='font-medium'>{meetingData.title}</div>
+              <div className='text-xs text-muted-foreground'>
+                {subheaderParts.join(' • ')}
               </div>
             </div>
           )
@@ -284,7 +284,7 @@ export const meetingDataTableConfig: DataTableConfig<
         minSize: 120,
         maxSize: 200,
         meta: {
-          hidden: visibleColumns?.includes('team') === false || isGroupedByTeam,
+          hidden: true,
         },
       },
       {
@@ -325,7 +325,7 @@ export const meetingDataTableConfig: DataTableConfig<
         minSize: 100,
         maxSize: 150,
         meta: {
-          hidden: visibleColumns?.includes('date') === false,
+          hidden: true,
         },
       },
       {
@@ -360,7 +360,7 @@ export const meetingDataTableConfig: DataTableConfig<
         minSize: 80,
         maxSize: 120,
         meta: {
-          hidden: visibleColumns?.includes('duration') === false,
+          hidden: true,
         },
       },
       {
@@ -406,9 +406,7 @@ export const meetingDataTableConfig: DataTableConfig<
         minSize: 120,
         maxSize: 200,
         meta: {
-          hidden:
-            visibleColumns?.includes('initiative') === false ||
-            isGroupedByInitiative,
+          hidden: true,
         },
       },
       {

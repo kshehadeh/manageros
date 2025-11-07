@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { PersonAvatarWrapper } from './person-avatar-wrapper'
@@ -108,7 +109,7 @@ export function PersonDetailModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent size='md' className='max-h-[90vh] overflow-y-auto'>
+      <DialogContent size='md' className='overflow-y-auto'>
         <DialogHeader>
           {loading ? (
             <>
@@ -210,21 +211,22 @@ export function PersonDetailModal({
                   No initiatives, tasks, or feedback found.
                 </div>
               )}
-
-            {/* View Full Details Button */}
-            <div className='pt-4 border-t'>
-              <Button asChild variant='outline' className='w-full'>
-                <Link
-                  href={`/people/${personData.id}`}
-                  onClick={onClose}
-                  className='flex items-center justify-center gap-2'
-                >
-                  <ExternalLink className='w-4 h-4' />
-                  View Full Profile
-                </Link>
-              </Button>
-            </div>
           </div>
+        )}
+
+        {personData && (
+          <DialogFooter>
+            <Button asChild variant='outline' className='w-full'>
+              <Link
+                href={`/people/${personData.id}`}
+                onClick={onClose}
+                className='flex items-center justify-center gap-2'
+              >
+                <ExternalLink className='w-4 h-4' />
+                View Full Profile
+              </Link>
+            </Button>
+          </DialogFooter>
         )}
       </DialogContent>
     </Dialog>

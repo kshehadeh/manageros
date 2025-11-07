@@ -101,9 +101,6 @@ export const oneOnOneDataTableConfig: DataTableConfig<
   // Column definitions
   createColumns: ({ onButtonClick, visibleColumns, grouping }) => {
     // Check which column is being grouped by to hide it
-    const isGroupedByManager = grouping && grouping.includes('manager')
-    const isGroupedByReport = grouping && grouping.includes('report')
-    const isGroupedByDate = grouping && grouping.includes('scheduledAt')
 
     return [
       {
@@ -176,8 +173,7 @@ export const oneOnOneDataTableConfig: DataTableConfig<
         minSize: 120,
         maxSize: 200,
         meta: {
-          hidden:
-            visibleColumns?.includes('manager') === false || isGroupedByManager,
+          hidden: true,
         },
       },
       {
@@ -200,8 +196,7 @@ export const oneOnOneDataTableConfig: DataTableConfig<
         minSize: 120,
         maxSize: 200,
         meta: {
-          hidden:
-            visibleColumns?.includes('report') === false || isGroupedByReport,
+          hidden: true,
         },
       },
       {
@@ -232,9 +227,7 @@ export const oneOnOneDataTableConfig: DataTableConfig<
         minSize: 150,
         maxSize: 300,
         meta: {
-          hidden:
-            visibleColumns?.includes('scheduledAt') === false ||
-            isGroupedByDate,
+          hidden: true,
         },
       },
       {

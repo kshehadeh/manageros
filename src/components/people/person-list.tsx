@@ -12,15 +12,59 @@ import {
 import { DeleteModal } from '@/components/common/delete-modal'
 import { PersonAvatar } from './person-avatar'
 import { PersonDetailModal } from './person-detail-modal'
-import type { Person } from '@/types/person'
 import { deletePerson } from '@/lib/actions/person'
 import { toast } from 'sonner'
 import { SimpleListContainer } from '@/components/common/simple-list-container'
 import { SimpleListItem } from '@/components/common/simple-list-item'
 import { SimpleListItemsContainer } from '@/components/common/simple-list-items-container'
 
+/**
+ * Type representing what SimplePeopleList actually needs from a person
+ * This allows both Person type and Prisma Person types to be used
+ */
+export type PersonForList = {
+  id: string
+  name: string
+  email: string | null
+  role: string | null
+  status: string
+  avatar: string | null
+  team: ({ id: string; name: string } & Record<string, unknown>) | null
+  jobRole: {
+    id: string
+    title: string
+    level: { id: string; name: string } | null
+    domain: { id: string; name: string } | null
+  } | null
+  manager: {
+    id: string
+    name: string
+    email: string | null
+    role: string | null
+    status: string
+    birthday: Date | null
+    reports: Array<{
+      id: string
+      name: string
+      email: string | null
+      role: string | null
+      status: string
+      birthday: Date | null
+    }>
+  } | null
+  reports: Array<{
+    id: string
+    name: string
+    email: string | null
+    role: string | null
+    status: string
+    birthday: Date | null
+  }>
+  level?: number // Optional since SimplePeopleList doesn't use it
+}
+
 export interface PersonListProps {
-  people: Person[]
+  people: PersonForList[]
   variant?: 'compact' | 'full'
   emptyStateText?: string
   onPersonUpdate?: () => void
@@ -81,7 +125,7 @@ export function SimplePeopleList({
   }
 
   // Filter people based on immutable filters
-  const filterPeople = (peopleToFilter: Person[]) => {
+  const filterPeople = (peopleToFilter: PersonForList[]) => {
     if (!immutableFilters || Object.keys(immutableFilters).length === 0) {
       return peopleToFilter
     }
@@ -111,7 +155,7 @@ export function SimplePeopleList({
   // Apply filters to people
   const visiblePeople = filterPeople(people)
 
-  const renderPersonItem = (person: Person) => {
+  const renderPersonItem = (person: PersonForList) => {
     const subheaderItems: React.ReactNode[] = []
 
     // Custom subtext takes precedence and is added first if provided
@@ -139,7 +183,7 @@ export function SimplePeopleList({
       )
     }
 
-    if (showJobRole && variant === 'full' && person.jobRole) {
+    if (showJobRole && person.jobRole) {
       subheaderItems.push(
         <span key='jobRole' className='truncate'>
           {person.jobRole.title}
@@ -150,7 +194,7 @@ export function SimplePeopleList({
     if (showManager && variant === 'full' && person.manager) {
       subheaderItems.push(
         <span key='manager' className='truncate'>
-          Manager: {person.manager.name}
+          {person.manager.name}
         </span>
       )
     }
@@ -164,6 +208,8 @@ export function SimplePeopleList({
     if (showEmail) {
       subheaderItems.push(<span key='email'>{person.email || 'No email'}</span>)
     }
+
+    console.log(subheaderItems)
 
     return (
       <SimpleListItem key={person.id}>

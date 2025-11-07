@@ -55,69 +55,67 @@ export default async function TaskDetailPage({
     <TaskDetailBreadcrumbClient taskTitle={task.title} taskId={task.id}>
       <div className='space-y-6'>
         {/* Header - Full Width */}
-        <div className='px-4 lg:px-6'>
-          <div className='page-header'>
-            <div className='flex items-start justify-between'>
-              <div className='flex-1'>
-                <div className='flex items-center gap-3 mb-2'>
-                  <ListTodo className='h-6 w-6 text-muted-foreground hidden md:block' />
-                  <InlineEditableText
-                    value={task.title}
-                    onValueChange={async newTitle => {
-                      'use server'
-                      await updateTaskTitle(task.id, newTitle)
-                    }}
-                    placeholder='Enter task title'
-                    className='text-2xl font-bold flex-1'
-                  />
-                </div>
+        <div className='page-header'>
+          <div className='flex items-start justify-between'>
+            <div className='flex-1'>
+              <div className='flex items-center gap-3 mb-2'>
+                <ListTodo className='h-6 w-6 text-muted-foreground hidden md:block' />
+                <InlineEditableText
+                  value={task.title}
+                  onValueChange={async newTitle => {
+                    'use server'
+                    await updateTaskTitle(task.id, newTitle)
+                  }}
+                  placeholder='Enter task title'
+                  className='text-2xl font-bold flex-1'
+                />
+              </div>
 
-                {/* Created Date, Assignee, and Completion Date in subheader */}
-                <div className='flex flex-wrap items-center gap-3 mt-2 mb-3'>
+              {/* Created Date, Assignee, and Completion Date in subheader */}
+              <div className='flex flex-wrap items-center gap-3 mt-2 mb-3'>
+                <div className='flex items-center gap-1 text-sm text-muted-foreground'>
+                  <Calendar className='w-4 h-4' />
+                  <span>
+                    Created {new Date(task.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                {task.assignee && (
                   <div className='flex items-center gap-1 text-sm text-muted-foreground'>
-                    <Calendar className='w-4 h-4' />
+                    <User className='w-4 h-4' />
+                    <Link
+                      href={`/people/${task.assignee.id}`}
+                      className='hover:text-primary transition-colors'
+                    >
+                      {task.assignee.name}
+                    </Link>
+                  </div>
+                )}
+                {task.completedAt && (
+                  <div className='flex items-center gap-1 text-sm text-muted-foreground'>
+                    <Clock className='w-4 h-4' />
                     <span>
-                      Created {new Date(task.createdAt).toLocaleDateString()}
+                      Completed{' '}
+                      {new Date(task.completedAt).toLocaleDateString()}
                     </span>
                   </div>
-                  {task.assignee && (
-                    <div className='flex items-center gap-1 text-sm text-muted-foreground'>
-                      <User className='w-4 h-4' />
-                      <Link
-                        href={`/people/${task.assignee.id}`}
-                        className='hover:text-primary transition-colors'
-                      >
-                        {task.assignee.name}
-                      </Link>
-                    </div>
-                  )}
-                  {task.completedAt && (
-                    <div className='flex items-center gap-1 text-sm text-muted-foreground'>
-                      <Clock className='w-4 h-4' />
-                      <span>
-                        Completed{' '}
-                        {new Date(task.completedAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
-              <TaskActionsDropdown
-                taskId={task.id}
-                task={{
-                  id: task.id,
-                  title: task.title,
-                  status: task.status as TaskStatus,
-                  assignee: task.assignee,
-                  initiative: task.initiative,
-                }}
-              />
             </div>
+            <TaskActionsDropdown
+              taskId={task.id}
+              task={{
+                id: task.id,
+                title: task.title,
+                status: task.status as TaskStatus,
+                assignee: task.assignee,
+                initiative: task.initiative,
+              }}
+            />
           </div>
         </div>
 
         {/* Main Content and Sidebar */}
-        <div className='flex flex-col lg:flex-row gap-6 px-4 lg:px-6'>
+        <div className='flex flex-col lg:flex-row gap-6 px-0 lg:px-6'>
           {/* Main Content */}
           <div className='flex-1 min-w-0'>
             <div className='space-y-6'>

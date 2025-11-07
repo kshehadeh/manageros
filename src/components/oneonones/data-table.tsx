@@ -6,6 +6,7 @@ import { oneOnOneDataTableConfig } from '@/components/oneonones/data-table-confi
 interface OneOnOneDataTableProps {
   onOneOnOneUpdate?: () => void
   hideFilters?: boolean
+  hideHeaders?: boolean
   settingsId?: string
   page?: number
   limit?: number
@@ -20,6 +21,15 @@ interface OneOnOneDataTableProps {
   }
 }
 
-export function OneOnOneDataTable(props: OneOnOneDataTableProps) {
-  return <GenericDataTable config={oneOnOneDataTableConfig} {...props} />
+export function OneOnOneDataTable({
+  hideHeaders = true,
+  ...props
+}: OneOnOneDataTableProps) {
+  return (
+    <GenericDataTable
+      config={oneOnOneDataTableConfig}
+      hideHeaders={hideHeaders}
+      {...props}
+    />
+  )
 }

@@ -6,6 +6,7 @@ import { meetingDataTableConfig } from '@/components/meetings/data-table-config'
 interface MeetingDataTableProps {
   onMeetingUpdate?: () => void
   hideFilters?: boolean
+  hideHeaders?: boolean
   settingsId?: string
   page?: number
   limit?: number
@@ -20,6 +21,15 @@ interface MeetingDataTableProps {
   }
 }
 
-export function MeetingDataTable(props: MeetingDataTableProps) {
-  return <GenericDataTable config={meetingDataTableConfig} {...props} />
+export function MeetingDataTable({
+  hideHeaders = true,
+  ...props
+}: MeetingDataTableProps) {
+  return (
+    <GenericDataTable
+      config={meetingDataTableConfig}
+      hideHeaders={hideHeaders}
+      {...props}
+    />
+  )
 }

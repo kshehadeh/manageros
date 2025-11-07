@@ -17,38 +17,36 @@ export default function LoadingPage() {
   return (
     <div className='space-y-6'>
       {/* Header - Full Width */}
-      <div className='px-4 lg:px-6'>
-        <div className='page-header'>
-          <div className='flex items-start justify-between'>
-            <div className='flex-1'>
-              <div className='flex items-center gap-3 mb-2'>
-                <ListTodo className='h-6 w-6 text-muted-foreground hidden md:block' />
-                <Skeleton className='h-8 w-96' />
-              </div>
+      <div className='page-header'>
+        <div className='flex items-start justify-between'>
+          <div className='flex-1'>
+            <div className='flex items-center gap-3 mb-2'>
+              <ListTodo className='h-6 w-6 text-muted-foreground hidden md:block' />
+              <Skeleton className='h-8 w-96' />
+            </div>
 
-              {/* Created Date, Assignee, and Completion Date skeleton */}
-              <div className='flex flex-wrap items-center gap-3 mt-2 mb-3'>
-                <div className='flex items-center gap-1'>
-                  <Calendar className='w-4 h-4 text-muted-foreground' />
-                  <Skeleton className='h-4 w-32' />
-                </div>
-                <div className='flex items-center gap-1'>
-                  <User className='w-4 h-4 text-muted-foreground' />
-                  <Skeleton className='h-4 w-28' />
-                </div>
-                <div className='flex items-center gap-1'>
-                  <Clock className='w-4 h-4 text-muted-foreground' />
-                  <Skeleton className='h-4 w-36' />
-                </div>
+            {/* Created Date, Assignee, and Completion Date skeleton */}
+            <div className='flex flex-wrap items-center gap-3 mt-2 mb-3'>
+              <div className='flex items-center gap-1'>
+                <Calendar className='w-4 h-4 text-muted-foreground' />
+                <Skeleton className='h-4 w-32' />
+              </div>
+              <div className='flex items-center gap-1'>
+                <User className='w-4 h-4 text-muted-foreground' />
+                <Skeleton className='h-4 w-28' />
+              </div>
+              <div className='flex items-center gap-1'>
+                <Clock className='w-4 h-4 text-muted-foreground' />
+                <Skeleton className='h-4 w-36' />
               </div>
             </div>
-            <Skeleton className='h-9 w-9 rounded-md' />
           </div>
+          <Skeleton className='h-9 w-9 rounded-md' />
         </div>
       </div>
 
       {/* Main Content and Sidebar */}
-      <div className='flex flex-col lg:flex-row gap-6 px-4 lg:px-6'>
+      <div className='flex flex-col lg:flex-row gap-6 px-0 lg:px-6'>
         {/* Main Content */}
         <div className='flex-1 min-w-0'>
           <div className='space-y-6'>

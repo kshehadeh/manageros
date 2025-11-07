@@ -82,7 +82,7 @@ export default async function MeetingDetailPage({
           <div className='flex items-start justify-between'>
             <div className='flex-1'>
               <div className='flex items-center gap-3 mb-2'>
-                <Calendar className='h-6 w-6 text-muted-foreground' />
+                <Calendar className='h-6 w-6 hidden md:block' />
                 <h1 className='page-title'>{meeting.title}</h1>
               </div>
 

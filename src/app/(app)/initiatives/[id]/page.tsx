@@ -56,19 +56,17 @@ export default async function InitiativeDetail({
     <InitiativeDetailClient initiativeTitle={init.title} initiativeId={init.id}>
       <div className='space-y-6'>
         {/* Header - Full Width */}
-        <div className='px-4 lg:px-6'>
-          <InitiativeHeader
-            initiative={{
-              id: init.id,
-              title: init.title,
-              rag: init.rag,
-              completionRate: completionRate,
-            }}
-          />
-        </div>
+        <InitiativeHeader
+          initiative={{
+            id: init.id,
+            title: init.title,
+            rag: init.rag,
+            completionRate: completionRate,
+          }}
+        />
 
         {/* Main Content and Sidebar */}
-        <div className='flex flex-col lg:flex-row gap-6 px-4 lg:px-6'>
+        <div className='flex flex-col lg:flex-row gap-6 px-0 lg:px-6'>
           {/* Main Content */}
           <div className='flex-1 min-w-0'>
             <div className='space-y-6'>
