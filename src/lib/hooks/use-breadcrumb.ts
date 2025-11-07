@@ -18,13 +18,17 @@ export function useSetBreadcrumbs(breadcrumbs: BreadcrumbItem[]) {
   const prevBreadcrumbsRef = useRef<string>('')
 
   useEffect(() => {
+    // Create a stable string representation for comparison
     const breadcrumbsString = JSON.stringify(breadcrumbs)
+
+    // Always update breadcrumbs when they change
+    // This ensures client components can override default breadcrumbs
     if (breadcrumbsString !== prevBreadcrumbsRef.current) {
       setBreadcrumbs(breadcrumbs)
       setHasManualBreadcrumbs(true)
       prevBreadcrumbsRef.current = breadcrumbsString
     }
-  }, [setBreadcrumbs, breadcrumbs, setHasManualBreadcrumbs])
+  }, [breadcrumbs, setBreadcrumbs, setHasManualBreadcrumbs])
 }
 
 /**

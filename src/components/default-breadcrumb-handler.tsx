@@ -31,8 +31,12 @@ const routeMap: Record<string, string> = {
  */
 export function DefaultBreadcrumbHandler() {
   const pathname = usePathname()
-  const { setBreadcrumbs, hasManualBreadcrumbs, setHasManualBreadcrumbs } =
-    useBreadcrumb()
+  const {
+    breadcrumbs: currentBreadcrumbs,
+    setBreadcrumbs,
+    hasManualBreadcrumbs,
+    setHasManualBreadcrumbs,
+  } = useBreadcrumb()
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const prevPathnameRef = useRef<string>('')
 
@@ -92,26 +96,50 @@ export function DefaultBreadcrumbHandler() {
       return breadcrumbs
     }
 
+    // Helper to check if breadcrumbs match the current pathname
+    const breadcrumbsMatchPathname = (
+      breadcrumbs: BreadcrumbItem[]
+    ): boolean => {
+      if (breadcrumbs.length === 0) return false
+      const lastBreadcrumb = breadcrumbs[breadcrumbs.length - 1]
+      return lastBreadcrumb.href === pathname
+    }
+
+    // Helper to check if breadcrumbs are still in loading state
+    const hasLoadingBreadcrumbs = (breadcrumbs: BreadcrumbItem[]): boolean => {
+      return breadcrumbs.some(b => b.isLoading === true)
+    }
+
     // Clear any existing timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
     }
 
-    // Add a small delay to allow manual breadcrumb handlers to set breadcrumbs first
-    // This prevents the default handler from overwriting manually set breadcrumbs
+    // Add a delay to allow manual breadcrumb handlers to set breadcrumbs first
+    // Increased timeout to give client components more time to mount and set breadcrumbs
     timeoutRef.current = setTimeout(() => {
       // Only set breadcrumbs if manual breadcrumbs haven't been set
       if (!hasManualBreadcrumbs) {
+        // Check if current breadcrumbs already match the pathname and aren't loading
+        // This prevents overwriting breadcrumbs that were just set by a client component
+        if (
+          currentBreadcrumbs.length > 0 &&
+          breadcrumbsMatchPathname(currentBreadcrumbs) &&
+          !hasLoadingBreadcrumbs(currentBreadcrumbs)
+        ) {
+          // Breadcrumbs are already set correctly, don't overwrite
+          return
+        }
         setBreadcrumbs(generateBreadcrumbs())
       }
-    }, 100)
+    }, 250)
 
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)
       }
     }
-  }, [pathname, setBreadcrumbs, hasManualBreadcrumbs])
+  }, [pathname, setBreadcrumbs, hasManualBreadcrumbs, currentBreadcrumbs])
 
   return null
 }
