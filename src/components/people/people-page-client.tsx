@@ -11,7 +11,6 @@ import { useSession } from 'next-auth/react'
 import { isAdmin } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
 import { Upload, UserPlus, Workflow, User } from 'lucide-react'
-import { HelpIcon } from '@/components/help-icon'
 
 export function PeoplePageClient() {
   const { data: session } = useSession()
@@ -21,11 +20,7 @@ export function PeoplePageClient() {
       <PageHeader
         title='People'
         titleIcon={User}
-        subtitle={
-          <div className='flex items-center gap-2'>
-            <HelpIcon helpId='people' size='md' />
-          </div>
-        }
+        helpId='people'
         actions={
           <div className='flex flex-wrap items-center gap-3'>
             <Button asChild variant='outline'>

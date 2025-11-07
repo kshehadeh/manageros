@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { InitiativeDataTable } from '@/components/initiatives/data-table'
 import { Rocket, Plus } from 'lucide-react'
-import { HelpIcon } from '../../../components/help-icon'
 import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
@@ -14,11 +13,7 @@ export default function InitiativesPage() {
       <PageHeader
         title='Initiatives'
         titleIcon={Rocket}
-        subtitle={
-          <div className='flex items-center gap-2'>
-            <HelpIcon helpId='initiatives' size='md' />
-          </div>
-        }
+        helpId='initiatives'
         actions={
           <Button asChild className='flex items-center gap-2'>
             <Link href='/initiatives/new'>

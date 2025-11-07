@@ -6,6 +6,7 @@ import { PageTitle } from './page-title'
 interface PageHeaderProps {
   title?: string
   titleIcon?: LucideIcon | React.ElementType
+  helpId?: string
   subtitle?: string | ReactNode
   actions?: ReactNode
   className?: string
@@ -14,6 +15,7 @@ interface PageHeaderProps {
 export function PageHeader({
   title,
   titleIcon: TitleIcon,
+  helpId,
   subtitle,
   actions,
   className = '',
@@ -23,7 +25,7 @@ export function PageHeader({
       <div className='flex items-start justify-between'>
         <div className='flex-1'>
           {title && (
-            <PageTitle icon={TitleIcon} className='mb-2'>
+            <PageTitle icon={TitleIcon} helpId={helpId} className='mb-2'>
               {title}
             </PageTitle>
           )}

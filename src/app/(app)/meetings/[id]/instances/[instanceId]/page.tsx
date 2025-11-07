@@ -10,7 +10,6 @@ import { LinkListSection } from '@/components/links/link-list-section'
 import { MeetingInstanceDetailBreadcrumbClient } from '@/components/meetings/meeting-instance-detail-breadcrumb-client'
 import { MeetingInstanceActionsDropdown } from '@/components/meetings/meeting-instance-actions-dropdown'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
-import { HelpIcon } from '@/components/help-icon'
 import { SimplePeopleList } from '@/components/people/person-list'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
@@ -69,11 +68,9 @@ export default async function MeetingInstanceDetailPage({
       <PageContainer>
         <PageHeader
           title={meetingInstance.meeting.title}
+          helpId='meeting-instances'
           subtitle={
             <>
-              <div className='flex items-center gap-2 mb-1'>
-                <HelpIcon helpId='meeting-instances' size='md' />
-              </div>
               <p className='page-section-subtitle'>Meeting Instance</p>
               {/* Instance details in header */}
               <div className='flex flex-wrap items-center gap-4 mt-3 text-xs text-muted-foreground'>

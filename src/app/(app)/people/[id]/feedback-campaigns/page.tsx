@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Plus, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import { checkIfManagerOrSelf } from '@/lib/utils/people-utils'
-import { HelpIcon } from '@/components/help-icon'
 import { getPersonById, getPersonByUserId } from '@/lib/data/people'
 import { getFeedbackCampaignsForPerson } from '@/lib/data/feedback-campaigns'
 import { PageContainer } from '@/components/ui/page-container'
@@ -108,14 +107,8 @@ export default async function FeedbackCampaignsPage({
         <PageHeader
           title='Feedback Campaigns'
           titleIcon={MessageSquare}
-          subtitle={
-            <>
-              <div className='flex items-center gap-2 mb-1'>
-                <HelpIcon helpId='feedback-campaigns' size='md' />
-              </div>
-              <p>Manage feedback campaigns for {person.name}</p>
-            </>
-          }
+          helpId='feedback-campaigns'
+          subtitle={`Manage feedback campaigns for ${person.name}`}
           actions={
             <Button asChild>
               <Link
