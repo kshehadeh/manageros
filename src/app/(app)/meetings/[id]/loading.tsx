@@ -1,6 +1,11 @@
 import { Skeleton } from '@/components/ui/skeleton'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
+import { PageMain } from '@/components/ui/page-main'
+import { PageSidebar } from '@/components/ui/page-sidebar'
 import {
   Clock,
   Users,
@@ -15,8 +20,8 @@ import {
 
 export default function LoadingPage() {
   return (
-    <div className='page-container'>
-      <div className='page-header'>
+    <PageContainer>
+      <PageHeader>
         <div className='flex items-start justify-between'>
           <div className='flex-1'>
             <div className='flex items-center gap-3 mb-2'>
@@ -51,12 +56,10 @@ export default function LoadingPage() {
           </div>
           <Skeleton className='h-9 w-9 rounded-md' />
         </div>
-      </div>
+      </PageHeader>
 
-      {/* Main Content and Sidebar */}
-      <div className='flex flex-col lg:flex-row gap-6'>
-        {/* Main Content */}
-        <div className='flex-1 min-w-0'>
+      <PageContent>
+        <PageMain>
           <div className='space-y-6'>
             {/* Description Section */}
             <PageSection
@@ -104,10 +107,9 @@ export default function LoadingPage() {
               </div>
             </PageSection>
           </div>
-        </div>
+        </PageMain>
 
-        {/* Right Sidebar */}
-        <div className='w-full lg:w-80 lg:shrink-0'>
+        <PageSidebar>
           {/* Participants Section */}
           <PageSection
             header={<SectionHeader icon={Users} title='Participants (0)' />}
@@ -144,8 +146,8 @@ export default function LoadingPage() {
               ))}
             </div>
           </PageSection>
-        </div>
-      </div>
-    </div>
+        </PageSidebar>
+      </PageContent>
+    </PageContainer>
   )
 }

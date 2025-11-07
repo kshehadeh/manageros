@@ -2,7 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { InitiativeDetailClient } from '@/components/initiatives/initiative-detail-client'
-import { InitiativeHeader } from '@/components/initiatives/initiative-header'
+import { InitiativeActionsDropdown } from '@/components/initiatives/initiative-actions-dropdown'
 import { InitiativeObjectives } from '@/components/initiatives/initiative-objectives'
 import { InitiativeTasks } from '@/components/initiatives/initiative-tasks'
 import { InitiativeCheckIns } from '@/components/initiatives/initiative-checkins'
@@ -11,6 +11,11 @@ import { InitiativeSidebar } from '@/components/initiatives/initiative-sidebar'
 import { NotesSection } from '@/components/notes/notes-section'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
+import { PageMain } from '@/components/ui/page-main'
+import { PageSidebar } from '@/components/ui/page-sidebar'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { Suspense } from 'react'
 import { Loading } from '@/components/ui/loading'
@@ -22,7 +27,8 @@ import { getMeetingsForInitiativeSimple } from '@/lib/actions/meeting'
 import { getAllTasksForInitiative } from '@/lib/actions/task'
 import { getTeams } from '@/lib/actions/team'
 import { getEntityLinks } from '@/lib/actions/entity-links'
-import { FileText } from 'lucide-react'
+import { FileText, Rocket } from 'lucide-react'
+import { Rag } from '@/components/rag'
 
 export default async function InitiativeDetail({
   params,
@@ -54,21 +60,28 @@ export default async function InitiativeDetail({
 
   return (
     <InitiativeDetailClient initiativeTitle={init.title} initiativeId={init.id}>
-      <div className='space-y-6'>
-        {/* Header - Full Width */}
-        <InitiativeHeader
-          initiative={{
-            id: init.id,
-            title: init.title,
-            rag: init.rag,
-            completionRate: completionRate,
-          }}
-        />
+      <PageContainer>
+        <PageHeader>
+          <div className='flex items-start justify-between gap-4'>
+            <div className='flex-1 min-w-0'>
+              <div className='flex items-center gap-3 mb-2 min-w-0'>
+                <Rocket className='hidden md:block h-6 w-6 text-muted-foreground shrink-0' />
+                <h1 className='page-title truncate'>{init.title}</h1>
+              </div>
+              {/* Subheader with RAG and % complete */}
+              <div className='flex items-center gap-2 ml-0 md:ml-9'>
+                <Rag rag={init.rag} />
+                <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
+                  {completionRate}% complete
+                </span>
+              </div>
+            </div>
+            <InitiativeActionsDropdown initiativeId={init.id} />
+          </div>
+        </PageHeader>
 
-        {/* Main Content and Sidebar */}
-        <div className='flex flex-col lg:flex-row gap-6 px-0 lg:px-6'>
-          {/* Main Content */}
-          <div className='flex-1 min-w-0'>
+        <PageContent>
+          <PageMain>
             <div className='space-y-6'>
               {/* Summary Section */}
               {init.summary && (
@@ -202,10 +215,9 @@ export default async function InitiativeDetail({
                 </Suspense>
               )}
             </div>
-          </div>
+          </PageMain>
 
-          {/* Right Sidebar - Full width on mobile, fixed width on desktop */}
-          <div className='w-full lg:w-80 lg:shrink-0'>
+          <PageSidebar>
             <InitiativeSidebar
               team={init.team}
               owners={init.owners}
@@ -215,9 +227,9 @@ export default async function InitiativeDetail({
               teams={teams}
               people={people}
             />
-          </div>
-        </div>
-      </div>
+          </PageSidebar>
+        </PageContent>
+      </PageContainer>
     </InitiativeDetailClient>
   )
 }

@@ -8,6 +8,13 @@ import { FeedbackCampaignActionsDropdown } from '@/components/feedback/feedback-
 import { FeedbackResponseLink } from '@/components/feedback/feedback-response-link'
 import { FeedbackInviteeList } from '@/components/feedback/feedback-invitee-list'
 import { Badge } from '@/components/ui/badge'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
+import { PageMain } from '@/components/ui/page-main'
+import { PageSidebar } from '@/components/ui/page-sidebar'
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
 import {
   Calendar,
   Mail,
@@ -16,6 +23,8 @@ import {
   Clock,
   XCircle,
   AlertCircle,
+  FileText,
+  Link as LinkIcon,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { checkIfManagerOrSelf } from '@/lib/utils/people-utils'
@@ -154,8 +163,8 @@ export default async function FeedbackCampaignDetailPage({
       campaignTitle={campaignTitle}
       campaignId={campaign.id}
     >
-      <div className='page-container'>
-        <div className='page-header'>
+      <PageContainer>
+        <PageHeader>
           <div className='flex items-start justify-between'>
             <div className='flex-1'>
               <div className='flex items-center gap-3 mb-2'>
@@ -209,110 +218,122 @@ export default async function FeedbackCampaignDetailPage({
               totalResponses={totalResponses}
             />
           </div>
-        </div>
+        </PageHeader>
 
-        <div className='flex flex-col lg:flex-row gap-6'>
-          {/* Main Content */}
-          <div className='flex-1 space-y-6'>
-            {/* Campaign Details */}
-            <div className='page-section'>
-              <h2 className='page-section-title'>Campaign Details</h2>
-              <div className='card-grid'>
-                <div className='space-y-4'>
-                  {campaign.template && (
+        <PageContent>
+          <PageMain>
+            <div className='space-y-6'>
+              {/* Campaign Details */}
+              <PageSection
+                header={
+                  <SectionHeader icon={FileText} title='Campaign Details' />
+                }
+              >
+                <div className='card-grid'>
+                  <div className='space-y-4'>
+                    {campaign.template && (
+                      <div>
+                        <span className='text-sm font-medium text-muted-foreground'>
+                          Template:
+                        </span>
+                        <div className='mt-1'>
+                          <span className='text-sm font-medium'>
+                            {campaign.template.name}
+                          </span>
+                          {campaign.template.description && (
+                            <p className='text-sm text-muted-foreground mt-1'>
+                              {campaign.template.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     <div>
                       <span className='text-sm font-medium text-muted-foreground'>
-                        Template:
+                        Campaign Period:
                       </span>
-                      <div className='mt-1'>
-                        <span className='text-sm font-medium'>
-                          {campaign.template.name}
+                      <div className='mt-1 flex items-center gap-2'>
+                        <Calendar className='h-4 w-4' />
+                        <span className='text-sm'>
+                          {format(campaign.startDate, 'MMM d, yyyy')} -{' '}
+                          {format(campaign.endDate, 'MMM d, yyyy')}
                         </span>
-                        {campaign.template.description && (
-                          <p className='text-sm text-muted-foreground mt-1'>
-                            {campaign.template.description}
-                          </p>
-                        )}
                       </div>
                     </div>
-                  )}
 
-                  <div>
-                    <span className='text-sm font-medium text-muted-foreground'>
-                      Campaign Period:
-                    </span>
-                    <div className='mt-1 flex items-center gap-2'>
-                      <Calendar className='h-4 w-4' />
-                      <span className='text-sm'>
-                        {format(campaign.startDate, 'MMM d, yyyy')} -{' '}
-                        {format(campaign.endDate, 'MMM d, yyyy')}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <span className='text-sm font-medium text-muted-foreground'>
-                      Created By:
-                    </span>
-                    <div className='mt-1 flex items-center gap-2'>
-                      <Mail className='h-4 w-4' />
-                      <span className='text-sm'>{campaign.user.name}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className='space-y-4'>
-                  <div>
-                    <span className='text-sm font-medium text-muted-foreground'>
-                      Created:
-                    </span>
-                    <div className='mt-1 text-sm'>
-                      {format(campaign.createdAt, 'MMM d, yyyy')}
-                    </div>
-                  </div>
-
-                  {campaign.updatedAt && (
                     <div>
                       <span className='text-sm font-medium text-muted-foreground'>
-                        Last Updated:
+                        Created By:
+                      </span>
+                      <div className='mt-1 flex items-center gap-2'>
+                        <Mail className='h-4 w-4' />
+                        <span className='text-sm'>{campaign.user.name}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className='space-y-4'>
+                    <div>
+                      <span className='text-sm font-medium text-muted-foreground'>
+                        Created:
                       </span>
                       <div className='mt-1 text-sm'>
-                        {format(campaign.updatedAt, 'MMM d, yyyy')}
+                        {format(campaign.createdAt, 'MMM d, yyyy')}
                       </div>
                     </div>
-                  )}
+
+                    {campaign.updatedAt && (
+                      <div>
+                        <span className='text-sm font-medium text-muted-foreground'>
+                          Last Updated:
+                        </span>
+                        <div className='mt-1 text-sm'>
+                          {format(campaign.updatedAt, 'MMM d, yyyy')}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              </PageSection>
+
+              {/* Feedback Response Link */}
+              {campaign.inviteLink && campaign.status === 'active' && (
+                <PageSection
+                  header={
+                    <SectionHeader
+                      icon={LinkIcon}
+                      title='Feedback Response Link'
+                    />
+                  }
+                >
+                  <FeedbackResponseLink
+                    inviteLink={campaign.inviteLink}
+                    startDate={campaign.startDate}
+                    endDate={campaign.endDate}
+                  />
+                </PageSection>
+              )}
             </div>
+          </PageMain>
 
-            {/* Feedback Response Link */}
-            {campaign.inviteLink && campaign.status === 'active' && (
-              <div className='page-section'>
-                <h2 className='page-section-title'>Feedback Response Link</h2>
-                <FeedbackResponseLink
-                  inviteLink={campaign.inviteLink}
-                  startDate={campaign.startDate}
-                  endDate={campaign.endDate}
+          <PageSidebar>
+            <PageSection
+              header={
+                <SectionHeader
+                  icon={Users}
+                  title={`Invited People (${campaign.inviteEmails.length})`}
                 />
-              </div>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className='w-full lg:w-80 space-y-6'>
-            {/* Invited People */}
-            <div className='page-section'>
-              <h2 className='page-section-title'>
-                Invited People ({campaign.inviteEmails.length})
-              </h2>
+              }
+            >
               <FeedbackInviteeList
                 inviteEmails={campaign.inviteEmails}
                 responses={campaign.responses}
               />
-            </div>
-          </div>
-        </div>
-      </div>
+            </PageSection>
+          </PageSidebar>
+        </PageContent>
+      </PageContainer>
     </FeedbackCampaignDetailBreadcrumbClient>
   )
 }

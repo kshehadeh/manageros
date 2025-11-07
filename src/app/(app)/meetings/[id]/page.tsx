@@ -6,6 +6,11 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
+import { PageMain } from '@/components/ui/page-main'
+import { PageSidebar } from '@/components/ui/page-sidebar'
 import { notFound } from 'next/navigation'
 import { MeetingDetailBreadcrumbClient } from '@/components/meetings/meeting-detail-breadcrumb-client'
 import { MeetingInstanceList } from '@/components/meetings/meeting-instance-list'
@@ -77,8 +82,8 @@ export default async function MeetingDetailPage({
       meetingTitle={meeting.title}
       meetingId={meeting.id}
     >
-      <div className='page-container'>
-        <div className='page-header'>
+      <PageContainer>
+        <PageHeader>
           <div className='flex items-start justify-between'>
             <div className='flex-1'>
               <div className='flex items-center gap-3 mb-2'>
@@ -141,12 +146,10 @@ export default async function MeetingDetailPage({
             </div>
             <MeetingActionsDropdown meetingId={meeting.id} meeting={meeting} />
           </div>
-        </div>
+        </PageHeader>
 
-        {/* Main Content and Sidebar */}
-        <div className='flex flex-col lg:flex-row gap-6'>
-          {/* Main Content */}
-          <div className='flex-1 min-w-0'>
+        <PageContent>
+          <PageMain>
             <div className='space-y-6'>
               {/* Description */}
               {meeting.description && (
@@ -189,10 +192,9 @@ export default async function MeetingDetailPage({
                 </PageSection>
               )}
             </div>
-          </div>
+          </PageMain>
 
-          {/* Right Sidebar - Full width on mobile, fixed width on desktop */}
-          <div className='w-full lg:w-80 lg:shrink-0'>
+          <PageSidebar>
             <PageSection
               header={
                 <SectionHeader
@@ -244,9 +246,9 @@ export default async function MeetingDetailPage({
               emptyStateText='No links added yet.'
               className='mt-6'
             />
-          </div>
-        </div>
-      </div>
+          </PageSidebar>
+        </PageContent>
+      </PageContainer>
     </MeetingDetailBreadcrumbClient>
   )
 }

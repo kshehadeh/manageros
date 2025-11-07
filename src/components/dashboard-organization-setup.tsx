@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { OrganizationSetupCards } from '@/components/organization-setup-cards'
+import { PageContainer } from '@/components/ui/page-container'
 
 interface OrganizationInvitation {
   id: string
@@ -47,17 +48,17 @@ export function DashboardOrganizationSetup() {
 
   if (loading) {
     return (
-      <div className='page-container'>
+      <PageContainer>
         <div className='flex items-center justify-center py-12'>
           <div className='text-muted-foreground'>Loading...</div>
         </div>
-      </div>
+      </PageContainer>
     )
   }
 
   return (
-    <div className='page-container'>
+    <PageContainer>
       <OrganizationSetupCards pendingInvitations={invitations} />
-    </div>
+    </PageContainer>
   )
 }

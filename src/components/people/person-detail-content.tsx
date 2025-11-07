@@ -2,6 +2,11 @@ import Link from 'next/link'
 import { PersonAvatarWrapper } from './person-avatar-wrapper'
 import { PersonStatusBadge } from './person-status-badge'
 import { PersonActionsDropdown } from './person-actions-dropdown'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
+import { PageMain } from '@/components/ui/page-main'
+import { PageSidebar } from '@/components/ui/page-sidebar'
 import {
   CalendarDays,
   User as UserIcon,
@@ -93,8 +98,8 @@ export function PersonDetailContent({
   feedbackCount,
 }: PersonDetailContentProps) {
   return (
-    <div className='page-container'>
-      <div className='page-header'>
+    <PageContainer>
+      <PageHeader>
         <div className='flex items-start justify-between'>
           <div className='flex-1'>
             <div className='flex items-center gap-3 mb-2'>
@@ -194,108 +199,110 @@ export function PersonDetailContent({
             isAdmin={isAdmin}
           />
         </div>
-      </div>
+      </PageHeader>
 
-      <div className='flex flex-col lg:flex-row gap-6'>
-        {/* Main Content */}
-        <div className='flex-1 space-y-6'>
-          {/* Feedback Campaigns Section */}
-          <Suspense fallback={<FeedbackCampaignsSectionSkeleton />}>
-            <FeedbackCampaignsSection
-              personId={person.id}
-              organizationId={organizationId}
-              currentUserId={currentUserId}
-            />
-          </Suspense>
-
-          {/* Feedback Section */}
-          <Suspense fallback={<FeedbackSectionSkeleton />}>
-            <FeedbackSection
-              personId={person.id}
-              organizationId={organizationId}
-            />
-          </Suspense>
-
-          {/* Owned Initiatives */}
-          <Suspense fallback={<OwnedInitiativesSectionSkeleton />}>
-            <OwnedInitiativesSection
-              personId={person.id}
-              organizationId={organizationId}
-            />
-          </Suspense>
-
-          {/* Active Tasks */}
-          <Suspense fallback={<ActiveTasksSectionSkeleton />}>
-            <ActiveTasksSection
-              personId={person.id}
-              organizationId={organizationId}
-            />
-          </Suspense>
-
-          {/* 1:1 Meetings */}
-          <Suspense fallback={<OneOnOneMeetingsSectionSkeleton />}>
-            <OneOnOneMeetingsSection
-              personId={person.id}
-              organizationId={organizationId}
-            />
-          </Suspense>
-
-          {/* Jira Metrics - Show if person has Jira account */}
-          {Boolean(person.jiraAccount) && (
-            <JiraMetricsSection personId={person.id} hasJiraAccount={true} />
-          )}
-
-          {/* GitHub Metrics - Show if person has GitHub account */}
-          {Boolean(person.githubAccount) && (
-            <GithubMetricsSection
-              personId={person.id}
-              hasGithubAccount={true}
-            />
-          )}
-        </div>
-
-        {/* Right Sidebar */}
-        <div className='w-full lg:w-80 space-y-6'>
-          {/* Overview Section */}
-          <Suspense fallback={<OverviewSectionSkeleton />}>
-            <OverviewSection
-              personId={person.id}
-              organizationId={organizationId}
-            />
-          </Suspense>
-
-          {/* Job Role Section */}
-          <Suspense fallback={<JobRoleSectionSkeleton />}>
-            <JobRoleSection
-              personId={person.id}
-              personName={person.name}
-              currentJobRole={person.jobRole}
-            />
-          </Suspense>
-
-          {/* Direct Reports */}
-          <Suspense fallback={<DirectReportsSectionSkeleton />}>
-            <DirectReportsSection
-              personId={person.id}
-              organizationId={organizationId}
-            />
-          </Suspense>
-
-          {/* Account Linking - Only show for admins */}
-          {isAdmin && (
-            <Suspense fallback={<AccountLinkingSectionSkeleton />}>
-              <AccountLinkingSection
+      <PageContent>
+        <PageMain>
+          <div className='space-y-6'>
+            {/* Feedback Campaigns Section */}
+            <Suspense fallback={<FeedbackCampaignsSectionSkeleton />}>
+              <FeedbackCampaignsSection
                 personId={person.id}
-                personName={person.name}
-                personEmail={person.email}
-                linkedUser={person.user as User | null}
-                jiraAccount={person.jiraAccount}
-                githubAccount={person.githubAccount}
+                organizationId={organizationId}
+                currentUserId={currentUserId}
               />
             </Suspense>
-          )}
-        </div>
-      </div>
-    </div>
+
+            {/* Feedback Section */}
+            <Suspense fallback={<FeedbackSectionSkeleton />}>
+              <FeedbackSection
+                personId={person.id}
+                organizationId={organizationId}
+              />
+            </Suspense>
+
+            {/* Owned Initiatives */}
+            <Suspense fallback={<OwnedInitiativesSectionSkeleton />}>
+              <OwnedInitiativesSection
+                personId={person.id}
+                organizationId={organizationId}
+              />
+            </Suspense>
+
+            {/* Active Tasks */}
+            <Suspense fallback={<ActiveTasksSectionSkeleton />}>
+              <ActiveTasksSection
+                personId={person.id}
+                organizationId={organizationId}
+              />
+            </Suspense>
+
+            {/* 1:1 Meetings */}
+            <Suspense fallback={<OneOnOneMeetingsSectionSkeleton />}>
+              <OneOnOneMeetingsSection
+                personId={person.id}
+                organizationId={organizationId}
+              />
+            </Suspense>
+
+            {/* Jira Metrics - Show if person has Jira account */}
+            {Boolean(person.jiraAccount) && (
+              <JiraMetricsSection personId={person.id} hasJiraAccount={true} />
+            )}
+
+            {/* GitHub Metrics - Show if person has GitHub account */}
+            {Boolean(person.githubAccount) && (
+              <GithubMetricsSection
+                personId={person.id}
+                hasGithubAccount={true}
+              />
+            )}
+          </div>
+        </PageMain>
+
+        <PageSidebar>
+          <div className='space-y-6'>
+            {/* Overview Section */}
+            <Suspense fallback={<OverviewSectionSkeleton />}>
+              <OverviewSection
+                personId={person.id}
+                organizationId={organizationId}
+              />
+            </Suspense>
+
+            {/* Job Role Section */}
+            <Suspense fallback={<JobRoleSectionSkeleton />}>
+              <JobRoleSection
+                personId={person.id}
+                personName={person.name}
+                currentJobRole={person.jobRole}
+              />
+            </Suspense>
+
+            {/* Direct Reports */}
+            <Suspense fallback={<DirectReportsSectionSkeleton />}>
+              <DirectReportsSection
+                personId={person.id}
+                organizationId={organizationId}
+              />
+            </Suspense>
+
+            {/* Account Linking - Only show for admins */}
+            {isAdmin && (
+              <Suspense fallback={<AccountLinkingSectionSkeleton />}>
+                <AccountLinkingSection
+                  personId={person.id}
+                  personName={person.name}
+                  personEmail={person.email}
+                  linkedUser={person.user as User | null}
+                  jiraAccount={person.jiraAccount}
+                  githubAccount={person.githubAccount}
+                />
+              </Suspense>
+            )}
+          </div>
+        </PageSidebar>
+      </PageContent>
+    </PageContainer>
   )
 }

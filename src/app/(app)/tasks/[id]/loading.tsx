@@ -1,6 +1,11 @@
 import { Skeleton } from '@/components/ui/skeleton'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
+import { PageMain } from '@/components/ui/page-main'
+import { PageSidebar } from '@/components/ui/page-sidebar'
 import {
   Calendar,
   User,
@@ -15,9 +20,8 @@ import {
 
 export default function LoadingPage() {
   return (
-    <div className='space-y-6'>
-      {/* Header - Full Width */}
-      <div className='page-header'>
+    <PageContainer>
+      <PageHeader>
         <div className='flex items-start justify-between'>
           <div className='flex-1'>
             <div className='flex items-center gap-3 mb-2'>
@@ -43,12 +47,10 @@ export default function LoadingPage() {
           </div>
           <Skeleton className='h-9 w-9 rounded-md' />
         </div>
-      </div>
+      </PageHeader>
 
-      {/* Main Content and Sidebar */}
-      <div className='flex flex-col lg:flex-row gap-6 px-0 lg:px-6'>
-        {/* Main Content */}
-        <div className='flex-1 min-w-0'>
+      <PageContent>
+        <PageMain>
           <div className='space-y-6'>
             {/* Task Description Section */}
             <PageSection
@@ -62,10 +64,9 @@ export default function LoadingPage() {
               </div>
             </PageSection>
           </div>
-        </div>
+        </PageMain>
 
-        {/* Right Sidebar */}
-        <div className='w-full lg:w-80 space-y-6'>
+        <PageSidebar>
           {/* Details Section */}
           <PageSection header={<SectionHeader icon={Clock} title='Details' />}>
             <div className='text-sm'>
@@ -208,8 +209,8 @@ export default function LoadingPage() {
               ))}
             </div>
           </PageSection>
-        </div>
-      </div>
-    </div>
+        </PageSidebar>
+      </PageContent>
+    </PageContainer>
   )
 }

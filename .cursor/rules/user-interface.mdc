@@ -49,6 +49,117 @@ Only use cards when there is more than one section.  Each section can be in a ca
 * Reuse components whenever possible.
 * Look for other places where similar component are used and modify them to fit the new use case and reuse.  But weigh that against the complexity being introduced to satisfy this constraint.  If the complexity is too high, then create a new component.
 
+## Shared Layout Components
+
+All entity detail pages and list pages must use the shared layout components instead of CSS classes directly. This ensures consistency and enables centralized layout management.
+
+### PageContainer
+
+* **Always use `PageContainer` component** instead of `page-container` CSS class
+* Import from `@/components/ui/page-container`
+* Wraps entire page with consistent spacing
+* Example:
+
+  ```tsx
+  import { PageContainer } from '@/components/ui/page-container'
+  
+  <PageContainer>
+    {/* Page content */}
+  </PageContainer>
+  ```
+
+### PageHeader
+
+* **Always use `PageHeader` component** instead of `page-header` CSS class
+* Import from `@/components/ui/page-header`
+* Supports simple headers with props or complex headers with children
+* Example - Simple:
+
+  ```tsx
+  import { PageHeader } from '@/components/ui/page-header'
+  import { Rocket } from 'lucide-react'
+  
+  <PageHeader
+    title='Initiatives'
+    titleIcon={Rocket}
+    subtitle='Manage initiatives'
+    actions={<Button>Create</Button>}
+  />
+  ```
+
+* Example - Complex (with children):
+
+  ```tsx
+  <PageHeader>
+    <div className='flex items-start justify-between'>
+      <div className='flex-1'>
+        <h1 className='page-title'>{title}</h1>
+        {/* Custom content */}
+      </div>
+      <ActionsDropdown />
+    </div>
+  </PageHeader>
+  ```
+
+### PageContent, PageMain, PageSidebar
+
+* **Always use these components** for two-column layouts instead of CSS classes
+* Import from `@/components/ui/page-content`, `@/components/ui/page-main`, `@/components/ui/page-sidebar`
+* `PageContent` handles the flex layout
+* `PageMain` wraps main content column
+* `PageSidebar` wraps sidebar column
+* Example:
+
+  ```tsx
+  import { PageContent } from '@/components/ui/page-content'
+  import { PageMain } from '@/components/ui/page-main'
+  import { PageSidebar } from '@/components/ui/page-sidebar'
+  
+  <PageContent>
+    <PageMain>
+      {/* Main content */}
+    </PageMain>
+    <PageSidebar>
+      {/* Sidebar content */}
+    </PageSidebar>
+  </PageContent>
+  ```
+
+### Complete Page Structure
+
+All entity detail pages should follow this structure:
+
+```tsx
+<PageContainer>
+  <PageHeader title={...} actions={...} />
+  <PageContent>
+    <PageMain>
+      <PageSection>
+        {/* Content */}
+      </PageSection>
+    </PageMain>
+    <PageSidebar>
+      <PageSection>
+        {/* Sidebar content */}
+      </PageSection>
+    </PageSidebar>
+  </PageContent>
+</PageContainer>
+```
+
+For list pages (no sidebar):
+
+```tsx
+<PageContainer>
+  <PageHeader title={...} actions={...} />
+  <PageContent>
+    <PageSection>
+      {/* List/table content */}
+    </PageSection>
+  </PageContent>
+</PageContainer>
+```
+
 ## PageSection Component
 
 * **Always use `PageSection` component** instead of manually applying `page-section` class

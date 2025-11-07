@@ -20,13 +20,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
   }
 
   const { id } = await params
-  const team = await getTeamById(id, session.user.organizationId, {
-    includeParent: true,
-    includeChildren: true,
-    includePeople: true,
-    includeInitiatives: true,
-    includeJobRoles: true,
-  })
+  const team = await getTeamById(id, session.user.organizationId)
 
   if (!team) {
     notFound()

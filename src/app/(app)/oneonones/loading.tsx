@@ -1,12 +1,31 @@
-import { Loading } from '@/components/ui/loading'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
+import { PageSection } from '@/components/ui/page-section'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Handshake } from 'lucide-react'
 
 export default function LoadingPage() {
   return (
-    <div className='flex items-center justify-center min-h-[400px]'>
-      <div className='flex flex-col items-center space-y-4'>
-        <Loading size='lg' />
-        <p className='text-sm text-muted-foreground'>Loading 1:1s...</p>
-      </div>
-    </div>
+    <PageContainer>
+      <PageHeader
+        title='1:1 Meetings'
+        titleIcon={Handshake}
+        subtitle='Loading 1:1 meetings...'
+      />
+
+      <PageContent>
+        <PageSection>
+          <div className='space-y-3'>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className='border rounded-lg p-4 space-y-2'>
+                <Skeleton className='h-5 w-48' />
+                <Skeleton className='h-4 w-32' />
+              </div>
+            ))}
+          </div>
+        </PageSection>
+      </PageContent>
+    </PageContainer>
   )
 }

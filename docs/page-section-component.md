@@ -12,7 +12,6 @@ All page sections should use the `PageSection` component instead of manually app
 
 ```tsx
 import { PageSection } from '@/components/ui/page-section'
-
 ;<PageSection>{/* Your content here */}</PageSection>
 ```
 
@@ -22,7 +21,6 @@ import { PageSection } from '@/components/ui/page-section'
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
 import { FileText } from 'lucide-react'
-
 ;<PageSection header={<SectionHeader icon={FileText} title='Section Title' />}>
   {/* Your content here */}
 </PageSection>
@@ -87,11 +85,15 @@ When updating existing code:
 ## Related Components
 
 - `SectionHeader`: Standard component for section titles with icons and optional actions
-- `page-container`: Wrapper class for page layouts
-- `page-header`: Header section for pages
+- `PageContainer`: Wrapper component for page layouts
+- `PageHeader`: Header component for pages
+- `PageContent`: Main content wrapper with two-column layout support
+- `PageMain`: Main content column wrapper
+- `PageSidebar`: Sidebar column wrapper
 
 ## See Also
 
+- [Shared Layout Components](./shared-layout-components.md) - Complete guide to shared layout components
 - [Entity Detail Page Standards](./entity-detail-page-standards.md)
 - [Theming Guide](./theming.md)
 - [User Interface Rules](../.cursor/rules/user-interface.mdc)

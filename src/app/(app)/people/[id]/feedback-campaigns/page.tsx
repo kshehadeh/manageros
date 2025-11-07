@@ -4,12 +4,16 @@ import { authOptions } from '@/lib/auth'
 import { FeedbackCampaignList } from '@/components/feedback/feedback-campaign-list'
 import { FeedbackCampaignsBreadcrumbClient } from '@/components/feedback/feedback-campaigns-breadcrumb-client'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { Plus, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import { checkIfManagerOrSelf } from '@/lib/utils/people-utils'
 import { HelpIcon } from '@/components/help-icon'
 import { getPersonById, getPersonByUserId } from '@/lib/data/people'
 import { getFeedbackCampaignsForPerson } from '@/lib/data/feedback-campaigns'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
+import { PageSection } from '@/components/ui/page-section'
 
 interface FeedbackCampaignsPageProps {
   params: Promise<{
@@ -100,31 +104,35 @@ export default async function FeedbackCampaignsPage({
       personName={person.name}
       personId={person.id}
     >
-      <div className='space-y-6'>
-        <div className='flex items-center justify-between'>
-          <div className='flex flex-col gap-1'>
+      <PageContainer>
+        <PageHeader
+          title={
             <div className='flex items-center gap-2'>
-              <h1 className='text-2xl font-bold'>Feedback Campaigns</h1>
+              Feedback Campaigns
               <HelpIcon helpId='feedback-campaigns' size='md' />
             </div>
-            <p className='text-gray-600'>
-              Manage feedback campaigns for {person.name}
-            </p>
-          </div>
-          <Button asChild>
-            <Link
-              href={`/people/${person.id}/feedback-campaigns/new`}
-              className='flex items-center gap-2'
-            >
-              <Plus className='h-4 w-4' />
-              Create Campaign
-            </Link>
-          </Button>
-        </div>
-        <div>
-          <FeedbackCampaignList campaigns={typedCampaigns} />
-        </div>
-      </div>
+          }
+          titleIcon={MessageSquare}
+          subtitle={`Manage feedback campaigns for ${person.name}`}
+          actions={
+            <Button asChild>
+              <Link
+                href={`/people/${person.id}/feedback-campaigns/new`}
+                className='flex items-center gap-2'
+              >
+                <Plus className='h-4 w-4' />
+                Create Campaign
+              </Link>
+            </Button>
+          }
+        />
+
+        <PageContent>
+          <PageSection>
+            <FeedbackCampaignList campaigns={typedCampaigns} />
+          </PageSection>
+        </PageContent>
+      </PageContainer>
     </FeedbackCampaignsBreadcrumbClient>
   )
 }

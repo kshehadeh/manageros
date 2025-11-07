@@ -6,6 +6,11 @@ import { OneOnOneActionsDropdown } from '@/components/oneonones/oneonone-actions
 import { MessageCircle, Info, StickyNote } from 'lucide-react'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
+import { PageMain } from '@/components/ui/page-main'
+import { PageSidebar } from '@/components/ui/page-sidebar'
 import { PersonListItem } from '@/components/people/person-list-item'
 
 interface OneOnOneViewPageProps {
@@ -28,28 +33,16 @@ export default async function OneOnOneViewPage({
         reportName={oneOnOne.report.name}
         oneOnOneId={oneOnOne.id}
       >
-        <div className='space-y-6'>
-          {/* Header - Full Width */}
-          <div className='page-header'>
-            <div className='flex items-start justify-between'>
-              <div className='flex-1'>
-                <div className='flex items-center gap-3 mb-2'>
-                  <MessageCircle className='h-6 w-6 text-muted-foreground' />
-                  <h1 className='page-title'>1:1 Meeting</h1>
-                </div>
-                <p className='page-subtitle'>
-                  Meeting between {oneOnOne.manager.name} and{' '}
-                  {oneOnOne.report.name}
-                </p>
-              </div>
-              <OneOnOneActionsDropdown oneOnOneId={oneOnOne.id} />
-            </div>
-          </div>
+        <PageContainer>
+          <PageHeader
+            title='1:1 Meeting'
+            titleIcon={MessageCircle}
+            subtitle={`Meeting between ${oneOnOne.manager.name} and ${oneOnOne.report.name}`}
+            actions={<OneOnOneActionsDropdown oneOnOneId={oneOnOne.id} />}
+          />
 
-          {/* Main Content and Sidebar */}
-          <div className='flex flex-col lg:flex-row gap-6 px-0 lg:px-6'>
-            {/* Main Content */}
-            <div className='flex-1 min-w-0'>
+          <PageContent>
+            <PageMain>
               <div className='space-y-6'>
                 {/* Meeting Notes */}
                 <PageSection
@@ -74,10 +67,9 @@ export default async function OneOnOneViewPage({
                   </div>
                 </PageSection>
               </div>
-            </div>
+            </PageMain>
 
-            {/* Right Sidebar */}
-            <div className='w-full lg:w-80 lg:shrink-0'>
+            <PageSidebar>
               <PageSection
                 header={<SectionHeader icon={Info} title='Meeting Details' />}
               >
@@ -122,9 +114,9 @@ export default async function OneOnOneViewPage({
                   </div>
                 </div>
               </PageSection>
-            </div>
-          </div>
-        </div>
+            </PageSidebar>
+          </PageContent>
+        </PageContainer>
       </OneOnOneDetailClient>
     )
   } catch (error) {

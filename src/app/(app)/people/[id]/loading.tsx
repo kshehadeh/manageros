@@ -1,5 +1,10 @@
 import { Skeleton } from '@/components/ui/skeleton'
 import { SectionHeader } from '@/components/ui/section-header'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
+import { PageMain } from '@/components/ui/page-main'
+import { PageSidebar } from '@/components/ui/page-sidebar'
 import {
   CalendarDays,
   User as UserIcon,
@@ -14,8 +19,8 @@ import {
 
 export default function LoadingPage() {
   return (
-    <div className='page-container'>
-      <div className='page-header'>
+    <PageContainer>
+      <PageHeader>
         <div className='flex items-start justify-between'>
           <div className='flex-1'>
             <div className='flex items-center gap-3 mb-2'>
@@ -54,11 +59,10 @@ export default function LoadingPage() {
           </div>
           <Skeleton className='h-9 w-9 rounded-md' />
         </div>
-      </div>
+      </PageHeader>
 
-      <div className='flex flex-col lg:flex-row gap-6'>
-        {/* Main Content */}
-        <div className='flex-1 space-y-6'>
+      <PageContent>
+        <PageMain>
           {/* Feedback Campaigns Section */}
           <section className='rounded-xl py-4 -mx-3 px-3 space-y-4'>
             <div className='flex items-center justify-between border-b border-muted pb-3 mb-3 -mx-3 px-3 md:mx-0 md:px-0'>
@@ -206,10 +210,9 @@ export default function LoadingPage() {
               ))}
             </div>
           </section>
-        </div>
+        </PageMain>
 
-        {/* Right Sidebar */}
-        <div className='w-full lg:w-80 space-y-6'>
+        <PageSidebar>
           {/* Overview Section */}
           <section>
             <SectionHeader
@@ -249,8 +252,8 @@ export default function LoadingPage() {
               ))}
             </div>
           </section>
-        </div>
-      </div>
-    </div>
+        </PageSidebar>
+      </PageContent>
+    </PageContainer>
   )
 }

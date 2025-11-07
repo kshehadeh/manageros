@@ -8,36 +8,58 @@ Entity detail pages follow a standardized layout pattern with a header section, 
 
 ## Layout Structure
 
+All entity detail pages should use the shared layout components instead of CSS classes directly. This ensures consistency and enables centralized layout management.
+
 ### 1. Page Container
 
+**Component**: `PageContainer` from `@/components/ui/page-container`
+
 ```tsx
-<div className='page-container'>
+import { PageContainer } from '@/components/ui/page-container'
+
+;<PageContainer>
   {/* Header */}
   {/* Main Content */}
-</div>
+</PageContainer>
 ```
-
-**CSS Class**: `.page-container`
 
 - Provides consistent spacing between major sections
 - Acts as the main wrapper for all detail page content
+- **Always use the component** instead of the `page-container` CSS class
 
 ### 2. Header Section
 
+**Component**: `PageHeader` from `@/components/ui/page-header`
+
+**Simple Header**:
+
 ```tsx
-<div className='page-header'>
-  <div className='header-layout'>
-    <div className='header-content'>{/* Title and basic info */}</div>
-    {/* Actions dropdown */}
-  </div>
-</div>
+import { PageHeader } from '@/components/ui/page-header'
+import { Rocket } from 'lucide-react'
+
+;<PageHeader
+  title={entity.name}
+  titleIcon={Rocket}
+  subtitle={entity.description}
+  actions={<EntityActionsDropdown entityId={entity.id} />}
+/>
 ```
 
-**CSS Class**: `.page-header`
+**Complex Header** (for custom layouts):
+
+```tsx
+<PageHeader>
+  <div className='flex items-start justify-between'>
+    <div className='flex-1'>{/* Custom header content */}</div>
+    <EntityActionsDropdown entityId={entity.id} />
+  </div>
+</PageHeader>
+```
 
 - Provides bottom margin for separation from content
 - Contains the entity title, status, and key information
 - Includes action buttons/dropdowns on the right
+- **Always use the component** instead of the `page-header` CSS class
 
 #### Header Components
 
@@ -89,29 +111,34 @@ Entity detail pages follow a standardized layout pattern with a header section, 
 
 #### Two-Column Layout
 
-```tsx
-<div className='main-layout'>
-  {/* Main Content */}
-  <div className='main-content'>{/* Content sections */}</div>
+**Components**: `PageContent`, `PageMain`, `PageSidebar` from `@/components/ui/`
 
-  {/* Right Sidebar */}
-  <div className='sidebar'>{/* Sidebar sections */}</div>
-</div>
+```tsx
+import { PageContent } from '@/components/ui/page-content'
+import { PageMain } from '@/components/ui/page-main'
+import { PageSidebar } from '@/components/ui/page-sidebar'
+
+;<PageContent>
+  <PageMain>{/* Main content sections */}</PageMain>
+
+  <PageSidebar>{/* Sidebar sections */}</PageSidebar>
+</PageContent>
 ```
 
 **Layout Guidelines**:
 
-- Main content uses flex-1 to take remaining space
-- Sidebar has fixed width of 320px
-- Gap between columns: 24px
+- `PageContent` handles the two-column flex layout
+- `PageMain` applies `flex-1 min-w-0` for proper flex behavior
+- `PageSidebar` applies responsive width (`w-full lg:w-80 lg:shrink-0`)
+- Gap between columns: 24px (handled by `PageContent`)
 - Vertical spacing within sections: 24px
+- **Always use these components** instead of CSS classes
 
 #### Main Content Sections
 
 ```tsx
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
-
 ;<PageSection
   header={
     <SectionHeader icon={FileText} title={`Section Title (${items.length})`} />
@@ -156,21 +183,28 @@ import { SectionHeader } from '@/components/ui/section-header'
 
 #### Sidebar Structure
 
+**Component**: `PageSidebar` from `@/components/ui/page-sidebar`
+
 ```tsx
-<div className='sidebar'>
-  <section>
-    <h3 className='section-title'>Section Title</h3>
-    {/* Section content */}
-  </section>
-</div>
+import { PageSidebar } from '@/components/ui/page-sidebar'
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
+
+;<PageSidebar>
+  <PageSection header={<SectionHeader icon={Users} title='Related Items' />}>
+    {/* Sidebar content */}
+  </PageSection>
+</PageSidebar>
 ```
 
 **Sidebar Guidelines**:
 
-- Fixed width: 320px
+- Use `PageSidebar` component for sidebar wrapper
+- Fixed width: 320px on desktop, full width on mobile
 - Vertical spacing: 24px between sections
-- Same section structure as main content
+- Same section structure as main content (use `PageSection` and `SectionHeader`)
 - Typically contains secondary information, actions, or related entities
+- **Always use the component** instead of the `sidebar` CSS class
 
 #### Sidebar Content Types
 
@@ -336,6 +370,15 @@ Display errors clearly:
 ### Complete Entity Detail Page
 
 ```tsx
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
+import { PageMain } from '@/components/ui/page-main'
+import { PageSidebar } from '@/components/ui/page-sidebar'
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
+import { FileText, Users, Building2 } from 'lucide-react'
+
 export default function EntityDetailPage({
   params,
 }: {
@@ -345,25 +388,32 @@ export default function EntityDetailPage({
 
   return (
     <EntityDetailClient entityName={entity.name} entityId={entity.id}>
-      <div className='page-container'>
-        <div className='page-header'>
+      <PageContainer>
+        <PageHeader
+          title={entity.name}
+          titleIcon={FileText}
+          subtitle={entity.role ?? ''}
+          actions={<EntityActionsDropdown entity={entity} />}
+        >
           <div className='flex items-start justify-between'>
             <div className='flex-1'>
-              <div className='title-section'>
+              <div className='flex items-center gap-3 mb-2'>
                 <h1 className='page-title'>{entity.name}</h1>
                 <StatusBadge status={entity.status} />
               </div>
               <div className='page-section-subtitle'>{entity.role ?? ''}</div>
-              <div className='entity-email'>{entity.email}</div>
+              <div className='text-xs text-muted-foreground'>
+                {entity.email}
+              </div>
 
               {/* Basic Information with Icons */}
-              <div className='entity-info-row'>
+              <div className='flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground'>
                 {entity.team && (
-                  <div className='info-item'>
-                    <Building2 className='info-icon' />
+                  <div className='flex items-center gap-1'>
+                    <Building2 className='w-4 h-4' />
                     <Link
                       href={`/teams/${entity.team.id}`}
-                      className='info-link'
+                      className='hover:text-primary transition-colors'
                     >
                       {entity.team.name}
                     </Link>
@@ -374,15 +424,20 @@ export default function EntityDetailPage({
             </div>
             <EntityActionsDropdown entity={entity} />
           </div>
-        </div>
+        </PageHeader>
 
-        <div className='main-layout'>
-          {/* Main Content */}
-          <div className='main-content'>
-            {entity.items.length > 0 && (
-              <section>
-                <h3 className='section-title'>Items ({entity.items.length})</h3>
-                <div className='section-content'>
+        <PageContent>
+          <PageMain>
+            <div className='space-y-6'>
+              {entity.items.length > 0 && (
+                <PageSection
+                  header={
+                    <SectionHeader
+                      icon={FileText}
+                      title={`Items (${entity.items.length})`}
+                    />
+                  }
+                >
                   {entity.items.map(item => (
                     <Link
                       key={item.id}
@@ -400,24 +455,27 @@ export default function EntityDetailPage({
                       </div>
                     </Link>
                   ))}
-                </div>
-              </section>
-            )}
-          </div>
+                </PageSection>
+              )}
+            </div>
+          </PageMain>
 
-          {/* Right Sidebar */}
-          <div className='sidebar'>
+          <PageSidebar>
             {entity.relatedItems.length > 0 && (
-              <section>
-                <h3 className='section-title'>
-                  Related Items ({entity.relatedItems.length})
-                </h3>
-                <div className='section-content'>{/* Sidebar content */}</div>
-              </section>
+              <PageSection
+                header={
+                  <SectionHeader
+                    icon={Users}
+                    title={`Related Items (${entity.relatedItems.length})`}
+                  />
+                }
+              >
+                {/* Sidebar content */}
+              </PageSection>
             )}
-          </div>
-        </div>
-      </div>
+          </PageSidebar>
+        </PageContent>
+      </PageContainer>
     </EntityDetailClient>
   )
 }
@@ -425,16 +483,22 @@ export default function EntityDetailPage({
 
 ## Best Practices
 
-1. **Consistency**: Follow the established patterns for all entity detail pages
-2. **Performance**: Use conditional rendering to avoid unnecessary DOM elements
-3. **Accessibility**: Ensure proper semantic structure and keyboard navigation
-4. **Responsive**: Design for mobile-first with progressive enhancement
-5. **Loading**: Provide clear loading and error states
-6. **Empty States**: Handle cases where sections have no content
-7. **Icons**: Use consistent iconography throughout
-8. **Spacing**: Maintain consistent spacing using the defined scale
-9. **Typography**: Follow the established text hierarchy
-10. **Colors**: Use the design system color tokens consistently
+1. **Use Shared Components**: Always use `PageContainer`, `PageHeader`, `PageContent`, `PageMain`, `PageSidebar` instead of CSS classes
+2. **Consistency**: Follow the established patterns for all entity detail pages
+3. **Performance**: Use conditional rendering to avoid unnecessary DOM elements
+4. **Accessibility**: Ensure proper semantic structure and keyboard navigation
+5. **Responsive**: Design for mobile-first with progressive enhancement
+6. **Loading**: Provide clear loading and error states
+7. **Empty States**: Handle cases where sections have no content
+8. **Icons**: Use consistent iconography throughout
+9. **Spacing**: Maintain consistent spacing using the defined scale
+10. **Typography**: Follow the established text hierarchy
+11. **Colors**: Use the design system color tokens consistently
+
+## Related Documentation
+
+- [Shared Layout Components](./shared-layout-components.md) - Complete guide to using shared layout components
+- [PageSection Component](./page-section-component.md) - Documentation for the PageSection component
 
 ## Future Considerations
 

@@ -4,6 +4,9 @@ import React from 'react'
 import Link from 'next/link'
 import { PeopleDataTable } from '@/components/people/data-table'
 import { PageSection } from '@/components/ui/page-section'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
 import { useSession } from 'next-auth/react'
 import { isAdmin } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
@@ -14,16 +17,16 @@ export function PeoplePageClient() {
   const { data: session } = useSession()
 
   return (
-    <div className='page-container px-3 md:px-0'>
-      <div className='page-header'>
-        <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
-          <div>
-            <div className='flex items-center gap-2'>
-              <User className='h-6 w-6 text-muted-foreground' />
-              <h1 className='page-title'>People</h1>
-              <HelpIcon helpId='people' size='md' />
-            </div>
+    <PageContainer className='px-3 md:px-0'>
+      <PageHeader
+        title={
+          <div className='flex items-center gap-2'>
+            People
+            <HelpIcon helpId='people' size='md' />
           </div>
+        }
+        titleIcon={User}
+        actions={
           <div className='flex flex-wrap items-center gap-3'>
             <Button asChild variant='outline'>
               <Link href='/people/chart' className='flex items-center gap-2'>
@@ -52,12 +55,14 @@ export function PeoplePageClient() {
               </>
             )}
           </div>
-        </div>
-      </div>
+        }
+      />
 
-      <PageSection className='-mx-3 md:mx-0'>
-        <PeopleDataTable enablePagination={true} limit={100} />
-      </PageSection>
-    </div>
+      <PageContent>
+        <PageSection className='-mx-3 md:mx-0'>
+          <PeopleDataTable enablePagination={true} limit={100} />
+        </PageSection>
+      </PageContent>
+    </PageContainer>
   )
 }

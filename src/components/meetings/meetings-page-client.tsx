@@ -3,41 +3,44 @@
 import Link from 'next/link'
 import { MeetingDataTable } from '@/components/meetings/data-table'
 import { PageSection } from '@/components/ui/page-section'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
 import { Button } from '@/components/ui/button'
 import { Plus, Calendar } from 'lucide-react'
 import { HelpIcon } from '@/components/help-icon'
 
 export function MeetingsPageClient() {
   return (
-    <div className='page-container'>
-      <div className='page-header'>
-        <div className='flex items-center justify-between'>
-          <div>
-            <div className='flex items-center gap-2'>
-              <Calendar className='h-6 w-6 text-muted-foreground' />
-              <h1 className='page-title'>Meetings</h1>
-              <HelpIcon helpId='meetings' size='md' />
-            </div>
-            <p className='page-subtitle'>
-              Manage and track your organization&apos;s meetings
-            </p>
+    <PageContainer>
+      <PageHeader
+        title={
+          <div className='flex items-center gap-2'>
+            Meetings
+            <HelpIcon helpId='meetings' size='md' />
           </div>
+        }
+        titleIcon={Calendar}
+        subtitle="Manage and track your organization's meetings"
+        actions={
           <Button asChild className='flex items-center gap-2'>
             <Link href='/meetings/new'>
               <Plus className='h-4 w-4' />
               Create Meeting
             </Link>
           </Button>
-        </div>
-      </div>
+        }
+      />
 
-      <PageSection>
-        <MeetingDataTable
-          settingsId='meetings-list'
-          enablePagination={true}
-          limit={20}
-        />
-      </PageSection>
-    </div>
+      <PageContent>
+        <PageSection>
+          <MeetingDataTable
+            settingsId='meetings-list'
+            enablePagination={true}
+            limit={20}
+          />
+        </PageSection>
+      </PageContent>
+    </PageContainer>
   )
 }

@@ -3,7 +3,13 @@ import { notFound } from 'next/navigation'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { FeedbackDetailClient } from '@/components/feedback/feedback-detail-client'
 import { FeedbackActionsDropdown } from '@/components/feedback/feedback-actions-dropdown'
-import { MessageCircle } from 'lucide-react'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
+import { PageMain } from '@/components/ui/page-main'
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
+import { MessageCircle, FileText } from 'lucide-react'
 
 interface FeedbackDetailPageProps {
   params: Promise<{
@@ -26,55 +32,43 @@ export default async function FeedbackDetailPage({
         aboutName={feedback.about.name}
         feedbackId={feedback.id}
       >
-        <div className='page-container'>
-          <div className='page-header'>
-            <div className='flex items-start justify-between'>
-              <div className='flex-1'>
-                <div className='flex items-center gap-3 mb-2'>
-                  <MessageCircle className='h-6 w-6 text-muted-foreground' />
-                  <h1 className='page-title'>
-                    Feedback for {feedback.about.name} from {feedback.from.name}
-                  </h1>
-                </div>
-                <div className='text-xs text-muted-foreground mt-1'>
-                  {feedback.kind === 'praise' && 'Praise'}
-                  {feedback.kind === 'concern' && 'Concern'}
-                  {feedback.kind === 'note' && 'Note'} •{' '}
-                  {feedback.isPrivate ? 'Private' : 'Public'} • Created{' '}
-                  {new Date(feedback.createdAt).toLocaleDateString()}
-                </div>
-              </div>
-              <div className='flex items-center gap-2'>
-                <FeedbackActionsDropdown
-                  feedbackId={feedback.id}
-                  aboutPersonId={feedback.about.id}
-                />
-              </div>
-            </div>
-          </div>
+        <PageContainer>
+          <PageHeader
+            title={`Feedback for ${feedback.about.name} from ${feedback.from.name}`}
+            titleIcon={MessageCircle}
+            subtitle={`${feedback.kind === 'praise' ? 'Praise' : feedback.kind === 'concern' ? 'Concern' : 'Note'} • ${feedback.isPrivate ? 'Private' : 'Public'} • Created ${new Date(feedback.createdAt).toLocaleDateString()}`}
+            actions={
+              <FeedbackActionsDropdown
+                feedbackId={feedback.id}
+                aboutPersonId={feedback.about.id}
+              />
+            }
+          />
 
-          {/* Feedback Content */}
-          <div className='space-y-6'>
-            <div className='flex items-center justify-between border-b border-muted pb-3 mb-3'>
-              <h3 className='font-bold'>Feedback</h3>
-            </div>
-            <div className='text-sm text-neutral-400'>
-              {feedback.body ? (
-                <ReadonlyNotesField
-                  content={feedback.body}
-                  variant='default'
-                  emptyStateText='No content recorded'
-                  truncateMode={true}
-                  maxHeight='200px'
-                />
-              ) : (
-                <div className='text-center py-8 text-neutral-500'>
-                  No content recorded
+          <PageContent>
+            <PageMain>
+              <PageSection
+                header={<SectionHeader icon={FileText} title='Feedback' />}
+              >
+                <div className='text-sm text-neutral-400'>
+                  {feedback.body ? (
+                    <ReadonlyNotesField
+                      content={feedback.body}
+                      variant='default'
+                      emptyStateText='No content recorded'
+                      truncateMode={true}
+                      maxHeight='200px'
+                    />
+                  ) : (
+                    <div className='text-center py-8 text-neutral-500'>
+                      No content recorded
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
-        </div>
+              </PageSection>
+            </PageMain>
+          </PageContent>
+        </PageContainer>
       </FeedbackDetailClient>
     )
   } catch (error) {

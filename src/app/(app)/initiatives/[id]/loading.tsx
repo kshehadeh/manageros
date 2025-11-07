@@ -1,6 +1,11 @@
 import { Skeleton } from '@/components/ui/skeleton'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
+import { PageMain } from '@/components/ui/page-main'
+import { PageSidebar } from '@/components/ui/page-sidebar'
 import {
   Rocket,
   FileText,
@@ -14,9 +19,8 @@ import {
 
 export default function LoadingPage() {
   return (
-    <div className='space-y-6'>
-      {/* Header - Full Width */}
-      <div className='page-header'>
+    <PageContainer>
+      <PageHeader>
         <div className='flex items-center justify-between'>
           <div className='flex-1'>
             <div className='flex items-center gap-3 mb-2'>
@@ -30,12 +34,10 @@ export default function LoadingPage() {
           </div>
           <Skeleton className='h-9 w-9 rounded-md' />
         </div>
-      </div>
+      </PageHeader>
 
-      {/* Main Content and Sidebar */}
-      <div className='flex flex-col lg:flex-row gap-6 px-0 lg:px-6'>
-        {/* Main Content */}
-        <div className='flex-1 min-w-0'>
+      <PageContent>
+        <PageMain>
           <div className='space-y-6'>
             {/* Summary Section */}
             <PageSection
@@ -135,82 +137,79 @@ export default function LoadingPage() {
               </div>
             </PageSection>
           </div>
-        </div>
+        </PageMain>
 
-        {/* Right Sidebar */}
-        <div className='w-full lg:w-80 lg:shrink-0'>
-          <div className='w-full lg:w-80 space-y-6'>
-            {/* Team Section */}
-            <PageSection
-              variant='bordered'
-              header={
-                <SectionHeader
-                  icon={Users}
-                  title='Team'
-                  action={<Skeleton className='h-8 w-8' />}
-                  className='mb-3'
-                />
-              }
-            >
-              <div className='flex items-center gap-3'>
-                <Skeleton className='h-10 w-10 rounded-full' />
-                <Skeleton className='h-4 w-32' />
-              </div>
-            </PageSection>
+        <PageSidebar>
+          {/* Team Section */}
+          <PageSection
+            variant='bordered'
+            header={
+              <SectionHeader
+                icon={Users}
+                title='Team'
+                action={<Skeleton className='h-8 w-8' />}
+                className='mb-3'
+              />
+            }
+          >
+            <div className='flex items-center gap-3'>
+              <Skeleton className='h-10 w-10 rounded-full' />
+              <Skeleton className='h-4 w-32' />
+            </div>
+          </PageSection>
 
-            {/* People Section */}
-            <PageSection
-              variant='bordered'
-              header={
-                <SectionHeader
-                  icon={User}
-                  title='People'
-                  action={<Skeleton className='h-8 w-8' />}
-                  className='mb-3'
-                />
-              }
-            >
-              <div className='space-y-3'>
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className='flex items-center gap-3'>
-                    <Skeleton className='h-10 w-10 rounded-full' />
-                    <div className='flex-1 space-y-1'>
-                      <Skeleton className='h-4 w-32' />
-                      <Skeleton className='h-3 w-20' />
-                    </div>
+          {/* People Section */}
+          <PageSection
+            variant='bordered'
+            header={
+              <SectionHeader
+                icon={User}
+                title='People'
+                action={<Skeleton className='h-8 w-8' />}
+                className='mb-3'
+              />
+            }
+          >
+            <div className='space-y-3'>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className='flex items-center gap-3'>
+                  <Skeleton className='h-10 w-10 rounded-full' />
+                  <div className='flex-1 space-y-1'>
+                    <Skeleton className='h-4 w-32' />
+                    <Skeleton className='h-3 w-20' />
                   </div>
-                ))}
-              </div>
-            </PageSection>
+                </div>
+              ))}
+            </div>
+          </PageSection>
 
-            {/* Links Section */}
-            <PageSection
-              variant='bordered'
-              header={
-                <SectionHeader
-                  icon={LinkIcon}
-                  title='Links'
-                  action={<Skeleton className='h-8 w-8' />}
-                />
-              }
-            >
-              <div className='space-y-3'>
-                {Array.from({ length: 2 }).map((_, i) => (
-                  <div key={i} className='border rounded-lg p-3 space-y-2'>
-                    <Skeleton className='h-4 w-full' />
-                    <Skeleton className='h-3 w-3/4' />
-                    <div className='flex items-center gap-2 pt-1'>
-                      <Skeleton className='h-3 w-16' />
-                      <Skeleton className='h-3 w-2' />
-                      <Skeleton className='h-3 w-20' />
-                    </div>
+          {/* Links Section */}
+          <PageSection
+            variant='bordered'
+            header={
+              <SectionHeader
+                icon={LinkIcon}
+                title='Links'
+                action={<Skeleton className='h-8 w-8' />}
+              />
+            }
+          >
+            <div className='space-y-3'>
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div key={i} className='border rounded-lg p-3 space-y-2'>
+                  <Skeleton className='h-4 w-full' />
+                  <Skeleton className='h-3 w-3/4' />
+                  <div className='flex items-center gap-2 pt-1'>
+                    <Skeleton className='h-3 w-16' />
+                    <Skeleton className='h-3 w-2' />
+                    <Skeleton className='h-3 w-20' />
                   </div>
-                ))}
-              </div>
-            </PageSection>
-          </div>
-        </div>
-      </div>
-    </div>
+                </div>
+              ))}
+            </div>
+          </PageSection>
+        </PageSidebar>
+      </PageContent>
+    </PageContainer>
   )
 }
