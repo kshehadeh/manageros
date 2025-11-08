@@ -1,22 +1,31 @@
-# Clerk JWT Template Setup for ManagerOS
+# Clerk Session Token Setup for ManagerOS
 
-This guide explains how to configure Clerk's JWT template to include ManagerOS-specific data (organization ID, user ID, etc.) in the session token.
+This guide explains how to configure Clerk's session token to include ManagerOS-specific data (organization ID, user ID, etc.) in the session claims.
 
 ## Overview
 
-By default, Clerk's JWT tokens only include basic user information. To include ManagerOS-specific data like `organizationId`, `managerOSUserId`, `personId`, etc., you need to:
+By default, Clerk's session tokens only include basic user information. To include ManagerOS-specific data like `organizationId`, `managerOSUserId`, `personId`, etc., you need to:
 
-1. Set up a JWT template in Clerk Dashboard
+1. **Customize the Session Token** in Clerk Dashboard (required for `auth().sessionClaims`)
 2. Use the `syncUserDataToClerk()` function to populate user metadata
 3. Access the data via `auth()` session claims
 
-## Step 1: Create JWT Template in Clerk Dashboard
+## Important: Session Token vs JWT Templates
+
+Clerk has two different concepts:
+
+- **Session Token** (used by `auth()`): This is what's stored in cookies and used for authentication. Custom claims must be added via "Customize session token" in the Sessions page. This is what affects `auth().sessionClaims`.
+- **JWT Templates** (used by `getToken()`): These are used for backend API requests, not for session tokens.
+
+**For `auth().sessionClaims` to work, you MUST customize the Session Token, not just create a JWT Template.**
+
+## Step 1: Customize Session Token in Clerk Dashboard
 
 1. Go to your [Clerk Dashboard](https://dashboard.clerk.com)
-2. Navigate to **JWT Templates** in the sidebar
-3. Click **New template** or edit the default template
-4. Give it a name (e.g., "ManagerOS Session")
-5. In the **Token Claims** section, add the following custom claims:
+2. Navigate to **Sessions** in the sidebar
+3. Scroll down to **Customize session token** section
+4. Click **Edit** or **Add claims** in the Claims editor
+5. Add the following custom claims:
 
 ```json
 {
@@ -29,10 +38,23 @@ By default, Clerk's JWT tokens only include basic user information. To include M
 }
 ```
 
-**Important**: Make sure to use `public_metadata` (with underscore) - this is Clerk's syntax for accessing public metadata.
+**Important**:
 
-6. Save the template
-7. **Make this template the default** for your application (or assign it to specific applications if you have multiple)
+- Make sure to use `public_metadata` (with underscore) - this is Clerk's syntax for accessing public metadata.
+- The session token has a size limit (~1.2KB for custom claims after default claims), so keep claims small.
+
+6. Click **Save** to apply the changes
+
+## Alternative: JWT Templates (for API calls only)
+
+If you need custom claims in JWT tokens for API calls (using `getToken()`), you can also create a JWT Template:
+
+1. Go to **JWT Templates** in the sidebar
+2. Click **New template** or edit the default template
+3. Add the same claims as above
+4. Use `getToken({ template: 'template-name' })` to get the token with custom claims
+
+**Note**: JWT Templates do NOT affect `auth().sessionClaims` - they're only for tokens retrieved via `getToken()`.
 
 ## Step 2: How It Works
 
@@ -88,19 +110,22 @@ await syncUserDataToClerk(clerkUserId)
 
 ## Important Notes
 
-- The JWT template must be configured in Clerk Dashboard for this to work
+- **The Session Token must be customized in Clerk Dashboard** (Sessions → Customize session token) for this to work
 - User metadata is synced automatically, but you may need to sign out/in for changes to appear in the token
 - If session claims are not available, the system falls back to database lookup
 - Public metadata is readable on both frontend and backend, but only writable from backend
+- Session token size is limited to ~4KB total (including default claims), so custom claims should be kept small
 
 ## Troubleshooting
 
 ### Data not appearing in session claims?
 
-1. Verify the JWT template is saved in Clerk Dashboard
+1. **Verify the Session Token is customized** in Clerk Dashboard (Sessions → Customize session token)
+   - ⚠️ **Important**: Creating a JWT Template alone is NOT enough - you must customize the Session Token
 2. Check that `syncUserDataToClerk()` has been called for the user
-3. User may need to sign out and sign back in to get a new token
-4. Check Clerk Dashboard → Users → [User] → Metadata to verify data is synced
+3. User may need to sign out and sign back in to get a new token with custom claims
+4. Check Clerk Dashboard → Users → [User] → Metadata to verify data is synced to public metadata
+5. Check the browser console - the `console.log(sessionClaims)` in `getCurrentUser()` will show what claims are available
 
 ### Data is outdated?
 

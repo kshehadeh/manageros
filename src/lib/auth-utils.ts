@@ -21,9 +21,11 @@ export async function getCurrentUser(): Promise<User> {
     throw new Error('Unauthorized')
   }
 
-  // Try to get user data from session claims first (if JWT template is configured)
+  // Try to get user data from session claims first (if Session Token is customized in Clerk Dashboard)
   // This avoids a database lookup if the data is in the token
-  const claimsData = sessionClaims as {
+  // NOTE: Custom claims only appear in sessionClaims if the Session Token is customized in
+  // Clerk Dashboard (Sessions → Customize session token), NOT just JWT Templates
+  const claimsData = sessionClaims.metadata as {
     managerOSUserId?: string
     organizationId?: string | null
     organizationName?: string | null
@@ -69,7 +71,6 @@ export async function getCurrentUser(): Promise<User> {
   // This handles the case where a user existed before Clerk migration
   if (!user) {
     try {
-      console.log('user not found, trying to link by email')
       // Get user email from Clerk using the Clerk client
       const client = await clerkClient()
       const clerkUser = await client.users.getUser(userId)
@@ -133,8 +134,6 @@ export async function getCurrentUser(): Promise<User> {
   syncUserDataToClerk(userId).catch(err => {
     console.error('Failed to sync user data to Clerk:', err)
   })
-
-  console.log('user found', user)
 
   return {
     id: user.id,

@@ -21,17 +21,23 @@ export default clerkMiddleware(async (auth, req) => {
   const response = NextResponse.next()
   response.headers.set('x-pathname', pathname)
 
+  // Get auth state early to check for authenticated users on root path
+  const authResult = await auth({ treatPendingAsSignedOut: false })
+  const { userId } = authResult
+
+  // Redirect authenticated users from root to dashboard
+  if (pathname === '/' && userId) {
+    return NextResponse.redirect(new URL('/dashboard', req.url))
+  }
+
   // Allow public routes without authentication
   if (isPublicRouteMatcher(req)) {
     console.log('Public route:', pathname)
     return response
   }
 
-  // Get auth state - this sets up the auth context
-  const authResult = await auth({ treatPendingAsSignedOut: false })
-  const { userId } = authResult
-
   // For API routes, let the route handler check auth and return 401
+  // Note: auth state was already checked above for root path redirect
   // The auth context is now available for the route handler
   if (pathname.startsWith('/api/')) {
     return response

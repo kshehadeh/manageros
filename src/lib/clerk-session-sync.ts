@@ -1,7 +1,12 @@
 /**
  * Utilities for syncing ManagerOS user data to Clerk session claims
- * This allows us to store orgId, managerOSUserId, etc. in the JWT token
+ * This allows us to store orgId, managerOSUserId, etc. in the session token
  * so they're available via auth() without database lookups
+ *
+ * IMPORTANT: For custom claims to appear in auth().sessionClaims, you must:
+ * 1. Call syncUserDataToClerk() to populate user public metadata
+ * 2. Customize the Session Token in Clerk Dashboard (Sessions → Customize session token)
+ *    - JWT Templates alone are NOT sufficient for sessionClaims
  */
 
 import { clerkClient } from '@clerk/nextjs/server'
