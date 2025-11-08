@@ -100,20 +100,26 @@ export function PersonDetailContent({
   return (
     <PageContainer>
       <PageHeader
-        title={person.name}
-        subtitle={
-          <>
-            <div className='flex items-center gap-3 mb-2'>
-              <PersonAvatarWrapper
-                personId={person.id}
-                personName={person.name}
-                currentAvatar={person.avatar || null}
-                jiraAvatar={linkedAvatars?.jiraAvatar}
-                githubAvatar={linkedAvatars?.githubAvatar}
-                isAdmin={isAdmin}
-              />
+        title={
+          <div className='flex flex-col leading-none'>
+            <div>{person.name}</div>
+            <div className='mt-1'>
               <PersonStatusBadge status={person.status} />
             </div>
+          </div>
+        }
+        iconComponent={
+          <PersonAvatarWrapper
+            personId={person.id}
+            personName={person.name}
+            currentAvatar={person.avatar || null}
+            jiraAvatar={linkedAvatars?.jiraAvatar}
+            githubAvatar={linkedAvatars?.githubAvatar}
+            isAdmin={isAdmin}
+          />
+        }
+        subtitle={
+          <>
             <div className='page-section-subtitle'>{person.role ?? ''}</div>
             <div className='text-xs text-muted-foreground'>{person.email}</div>
 

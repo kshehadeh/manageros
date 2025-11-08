@@ -19,9 +19,15 @@ export function PageTitle({
   className = '',
 }: PageTitleProps) {
   return (
-    <div className={cn('flex items-center gap-3', className)}>
+    <div
+      className={cn(
+        'flex gap-3',
+        iconComponent ? 'items-start' : 'items-center',
+        className
+      )}
+    >
       {iconComponent ? (
-        <div className='hidden md:block'>{iconComponent}</div>
+        <div>{iconComponent}</div>
       ) : Icon ? (
         <Icon className='h-6 w-6 text-muted-foreground hidden md:block' />
       ) : null}

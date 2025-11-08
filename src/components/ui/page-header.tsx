@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 import { PageTitle } from './page-title'
 
 interface PageHeaderProps {
-  title?: string
+  title?: string | ReactNode
   titleIcon?: LucideIcon | React.ElementType
   iconComponent?: ReactNode
   helpId?: string
