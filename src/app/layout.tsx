@@ -2,8 +2,6 @@ import './globals.css'
 import type { ReactNode } from 'react'
 import '@/lib/reports/register-all'
 import { Metadata } from 'next'
-import { ClerkProvider } from '@clerk/nextjs'
-import { shadcn } from '@clerk/themes'
 
 export const metadata: Metadata = {
   title: {
@@ -36,12 +34,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <ClerkProvider appearance={{ theme: shadcn }}>
-      <html lang='en' suppressHydrationWarning>
-        <body className='min-h-screen bg-background text-foreground antialiased'>
-          {children}
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang='en' suppressHydrationWarning>
+      <body className='min-h-screen bg-background text-foreground antialiased'>
+        {children}
+      </body>
+    </html>
   )
 }

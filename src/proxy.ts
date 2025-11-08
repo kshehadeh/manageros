@@ -23,6 +23,7 @@ export default clerkMiddleware(async (auth, req) => {
 
   // Allow public routes without authentication
   if (isPublicRouteMatcher(req)) {
+    console.log('Public route:', pathname)
     return response
   }
 
