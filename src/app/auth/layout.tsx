@@ -3,11 +3,11 @@ import { IndigoIcon } from '@/components/indigo-icon'
 import { ThemeProvider } from 'next-themes'
 import Link from 'next/link'
 import { ClerkProvider } from '@clerk/nextjs'
-import { shadcn } from '@clerk/themes'
+import { dark } from '@clerk/themes'
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <ClerkProvider appearance={{ theme: shadcn }}>
+    <ClerkProvider appearance={{ theme: dark }}>
       <ThemeProvider
         attribute='class'
         defaultTheme='dark'
