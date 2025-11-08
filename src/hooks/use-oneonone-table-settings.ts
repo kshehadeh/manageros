@@ -1,6 +1,6 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
+import { useUser } from '@clerk/nextjs'
 import { useCallback, useEffect, useState } from 'react'
 import { SortingState } from '@tanstack/react-table'
 import {
@@ -35,7 +35,20 @@ export function useOneOnOneTableSettings({
   settingsId,
   enabled = true,
 }: UseOneOnOneTableSettingsOptions) {
-  const { data: session } = useSession()
+  const { user, isLoaded: clerkLoaded } = useUser()
+  const [userId, setUserId] = useState<string | undefined>(undefined)
+
+  // Get user ID from API
+  useEffect(() => {
+    if (clerkLoaded && user) {
+      fetch('/api/user/current')
+        .then(res => res.json())
+        .then(data => setUserId(data.user?.id))
+        .catch(() => {})
+    } else {
+      setUserId(undefined)
+    }
+  }, [clerkLoaded, user])
   const [settings, setSettings] = useState<OneOnOneTableSettings>({
     sorting: [],
     grouping: 'none',
@@ -50,8 +63,6 @@ export function useOneOnOneTableSettings({
     },
   })
   const [isLoaded, setIsLoaded] = useState(false)
-
-  const userId = session?.user?.id
 
   // Load settings when user changes or settingsId changes
   useEffect(() => {

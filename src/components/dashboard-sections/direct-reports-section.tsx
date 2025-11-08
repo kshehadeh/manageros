@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { SimplePeopleList } from '@/components/people/person-list'
 import { SimpleTaskListSkeleton } from '@/components/common/simple-task-list-skeleton'
@@ -8,13 +8,24 @@ import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { Button } from '@/components/ui/button'
 import { usePeople } from '@/hooks/use-people'
-import { useSession } from 'next-auth/react'
+import { useUser } from '@clerk/nextjs'
 import { Users, Eye } from 'lucide-react'
 import type { Person } from '@/types/person'
 
 export function DashboardDirectReportsSection() {
-  const { data: session, status } = useSession()
-  const currentPersonId = (session?.user as { personId?: string })?.personId
+  const { user, isLoaded } = useUser()
+  const [userData, setUserData] = useState<{ personId?: string } | null>(null)
+
+  useEffect(() => {
+    if (isLoaded && user) {
+      fetch('/api/user/current')
+        .then(res => res.json())
+        .then(data => setUserData(data.user))
+        .catch(() => {})
+    }
+  }, [isLoaded, user])
+
+  const currentPersonId = userData?.personId
 
   // Memoize immutableFilters to prevent infinite loop
   const immutableFilters = useMemo(

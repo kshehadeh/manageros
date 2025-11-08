@@ -1,13 +1,13 @@
 import { getTeams } from '@/lib/actions/team'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+
 import { redirect } from 'next/navigation'
 import { MeetingForm } from '@/components/meetings/meeting-form'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function NewMeetingPage() {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 

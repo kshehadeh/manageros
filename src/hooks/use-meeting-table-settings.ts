@@ -1,6 +1,6 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
+import { useUser } from '@clerk/nextjs'
 import { useCallback, useEffect, useState } from 'react'
 import { SortingState } from '@tanstack/react-table'
 import {
@@ -38,7 +38,20 @@ export function useMeetingTableSettings({
   settingsId,
   enabled = true,
 }: UseMeetingTableSettingsOptions) {
-  const { data: session } = useSession()
+  const { user, isLoaded: clerkLoaded } = useUser()
+  const [userId, setUserId] = useState<string | undefined>(undefined)
+
+  // Get user ID from API
+  useEffect(() => {
+    if (clerkLoaded && user) {
+      fetch('/api/user/current')
+        .then(res => res.json())
+        .then(data => setUserId(data.user?.id))
+        .catch(() => {})
+    } else {
+      setUserId(undefined)
+    }
+  }, [clerkLoaded, user])
   const [settings, setSettings] = useState<MeetingTableSettings>({
     sorting: [],
     grouping: 'none',
@@ -56,8 +69,6 @@ export function useMeetingTableSettings({
     },
   })
   const [isLoaded, setIsLoaded] = useState(false)
-
-  const userId = session?.user?.id
 
   // Load settings when user changes or settingsId changes
   useEffect(() => {

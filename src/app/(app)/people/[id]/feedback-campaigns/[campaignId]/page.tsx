@@ -1,7 +1,6 @@
 import { prisma } from '@/lib/db'
 import { notFound, redirect } from 'next/navigation'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+
 import Link from 'next/link'
 import { FeedbackCampaignDetailBreadcrumbClient } from '@/components/feedback/feedback-campaign-detail-breadcrumb-client'
 import { FeedbackCampaignActionsDropdown } from '@/components/feedback/feedback-campaign-actions-dropdown'
@@ -28,6 +27,7 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { checkIfManagerOrSelf } from '@/lib/utils/people-utils'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 interface FeedbackCampaignDetailPageProps {
   params: Promise<{
@@ -39,11 +39,11 @@ interface FeedbackCampaignDetailPageProps {
 export default async function FeedbackCampaignDetailPage({
   params,
 }: FeedbackCampaignDetailPageProps) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
   const { id, campaignId } = await params
 
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 
@@ -51,7 +51,7 @@ export default async function FeedbackCampaignDetailPage({
   const person = await prisma.person.findFirst({
     where: {
       id,
-      organizationId: session.user.organizationId,
+      organizationId: user.organizationId,
     },
     select: {
       id: true,
@@ -68,7 +68,7 @@ export default async function FeedbackCampaignDetailPage({
   const currentPerson = await prisma.person.findFirst({
     where: {
       user: {
-        id: session.user.id,
+        id: user.id,
       },
     },
   })
@@ -89,7 +89,7 @@ export default async function FeedbackCampaignDetailPage({
     where: {
       id: campaignId,
       targetPersonId: id,
-      userId: session.user.id,
+      userId: user.id,
     },
     include: {
       template: {

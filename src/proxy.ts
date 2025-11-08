@@ -1,4 +1,4 @@
-import { withAuth } from 'next-auth/middleware'
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 
 // Define public routes in a single location to avoid duplication
@@ -10,57 +10,47 @@ const PUBLIC_ROUTES = [
   '/auth/signup',
   '/auth/forgot-password',
   '/auth/reset-password',
-] as const
+]
 
-// Helper function to check if a pathname is a public route
-function isPublicRoute(pathname: string): boolean {
-  return PUBLIC_ROUTES.some(route =>
-    route === '/' ? pathname === '/' : pathname.startsWith(route)
-  )
-}
+// Create a matcher for public routes
+const isPublicRouteMatcher = createRouteMatcher(PUBLIC_ROUTES)
 
-export default withAuth(
-  function middleware(req) {
-    const { pathname } = req.nextUrl
-    const token = req.nextauth.token
+export default clerkMiddleware(async (auth, req) => {
+  const { pathname } = req.nextUrl
 
-    const response = NextResponse.next()
-    response.headers.set('x-pathname', pathname)
+  const response = NextResponse.next()
+  response.headers.set('x-pathname', pathname)
 
-    // Allow access to organization creation page for users without organizations
-    if (pathname === '/organization/create' && token && !token.organizationId) {
-      return response
-    }
-
-    // Redirect users with organizations away from organization creation page
-    if (token && token.organizationId && pathname === '/organization/create') {
-      return NextResponse.redirect(new URL('/dashboard', req.url))
-    }
-
-    // Note: We don't redirect users without organizations to organization creation
-    // They can access the main app and create an organization when they're ready
-
+  // Allow public routes without authentication
+  if (isPublicRouteMatcher(req)) {
     return response
-  },
-  {
-    callbacks: {
-      authorized: ({ token, req }) => {
-        const { pathname } = req.nextUrl
-
-        // Allow public routes without authentication
-        if (isPublicRoute(pathname)) {
-          return true
-        }
-
-        // Require authentication for all other routes
-        return !!token
-      },
-    },
   }
-)
+
+  // Get auth state - this sets up the auth context
+  const authResult = await auth({ treatPendingAsSignedOut: false })
+  const { userId } = authResult
+
+  // For API routes, let the route handler check auth and return 401
+  // The auth context is now available for the route handler
+  if (pathname.startsWith('/api/')) {
+    return response
+  }
+
+  // For non-API routes, redirect to sign-in if not authenticated
+  if (!userId) {
+    const signInUrl = new URL('/auth/signin', req.url)
+    signInUrl.searchParams.set('redirect_url', pathname)
+    return NextResponse.redirect(signInUrl)
+  }
+
+  return response
+})
 
 export const config = {
   matcher: [
-    '/((?!api/auth|_next/static|_next/image|favicon.ico|manifest.json|images/|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.svg|.*\\.ico).*)',
+    // Skip Next.js internals and all static files, unless found in search params
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for API routes
+    '/(api|trpc)(.*)',
   ],
 }

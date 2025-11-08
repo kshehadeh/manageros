@@ -7,13 +7,26 @@ import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
-import { useSession } from 'next-auth/react'
-import { isAdmin } from '@/lib/auth'
+import { useUser } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 import { Upload, UserPlus, Workflow, User } from 'lucide-react'
 
 export function PeoplePageClient() {
-  const { data: session } = useSession()
+  const { user } = useUser()
+
+  // Get user data from API to check role
+  const [userData, setUserData] = React.useState<{ role: string } | null>(null)
+
+  React.useEffect(() => {
+    if (user) {
+      fetch('/api/user/current')
+        .then(res => res.json())
+        .then(data => setUserData(data.user))
+        .catch(() => {})
+    }
+  }, [user])
+
+  const isAdmin = userData?.role === 'ADMIN'
 
   return (
     <PageContainer className='px-3 md:px-0'>
@@ -30,7 +43,7 @@ export function PeoplePageClient() {
               </Link>
             </Button>
 
-            {session?.user && isAdmin(session.user) && (
+            {isAdmin && (
               <>
                 <Button asChild variant='outline'>
                   <Link

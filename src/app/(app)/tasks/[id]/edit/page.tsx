@@ -1,22 +1,22 @@
 import { prisma } from '@/lib/db'
 import { getTask } from '@/lib/actions/task'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+
 import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import { TaskForm } from '@/components/tasks/task-form'
 import { TaskDetailBreadcrumbClient } from '@/components/tasks/task-detail-breadcrumb-client'
 import { PageSection } from '@/components/ui/page-section'
 import { type TaskStatus } from '@/lib/task-status'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function EditTaskPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 
@@ -31,14 +31,14 @@ export default async function EditTaskPage({
   const [people, objectives] = await Promise.all([
     prisma.person.findMany({
       where: {
-        organizationId: session.user.organizationId,
+        organizationId: user.organizationId,
       },
       orderBy: { name: 'asc' },
     }),
     prisma.objective.findMany({
       where: {
         initiative: {
-          organizationId: session.user.organizationId,
+          organizationId: user.organizationId,
         },
       },
       orderBy: { title: 'asc' },

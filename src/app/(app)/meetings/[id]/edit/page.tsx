@@ -1,20 +1,20 @@
 import { getMeeting } from '@/lib/actions/meeting'
 import { getTeams } from '@/lib/actions/team'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+
 import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import { MeetingForm } from '@/components/meetings/meeting-form'
 import { utcToLocalDateTimeString } from '@/lib/timezone-utils'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function EditMeetingPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 

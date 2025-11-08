@@ -1,7 +1,6 @@
 import { getMeetingInstance } from '@/lib/actions/meeting-instance'
 import { getEntityLinks } from '@/lib/actions/entity-links'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+
 import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -18,15 +17,16 @@ import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
 import { PageSidebar } from '@/components/ui/page-sidebar'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function MeetingInstanceDetailPage({
   params,
 }: {
   params: Promise<{ id: string; instanceId: string }>
 }) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 

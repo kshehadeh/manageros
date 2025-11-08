@@ -1,8 +1,8 @@
 import { prisma } from '@/lib/db'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+
 import { JobRoleSectionClient } from './job-role-section-client'
 import { PageSection } from '@/components/ui/page-section'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 interface JobRoleSectionProps {
   personId: string
@@ -26,9 +26,9 @@ export async function JobRoleSection({
   personName,
   currentJobRole,
 }: JobRoleSectionProps) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
-  if (!session?.user?.organizationId) {
+  if (!user?.organizationId) {
     return null
   }
 
@@ -40,7 +40,7 @@ export async function JobRoleSection({
     const person = await prisma.person.findFirst({
       where: {
         id: personId,
-        organizationId: session.user.organizationId,
+        organizationId: user.organizationId,
       },
       include: {
         jobRole: {
@@ -63,7 +63,7 @@ export async function JobRoleSection({
   // Get all available job roles for the organization
   const jobRoles = await prisma.jobRole.findMany({
     where: {
-      organizationId: session.user.organizationId,
+      organizationId: user.organizationId,
     },
     include: {
       level: true,

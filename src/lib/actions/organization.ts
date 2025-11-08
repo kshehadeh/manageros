@@ -3,6 +3,8 @@
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth-utils'
+import { syncUserDataToClerk } from '@/lib/clerk-session-sync'
+import { auth } from '@clerk/nextjs/server'
 
 export async function createOrganization(formData: {
   name: string
@@ -45,6 +47,12 @@ export async function createOrganization(formData: {
 
     return organization
   })
+
+  // Sync updated user data to Clerk (organizationId and role changed)
+  const { userId } = await auth()
+  if (userId) {
+    await syncUserDataToClerk(userId)
+  }
 
   revalidatePath('/')
   return result
@@ -550,6 +558,12 @@ export async function acceptInvitationForUser(invitationId: string) {
     return updatedUser
   })
 
+  // Sync updated user data to Clerk (organizationId changed)
+  const { userId } = await auth()
+  if (userId) {
+    await syncUserDataToClerk(userId)
+  }
+
   revalidatePath('/')
   return result
 }
@@ -652,6 +666,11 @@ export async function updateUserRole(
     data: { role: newRole },
   })
 
+  // Sync updated user data to Clerk (role changed)
+  if (targetUser.clerkUserId) {
+    await syncUserDataToClerk(targetUser.clerkUserId)
+  }
+
   revalidatePath('/organization/members')
   revalidatePath('/organization/settings')
 }
@@ -722,6 +741,11 @@ export async function removeUserFromOrganization(userId: string) {
     })
   })
 
+  // Sync updated user data to Clerk (organizationId and role changed)
+  if (targetUser.clerkUserId) {
+    await syncUserDataToClerk(targetUser.clerkUserId)
+  }
+
   revalidatePath('/organization/members')
   revalidatePath('/organization/settings')
 }
@@ -788,6 +812,12 @@ export async function linkSelfToPerson(personId: string) {
     data: { personId: personId },
   })
 
+  // Sync updated user data to Clerk (personId changed)
+  const { userId } = await auth()
+  if (userId) {
+    await syncUserDataToClerk(userId)
+  }
+
   revalidatePath('/settings')
   revalidatePath('/dashboard')
 }
@@ -805,6 +835,12 @@ export async function unlinkSelfFromPerson() {
     where: { id: currentUser.id },
     data: { personId: null },
   })
+
+  // Sync updated user data to Clerk (personId changed)
+  const { userId } = await auth()
+  if (userId) {
+    await syncUserDataToClerk(userId)
+  }
 
   revalidatePath('/settings')
   revalidatePath('/dashboard')

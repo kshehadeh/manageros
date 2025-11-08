@@ -1,7 +1,6 @@
 import { MarketingHeader } from '@/components/marketing/marketing-header'
 import { AnimatedGeometricPattern } from '@/components/marketing/animated-geometric-pattern'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { ThemeProvider } from 'next-themes'
 
@@ -10,9 +9,9 @@ export default async function MarketingLayout({
 }: {
   children: React.ReactNode
 }) {
-  const session = await getServerSession(authOptions)
+  const { userId } = await auth()
 
-  if (session?.user) {
+  if (userId) {
     return redirect('/dashboard')
   }
 

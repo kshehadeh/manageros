@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { createOrganization } from '@/lib/actions/organization'
-import { useSession } from 'next-auth/react'
 
 export default function CreateOrganizationPage() {
   const [formData, setFormData] = useState({
@@ -14,7 +13,6 @@ export default function CreateOrganizationPage() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const { update: updateSession } = useSession()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -24,10 +22,10 @@ export default function CreateOrganizationPage() {
     try {
       await createOrganization(formData)
 
-      // Update the session to reflect the new organization
-      await updateSession()
-
+      // Redirect to dashboard
+      // Clerk will automatically update the user data
       router.push('/')
+      router.refresh() // Refresh to get updated user data
     } catch (error) {
       setError(
         error instanceof Error

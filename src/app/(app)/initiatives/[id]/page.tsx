@@ -1,5 +1,3 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { InitiativeDetailClient } from '@/components/initiatives/initiative-detail-client'
 import { InitiativeActionsDropdown } from '@/components/initiatives/initiative-actions-dropdown'
@@ -29,15 +27,16 @@ import { getTeams } from '@/lib/actions/team'
 import { getEntityLinks } from '@/lib/actions/entity-links'
 import { FileText, Rocket } from 'lucide-react'
 import { Rag } from '@/components/rag'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function InitiativeDetail({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 

@@ -8,12 +8,24 @@ import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 import { NotificationsHeader } from '@/components/notifications/notifications-header'
-import { useSession } from 'next-auth/react'
+import { useUser } from '@clerk/nextjs'
+import { useEffect } from 'react'
 
 export default function NotificationsPage() {
   const [showAllNotifications, setShowAllNotifications] = useState(false)
-  const { data: session } = useSession()
-  const isAdmin = session?.user?.role === 'ADMIN'
+  const { user, isLoaded } = useUser()
+  const [userData, setUserData] = useState<{ role?: string } | null>(null)
+
+  useEffect(() => {
+    if (isLoaded && user) {
+      fetch('/api/user/current')
+        .then(res => res.json())
+        .then(data => setUserData(data.user))
+        .catch(() => {})
+    }
+  }, [isLoaded, user])
+
+  const isAdmin = userData?.role === 'ADMIN'
 
   const handleRefresh = () => {
     window.location.reload()

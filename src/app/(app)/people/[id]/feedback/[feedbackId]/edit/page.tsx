@@ -2,10 +2,10 @@ import { prisma } from '@/lib/db'
 import { FeedbackForm } from '@/components/feedback/feedback-form'
 import { EditFeedbackBreadcrumbClient } from '@/components/feedback/edit-feedback-breadcrumb-client'
 import { notFound } from 'next/navigation'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+
 import { redirect } from 'next/navigation'
 import { PageSection } from '@/components/ui/page-section'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 interface FeedbackEditPageProps {
   params: Promise<{
@@ -17,11 +17,11 @@ interface FeedbackEditPageProps {
 export default async function FeedbackEditPage({
   params,
 }: FeedbackEditPageProps) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
   const { id, feedbackId } = await params
 
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 
@@ -29,7 +29,7 @@ export default async function FeedbackEditPage({
   const currentPerson = await prisma.person.findFirst({
     where: {
       user: {
-        id: session.user.id,
+        id: user.id,
       },
     },
   })
@@ -42,7 +42,7 @@ export default async function FeedbackEditPage({
   const person = await prisma.person.findFirst({
     where: {
       id,
-      organizationId: session.user.organizationId,
+      organizationId: user.organizationId,
     },
   })
 

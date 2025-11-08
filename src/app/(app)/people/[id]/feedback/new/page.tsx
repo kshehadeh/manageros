@@ -1,9 +1,9 @@
 import { prisma } from '@/lib/db'
 import { notFound, redirect } from 'next/navigation'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+
 import { FeedbackForm } from '@/components/feedback/feedback-form'
 import { NewFeedbackBreadcrumbClient } from '@/components/feedback/new-feedback-breadcrumb-client'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 interface NewFeedbackPageProps {
   params: Promise<{
@@ -14,11 +14,11 @@ interface NewFeedbackPageProps {
 export default async function NewFeedbackPage({
   params,
 }: NewFeedbackPageProps) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
   const { id } = await params
 
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 
@@ -26,7 +26,7 @@ export default async function NewFeedbackPage({
   const person = await prisma.person.findFirst({
     where: {
       id,
-      organizationId: session.user.organizationId,
+      organizationId: user.organizationId,
     },
   })
 

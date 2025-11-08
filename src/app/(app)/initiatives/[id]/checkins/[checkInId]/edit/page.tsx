@@ -1,18 +1,18 @@
 import { prisma } from '@/lib/db'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+
 import { redirect } from 'next/navigation'
 import { CheckInFormContent } from '@/components/checkin-form-content'
 import { InitiativeDetailClient } from '@/components/initiatives/initiative-detail-client'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function EditCheckInPage({
   params,
 }: {
   params: Promise<{ id: string; checkInId: string }>
 }) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 
@@ -24,7 +24,7 @@ export default async function EditCheckInPage({
       id: checkInId,
       initiative: {
         id,
-        organizationId: session.user.organizationId,
+        organizationId: user.organizationId,
       },
     },
     include: {

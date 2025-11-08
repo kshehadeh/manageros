@@ -1,22 +1,21 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { TaskForm } from '@/components/tasks/task-form'
 import { PageSection } from '@/components/ui/page-section'
 import { getPeopleForOrganization } from '@/lib/data/people'
 import { getObjectivesForOrganization } from '@/lib/data/objectives'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function NewTaskPage() {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 
   // Get all people and objectives for the form
   const [people, objectives] = await Promise.all([
-    getPeopleForOrganization(session.user.organizationId),
-    getObjectivesForOrganization(session.user.organizationId),
+    getPeopleForOrganization(user.organizationId),
+    getObjectivesForOrganization(user.organizationId),
   ])
 
   return (

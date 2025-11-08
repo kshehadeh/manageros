@@ -1,6 +1,5 @@
 import { getLatestPersonOverview } from '@/lib/actions/person-overview'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getCurrentUser } from '@/lib/auth-utils'
 import { OverviewSectionClient } from './overview-section-client'
 import { PageSection } from '@/components/ui/page-section'
 import { canAccessSynopsesForPerson } from '@/lib/auth-utils'
@@ -27,12 +26,9 @@ export async function OverviewSection({
   personId,
   organizationId,
 }: OverviewSectionProps) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
-  if (
-    !session?.user?.organizationId ||
-    session.user.organizationId !== organizationId
-  ) {
+  if (!user?.organizationId || user.organizationId !== organizationId) {
     return null
   }
 

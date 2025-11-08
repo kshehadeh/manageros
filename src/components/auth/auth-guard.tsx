@@ -1,8 +1,8 @@
 'use client'
 
-import { ReactNode, useEffect } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@clerk/nextjs'
 
 interface AuthGuardProps {
   children: ReactNode
@@ -22,34 +22,54 @@ export function AuthGuard({
   redirectTo,
   fallback,
 }: AuthGuardProps) {
-  const { data: session, status } = useSession()
+  const { isLoaded, userId } = useAuth()
   const router = useRouter()
+  const [userData, setUserData] = useState<{
+    organizationId: string | null
+  } | null>(null)
+
+  // Fetch user data from API to get organization info
+  useEffect(() => {
+    if (isLoaded && userId) {
+      fetch('/api/user/current')
+        .then(res => res.json())
+        .then(data => {
+          if (data.user) {
+            setUserData(data.user)
+          }
+        })
+        .catch(() => {
+          // If API fails, user might not be in database yet
+          setUserData({ organizationId: null })
+        })
+    }
+  }, [isLoaded, userId])
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (!isLoaded) {
+      return
+    }
+
+    if (!userId) {
       router.push('/auth/signin')
       return
     }
 
-    if (
-      status === 'authenticated' &&
-      requireOrganization &&
-      !session?.user?.organizationId
-    ) {
+    if (userId && requireOrganization && userData && !userData.organizationId) {
       router.push(redirectTo || '/organization/create')
       return
     }
-  }, [status, session, requireOrganization, redirectTo, router])
+  }, [isLoaded, userId, userData, requireOrganization, redirectTo, router])
 
-  if (status === 'loading') {
+  if (!isLoaded) {
     return fallback ?? null
   }
 
-  if (status === 'unauthenticated') {
+  if (!userId) {
     return fallback ?? null
   }
 
-  if (requireOrganization && !session?.user?.organizationId) {
+  if (requireOrganization && userData && !userData.organizationId) {
     return fallback ?? null
   }
 

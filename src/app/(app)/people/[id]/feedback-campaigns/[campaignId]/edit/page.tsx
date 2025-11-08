@@ -1,10 +1,10 @@
 import { prisma } from '@/lib/db'
 import { notFound, redirect } from 'next/navigation'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+
 import { FeedbackCampaignForm } from '@/components/feedback/feedback-campaign-form'
 import { EditFeedbackCampaignBreadcrumbClient } from '@/components/feedback/edit-feedback-campaign-breadcrumb-client'
 import { checkIfManagerOrSelf } from '@/lib/utils/people-utils'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 interface EditFeedbackCampaignPageProps {
   params: Promise<{
@@ -16,11 +16,11 @@ interface EditFeedbackCampaignPageProps {
 export default async function EditFeedbackCampaignPage({
   params,
 }: EditFeedbackCampaignPageProps) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
   const { id, campaignId } = await params
 
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 
@@ -28,7 +28,7 @@ export default async function EditFeedbackCampaignPage({
   const person = await prisma.person.findFirst({
     where: {
       id,
-      organizationId: session.user.organizationId,
+      organizationId: user.organizationId,
     },
   })
 
@@ -40,7 +40,7 @@ export default async function EditFeedbackCampaignPage({
   const currentPerson = await prisma.person.findFirst({
     where: {
       user: {
-        id: session.user.id,
+        id: user.id,
       },
     },
   })
@@ -61,7 +61,7 @@ export default async function EditFeedbackCampaignPage({
     where: {
       id: campaignId,
       targetPersonId: id,
-      userId: session.user.id, // Only allow editing campaigns created by the current user
+      userId: user.id, // Only allow editing campaigns created by the current user
     },
     include: {
       template: {

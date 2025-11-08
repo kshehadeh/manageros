@@ -1,7 +1,6 @@
 import { getTask } from '@/lib/actions/task'
 import { getEntityLinks } from '@/lib/data/entity-links'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -20,15 +19,16 @@ import { Calendar, User, Clock, FileText, ListTodo } from 'lucide-react'
 import { type TaskStatus } from '@/lib/task-status'
 import { type TaskPriority } from '@/lib/task-priority'
 import { updateTaskTitle, updateTaskDescription } from '@/lib/actions/task'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function TaskDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 
@@ -43,7 +43,7 @@ export default async function TaskDetailPage({
   const entityLinksResult = await getEntityLinks(
     'Task',
     id,
-    session.user.organizationId,
+    user.organizationId,
     {
       includeCreatedBy: true,
     }

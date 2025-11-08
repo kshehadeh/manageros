@@ -5,10 +5,11 @@ import { getJobRolesForSelection } from '@/lib/actions/job-roles'
 import { getLinkedAccountAvatars } from '@/lib/actions/avatar'
 import { prisma } from '@/lib/db'
 import { notFound } from 'next/navigation'
-import { getServerSession } from 'next-auth'
-import { authOptions, isAdmin } from '@/lib/auth'
+
+import { isAdmin } from '@/lib/auth-utils'
 import { redirect } from 'next/navigation'
 import { PersonDetailClient } from '@/components/people/person-detail-client'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 interface EditPersonPageProps {
   params: Promise<{
@@ -17,10 +18,10 @@ interface EditPersonPageProps {
 }
 
 export default async function EditPersonPage({ params }: EditPersonPageProps) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
   // Check if user is admin
-  if (!session?.user || !isAdmin(session.user)) {
+  if (!user || !isAdmin(user)) {
     redirect('/people')
   }
 

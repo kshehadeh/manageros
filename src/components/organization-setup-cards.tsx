@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/card'
 import { OrganizationCreationDialog } from '@/components/organization-creation-dialog'
 import { acceptInvitationForUser } from '@/lib/actions/organization'
-import { useSession } from 'next-auth/react'
 import { Building2, Users, Mail, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
@@ -48,7 +47,6 @@ export function OrganizationSetupCards({
     null
   )
   const [error, setError] = useState<string | null>(null)
-  const { update: updateSession } = useSession()
   const router = useRouter()
 
   const handleAcceptInvitation = async (invitationId: string) => {
@@ -58,11 +56,10 @@ export function OrganizationSetupCards({
 
       await acceptInvitationForUser(invitationId)
 
-      // Update the session to reflect the new organization
-      await updateSession()
-
       // Redirect to dashboard after successful acceptance
+      // Clerk will automatically update the user data
       router.push('/dashboard')
+      router.refresh() // Refresh to get updated user data
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Failed to accept invitation'

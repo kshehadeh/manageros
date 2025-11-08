@@ -48,7 +48,8 @@ model User {
   id             String        @id @default(cuid())
   email          String        @unique
   name           String
-  passwordHash   String
+  passwordHash   String?       // Optional for Clerk-managed users
+  clerkUserId    String?       @unique // Clerk user ID
   role           String        @default("USER") // ADMIN or USER
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id])
@@ -72,6 +73,7 @@ model User {
   
   @@index([organizationId])
   @@index([personId])
+  @@index([clerkUserId])
 }
 
 model Team {

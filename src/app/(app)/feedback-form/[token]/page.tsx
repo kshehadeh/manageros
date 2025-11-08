@@ -1,5 +1,6 @@
 import { getFeedbackCampaignByInviteLink } from '@/lib/actions/feedback-campaign'
 import { FeedbackSubmissionForm } from '@/components/feedback/feedback-submission-form'
+import { Suspense } from 'react'
 
 interface FeedbackFormPageProps {
   params: Promise<{
@@ -31,7 +32,9 @@ export default async function FeedbackFormPage({
               </p>
             </div>
 
-            <FeedbackSubmissionForm campaign={campaign} />
+            <Suspense>
+              <FeedbackSubmissionForm campaign={campaign} />
+            </Suspense>
           </div>
         </div>
       </div>
