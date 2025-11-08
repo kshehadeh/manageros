@@ -3,10 +3,11 @@
 import { useMemo } from 'react'
 import { DashboardUpcomingMeetings } from '@/components/meetings/dashboard-upcoming-meetings'
 import { useMeetings } from '@/hooks/use-meetings'
-import { useSession } from 'next-auth/react'
+import { useUser } from '@clerk/nextjs'
 
 export function DashboardUpcomingMeetingsSection() {
-  const { status } = useSession()
+  const { isLoaded } = useUser()
+  const status = isLoaded ? 'authenticated' : 'loading'
 
   // Memoize date calculations to prevent infinite loop
   const dateFilters = useMemo(() => {

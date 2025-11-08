@@ -1,10 +1,10 @@
 import { TeamDetailClient } from '@/components/teams/team-detail-client'
 import { TeamDetailContent } from '@/components/teams/team-detail-content'
 import { notFound } from 'next/navigation'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+
 import { redirect } from 'next/navigation'
 import { getTeamById } from '@/lib/data/teams'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 interface TeamDetailPageProps {
   params: Promise<{
@@ -13,14 +13,14 @@ interface TeamDetailPageProps {
 }
 
 export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 
   const { id } = await params
-  const team = await getTeamById(id, session.user.organizationId)
+  const team = await getTeamById(id, user.organizationId)
 
   if (!team) {
     notFound()
@@ -31,9 +31,9 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
       teamName={team.name}
       teamId={team.id}
       teamAvatar={team.avatar}
-      isAdmin={session.user.role === 'ADMIN'}
+      isAdmin={user.role === 'ADMIN'}
     >
-      <TeamDetailContent team={team} isAdmin={session.user.role === 'ADMIN'} />
+      <TeamDetailContent team={team} isAdmin={user.role === 'ADMIN'} />
     </TeamDetailClient>
   )
 }

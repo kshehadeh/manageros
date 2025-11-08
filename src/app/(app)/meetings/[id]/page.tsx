@@ -1,7 +1,6 @@
 import { getMeeting } from '@/lib/actions/meeting'
 import { getEntityLinks } from '@/lib/data/entity-links'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { SectionHeader } from '@/components/ui/section-header'
@@ -29,15 +28,16 @@ import {
 } from 'lucide-react'
 import { LinkListSection } from '@/components/links/link-list-section'
 import { MeetingStatusBadge } from '@/components/meetings/meeting-status-badge'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function MeetingDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 
@@ -52,7 +52,7 @@ export default async function MeetingDetailPage({
   const entityLinksResult = await getEntityLinks(
     'Meeting',
     id,
-    session.user.organizationId,
+    user.organizationId,
     {
       includeCreatedBy: true,
     }

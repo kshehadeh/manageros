@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useUser } from '@clerk/nextjs'
 import {
   flexRender,
   getCoreRowModel,
@@ -110,7 +110,8 @@ export function FeedbackDataTable({
   })
 
   // Get current user's session
-  const { status: sessionStatus } = useSession()
+  const { isLoaded } = useUser()
+  const sessionStatus = isLoaded ? 'authenticated' : 'loading'
 
   // Don't fetch data if we're waiting for session
   const shouldFetch = sessionStatus !== 'loading'

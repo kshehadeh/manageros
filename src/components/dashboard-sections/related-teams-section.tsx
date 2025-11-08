@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import { SimpleTeamList } from '@/components/teams/team-list'
 import { SimpleTaskListSkeleton } from '@/components/common/simple-task-list-skeleton'
 import { useTeams } from '@/hooks/use-teams'
-import { useSession } from 'next-auth/react'
+import { useUser } from '@clerk/nextjs'
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
 import { Button } from '@/components/ui/button'
@@ -12,7 +12,8 @@ import { Building2, Eye } from 'lucide-react'
 import Link from 'next/link'
 
 export function DashboardRelatedTeamsSection() {
-  const { status } = useSession()
+  const { isLoaded } = useUser()
+  const status = isLoaded ? 'authenticated' : 'loading'
 
   // Memoize immutableFilters to prevent infinite loop
   const immutableFilters = useMemo(

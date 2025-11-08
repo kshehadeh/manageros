@@ -1,10 +1,10 @@
 import { prisma } from '@/lib/db'
 import { notFound, redirect } from 'next/navigation'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+
 import { FeedbackCampaignForm } from '@/components/feedback/feedback-campaign-form'
 import { NewFeedbackCampaignBreadcrumbClient } from '@/components/feedback/new-feedback-campaign-breadcrumb-client'
 import { checkIfManagerOrSelf } from '@/lib/utils/people-utils'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 interface NewFeedbackCampaignPageProps {
   params: Promise<{
@@ -15,11 +15,11 @@ interface NewFeedbackCampaignPageProps {
 export default async function NewFeedbackCampaignPage({
   params,
 }: NewFeedbackCampaignPageProps) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
   const { id } = await params
 
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 
@@ -27,7 +27,7 @@ export default async function NewFeedbackCampaignPage({
   const person = await prisma.person.findFirst({
     where: {
       id,
-      organizationId: session.user.organizationId,
+      organizationId: user.organizationId,
     },
   })
 
@@ -36,14 +36,14 @@ export default async function NewFeedbackCampaignPage({
   }
 
   // Get the current user's person ID from session
-  if (!session?.user.personId) {
+  if (!user.personId) {
     redirect('/people')
   }
 
   // Fetch the full person record
   const currentPerson = await prisma.person.findUnique({
     where: {
-      id: session.user.personId,
+      id: user.personId,
     },
   })
 

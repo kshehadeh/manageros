@@ -1,8 +1,9 @@
 import { PersonForm } from '@/components/people/person-form'
 import { getJobRolesForSelection } from '@/lib/actions/job-roles'
-import { getServerSession } from 'next-auth'
-import { authOptions, isAdmin } from '@/lib/auth'
+
+import { isAdmin } from '@/lib/auth-utils'
 import { redirect } from 'next/navigation'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 interface NewPersonPageProps {
   searchParams: Promise<{
@@ -14,10 +15,10 @@ interface NewPersonPageProps {
 export default async function NewPersonPage({
   searchParams,
 }: NewPersonPageProps) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
   // Check if user is admin
-  if (!session?.user || !isAdmin(session.user)) {
+  if (!user || !isAdmin(user)) {
     redirect('/people')
   }
 

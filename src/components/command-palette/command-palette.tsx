@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useUser } from '@clerk/nextjs'
 import { Command as CommandPrimitive } from 'cmdk'
 import { Search } from 'lucide-react'
 import {
@@ -28,7 +28,7 @@ export function CommandPalette() {
   const { isOpen, setOpen } = useCommandPalette()
   const router = useRouter()
   const pathname = usePathname()
-  const { data: session } = useSession()
+  const { user, isLoaded } = useUser()
   const [query, setQuery] = useState('')
   const [items, setItems] = useState<CommandItemDescriptor[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -39,29 +39,35 @@ export function CommandPalette() {
   // Debounce the search query to avoid frequent API calls
   const debouncedQuery = useDebounce(query, 300)
 
-  // Fetch current user's person ID when session is available
-  useEffect(() => {
-    if (!session?.user) return
+  const [userData, setUserData] = useState<{ role?: string } | null>(null)
 
-    const fetchCurrentUserPerson = async () => {
+  // Fetch current user's person ID and role when user is available
+  useEffect(() => {
+    if (!isLoaded || !user) return
+
+    const fetchCurrentUserData = async () => {
       try {
-        const { person } = await getCurrentUserWithPerson()
-        setCurrentUserPersonId(person?.id)
+        const [personData, userDataRes] = await Promise.all([
+          getCurrentUserWithPerson(),
+          fetch('/api/user/current').then(res => res.json()),
+        ])
+        setCurrentUserPersonId(personData.person?.id)
+        setUserData(userDataRes.user)
       } catch (error) {
-        console.error('Failed to fetch current user person:', error)
+        console.error('Failed to fetch current user data:', error)
         setCurrentUserPersonId(undefined)
       }
     }
 
-    fetchCurrentUserPerson()
-  }, [session?.user])
+    fetchCurrentUserData()
+  }, [isLoaded, user])
 
   useEffect(() => {
     let isCancelled = false
     async function run() {
       setIsLoading(true)
       try {
-        const userRole = session?.user?.role
+        const userRole = userData?.role
         const all = await Promise.all(
           sources.map(s =>
             s.getItems(debouncedQuery, userRole, pathname, currentUserPersonId)
@@ -77,7 +83,7 @@ export function CommandPalette() {
     return () => {
       isCancelled = true
     }
-  }, [debouncedQuery, session?.user?.role, pathname, currentUserPersonId])
+  }, [debouncedQuery, userData?.role, pathname, currentUserPersonId])
 
   const grouped = useMemo<Record<string, CommandItemDescriptor[]>>(() => {
     const byGroup: Record<string, CommandItemDescriptor[]> = {}

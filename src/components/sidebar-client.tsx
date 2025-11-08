@@ -1,10 +1,10 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@clerk/nextjs'
 import { useEffect, useState } from 'react'
 import Sidebar from './sidebar'
 import { getSidebarData } from '@/lib/actions/organization'
-import type { User as NextAuthUser } from 'next-auth'
+import type { User } from '@/lib/auth-types'
 
 interface NavItem {
   name: string
@@ -21,25 +21,23 @@ interface PersonData {
 }
 
 interface SidebarData {
-  user: NextAuthUser
+  user: User
   person: PersonData | null
   navigation: NavItem[]
 }
 
-type SessionStatus = 'authenticated' | 'loading' | 'unauthenticated'
-
 export default function SidebarClient() {
-  const { data: session, status } = useSession()
+  const { isLoaded, userId } = useAuth()
   const [sidebarData, setSidebarData] = useState<SidebarData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     async function fetchSidebarData() {
-      if (status === 'loading') {
+      if (!isLoaded) {
         return
       }
 
-      if (status === 'unauthenticated' || !session) {
+      if (!userId) {
         setIsLoading(false)
         return
       }
@@ -55,19 +53,15 @@ export default function SidebarClient() {
     }
 
     fetchSidebarData()
-  }, [session, status])
+  }, [isLoaded, userId])
 
   // Always show skeleton during loading to prevent hydration mismatch
-  if (isLoading || status === 'loading') {
+  if (isLoading || !isLoaded) {
     return <Sidebar />
   }
 
   // If no session, render the unauthenticated sidebar
-  if (
-    !sidebarData ||
-    !session ||
-    (status as SessionStatus) === 'unauthenticated'
-  ) {
+  if (!sidebarData || !userId) {
     return <Sidebar />
   }
 

@@ -1,6 +1,5 @@
 import { getMeeting } from '@/lib/actions/meeting'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+
 import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import { MeetingInstanceForm } from '@/components/meetings/meeting-instance-form'
@@ -8,15 +7,16 @@ import { NewMeetingInstanceBreadcrumbClient } from '@/components/meetings/new-me
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function NewMeetingInstancePage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 

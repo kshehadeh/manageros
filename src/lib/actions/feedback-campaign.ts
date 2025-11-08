@@ -473,6 +473,10 @@ export async function submitFeedbackResponseByInviteLink(
   // Get the campaign by invite link
   const campaign = await getFeedbackCampaignByInviteLink(inviteLink)
 
+  if (!campaign) {
+    return null
+  }
+
   // Check if the responder email is in the invite list
   if (!campaign.inviteEmails.includes(responderEmail)) {
     throw new Error('Your email is not authorized to respond to this campaign')
@@ -579,18 +583,6 @@ export async function getFeedbackCampaignByInviteLink(inviteLink: string) {
     },
   })
 
-  if (!campaign) {
-    throw new Error('Invalid or expired invite link')
-  }
-
-  // Check if the campaign is currently active (within date range)
-  const now = new Date()
-  if (now < campaign.startDate || now > campaign.endDate) {
-    throw new Error(
-      'This feedback campaign is active but the start date has not been reached yet'
-    )
-  }
-
   return campaign
 }
 
@@ -626,12 +618,6 @@ export async function getFeedbackCampaignResponses(campaignId: string) {
       },
     },
   })
-
-  if (!campaign) {
-    throw new Error(
-      'Campaign not found or you do not have permission to view responses'
-    )
-  }
 
   return campaign
 }

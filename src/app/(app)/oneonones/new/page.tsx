@@ -1,8 +1,8 @@
 import { OneOnOneForm } from '@/components/oneonone-form'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+
 import { redirect } from 'next/navigation'
 import { Handshake } from 'lucide-react'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 interface NewOneOnOnePageProps {
   searchParams: Promise<{
@@ -16,9 +16,9 @@ interface NewOneOnOnePageProps {
 export default async function NewOneOnOnePage({
   searchParams,
 }: NewOneOnOnePageProps) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 

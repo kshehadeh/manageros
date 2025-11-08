@@ -1,16 +1,16 @@
 'use client'
 
 import Link from 'next/link'
-import { signOut } from 'next-auth/react'
-import { signOutWithCleanup } from '@/lib/auth-utils'
+import { useClerk } from '@clerk/nextjs'
+import { signOutWithCleanup } from '@/lib/auth-client-utils'
 import { usePathname } from 'next/navigation'
 import { useMobileMenu } from '@/components/mobile-menu-provider'
 import { IndigoIcon } from '@/components/indigo-icon'
-import type { User as NextAuthUser } from 'next-auth'
+import type { User as UserType } from '@/lib/auth-types'
 import {
   Home,
   Rocket,
-  User,
+  User as UserIcon,
   Users2,
   ListTodo,
   Settings,
@@ -47,14 +47,14 @@ interface PersonData {
 
 interface SidebarProps {
   navigation?: NavItem[]
-  serverSession?: NextAuthUser | null
+  serverSession?: UserType | null
   personData?: PersonData | null
 }
 
 const iconMap = {
   Home,
   Rocket,
-  User,
+  User: UserIcon,
   Users2,
   ListTodo,
   Settings,
@@ -75,6 +75,7 @@ export default function Sidebar({
   const [isGettingStartedOpen, setIsGettingStartedOpen] = useState(false)
   const [isBugOpen, setIsBugOpen] = useState(false)
   const { toggleAIChat } = useAIChat()
+  const { signOut } = useClerk()
 
   // Use the navigation passed from server-side filtering
   const filteredNavigation = navigation
@@ -149,7 +150,7 @@ export default function Sidebar({
                     onClick={async () => {
                       setIsMobileMenuOpen(false)
                       await signOutWithCleanup()
-                      signOut({ callbackUrl: '/auth/signin' })
+                      await signOut({ redirectUrl: '/auth/signin' })
                     }}
                     className='text-xs text-muted-foreground hover:text-foreground underline cursor-pointer'
                   >

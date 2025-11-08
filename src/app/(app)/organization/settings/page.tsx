@@ -1,5 +1,4 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getCurrentUser } from '@/lib/auth-utils'
 import { redirect } from 'next/navigation'
 import {
   getOrganizationInvitations,
@@ -30,15 +29,15 @@ import { OrganizationSettingsBreadcrumbClient } from '@/components/organization/
 import { GithubOrganizationsManager } from '@/components/organization/github-organizations-manager'
 
 export default async function OrganizationSettingsPage() {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
   // Check if user is admin
-  if (session?.user.role !== 'ADMIN') {
+  if (user.role !== 'ADMIN') {
     redirect('/dashboard')
   }
 
   // Check if user belongs to an organization
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 
@@ -73,14 +72,12 @@ export default async function OrganizationSettingsPage() {
                 <div>
                   <p className='text-sm font-medium'>Name</p>
                   <p className='text-sm text-muted-foreground'>
-                    {session.user.organizationName}
+                    {user.organizationName}
                   </p>
                 </div>
                 <div>
                   <p className='text-sm font-medium'>Your Role</p>
-                  <p className='text-sm text-muted-foreground'>
-                    {session.user.role}
-                  </p>
+                  <p className='text-sm text-muted-foreground'>{user.role}</p>
                 </div>
               </div>
             </PageSection>

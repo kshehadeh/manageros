@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import 'react-day-picker/dist/style.css';
 @import '../styles/tiptap.css';
+@import '@clerk/themes/shadcn.css';
 
 @theme {
   --color-background: hsl(0 0% 100%);

@@ -12,7 +12,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { createOrganization } from '@/lib/actions/organization'
-import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { AlertCircle } from 'lucide-react'
 
@@ -31,7 +30,6 @@ export function OrganizationCreationDialog({
   })
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const { update: updateSession } = useSession()
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,12 +40,11 @@ export function OrganizationCreationDialog({
     try {
       await createOrganization(formData)
 
-      // Update the session to reflect the new organization
-      await updateSession()
-
       // Close dialog and redirect to dashboard
+      // Clerk will automatically update the user data
       onOpenChange(false)
       router.push('/dashboard')
+      router.refresh() // Refresh to get updated user data
     } catch (error) {
       setError(
         error instanceof Error

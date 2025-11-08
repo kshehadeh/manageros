@@ -1,5 +1,3 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { getAllFeedbackCampaignsForOrganization } from '@/lib/actions/feedback-campaign'
 import { FeedbackCampaignList } from '@/components/feedback/feedback-campaign-list'
@@ -19,11 +17,12 @@ import { PageSidebar } from '@/components/ui/page-sidebar'
 import { PageSection } from '@/components/ui/page-section'
 import { Plus, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function FeedbackCampaignsPage() {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 

@@ -1,7 +1,6 @@
 import { getJobRole } from '@/lib/actions/job-roles'
 import { notFound } from 'next/navigation'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+
 import { redirect } from 'next/navigation'
 import { JobRoleDetailClient } from '@/components/jobs/job-role-detail-client'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
@@ -16,6 +15,7 @@ import { PageMain } from '@/components/ui/page-main'
 import { Building2, Users, Briefcase, FileText } from 'lucide-react'
 import type { Person } from '@/types/person'
 import { AssignPersonButton } from '@/components/jobs/assign-person-button'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 interface JobRoleDetailPageProps {
   params: Promise<{ id: string }>
@@ -24,10 +24,10 @@ interface JobRoleDetailPageProps {
 export default async function JobRoleDetailPage({
   params,
 }: JobRoleDetailPageProps) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 

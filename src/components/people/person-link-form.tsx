@@ -23,7 +23,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Link, Unlink } from 'lucide-react'
 import { PersonListItem } from '@/components/people/person-list-item'
-import { User } from 'next-auth'
+import type { User } from '@/lib/auth-types'
 import {
   linkSelfToPerson,
   unlinkSelfFromPerson,

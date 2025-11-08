@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useUser } from '@clerk/nextjs'
 import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 import {
   flexRender,
@@ -265,7 +265,8 @@ export function GenericDataTable<
   }, [effectiveGrouping, settings.sorting.length, updateSorting])
 
   // Get current user's session
-  const { status: sessionStatus } = useSession()
+  const { isLoaded } = useUser()
+  const sessionStatus = isLoaded ? 'authenticated' : 'loading'
 
   // Don't fetch data if we're waiting for session or settings to load
   const shouldFetch = sessionStatus !== 'loading' && settingsLoaded

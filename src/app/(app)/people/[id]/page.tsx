@@ -2,12 +2,13 @@ import { PersonDetailClient } from '@/components/people/person-detail-client'
 import { PersonDetailContent } from '@/components/people/person-detail-content'
 import type { PersonWithDetailRelations } from '@/components/people/person-detail-content'
 import { notFound } from 'next/navigation'
-import { getServerSession } from 'next-auth'
-import { authOptions, isAdmin } from '@/lib/auth'
+
+import { isAdmin } from '@/lib/auth-utils'
 import { redirect } from 'next/navigation'
 import { getLinkedAccountAvatars } from '@/lib/actions/avatar'
 import { getPersonById } from '@/lib/data/people'
 import { getFeedbackCountForPerson } from '@/lib/data/feedback'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 interface PersonDetailPageProps {
   params: Promise<{
@@ -18,15 +19,15 @@ interface PersonDetailPageProps {
 export default async function PersonDetailPage({
   params,
 }: PersonDetailPageProps) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
   const { id } = await params
 
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 
-  const personResult = await getPersonById(id, session.user.organizationId, {
+  const personResult = await getPersonById(id, user.organizationId, {
     includeTeam: true,
     includeManager: true,
     includeReports: true,
@@ -45,10 +46,10 @@ export default async function PersonDetailPage({
   }
 
   // Get feedback count for this person (respecting privacy rules)
-  // Use session.user.personId directly - no need to fetch from database
+  // Use user.personId directly - no need to fetch from database
   const feedbackCount = await getFeedbackCountForPerson(
     personResult.id,
-    session.user.personId || undefined
+    user.personId || undefined
   )
 
   // Add level field to match Person type requirements
@@ -74,10 +75,10 @@ export default async function PersonDetailPage({
       <PersonDetailContent
         person={personWithLevel as PersonWithDetailRelations}
         linkedAvatars={linkedAvatars}
-        isAdmin={isAdmin(session.user)}
-        currentPersonId={session.user.personId || undefined}
-        organizationId={session.user.organizationId}
-        currentUserId={session.user.id}
+        isAdmin={isAdmin(user)}
+        currentPersonId={user.personId || undefined}
+        organizationId={user.organizationId}
+        currentUserId={user.id}
         feedbackCount={feedbackCount}
       />
     </PersonDetailClient>

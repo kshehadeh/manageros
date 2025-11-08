@@ -1,5 +1,4 @@
 import { ReactNode } from 'react'
-import NetworkAwareSessionProvider from '@/components/network-aware-session-provider'
 import { BreadcrumbProvider } from '@/components/breadcrumb-provider'
 import { DefaultBreadcrumbHandler } from '@/components/default-breadcrumb-handler'
 import { MobileMenuProvider } from '@/components/mobile-menu-provider'
@@ -17,6 +16,8 @@ import { OfflineAwareLayout } from '@/components/offline-aware-layout'
 import { AIChatSidebarWrapper } from '@/components/ai-chat-sidebar-wrapper'
 import { CacheProvider } from '@/components/cache-provider'
 import SidebarClient from '@/components/sidebar-client'
+import { ClerkProvider } from '@clerk/nextjs'
+import { shadcn } from '@clerk/themes'
 
 interface AppLayoutProps {
   children: ReactNode
@@ -25,7 +26,7 @@ interface AppLayoutProps {
 export default async function AppLayout({ children }: AppLayoutProps) {
   // Render full layout for authenticated routes
   return (
-    <NetworkAwareSessionProvider>
+    <ClerkProvider appearance={{ theme: shadcn }}>
       <ThemeProvider
         attribute='class'
         defaultTheme='dark'
@@ -64,6 +65,6 @@ export default async function AppLayout({ children }: AppLayoutProps) {
           <Toaster theme='system' />
         </TooltipProvider>
       </ThemeProvider>
-    </NetworkAwareSessionProvider>
+    </ClerkProvider>
   )
 }

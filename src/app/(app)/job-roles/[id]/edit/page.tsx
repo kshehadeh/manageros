@@ -4,11 +4,11 @@ import {
   getJobDomains,
 } from '@/lib/actions/job-roles'
 import { notFound } from 'next/navigation'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+
 import { redirect } from 'next/navigation'
 import { JobRoleDetailClient } from '@/components/jobs/job-role-detail-client'
 import { JobRoleEditForm } from '@/components/jobs/job-role-edit-form'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 interface JobRoleEditPageProps {
   params: Promise<{ id: string }>
@@ -17,15 +17,15 @@ interface JobRoleEditPageProps {
 export default async function JobRoleEditPage({
   params,
 }: JobRoleEditPageProps) {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
   // Check if user is admin
-  if (session?.user.role !== 'ADMIN') {
+  if (user.role !== 'ADMIN') {
     redirect('/dashboard')
   }
 
   // Check if user belongs to an organization
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 

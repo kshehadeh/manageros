@@ -1,5 +1,3 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { getOrganizationInvitations } from '@/lib/actions/organization'
 import InvitationForm from '@/components/invitation-form'
@@ -9,17 +7,18 @@ import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function OrganizationInvitationsPage() {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
   // Check if user is admin
-  if (session?.user.role !== 'ADMIN') {
+  if (user.role !== 'ADMIN') {
     redirect('/dashboard')
   }
 
   // Check if user belongs to an organization
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 

@@ -1,9 +1,9 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { InitiativeDataTable } from '@/components/initiatives/data-table'
 import { ExpandableSection } from '@/components/expandable-section'
-import { useSession } from 'next-auth/react'
+import { useUser } from '@clerk/nextjs'
 
 interface DashboardOpenInitiativesSectionProps {
   organizationId: string
@@ -12,8 +12,20 @@ interface DashboardOpenInitiativesSectionProps {
 export function DashboardOpenInitiativesSection({
   organizationId: _organizationId,
 }: DashboardOpenInitiativesSectionProps) {
-  const { data: session } = useSession()
-  const personId = (session?.user as { personId?: string })?.personId
+  const { user, isLoaded } = useUser()
+  const [userData, setUserData] = useState<{ personId?: string } | null>(null)
+
+  useEffect(() => {
+    if (isLoaded && user) {
+      fetch('/api/user/current')
+        .then(res => res.json())
+        .then(data => setUserData(data.user))
+        .catch(() => {})
+    }
+  }, [isLoaded, user])
+
+  const currentPersonId = userData?.personId
+  const personId = currentPersonId
 
   // Memoize immutableFilters to prevent infinite loop
   const immutableFilters = useMemo(

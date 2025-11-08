@@ -1,5 +1,3 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import {
   getOrganizationMembers,
@@ -14,17 +12,18 @@ import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
 import { PageSidebar } from '@/components/ui/page-sidebar'
 import { UserCheck } from 'lucide-react'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function OrganizationMembersPage() {
-  const session = await getServerSession(authOptions)
+  const user = await getCurrentUser()
 
   // Check if user is admin
-  if (session?.user.role !== 'ADMIN') {
+  if (user.role !== 'ADMIN') {
     redirect('/dashboard')
   }
 
   // Check if user belongs to an organization
-  if (!session?.user.organizationId) {
+  if (!user.organizationId) {
     redirect('/organization/create')
   }
 
@@ -44,7 +43,7 @@ export default async function OrganizationMembersPage() {
           <PageSection>
             <OrganizationMembersList
               members={members}
-              currentUserId={session.user.id}
+              currentUserId={user.id}
             />
           </PageSection>
         </PageMain>
