@@ -67,7 +67,9 @@ export function PersonLinkForm({
 
     try {
       await linkSelfToPerson(selectedPersonId)
-      // Refresh the component data
+      // Refresh the router to invalidate any cached data
+      router.refresh()
+      // Refresh the component data - getCurrentUserWithPerson now queries DB directly
       const [availablePersonsData, userWithPerson] = await Promise.all([
         getAvailablePersonsForSelfLinking(),
         getCurrentUserWithPerson(),
@@ -75,8 +77,11 @@ export function PersonLinkForm({
       setAvailablePersons(availablePersonsData)
       setUserData(userWithPerson)
       setSelectedPersonId('')
-      // Refresh the router to update the UI
-      router.refresh()
+      // Dispatch event to notify other components (like sidebar) to refresh
+      // Small delay to ensure database transaction is fully committed
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('user:personLinkChanged'))
+      }, 150)
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred')
     } finally {
@@ -106,6 +111,33 @@ export function PersonLinkForm({
     }
     loadData()
   }, [refreshTrigger])
+
+  const handleUnlink = useCallback(async () => {
+    setIsLoading(true)
+    setError('')
+
+    try {
+      await unlinkSelfFromPerson()
+      // Refresh the router to invalidate any cached data
+      router.refresh()
+      // Refresh the component data - getCurrentUserWithPerson now queries DB directly
+      const [availablePersonsData, userWithPerson] = await Promise.all([
+        getAvailablePersonsForSelfLinking(),
+        getCurrentUserWithPerson(),
+      ])
+      setAvailablePersons(availablePersonsData)
+      setUserData(userWithPerson)
+      // Dispatch event to notify other components (like sidebar) to refresh
+      // Small delay to ensure database transaction is fully committed
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('user:personLinkChanged'))
+      }, 150)
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An error occurred')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [router])
 
   // Render button for SectionHeader
   useEffect(() => {
@@ -166,29 +198,8 @@ export function PersonLinkForm({
     isLoading,
     onButtonRender,
     handleLink,
+    handleUnlink,
   ])
-
-  const handleUnlink = async () => {
-    setIsLoading(true)
-    setError('')
-
-    try {
-      await unlinkSelfFromPerson()
-      // Refresh the component data
-      const [availablePersonsData, userWithPerson] = await Promise.all([
-        getAvailablePersonsForSelfLinking(),
-        getCurrentUserWithPerson(),
-      ])
-      setAvailablePersons(availablePersonsData)
-      setUserData(userWithPerson)
-      // Refresh the router to update the UI
-      router.refresh()
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'An error occurred')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   if (!userData) {
     return (

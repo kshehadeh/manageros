@@ -969,8 +969,27 @@ export async function linkSelfToPerson(personId: string) {
     throw new Error('User must belong to an organization to link to a person')
   }
 
-  // Check if user is already linked to a person
-  if (currentUser.personId) {
+  // Query the database directly to check if user is already linked
+  // This bypasses any cached session claims that might be stale
+  const { userId } = await auth()
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { clerkUserId: userId },
+    select: {
+      id: true,
+      personId: true,
+    },
+  })
+
+  if (!dbUser) {
+    throw new Error('User not found')
+  }
+
+  // Check if user is already linked to a person using fresh database data
+  if (dbUser.personId) {
     throw new Error(
       'You are already linked to a person. Unlink first to link elsewhere.'
     )
@@ -992,14 +1011,22 @@ export async function linkSelfToPerson(personId: string) {
 
   // Link the current user to the person
   await prisma.user.update({
-    where: { id: currentUser.id },
+    where: { id: dbUser.id },
     data: { personId: personId },
   })
 
   // Sync updated user data to Clerk (personId changed)
-  const { userId } = await auth()
+  // This updates Clerk's public metadata so it's available in session tokens
   if (userId) {
-    await syncUserDataToClerk(userId)
+    try {
+      await syncUserDataToClerk(userId)
+    } catch (error) {
+      // Log error but don't fail the operation - sync is non-critical
+      console.error(
+        'Failed to sync user data to Clerk after linking person:',
+        error
+      )
+    }
   }
 
   revalidatePath('/settings')
@@ -1007,23 +1034,51 @@ export async function linkSelfToPerson(personId: string) {
 }
 
 export async function unlinkSelfFromPerson() {
-  const currentUser = await getCurrentUser()
+  // Verify user is authenticated (getCurrentUser throws if not)
+  await getCurrentUser()
 
-  // Check if user is actually linked to a person
-  if (!currentUser.personId) {
+  // Query the database directly to get the fresh personId value
+  // This bypasses any cached session claims that might be stale
+  const { userId } = await auth()
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { clerkUserId: userId },
+    select: {
+      id: true,
+      personId: true,
+    },
+  })
+
+  if (!dbUser) {
+    throw new Error('User not found')
+  }
+
+  // Check if user is actually linked to a person using fresh database data
+  if (!dbUser.personId) {
     throw new Error('You are not currently linked to any person')
   }
 
   // Unlink the current user from their person
   await prisma.user.update({
-    where: { id: currentUser.id },
+    where: { id: dbUser.id },
     data: { personId: null },
   })
 
   // Sync updated user data to Clerk (personId changed)
-  const { userId } = await auth()
+  // This updates Clerk's public metadata so it's available in session tokens
   if (userId) {
-    await syncUserDataToClerk(userId)
+    try {
+      await syncUserDataToClerk(userId)
+    } catch (error) {
+      // Log error but don't fail the operation - sync is non-critical
+      console.error(
+        'Failed to sync user data to Clerk after unlinking person:',
+        error
+      )
+    }
   }
 
   revalidatePath('/settings')
@@ -1040,10 +1095,27 @@ export async function getCurrentUserWithPerson() {
     }
   }
 
-  // Get the linked person if it exists
-  const person = currentUser.personId
+  // Query the database directly to get the fresh personId value
+  // This bypasses any cached session claims that might be stale
+  const { userId } = await auth()
+  if (!userId) {
+    return {
+      user: currentUser,
+      person: null,
+    }
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { clerkUserId: userId },
+    select: {
+      personId: true,
+    },
+  })
+
+  // Get the linked person if it exists, using the fresh personId from database
+  const person = dbUser?.personId
     ? await prisma.person.findUnique({
-        where: { id: currentUser.personId },
+        where: { id: dbUser.personId },
         include: {
           jobRole: true,
         },
@@ -1071,10 +1143,28 @@ export async function getSidebarData() {
       }
     }
 
-    // Get the linked person if it exists
-    const person = currentUser.personId
+    // Query the database directly to get the fresh personId value
+    // This bypasses any cached session claims that might be stale
+    const { userId } = await auth()
+    if (!userId) {
+      return {
+        user: currentUser,
+        person: null,
+        navigation,
+      }
+    }
+
+    const dbUser = await prisma.user.findUnique({
+      where: { clerkUserId: userId },
+      select: {
+        personId: true,
+      },
+    })
+
+    // Get the linked person if it exists, using the fresh personId from database
+    const person = dbUser?.personId
       ? await prisma.person.findUnique({
-          where: { id: currentUser.personId },
+          where: { id: dbUser.personId },
           select: {
             id: true,
             name: true,

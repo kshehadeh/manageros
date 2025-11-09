@@ -33,13 +33,15 @@ export default function SidebarClient() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    async function fetchSidebarData() {
+    async function fetchSidebarData(isInitialLoad = false) {
       if (!isLoaded) {
         return
       }
 
       if (!userId) {
-        setIsLoading(false)
+        if (isInitialLoad) {
+          setIsLoading(false)
+        }
         return
       }
 
@@ -49,11 +51,30 @@ export default function SidebarClient() {
       } catch (error) {
         console.error('Failed to fetch sidebar data:', error)
       } finally {
-        setIsLoading(false)
+        if (isInitialLoad) {
+          setIsLoading(false)
+        }
       }
     }
 
-    fetchSidebarData()
+    // Initial load
+    fetchSidebarData(true)
+
+    // Listen for person link changes to refresh sidebar data
+    function handlePersonLinkChange() {
+      // Small delay to ensure database transaction is committed
+      setTimeout(() => {
+        fetchSidebarData(false)
+      }, 100)
+    }
+
+    window.addEventListener('user:personLinkChanged', handlePersonLinkChange)
+    return () => {
+      window.removeEventListener(
+        'user:personLinkChanged',
+        handlePersonLinkChange
+      )
+    }
   }, [isLoaded, userId])
 
   // Always show skeleton during loading to prevent hydration mismatch
