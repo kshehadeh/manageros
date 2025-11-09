@@ -213,7 +213,7 @@ export default function OrganizationInvitationsSection({
         header={
           <SectionHeader
             icon={Mail}
-            title={`Invitations (${invitations.length})`}
+            title='Invitations'
             action={
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>

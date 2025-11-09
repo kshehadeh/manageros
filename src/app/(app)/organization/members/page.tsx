@@ -1,9 +1,6 @@
 import { redirect } from 'next/navigation'
-import {
-  getOrganizationMembers,
-  getOrganizationInvitations,
-} from '@/lib/actions/organization'
-import OrganizationMembersList from '@/components/organization-members-list'
+import { getOrganizationInvitations } from '@/lib/actions/organization'
+import { OrganizationMembersDataTable } from '@/components/organization-members/data-table'
 import OrganizationInvitationsSection from '@/components/organization-invitations-section'
 import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
@@ -27,13 +24,12 @@ export default async function OrganizationMembersPage() {
     redirect('/organization/create')
   }
 
-  const members = await getOrganizationMembers()
   const invitations = await getOrganizationInvitations()
 
   return (
     <PageContainer>
       <PageHeader
-        title={`Organization Members (${members.length})`}
+        title='Organization Members'
         titleIcon={UserCheck}
         subtitle='Manage member roles and remove users from your organization.'
       />
@@ -41,8 +37,8 @@ export default async function OrganizationMembersPage() {
       <PageContent>
         <PageMain>
           <PageSection>
-            <OrganizationMembersList
-              members={members}
+            <OrganizationMembersDataTable
+              settingsId='organization-members'
               currentUserId={user.id}
             />
           </PageSection>

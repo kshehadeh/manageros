@@ -203,6 +203,23 @@ export interface UserSettings {
     }
   >
 
+  // Per-view organization members table settings
+  organizationMembersTableSettings: Record<
+    string,
+    {
+      sorting: Array<{ id: string; desc: boolean }>
+      grouping: string
+      sort: {
+        field: string
+        direction: 'asc' | 'desc'
+      }
+      filters: {
+        search: string
+        role: string
+      }
+    }
+  >
+
   // Future expandable settings can be added here:
   // sidebarCollapsed: boolean
   // defaultPageSize: number
@@ -249,6 +266,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   meetingTableSettings: {},
   feedbackTableSettings: {},
   jobRolesTableSettings: {},
+  organizationMembersTableSettings: {},
   // When adding new settings, add their defaults here:
   // sidebarCollapsed: false
   // defaultPageSize: 25
@@ -899,6 +917,72 @@ export function updateJobRolesTableSettings(
     ...currentSettings,
     jobRolesTableSettings: {
       ...currentSettings.jobRolesTableSettings,
+      [settingsId]: updatedTableSettings,
+    },
+  }
+
+  saveUserSettings(userId, updatedSettings)
+}
+
+/**
+ * Get organization members table settings for a specific view
+ */
+export function getOrganizationMembersTableSettings(
+  userId: string,
+  settingsId: string
+): UserSettings['organizationMembersTableSettings'][string] {
+  const settings = loadUserSettings(userId)
+  return (
+    settings.organizationMembersTableSettings[settingsId] || {
+      sorting: [],
+      grouping: 'none',
+      sort: {
+        field: '',
+        direction: 'asc',
+      },
+      filters: {
+        search: '',
+        role: '',
+      },
+    }
+  )
+}
+
+/**
+ * Update organization members table settings for a specific view
+ */
+export function updateOrganizationMembersTableSettings(
+  userId: string,
+  settingsId: string,
+  tableSettings: Partial<
+    UserSettings['organizationMembersTableSettings'][string]
+  >
+): void {
+  const currentSettings = loadUserSettings(userId)
+  const currentTableSettings = currentSettings.organizationMembersTableSettings[
+    settingsId
+  ] || {
+    sorting: [],
+    grouping: 'none',
+    sort: {
+      field: '',
+      direction: 'asc' as const,
+    },
+    filters: {
+      search: '',
+      role: '',
+    },
+  }
+
+  const updatedTableSettings = {
+    ...currentTableSettings,
+    ...tableSettings,
+  }
+
+  const updatedSettings = {
+    ...currentSettings,
+    organizationMembersTableSettings: {
+      ...currentSettings.organizationMembersTableSettings,
       [settingsId]: updatedTableSettings,
     },
   }
