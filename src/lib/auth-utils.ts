@@ -534,8 +534,209 @@ const PermissionMap: Record<string, PermissionCheck> = {
 
     return !!meeting
   },
-  'meeting.view': user => {
-    return !!user.organizationId
+  'meeting.view': async (user, id) => {
+    if (!user.organizationId) {
+      return false
+    }
+
+    if (!id || !user.personId) {
+      return !!user.organizationId
+    } else {
+      // If the meeting exists AND is in the user's organization AND the user is an admin OR the user is the creator, owner or participant then
+      // allow the user to view the meeting
+      const meeting = await prisma.meeting.findFirst({
+        where: {
+          id,
+          organizationId: user.organizationId,
+          OR: [
+            { createdById: user.id },
+            { ownerId: user.personId },
+            { participants: { some: { personId: user.personId } } },
+          ],
+        },
+      })
+
+      return !!meeting
+    }
+  },
+
+  // Meeting Instance permissions
+  'meeting-instance.create': user => {
+    return !!user.personId && !!user.organizationId
+  },
+  'meeting-instance.edit': async (user, id) => {
+    if (!user.organizationId || !id) return false
+    if (!user.personId) return false
+
+    // Get current user's person record
+    const currentPerson = await prisma.person.findFirst({
+      where: { user: { id: user.id } },
+    })
+
+    if (!currentPerson) return false
+
+    // Check if meeting instance exists and user has permission to edit it
+    // User can edit if they can edit the parent meeting OR they are a participant of the instance
+    // ADMIN users can edit any meeting instance in their organization
+    const meetingInstance = await prisma.meetingInstance.findFirst({
+      where: {
+        id,
+        organizationId: user.organizationId,
+      },
+      include: {
+        meeting: true,
+        participants: true,
+      },
+    })
+
+    if (!meetingInstance) return false
+
+    // Check if user is participant of the instance
+    const isInstanceParticipant = meetingInstance.participants.some(
+      p => p.personId === currentPerson.id
+    )
+
+    if (isInstanceParticipant) return true
+
+    // Check parent meeting permissions (same as meeting.edit)
+    if (user.role === 'ADMIN') return true
+
+    const meeting = await prisma.meeting.findFirst({
+      where: {
+        id: meetingInstance.meetingId,
+        organizationId: user.organizationId,
+        OR: [
+          { createdById: user.id },
+          { ownerId: currentPerson.id },
+          {
+            participants: {
+              some: {
+                personId: currentPerson.id,
+              },
+            },
+          },
+        ],
+      },
+    })
+
+    return !!meeting
+  },
+  'meeting-instance.delete': async (user, id) => {
+    if (!user.organizationId || !id) return false
+    if (user.role === 'ADMIN') return true
+    if (!user.personId) return false
+
+    // Get current user's person record
+    const currentPerson = await prisma.person.findFirst({
+      where: { user: { id: user.id } },
+    })
+
+    if (!currentPerson) return false
+
+    // Check if meeting instance exists
+    const meetingInstance = await prisma.meetingInstance.findFirst({
+      where: {
+        id,
+        organizationId: user.organizationId,
+      },
+      include: {
+        meeting: true,
+      },
+    })
+
+    if (!meetingInstance) return false
+
+    // Check parent meeting permissions (same as meeting.delete)
+    // User can delete if they created the meeting OR they are the owner
+    const meeting = await prisma.meeting.findFirst({
+      where: {
+        id: meetingInstance.meetingId,
+        organizationId: user.organizationId,
+        OR: [{ createdById: user.id }, { ownerId: currentPerson.id }],
+      },
+    })
+
+    return !!meeting
+  },
+  'meeting-instance.view': async (user, id) => {
+    if (!user.organizationId) {
+      return false
+    }
+
+    if (!id) {
+      return !!user.organizationId
+    }
+
+    // Get current user's person record (may be null if not linked)
+    const currentPerson = await prisma.person.findFirst({
+      where: { user: { id: user.id }, organizationId: user.organizationId },
+    })
+
+    // Check if meeting instance exists and user has access
+    // User can view if:
+    // 1. Meeting is public (isPrivate: false)
+    // 2. User is creator of the parent meeting
+    // 3. User is owner of the parent meeting
+    // 4. User is participant of the instance
+    // 5. User is participant of the parent meeting
+    const meetingInstance = await prisma.meetingInstance.findFirst({
+      where: {
+        id,
+        organizationId: user.organizationId,
+        OR: [
+          // Meeting is public
+          {
+            meeting: {
+              isPrivate: false,
+            },
+          },
+          // User is creator of the meeting
+          {
+            meeting: {
+              createdById: user.id,
+            },
+          },
+          // User is owner of the meeting
+          ...(currentPerson
+            ? [
+                {
+                  meeting: {
+                    ownerId: currentPerson.id,
+                  },
+                },
+              ]
+            : []),
+          // User is participant of the instance
+          ...(currentPerson
+            ? [
+                {
+                  participants: {
+                    some: {
+                      personId: currentPerson.id,
+                    },
+                  },
+                },
+              ]
+            : []),
+          // User is participant of the parent meeting
+          ...(currentPerson
+            ? [
+                {
+                  meeting: {
+                    participants: {
+                      some: {
+                        personId: currentPerson.id,
+                      },
+                    },
+                  },
+                },
+              ]
+            : []),
+        ],
+      },
+    })
+
+    return !!meetingInstance
   },
 
   // Initiative permissions

@@ -8,7 +8,7 @@ import {
   type MeetingUpdateData,
 } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 import { utcToLocalDateTimeString } from '@/lib/timezone-utils'
 
 export async function createMeeting(formData: MeetingFormData) {
@@ -461,39 +461,15 @@ export async function getMeetingsForInitiativeSimple(initiativeId: string) {
 export async function getMeeting(id: string) {
   const user = await getCurrentUser()
 
-  // Check if user belongs to an organization
-  if (!user.organizationId) {
-    throw new Error('User must belong to an organization to view meetings')
-  }
+  const hasPermission = await getActionPermission(user, 'meeting.view', id)
 
-  // Get the current user's person record (may be null if not linked)
-  const currentPerson = await prisma.person.findFirst({
-    where: {
-      user: {
-        id: user.id,
-      },
-    },
-  })
+  if (!hasPermission) {
+    throw new Error('You do not have permission to view this meeting')
+  }
 
   const meeting = await prisma.meeting.findFirst({
     where: {
       id,
-      organizationId: user.organizationId,
-      OR: [
-        { isPrivate: false }, // Public meetings
-        { createdById: user.id }, // Private meetings created by current user
-        ...(currentPerson
-          ? [
-              {
-                participants: {
-                  some: {
-                    personId: currentPerson.id,
-                  },
-                },
-              } as const,
-            ]
-          : []),
-      ],
     },
     include: {
       organization: true,

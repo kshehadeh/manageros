@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db'
 import { initiativeSchema, type InitiativeFormData } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 
 export async function createInitiative(formData: InitiativeFormData) {
   const user = await getCurrentUser()
@@ -485,15 +485,15 @@ export async function removeInitiativeOwner(
 export async function getInitiativeById(id: string) {
   const user = await getCurrentUser()
 
-  // Check if user belongs to an organization
-  if (!user.organizationId) {
-    throw new Error('User must belong to an organization to view initiatives')
+  const hasPermission = await getActionPermission(user, 'initiative.view', id)
+
+  if (!hasPermission) {
+    throw new Error('You do not have permission to view this initiative')
   }
 
   return await prisma.initiative.findFirst({
     where: {
       id,
-      organizationId: user.organizationId,
     },
     include: {
       objectives: true,

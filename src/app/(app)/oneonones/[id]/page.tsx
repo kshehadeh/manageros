@@ -26,6 +26,9 @@ export default async function OneOnOneViewPage({
 
   try {
     const oneOnOne = await getOneOnOneById(id)
+    if (!oneOnOne) {
+      notFound()
+    }
 
     return (
       <OneOnOneDetailClient

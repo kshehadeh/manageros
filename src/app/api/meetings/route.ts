@@ -165,30 +165,51 @@ export async function GET(request: NextRequest) {
         }
       }
 
+      // Build meeting filter conditions (team, initiative, search)
+      const meetingFilters: Prisma.MeetingWhereInput = {}
+      if (teamIdFilter) {
+        meetingFilters.teamId = teamIdFilter
+      }
+      if (initiativeIdFilter) {
+        meetingFilters.initiativeId = initiativeIdFilter
+      }
+      if (searchFilter) {
+        meetingFilters.OR = [
+          { title: { contains: searchFilter, mode: 'insensitive' } },
+          { description: { contains: searchFilter, mode: 'insensitive' } },
+          { location: { contains: searchFilter, mode: 'insensitive' } },
+          { notes: { contains: searchFilter, mode: 'insensitive' } },
+        ]
+      }
+
       // Build the access control OR clause for instances
+      // Each condition must include the meeting filters to ensure proper access control
       const accessControlOr: Prisma.MeetingInstanceWhereInput[] = []
 
-      // 1. Meeting is public
+      // 1. Meeting is public (and matches filters)
       accessControlOr.push({
         meeting: {
           isPrivate: false,
+          ...meetingFilters,
         },
       })
-      // 2. User is the creator of the meeting
+      // 2. User is the creator of the meeting (and matches filters)
       accessControlOr.push({
         meeting: {
           createdById: user.id,
+          ...meetingFilters,
         },
       })
-      // 3. User is the owner of the meeting
+      // 3. User is the owner of the meeting (and matches filters)
       if (currentPerson) {
         accessControlOr.push({
           meeting: {
             ownerId: currentPerson.id,
+            ...meetingFilters,
           },
         })
       }
-      // 4. User is a participant of the instance
+      // 4. User is a participant of the instance (meeting filters still apply)
       if (currentPerson) {
         accessControlOr.push({
           participants: {
@@ -196,9 +217,10 @@ export async function GET(request: NextRequest) {
               personId: currentPerson.id,
             },
           },
+          meeting: meetingFilters,
         })
       }
-      // 5. User is a participant of the main meeting
+      // 5. User is a participant of the main meeting (and matches filters)
       if (currentPerson) {
         accessControlOr.push({
           meeting: {
@@ -207,51 +229,12 @@ export async function GET(request: NextRequest) {
                 personId: currentPerson.id,
               },
             },
+            ...meetingFilters,
           },
         })
       }
 
       baseWhere.OR = accessControlOr
-
-      // Add search filter - combine with existing conditions using AND
-      if (searchFilter) {
-        const existingAnd = Array.isArray(baseWhere.AND)
-          ? baseWhere.AND
-          : baseWhere.AND
-            ? [baseWhere.AND]
-            : []
-        baseWhere.AND = [
-          ...existingAnd,
-          {
-            meeting: {
-              OR: [
-                { title: { contains: searchFilter, mode: 'insensitive' } },
-                {
-                  description: { contains: searchFilter, mode: 'insensitive' },
-                },
-                { location: { contains: searchFilter, mode: 'insensitive' } },
-                { notes: { contains: searchFilter, mode: 'insensitive' } },
-              ],
-            },
-          },
-        ]
-      }
-
-      // Add team filter
-      if (teamIdFilter) {
-        if (!baseWhere.meeting) {
-          baseWhere.meeting = {}
-        }
-        baseWhere.meeting.teamId = teamIdFilter
-      }
-
-      // Add initiative filter
-      if (initiativeIdFilter) {
-        if (!baseWhere.meeting) {
-          baseWhere.meeting = {}
-        }
-        baseWhere.meeting.initiativeId = initiativeIdFilter
-      }
 
       return baseWhere
     }
@@ -283,24 +266,45 @@ export async function GET(request: NextRequest) {
         }
       }
 
+      // Build additional filter conditions (team, initiative, search)
+      const additionalFilters: Prisma.MeetingWhereInput = {}
+      if (teamIdFilter) {
+        additionalFilters.teamId = teamIdFilter
+      }
+      if (initiativeIdFilter) {
+        additionalFilters.initiativeId = initiativeIdFilter
+      }
+      if (searchFilter) {
+        additionalFilters.OR = [
+          { title: { contains: searchFilter, mode: 'insensitive' } },
+          { description: { contains: searchFilter, mode: 'insensitive' } },
+          { location: { contains: searchFilter, mode: 'insensitive' } },
+          { notes: { contains: searchFilter, mode: 'insensitive' } },
+        ]
+      }
+
       // Build the access control OR clause for meetings
+      // Each condition must include the additional filters to ensure proper access control
       const accessControlOr: Prisma.MeetingWhereInput[] = []
 
-      // 1. Meeting is public
+      // 1. Meeting is public (and matches filters)
       accessControlOr.push({
         isPrivate: false,
+        ...additionalFilters,
       })
-      // 2. User is the creator
+      // 2. User is the creator (and matches filters)
       accessControlOr.push({
         createdById: user.id,
+        ...additionalFilters,
       })
-      // 3. User is the owner
+      // 3. User is the owner (and matches filters)
       if (currentPerson) {
         accessControlOr.push({
           ownerId: currentPerson.id,
+          ...additionalFilters,
         })
       }
-      // 4. User is a participant
+      // 4. User is a participant (and matches filters)
       if (currentPerson) {
         accessControlOr.push({
           participants: {
@@ -308,40 +312,11 @@ export async function GET(request: NextRequest) {
               personId: currentPerson.id,
             },
           },
+          ...additionalFilters,
         })
       }
 
       baseWhere.OR = accessControlOr
-
-      // Add search filter - combine with existing conditions using AND
-      if (searchFilter) {
-        const existingAnd = Array.isArray(baseWhere.AND)
-          ? baseWhere.AND
-          : baseWhere.AND
-            ? [baseWhere.AND]
-            : []
-        baseWhere.AND = [
-          ...existingAnd,
-          {
-            OR: [
-              { title: { contains: searchFilter, mode: 'insensitive' } },
-              { description: { contains: searchFilter, mode: 'insensitive' } },
-              { location: { contains: searchFilter, mode: 'insensitive' } },
-              { notes: { contains: searchFilter, mode: 'insensitive' } },
-            ],
-          },
-        ]
-      }
-
-      // Add team filter
-      if (teamIdFilter) {
-        baseWhere.teamId = teamIdFilter
-      }
-
-      // Add initiative filter
-      if (initiativeIdFilter) {
-        baseWhere.initiativeId = initiativeIdFilter
-      }
 
       return baseWhere
     }

@@ -1,6 +1,5 @@
 import { getMeetingInstance } from '@/lib/actions/meeting-instance'
 import { getEntityLinks } from '@/lib/actions/entity-links'
-import { getMeeting } from '@/lib/actions/meeting'
 
 import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
@@ -41,22 +40,16 @@ export default async function MeetingInstanceDetailPage({
     notFound()
   }
 
-  // Get parent meeting for permission checks
-  const parentMeeting = await getMeeting(meetingInstance.meetingId)
-  if (!parentMeeting) {
-    notFound()
-  }
-
-  // Check permissions for edit and delete (based on parent meeting permissions)
+  // Check permissions for edit and delete (using meeting instance permissions)
   const canEdit = await getActionPermission(
     user,
-    'meeting.edit',
-    parentMeeting.id
+    'meeting-instance.edit',
+    meetingInstance.id
   )
   const canDelete = await getActionPermission(
     user,
-    'meeting.delete',
-    parentMeeting.id
+    'meeting-instance.delete',
+    meetingInstance.id
   )
 
   const scheduledDate = new Date(meetingInstance.scheduledAt)

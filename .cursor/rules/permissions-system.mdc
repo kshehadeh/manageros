@@ -77,11 +77,30 @@ const canEdit = await getActionPermission(user, 'task.edit', taskId)
 ## Implementation Guidelines
 
 1. **Always check permissions server-side** - Never trust client-side checks
-2. **Verify organization membership** - All queries must filter by `organizationId`
-3. **Check entity ownership** - For ID-based permissions, verify ownership/participation
-4. **Use PermissionMap** - All permissions must be defined in `PermissionMap` in `auth-utils.ts`
-5. **Add to ALL_PERMISSIONS** - New permissions must be added to `ALL_PERMISSIONS` in `permissions.ts`
-6. **Mark ID-required permissions** - Add ID-based permissions to `PERMISSIONS_REQUIRING_ID`
+2. **Centralize permission checks** - Use `getActionPermission` for all permission checks
+3. **Single entity retrieval pattern** - For functions that retrieve a single entity by ID:
+   - First call `getActionPermission` with the entity ID
+   - If permission is granted, perform a simple query by ID without user/organization restrictions
+   - This centralizes permission logic instead of baking it into queries
+   - Example:
+
+     ```typescript
+     export async function getTask(taskId: string) {
+       const user = await getCurrentUser()
+       const hasPermission = await getActionPermission(user, 'task.view', taskId)
+       if (!hasPermission) {
+         throw new Error('You do not have permission to view this task')
+       }
+       return await prisma.task.findFirst({ where: { id: taskId } })
+     }
+     ```
+
+4. **List queries** - For queries that return lists, continue to filter by `organizationId` and other restrictions in the query (permission checks on every item would be too expensive)
+5. **Verify organization membership** - All queries must filter by `organizationId` (except single entity retrievals that use the pattern above)
+6. **Check entity ownership** - For ID-based permissions, verify ownership/participation
+7. **Use PermissionMap** - All permissions must be defined in `PermissionMap` in `auth-utils.ts`
+8. **Add to ALL_PERMISSIONS** - New permissions must be added to `ALL_PERMISSIONS` in `permissions.ts`
+9. **Mark ID-required permissions** - Add ID-based permissions to `PERMISSIONS_REQUIRING_ID`
 
 ## Adding New Permissions
 
@@ -93,7 +112,8 @@ const canEdit = await getActionPermission(user, 'task.edit', taskId)
 ## Security Checklist
 
 - ✅ Permission check performed server-side
+- ✅ Single entity retrievals use `getActionPermission` before querying
 - ✅ Organization membership verified
 - ✅ Entity ownership/participation verified (for ID-based)
 - ✅ Error messages don't leak information
-- ✅ Database queries filter by `organizationId`
+- ✅ Database queries filter by `organizationId` (except single entity retrievals using the centralized pattern)

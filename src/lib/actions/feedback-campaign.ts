@@ -8,7 +8,7 @@ import {
   type FeedbackResponseFormData,
 } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 import { generateInviteLinkToken } from '@/lib/utils/invite-link'
 import { checkIfManagerOrSelf } from '../utils/people-utils'
 import { generateText } from '@/lib/ai'
@@ -329,34 +329,19 @@ export async function getFeedbackCampaignsForPerson(personId: string) {
 export async function getFeedbackCampaignById(id: string) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
-    throw new Error(
-      'User must belong to an organization to view feedback campaigns'
-    )
+  const hasPermission = await getActionPermission(
+    user,
+    'feedback-campaign.view',
+    id
+  )
+
+  if (!hasPermission) {
+    throw new Error('You do not have permission to view this feedback campaign')
   }
 
-  // Get the current user's person record
-  const currentPerson = await prisma.person.findFirst({
-    where: {
-      user: {
-        id: user.id,
-      },
-    },
-  })
-
-  if (!currentPerson) {
-    throw new Error('No person record found for current user')
-  }
-
-  // Get the campaign created by the current user
   const campaign = await prisma.feedbackCampaign.findFirst({
     where: {
       id,
-      userId: user.id,
-      // Ensure the campaign is for someone in the same organization
-      targetPerson: {
-        organizationId: user.organizationId,
-      },
     },
     include: {
       targetPerson: {
@@ -383,22 +368,6 @@ export async function getFeedbackCampaignById(id: string) {
       },
     },
   })
-
-  if (!campaign) {
-    throw new Error('Campaign not found or access denied')
-  }
-
-  // Check if the current user is a manager (direct or indirect) of the target person
-  const isManager = await checkIfManagerOrSelf(
-    currentPerson.id,
-    campaign.targetPersonId
-  )
-
-  if (!isManager) {
-    throw new Error(
-      'You must be a manager of this person to view their feedback campaigns'
-    )
-  }
 
   return campaign
 }

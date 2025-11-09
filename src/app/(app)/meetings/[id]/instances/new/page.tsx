@@ -31,7 +31,13 @@ export default async function NewMeetingInstancePage({
     redirect(`/meetings/${id}`)
   }
 
-  // Check if user can edit the meeting (required to create instances)
+  // Check if user can create meeting instances
+  const canCreate = await getActionPermission(user, 'meeting-instance.create')
+  if (!canCreate) {
+    redirect(`/meetings/${id}`)
+  }
+
+  // Also check if user can edit the meeting (required to create instances)
   const canEdit = await getActionPermission(user, 'meeting.edit', meeting.id)
   if (!canEdit) {
     redirect(`/meetings/${id}`)

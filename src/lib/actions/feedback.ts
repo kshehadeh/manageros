@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/db'
 import { feedbackSchema, type FeedbackFormData } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 
 export async function createFeedback(formData: FeedbackFormData) {
   const user = await getCurrentUser()
@@ -253,28 +253,15 @@ export async function getFeedbackForPerson(personId: string) {
 export async function getFeedbackById(id: string) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
-    throw new Error('User must belong to an organization to view feedback')
+  const hasPermission = await getActionPermission(user, 'feedback.view', id)
+
+  if (!hasPermission) {
+    throw new Error('You do not have permission to view this feedback')
   }
 
-  // Get the current user's person record
-  const currentPerson = await prisma.person.findFirst({
-    where: {
-      user: {
-        id: user.id,
-      },
-    },
-  })
-
-  if (!currentPerson) {
-    throw new Error('No person record found for current user')
-  }
-
-  // Get the feedback, ensuring the current user has access to it
   const feedback = await prisma.feedback.findFirst({
     where: {
       id,
-      OR: [{ isPrivate: false }, { fromId: currentPerson.id }],
     },
     include: {
       about: {
@@ -291,10 +278,6 @@ export async function getFeedbackById(id: string) {
       },
     },
   })
-
-  if (!feedback) {
-    throw new Error('Feedback not found or you do not have access to it')
-  }
 
   return feedback
 }

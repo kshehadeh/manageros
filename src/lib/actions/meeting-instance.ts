@@ -8,23 +8,19 @@ import {
   type MeetingInstanceUpdateData,
 } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
 
 export async function createMeetingInstance(formData: MeetingInstanceFormData) {
   const user = await getCurrentUser()
 
-  // Check if user belongs to an organization
-  if (!user.organizationId) {
-    throw new Error(
-      'User must belong to an organization to create meeting instances'
-    )
-  }
+  // Check permission to create meeting instances
+  const hasPermission = await getActionPermission(
+    user,
+    'meeting-instance.create'
+  )
 
-  // Check if user is linked to a person
-  if (!user.personId) {
-    throw new Error(
-      'User must be linked to a person to create meeting instances'
-    )
+  if (!hasPermission || !user.organizationId) {
+    throw new Error('You do not have permission to create meeting instances')
   }
 
   // Validate the form data
@@ -101,16 +97,15 @@ export async function updateMeetingInstance(
 ) {
   const user = await getCurrentUser()
 
-  // Check if user belongs to an organization
-  if (!user.organizationId) {
-    throw new Error(
-      'User must belong to an organization to update meeting instances'
-    )
-  }
+  // Check permission to edit this meeting instance
+  const hasPermission = await getActionPermission(
+    user,
+    'meeting-instance.edit',
+    id
+  )
 
-  // Check if user is linked to a person
-  if (!user.personId) {
-    throw new Error('User must be linked to a person to edit meeting instances')
+  if (!hasPermission || !user.organizationId) {
+    throw new Error('You do not have permission to edit this meeting instance')
   }
 
   // Validate the form data
@@ -188,21 +183,20 @@ export async function updateMeetingInstance(
 export async function deleteMeetingInstance(id: string) {
   const user = await getCurrentUser()
 
-  // Check if user belongs to an organization
-  if (!user.organizationId) {
+  // Check permission to delete this meeting instance
+  const hasPermission = await getActionPermission(
+    user,
+    'meeting-instance.delete',
+    id
+  )
+
+  if (!hasPermission || !user.organizationId) {
     throw new Error(
-      'User must belong to an organization to delete meeting instances'
+      'You do not have permission to delete this meeting instance'
     )
   }
 
-  // Check if user is linked to a person
-  if (!user.personId) {
-    throw new Error(
-      'User must be linked to a person to delete meeting instances'
-    )
-  }
-
-  // Check if meeting instance exists and belongs to user's organization
+  // Get meeting instance to find meetingId for revalidation
   const meetingInstance = await prisma.meetingInstance.findFirst({
     where: {
       id,
@@ -226,45 +220,19 @@ export async function deleteMeetingInstance(id: string) {
 export async function getMeetingInstance(id: string) {
   const user = await getCurrentUser()
 
-  // Check if user belongs to an organization
-  if (!user.organizationId) {
-    throw new Error(
-      'User must belong to an organization to view meeting instances'
-    )
-  }
+  const hasPermission = await getActionPermission(
+    user,
+    'meeting-instance.view',
+    id
+  )
 
-  // Get the current user's person record (may be null if not linked)
-  const currentPerson = await prisma.person.findFirst({
-    where: {
-      user: {
-        id: user.id,
-      },
-    },
-  })
+  if (!hasPermission) {
+    throw new Error('You do not have permission to view this meeting instance')
+  }
 
   const meetingInstance = await prisma.meetingInstance.findFirst({
     where: {
       id,
-      organizationId: user.organizationId,
-      OR: [
-        { isPrivate: false }, // Public meeting instances
-        {
-          meeting: {
-            createdById: user.id,
-          },
-        }, // Private meeting instances from meetings created by current user
-        ...(currentPerson
-          ? [
-              {
-                participants: {
-                  some: {
-                    personId: currentPerson.id,
-                  },
-                },
-              } as const,
-            ]
-          : []),
-      ],
     },
     include: {
       meeting: {
@@ -282,10 +250,6 @@ export async function getMeetingInstance(id: string) {
       },
     },
   })
-
-  if (!meetingInstance) {
-    throw new Error('Meeting instance not found or access denied')
-  }
 
   return meetingInstance
 }

@@ -24,6 +24,9 @@ export default async function FeedbackDetailPage({
 
   try {
     const feedback = await getFeedbackById(id)
+    if (!feedback) {
+      notFound()
+    }
 
     return (
       <FeedbackDetailClient

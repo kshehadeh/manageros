@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db'
 import { oneOnOneSchema, type OneOnOneFormData } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 
 export async function createOneOnOne(formData: OneOnOneFormData) {
   const user = await getCurrentUser()
@@ -99,28 +99,15 @@ export async function getOneOnOnes() {
 export async function getOneOnOneById(id: string) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
-    throw new Error('User must belong to an organization')
+  const hasPermission = await getActionPermission(user, 'oneonone.view', id)
+
+  if (!hasPermission) {
+    throw new Error('You do not have permission to view this one-on-one')
   }
 
-  // Get the current user's person ID from session
-  if (!user.personId) {
-    throw new Error('No person record found for current user')
-  }
-
-  const currentPerson = await prisma.person.findUnique({
-    where: { id: user.personId },
-  })
-
-  if (!currentPerson) {
-    throw new Error('No person record found for current user')
-  }
-
-  // Get the one-on-one record, ensuring the current user is a participant
   const oneOnOne = await prisma.oneOnOne.findFirst({
     where: {
       id,
-      OR: [{ managerId: currentPerson.id }, { reportId: currentPerson.id }], // participant1 or participant2
     },
     include: {
       manager: {
@@ -143,10 +130,6 @@ export async function getOneOnOneById(id: string) {
       },
     },
   })
-
-  if (!oneOnOne) {
-    throw new Error('One-on-one not found or you do not have access to it')
-  }
 
   return oneOnOne
 }

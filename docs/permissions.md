@@ -107,6 +107,50 @@ const canCreate = await getActionPermission(user, 'task.create')
 const canEdit = await getActionPermission(user, 'task.edit', taskId)
 ```
 
+### Single Entity Retrieval Pattern
+
+For functions that retrieve a single entity instance by ID, use the centralized permission pattern:
+
+1. **First check permission** using `getActionPermission` with the entity ID
+2. **Then query by ID only** - Remove all user/organization restrictions from the query
+3. **Centralize logic** - This ensures all permission logic is in one place
+
+**Example:**
+
+```typescript
+export async function getTask(taskId: string) {
+  const user = await getCurrentUser()
+
+  // Check permission first
+  const hasPermission = await getActionPermission(user, 'task.view', taskId)
+
+  if (!hasPermission) {
+    throw new Error('You do not have permission to view this task')
+  }
+
+  // Simple query by ID - no user/organization restrictions
+  const task = await prisma.task.findFirst({
+    where: { id: taskId },
+    include: {
+      assignee: true,
+      initiative: true,
+      // ... other relations
+    },
+  })
+
+  return task
+}
+```
+
+**Why this pattern?**
+
+- **Centralized permissions**: All permission logic lives in `getActionPermission`
+- **Easier maintenance**: Update permissions in one place instead of multiple queries
+- **Consistency**: All single entity retrievals follow the same pattern
+- **Security**: Permission checks happen before data access
+
+**Note**: This pattern applies only to single entity retrievals. For list queries, continue to filter by `organizationId` and other restrictions in the query itself, as checking permissions on every item would be too expensive.
+
 ### Permission Map
 
 All permissions are defined in the `PermissionMap` object in `src/lib/auth-utils.ts`. Each permission has a check function that:
@@ -187,9 +231,39 @@ Users can view their current permissions by navigating to **Settings → Permiss
 
 All permission checks must be performed on the server side. Client-side checks are for UI purposes only and should never be relied upon for security.
 
+### Single Entity Retrieval Pattern
+
+When implementing functions that retrieve a single entity by ID:
+
+1. **Use `getActionPermission` first** - Check permission before querying
+2. **Query by ID only** - Remove user/organization restrictions from the query
+3. **Centralize logic** - All permission checks go through `getActionPermission`
+
+This pattern ensures:
+
+- Permission logic is centralized in one place
+- Easier to maintain and update access rules
+- Consistent security model across all entity retrievals
+
+**Functions using this pattern:**
+
+- `getTask()`
+- `getInitiativeById()`
+- `getOneOnOneById()`
+- `getFeedbackById()`
+- `getMeeting()`
+- `getMeetingInstance()`
+- `getFeedbackCampaignById()`
+
+**Functions that don't use this pattern (list queries):**
+
+- `getAllTasksForInitiative()` - Filters by organization in query
+- `getMeetingsForInitiative()` - Filters by organization in query
+- `getFeedbackForPerson()` - Filters by organization in query
+
 ### Organization Isolation
 
-All permission checks automatically enforce organization boundaries. Users can only access data from their own organization.
+All permission checks automatically enforce organization boundaries. Users can only access data from their own organization. For single entity retrievals, this is enforced through `getActionPermission`. For list queries, this is enforced through `organizationId` filters in the query.
 
 ### Error Handling
 
@@ -211,10 +285,11 @@ To add a new permission:
 ## Security Considerations
 
 1. **Always check permissions server-side** - Never trust client-side permission checks
-2. **Verify organization membership** - All queries must filter by `organizationId`
-3. **Check entity ownership** - For ID-based permissions, verify the user owns or participates in the entity
-4. **Use parameterized queries** - Prevent SQL injection by using Prisma's query builder
-5. **Log access attempts** - Consider logging failed permission checks for security monitoring
+2. **Use centralized permission checks** - For single entity retrievals, use `getActionPermission` before querying
+3. **Verify organization membership** - All list queries must filter by `organizationId`; single entity retrievals enforce this through `getActionPermission`
+4. **Check entity ownership** - For ID-based permissions, verify the user owns or participates in the entity
+5. **Use parameterized queries** - Prevent SQL injection by using Prisma's query builder
+6. **Log access attempts** - Consider logging failed permission checks for security monitoring
 
 ## Related Documentation
 

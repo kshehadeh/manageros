@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db'
 import { taskSchema, type TaskFormData } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 import { type TaskStatus } from '@/lib/task-status'
 import { taskPriorityUtils, DEFAULT_TASK_PRIORITY } from '@/lib/task-priority'
 import { getTaskAccessWhereClause } from '@/lib/task-access-utils'
@@ -306,19 +306,15 @@ export async function getAllTasksForInitiative(initiativeId: string) {
 export async function getTask(taskId: string) {
   const user = await getCurrentUser()
 
-  // Check if user belongs to an organization
-  if (!user.organizationId) {
-    throw new Error('User must belong to an organization to view tasks')
+  const hasPermission = await getActionPermission(user, 'task.view', taskId)
+
+  if (!hasPermission) {
+    throw new Error('You do not have permission to view this task')
   }
 
   const task = await prisma.task.findFirst({
     where: {
       id: taskId,
-      ...getTaskAccessWhereClause(
-        user.organizationId,
-        user.id,
-        user.personId || undefined
-      ),
     },
     include: {
       assignee: true,

@@ -4,6 +4,7 @@ import { OneOnOneDetailClient } from '@/components/oneonone-detail-client'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Handshake } from 'lucide-react'
+import { notFound } from 'next/navigation'
 
 interface EditOneOnOnePageProps {
   params: Promise<{
@@ -18,6 +19,9 @@ export default async function EditOneOnOnePage({
 
   try {
     const oneOnOne = await getOneOnOneById(id)
+    if (!oneOnOne) {
+      notFound()
+    }
 
     return (
       <OneOnOneDetailClient

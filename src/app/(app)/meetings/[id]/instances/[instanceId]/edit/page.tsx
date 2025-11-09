@@ -28,14 +28,14 @@ export default async function EditMeetingInstancePage({
     notFound()
   }
 
-  // Check if user can edit the meeting (required to edit instances)
+  // Check if user can edit this meeting instance
   const canEdit = await getActionPermission(
     user,
-    'meeting.edit',
-    parentMeeting.id
+    'meeting-instance.edit',
+    instanceId
   )
   if (!canEdit) {
-    redirect(`/meetings/${id}`)
+    redirect(`/meetings/${id}/instances/${instanceId}`)
   }
 
   // Format the instance data for the form
