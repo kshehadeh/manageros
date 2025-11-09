@@ -12,6 +12,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Geist_Mono as GeistMono } from 'next/font/google'
+
+const geistMono = GeistMono({
+  subsets: ['latin'],
+  variable: '--font-geist-mono',
+})
 
 export function MarketingHeader() {
   const pathname = usePathname()
@@ -31,8 +37,14 @@ export function MarketingHeader() {
             priority
           />
           <div>
-            <p className='text-lg font-semibold tracking-tight'>mpath</p>
-            <p className='text-xs text-white/60 hidden md:block'>
+            <p
+              className={`text-lg font-semibold tracking-tight ${geistMono.className}`}
+            >
+              mpath
+            </p>
+            <p
+              className={`text-xs text-white/60 hidden md:block ${geistMono.className}`}
+            >
               Built for engineering leaders
             </p>
           </div>
@@ -50,7 +62,9 @@ export function MarketingHeader() {
           )}
         </button>
       </div>
-      <nav className='hidden items-center gap-8 text-sm font-medium text-white/70 md:flex'>
+      <nav
+        className={`hidden items-center gap-8 text-sm font-medium text-white/70 md:flex ${geistMono.className}`}
+      >
         {!isHomePage && (
           <Link href='/' className='transition-colors hover:text-white'>
             Home
@@ -72,13 +86,15 @@ export function MarketingHeader() {
           </Link>
         )}
         <DropdownMenu>
-          <DropdownMenuTrigger className='flex items-center gap-1 transition-colors hover:text-white outline-none'>
+          <DropdownMenuTrigger
+            className={`flex items-center gap-1 transition-colors hover:text-white outline-none ${geistMono.className}`}
+          >
             Product Tour
             <ChevronDown className='h-4 w-4' />
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align='end'
-            className='bg-white/95 backdrop-blur-sm border-white/20'
+            className={`bg-white/95 backdrop-blur-sm border-white/20 ${geistMono.className}`}
           >
             <DropdownMenuItem asChild>
               <Link
@@ -114,7 +130,9 @@ export function MarketingHeader() {
       </nav>
       {/* Mobile menu */}
       {isMobileMenuOpen && (
-        <div className='md:hidden w-full flex flex-col gap-4 pb-4 border-t border-white/20 pt-4 animate-in slide-in-from-top-2'>
+        <div
+          className={`md:hidden w-full flex flex-col gap-4 pb-4 border-t border-white/20 pt-4 animate-in slide-in-from-top-2 ${geistMono.className}`}
+        >
           <nav className='flex flex-col gap-4'>
             {!isHomePage && (
               <Link
@@ -212,7 +230,9 @@ export function MarketingHeader() {
           </div>
         </div>
       )}
-      <div className='hidden md:flex items-center gap-3'>
+      <div
+        className={`hidden md:flex items-center gap-3 ${geistMono.className}`}
+      >
         <Button
           asChild
           variant='ghost'
