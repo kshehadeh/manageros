@@ -1,10 +1,38 @@
 'use client'
 
-import { SignIn } from '@clerk/nextjs'
+import { SignIn, useAuth } from '@clerk/nextjs'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect } from 'react'
 import { AnimatedGeometricPattern } from '@/components/marketing/animated-geometric-pattern'
 import { AuthMarketingPanel } from '@/components/auth/auth-marketing-panel'
 
 export default function SignInPage() {
+  const { isLoaded, userId } = useAuth()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    // Redirect authenticated users to dashboard or redirect_url
+    if (isLoaded && userId) {
+      const redirectUrl = searchParams.get('redirect_url') || '/dashboard'
+      router.replace(redirectUrl)
+    }
+  }, [isLoaded, userId, router, searchParams])
+
+  // Show loading state while checking auth
+  if (!isLoaded) {
+    return (
+      <div className='relative min-h-screen overflow-hidden bg-[#05070f] flex items-center justify-center'>
+        <div className='text-foreground'>Loading...</div>
+      </div>
+    )
+  }
+
+  // Don't render sign-in if user is authenticated (redirect will happen)
+  if (userId) {
+    return null
+  }
+
   return (
     <div className='relative min-h-screen overflow-hidden bg-[#05070f]'>
       {/* Animated background */}

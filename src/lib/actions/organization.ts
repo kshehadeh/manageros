@@ -462,17 +462,15 @@ export async function checkPendingInvitation(email: string) {
   return invitation
 }
 
-export async function getPendingInvitationsForUser() {
-  const user = await getCurrentUser()
-
-  // Only return invitations if user doesn't have an organization
-  if (user.organizationId) {
+export async function getPendingInvitationsForUser(email: string | null) {
+  // If user doesn't exist, return empty array
+  if (!email) {
     return []
   }
 
   const invitations = await prisma.organizationInvitation.findMany({
     where: {
-      email: user.email,
+      email: email.toLowerCase(),
       status: 'pending',
       expiresAt: {
         gt: new Date(), // Not expired
@@ -873,36 +871,47 @@ export async function getCurrentUserWithPerson() {
 }
 
 export async function getSidebarData() {
-  const currentUser = await getCurrentUser()
-  const { getFilteredNavigation } = await import('@/lib/auth-utils')
+  try {
+    const currentUser = await getCurrentUser()
+    const { getFilteredNavigation } = await import('@/lib/auth-utils')
 
-  const navigation = await getFilteredNavigation(currentUser)
+    const navigation = await getFilteredNavigation(currentUser)
 
-  if (!currentUser.organizationId) {
+    if (!currentUser.organizationId) {
+      return {
+        user: currentUser,
+        person: null,
+        navigation,
+      }
+    }
+
+    // Get the linked person if it exists
+    const person = currentUser.personId
+      ? await prisma.person.findUnique({
+          where: { id: currentUser.personId },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            avatar: true,
+          },
+        })
+      : null
+
     return {
       user: currentUser,
-      person: null,
+      person,
       navigation,
     }
-  }
-
-  // Get the linked person if it exists
-  const person = currentUser.personId
-    ? await prisma.person.findUnique({
-        where: { id: currentUser.personId },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          avatar: true,
-        },
-      })
-    : null
-
-  return {
-    user: currentUser,
-    person,
-    navigation,
+  } catch (error) {
+    // If getCurrentUser fails, return empty sidebar data
+    // This can happen if the user is authenticated in Clerk but not in database yet
+    console.error('Error fetching sidebar data:', error)
+    return {
+      user: null,
+      person: null,
+      navigation: [],
+    }
   }
 }
 

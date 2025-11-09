@@ -1,41 +1,12 @@
 import { NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth-utils'
-import { prisma } from '@/lib/db'
+import { getPendingInvitationsForUser } from '@/lib/actions/organization'
+import { getCurrentUser } from '../../../../lib/auth-utils'
 
 export async function GET() {
   const user = await getCurrentUser()
+
   try {
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Get pending invitations for the current user
-    const invitations = await prisma.organizationInvitation.findMany({
-      where: {
-        email: user.email,
-        status: 'pending',
-      },
-      include: {
-        organization: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-            description: true,
-          },
-        },
-        invitedBy: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
-
+    const invitations = await getPendingInvitationsForUser(user?.email || null)
     return NextResponse.json({ invitations })
   } catch (error) {
     console.error('Error fetching invitations:', error)

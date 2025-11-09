@@ -63,20 +63,41 @@ export async function POST(req: Request) {
       // Check for pending invitation
       const pendingInvitation = await checkPendingInvitation(email)
 
-      // Check if user already exists by email (for migration from NextAuth)
-      const existingUser = await prisma.user.findUnique({
-        where: { email: email.toLowerCase() },
+      // Check if user already exists by clerkUserId (handles on-the-fly creation)
+      let existingUser = await prisma.user.findUnique({
+        where: { clerkUserId: id },
       })
+
+      // If not found by clerkUserId, check by email (for migration from NextAuth)
+      if (!existingUser) {
+        existingUser = await prisma.user.findUnique({
+          where: { email: email.toLowerCase() },
+        })
+      }
 
       let createdOrUpdatedUserId: string
 
       await prisma.$transaction(async tx => {
         if (existingUser) {
-          // User exists but doesn't have clerkUserId - link them
+          // User exists - update if needed
           if (!existingUser.clerkUserId) {
+            // Link clerkUserId if missing
             await tx.user.update({
               where: { id: existingUser.id },
               data: { clerkUserId: id },
+            })
+          }
+          // Update email and name if they've changed
+          if (
+            existingUser.email !== email.toLowerCase() ||
+            existingUser.name !== name
+          ) {
+            await tx.user.update({
+              where: { id: existingUser.id },
+              data: {
+                email: email.toLowerCase(),
+                name,
+              },
             })
           }
           createdOrUpdatedUserId = existingUser.id

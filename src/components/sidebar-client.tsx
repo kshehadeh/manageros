@@ -21,7 +21,7 @@ interface PersonData {
 }
 
 interface SidebarData {
-  user: User
+  user: User | null
   person: PersonData | null
   navigation: NavItem[]
 }
@@ -62,6 +62,11 @@ export default function SidebarClient() {
 
   // If no session, render the unauthenticated sidebar
   if (!sidebarData || !userId) {
+    return <Sidebar />
+  }
+
+  // Handle case where user is null (error case)
+  if (!sidebarData.user) {
     return <Sidebar />
   }
 

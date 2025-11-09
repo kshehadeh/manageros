@@ -44,6 +44,14 @@ export async function syncUserDataToClerk(clerkUserId: string) {
       return
     }
 
+    // Check if CLERK_SECRET_KEY is configured
+    if (!process.env.CLERK_SECRET_KEY) {
+      console.warn(
+        'CLERK_SECRET_KEY environment variable is not set. Cannot sync user data to Clerk.'
+      )
+      return
+    }
+
     const client = await clerkClient()
 
     // Update Clerk user's public metadata with ManagerOS-specific data
@@ -77,6 +85,14 @@ export async function getUserFromSessionClaims(clerkUserId: string): Promise<{
   role?: string
 } | null> {
   try {
+    // Check if CLERK_SECRET_KEY is configured
+    if (!process.env.CLERK_SECRET_KEY) {
+      console.warn(
+        'CLERK_SECRET_KEY environment variable is not set. Cannot fetch user from Clerk.'
+      )
+      return null
+    }
+
     const client = await clerkClient()
     const clerkUser = await client.users.getUser(clerkUserId)
 

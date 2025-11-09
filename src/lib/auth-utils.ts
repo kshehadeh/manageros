@@ -67,16 +67,32 @@ export async function getCurrentUser(): Promise<User> {
     },
   })
 
-  // If user not found by clerkUserId, try to link by email
-  // This handles the case where a user existed before Clerk migration
+  // If user not found by clerkUserId, try to link by email or create on-the-fly
+  // This handles:
+  // 1. Users that existed before Clerk migration (link by email)
+  // 2. Race condition where user registered via Clerk but webhook hasn't processed yet
   if (!user) {
     try {
+      // Check if CLERK_SECRET_KEY is configured
+      if (!process.env.CLERK_SECRET_KEY) {
+        console.error(
+          'CLERK_SECRET_KEY environment variable is not set. Cannot fetch user from Clerk.'
+        )
+        throw new Error(
+          'Clerk secret key not configured. Please set CLERK_SECRET_KEY in your environment variables.'
+        )
+      }
+
       // Get user email from Clerk using the Clerk client
       const client = await clerkClient()
       const clerkUser = await client.users.getUser(userId)
 
       if (clerkUser?.emailAddresses?.[0]?.emailAddress) {
         const email = clerkUser.emailAddresses[0].emailAddress.toLowerCase()
+        const name =
+          clerkUser.firstName && clerkUser.lastName
+            ? `${clerkUser.firstName} ${clerkUser.lastName}`
+            : clerkUser.firstName || clerkUser.lastName || email.split('@')[0]
 
         // Try to find existing user by email
         const existingUser = await prisma.user.findUnique({
@@ -116,6 +132,51 @@ export async function getCurrentUser(): Promise<User> {
             },
           })
           // Sync the linked user data to Clerk
+          await syncUserDataToClerk(userId)
+        } else if (!existingUser) {
+          // User doesn't exist - create on-the-fly (handles webhook race condition)
+          // Check for pending invitation
+          const { checkPendingInvitation } = await import(
+            '@/lib/actions/organization'
+          )
+          const pendingInvitation = await checkPendingInvitation(email)
+
+          // Create user in database
+          user = await prisma.user.create({
+            data: {
+              email,
+              name,
+              clerkUserId: userId,
+              role: 'USER',
+              organizationId: pendingInvitation?.organization.id || null,
+            },
+            include: {
+              organization: {
+                select: {
+                  name: true,
+                  slug: true,
+                },
+              },
+              person: {
+                select: {
+                  id: true,
+                },
+              },
+            },
+          })
+
+          // If there's a pending invitation, mark it as accepted
+          if (pendingInvitation) {
+            await prisma.organizationInvitation.update({
+              where: { id: pendingInvitation.id },
+              data: {
+                status: 'accepted',
+                acceptedAt: new Date(),
+              },
+            })
+          }
+
+          // Sync user data to Clerk metadata
           await syncUserDataToClerk(userId)
         }
       }
