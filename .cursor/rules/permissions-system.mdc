@@ -1,0 +1,99 @@
+---
+description: Permissions system documentation and implementation guidelines
+alwaysApply: false
+---
+
+# Permissions System
+
+## Overview
+
+ManagerOS uses a centralized permission system that controls access to all actions in the system. Permissions are checked at the server level to ensure security and are based on user roles, organization membership, and entity ownership/participation.
+
+## User Roles
+
+- **ADMIN**: Organization administrators with elevated permissions
+- **USER**: Standard users with limited permissions
+
+## Permission Structure
+
+Permissions follow the pattern: `{entity}.{action}` (e.g., `task.create`, `meeting.edit`)
+
+## Permission Types
+
+### General Permissions
+
+Don't require an entity ID:
+
+- `task.create`, `task.view`
+- `meeting.create`, `meeting.view`
+- `initiative.create`, `initiative.view`
+- `report.access`, `report.view`
+- `feedback.create`, `feedback.view`
+- `oneonone.create`
+- `feedback-campaign.create`
+- `user.link-person`
+
+### ID-Based Permissions
+
+Require an entity ID to check ownership/participation:
+
+- `task.edit`, `task.delete`
+- `meeting.edit`, `meeting.delete`
+- `feedback.edit`, `feedback.delete`
+- `oneonone.edit`, `oneonone.delete`, `oneonone.view`
+- `feedback-campaign.edit`, `feedback-campaign.delete`, `feedback-campaign.view`
+
+### Admin-Only Permissions
+
+Restricted to ADMIN users:
+
+- `initiative.edit`, `initiative.delete`
+- `report.create`, `report.edit`, `report.delete`
+- `user.link-person`
+
+## Permission Requirements
+
+### Organization Membership
+
+Most permissions require `user.organizationId` to be set.
+
+### Person Linking
+
+Some permissions require `user.personId` to be set:
+
+- Task, meeting, initiative, feedback, one-on-one, and feedback campaign creation
+- ID-based permissions for these entities (unless ADMIN)
+
+## Using Permissions
+
+```typescript
+import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
+
+const user = await getCurrentUser()
+const canCreate = await getActionPermission(user, 'task.create')
+const canEdit = await getActionPermission(user, 'task.edit', taskId)
+```
+
+## Implementation Guidelines
+
+1. **Always check permissions server-side** - Never trust client-side checks
+2. **Verify organization membership** - All queries must filter by `organizationId`
+3. **Check entity ownership** - For ID-based permissions, verify ownership/participation
+4. **Use PermissionMap** - All permissions must be defined in `PermissionMap` in `auth-utils.ts`
+5. **Add to ALL_PERMISSIONS** - New permissions must be added to `ALL_PERMISSIONS` in `permissions.ts`
+6. **Mark ID-required permissions** - Add ID-based permissions to `PERMISSIONS_REQUIRING_ID`
+
+## Adding New Permissions
+
+1. Add permission string to `ALL_PERMISSIONS` in `src/lib/actions/permissions.ts`
+2. Add check function to `PermissionMap` in `src/lib/auth-utils.ts`
+3. If ID-based, add to `PERMISSIONS_REQUIRING_ID` in `src/lib/actions/permissions.ts`
+4. Update documentation in `docs/permissions.md`
+
+## Security Checklist
+
+- ✅ Permission check performed server-side
+- ✅ Organization membership verified
+- ✅ Entity ownership/participation verified (for ID-based)
+- ✅ Error messages don't leak information
+- ✅ Database queries filter by `organizationId`
