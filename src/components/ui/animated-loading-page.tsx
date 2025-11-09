@@ -53,7 +53,7 @@ export function AnimatedLoadingPage({
           <div className='relative animate-[fadeInScale_1s_ease-out]'>
             <Image
               src={logoSrc}
-              alt='ManagerOS Logo'
+              alt='mpath Logo'
               width={120}
               height={120}
               className='h-[120px] w-[120px]'

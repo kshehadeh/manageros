@@ -37,8 +37,8 @@ export function AuthMarketingPanel() {
           Lead high-performing engineering teams
         </h1>
         <p className='text-lg text-white/70 sm:text-xl'>
-          ManagerOS brings planning, 1:1s, feedback, and delivery signals
-          together so engineering managers can lead with confidence.
+          mpath brings planning, 1:1s, feedback, and delivery signals together
+          so engineering managers can lead with confidence.
         </p>
       </div>
 

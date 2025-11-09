@@ -6,7 +6,7 @@ category: Reports & Analytics
 
 # Person Overview Report
 
-The Person Overview Report provides a comprehensive analysis of an individual's work activity by aggregating data from multiple sources within ManagerOS and external integrations. It offers detailed insights into task completion, initiative involvement, and overall work patterns.
+The Person Overview Report provides a comprehensive analysis of an individual's work activity by aggregating data from multiple sources within mpath and external integrations. It offers detailed insights into task completion, initiative involvement, and overall work patterns.
 
 ## Overview
 

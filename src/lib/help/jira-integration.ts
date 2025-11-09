@@ -22,7 +22,7 @@ export const helpContent: HelpContent = {
   category: 'Integrations',
   content: `# Jira Integration
 
-ManagerOS integrates with Jira to provide a unified view of your team's work across both platforms.
+mpath integrates with Jira to provide a unified view of your team's work across both platforms.
 
 ## Setup Process
 
@@ -34,13 +34,13 @@ ManagerOS integrates with Jira to provide a unified view of your team's work acr
 
 ### 2. Link Team Members
 
-- **Associate Jira accounts** with ManagerOS people
+- **Associate Jira accounts** with mpath people
 - **Map Jira usernames** to team member profiles
 - **Verify access permissions** for each user
 
 ### 3. Configure Work Tracking
 
-- **Select projects** to track in ManagerOS
+- **Select projects** to track in mpath
 - **Choose issue types** to include in work activity
 - **Set up automatic sync** for real-time updates
 
@@ -54,13 +54,13 @@ ManagerOS integrates with Jira to provide a unified view of your team's work acr
 
 ### Status Synchronization
 
-- **Real-time updates** from Jira to ManagerOS
+- **Real-time updates** from Jira to mpath
 - **Automatic task creation** from Jira issues
 - **Progress tracking** across both platforms
 
 ## Best Practices
 
-- **Use consistent naming** between Jira and ManagerOS
+- **Use consistent naming** between Jira and mpath
 - **Regular sync** to keep data current
 - **Train team members** on the integration
 - **Monitor performance** and adjust as needed

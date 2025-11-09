@@ -6,7 +6,7 @@ category: Meetings & Communication
 
 # Meetings
 
-Meetings in ManagerOS let you plan one-time or recurring sessions, invite participants, and connect discussions to work.
+Meetings in mpath let you plan one-time or recurring sessions, invite participants, and connect discussions to work.
 
 ## Create a meeting
 
@@ -19,7 +19,7 @@ Meetings in ManagerOS let you plan one-time or recurring sessions, invite partic
 
 ## Recurrence (optional)
 
-Create a series with a repeat pattern. ManagerOS generates individual instances you can manage separately.
+Create a series with a repeat pattern. mpath generates individual instances you can manage separately.
 
 - Patterns: daily, weekly, monthly, bi‑monthly, semi‑annually
 - Start/end dates define the range of generated instances
@@ -50,4 +50,3 @@ Track responses at the meeting level:
 - If invites aren’t received, verify email addresses and resend
 - Adjust recurrence dates if instances aren’t appearing
 - Update participants when team membership changes
-

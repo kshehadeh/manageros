@@ -1,5 +1,11 @@
 import { ReactNode } from 'react'
 import { LucideIcon } from 'lucide-react'
+import { Geist_Mono as GeistMono } from 'next/font/google'
+
+const geistMono = GeistMono({
+  subsets: ['latin'],
+  variable: '--font-geist-mono',
+})
 
 interface SectionHeaderProps {
   icon: LucideIcon | React.ElementType
@@ -37,7 +43,9 @@ export function SectionHeader({
       className={`flex items-center justify-between md:mx-0 md:px-2 ${className} mb-2 bg-card p-2 rounded-[var(--radius-md)]`}
     >
       <div className='flex-1'>
-        <h3 className='text-xl font-bold flex items-center gap-2'>
+        <h3
+          className={`text-xl font-bold flex items-center gap-2 ${geistMono.className}`}
+        >
           <Icon className='w-6 h-6' />
           {title}
         </h3>

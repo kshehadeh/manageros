@@ -6,7 +6,7 @@ category: Meetings & Communication
 
 # Meetings and Meeting Instances
 
-ManagerOS provides comprehensive meeting management with support for both one-time meetings and recurring meeting series with individual instances.
+mpath provides comprehensive meeting management with support for both one-time meetings and recurring meeting series with individual instances.
 
 ## Meeting Types
 

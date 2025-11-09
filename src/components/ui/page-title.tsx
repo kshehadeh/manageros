@@ -2,6 +2,12 @@ import { ReactNode } from 'react'
 import { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { HelpIcon } from '@/components/help-icon'
+import { Geist_Mono as GeistMono } from 'next/font/google'
+
+const geistMono = GeistMono({
+  subsets: ['latin'],
+  variable: '--font-geist-mono',
+})
 
 interface PageTitleProps {
   children: ReactNode
@@ -31,7 +37,7 @@ export function PageTitle({
       ) : Icon ? (
         <Icon className='h-6 w-6 text-muted-foreground hidden md:block' />
       ) : null}
-      <h1 className='page-title'>{children}</h1>
+      <h1 className={`page-title ${geistMono.className}`}>{children}</h1>
       {helpId && <HelpIcon helpId={helpId} size='md' />}
     </div>
   )

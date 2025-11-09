@@ -22,7 +22,7 @@ export const helpContent: HelpContent = {
   category: 'Integrations',
   content: `# GitHub Integration
 
-ManagerOS integrates with GitHub to provide visibility into your team's development work, track pull requests, and link team members to their GitHub accounts.
+mpath integrates with GitHub to provide visibility into your team's development work, track pull requests, and link team members to their GitHub accounts.
 
 ## Setup Process
 
@@ -57,7 +57,7 @@ ManagerOS integrates with GitHub to provide visibility into your team's developm
 
 ### Account Linking
 
-- **Secure GitHub account association** with ManagerOS profiles
+- **Secure GitHub account association** with mpath profiles
 - **Automatic profile matching** by username
 - **Display name and email** synchronization
 - **Easy unlinking** when needed
@@ -78,7 +78,7 @@ ManagerOS integrates with GitHub to provide visibility into your team's developm
    - \`repo\` - Full control of private repositories
    - \`read:user\` - Read user profile data
 4. **Generate and copy** the token immediately
-5. **Enter in ManagerOS** settings
+5. **Enter in mpath** settings
 
 ### Required Permissions
 

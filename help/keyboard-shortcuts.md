@@ -6,7 +6,7 @@ category: Getting Started
 
 # Keyboard Shortcuts
 
-ManagerOS includes several keyboard shortcuts to help you navigate and work more efficiently.
+mpath includes several keyboard shortcuts to help you navigate and work more efficiently.
 
 ## Global Shortcuts
 
@@ -48,7 +48,7 @@ ManagerOS includes several keyboard shortcuts to help you navigate and work more
 
 ## Browser Shortcuts
 
-These standard browser shortcuts also work in ManagerOS:
+These standard browser shortcuts also work in mpath:
 
 - **⌘R** (Mac) / **Ctrl+R** (Windows/Linux) - Refresh the page
 - **⌘L** (Mac) / **Ctrl+L** (Windows/Linux) - Focus the address bar
@@ -64,5 +64,5 @@ All keyboard shortcuts are designed to work with screen readers and other assist
 - The command palette is your fastest way to navigate the app
 - Use AI chat (⌘J) to quickly get answers about your organization's data
 - Use Q to quickly capture tasks as they come up in meetings or conversations
-- Keyboard shortcuts work consistently across all pages in ManagerOS
+- Keyboard shortcuts work consistently across all pages in mpath
 - You can always use the mouse if you prefer - keyboard shortcuts are optional

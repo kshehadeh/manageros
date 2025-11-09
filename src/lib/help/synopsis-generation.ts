@@ -22,7 +22,7 @@ export const helpContent: HelpContent = {
   category: 'Feedback & Development',
   content: `# Synopsis Generation
 
-ManagerOS uses AI-powered synopsis generation to create concise, professional summaries of team members' work activities, combining data from tasks, GitHub pull requests, Jira tickets, and feedback to provide comprehensive performance insights.
+mpath uses AI-powered synopsis generation to create concise, professional summaries of team members' work activities, combining data from tasks, GitHub pull requests, Jira tickets, and feedback to provide comprehensive performance insights.
 
 ## Overview
 

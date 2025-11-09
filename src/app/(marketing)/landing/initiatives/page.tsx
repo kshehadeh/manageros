@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Why initiatives matter | ManagerOS',
+  title: 'Why initiatives matter | mpath',
   description:
-    'Discover how ManagerOS keeps strategic initiatives visible, connected, and moving forward with clarity for every stakeholder.',
+    'Discover how mpath keeps strategic initiatives visible, connected, and moving forward with clarity for every stakeholder.',
 }
 
 const narrative = [
@@ -24,7 +24,7 @@ const narrative = [
   },
   {
     id: 'shine',
-    text: 'This is where ManagerOS shines: it pulls initiatives out of the jumble and gives them space to breathe. Instead of getting buried under the noise of day-to-day execution, important efforts stay visible, grounded, and connected to outcomes.',
+    text: 'This is where mpath shines: it pulls initiatives out of the jumble and gives them space to breathe. Instead of getting buried under the noise of day-to-day execution, important efforts stay visible, grounded, and connected to outcomes.',
     image: '/images/screenshots/ss-initiative-3.png',
   },
 ]
@@ -45,9 +45,8 @@ export default function InitiativesWhyPage() {
         </FadeInOnScroll>
         <FadeInOnScroll delay={200} className='w-full'>
           <p className='mx-auto text-center text-base text-white/70 sm:text-lg'>
-            ManagerOS connects the why, what, and who behind every long-term
-            effort so teams stay aligned on the work that moves the business
-            forward.
+            mpath connects the why, what, and who behind every long-term effort
+            so teams stay aligned on the work that moves the business forward.
           </p>
         </FadeInOnScroll>
       </section>
@@ -99,8 +98,8 @@ export default function InitiativesWhyPage() {
         <FadeInOnScroll delay={200}>
           <p className='max-w-[50vw] text-base text-white/70 sm:text-lg'>
             Bring clarity to the work that spans quarters, teams, and
-            stakeholders. ManagerOS keeps purpose, progress, and ownership
-            connected so you can drive outcomes with confidence.
+            stakeholders. mpath keeps purpose, progress, and ownership connected
+            so you can drive outcomes with confidence.
           </p>
         </FadeInOnScroll>
         <FadeInOnScroll delay={300}>
@@ -111,7 +110,7 @@ export default function InitiativesWhyPage() {
               className='bg-primary text-primary-foreground shadow-[0_18px_40px_rgba(79,70,229,0.45)] transition-all duration-200 hover:-translate-y-0.5'
             >
               <Link href='/auth/signup'>
-                Start managing initiatives in ManagerOS
+                Start managing initiatives in mpath
               </Link>
             </Button>
             <Button

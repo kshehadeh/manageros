@@ -21,7 +21,7 @@ export function JobRoleDetailClient({
 
   useEffect(() => {
     // Set page title for browser tab
-    document.title = `${jobRoleTitle} - Job Role - ManagerOS`
+    document.title = `${jobRoleTitle} - Job Role - mpath`
   }, [jobRoleTitle])
 
   return <>{children}</>

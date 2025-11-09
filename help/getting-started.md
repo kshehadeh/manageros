@@ -1,12 +1,12 @@
 ---
 id: getting-started
-title: Getting Started with ManagerOS
+title: Getting Started with mpath
 category: Getting Started
 ---
 
-# Welcome to ManagerOS
+# Welcome to mpath
 
-ManagerOS helps managers organize people and teams, run initiatives, manage tasks, hold effective meetings and one‑on‑ones, collect feedback, and integrate with developer tools. This guide orients you to the main concepts and how they relate.
+mpath helps managers organize people and teams, run initiatives, manage tasks, hold effective meetings and one‑on‑ones, collect feedback, and integrate with developer tools. This guide orients you to the main concepts and how they relate.
 
 ## Core Concepts
 

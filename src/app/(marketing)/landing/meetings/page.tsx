@@ -5,20 +5,20 @@ import { FadeInOnScroll } from '@/components/marketing/fade-in'
 import { Button } from '@/components/ui/button'
 
 export const metadata = {
-  title: 'Why meetings matter | ManagerOS',
+  title: 'Why meetings matter | mpath',
   description:
-    'Discover how ManagerOS transforms meetings from disconnected calendar events into connected, productive sessions with context and follow-through.',
+    'Discover how mpath transforms meetings from disconnected calendar events into connected, productive sessions with context and follow-through.',
 }
 
 const narrative = [
   {
     id: 'meetings-with-context',
-    text: 'Most meeting tools treat each event as an isolated appointment. ManagerOS builds meetings into the fabric of your work. Link sessions to initiatives they discuss, track decisions, and connect outcomes to the people who need to follow through. Every meeting has purpose beyond the time slot.',
+    text: 'Most meeting tools treat each event as an isolated appointment. mpath builds meetings into the fabric of your work. Link sessions to initiatives they discuss, track decisions, and connect outcomes to the people who need to follow through. Every meeting has purpose beyond the time slot.',
     image: '/images/screenshots/ss-meeting-1.png',
   },
   {
     id: 'track-what-matters',
-    text: "From one-time sessions to recurring series, ManagerOS makes meeting management simple. Invite participants, track their responses, take notes that stay attached to the work, and generate instances automatically for recurring schedules. The meeting doesn't end when the call does — the context lives on.",
+    text: "From one-time sessions to recurring series, mpath makes meeting management simple. Invite participants, track their responses, take notes that stay attached to the work, and generate instances automatically for recurring schedules. The meeting doesn't end when the call does — the context lives on.",
     image: '/images/screenshots/ss-meeting-2.png',
   },
 ]
@@ -39,9 +39,9 @@ export default function MeetingsWhyPage() {
         </FadeInOnScroll>
         <FadeInOnScroll delay={200} className='w-full'>
           <p className='mx-auto text-center text-base text-white/70 sm:text-lg'>
-            ManagerOS transforms meetings from standalone events into
-            integrated, context-rich sessions that drive work forward and keep
-            everyone aligned.
+            mpath transforms meetings from standalone events into integrated,
+            context-rich sessions that drive work forward and keep everyone
+            aligned.
           </p>
         </FadeInOnScroll>
       </section>
@@ -92,7 +92,7 @@ export default function MeetingsWhyPage() {
         </FadeInOnScroll>
         <FadeInOnScroll delay={200}>
           <p className='max-w-[50vw] text-base text-white/70 sm:text-lg'>
-            Connect meetings to the work they discuss. ManagerOS ensures nothing
+            Connect meetings to the work they discuss. mpath ensures nothing
             gets lost in translation, with context that outlives the call and
             outcomes that become action.
           </p>
@@ -104,9 +104,7 @@ export default function MeetingsWhyPage() {
               size='lg'
               className='bg-primary text-primary-foreground shadow-[0_18px_40px_rgba(79,70,229,0.45)] transition-all duration-200 hover:-translate-y-0.5'
             >
-              <Link href='/auth/signup'>
-                Start managing meetings in ManagerOS
-              </Link>
+              <Link href='/auth/signup'>Start managing meetings in mpath</Link>
             </Button>
             <Button
               asChild

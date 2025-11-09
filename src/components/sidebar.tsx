@@ -7,6 +7,12 @@ import { usePathname } from 'next/navigation'
 import { useMobileMenu } from '@/components/mobile-menu-provider'
 import { IndigoIcon } from '@/components/indigo-icon'
 import type { User as UserType } from '@/lib/auth-types'
+import { Geist_Mono as GeistMono } from 'next/font/google'
+
+const geistMono = GeistMono({
+  subsets: ['latin'],
+  variable: '--font-geist-mono',
+})
 import {
   Home,
   Rocket,
@@ -103,7 +109,11 @@ export default function Sidebar({
         <div className='flex h-16 items-center px-6 border-b'>
           <div className='flex items-center gap-3'>
             <IndigoIcon width={40} height={33} color='currentColor' />
-            <h1 className='text-xl font-semibold text-foreground'>ManagerOS</h1>
+            <h1
+              className={`text-xl font-semibold text-foreground ${geistMono.className}`}
+            >
+              m.<span className='font-bold'>path</span>
+            </h1>
           </div>
         </div>
 
@@ -196,7 +206,7 @@ export default function Sidebar({
                     key={item.name}
                     href={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                    className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${geistMono.className} ${
                       isActive
                         ? 'bg-secondary text-secondary-foreground border'
                         : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
@@ -214,7 +224,7 @@ export default function Sidebar({
                   setIsMobileMenuOpen(false)
                   toggleAIChat()
                 }}
-                className='flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors w-full'
+                className={`flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
               >
                 <Bot className='h-5 w-5' />
                 <span>AI Chat</span>
@@ -249,7 +259,7 @@ export default function Sidebar({
                   setIsMobileMenuOpen(false)
                   setIsKeyboardShortcutsOpen(true)
                 }}
-                className='flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors w-full'
+                className={`flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
               >
                 <Keyboard className='h-5 w-5' />
                 <span>Keyboard Shortcuts</span>
@@ -259,7 +269,7 @@ export default function Sidebar({
                   setIsMobileMenuOpen(false)
                   setIsGettingStartedOpen(true)
                 }}
-                className='flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors w-full'
+                className={`flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
               >
                 <BookOpen className='h-5 w-5' />
                 <span>Help</span>
@@ -269,7 +279,7 @@ export default function Sidebar({
                   setIsMobileMenuOpen(false)
                   setIsBugOpen(true)
                 }}
-                className='flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors w-full'
+                className={`flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
               >
                 <Bug className='h-5 w-5' />
                 <span>Report a bug</span>

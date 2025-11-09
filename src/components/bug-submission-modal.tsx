@@ -173,7 +173,7 @@ export function BugSubmissionModal({
             Report a Bug
           </DialogTitle>
           <DialogDescription>
-            Help us improve ManagerOS by reporting bugs or issues you encounter.
+            Help us improve mpath by reporting bugs or issues you encounter.
             Your report will be submitted to our GitHub repository.
           </DialogDescription>
         </DialogHeader>

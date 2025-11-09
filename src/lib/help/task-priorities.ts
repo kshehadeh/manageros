@@ -22,7 +22,7 @@ export const helpContent: HelpContent = {
   category: 'Tasks & Projects',
   content: `# Task Priorities
 
-Task priorities help you and your team focus on what matters most. ManagerOS uses a simple but effective priority system:
+Task priorities help you and your team focus on what matters most. mpath uses a simple but effective priority system:
 
 ## Priority Levels
 

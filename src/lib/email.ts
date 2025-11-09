@@ -53,11 +53,11 @@ export async function sendPasswordResetEmail(
     const mailOptions = {
       from: fromAddress,
       to: email,
-      subject: 'Reset your ManagerOS password',
+      subject: 'Reset your mpath password',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #333;">Reset your password</h2>
-          <p>You requested a password reset for your ManagerOS account.</p>
+          <p>You requested a password reset for your mpath account.</p>
           <p>Click the button below to reset your password:</p>
           <div style="text-align: center; margin: 30px 0;">
             <a href="${resetUrl}" 
@@ -72,21 +72,21 @@ export async function sendPasswordResetEmail(
           </p>
           <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
           <p style="color: #999; font-size: 12px;">
-            This email was sent from ManagerOS. If you have any questions, please contact support.
+            This email was sent from mpath. If you have any questions, please contact support.
           </p>
         </div>
       `,
       text: `
         Reset your password
         
-        You requested a password reset for your ManagerOS account.
+        You requested a password reset for your mpath account.
         
         Click this link to reset your password:
         ${resetUrl}
         
         This link will expire in 1 hour. If you didn't request this password reset, you can safely ignore this email.
         
-        This email was sent from ManagerOS. If you have any questions, please contact support.
+        This email was sent from mpath. If you have any questions, please contact support.
       `,
     }
 
@@ -97,7 +97,7 @@ export async function sendPasswordResetEmail(
       console.log('=== PASSWORD RESET EMAIL (Development Mode) ===')
       console.log(`To: ${email}`)
       console.log(`From: ${fromAddress}`)
-      console.log(`Subject: Reset your ManagerOS password`)
+      console.log(`Subject: Reset your mpath password`)
       console.log(`Reset URL: ${resetUrl}`)
       console.log('===============================================')
       return { success: true, messageId: 'dev-mode' }

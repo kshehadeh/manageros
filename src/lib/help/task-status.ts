@@ -22,7 +22,7 @@ export const helpContent: HelpContent = {
   category: 'Tasks & Projects',
   content: `# Task Status
 
-Task status helps you track the progress of work items through their lifecycle. ManagerOS uses a simple but effective status system:
+Task status helps you track the progress of work items through their lifecycle. mpath uses a simple but effective status system:
 
 ## Status Types
 

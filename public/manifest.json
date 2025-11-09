@@ -1,6 +1,6 @@
 {
-    "name": "ManagerOS",
-    "short_name": "ManagerOS",
+    "name": "mpath",
+    "short_name": "mpath",
     "description": "Manager-only MVP",
     "start_url": "/",
     "display": "standalone",

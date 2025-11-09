@@ -5,15 +5,15 @@ import { FadeInOnScroll } from '@/components/marketing/fade-in'
 import { Button } from '@/components/ui/button'
 
 export const metadata = {
-  title: 'Why tasks matter | ManagerOS',
+  title: 'Why tasks matter | mpath',
   description:
-    'Discover how ManagerOS makes task management simple, connected, and actionable with quick creation and seamless integration.',
+    'Discover how mpath makes task management simple, connected, and actionable with quick creation and seamless integration.',
 }
 
 const narrative = [
   {
     id: 'tasks-with-purpose',
-    text: 'Tasks in ManagerOS are more than checkboxes. Assign ownership, set priorities, track status, and add estimates — all while keeping tasks connected to the bigger picture. Whether it is a quick follow-up or a multi-week deliverable, every task has clear ownership and purpose.',
+    text: 'Tasks in mpath are more than checkboxes. Assign ownership, set priorities, track status, and add estimates — all while keeping tasks connected to the bigger picture. Whether it is a quick follow-up or a multi-week deliverable, every task has clear ownership and purpose.',
     image: '/images/screenshots/ss-tasks-1.png',
   },
   {
@@ -23,7 +23,7 @@ const narrative = [
   },
   {
     id: 'create-anywhere',
-    text: "Press Q from anywhere in ManagerOS and create a task instantly. Whether you are reviewing an initiative, in a meeting, or on someone's profile, capture work immediately — no context switching, no navigation. ManagerOS makes task creation as simple as remembering what needs to be done.",
+    text: "Press Q from anywhere in mpath and create a task instantly. Whether you are reviewing an initiative, in a meeting, or on someone's profile, capture work immediately — no context switching, no navigation. mpath makes task creation as simple as remembering what needs to be done.",
     image: '/images/screenshots/ss-tasks-2.png',
   },
 ]
@@ -44,8 +44,8 @@ export default function TasksWhyPage() {
         </FadeInOnScroll>
         <FadeInOnScroll delay={200} className='w-full'>
           <p className='mx-auto text-center text-base text-white/70 sm:text-lg'>
-            ManagerOS makes task management simple, connected, and instant —
-            from strategic initiatives to quick follow-ups, capture and track
+            mpath makes task management simple, connected, and instant — from
+            strategic initiatives to quick follow-ups, capture and track
             everything that matters.
           </p>
         </FadeInOnScroll>
@@ -97,8 +97,8 @@ export default function TasksWhyPage() {
         </FadeInOnScroll>
         <FadeInOnScroll delay={200}>
           <p className='max-w-[50vw] text-base text-white/70 sm:text-lg'>
-            From quick follow-ups to strategic deliverables, ManagerOS makes
-            task management seamless. Create tasks from anywhere, link them to
+            From quick follow-ups to strategic deliverables, mpath makes task
+            management seamless. Create tasks from anywhere, link them to
             initiatives, and watch them become action.
           </p>
         </FadeInOnScroll>
@@ -109,7 +109,7 @@ export default function TasksWhyPage() {
               size='lg'
               className='bg-primary text-primary-foreground shadow-[0_18px_40px_rgba(79,70,229,0.45)] transition-all duration-200 hover:-translate-y-0.5'
             >
-              <Link href='/auth/signup'>Start managing tasks in ManagerOS</Link>
+              <Link href='/auth/signup'>Start managing tasks in mpath</Link>
             </Button>
             <Button
               asChild

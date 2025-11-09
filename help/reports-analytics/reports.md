@@ -6,13 +6,13 @@ category: Reports & Analytics
 
 # Reports
 
-Reports in ManagerOS provide powerful data analysis and insights by aggregating information from multiple sources across your organization. They help managers and team members understand work patterns, track progress, and make data-driven decisions.
+Reports in mpath provide powerful data analysis and insights by aggregating information from multiple sources across your organization. They help managers and team members understand work patterns, track progress, and make data-driven decisions.
 
 ## Overview
 
 ### What are Reports?
 
-Reports are structured data analysis tools that combine information from various ManagerOS features and external integrations to provide comprehensive insights. They can be generated on-demand with customizable parameters and are designed to support performance management, team oversight, and organizational analytics.
+Reports are structured data analysis tools that combine information from various mpath features and external integrations to provide comprehensive insights. They can be generated on-demand with customizable parameters and are designed to support performance management, team oversight, and organizational analytics.
 
 ### Key Features
 
@@ -52,7 +52,7 @@ AI-powered professional summaries of work activity, featuring:
 
 Reports can integrate data from multiple sources:
 
-### Internal ManagerOS Data
+### Internal mpath Data
 
 - **Tasks**: Completion status, priorities, assignments, and progress
 - **Initiatives**: Project involvement, contributions, and outcomes

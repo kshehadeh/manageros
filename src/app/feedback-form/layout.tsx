@@ -40,16 +40,14 @@ export default function FeedbackFormLayout({
             <Link href='/' className='flex items-center gap-3'>
               <Image
                 src='/images/indigo-logo-white.png'
-                alt='ManagerOS Logo'
+                alt='mpath Logo'
                 width={40}
                 height={40}
                 className='h-10 w-10'
                 priority
               />
               <div>
-                <p className='text-lg font-semibold tracking-tight'>
-                  ManagerOS
-                </p>
+                <p className='text-lg font-semibold tracking-tight'>mpath</p>
                 <p className='text-xs text-white/60 hidden sm:block'>
                   Built for engineering leaders
                 </p>

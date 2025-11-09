@@ -89,7 +89,7 @@ export function OrganizationSetupCards({
   return (
     <div className='space-y-6'>
       <div className='text-center'>
-        <h2 className='text-2xl font-semibold mb-2'>Welcome to ManagerOS!</h2>
+        <h2 className='text-2xl font-semibold mb-2'>Welcome to mpath!</h2>
         <p className='text-muted-foreground'>
           To get started, you&apos;ll need to create an organization or join an
           existing one.

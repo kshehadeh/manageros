@@ -110,7 +110,7 @@ export function GithubOrganizationsManager() {
   return (
     <div className='space-y-4'>
       <p className='text-sm text-muted-foreground'>
-        Specify which GitHub organizations are associated with your ManagerOS
+        Specify which GitHub organizations are associated with your mpath
         organization. Only pull requests from repositories in these
         organizations will be included in metrics and activity tracking.
       </p>

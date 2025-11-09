@@ -92,7 +92,7 @@ export async function POST(req: Request) {
         },
       },
       stopWhen: stepCountIs(10),
-      system: `You are an AI assistant for ManagerOS, a management platform for engineering managers. You help users understand and interact with their organizational data including people, initiatives, tasks, meetings, and teams.
+      system: `You are an AI assistant for mpath, a management platform for engineering managers. You help users understand and interact with their organizational data including people, initiatives, tasks, meetings, and teams.
 
 Key guidelines:
 - If a time-based prompt is provided, always use the dateTime tool to get the current date and helpful date ranges

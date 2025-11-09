@@ -5,15 +5,15 @@ import { FadeInOnScroll } from '@/components/marketing/fade-in'
 import { Button } from '@/components/ui/button'
 
 export const metadata = {
-  title: 'Why people matter | ManagerOS',
+  title: 'Why people matter | mpath',
   description:
-    'Discover how ManagerOS puts people at the center of everything, connecting their work, feedback, and growth in one unified view.',
+    'Discover how mpath puts people at the center of everything, connecting their work, feedback, and growth in one unified view.',
 }
 
 const narrative = [
   {
     id: 'people-are-the-point',
-    text: "Initiatives don't move forward without people. ManagerOS puts every teammate at the center - not as a resource, but as a human. You get a full picture of who they are, how they're doing, and what they're contributing, all in one place.",
+    text: "Initiatives don't move forward without people. mpath puts every teammate at the center - not as a resource, but as a human. You get a full picture of who they are, how they're doing, and what they're contributing, all in one place.",
     image: '/images/screenshots/ss-people-2.png',
   },
   {
@@ -23,12 +23,12 @@ const narrative = [
   },
   {
     id: 'connected-to-work',
-    text: "ManagerOS automatically links people to the initiatives they're involved in, the meetings they've attended, and the tasks they've owned or contributed to. This makes it easy to recognize impact, surface blockers, and spot patterns over time.",
+    text: "mpath automatically links people to the initiatives they're involved in, the meetings they've attended, and the tasks they've owned or contributed to. This makes it easy to recognize impact, surface blockers, and spot patterns over time.",
     image: '/images/screenshots/ss-people-4.png',
   },
   {
     id: 'build-relationships',
-    text: 'ManagerOS helps managers go beyond status updates. By centralizing everything from feedback to follow-ups, it makes every interaction more meaningful - and keeps the relationship at the core of team health and performance.',
+    text: 'mpath helps managers go beyond status updates. By centralizing everything from feedback to follow-ups, it makes every interaction more meaningful - and keeps the relationship at the core of team health and performance.',
     image: '/images/screenshots/ss-people-1.png',
   },
 ]
@@ -49,7 +49,7 @@ export default function PeopleWhyPage() {
         </FadeInOnScroll>
         <FadeInOnScroll delay={200} className='w-full'>
           <p className='mx-auto text-center text-base text-white/70 sm:text-lg'>
-            ManagerOS gives you a complete picture of every teammate — their
+            mpath gives you a complete picture of every teammate — their
             contributions, growth, and context — so you can lead with confidence
             and clarity.
           </p>
@@ -102,9 +102,8 @@ export default function PeopleWhyPage() {
         </FadeInOnScroll>
         <FadeInOnScroll delay={200}>
           <p className='max-w-[50vw] text-base text-white/70 sm:text-lg'>
-            See every person in full context. ManagerOS brings together their
-            work, feedback, and growth so you can be the manager your team
-            deserves.
+            See every person in full context. mpath brings together their work,
+            feedback, and growth so you can be the manager your team deserves.
           </p>
         </FadeInOnScroll>
         <FadeInOnScroll delay={300}>
@@ -114,9 +113,7 @@ export default function PeopleWhyPage() {
               size='lg'
               className='bg-primary text-primary-foreground shadow-[0_18px_40px_rgba(79,70,229,0.45)] transition-all duration-200 hover:-translate-y-0.5'
             >
-              <Link href='/auth/signup'>
-                Start managing people in ManagerOS
-              </Link>
+              <Link href='/auth/signup'>Start managing people in mpath</Link>
             </Button>
             <Button
               asChild

@@ -79,7 +79,7 @@ export function OrganizationCreationDialog({
         <DialogHeader>
           <DialogTitle>Create New Organization</DialogTitle>
           <DialogDescription>
-            Create a new organization to get started with ManagerOS. You&apos;ll
+            Create a new organization to get started with mpath. You&apos;ll
             become the admin of this organization.
           </DialogDescription>
         </DialogHeader>

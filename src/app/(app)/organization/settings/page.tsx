@@ -208,7 +208,7 @@ export default async function OrganizationSettingsPage() {
                 <SectionHeader
                   icon={Github}
                   title='GitHub Organizations'
-                  description='Configure which GitHub organizations are associated with your ManagerOS organization'
+                  description='Configure which GitHub organizations are associated with your mpath organization'
                 />
               }
             >

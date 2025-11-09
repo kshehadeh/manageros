@@ -5,12 +5,12 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: {
-    default: 'ManagerOS',
-    template: '%s | ManagerOS',
+    default: 'mpath',
+    template: '%s | mpath',
   },
   description: 'The ultimate productivity tool for managers',
-  applicationName: 'ManagerOS',
-  keywords: ['ManagerOS', 'Manager', 'MVP', 'Productivity', 'Business'],
+  applicationName: 'mpath',
+  keywords: ['mpath', 'Manager', 'MVP', 'Productivity', 'Business'],
   icons: {
     apple: [
       { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
@@ -19,14 +19,14 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'ManagerOS',
+    title: 'mpath',
   },
   other: {
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-status-bar-style': 'default',
-    'apple-mobile-web-app-title': 'ManagerOS',
-    'application-name': 'ManagerOS',
+    'apple-mobile-web-app-title': 'mpath',
+    'application-name': 'mpath',
     'msapplication-TileColor': '#6366f1',
     'theme-color': '#6366f1',
   },

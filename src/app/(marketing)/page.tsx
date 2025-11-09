@@ -58,9 +58,9 @@ const proofPoints = [
 ]
 
 export const metadata: Metadata = {
-  title: 'Lead high-performing engineering teams | ManagerOS',
+  title: 'Lead high-performing engineering teams | mpath',
   description:
-    'ManagerOS gives engineering managers a unified operating system for clarity, coaching, and continuous improvement across their teams.',
+    'mpath gives engineering managers a unified operating system for clarity, coaching, and continuous improvement across their teams.',
 }
 
 export default async function MarketingHome() {
@@ -80,10 +80,10 @@ export default async function MarketingHome() {
         </FadeInOnScroll>
         <FadeInOnScroll delay={200}>
           <p className='mx-auto max-w-4xl text-base text-white/70 sm:text-lg'>
-            ManagerOS brings planning, 1:1s, feedback, and delivery signals
-            together so engineering managers can lead with confidence—not
-            spreadsheets. Stay aligned, move faster, and grow people without
-            losing sight of execution.
+            mpath brings planning, 1:1s, feedback, and delivery signals together
+            so engineering managers can lead with confidence—not spreadsheets.
+            Stay aligned, move faster, and grow people without losing sight of
+            execution.
           </p>
         </FadeInOnScroll>
         <FadeInOnScroll delay={300}>
@@ -117,7 +117,7 @@ export default async function MarketingHome() {
           <div className='grid gap-10 md:grid-cols-[1.3fr_1fr] md:items-center'>
             <div className='space-y-6'>
               <p className='text-sm font-semibold uppercase tracking-[0.3em] text-white/60'>
-                Why teams choose ManagerOS
+                Why teams choose mpath
               </p>
               <h2 className='text-3xl font-semibold text-white sm:text-4xl'>
                 Operational calm meets empowered engineering teams.
@@ -190,9 +190,9 @@ export default async function MarketingHome() {
         >
           <blockquote className='space-y-6 text-lg text-white/80'>
             <p>
-              “ManagerOS helped us connect the dots between delivery, people
-              health, and leadership rituals. Our managers prep faster, uncover
-              risks earlier, and our engineers finally see a clear growth path.”
+              "mpath helped us connect the dots between delivery, people health,
+              and leadership rituals. Our managers prep faster, uncover risks
+              earlier, and our engineers finally see a clear growth path."
             </p>
             <footer className='text-sm text-white/60'>
               Priya K., Director of Engineering
@@ -212,7 +212,7 @@ export default async function MarketingHome() {
               Bring harmony to how your engineering teams deliver.
             </h2>
             <p className='mx-auto max-w-4xl text-base text-white/70'>
-              Get started with ManagerOS today. Invite your leads, connect your
+              Get started with mpath today. Invite your leads, connect your
               rituals, and see how a shared operating system transforms the way
               you support engineers.
             </p>
@@ -243,7 +243,7 @@ export default async function MarketingHome() {
       <footer className='border-t border-white/10 bg-black/20'>
         <div className='mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 text-sm text-white/50 sm:flex-row sm:px-8'>
           <p>
-            © <CurrentYear /> ManagerOS. Designed for engineering leaders.
+            © <CurrentYear /> mpath. Designed for engineering leaders.
           </p>
           <div className='flex items-center gap-6'>
             <Link
