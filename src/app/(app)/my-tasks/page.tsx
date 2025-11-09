@@ -5,10 +5,11 @@ import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
-import { getOptionalUser } from '@/lib/auth-utils'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function MyTasksPage() {
-  const user = await getOptionalUser()
+  const user = await getCurrentUser()
+  const canCreateTasks = user.role === 'ADMIN' || !!user.personId
 
   return (
     <PageContainer>
@@ -16,12 +17,12 @@ export default async function MyTasksPage() {
         title='My Tasks'
         titleIcon={CheckSquare}
         subtitle='Track and manage tasks assigned to you'
-        actions={<CreateTaskButton variant='default' />}
+        actions={canCreateTasks ? <CreateTaskButton variant='default' /> : null}
       />
 
       <PageContent>
         <PageSection>
-          <MyTasksPageClient personId={user?.personId ?? null} />
+          <MyTasksPageClient personId={user.personId ?? null} />
         </PageSection>
       </PageContent>
     </PageContainer>

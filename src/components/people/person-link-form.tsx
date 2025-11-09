@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
   AlertDialog,
@@ -48,6 +49,7 @@ export function PersonLinkForm({
   refreshTrigger,
   onButtonRender,
 }: PersonLinkFormProps) {
+  const router = useRouter()
   const [availablePersons, setAvailablePersons] = useState<Person[]>([])
   const [selectedPersonId, setSelectedPersonId] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -73,12 +75,14 @@ export function PersonLinkForm({
       setAvailablePersons(availablePersonsData)
       setUserData(userWithPerson)
       setSelectedPersonId('')
+      // Refresh the router to update the UI
+      router.refresh()
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred')
     } finally {
       setIsLoading(false)
     }
-  }, [selectedPersonId])
+  }, [selectedPersonId, router])
 
   useEffect(() => {
     const loadData = async () => {
@@ -177,6 +181,8 @@ export function PersonLinkForm({
       ])
       setAvailablePersons(availablePersonsData)
       setUserData(userWithPerson)
+      // Refresh the router to update the UI
+      router.refresh()
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred')
     } finally {

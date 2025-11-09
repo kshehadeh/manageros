@@ -9,7 +9,13 @@ import { PageContent } from '@/components/ui/page-content'
 import { Button } from '@/components/ui/button'
 import { Plus, Calendar } from 'lucide-react'
 
-export function MeetingsPageClient() {
+interface MeetingsPageClientProps {
+  canCreateMeetings: boolean
+}
+
+export function MeetingsPageClient({
+  canCreateMeetings,
+}: MeetingsPageClientProps) {
   return (
     <PageContainer>
       <PageHeader
@@ -18,12 +24,14 @@ export function MeetingsPageClient() {
         helpId='meetings'
         subtitle="Manage and track your organization's meetings"
         actions={
-          <Button asChild className='flex items-center gap-2'>
-            <Link href='/meetings/new'>
-              <Plus className='h-4 w-4' />
-              Create Meeting
-            </Link>
-          </Button>
+          canCreateMeetings ? (
+            <Button asChild className='flex items-center gap-2'>
+              <Link href='/meetings/new'>
+                <Plus className='h-4 w-4' />
+                Create Meeting
+              </Link>
+            </Button>
+          ) : null
         }
       />
 

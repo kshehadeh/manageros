@@ -52,12 +52,14 @@ interface NotesSectionProps {
   entityType: string
   entityId: string
   notes: NoteWithAttachments[]
+  canEdit?: boolean
 }
 
 export function NotesSection({
   entityType,
   entityId,
   notes,
+  canEdit = false,
 }: NotesSectionProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -274,14 +276,16 @@ export function NotesSection({
             icon={FileText}
             title='Notes'
             action={
-              <Button
-                onClick={() => setIsCreateDialogOpen(true)}
-                size='sm'
-                className='flex items-center gap-2'
-              >
-                <Plus className='h-4 w-4' />
-                Add Note
-              </Button>
+              canEdit ? (
+                <Button
+                  onClick={() => setIsCreateDialogOpen(true)}
+                  size='sm'
+                  className='flex items-center gap-2'
+                >
+                  <Plus className='h-4 w-4' />
+                  Add Note
+                </Button>
+              ) : undefined
             }
           />
         }
@@ -315,32 +319,34 @@ export function NotesSection({
                           </p>
                         </div>
                       </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant='ghost'
-                            size='sm'
-                            className='h-8 w-8 p-0'
-                          >
-                            <MoreHorizontal className='h-4 w-4' />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align='end'>
-                          <DropdownMenuItem
-                            onClick={() => openEditDialog(note)}
-                          >
-                            <Edit className='h-4 w-4 mr-2' />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleDeleteNote(note.id)}
-                            className='text-destructive'
-                          >
-                            <Trash2 className='h-4 w-4 mr-2' />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      {canEdit && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant='ghost'
+                              size='sm'
+                              className='h-8 w-8 p-0'
+                            >
+                              <MoreHorizontal className='h-4 w-4' />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align='end'>
+                            <DropdownMenuItem
+                              onClick={() => openEditDialog(note)}
+                            >
+                              <Edit className='h-4 w-4 mr-2' />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteNote(note.id)}
+                              className='text-destructive'
+                            >
+                              <Trash2 className='h-4 w-4 mr-2' />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </div>
                   </div>
                   <div className='px-4 pb-4'>

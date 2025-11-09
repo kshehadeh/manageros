@@ -11,11 +11,13 @@ interface InitiativeObjectivesProps {
     sortIndex: number
   }>
   initiativeId: string
+  canEdit?: boolean
 }
 
 export function InitiativeObjectives({
   objectives,
   initiativeId,
+  canEdit = false,
 }: InitiativeObjectivesProps) {
   return (
     <PageSection
@@ -23,7 +25,11 @@ export function InitiativeObjectives({
         <SectionHeader
           icon={Target}
           title='Objectives & Key Results'
-          action={<CreateObjectiveModal initiativeId={initiativeId} />}
+          action={
+            canEdit ? (
+              <CreateObjectiveModal initiativeId={initiativeId} />
+            ) : undefined
+          }
           className='mb-4'
         />
       }

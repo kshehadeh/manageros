@@ -15,7 +15,11 @@ import {
   Briefcase,
   ClipboardList,
 } from 'lucide-react'
-import { type CommandItemDescriptor, type CommandSource } from '../types'
+import {
+  type CommandItemDescriptor,
+  type CommandSource,
+  type CommandActionContext,
+} from '../types'
 
 function createStaticItems(
   query: string,
@@ -24,8 +28,17 @@ function createStaticItems(
   currentUserPersonId?: string
 ): CommandItemDescriptor[] {
   const q = query.toLowerCase()
-  const items: CommandItemDescriptor[] = [
-    {
+  const isAdmin = userRole === 'ADMIN'
+  const hasLinkedPerson = !!currentUserPersonId
+  const canCreateTasks = isAdmin || hasLinkedPerson
+  const canCreateMeetings = isAdmin || hasLinkedPerson
+  const canCreateInitiatives = isAdmin || hasLinkedPerson
+
+  const items: CommandItemDescriptor[] = []
+
+  // Task creation - only if admin or has linked person
+  if (canCreateTasks) {
+    items.push({
       id: 'task.create',
       title: 'Create Task',
       subtitle: 'Open quick create task',
@@ -37,23 +50,29 @@ function createStaticItems(
         window.dispatchEvent(ev)
         closePalette()
       },
+    })
+  }
+
+  // One-on-one creation
+  items.push({
+    id: 'oneonone.create',
+    title: 'Create 1:1 Meeting',
+    subtitle: 'Schedule a new one-on-one meeting',
+    icon: <Handshake className='h-4 w-4' />,
+    keywords: ['1:1', 'one on one', 'meeting', 'schedule', 'calendar'],
+    group: 'Quick Actions',
+    perform: ({ closePalette, router }) => {
+      const url = currentUserPersonId
+        ? `/oneonones/new?participant1Id=${currentUserPersonId}`
+        : '/oneonones/new'
+      router.push(url)
+      closePalette()
     },
-    {
-      id: 'oneonone.create',
-      title: 'Create 1:1 Meeting',
-      subtitle: 'Schedule a new one-on-one meeting',
-      icon: <Handshake className='h-4 w-4' />,
-      keywords: ['1:1', 'one on one', 'meeting', 'schedule', 'calendar'],
-      group: 'Quick Actions',
-      perform: ({ closePalette, router }) => {
-        const url = currentUserPersonId
-          ? `/oneonones/new?participant1Id=${currentUserPersonId}`
-          : '/oneonones/new'
-        router.push(url)
-        closePalette()
-      },
-    },
-    {
+  })
+
+  // Meeting creation - only if admin or has linked person
+  if (canCreateMeetings) {
+    items.push({
       id: 'meeting.create',
       title: 'Create Meeting',
       subtitle: 'Schedule a new team meeting',
@@ -70,8 +89,12 @@ function createStaticItems(
         router.push('/meetings/new')
         closePalette()
       },
-    },
-    {
+    })
+  }
+
+  // Initiative creation - only if admin or has linked person
+  if (canCreateInitiatives) {
+    items.push({
       id: 'initiative.create',
       title: 'Create Initiative',
       subtitle: 'Start a new initiative or OKR',
@@ -82,41 +105,46 @@ function createStaticItems(
         router.push('/initiatives/new')
         closePalette()
       },
+    })
+  }
+
+  // Feedback creation
+  items.push({
+    id: 'feedback.create',
+    title: 'Create Feedback',
+    subtitle: 'Give feedback to a team member',
+    icon: <MessageCircle className='h-4 w-4' />,
+    keywords: ['feedback', 'review', 'comment', 'praise', 'criticism'],
+    group: 'Quick Actions',
+    perform: ({ closePalette }) => {
+      const ev = new CustomEvent('command:openPersonSelectorModal')
+      window.dispatchEvent(ev)
+      closePalette()
     },
-    {
-      id: 'feedback.create',
-      title: 'Create Feedback',
-      subtitle: 'Give feedback to a team member',
-      icon: <MessageCircle className='h-4 w-4' />,
-      keywords: ['feedback', 'review', 'comment', 'praise', 'criticism'],
+  })
+
+  // Add initiative-specific task creation if we're on an initiative page and can create tasks
+  if (pathname?.match(/^\/initiatives\/[^/]+$/) && canCreateTasks) {
+    items.push({
+      id: 'task.create.initiative',
+      title: 'Create Task for Initiative',
+      subtitle: 'Add task to this initiative',
+      icon: <Plus className='h-4 w-4' />,
+      keywords: ['task', 'new task', 'add task', 'initiative'],
       group: 'Quick Actions',
-      perform: ({ closePalette }) => {
-        const ev = new CustomEvent('command:openPersonSelectorModal')
+      perform: ({ closePalette }: { closePalette: () => void }) => {
+        const initiativeId = pathname.split('/')[2]
+        const ev = new CustomEvent('command:openCreateTaskModal', {
+          detail: { initiativeId },
+        })
         window.dispatchEvent(ev)
         closePalette()
       },
-    },
-    // Add initiative-specific task creation if we're on an initiative page
-    ...(pathname?.match(/^\/initiatives\/[^/]+$/)
-      ? [
-          {
-            id: 'task.create.initiative',
-            title: 'Create Task for Initiative',
-            subtitle: 'Add task to this initiative',
-            icon: <Plus className='h-4 w-4' />,
-            keywords: ['task', 'new task', 'add task', 'initiative'],
-            group: 'Quick Actions',
-            perform: ({ closePalette }: { closePalette: () => void }) => {
-              const initiativeId = pathname.split('/')[2]
-              const ev = new CustomEvent('command:openCreateTaskModal', {
-                detail: { initiativeId },
-              })
-              window.dispatchEvent(ev)
-              closePalette()
-            },
-          },
-        ]
-      : []),
+    })
+  }
+
+  // Navigation items
+  items.push(
     {
       id: 'nav.tasks',
       title: 'View Tasks',
@@ -129,18 +157,23 @@ function createStaticItems(
         closePalette()
       },
     },
-    {
-      id: 'nav.my-tasks',
-      title: 'View My Tasks',
-      subtitle: 'Go to my assigned tasks',
-      icon: <CheckSquare className='h-4 w-4' />,
-      keywords: ['my tasks', 'assigned', 'personal', 'todo'],
-      group: 'Navigation',
-      perform: ({ closePalette, router }) => {
-        router.push('/my-tasks')
-        closePalette()
-      },
-    },
+    // Only show "My Tasks" if user has a linked person
+    ...(hasLinkedPerson
+      ? [
+          {
+            id: 'nav.my-tasks',
+            title: 'View My Tasks',
+            subtitle: 'Go to my assigned tasks',
+            icon: <CheckSquare className='h-4 w-4' />,
+            keywords: ['my tasks', 'assigned', 'personal', 'todo'],
+            group: 'Navigation',
+            perform: ({ closePalette, router }: CommandActionContext) => {
+              router.push('/my-tasks')
+              closePalette()
+            },
+          },
+        ]
+      : []),
     {
       id: 'nav.people',
       title: 'View People',
@@ -236,19 +269,24 @@ function createStaticItems(
         closePalette()
       },
     },
-    {
-      id: 'nav.reports',
-      title: 'View Reports',
-      subtitle: 'Go to reports page',
-      icon: <BarChart3 className='h-4 w-4' />,
-      keywords: ['reports', 'analytics', 'data', 'charts'],
-      group: 'Navigation',
-      perform: ({ closePalette, router }) => {
-        router.push('/reports')
-        closePalette()
-      },
-    },
-  ]
+    // Add reports navigation for admin users
+    ...(isAdmin
+      ? [
+          {
+            id: 'nav.reports',
+            title: 'View Reports',
+            subtitle: 'Go to reports page',
+            icon: <BarChart3 className='h-4 w-4' />,
+            keywords: ['reports', 'analytics', 'data', 'charts'],
+            group: 'Navigation',
+            perform: ({ closePalette, router }: CommandActionContext) => {
+              router.push('/reports')
+              closePalette()
+            },
+          },
+        ]
+      : [])
+  )
 
   // Add admin-only commands
   if (userRole === 'ADMIN') {

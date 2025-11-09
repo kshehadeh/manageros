@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import { MeetingInstanceEditClient } from '@/components/meetings/meeting-instance-edit-client'
 import { utcToLocalDateTimeString } from '@/lib/timezone-utils'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 
 export default async function EditMeetingInstancePage({
   params,
@@ -26,6 +26,16 @@ export default async function EditMeetingInstancePage({
 
   if (!meetingInstance || !parentMeeting) {
     notFound()
+  }
+
+  // Check if user can edit the meeting (required to edit instances)
+  const canEdit = await getActionPermission(
+    user,
+    'meeting.edit',
+    parentMeeting.id
+  )
+  if (!canEdit) {
+    redirect(`/meetings/${id}`)
   }
 
   // Format the instance data for the form

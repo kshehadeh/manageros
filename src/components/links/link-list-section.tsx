@@ -15,6 +15,7 @@ interface LinkListSectionProps {
   emptyStateText?: string
   onLinksUpdate?: () => void
   className?: string
+  canEdit?: boolean
 }
 
 export function LinkListSection({
@@ -25,6 +26,7 @@ export function LinkListSection({
   emptyStateText = 'No links added yet.',
   onLinksUpdate,
   className,
+  canEdit = false,
 }: LinkListSectionProps) {
   return (
     <PageSection
@@ -33,11 +35,13 @@ export function LinkListSection({
           icon={LinkIcon}
           title={title}
           action={
-            <AddLinkModal
-              entityType={entityType}
-              entityId={entityId}
-              onLinkAdded={onLinksUpdate}
-            />
+            canEdit ? (
+              <AddLinkModal
+                entityType={entityType}
+                entityId={entityId}
+                onLinkAdded={onLinksUpdate}
+              />
+            ) : undefined
           }
         />
       }

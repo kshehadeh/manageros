@@ -35,6 +35,7 @@ interface MeetingInstanceListProps {
     status: string
   }>
   parentScheduledAt?: Date
+  canEdit?: boolean
 }
 
 export function MeetingInstanceList({
@@ -42,6 +43,7 @@ export function MeetingInstanceList({
   meetingId,
   parentParticipants: _parentParticipants = [],
   parentScheduledAt: _parentScheduledAt,
+  canEdit = false,
 }: MeetingInstanceListProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
@@ -137,12 +139,14 @@ export function MeetingInstanceList({
         icon={Calendar}
         title='Meeting Instances'
         action={
-          <Button asChild className='flex items-center gap-2'>
-            <Link href={`/meetings/${meetingId}/instances/new`}>
-              <Plus className='h-4 w-4' />
-              Add Instance
-            </Link>
-          </Button>
+          canEdit ? (
+            <Button asChild className='flex items-center gap-2'>
+              <Link href={`/meetings/${meetingId}/instances/new`}>
+                <Plus className='h-4 w-4' />
+                Add Instance
+              </Link>
+            </Button>
+          ) : undefined
         }
       />
 
@@ -152,12 +156,14 @@ export function MeetingInstanceList({
           <p className='text-sm text-muted-foreground mb-4'>
             No meeting instances yet
           </p>
-          <Button asChild className='flex items-center gap-2'>
-            <Link href={`/meetings/${meetingId}/instances/new`}>
-              <Plus className='h-4 w-4' />
-              Create First Instance
-            </Link>
-          </Button>
+          {canEdit && (
+            <Button asChild className='flex items-center gap-2'>
+              <Link href={`/meetings/${meetingId}/instances/new`}>
+                <Plus className='h-4 w-4' />
+                Create First Instance
+              </Link>
+            </Button>
+          )}
         </div>
       ) : (
         <section className='rounded-xl py-4 -mx-3 px-3 space-y-4'>
@@ -179,16 +185,20 @@ export function MeetingInstanceList({
               <Calendar className='w-4 h-4' />
               View Details
             </button>
-            <button
-              className='w-full px-3 py-2 text-left text-sm hover:bg-accent flex items-center gap-2'
-              onClick={() => {
-                router.push(`/meetings/${meetingId}/instances/${entityId}/edit`)
-                close()
-              }}
-            >
-              <Edit className='w-4 h-4' />
-              Edit
-            </button>
+            {canEdit && (
+              <button
+                className='w-full px-3 py-2 text-left text-sm hover:bg-accent flex items-center gap-2'
+                onClick={() => {
+                  router.push(
+                    `/meetings/${meetingId}/instances/${entityId}/edit`
+                  )
+                  close()
+                }}
+              >
+                <Edit className='w-4 h-4' />
+                Edit
+              </button>
+            )}
             <DeleteMenuItem
               onDelete={() => {
                 setDeleteTargetId(entityId)

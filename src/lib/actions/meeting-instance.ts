@@ -20,6 +20,13 @@ export async function createMeetingInstance(formData: MeetingInstanceFormData) {
     )
   }
 
+  // Check if user is linked to a person
+  if (!user.personId) {
+    throw new Error(
+      'User must be linked to a person to create meeting instances'
+    )
+  }
+
   // Validate the form data
   const validatedData = meetingInstanceSchema.parse(formData)
 
@@ -101,6 +108,11 @@ export async function updateMeetingInstance(
     )
   }
 
+  // Check if user is linked to a person
+  if (!user.personId) {
+    throw new Error('User must be linked to a person to edit meeting instances')
+  }
+
   // Validate the form data
   const validatedData = meetingInstanceUpdateSchema.parse(formData)
 
@@ -180,6 +192,13 @@ export async function deleteMeetingInstance(id: string) {
   if (!user.organizationId) {
     throw new Error(
       'User must belong to an organization to delete meeting instances'
+    )
+  }
+
+  // Check if user is linked to a person
+  if (!user.personId) {
+    throw new Error(
+      'User must be linked to a person to delete meeting instances'
     )
   }
 

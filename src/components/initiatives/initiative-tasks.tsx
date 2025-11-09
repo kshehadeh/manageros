@@ -18,11 +18,13 @@ interface InitiativeTasksProps {
     keyResult: string | null
     sortIndex: number
   }>
+  canEdit?: boolean
 }
 
 export function InitiativeTasks({
   initiativeId,
   tasks: initialTasks,
+  canEdit = false,
 }: InitiativeTasksProps) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -44,17 +46,19 @@ export function InitiativeTasks({
     handleTaskUpdate()
   }
 
-  const actions = [
-    <Button
-      onClick={() => setIsAddModalOpen(true)}
-      variant='outline'
-      size='sm'
-      key='add-task'
-    >
-      <Plus className='h-4 w-4 mr-2' />
-      Add Task
-    </Button>,
-  ]
+  const actions = canEdit
+    ? [
+        <Button
+          onClick={() => setIsAddModalOpen(true)}
+          variant='outline'
+          size='sm'
+          key='add-task'
+        >
+          <Plus className='h-4 w-4 mr-2' />
+          Add Task
+        </Button>,
+      ]
+    : undefined
 
   return (
     <>

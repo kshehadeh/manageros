@@ -28,7 +28,7 @@ import {
 } from 'lucide-react'
 import { LinkListSection } from '@/components/links/link-list-section'
 import { MeetingStatusBadge } from '@/components/meetings/meeting-status-badge'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 
 export default async function MeetingDetailPage({
   params,
@@ -47,6 +47,14 @@ export default async function MeetingDetailPage({
   if (!meeting) {
     notFound()
   }
+
+  // Check permissions for edit and delete
+  const canEdit = await getActionPermission(user, 'meeting.edit', meeting.id)
+  const canDelete = await getActionPermission(
+    user,
+    'meeting.delete',
+    meeting.id
+  )
 
   // Get entity links for this meeting
   const entityLinksResult = await getEntityLinks(
@@ -140,7 +148,12 @@ export default async function MeetingDetailPage({
             </div>
           }
           actions={
-            <MeetingActionsDropdown meetingId={meeting.id} meeting={meeting} />
+            <MeetingActionsDropdown
+              meetingId={meeting.id}
+              meeting={meeting}
+              canEdit={canEdit}
+              canDelete={canDelete}
+            />
           }
         />
 
@@ -184,6 +197,7 @@ export default async function MeetingDetailPage({
                       status: p.status,
                     }))}
                     parentScheduledAt={meeting.scheduledAt}
+                    canEdit={canEdit}
                   />
                 </PageSection>
               )}
@@ -241,6 +255,7 @@ export default async function MeetingDetailPage({
               title='Links'
               emptyStateText='No links added yet.'
               className='mt-6'
+              canEdit={canEdit}
             />
           </PageSidebar>
         </PageContent>

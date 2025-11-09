@@ -7,7 +7,7 @@ import { NewMeetingInstanceBreadcrumbClient } from '@/components/meetings/new-me
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 
 export default async function NewMeetingInstancePage({
   params,
@@ -28,6 +28,12 @@ export default async function NewMeetingInstancePage({
   }
 
   if (!meeting.isRecurring) {
+    redirect(`/meetings/${id}`)
+  }
+
+  // Check if user can edit the meeting (required to create instances)
+  const canEdit = await getActionPermission(user, 'meeting.edit', meeting.id)
+  if (!canEdit) {
     redirect(`/meetings/${id}`)
   }
 

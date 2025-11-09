@@ -66,6 +66,7 @@ interface InitiativeSidebarProps {
   entityId: string
   teams: Team[]
   people: PersonWithRelations[]
+  canEdit?: boolean
 }
 
 /**
@@ -156,6 +157,7 @@ export function InitiativeSidebar({
   entityId,
   teams,
   people,
+  canEdit = false,
 }: InitiativeSidebarProps) {
   const router = useRouter()
 
@@ -183,11 +185,13 @@ export function InitiativeSidebar({
             icon={Users}
             title='Team'
             action={
-              <ChangeTeamModal
-                initiativeId={entityId}
-                currentTeam={team}
-                teams={teams}
-              />
+              canEdit ? (
+                <ChangeTeamModal
+                  initiativeId={entityId}
+                  currentTeam={team}
+                  teams={teams}
+                />
+              ) : undefined
             }
             className='mb-3'
           />
@@ -216,11 +220,13 @@ export function InitiativeSidebar({
             icon={User}
             title='People'
             action={
-              <ManageOwnersModal
-                initiativeId={entityId}
-                owners={mappedOwners}
-                people={mappedPeople}
-              />
+              canEdit ? (
+                <ManageOwnersModal
+                  initiativeId={entityId}
+                  owners={mappedOwners}
+                  people={mappedPeople}
+                />
+              ) : undefined
             }
             className='mb-3'
           />
@@ -258,11 +264,13 @@ export function InitiativeSidebar({
             icon={LinkIcon}
             title='Links'
             action={
-              <AddLinkModal
-                entityType={entityType}
-                entityId={entityId}
-                onLinkAdded={() => router.refresh()}
-              />
+              canEdit ? (
+                <AddLinkModal
+                  entityType={entityType}
+                  entityId={entityId}
+                  onLinkAdded={() => router.refresh()}
+                />
+              ) : undefined
             }
           />
         }

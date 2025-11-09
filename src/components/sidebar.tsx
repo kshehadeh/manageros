@@ -36,6 +36,7 @@ interface NavItem {
   href: string
   icon: string
   adminOnly?: boolean
+  requiresPermission?: string
 }
 
 interface PersonData {
@@ -117,7 +118,10 @@ export default function Sidebar({
                   size='sm'
                 />
               ) : (
-                <div className='h-8 w-8 bg-muted rounded-full shrink-0' />
+                <PersonAvatar
+                  name={serverSession.name || serverSession.email || 'User'}
+                  size='sm'
+                />
               )}
               <div className='flex-1 min-w-0'>
                 {personData ? (
@@ -128,7 +132,7 @@ export default function Sidebar({
                   </Link>
                 ) : (
                   <div className='text-sm text-foreground font-medium truncate'>
-                    {serverSession?.name}
+                    {serverSession?.name || serverSession?.email}
                   </div>
                 )}
                 {personData?.email || serverSession?.email ? (
@@ -136,6 +140,11 @@ export default function Sidebar({
                     {personData?.email || serverSession?.email}
                   </div>
                 ) : null}
+                {!personData && serverSession?.organizationId && (
+                  <div className='text-xs text-muted-foreground mt-0.5'>
+                    No linked person
+                  </div>
+                )}
                 <div className='flex items-center gap-2 mt-1'>
                   <Link
                     href='/settings'

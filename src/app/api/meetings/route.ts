@@ -102,20 +102,13 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get the current user's person record
+    // Get the current user's person record (may be null if not linked)
     const currentPerson = await prisma.person.findFirst({
       where: {
         user: { id: user.id },
         organizationId: user.organizationId,
       },
     })
-
-    if (!currentPerson) {
-      return NextResponse.json(
-        { error: 'No person record found for current user' },
-        { status: 403 }
-      )
-    }
 
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')

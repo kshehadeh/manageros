@@ -23,12 +23,16 @@ interface MeetingActionsDropdownProps {
     owner?: { id: string; name: string } | null
   }
   size?: 'sm' | 'default'
+  canEdit?: boolean
+  canDelete?: boolean
 }
 
 export function MeetingActionsDropdown({
   meetingId,
   meeting,
   size = 'default',
+  canEdit = false,
+  canDelete = false,
 }: MeetingActionsDropdownProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
@@ -44,6 +48,14 @@ export function MeetingActionsDropdown({
     }
   }
 
+  const hasActions =
+    canEdit || canDelete || meeting.team || meeting.initiative || meeting.owner
+
+  // Don't show dropdown if user has no permissions and no navigation links
+  if (!hasActions) {
+    return null
+  }
+
   return (
     <>
       <ActionDropdown
@@ -56,23 +68,27 @@ export function MeetingActionsDropdown({
       >
         {({ close }) => (
           <div className='py-1'>
-            <Link
-              href={`/meetings/${meetingId}/edit`}
-              className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-              onClick={close}
-            >
-              <Edit className='w-4 h-4' />
-              Edit Meeting
-            </Link>
+            {canEdit && (
+              <>
+                <Link
+                  href={`/meetings/${meetingId}/edit`}
+                  className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                  onClick={close}
+                >
+                  <Edit className='w-4 h-4' />
+                  Edit Meeting
+                </Link>
 
-            <Link
-              href={`/meetings/${meetingId}/instances/new`}
-              className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-              onClick={close}
-            >
-              <CalendarPlus className='w-4 h-4' />
-              Create Instance
-            </Link>
+                <Link
+                  href={`/meetings/${meetingId}/instances/new`}
+                  className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                  onClick={close}
+                >
+                  <CalendarPlus className='w-4 h-4' />
+                  Create Instance
+                </Link>
+              </>
+            )}
 
             {meeting.team && (
               <Link
@@ -107,19 +123,28 @@ export function MeetingActionsDropdown({
               </Link>
             )}
 
-            <div className='border-t border-border my-1' />
+            {canDelete && (
+              <>
+                {(canEdit ||
+                  meeting.team ||
+                  meeting.initiative ||
+                  meeting.owner) && (
+                  <div className='border-t border-border my-1' />
+                )}
 
-            <button
-              className='flex w-full items-center gap-3 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors text-left'
-              onClick={event => {
-                event.stopPropagation()
-                close()
-                setShowDeleteModal(true)
-              }}
-            >
-              <Trash2 className='w-4 h-4' />
-              Delete Meeting
-            </button>
+                <button
+                  className='flex w-full items-center gap-3 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors text-left'
+                  onClick={event => {
+                    event.stopPropagation()
+                    close()
+                    setShowDeleteModal(true)
+                  }}
+                >
+                  <Trash2 className='w-4 h-4' />
+                  Delete Meeting
+                </button>
+              </>
+            )}
           </div>
         )}
       </ActionDropdown>

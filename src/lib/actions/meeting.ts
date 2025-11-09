@@ -19,6 +19,11 @@ export async function createMeeting(formData: MeetingFormData) {
     throw new Error('User must belong to an organization to create meetings')
   }
 
+  // Check if user is linked to a person
+  if (!user.personId) {
+    throw new Error('User must be linked to a person to create meetings')
+  }
+
   // Validate the form data
   const validatedData = meetingSchema.parse(formData)
 
@@ -138,6 +143,11 @@ export async function updateMeeting(id: string, formData: MeetingUpdateData) {
   // Check if user belongs to an organization
   if (!user.organizationId) {
     throw new Error('User must belong to an organization to update meetings')
+  }
+
+  // Check if user is linked to a person
+  if (!user.personId) {
+    throw new Error('User must be linked to a person to edit meetings')
   }
 
   // Validate the form data

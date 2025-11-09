@@ -6,8 +6,12 @@ import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
+import { getCurrentUser } from '@/lib/auth-utils'
 
-export default function InitiativesPage() {
+export default async function InitiativesPage() {
+  const user = await getCurrentUser()
+  const canCreateInitiatives = user.role === 'ADMIN' || !!user.personId
+
   return (
     <PageContainer>
       <PageHeader
@@ -15,12 +19,14 @@ export default function InitiativesPage() {
         titleIcon={Rocket}
         helpId='initiatives'
         actions={
-          <Button asChild className='flex items-center gap-2'>
-            <Link href='/initiatives/new'>
-              <Plus className='h-4 w-4' />
-              Create Initiative
-            </Link>
-          </Button>
+          canCreateInitiatives ? (
+            <Button asChild className='flex items-center gap-2'>
+              <Link href='/initiatives/new'>
+                <Plus className='h-4 w-4' />
+                Create Initiative
+              </Link>
+            </Button>
+          ) : null
         }
       />
       <PageContent>

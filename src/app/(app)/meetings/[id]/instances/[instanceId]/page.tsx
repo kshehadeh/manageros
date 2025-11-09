@@ -1,5 +1,6 @@
 import { getMeetingInstance } from '@/lib/actions/meeting-instance'
 import { getEntityLinks } from '@/lib/actions/entity-links'
+import { getMeeting } from '@/lib/actions/meeting'
 
 import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
@@ -17,7 +18,7 @@ import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
 import { PageSidebar } from '@/components/ui/page-sidebar'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 
 export default async function MeetingInstanceDetailPage({
   params,
@@ -39,6 +40,24 @@ export default async function MeetingInstanceDetailPage({
   if (!meetingInstance) {
     notFound()
   }
+
+  // Get parent meeting for permission checks
+  const parentMeeting = await getMeeting(meetingInstance.meetingId)
+  if (!parentMeeting) {
+    notFound()
+  }
+
+  // Check permissions for edit and delete (based on parent meeting permissions)
+  const canEdit = await getActionPermission(
+    user,
+    'meeting.edit',
+    parentMeeting.id
+  )
+  const canDelete = await getActionPermission(
+    user,
+    'meeting.delete',
+    parentMeeting.id
+  )
 
   const scheduledDate = new Date(meetingInstance.scheduledAt)
   const isPast = scheduledDate < new Date()
@@ -96,6 +115,8 @@ export default async function MeetingInstanceDetailPage({
             <MeetingInstanceActionsDropdown
               meetingId={meetingInstance.meetingId}
               instanceId={meetingInstance.id}
+              canEdit={canEdit}
+              canDelete={canDelete}
             />
           }
         />
@@ -169,6 +190,7 @@ export default async function MeetingInstanceDetailPage({
               title='Links'
               emptyStateText='No links added yet.'
               className='mt-6'
+              canEdit={canEdit}
             />
           </PageSidebar>
         </PageContent>

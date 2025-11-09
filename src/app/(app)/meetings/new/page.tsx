@@ -11,6 +11,12 @@ export default async function NewMeetingPage() {
     redirect('/organization/create')
   }
 
+  // Check if user can create meetings (admin or has linked person)
+  const canCreateMeetings = user.role === 'ADMIN' || !!user.personId
+  if (!canCreateMeetings) {
+    redirect('/meetings')
+  }
+
   const teams = await getTeams()
 
   return (

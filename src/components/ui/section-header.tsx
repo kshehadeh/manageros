@@ -34,7 +34,7 @@ export function SectionHeader({
 
   return (
     <div
-      className={`flex items-start justify-between md:mx-0 md:px-2 ${className} mb-2 bg-card p-2 rounded-[var(--radius-md)]`}
+      className={`flex items-center justify-between md:mx-0 md:px-2 ${className} mb-2 bg-card p-2 rounded-[var(--radius-md)]`}
     >
       <div className='flex-1'>
         <h3 className='text-xl font-bold flex items-center gap-2'>

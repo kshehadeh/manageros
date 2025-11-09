@@ -132,10 +132,16 @@ export async function updateInitiative(
   formData: InitiativeFormData
 ) {
   const user = await getCurrentUser()
+  const { getActionPermission } = await import('@/lib/auth-utils')
 
   // Check if user belongs to an organization
   if (!user.organizationId) {
     throw new Error('User must belong to an organization to update initiatives')
+  }
+
+  // Check permission to edit initiatives
+  if (!(await getActionPermission(user, 'initiative.edit', id))) {
+    throw new Error('You do not have permission to edit initiatives')
   }
 
   // Validate the form data
@@ -227,10 +233,16 @@ export async function updateInitiative(
 
 export async function deleteInitiative(id: string) {
   const user = await getCurrentUser()
+  const { getActionPermission } = await import('@/lib/auth-utils')
 
   // Check if user belongs to an organization
   if (!user.organizationId) {
     throw new Error('User must belong to an organization to delete initiatives')
+  }
+
+  // Check permission to delete initiatives
+  if (!(await getActionPermission(user, 'initiative.delete', id))) {
+    throw new Error('You do not have permission to delete initiatives')
   }
 
   // Verify initiative belongs to user's organization

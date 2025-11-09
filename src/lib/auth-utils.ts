@@ -291,7 +291,12 @@ export async function getFilteredNavigation(user: User | null) {
     { name: 'My Tasks', href: '/my-tasks', icon: 'CheckSquare' },
     { name: 'Initiatives', href: '/initiatives', icon: 'Rocket' },
     { name: 'Meetings', href: '/meetings', icon: 'Calendar' },
-    { name: 'Reports', href: '/reports', icon: 'BarChart3' },
+    {
+      name: 'Reports',
+      href: '/reports',
+      icon: 'BarChart3',
+      requiresPermission: 'report.access',
+    },
     {
       name: 'Org Settings',
       href: '/organization/settings',
@@ -301,15 +306,41 @@ export async function getFilteredNavigation(user: User | null) {
   ]
 
   // Filter navigation based on organization membership and admin role
-  return navigation.filter(item => {
-    // If user has no organization, only show Dashboard
-    if (!user.organizationId) {
-      return item.href === '/dashboard'
-    }
+  const filteredNavigation = await Promise.all(
+    navigation.map(async item => {
+      // If user has no organization, only show Dashboard
+      if (!user.organizationId) {
+        return item.href === '/dashboard' ? item : null
+      }
 
-    // If user has organization, filter by admin role for admin-only items
-    return !item.adminOnly || user.role === 'ADMIN'
-  })
+      // Hide "My Tasks" if user doesn't have a linked person
+      if (item.href === '/my-tasks' && !user.personId) {
+        return null
+      }
+
+      // Check permission-based access
+      if (item.requiresPermission) {
+        const hasPermission = await getActionPermission(
+          user,
+          item.requiresPermission
+        )
+        if (!hasPermission) {
+          return null
+        }
+      }
+
+      // If user has organization, filter by admin role for admin-only items
+      if (item.adminOnly && user.role !== 'ADMIN') {
+        return null
+      }
+
+      return item
+    })
+  )
+
+  return filteredNavigation.filter(
+    (item): item is NonNullable<typeof item> => item !== null
+  )
 }
 
 /**
@@ -351,4 +382,424 @@ export function canAccessOrganization(
   organizationId: string
 ) {
   return user.organizationId === organizationId
+}
+
+/**
+ * Type for permission check functions
+ * Can be synchronous (for simple checks) or asynchronous (for entity lookups)
+ */
+type PermissionCheck = (user: User, id?: string) => boolean | Promise<boolean>
+
+/**
+ * Permission map that maps action IDs to their permission check functions
+ */
+const PermissionMap: Record<string, PermissionCheck> = {
+  // Task permissions
+  'task.create': user => {
+    return (user.role === 'ADMIN' || !!user.personId) && !!user.organizationId
+  },
+  'task.edit': async (user, id) => {
+    if (!user.organizationId || !id) return false
+    if (user.role === 'ADMIN') return true
+    if (!user.personId) return false
+
+    // Check if user created task OR user is assigned to task
+    // Also verify task belongs to user's organization
+    const task = await prisma.task.findFirst({
+      where: {
+        id,
+        OR: [
+          {
+            createdById: user.id,
+            createdBy: {
+              organizationId: user.organizationId,
+            },
+          },
+          {
+            assigneeId: user.personId,
+            OR: [
+              { initiative: { organizationId: user.organizationId } },
+              {
+                objective: {
+                  initiative: { organizationId: user.organizationId },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    })
+
+    return !!task
+  },
+  'task.delete': async (user, id) => {
+    if (!user.organizationId || !id) return false
+    if (user.role === 'ADMIN') return true
+    if (!user.personId) return false
+
+    // Check if user created task OR user is assigned to task
+    // Also verify task belongs to user's organization
+    const task = await prisma.task.findFirst({
+      where: {
+        id,
+        OR: [
+          {
+            createdById: user.id,
+            createdBy: {
+              organizationId: user.organizationId,
+            },
+          },
+          {
+            assigneeId: user.personId,
+            OR: [
+              { initiative: { organizationId: user.organizationId } },
+              {
+                objective: {
+                  initiative: { organizationId: user.organizationId },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    })
+
+    return !!task
+  },
+  'task.view': user => {
+    return !!user.organizationId
+  },
+
+  // Meeting permissions
+  'meeting.create': user => {
+    return !!user.personId && !!user.organizationId
+  },
+  'meeting.edit': async (user, id) => {
+    if (!user.organizationId || !id) return false
+    if (!user.personId) return false
+
+    // Get current user's person record
+    const currentPerson = await prisma.person.findFirst({
+      where: { user: { id: user.id } },
+    })
+
+    if (!currentPerson) return false
+
+    // Check if user created meeting OR user is owner OR user is participant
+    // ADMIN users can edit any meeting in their organization
+    const meeting = await prisma.meeting.findFirst({
+      where: {
+        id,
+        organizationId: user.organizationId,
+        ...(user.role === 'ADMIN'
+          ? {}
+          : {
+              OR: [
+                { createdById: user.id },
+                { ownerId: currentPerson.id },
+                {
+                  participants: {
+                    some: {
+                      personId: currentPerson.id,
+                    },
+                  },
+                },
+              ],
+            }),
+      },
+    })
+
+    return !!meeting
+  },
+  'meeting.delete': async (user, id) => {
+    if (!user.organizationId || !id) return false
+    if (user.role === 'ADMIN') return true
+    if (!user.personId) return false
+
+    // Get current user's person record
+    const currentPerson = await prisma.person.findFirst({
+      where: { user: { id: user.id } },
+    })
+
+    if (!currentPerson) return false
+
+    // Check if user created meeting OR user is owner
+    const meeting = await prisma.meeting.findFirst({
+      where: {
+        id,
+        organizationId: user.organizationId,
+        OR: [{ createdById: user.id }, { ownerId: currentPerson.id }],
+      },
+    })
+
+    return !!meeting
+  },
+  'meeting.view': user => {
+    return !!user.organizationId
+  },
+
+  // Initiative permissions
+  'initiative.create': user => {
+    return (user.role === 'ADMIN' || !!user.personId) && !!user.organizationId
+  },
+  'initiative.edit': user => {
+    return user.role === 'ADMIN' && !!user.organizationId
+  },
+  'initiative.delete': user => {
+    return user.role === 'ADMIN' && !!user.organizationId
+  },
+  'initiative.view': user => {
+    return !!user.organizationId
+  },
+
+  // Report permissions
+  'report.access': user => {
+    return user.role === 'ADMIN' && !!user.organizationId
+  },
+  'report.create': user => {
+    return user.role === 'ADMIN' && !!user.organizationId
+  },
+  'report.edit': user => {
+    return user.role === 'ADMIN' && !!user.organizationId
+  },
+  'report.delete': user => {
+    return user.role === 'ADMIN' && !!user.organizationId
+  },
+  'report.view': user => {
+    return !!user.organizationId
+  },
+
+  // Feedback permissions
+  'feedback.create': user => {
+    return (user.role === 'ADMIN' || !!user.personId) && !!user.organizationId
+  },
+  'feedback.edit': async (user, id) => {
+    if (!user.organizationId || !id) return false
+    if (user.role === 'ADMIN') return true
+    if (!user.personId) return false
+
+    // Get current user's person record
+    const currentPerson = await prisma.person.findFirst({
+      where: { user: { id: user.id } },
+    })
+
+    if (!currentPerson) return false
+
+    // Check if user is the creator (fromId)
+    const feedback = await prisma.feedback.findFirst({
+      where: {
+        id,
+        fromId: currentPerson.id,
+        about: {
+          organizationId: user.organizationId,
+        },
+      },
+    })
+
+    return !!feedback
+  },
+  'feedback.delete': async (user, id) => {
+    if (!user.organizationId || !id) return false
+    if (user.role === 'ADMIN') return true
+    if (!user.personId) return false
+
+    // Get current user's person record
+    const currentPerson = await prisma.person.findFirst({
+      where: { user: { id: user.id } },
+    })
+
+    if (!currentPerson) return false
+
+    // Check if user is the creator (fromId)
+    const feedback = await prisma.feedback.findFirst({
+      where: {
+        id,
+        fromId: currentPerson.id,
+        about: {
+          organizationId: user.organizationId,
+        },
+      },
+    })
+
+    return !!feedback
+  },
+  'feedback.view': user => {
+    return !!user.organizationId
+  },
+
+  // One-on-One permissions
+  'oneonone.create': user => {
+    return (user.role === 'ADMIN' || !!user.personId) && !!user.organizationId
+  },
+  'oneonone.edit': async (user, id) => {
+    if (!user.organizationId || !id) return false
+    if (user.role === 'ADMIN') return true
+    if (!user.personId) return false
+
+    // Check if user is a participant (managerId or reportId)
+    // Also verify both participants belong to user's organization
+    const oneOnOne = await prisma.oneOnOne.findFirst({
+      where: {
+        id,
+        OR: [
+          {
+            managerId: user.personId,
+            manager: { organizationId: user.organizationId },
+            report: { organizationId: user.organizationId },
+          },
+          {
+            reportId: user.personId,
+            manager: { organizationId: user.organizationId },
+            report: { organizationId: user.organizationId },
+          },
+        ],
+      },
+    })
+
+    return !!oneOnOne
+  },
+  'oneonone.delete': async (user, id) => {
+    if (!user.organizationId || !id) return false
+    if (user.role === 'ADMIN') return true
+    if (!user.personId) return false
+
+    // Check if user is a participant (managerId or reportId)
+    // Also verify both participants belong to user's organization
+    const oneOnOne = await prisma.oneOnOne.findFirst({
+      where: {
+        id,
+        OR: [
+          {
+            managerId: user.personId,
+            manager: { organizationId: user.organizationId },
+            report: { organizationId: user.organizationId },
+          },
+          {
+            reportId: user.personId,
+            manager: { organizationId: user.organizationId },
+            report: { organizationId: user.organizationId },
+          },
+        ],
+      },
+    })
+
+    return !!oneOnOne
+  },
+  'oneonone.view': async (user, id) => {
+    if (!user.organizationId) return false
+    if (user.role === 'ADMIN') return true
+    if (!user.personId || !id) return false
+
+    // Check if user is a participant (managerId or reportId)
+    // Also verify both participants belong to user's organization
+    const oneOnOne = await prisma.oneOnOne.findFirst({
+      where: {
+        id,
+        OR: [
+          {
+            managerId: user.personId,
+            manager: { organizationId: user.organizationId },
+            report: { organizationId: user.organizationId },
+          },
+          {
+            reportId: user.personId,
+            manager: { organizationId: user.organizationId },
+            report: { organizationId: user.organizationId },
+          },
+        ],
+      },
+    })
+
+    return !!oneOnOne
+  },
+
+  // Feedback Campaign permissions
+  'feedback-campaign.create': user => {
+    return (user.role === 'ADMIN' || !!user.personId) && !!user.organizationId
+  },
+  'feedback-campaign.edit': async (user, id) => {
+    if (!user.organizationId || !id) return false
+    if (user.role === 'ADMIN') return true
+    if (!user.personId) return false
+
+    // Check if user is the creator (userId)
+    const campaign = await prisma.feedbackCampaign.findFirst({
+      where: {
+        id,
+        userId: user.id,
+        targetPerson: {
+          organizationId: user.organizationId,
+        },
+      },
+    })
+
+    return !!campaign
+  },
+  'feedback-campaign.delete': async (user, id) => {
+    if (!user.organizationId || !id) return false
+    if (user.role === 'ADMIN') return true
+    if (!user.personId) return false
+
+    // Check if user is the creator (userId)
+    const campaign = await prisma.feedbackCampaign.findFirst({
+      where: {
+        id,
+        userId: user.id,
+        targetPerson: {
+          organizationId: user.organizationId,
+        },
+      },
+    })
+
+    return !!campaign
+  },
+  'feedback-campaign.view': async (user, id) => {
+    if (!user.organizationId) return false
+    if (user.role === 'ADMIN') return true
+    if (!user.personId) return false
+
+    if (!id) {
+      // Viewing list - user can see their own campaigns
+      return true
+    }
+
+    // Check if user is the creator (userId)
+    const campaign = await prisma.feedbackCampaign.findFirst({
+      where: {
+        id,
+        userId: user.id,
+        targetPerson: {
+          organizationId: user.organizationId,
+        },
+      },
+    })
+
+    return !!campaign
+  },
+
+  // User linking permissions
+  'user.link-person': user => {
+    return user.role === 'ADMIN'
+  },
+}
+
+/**
+ * Central permission function to check if a user can perform a specific action
+ * @param user - The user object
+ * @param actionId - The action identifier (e.g., 'initiative.delete', 'task.create')
+ * @param id - Optional entity ID for actions that require checking specific entity ownership
+ * @returns Promise<boolean> indicating if the user can perform the action
+ */
+export async function getActionPermission(
+  user: User,
+  actionId: string,
+  id?: string
+): Promise<boolean> {
+  if (actionId in PermissionMap) {
+    const result = PermissionMap[actionId](user, id)
+    return await Promise.resolve(result)
+  }
+
+  console.error(`Unknown action ID given: ${actionId}`)
+  return false
 }

@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db'
 import { redirect } from 'next/navigation'
 import { InitiativeForm } from '@/components/initiatives/initiative-form'
 import { InitiativeDetailClient } from '@/components/initiatives/initiative-detail-client'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 
 export default async function EditInitiative({
   params,
@@ -17,6 +17,11 @@ export default async function EditInitiative({
   }
 
   const { id } = await params
+
+  // Check permission to edit initiatives
+  if (!(await getActionPermission(user, 'initiative.edit', id))) {
+    redirect(`/initiatives/${id}`)
+  }
 
   // Get the initiative with all related data
   const initiative = await prisma.initiative.findFirst({

@@ -11,6 +11,7 @@ interface NavItem {
   href: string
   icon: string
   adminOnly?: boolean
+  requiresPermission?: string
 }
 
 interface PersonData {

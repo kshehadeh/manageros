@@ -27,7 +27,7 @@ import { getTeams } from '@/lib/actions/team'
 import { getEntityLinks } from '@/lib/actions/entity-links'
 import { FileText, Rocket } from 'lucide-react'
 import { Rag } from '@/components/rag'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 
 export default async function InitiativeDetail({
   params,
@@ -36,11 +36,12 @@ export default async function InitiativeDetail({
 }) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
-    redirect('/organization/create')
+  const { id } = await params
+  const canView = await getActionPermission(user, 'initiative.view', id)
+  if (!canView) {
+    redirect('/initiatives')
   }
 
-  const { id } = await params
   const [init, people, meetings, notes, teams, allTasks, entityLinks] =
     await Promise.all([
       getInitiativeById(id),
@@ -57,6 +58,14 @@ export default async function InitiativeDetail({
   // Calculate completion rate for the initiative
   const completionRate = calculateTaskCompletionPercentage(allTasks)
 
+  // Check permissions for edit and delete
+  const canEdit = await getActionPermission(user, 'initiative.edit', init.id)
+  const canDelete = await getActionPermission(
+    user,
+    'initiative.delete',
+    init.id
+  )
+
   return (
     <InitiativeDetailClient initiativeTitle={init.title} initiativeId={init.id}>
       <PageContainer>
@@ -71,7 +80,13 @@ export default async function InitiativeDetail({
               </span>
             </div>
           }
-          actions={<InitiativeActionsDropdown initiativeId={init.id} />}
+          actions={
+            <InitiativeActionsDropdown
+              initiativeId={init.id}
+              canEdit={canEdit}
+              canDelete={canDelete}
+            />
+          }
         />
 
         <PageContent>
@@ -109,6 +124,7 @@ export default async function InitiativeDetail({
                     initiativeId={init.id}
                     tasks={init.tasks}
                     objectives={init.objectives}
+                    canEdit={canEdit}
                   />
                 </Suspense>
               )}
@@ -129,6 +145,7 @@ export default async function InitiativeDetail({
                   <InitiativeObjectives
                     objectives={init.objectives}
                     initiativeId={init.id}
+                    canEdit={canEdit}
                   />
                 </Suspense>
               )}
@@ -171,6 +188,7 @@ export default async function InitiativeDetail({
                     entityType='Initiative'
                     entityId={init.id}
                     notes={notes}
+                    canEdit={canEdit}
                   />
                 </Suspense>
               )}
@@ -220,6 +238,7 @@ export default async function InitiativeDetail({
               entityId={init.id}
               teams={teams}
               people={people}
+              canEdit={canEdit}
             />
           </PageSidebar>
         </PageContent>

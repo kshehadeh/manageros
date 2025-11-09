@@ -28,7 +28,9 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { SectionHeader } from '@/components/ui/section-header'
-import { PageSection } from '@/components/ui/page-section'
+import { SimpleListContainer } from '@/components/common/simple-list-container'
+import { SimpleListItem } from '@/components/common/simple-list-item'
+import { SimpleListItemsContainer } from '@/components/common/simple-list-items-container'
 import {
   UserPlus,
   MoreHorizontal,
@@ -45,6 +47,7 @@ import {
   reactivateOrganizationInvitation,
 } from '@/lib/actions/organization'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 interface Invitation {
   id: string
@@ -67,6 +70,7 @@ export default function OrganizationInvitationsSection({
   invitations,
 }: OrganizationInvitationsSectionProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const router = useRouter()
   const [isCreating, setIsCreating] = useState(false)
   const [isRevoking, setIsRevoking] = useState<string | null>(null)
   const [isReactivating, setIsReactivating] = useState<string | null>(null)
@@ -87,8 +91,7 @@ export default function OrganizationInvitationsSection({
       toast.success(`Invitation sent to ${email}`)
       setEmail('')
       setIsDialogOpen(false)
-      // Refresh the page to show updated data
-      window.location.reload()
+      router.refresh()
     } catch (error) {
       setError(
         error instanceof Error ? error.message : 'Failed to send invitation'
@@ -209,157 +212,142 @@ export default function OrganizationInvitationsSection({
 
   return (
     <>
-      <PageSection
-        header={
-          <SectionHeader
-            icon={Mail}
-            title='Invitations'
-            action={
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button variant='outline' className='flex items-center gap-2'>
-                    <UserPlus className='h-4 w-4' />
-                    Invite User
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Invite User to Organization</DialogTitle>
-                    <DialogDescription>
-                      Enter the email address of the user you want to invite to
-                      your organization.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <form onSubmit={handleCreateInvitation} className='space-y-4'>
-                    {error && (
-                      <div className='bg-destructive/20 border border-destructive text-destructive px-4 py-3 rounded'>
-                        {error}
-                      </div>
-                    )}
-                    <div>
-                      <label
-                        htmlFor='email'
-                        className='block text-sm font-medium text-muted-foreground'
-                      >
-                        Email Address
-                      </label>
-                      <input
-                        type='email'
-                        id='email'
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        required
-                        className='input mt-1'
-                        placeholder='user@example.com'
-                      />
-                      <p className='mt-1 text-sm text-muted-foreground'>
-                        The user will receive an invitation to join your
-                        organization. They can accept it when they create their
-                        account.
-                      </p>
-                    </div>
-                    <div className='flex justify-end gap-2'>
-                      <Button
-                        type='button'
-                        variant='outline'
-                        onClick={() => setIsDialogOpen(false)}
-                      >
-                        Cancel
-                      </Button>
-                      <Button type='submit' disabled={isCreating}>
-                        {isCreating ? 'Sending...' : 'Send Invitation'}
-                      </Button>
-                    </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            }
-          />
-        }
-      >
-        {invitations.length === 0 ? (
-          <div className='flex flex-col items-center justify-center py-8 text-center'>
-            <Mail className='h-8 w-8 text-muted-foreground mb-2' />
-            <p className='text-muted-foreground text-sm mb-4'>
-              No invitations have been sent yet
-            </p>
-            <p className='text-xs text-muted-foreground'>
-              Click &quot;Invite User&quot; to send your first invitation.
-            </p>
-          </div>
-        ) : (
-          <div className='space-y-3'>
-            {sortedInvitations.map(invitation => (
-              <div
-                key={invitation.id}
-                className='flex items-start justify-between p-3 border rounded-lg'
-              >
-                <div className='flex-1 min-w-0'>
-                  <div className='font-medium text-sm truncate'>
-                    {invitation.email}
-                  </div>
-                  <div className='mt-1'>
-                    {getStatusBadge(invitation.status)}
-                  </div>
-                  {invitation.status === 'pending' && (
-                    <div className='text-xs text-muted-foreground mt-1'>
-                      Expires{' '}
-                      {isExpired(invitation.expiresAt) ? (
-                        <span className='text-red-600'>Expired</span>
-                      ) : (
-                        formatDate(invitation.expiresAt)
-                      )}
+      <SimpleListContainer>
+        <SectionHeader
+          icon={Mail}
+          title='Invitations'
+          action={
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant='outline' className='flex items-center gap-2'>
+                  <UserPlus className='h-4 w-4' />
+                  Invite User
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Invite User to Organization</DialogTitle>
+                  <DialogDescription>
+                    Enter the email address of the user you want to invite to
+                    your organization.
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleCreateInvitation} className='space-y-4'>
+                  {error && (
+                    <div className='bg-destructive/20 border border-destructive text-destructive px-4 py-3 rounded'>
+                      {error}
                     </div>
                   )}
+                  <div>
+                    <label
+                      htmlFor='email'
+                      className='block text-sm font-medium text-muted-foreground'
+                    >
+                      Email Address
+                    </label>
+                    <input
+                      type='email'
+                      id='email'
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      required
+                      className='input mt-1'
+                      placeholder='user@example.com'
+                    />
+                    <p className='mt-1 text-sm text-muted-foreground'>
+                      The user will receive an invitation to join your
+                      organization. They can accept it when they create their
+                      account.
+                    </p>
+                  </div>
+                  <div className='flex justify-end gap-2'>
+                    <Button
+                      type='button'
+                      variant='outline'
+                      onClick={() => setIsDialogOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type='submit' disabled={isCreating}>
+                      {isCreating ? 'Sending...' : 'Send Invitation'}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          }
+        />
+        <SimpleListItemsContainer
+          isEmpty={sortedInvitations.length === 0}
+          emptyStateText='No invitations have been sent yet. Click "Invite User" to send your first invitation.'
+        >
+          {sortedInvitations.map(invitation => (
+            <SimpleListItem key={invitation.id}>
+              <div className='flex-1 min-w-0'>
+                <div className='font-medium text-sm truncate mb-1'>
+                  {invitation.email}
                 </div>
-                <div className='ml-3'>
-                  {(invitation.status === 'pending' ||
-                    invitation.status === 'expired') && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          disabled={
-                            isRevoking === invitation.id ||
-                            isReactivating === invitation.id
-                          }
-                        >
-                          <MoreHorizontal className='h-4 w-4' />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align='end'>
-                        {invitation.status === 'pending' && (
-                          <DropdownMenuItem
-                            onClick={() => setInvitationToRevoke(invitation)}
-                            className='text-red-600 focus:text-red-600'
-                            disabled={isRevoking === invitation.id}
-                          >
-                            <Trash2 className='h-4 w-4 mr-2' />
-                            Revoke Invitation
-                          </DropdownMenuItem>
+                <div className='flex items-center gap-2 text-xs text-muted-foreground'>
+                  {getStatusBadge(invitation.status)}
+                  {invitation.status === 'pending' && (
+                    <>
+                      <span>•</span>
+                      <span>
+                        Expires{' '}
+                        {isExpired(invitation.expiresAt) ? (
+                          <span className='text-red-600'>Expired</span>
+                        ) : (
+                          formatDate(invitation.expiresAt)
                         )}
-                        {invitation.status === 'expired' && (
-                          <DropdownMenuItem
-                            onClick={() =>
-                              setInvitationToReactivate(invitation)
-                            }
-                            className='text-green-600 focus:text-green-600'
-                            disabled={isReactivating === invitation.id}
-                          >
-                            <UserPlus className='h-4 w-4 mr-2' />
-                            Reactivate Invitation
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                      </span>
+                    </>
                   )}
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </PageSection>
+              {(invitation.status === 'pending' ||
+                invitation.status === 'expired') && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      className='h-8 w-8 p-0 hover:bg-muted shrink-0'
+                      disabled={
+                        isRevoking === invitation.id ||
+                        isReactivating === invitation.id
+                      }
+                    >
+                      <MoreHorizontal className='h-4 w-4' />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align='end'>
+                    {invitation.status === 'pending' && (
+                      <DropdownMenuItem
+                        onClick={() => setInvitationToRevoke(invitation)}
+                        className='text-red-600 focus:text-red-600'
+                        disabled={isRevoking === invitation.id}
+                      >
+                        <Trash2 className='h-4 w-4 mr-2' />
+                        Revoke Invitation
+                      </DropdownMenuItem>
+                    )}
+                    {invitation.status === 'expired' && (
+                      <DropdownMenuItem
+                        onClick={() => setInvitationToReactivate(invitation)}
+                        className='text-green-600 focus:text-green-600'
+                        disabled={isReactivating === invitation.id}
+                      >
+                        <UserPlus className='h-4 w-4 mr-2' />
+                        Reactivate Invitation
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </SimpleListItem>
+          ))}
+        </SimpleListItemsContainer>
+      </SimpleListContainer>
 
       <AlertDialog
         open={!!invitationToRevoke}

@@ -1,4 +1,6 @@
+import { redirect } from 'next/navigation'
 import { listAvailableReports, listReportInstances } from '@/lib/actions/report'
+import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 import Link from 'next/link'
 import { BarChart3 } from 'lucide-react'
 import {
@@ -26,6 +28,11 @@ const reportHelpMap: Record<string, string> = {
 }
 
 export default async function ReportsPage() {
+  const user = await getCurrentUser()
+  const canAccess = await getActionPermission(user, 'report.access')
+  if (!canAccess) {
+    redirect('/dashboard')
+  }
   const [reports, recent] = await Promise.all([
     listAvailableReports(),
     listReportInstances(10),

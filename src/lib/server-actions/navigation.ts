@@ -1,6 +1,6 @@
 'use server'
 
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 import { cacheLife, cacheTag } from 'next/cache'
 
 /**
@@ -23,7 +23,12 @@ export async function getFilteredNavigation() {
     { name: 'Dashboard', href: '/dashboard', icon: 'Home' },
     { name: 'My Tasks', href: '/my-tasks', icon: 'CheckSquare' },
     { name: 'Initiatives', href: '/initiatives', icon: 'Rocket' },
-    { name: 'Reports', href: '/reports', icon: 'BarChart3' },
+    {
+      name: 'Reports',
+      href: '/reports',
+      icon: 'BarChart3',
+      requiresPermission: 'report.access',
+    },
     {
       name: 'Org Settings',
       href: '/organization/settings',
@@ -33,13 +38,34 @@ export async function getFilteredNavigation() {
   ]
 
   // Filter navigation based on organization membership and admin role
-  return navigation.filter(item => {
-    // If user has no organization, only show Dashboard
-    if (!user.organizationId) {
-      return item.href === '/dashboard'
-    }
+  const filteredNavigation = await Promise.all(
+    navigation.map(async item => {
+      // If user has no organization, only show Dashboard
+      if (!user.organizationId) {
+        return item.href === '/dashboard' ? item : null
+      }
 
-    // If user has organization, filter by admin role for admin-only items
-    return !item.adminOnly || user.role === 'ADMIN'
-  })
+      // Check permission-based access
+      if (item.requiresPermission) {
+        const hasPermission = await getActionPermission(
+          user,
+          item.requiresPermission
+        )
+        if (!hasPermission) {
+          return null
+        }
+      }
+
+      // If user has organization, filter by admin role for admin-only items
+      if (item.adminOnly && user.role !== 'ADMIN') {
+        return null
+      }
+
+      return item
+    })
+  )
+
+  return filteredNavigation.filter(
+    (item): item is NonNullable<typeof item> => item !== null
+  )
 }
