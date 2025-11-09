@@ -10,8 +10,10 @@ import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
-import { User, Settings } from 'lucide-react'
+import { User, Settings, Shield } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
 export default function SettingsPage() {
   const [jiraCredentials, setJiraCredentials] = useState<{
@@ -44,26 +46,56 @@ export default function SettingsPage() {
       />
 
       <PageContent>
-        <PageSection className='space-y-12'>
-          {/* Person Linking Section */}
-          <div className='space-y-4'>
-            <SectionHeader
-              icon={User}
-              title='Account Linking'
-              action={accountLinkingButton}
-            />
-            <PersonLinkForm onButtonRender={setAccountLinkingButton} />
+        <div className='space-y-6'>
+          {/* Account Linking and Permissions - Side by side on larger screens */}
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+            {/* Person Linking Section */}
+            <PageSection
+              variant='bordered'
+              header={
+                <SectionHeader
+                  icon={User}
+                  title='Account Linking'
+                  action={accountLinkingButton}
+                />
+              }
+            >
+              <PersonLinkForm onButtonRender={setAccountLinkingButton} />
+            </PageSection>
+
+            {/* Permissions Section */}
+            <PageSection
+              variant='bordered'
+              header={<SectionHeader icon={Shield} title='Permissions' />}
+            >
+              <p className='text-sm text-muted-foreground'>
+                View your access permissions for all actions in the system
+              </p>
+              <Button asChild variant='outline' className='mt-4'>
+                <Link
+                  href='/settings/permissions'
+                  className='flex items-center gap-2'
+                >
+                  <Shield className='w-4 h-4' />
+                  View Permissions
+                </Link>
+              </Button>
+            </PageSection>
           </div>
 
           {/* Integration Settings */}
-          <div className='space-y-4'>
-            <SectionHeader icon={Settings} title='Integration Settings' />
+          <PageSection
+            variant='bordered'
+            header={
+              <SectionHeader icon={Settings} title='Integration Settings' />
+            }
+          >
             <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
               <JiraCredentialsForm initialCredentials={jiraCredentials} />
               <GithubCredentialsForm initialCredentials={githubCredentials} />
             </div>
-          </div>
-        </PageSection>
+          </PageSection>
+        </div>
       </PageContent>
     </PageContainer>
   )
