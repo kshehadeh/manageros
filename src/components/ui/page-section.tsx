@@ -29,7 +29,11 @@ export function PageSection({
     >
       {header}
       {hasHeader ? (
-        <div className='px-2 pb-4 md:px-6 md:pb-6'>{children}</div>
+        <div
+          className={cn(variant === 'bordered' && 'px-2 pb-4 md:px-6 md:pb-6')}
+        >
+          {children}
+        </div>
       ) : (
         children
       )}

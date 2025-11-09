@@ -1,6 +1,10 @@
 'use client'
 
-import { type CommandItemDescriptor, type CommandSource } from '../types'
+import {
+  type CommandItemDescriptor,
+  type CommandSource,
+  type CommandPermissions,
+} from '../types'
 import {
   Calendar,
   ListTodo,
@@ -32,7 +36,8 @@ export const searchCommandSource: CommandSource = {
     query: string,
     _userRole?: string,
     _pathname?: string,
-    _currentUserPersonId?: string
+    _currentUserPersonId?: string,
+    _permissions?: CommandPermissions
   ) => {
     const results = await searchAll(query)
     const items: CommandItemDescriptor[] = results.map(r => {

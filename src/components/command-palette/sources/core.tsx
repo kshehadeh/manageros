@@ -19,24 +19,35 @@ import {
   type CommandItemDescriptor,
   type CommandSource,
   type CommandActionContext,
+  type CommandPermissions,
 } from '../types'
 
 function createStaticItems(
   query: string,
   userRole?: string,
   pathname?: string,
-  currentUserPersonId?: string
+  currentUserPersonId?: string,
+  permissions?: CommandPermissions
 ): CommandItemDescriptor[] {
   const q = query.toLowerCase()
-  const isAdmin = userRole === 'ADMIN'
+  const isAdmin = permissions?.isAdmin ?? userRole === 'ADMIN'
   const hasLinkedPerson = !!currentUserPersonId
-  const canCreateTasks = isAdmin || hasLinkedPerson
-  const canCreateMeetings = isAdmin || hasLinkedPerson
-  const canCreateInitiatives = isAdmin || hasLinkedPerson
+
+  // Use permissions from server if available, otherwise fall back to client-side checks
+  const canCreateTasks =
+    permissions?.['task.create'] ?? (isAdmin || hasLinkedPerson)
+  const canCreateMeetings =
+    permissions?.['meeting.create'] ?? (isAdmin || hasLinkedPerson)
+  const canCreateInitiatives =
+    permissions?.['initiative.create'] ?? (isAdmin || hasLinkedPerson)
+  const canCreateFeedback =
+    permissions?.['feedback.create'] ?? (isAdmin || hasLinkedPerson)
+  const canCreateOneOnOne =
+    permissions?.['oneonone.create'] ?? (isAdmin || hasLinkedPerson)
 
   const items: CommandItemDescriptor[] = []
 
-  // Task creation - only if admin or has linked person
+  // Task creation - use permission check
   if (canCreateTasks) {
     items.push({
       id: 'task.create',
@@ -53,24 +64,26 @@ function createStaticItems(
     })
   }
 
-  // One-on-one creation
-  items.push({
-    id: 'oneonone.create',
-    title: 'Create 1:1 Meeting',
-    subtitle: 'Schedule a new one-on-one meeting',
-    icon: <Handshake className='h-4 w-4' />,
-    keywords: ['1:1', 'one on one', 'meeting', 'schedule', 'calendar'],
-    group: 'Quick Actions',
-    perform: ({ closePalette, router }) => {
-      const url = currentUserPersonId
-        ? `/oneonones/new?participant1Id=${currentUserPersonId}`
-        : '/oneonones/new'
-      router.push(url)
-      closePalette()
-    },
-  })
+  // One-on-one creation - use permission check
+  if (canCreateOneOnOne) {
+    items.push({
+      id: 'oneonone.create',
+      title: 'Create 1:1 Meeting',
+      subtitle: 'Schedule a new one-on-one meeting',
+      icon: <Handshake className='h-4 w-4' />,
+      keywords: ['1:1', 'one on one', 'meeting', 'schedule', 'calendar'],
+      group: 'Quick Actions',
+      perform: ({ closePalette, router }) => {
+        const url = currentUserPersonId
+          ? `/oneonones/new?participant1Id=${currentUserPersonId}`
+          : '/oneonones/new'
+        router.push(url)
+        closePalette()
+      },
+    })
+  }
 
-  // Meeting creation - only if admin or has linked person
+  // Meeting creation - use permission check
   if (canCreateMeetings) {
     items.push({
       id: 'meeting.create',
@@ -92,7 +105,7 @@ function createStaticItems(
     })
   }
 
-  // Initiative creation - only if admin or has linked person
+  // Initiative creation - use permission check
   if (canCreateInitiatives) {
     items.push({
       id: 'initiative.create',
@@ -108,20 +121,22 @@ function createStaticItems(
     })
   }
 
-  // Feedback creation
-  items.push({
-    id: 'feedback.create',
-    title: 'Create Feedback',
-    subtitle: 'Give feedback to a team member',
-    icon: <MessageCircle className='h-4 w-4' />,
-    keywords: ['feedback', 'review', 'comment', 'praise', 'criticism'],
-    group: 'Quick Actions',
-    perform: ({ closePalette }) => {
-      const ev = new CustomEvent('command:openPersonSelectorModal')
-      window.dispatchEvent(ev)
-      closePalette()
-    },
-  })
+  // Feedback creation - use permission check
+  if (canCreateFeedback) {
+    items.push({
+      id: 'feedback.create',
+      title: 'Create Feedback',
+      subtitle: 'Give feedback to a team member',
+      icon: <MessageCircle className='h-4 w-4' />,
+      keywords: ['feedback', 'review', 'comment', 'praise', 'criticism'],
+      group: 'Quick Actions',
+      perform: ({ closePalette }) => {
+        const ev = new CustomEvent('command:openPersonSelectorModal')
+        window.dispatchEvent(ev)
+        closePalette()
+      },
+    })
+  }
 
   // Add initiative-specific task creation if we're on an initiative page and can create tasks
   if (pathname?.match(/^\/initiatives\/[^/]+$/) && canCreateTasks) {
@@ -362,8 +377,15 @@ export const coreCommandSource: CommandSource = {
     query: string,
     userRole?: string,
     pathname?: string,
-    currentUserPersonId?: string
+    currentUserPersonId?: string,
+    permissions?: CommandPermissions
   ) => {
-    return createStaticItems(query, userRole, pathname, currentUserPersonId)
+    return createStaticItems(
+      query,
+      userRole,
+      pathname,
+      currentUserPersonId,
+      permissions
+    )
   },
 }

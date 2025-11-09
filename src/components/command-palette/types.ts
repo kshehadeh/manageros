@@ -18,6 +18,17 @@ export interface CommandItemDescriptor {
   perform: (_ctx: CommandActionContext) => void | Promise<void>
 }
 
+export interface CommandPermissions {
+  'task.create': boolean
+  'meeting.create': boolean
+  'initiative.create': boolean
+  'feedback.create': boolean
+  'oneonone.create': boolean
+  'feedback-campaign.create': boolean
+  'report.create': boolean
+  isAdmin: boolean
+}
+
 export interface CommandSource {
   id: string
   label: string
@@ -25,6 +36,7 @@ export interface CommandSource {
     _query: string,
     _userRole?: string,
     _pathname?: string,
-    _currentUserPersonId?: string
+    _currentUserPersonId?: string,
+    _permissions?: CommandPermissions
   ) => Promise<CommandItemDescriptor[]>
 }

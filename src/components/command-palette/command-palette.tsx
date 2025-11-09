@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import { Command as CommandPrimitive } from 'cmdk'
@@ -16,13 +16,29 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { VisuallyHidden } from '@/components/ui/visually-hidden'
 import { Loading } from '@/components/ui/loading'
 import { useCommandPalette } from './provider'
-import { type CommandItemDescriptor, type CommandSource } from './types'
+import {
+  type CommandItemDescriptor,
+  type CommandSource,
+  type CommandPermissions,
+} from './types'
 import { coreCommandSource } from './sources/core'
 import { searchCommandSource } from './sources/search'
 import { useDebounce } from '@/hooks/use-debounce'
 import { getCurrentUserWithPerson } from '@/lib/actions/organization'
 
 const sources: CommandSource[] = [coreCommandSource, searchCommandSource]
+
+// Entity types that are searched in the database
+const SEARCH_ENTITY_TYPES = [
+  'tasks',
+  'initiatives',
+  'people',
+  'feedback',
+  'one-on-ones',
+  'meetings',
+] as const
+
+type SearchEntityType = (typeof SEARCH_ENTITY_TYPES)[number]
 
 export function CommandPalette() {
   const { isOpen, setOpen } = useCommandPalette()
@@ -32,6 +48,8 @@ export function CommandPalette() {
   const [query, setQuery] = useState('')
   const [items, setItems] = useState<CommandItemDescriptor[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [currentSearchEntity, setCurrentSearchEntity] =
+    useState<SearchEntityType | null>(null)
   const [currentUserPersonId, setCurrentUserPersonId] = useState<
     string | undefined
   >()
@@ -40,27 +58,67 @@ export function CommandPalette() {
   const debouncedQuery = useDebounce(query, 300)
 
   const [userData, setUserData] = useState<{ role?: string } | null>(null)
+  const [permissions, setPermissions] = useState<CommandPermissions | null>(
+    null
+  )
 
-  // Fetch current user's person ID and role when user is available
+  // Ref to track current entity index for rotation
+  const entityIndexRef = useRef(0)
+
+  // Fetch current user's person ID, role, and permissions when user is available
   useEffect(() => {
     if (!isLoaded || !user) return
 
     const fetchCurrentUserData = async () => {
       try {
-        const [personData, userDataRes] = await Promise.all([
+        const [personData, userDataRes, permissionsRes] = await Promise.all([
           getCurrentUserWithPerson(),
           fetch('/api/user/current').then(res => res.json()),
+          fetch('/api/command-palette/permissions').then(res => res.json()),
         ])
         setCurrentUserPersonId(personData.person?.id)
         setUserData(userDataRes.user)
+        if (permissionsRes.permissions) {
+          setPermissions(permissionsRes.permissions)
+        }
       } catch (error) {
         console.error('Failed to fetch current user data:', error)
         setCurrentUserPersonId(undefined)
+        setPermissions(null)
       }
     }
 
     fetchCurrentUserData()
   }, [isLoaded, user])
+
+  // Rotate through entity types during search to show progress
+  useEffect(() => {
+    if (!isLoading) {
+      setCurrentSearchEntity(null)
+      entityIndexRef.current = 0
+      return
+    }
+
+    // Only show entity rotation if we're actually searching (query length >= 2)
+    if (!debouncedQuery || debouncedQuery.trim().length < 2) {
+      setCurrentSearchEntity(null)
+      entityIndexRef.current = 0
+      return
+    }
+
+    // Set initial entity
+    setCurrentSearchEntity(SEARCH_ENTITY_TYPES[entityIndexRef.current])
+
+    const interval = setInterval(() => {
+      entityIndexRef.current =
+        (entityIndexRef.current + 1) % SEARCH_ENTITY_TYPES.length
+      setCurrentSearchEntity(SEARCH_ENTITY_TYPES[entityIndexRef.current])
+    }, 400) // Rotate every 400ms
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [isLoading, debouncedQuery])
 
   useEffect(() => {
     let isCancelled = false
@@ -70,20 +128,35 @@ export function CommandPalette() {
         const userRole = userData?.role
         const all = await Promise.all(
           sources.map(s =>
-            s.getItems(debouncedQuery, userRole, pathname, currentUserPersonId)
+            s.getItems(
+              debouncedQuery,
+              userRole,
+              pathname,
+              currentUserPersonId,
+              permissions || undefined
+            )
           )
         )
         if (isCancelled) return
         setItems(all.flat())
       } finally {
-        if (!isCancelled) setIsLoading(false)
+        if (!isCancelled) {
+          setIsLoading(false)
+          setCurrentSearchEntity(null)
+        }
       }
     }
     run()
     return () => {
       isCancelled = true
     }
-  }, [debouncedQuery, userData?.role, pathname, currentUserPersonId])
+  }, [
+    debouncedQuery,
+    userData?.role,
+    pathname,
+    currentUserPersonId,
+    permissions,
+  ])
 
   const grouped = useMemo<Record<string, CommandItemDescriptor[]>>(() => {
     const byGroup: Record<string, CommandItemDescriptor[]> = {}
@@ -121,12 +194,23 @@ export function CommandPalette() {
               className='flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50'
             />
             {isLoading && (
-              <Loading size='sm' className='ml-2 text-muted-foreground' />
+              <div className='ml-2 flex items-center gap-2 text-muted-foreground'>
+                <Loading size='sm' />
+                {currentSearchEntity && (
+                  <span className='text-xs'>
+                    Searching {currentSearchEntity}...
+                  </span>
+                )}
+              </div>
             )}
           </div>
           <CommandList className='flex-1 max-h-none sm:max-h-[400px]'>
             <CommandEmpty>
-              {isLoading ? 'Searching…' : 'No results found.'}
+              {isLoading
+                ? currentSearchEntity
+                  ? `Searching ${currentSearchEntity}...`
+                  : 'Searching…'
+                : 'No results found.'}
             </CommandEmpty>
             {Object.entries(grouped).map(([groupName, groupItems]) => (
               <CommandGroup key={groupName} heading={groupName}>
