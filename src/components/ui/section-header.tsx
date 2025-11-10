@@ -10,7 +10,7 @@ const geistMono = GeistMono({
 interface SectionHeaderProps {
   icon: LucideIcon | React.ElementType
   title: string
-  description?: string
+  description?: ReactNode
   action?: ReactNode | ReactNode[]
   className?: string
 }
