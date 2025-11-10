@@ -76,6 +76,12 @@ export default async function OrganizationSettingsPage() {
                   </p>
                 </div>
                 <div>
+                  <p className='text-sm font-medium'>Organization ID</p>
+                  <p className='text-sm text-muted-foreground'>
+                    {user.organizationId}
+                  </p>
+                </div>
+                <div>
                   <p className='text-sm font-medium'>Your Role</p>
                   <p className='text-sm text-muted-foreground'>{user.role}</p>
                 </div>

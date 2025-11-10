@@ -25,6 +25,7 @@ export default function SettingsPage() {
   } | null>(null)
   const [accountLinkingButton, setAccountLinkingButton] =
     useState<React.ReactNode>(null)
+  const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
     const loadCredentials = async () => {
@@ -38,6 +39,21 @@ export default function SettingsPage() {
     loadCredentials()
   }, [])
 
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const response = await fetch('/api/user/current')
+        const data = await response.json()
+        if (data.user?.id) {
+          setUserId(data.user.id)
+        }
+      } catch (error) {
+        console.error('Failed to load user:', error)
+      }
+    }
+    loadUser()
+  }, [])
+
   return (
     <PageContainer>
       <PageHeader
@@ -47,6 +63,27 @@ export default function SettingsPage() {
 
       <PageContent>
         <div className='space-y-6'>
+          {/* User Info */}
+          <PageSection
+            variant='bordered'
+            header={
+              <SectionHeader
+                icon={User}
+                title='User Info'
+                description='Basic information about your account'
+              />
+            }
+          >
+            <div className='space-y-2'>
+              {userId && (
+                <div>
+                  <p className='text-sm font-medium'>User ID</p>
+                  <p className='text-sm text-muted-foreground'>{userId}</p>
+                </div>
+              )}
+            </div>
+          </PageSection>
+
           {/* Account Linking and Permissions - Side by side on larger screens */}
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
             {/* Person Linking Section */}
