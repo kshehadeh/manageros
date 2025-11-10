@@ -362,7 +362,7 @@ export function NotesSection({
                     {note.content.length > 200 && (
                       <button
                         onClick={() => toggleNoteExpansion(note.id)}
-                        className='mt-2 text-sm text-primary hover:text-primary/80 flex items-center gap-1'
+                        className='mt-2 text-sm text-primary hover:text-highlight/80 flex items-center gap-1'
                       >
                         {expandedNotes.has(note.id) ? (
                           <>
@@ -522,7 +522,7 @@ export function NotesSection({
                   <button
                     type='button'
                     onClick={() => fileInputRef.current?.click()}
-                    className='text-primary hover:underline'
+                    className='text-primary hover:underline hover:text-highlight'
                     disabled={isSubmitting}
                   >
                     browse files

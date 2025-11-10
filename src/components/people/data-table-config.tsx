@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { MoreHorizontal, Users, Building, Briefcase } from 'lucide-react'
@@ -103,7 +103,7 @@ export const peopleDataTableConfig: DataTableConfig<
               <div className='flex flex-col'>
                 <Link
                   href={`/people/${person.id}`}
-                  className='font-medium text-primary hover:text-primary/90 transition-colors'
+                  className='font-medium text-primary hover:text-highlight/90 transition-colors'
                   onClick={e => e.stopPropagation()}
                 >
                   {person.name}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { Edit, Trash2 } from 'lucide-react'
 import { deleteOneOnOne } from '@/lib/actions/oneonone'
 import { ActionDropdown } from '@/components/common/action-dropdown'

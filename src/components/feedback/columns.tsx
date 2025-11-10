@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { ColumnDef } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
 import { MoreHorizontal, Calendar, User as UserIcon } from 'lucide-react'
@@ -42,7 +42,7 @@ export function createFeedbackColumns({
             <div className='flex items-center gap-2'>
               <Link
                 href={`/people/${feedback.about.id}`}
-                className='text-primary hover:text-primary/90 transition-colors'
+                className='text-primary hover:text-highlight/90 transition-colors'
                 onClick={e => e.stopPropagation()}
               >
                 {feedback.about.name}
@@ -112,7 +112,7 @@ export function createFeedbackColumns({
         return (
           <button
             onClick={() => onRowClick?.(feedback.id)}
-            className='text-left text-sm hover:text-primary transition-colors'
+            className='text-left text-sm hover:text-highlight transition-colors'
           >
             <div className='line-clamp-2'>{getExcerpt(feedback.body, 150)}</div>
           </button>

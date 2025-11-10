@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import {
   MoreHorizontal,
   Edit,
@@ -240,7 +240,7 @@ export function TeamsTable({ teams, onTeamUpdate }: TeamsTableProps) {
                   {team.parent ? (
                     <Link
                       href={`/teams/${team.parent.id}`}
-                      className='hover:text-primary transition-colors'
+                      className='hover:text-highlight transition-colors'
                       onClick={e => e.stopPropagation()}
                     >
                       {team.parent.name}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { TeamActionsDropdown } from './team-actions-dropdown'
 import { ClickableTeamAvatar } from './clickable-team-avatar'
 import { TeamAvatarEditDialog } from './team-avatar-edit-dialog'

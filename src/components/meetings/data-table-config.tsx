@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -273,7 +273,7 @@ export const meetingDataTableConfig: DataTableConfig<
           return (
             <Link
               href={`/teams/${team.id}`}
-              className='text-primary hover:text-primary/90 transition-colors'
+              className='text-primary hover:text-highlight/90 transition-colors'
               onClick={e => e.stopPropagation()}
             >
               {team.name}
@@ -395,7 +395,7 @@ export const meetingDataTableConfig: DataTableConfig<
           return (
             <Link
               href={`/initiatives/${initiative.id}`}
-              className='text-primary hover:text-primary/90 transition-colors'
+              className='text-primary hover:text-highlight/90 transition-colors'
               onClick={e => e.stopPropagation()}
             >
               {initiative.title}

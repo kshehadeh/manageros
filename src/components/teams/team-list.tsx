@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { MoreHorizontal } from 'lucide-react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
 import {
   ViewDetailsMenuItem,

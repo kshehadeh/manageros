@@ -24,7 +24,7 @@ import {
   MoreHorizontal,
 } from 'lucide-react'
 import { format } from 'date-fns'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
 import {
   ContextMenuItem,
@@ -157,7 +157,7 @@ export function FeedbackCampaignList({
                 {campaign.name && (
                   <Link
                     href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`}
-                    className='text-lg font-semibold text-foreground hover:text-blue-600 transition-colors'
+                    className='text-lg font-semibold text-foreground hover:text-highlight transition-colors'
                   >
                     {campaign.name}
                   </Link>

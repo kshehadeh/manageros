@@ -3,7 +3,7 @@ import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { Button } from '@/components/ui/button'
 import { MessageCircle, Eye, Plus } from 'lucide-react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { getActiveAndDraftFeedbackCampaignsForPerson } from '@/lib/data/feedback-campaigns'
 
 interface FeedbackCampaignsSectionProps {

@@ -16,7 +16,7 @@ import { PageMain } from '@/components/ui/page-main'
 import { PageSidebar } from '@/components/ui/page-sidebar'
 import { PageSection } from '@/components/ui/page-section'
 import { Plus, MessageSquare } from 'lucide-react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function FeedbackCampaignsPage() {

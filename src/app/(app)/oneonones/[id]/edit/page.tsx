@@ -1,7 +1,7 @@
 import { getOneOnOneById } from '@/lib/actions/oneonone'
 import { OneOnOneForm } from '@/components/oneonone-form'
 import { OneOnOneDetailClient } from '@/components/oneonone-detail-client'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 import { Handshake } from 'lucide-react'
 import { notFound } from 'next/navigation'

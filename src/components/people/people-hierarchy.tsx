@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { EditIconButton } from '@/components/edit-icon-button'
 import { PersonStatusBadge } from './person-status-badge'
 
@@ -77,7 +77,7 @@ export function PeopleHierarchy({ people }: PeopleHierarchyProps) {
                   <div className='flex items-center gap-2'>
                     <Link
                       href={`/people/${person.id}`}
-                      className='font-medium hover:text-primary'
+                      className='font-medium hover:text-highlight'
                     >
                       {person.name}
                     </Link>
@@ -97,7 +97,7 @@ export function PeopleHierarchy({ people }: PeopleHierarchyProps) {
                         Team:{' '}
                         <Link
                           href={`/teams/${person.team.id}`}
-                          className='hover:text-primary'
+                          className='hover:text-highlight'
                         >
                           {person.team.name}
                         </Link>
@@ -113,7 +113,7 @@ export function PeopleHierarchy({ people }: PeopleHierarchyProps) {
                         • Reports to:{' '}
                         <Link
                           href={`/people/${person.manager.id}`}
-                          className='hover:text-primary'
+                          className='hover:text-highlight'
                         >
                           {person.manager.name}
                         </Link>

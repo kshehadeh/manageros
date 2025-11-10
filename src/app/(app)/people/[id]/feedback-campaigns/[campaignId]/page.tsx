@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/db'
 import { notFound, redirect } from 'next/navigation'
 
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { FeedbackCampaignDetailBreadcrumbClient } from '@/components/feedback/feedback-campaign-detail-breadcrumb-client'
 import { FeedbackCampaignActionsDropdown } from '@/components/feedback/feedback-campaign-actions-dropdown'
 import { FeedbackResponseLink } from '@/components/feedback/feedback-response-link'

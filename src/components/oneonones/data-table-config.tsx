@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 import { MoreHorizontal, Calendar, Users } from 'lucide-react'
 import { OneOnOneListItem } from '@/hooks/use-oneonones'

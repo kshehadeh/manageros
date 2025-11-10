@@ -5,7 +5,7 @@ import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { PersonAvatar } from '@/components/people/person-avatar'
 import { Users, ChevronDown } from 'lucide-react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { useState } from 'react'
 
 interface Participant {
@@ -73,7 +73,7 @@ export function MeetingParticipantsSidebar({
               />
               <Link
                 href={`/people/${participant.person.id}`}
-                className='hover:text-primary transition-colors truncate'
+                className='hover:text-highlight transition-colors truncate'
               >
                 {participant.person.name}
               </Link>

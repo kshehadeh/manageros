@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { Rag } from '@/components/rag'
 import { CheckInModal } from '@/components/checkin-modal'
 import { Button } from '@/components/ui/button'

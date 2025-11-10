@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { Edit, Trash2, CalendarPlus } from 'lucide-react'
 import { deleteMeetingInstance } from '@/lib/actions/meeting-instance'
 import { toast } from 'sonner'

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { IndigoIcon } from '@/components/indigo-icon'
 import { ThemeProvider } from 'next-themes'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { ClerkProvider } from '@clerk/nextjs'
 import { dark } from '@clerk/themes'
 

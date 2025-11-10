@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState, useEffect } from 'react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { SimplePeopleList } from '@/components/people/person-list'
 import { SimpleTaskListSkeleton } from '@/components/common/simple-task-list-skeleton'
 import { SectionHeader } from '@/components/ui/section-header'

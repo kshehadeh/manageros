@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 import { MoreHorizontal, Calendar, User as UserIcon } from 'lucide-react'
 import type { FeedbackListItem } from '@/types/api'
@@ -51,7 +51,7 @@ export const feedbackDataTableConfig: DataTableConfig<FeedbackListItem> = {
               <div className='flex items-center gap-2'>
                 <Link
                   href={`/people/${feedback.about.id}`}
-                  className='text-primary hover:text-primary/90 transition-colors'
+                  className='text-primary hover:text-highlight/90 transition-colors'
                   onClick={e => e.stopPropagation()}
                 >
                   {feedback.about.name}

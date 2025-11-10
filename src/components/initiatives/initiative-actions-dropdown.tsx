@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { Edit, Trash2 } from 'lucide-react'
 import { deleteInitiative } from '@/lib/actions/initiative'
 import { ActionDropdown } from '@/components/common/action-dropdown'

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { TeamCard } from '@/components/teams/team-card'
 import { Team, Person, Initiative } from '@prisma/client'
 
@@ -49,7 +49,7 @@ export function HierarchicalTeamView({ teams }: HierarchicalTeamViewProps) {
       {topLevelTeams.length === 0 && (
         <div className='text-neutral-400 text-sm text-center py-8'>
           No teams yet.{' '}
-          <Link href='/teams/new' className='text-blue-400 hover:text-blue-300'>
+          <Link href='/teams/new' className='text-blue-400'>
             Create your first team
           </Link>
           .

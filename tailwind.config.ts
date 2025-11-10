@@ -38,6 +38,10 @@ export default {
           DEFAULT: 'var(--color-destructive)',
           foreground: 'var(--color-destructive-foreground)',
         },
+        highlight: {
+          DEFAULT: 'var(--color-highlight)',
+          bg: 'var(--color-highlight-bg)',
+        },
         border: 'var(--color-border)',
         input: 'var(--color-input)',
         ring: 'var(--color-ring)',

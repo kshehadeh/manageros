@@ -3,7 +3,7 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from 'sonner'
 import { AnimatedGeometricPattern } from '@/components/marketing/animated-geometric-pattern'
 import Image from 'next/image'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 
 export default function FeedbackFormLayout({
   children,

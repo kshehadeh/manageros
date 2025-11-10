@@ -3,6 +3,7 @@
 import { useState, useRef, useLayoutEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Button } from '@/components/ui/button'
+import { ExternalLink } from '@/components/ui/link'
 
 interface ReadonlyNotesFieldProps {
   content: string
@@ -140,14 +141,12 @@ export function ReadonlyNotesField({
 
               // Links - automatically detected and styled
               a: ({ href, children }) => (
-                <a
+                <ExternalLink
                   href={href}
                   className='underline decoration-primary/30 hover:decoration-primary/60 transition-colors break-all'
-                  target='_blank'
-                  rel='noopener noreferrer'
                 >
                   {children}
-                </a>
+                </ExternalLink>
               ),
 
               // Lists

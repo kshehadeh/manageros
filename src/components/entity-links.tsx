@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { ExternalLink } from '@/components/ui/link'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -93,14 +94,12 @@ export function LinkDisplay({
             <div className='flex items-start justify-between gap-2'>
               <div className='flex-1 min-w-0'>
                 <h4 className='font-medium text-sm truncate'>{urlTitle}</h4>
-                <a
+                <ExternalLink
                   href={link.url}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='text-xs text-blue-600 hover:text-blue-800 truncate block'
+                  className='text-xs text-blue-600 truncate block'
                 >
                   {link.url}
-                </a>
+                </ExternalLink>
                 {link.description && (
                   <p className='text-xs text-gray-600 mt-1 line-clamp-2'>
                     {link.description}

@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { Badge } from '@/components/ui/badge'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { taskStatusUtils, type TaskStatus } from '@/lib/task-status'
@@ -68,7 +68,7 @@ export function TaskCard({
               <span className='font-medium'>Initiative:</span>{' '}
               <Link
                 href={`/initiatives/${task.initiative.id}`}
-                className='text-primary hover:text-primary/80 transition-colors'
+                className='text-primary hover:text-highlight/80 transition-colors'
               >
                 {task.initiative.title}
               </Link>

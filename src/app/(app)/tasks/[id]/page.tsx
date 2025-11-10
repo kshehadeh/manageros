@@ -2,7 +2,7 @@ import { getTask } from '@/lib/actions/task'
 import { getEntityLinks } from '@/lib/data/entity-links'
 
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { notFound } from 'next/navigation'
 import { TaskDetailBreadcrumbClient } from '@/components/tasks/task-detail-breadcrumb-client'
 import { TaskActionsDropdown } from '@/components/tasks/task-actions-dropdown'
@@ -87,7 +87,7 @@ export default async function TaskDetailPage({
                     <User className='w-4 h-4' />
                     <Link
                       href={`/people/${task.assignee.id}`}
-                      className='hover:text-primary transition-colors'
+                      className='hover:text-highlight transition-colors'
                     >
                       {task.assignee.name}
                     </Link>

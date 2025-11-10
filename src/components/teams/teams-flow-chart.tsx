@@ -21,7 +21,7 @@ import dagre from 'dagre'
 import 'reactflow/dist/style.css'
 import { TeamWithHierarchy } from '@/types/team'
 import { Users, Target, Building2 } from 'lucide-react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 
 interface TeamsFlowChartProps {
   teams: TeamWithHierarchy[]
@@ -275,7 +275,7 @@ export function TeamsFlowChart({ teams }: TeamsFlowChartProps) {
     return (
       <div className='text-muted-foreground text-sm text-center py-12'>
         No teams yet.{' '}
-        <Link href='/teams/new' className='text-primary hover:text-primary/80'>
+        <Link href='/teams/new' className='text-primary'>
           Create your first team
         </Link>
         .

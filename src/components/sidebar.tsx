@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { useClerk } from '@clerk/nextjs'
 import { signOutWithCleanup } from '@/lib/auth-client-utils'
 import { usePathname } from 'next/navigation'
@@ -112,7 +112,7 @@ export default function Sidebar({
             <h1
               className={`text-xl font-semibold text-foreground ${geistMono.className}`}
             >
-              m<span className='font-bold'>Path</span>
+              [<span className='text-highlight'>mpath</span>]
             </h1>
           </div>
         </div>
@@ -208,8 +208,8 @@ export default function Sidebar({
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${geistMono.className} ${
                       isActive
-                        ? 'bg-secondary text-secondary-foreground border'
-                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                        ? 'bg-highlight-bg text-highlight border border-highlight/20'
+                        : 'text-muted-foreground hover:bg-accent hover:text-highlight'
                     }`}
                   >
                     {IconComponent && <IconComponent className='h-5 w-5' />}
@@ -224,7 +224,7 @@ export default function Sidebar({
                   setIsMobileMenuOpen(false)
                   toggleAIChat()
                 }}
-                className={`flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
+                className={`flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
               >
                 <Bot className='h-5 w-5' />
                 <span>AI Chat</span>
@@ -259,7 +259,7 @@ export default function Sidebar({
                   setIsMobileMenuOpen(false)
                   setIsKeyboardShortcutsOpen(true)
                 }}
-                className={`flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
+                className={`flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
               >
                 <Keyboard className='h-5 w-5' />
                 <span>Keyboard Shortcuts</span>
@@ -269,7 +269,7 @@ export default function Sidebar({
                   setIsMobileMenuOpen(false)
                   setIsGettingStartedOpen(true)
                 }}
-                className={`flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
+                className={`flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
               >
                 <BookOpen className='h-5 w-5' />
                 <span>Help</span>
@@ -279,7 +279,7 @@ export default function Sidebar({
                   setIsMobileMenuOpen(false)
                   setIsBugOpen(true)
                 }}
-                className={`flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
+                className={`flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
               >
                 <Bug className='h-5 w-5' />
                 <span>Report a bug</span>

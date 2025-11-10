@@ -214,7 +214,7 @@ function renderTitleCell(
                 router.push(`/meetings/${meetingData.id}`)
               }
             }}
-            className='text-left hover:text-blue-600 hover:underline transition-colors'
+            className='text-left hover:text-highlight hover:underline transition-colors'
           >
             {meetingData.title}
             {isInstance && (
@@ -234,7 +234,7 @@ function renderTitleCell(
                       router.push(`/meetings/${meetingData.id}`)
                     }
                   }}
-                  className='text-primary hover:text-primary/80 transition-colors'
+                  className='text-primary hover:text-highlight/80 transition-colors'
                 >
                   View parent meeting
                 </button>

@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 import { Badge, BadgeVariant } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -191,7 +191,7 @@ export const taskDataTableConfig: DataTableConfig<
           return (
             <Link
               href={`/people/${task.assignee.id}`}
-              className='text-primary hover:text-primary/90 transition-colors'
+              className='text-primary hover:text-highlight/90 transition-colors'
               onClick={e => e.stopPropagation()}
             >
               {task.assignee.name}
@@ -275,7 +275,7 @@ export const taskDataTableConfig: DataTableConfig<
           return (
             <Link
               href={`/initiatives/${task.initiative.id}`}
-              className='text-primary hover:text-primary/90 transition-colors'
+              className='text-primary hover:text-highlight/90 transition-colors'
               onClick={e => e.stopPropagation()}
             >
               {task.initiative.title}
