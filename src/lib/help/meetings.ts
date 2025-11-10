@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-10-25T08:06:22.007Z
+ * Generated on: 2025-11-10T14:22:20.657Z
  */
 
 export interface HelpContent {
@@ -66,6 +66,5 @@ Track responses at the meeting level:
 - If invites aren’t received, verify email addresses and resend
 - Adjust recurrence dates if instances aren’t appearing
 - Update participants when team membership changes
-
 `,
 }
