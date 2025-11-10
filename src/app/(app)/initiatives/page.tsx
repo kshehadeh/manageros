@@ -18,6 +18,7 @@ export default async function InitiativesPage() {
         title='Initiatives'
         titleIcon={Rocket}
         helpId='initiatives'
+        subtitle='Manage long-term goals and objectives'
         actions={
           canCreateInitiatives ? (
             <Button asChild className='flex items-center gap-2'>

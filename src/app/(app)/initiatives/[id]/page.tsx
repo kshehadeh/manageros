@@ -1,12 +1,13 @@
 import { redirect } from 'next/navigation'
 import { InitiativeDetailClient } from '@/components/initiatives/initiative-detail-client'
 import { InitiativeActionsDropdown } from '@/components/initiatives/initiative-actions-dropdown'
-import { InitiativeObjectives } from '@/components/initiatives/initiative-objectives'
-import { InitiativeTasks } from '@/components/initiatives/initiative-tasks'
-import { InitiativeCheckIns } from '@/components/initiatives/initiative-checkins'
-import { InitiativeMeetings } from '@/components/initiatives/initiative-meetings'
-import { InitiativeSidebar } from '@/components/initiatives/initiative-sidebar'
-import { NotesSection } from '@/components/notes/notes-section'
+import { InitiativeObjectivesServer } from '@/components/initiatives/initiative-objectives-server'
+import { InitiativeTasks } from '@/components/initiatives/initiative-tasks-server'
+import { InitiativeCheckInsServer } from '@/components/initiatives/initiative-checkins-server'
+import { InitiativeMeetingsServer } from '@/components/initiatives/initiative-meetings-server'
+import { InitiativeSidebarServer } from '@/components/initiatives/initiative-sidebar-server'
+import { NotesSectionServer } from '@/components/notes/notes-section-server'
+import { InitiativeCompletionRate } from '@/components/initiatives/initiative-completion-rate'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
@@ -16,18 +17,18 @@ import { PageMain } from '@/components/ui/page-main'
 import { PageSidebar } from '@/components/ui/page-sidebar'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { Suspense } from 'react'
-import { Loading } from '@/components/ui/loading'
-import { calculateTaskCompletionPercentage } from '@/lib/completion-utils'
-import { getNotesForEntity } from '@/lib/actions/notes'
-import { getInitiativeById } from '@/lib/actions/initiative'
-import { getPeopleForOrganization } from '@/lib/actions/person'
-import { getMeetingsForInitiativeSimple } from '@/lib/actions/meeting'
-import { getAllTasksForInitiative } from '@/lib/actions/task'
-import { getTeams } from '@/lib/actions/team'
-import { getEntityLinks } from '@/lib/actions/entity-links'
 import { FileText, Rocket } from 'lucide-react'
-import { Rag } from '@/components/rag'
 import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
+import { prisma } from '@/lib/db'
+import {
+  InitiativeTasksSkeleton,
+  InitiativeObjectivesSkeleton,
+  InitiativeMeetingsSkeleton,
+  InitiativeNotesSkeleton,
+  InitiativeCheckInsSkeleton,
+  InitiativeSidebarSkeleton,
+  InitiativeCompletionRateSkeleton,
+} from '@/components/initiatives/initiative-detail-skeletons'
 
 export default async function InitiativeDetail({
   params,
@@ -42,21 +43,17 @@ export default async function InitiativeDetail({
     redirect('/initiatives')
   }
 
-  const [init, people, meetings, notes, teams, allTasks, entityLinks] =
-    await Promise.all([
-      getInitiativeById(id),
-      getPeopleForOrganization(),
-      getMeetingsForInitiativeSimple(id),
-      getNotesForEntity('Initiative', id),
-      getTeams(),
-      getAllTasksForInitiative(id),
-      getEntityLinks('Initiative', id),
-    ])
+  // Only fetch the initiative with minimal data needed for the page
+  const init = await prisma.initiative.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      title: true,
+      summary: true,
+    },
+  })
 
   if (!init) return <div>Not found</div>
-
-  // Calculate completion rate for the initiative
-  const completionRate = calculateTaskCompletionPercentage(allTasks)
 
   // Check permissions for edit and delete
   const canEdit = await getActionPermission(user, 'initiative.edit', init.id)
@@ -73,12 +70,9 @@ export default async function InitiativeDetail({
           title={init.title}
           titleIcon={Rocket}
           subtitle={
-            <div className='flex items-center gap-2 ml-0 md:ml-9'>
-              <Rag rag={init.rag} />
-              <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary'>
-                {completionRate}% complete
-              </span>
-            </div>
+            <Suspense fallback={<InitiativeCompletionRateSkeleton />}>
+              <InitiativeCompletionRate initiativeId={init.id} />
+            </Suspense>
           }
           actions={
             <InitiativeActionsDropdown
@@ -107,139 +101,35 @@ export default async function InitiativeDetail({
                 </PageSection>
               )}
 
-              {allTasks.length > 0 && (
-                <Suspense
-                  fallback={
-                    <PageSection>
-                      <div className='flex items-center justify-center py-8'>
-                        <Loading size='md' />
-                        <span className='ml-2 text-sm text-muted-foreground'>
-                          Loading tasks...
-                        </span>
-                      </div>
-                    </PageSection>
-                  }
-                >
-                  <InitiativeTasks
-                    initiativeId={init.id}
-                    tasks={init.tasks}
-                    objectives={init.objectives}
-                    canEdit={canEdit}
-                  />
-                </Suspense>
-              )}
+              <Suspense fallback={<InitiativeTasksSkeleton />}>
+                <InitiativeTasks initiativeId={init.id} />
+              </Suspense>
 
-              {init.objectives.length > 0 && (
-                <Suspense
-                  fallback={
-                    <PageSection>
-                      <div className='flex items-center justify-center py-8'>
-                        <Loading size='md' />
-                        <span className='ml-2 text-sm text-muted-foreground'>
-                          Loading objectives...
-                        </span>
-                      </div>
-                    </PageSection>
-                  }
-                >
-                  <InitiativeObjectives
-                    objectives={init.objectives}
-                    initiativeId={init.id}
-                    canEdit={canEdit}
-                  />
-                </Suspense>
-              )}
+              <Suspense fallback={<InitiativeObjectivesSkeleton />}>
+                <InitiativeObjectivesServer initiativeId={init.id} />
+              </Suspense>
 
-              {meetings.length > 0 && (
-                <Suspense
-                  fallback={
-                    <PageSection>
-                      <div className='flex items-center justify-center py-8'>
-                        <Loading size='md' />
-                        <span className='ml-2 text-sm text-muted-foreground'>
-                          Loading meetings...
-                        </span>
-                      </div>
-                    </PageSection>
-                  }
-                >
-                  <InitiativeMeetings
-                    meetings={meetings}
-                    initiativeId={init.id}
-                    currentTeam={init.team}
-                  />
-                </Suspense>
-              )}
+              <Suspense fallback={<InitiativeMeetingsSkeleton />}>
+                <InitiativeMeetingsServer initiativeId={init.id} />
+              </Suspense>
 
-              {notes.length > 0 && (
-                <Suspense
-                  fallback={
-                    <PageSection>
-                      <div className='flex items-center justify-center py-8'>
-                        <Loading size='md' />
-                        <span className='ml-2 text-sm text-muted-foreground'>
-                          Loading notes...
-                        </span>
-                      </div>
-                    </PageSection>
-                  }
-                >
-                  <NotesSection
-                    entityType='Initiative'
-                    entityId={init.id}
-                    notes={notes}
-                    canEdit={canEdit}
-                  />
-                </Suspense>
-              )}
+              <Suspense fallback={<InitiativeNotesSkeleton />}>
+                <NotesSectionServer
+                  entityType='Initiative'
+                  entityId={init.id}
+                />
+              </Suspense>
 
-              {init.checkIns.length > 0 && (
-                <Suspense
-                  fallback={
-                    <PageSection>
-                      <div className='flex items-center justify-center py-8'>
-                        <Loading size='md' />
-                        <span className='ml-2 text-sm text-muted-foreground'>
-                          Loading check-ins...
-                        </span>
-                      </div>
-                    </PageSection>
-                  }
-                >
-                  <InitiativeCheckIns
-                    initiativeId={init.id}
-                    initiativeTitle={init.title}
-                    checkIns={init.checkIns.map(ci => ({
-                      id: ci.id,
-                      weekOf: ci.weekOf.toISOString(),
-                      rag: ci.rag,
-                      confidence: ci.confidence,
-                      summary: ci.summary,
-                      blockers: ci.blockers,
-                      nextSteps: ci.nextSteps,
-                      createdAt: ci.createdAt.toISOString(),
-                      createdBy: {
-                        id: ci.createdBy.id,
-                        name: ci.createdBy.name,
-                      },
-                    }))}
-                  />
-                </Suspense>
-              )}
+              <Suspense fallback={<InitiativeCheckInsSkeleton />}>
+                <InitiativeCheckInsServer initiativeId={init.id} />
+              </Suspense>
             </div>
           </PageMain>
 
           <PageSidebar>
-            <InitiativeSidebar
-              team={init.team}
-              owners={init.owners}
-              links={entityLinks}
-              entityType='Initiative'
-              entityId={init.id}
-              teams={teams}
-              people={people}
-              canEdit={canEdit}
-            />
+            <Suspense fallback={<InitiativeSidebarSkeleton />}>
+              <InitiativeSidebarServer initiativeId={init.id} />
+            </Suspense>
           </PageSidebar>
         </PageContent>
       </PageContainer>

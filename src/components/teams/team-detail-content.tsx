@@ -62,7 +62,7 @@ export function TeamDetailContent({ team, isAdmin }: TeamDetailContentProps) {
           subtitle={
             <>
               {team.description && (
-                <p className='page-section-subtitle'>{team.description}</p>
+                <div className='page-section-subtitle'>{team.description}</div>
               )}
               {team.parent && (
                 <div className='text-sm text-muted-foreground mt-1'>
