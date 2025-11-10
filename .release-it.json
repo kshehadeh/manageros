@@ -12,8 +12,7 @@
   },
   "github": {
     "release": true,
-    "releaseName": "Release v${version}",
-    "releaseNotes": "conventional-changelog"
+    "releaseName": "Release v${version}"
   },
   "npm": {
     "publish": false
@@ -21,7 +20,8 @@
   "plugins": {
     "@release-it/conventional-changelog": {
       "preset": "angular",
-      "infile": "CHANGELOG.md"
+      "infile": "CHANGELOG.md",
+      "releaseCount": 0
     }
   },
   "verbose": 2
