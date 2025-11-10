@@ -2,6 +2,8 @@
 
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { Rocket } from 'lucide-react'
@@ -30,18 +32,28 @@ export function ActiveInitiativesSection({
   }
 
   return (
-    <div className='space-y-4'>
-      <div>
-        <h2 className='text-lg font-semibold'>Active Initiatives</h2>
-        <div className='hidden md:flex items-center gap-2 text-[10px] text-muted-foreground mt-1'>
-          <Link href='/initiatives' className='hover:underline'>
-            View Initiatives
-          </Link>
-        </div>
-      </div>
+    <PageSection
+      header={
+        <SectionHeader
+          icon={Rocket}
+          title='Active Initiatives'
+          description={
+            <div className='hidden md:flex items-center gap-2 text-[10px] text-muted-foreground'>
+              <Link href='/initiatives' className='hover:underline'>
+                View Initiatives
+              </Link>
+            </div>
+          }
+        />
+      }
+    >
       <div className='flex flex-col gap-1.5'>
         {activeInitiatives.slice(0, 5).map(initiative => (
-          <Link key={initiative.id} href={`/initiatives/${initiative.id}`} className='block'>
+          <Link
+            key={initiative.id}
+            href={`/initiatives/${initiative.id}`}
+            className='block'
+          >
             <Card className='p-3 bg-muted/20 border-0 rounded-md shadow-none hover:bg-muted/30 transition-colors cursor-pointer'>
               <div className='flex items-center justify-between gap-3'>
                 <div className='flex items-center gap-3 flex-1 min-w-0'>
@@ -55,11 +67,18 @@ export function ActiveInitiativesSection({
                     <div className='flex items-center gap-2 text-xs text-muted-foreground mt-1'>
                       {initiative.team && (
                         <>
-                          <span className='truncate'>{initiative.team.name}</span>
+                          <span className='truncate'>
+                            {initiative.team.name}
+                          </span>
                           <span>•</span>
                         </>
                       )}
-                      <span>Updated {formatDistanceToNow(initiative.updatedAt, { addSuffix: true })}</span>
+                      <span>
+                        Updated{' '}
+                        {formatDistanceToNow(initiative.updatedAt, {
+                          addSuffix: true,
+                        })}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -78,6 +97,6 @@ export function ActiveInitiativesSection({
           </Link>
         ))}
       </div>
-    </div>
+    </PageSection>
   )
 }

@@ -2,10 +2,13 @@
 
 import { useState } from 'react'
 import { Card } from '@/components/ui/card'
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
 import { PersonAvatar } from '@/components/people/person-avatar'
 import { PersonDetailModal } from '@/components/people/person-detail-modal'
 import Link from 'next/link'
 import { format, isFuture, differenceInDays } from 'date-fns'
+import { Activity } from 'lucide-react'
 
 interface TeamPulseMember {
   id: string
@@ -70,19 +73,25 @@ export function TeamPulseSection({ members }: TeamPulseSectionProps) {
 
   return (
     <>
-      <div className='space-y-4'>
-        <div>
-          <h2 className='text-lg font-semibold'>Team Pulse</h2>
-          <div className='hidden md:flex items-center gap-2 text-[10px] text-muted-foreground mt-1'>
-            <Link href='/direct-reports' className='hover:underline'>
-              View Direct Reports
-            </Link>
-            <span>•</span>
-            <Link href='/teams' className='hover:underline'>
-              View Teams
-            </Link>
-          </div>
-        </div>
+      <PageSection
+        header={
+          <SectionHeader
+            icon={Activity}
+            title='Team Pulse'
+            description={
+              <div className='hidden md:flex items-center gap-2 text-[10px] text-muted-foreground'>
+                <Link href='/direct-reports' className='hover:underline'>
+                  View Direct Reports
+                </Link>
+                <span>•</span>
+                <Link href='/teams' className='hover:underline'>
+                  View Teams
+                </Link>
+              </div>
+            }
+          />
+        }
+      >
         <div className='flex flex-col gap-2.5'>
           {members.map(member => (
             <Card
@@ -119,7 +128,7 @@ export function TeamPulseSection({ members }: TeamPulseSectionProps) {
             </Card>
           ))}
         </div>
-      </div>
+      </PageSection>
 
       {selectedPersonId && (
         <PersonDetailModal
