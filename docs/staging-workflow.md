@@ -59,15 +59,23 @@ ManagerOS uses a staging-based development workflow where all development work h
 
 ## Version Management
 
-### Version Bumping in Staging
+### Automatic Version Determination
 
-Versions are incremented during development in the `staging` branch, not during the release process. This allows you to track version changes as features are added.
+Version increments are automatically determined by release-it when merging `staging` to `main`. The system analyzes commit messages since the last release tag using the Conventional Commits specification:
 
-**When to bump versions:**
+- **Major**: Commits with `BREAKING CHANGE:` or `!` (e.g., `feat!: remove API`)
+- **Minor**: Commits with `feat:` prefix (e.g., `feat: add dashboard`)
+- **Patch**: Commits with `fix:` or other types (e.g., `fix: resolve bug`)
 
-- **Patch** (`bun run version:patch`): Bug fixes, minor improvements
-- **Minor** (`bun run version:minor`): New features, backward-compatible changes
-- **Major** (`bun run version:major`): Breaking changes, major refactors
+The highest increment type found determines the version bump. For example, if you have both `feat:` and `fix:` commits, it will bump the minor version.
+
+**No manual version bumping required**: Simply use conventional commit messages, and release-it will handle version increments automatically.
+
+**Commit Message Guidelines:**
+
+- **Patch**: Use `fix:` for bug fixes, or `chore:`, `docs:`, `style:`, `refactor:`, `perf:`, `test:` for other changes
+- **Minor**: Use `feat:` for new features that are backward compatible
+- **Major**: Use `feat!:` or include `BREAKING CHANGE:` in the commit body for breaking changes
 
 **Example workflow:**
 
@@ -75,15 +83,20 @@ Versions are incremented during development in the `staging` branch, not during 
 # Working on a new feature
 git checkout staging
 # ... make changes ...
-bun run version:minor  # Bump version for new feature
 git add .
-git commit -m "feat: add user dashboard (v1.2.0)"
+git commit -m "feat: add user dashboard"  # Automatic minor version bump
 git push origin staging
 ```
 
 ### Version in Production
 
-When `staging` is merged to `main`, the version is already incremented. The release workflow will create a release tag and GitHub release, but the version bump has already happened in staging.
+When `staging` is merged to `main`, release-it automatically:
+
+- Analyzes all commits since the last release tag
+- Determines the appropriate version bump based on commit types
+- Updates `package.json` with the new version
+- Creates a release tag and GitHub release
+- Generates a changelog from conventional commits
 
 ## Database Migrations
 
@@ -138,11 +151,11 @@ When code is deployed to production (via Vercel), the build process automaticall
 
 ### Deployment Flow
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │ 1. Development in staging branch                       │
 │    - Create migrations with prisma migrate dev         │
-│    - Bump version as features are added                │
+│    - Use conventional commit messages (feat:, fix:)    │
 │    - Commit migration files and code                   │
 └────────────────────┬────────────────────────────────────┘
                      │

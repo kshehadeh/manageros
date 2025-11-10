@@ -13,12 +13,16 @@
   "github": {
     "release": true,
     "releaseName": "Release v${version}",
-    "releaseNotes": "npx auto-changelog --stdout --commit-limit false -u --template https://raw.githubusercontent.com/release-it/release-it/master/templates/changelog-compact.hbs"
+    "releaseNotes": "conventional-changelog"
   },
   "npm": {
     "publish": false
   },
-  "plugins": {},
-  "increment": false,
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "preset": "angular",
+      "infile": "CHANGELOG.md"
+    }
+  },
   "verbose": 2
 }

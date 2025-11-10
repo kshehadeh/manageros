@@ -4,11 +4,11 @@ This directory is reserved for release-it related configurations and documentati
 
 ## Staging-Based Workflow
 
-ManagerOS uses a staging-based development workflow where:
+ManagerOS uses a staging-based development workflow with automatic version determination:
 
-- **Version bumps happen in `staging`**: Versions are incremented during development using `bun run version:patch/minor/major`
-- **Releases happen on merge to `main`**: When `staging` is merged to `main`, the version is already bumped
-- **Release workflow creates tags**: The GitHub Action creates release tags and GitHub releases, but doesn't bump versions (they're already bumped in staging)
+- **Commit-based versioning**: Version bumps are automatically determined by release-it based on commit messages using the Conventional Commits specification
+- **Releases happen on merge to `main`**: When `staging` is merged to `main`, release-it analyzes commits since the last tag and determines the appropriate version bump
+- **Conventional Commits**: Use commit message prefixes (`feat:`, `fix:`, `BREAKING CHANGE:`) to control version increments
 
 ## Automated Releases
 
@@ -18,15 +18,17 @@ The project uses [release-it](https://github.com/release-it/release-it) for auto
 
 1. **Development in Staging**:
    - Work happens in the `staging` branch
-   - Versions are bumped during development as features are added
+   - Use conventional commit messages (`feat:`, `fix:`, etc.) to describe changes
    - Database migrations are created and committed
 
 2. **Automatic Releases**: When a PR from `staging` is merged to `main`, a GitHub Action automatically:
-   - Creates a release tag (version is already set from staging)
+   - Analyzes commits since the last release tag
+   - Determines version bump based on commit types (feat → minor, fix → patch, BREAKING CHANGE → major)
+   - Bumps version in `package.json` accordingly
    - Generates Prisma client
    - Creates a git commit starting with `chore: release`
-   - Pushes the changes
-   - Creates a GitHub release
+   - Creates a release tag and GitHub release
+   - Generates a changelog from conventional commits
 
 3. **Production Deployment**:
    - Vercel builds production when it sees the `chore: release` commit
@@ -60,20 +62,49 @@ The workflow uses the `GITHUB_TOKEN` secret automatically provided by GitHub to:
 - Create commits and tags
 - Create GitHub releases
 
-**Note**: The workflow does not bump versions - versions are already bumped in the `staging` branch during development. The workflow creates the release tag and GitHub release for the version that's already in `package.json`.
+**Note**: The workflow automatically determines version bumps based on commit messages. No manual version bumping is required in staging.
 
-### Version Strategy
+### Version Strategy (Automatic)
 
-Versions are bumped during development in the `staging` branch:
+Version increments are automatically determined by analyzing commit messages since the last release:
 
-- **Patch** (`bun run version:patch`): Bug fixes and minor changes
-- **Minor** (`bun run version:minor`): New features that are backward compatible
-- **Major** (`bun run version:major`): Breaking changes
+- **Major** (`BREAKING CHANGE:` or `!` in commit): Breaking changes that require a major version bump
+  - Example: `feat!: remove deprecated API` or `feat: new API
 
-The release workflow uses the version that's already in `package.json` from staging, so choose the appropriate increment type when bumping in staging.
+BREAKING CHANGE: old API removed`
+
+- **Minor** (`feat:`): New features that are backward compatible
+  - Example: `feat: add user dashboard`
+
+- **Patch** (`fix:` or other types): Bug fixes and other changes
+  - Example: `fix: resolve date picker issue` or `chore: update dependencies`
+
+The highest increment type found in the commits determines the version bump. For example, if you have both `feat:` and `fix:` commits, it will bump the minor version.
+
+### Manual Version Override
+
+If you need to manually control the version bump, you can still use:
+
+```bash
+bun run version:patch   # Force patch bump
+bun run version:minor   # Force minor bump
+bun run version:major  # Force major bump
+```
+
+However, with conventional commits, this is typically not necessary.
 
 ### Configuration
 
-The release-it configuration (`.release-it.json`) is set with `"increment": false` to use the version that's already in `package.json` from the staging branch, rather than auto-bumping. This aligns with the staging-based workflow where versions are bumped during development.
+The release-it configuration (`.release-it.json`) uses the `@release-it/conventional-changelog` plugin to automatically determine version bumps based on commit messages. The plugin:
 
-**Note**: If you need to manually create a release with a version bump (e.g., for hotfixes), you can temporarily modify the `increment` field or use the version scripts before running the release command.
+- Analyzes commits since the last release tag
+- Follows the Conventional Commits specification (Angular preset)
+- Generates a `CHANGELOG.md` file automatically
+- Determines the appropriate version increment (major/minor/patch)
+
+**Commit Message Format**: Use conventional commit prefixes in your commit messages:
+
+- `feat:` - New features (minor version bump)
+- `fix:` - Bug fixes (patch version bump)
+- `BREAKING CHANGE:` or `!` - Breaking changes (major version bump)
+- `chore:`, `docs:`, `style:`, `refactor:`, `perf:`, `test:` - Other changes (patch version bump)
