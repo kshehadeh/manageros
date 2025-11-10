@@ -264,7 +264,7 @@ async function seedDemoData() {
 
     // Step 2: Create users for the organization
     console.log('👥 Creating users...')
-    const passwordHash = await bcrypt.hash('password123', 12)
+    const passwordHash = await bcrypt.hash('trw_yjr8jme.vek4AEG', 12)
 
     const adminUser = await prisma.user.upsert({
       where: { email: 'admin@acme.com' },
