@@ -29,7 +29,7 @@ export default function SignUpPage() {
         </div>
 
         {/* Right side - Sign up form */}
-        <div className='flex w-full items-start md:justify-center p-4 lg:w-1/2'>
+        <div className='flex w-full items-start sm:justify-center p-4 lg:w-1/2'>
           <SignUp routing='path' path='/auth/signup' signInUrl='/auth/signin' />
         </div>
       </div>

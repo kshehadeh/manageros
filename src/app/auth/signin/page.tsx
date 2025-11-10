@@ -50,14 +50,14 @@ export default function SignInPage() {
       </div>
 
       {/* Content */}
-      <div className='relative z-10 flex min-h-screen flex-col items-start md:justify-center lg:flex-row'>
+      <div className='relative z-10 flex min-h-screen flex-col items-start sm:justify-center sm:flex-row'>
         {/* Left side - Marketing content */}
         <div className='hidden lg:flex lg:w-1/2 lg:flex-col'>
           <AuthMarketingPanel />
         </div>
 
         {/* Right side - Sign in form */}
-        <div className='flex w-full items-start md:justify-center p-4 lg:w-1/2'>
+        <div className='flex w-full items-start sm:justify-center p-4 lg:w-1/2'>
           <SignIn routing='path' path='/auth/signin' signUpUrl='/auth/signup' />
         </div>
       </div>

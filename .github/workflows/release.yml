@@ -2,19 +2,11 @@ name: Release
 
 on:
     workflow_dispatch:
-    pull_request:
-        types: [closed]
-        branches:
-            - main
+    push:
+        branches: [main]
 
 jobs:
     release:
-        # Only run if the PR was actually merged (not just closed)
-        # and not from the release bot itself
-        # Typically triggered when staging is merged to main
-        if: |
-            github.event.pull_request.merged == true &&
-            !contains(github.event.pull_request.title, 'chore: release')
         runs-on: ubuntu-latest
         permissions:
             contents: write
