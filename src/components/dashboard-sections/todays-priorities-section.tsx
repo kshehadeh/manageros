@@ -11,6 +11,8 @@ import {
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
 import Link from 'next/link'
 import { format, isToday, isTomorrow, isPast, differenceInDays } from 'date-fns'
 import { TaskQuickEditDialog } from '@/components/tasks/task-quick-edit-dialog'
@@ -239,27 +241,33 @@ export function TodaysPrioritiesSection({
 
   return (
     <>
-      <div className='space-y-4'>
-        <div>
-          <h2 className='text-lg font-semibold'>Today's Priorities</h2>
-          <div className='hidden md:flex items-center gap-2 text-[10px] text-muted-foreground mt-1'>
-            <Link href='/my-tasks' className='hover:underline'>
-              View My Tasks
-            </Link>
-            <span>•</span>
-            <Link href='/oneonones' className='hover:underline'>
-              View 1:1s
-            </Link>
-            <span>•</span>
-            <Link href='/feedback-campaigns' className='hover:underline'>
-              View Feedback Campaigns
-            </Link>
-            <span>•</span>
-            <Link href='/meetings' className='hover:underline'>
-              View Meetings
-            </Link>
-          </div>
-        </div>
+      <PageSection
+        header={
+          <SectionHeader
+            icon={ListTodo}
+            title="Today's Priorities"
+            description={
+              <div className='hidden md:flex items-center gap-2 text-[10px] text-muted-foreground'>
+                <Link href='/my-tasks' className='hover:underline'>
+                  View My Tasks
+                </Link>
+                <span>•</span>
+                <Link href='/oneonones' className='hover:underline'>
+                  View 1:1s
+                </Link>
+                <span>•</span>
+                <Link href='/feedback-campaigns' className='hover:underline'>
+                  View Feedback Campaigns
+                </Link>
+                <span>•</span>
+                <Link href='/meetings' className='hover:underline'>
+                  View Meetings
+                </Link>
+              </div>
+            }
+          />
+        }
+      >
         <div className='flex flex-col gap-1.5'>
           {priorities.map(item => {
             if (item.type === 'task') {
@@ -342,7 +350,7 @@ export function TodaysPrioritiesSection({
             )
           })}
         </div>
-      </div>
+      </PageSection>
 
       {/* Context Menu */}
       <ContextMenuComponent>

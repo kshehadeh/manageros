@@ -112,7 +112,7 @@ export default function Sidebar({
             <h1
               className={`text-xl font-semibold text-foreground ${geistMono.className}`}
             >
-              m.<span className='font-bold'>path</span>
+              m<span className='font-bold'>Path</span>
             </h1>
           </div>
         </div>
@@ -133,7 +133,7 @@ export default function Sidebar({
                   size='sm'
                 />
               )}
-              <div className='flex-1 min-w-0'>
+              <div className={`flex-1 min-w-0 ${geistMono.className}`}>
                 {personData ? (
                   <Link href={`/people/${personData.id}`}>
                     <div className='text-sm text-foreground font-medium truncate hover:underline cursor-pointer'>

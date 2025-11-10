@@ -18,6 +18,7 @@ jobs:
               uses: actions/checkout@v4
               with:
                   fetch-depth: 0
+                  ref: main
                   token: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Setup Bun
@@ -47,6 +48,16 @@ jobs:
               run: bun run release
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              # Note: Version should already be bumped in staging branch.
-              # release-it is configured with increment: false to use the version
-              # from package.json rather than auto-bumping.
+
+            - name: Update staging branch with new version
+              run: |
+                  # Fetch latest changes including the release commit that was just pushed
+                  git fetch origin main staging
+                  # Checkout staging branch
+                  git checkout staging
+                  # Merge the updated main (with new version) into staging
+                  git merge origin/main --no-edit -m "chore: sync staging with main after release"
+                  # Push the updated staging branch
+                  git push origin staging
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

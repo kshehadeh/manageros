@@ -10,7 +10,7 @@ const geistMono = GeistMono({
 interface SectionHeaderProps {
   icon: LucideIcon | React.ElementType
   title: string
-  description?: string
+  description?: ReactNode
   action?: ReactNode | ReactNode[]
   className?: string
 }
@@ -40,18 +40,20 @@ export function SectionHeader({
 
   return (
     <div
-      className={`flex items-center justify-between md:mx-0 md:px-2 ${className} mb-2 bg-card p-2 rounded-[var(--radius-md)]`}
+      className={`flex items-start justify-between md:mx-0 md:px-2 ${className} mb-2 bg-card p-2 rounded-[var(--radius-md)]`}
     >
-      <div className='flex-1'>
-        <h3
-          className={`text-xl font-bold flex items-center gap-2 ${geistMono.className}`}
-        >
-          <Icon className='w-6 h-6' />
-          {title}
-        </h3>
-        {description && (
-          <p className='text-sm text-muted-foreground mt-1'>{description}</p>
-        )}
+      <div className='flex-1 flex items-start gap-2'>
+        <Icon className='w-6 h-6 shrink-0 mt-0.5' />
+        <div className='flex-1 min-w-0'>
+          <h3 className={`text-xl font-bold ${geistMono.className}`}>
+            {title}
+          </h3>
+          {description && (
+            <div className='text-sm text-muted-foreground mt-1'>
+              {description}
+            </div>
+          )}
+        </div>
       </div>
       {renderActions()}
     </div>

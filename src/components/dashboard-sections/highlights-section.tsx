@@ -1,5 +1,13 @@
-import { AlertCircle, Calendar, Users, ClipboardCheck } from 'lucide-react'
+import {
+  AlertCircle,
+  Calendar,
+  Users,
+  ClipboardCheck,
+  Sparkles,
+} from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
 import Link from 'next/link'
 
 interface HighlightsSectionProps {
@@ -34,7 +42,8 @@ export function HighlightsSection({
     },
     {
       count: upcomingMeetingsCount,
-      label: upcomingMeetingsCount === 1 ? 'upcoming meeting' : 'upcoming meetings',
+      label:
+        upcomingMeetingsCount === 1 ? 'upcoming meeting' : 'upcoming meetings',
       icon: Calendar,
       color: 'text-blue-500',
       bgColor: 'bg-blue-500/5',
@@ -51,15 +60,16 @@ export function HighlightsSection({
   ]
 
   return (
-    <div className='space-y-4'>
-      <h2 className='text-lg font-semibold'>Highlights</h2>
+    <PageSection header={<SectionHeader icon={Sparkles} title='Highlights' />}>
       <div className='flex flex-wrap gap-3'>
         {highlights.map((highlight, index) => (
           <Link key={index} href={highlight.href}>
             <Card
               className={`flex items-center gap-2 px-4 py-2 ${highlight.bgColor} border-0 rounded-md shadow-none cursor-pointer hover:opacity-80 transition-opacity`}
             >
-              <div className={`${highlight.color} flex items-center justify-center`}>
+              <div
+                className={`${highlight.color} flex items-center justify-center`}
+              >
                 <highlight.icon className='h-4 w-4' />
               </div>
               <span className='text-sm font-medium'>
@@ -69,6 +79,6 @@ export function HighlightsSection({
           </Link>
         ))}
       </div>
-    </div>
+    </PageSection>
   )
 }
