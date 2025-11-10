@@ -9,6 +9,6 @@
       "schedule": "0 10 * * 1"
     }
   ],
-  "buildCommand": "bunx prisma generate && next build --turbo",
+  "buildCommand": "bunx prisma generate && bunx prisma migrate deploy && next build --turbo",
   "installCommand": "bun install"
 }
