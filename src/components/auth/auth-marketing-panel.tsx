@@ -31,7 +31,7 @@ export function AuthMarketingPanel() {
   ]
 
   return (
-    <div className='flex flex-col justify-center px-8 py-12 md:px-12 lg:px-16'>
+    <div className='flex flex-col justify-center px-8 py-12 md:px-12 lg:px-8'>
       <div className='mb-8'>
         <h1 className='mb-4 text-4xl font-semibold tracking-tight text-white sm:text-5xl md:text-6xl'>
           Lead high-performing engineering teams

@@ -7,7 +7,7 @@ import { dark } from '@clerk/themes'
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <ClerkProvider appearance={{ theme: dark }}>
+    <ClerkProvider appearance={dark}>
       <ThemeProvider
         attribute='class'
         defaultTheme='dark'

@@ -795,3 +795,15 @@ input[type='time']::-webkit-calendar-picker-indicator {
     opacity: 1;
   }
 }
+
+.cl-logoBox {
+  display: none;
+}
+
+.cl-card {
+  background: var(--color-card) !important;
+}
+
+.cl-footer {
+  background: var(--color-card) !important;
+}

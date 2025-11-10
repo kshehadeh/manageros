@@ -11,6 +11,7 @@ jobs:
     release:
         # Only run if the PR was actually merged (not just closed)
         # and not from the release bot itself
+        # Typically triggered when staging is merged to main
         if: |
             github.event.pull_request.merged == true &&
             !contains(github.event.pull_request.title, 'chore: release')
@@ -54,3 +55,6 @@ jobs:
               run: bun run release
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              # Note: Version should already be bumped in staging branch.
+              # release-it is configured with increment: false to use the version
+              # from package.json rather than auto-bumping.
