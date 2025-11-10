@@ -192,7 +192,17 @@ bun run db:restore       # Restore database from backup
 
 ## 🚀 Deployment
 
-ManagerOS uses Vercel for hosting and deployment with an intelligent build strategy:
+ManagerOS uses a staging-based development workflow with Vercel for hosting and deployment.
+
+### Development Workflow
+
+**Staging Branch**: All development work happens in the `staging` branch, including:
+
+- Feature development
+- Database migrations (created with `prisma migrate dev`)
+- Version increments (using `bun run version:patch/minor/major`)
+
+**Production Branch**: The `main` branch receives merges from `staging` and is automatically deployed to production.
 
 ### Build Strategy
 
@@ -200,15 +210,29 @@ ManagerOS uses Vercel for hosting and deployment with an intelligent build strat
 
 **Production (`main` branch)**: Only builds when the commit message starts with `chore: release`. This prevents unnecessary production builds while allowing controlled deployments.
 
+### Database Migrations
+
+Database migrations are automatically applied to production during the Vercel build process:
+
+1. **Creating Migrations**: Migrations are created in the `staging` branch using `prisma migrate dev`
+2. **Migration Files**: All migration files in `prisma/migrations/` are committed to version control
+3. **Production Application**: During production builds, `prisma migrate deploy` automatically applies any pending migrations to the production database
+4. **Safety**: `prisma migrate deploy` is production-safe and only applies migrations that haven't been applied yet
+
+**Important**: Migrations created in staging will be automatically applied to production when code is deployed. Always test migrations thoroughly in your development environment before merging to main.
+
 ### Deploying to Production
 
 #### Option 1: Automatic Deployment (Recommended)
 
-Simply merge a PR to `main`. The GitHub Action will automatically:
-
-- Create a release commit with a version bump
-- Tag the release
-- Push to the `main` branch, triggering a Vercel production build
+1. **Develop in Staging**: Work in the `staging` branch, create migrations, and bump versions as you add features
+2. **Merge to Main**: Create a PR to merge `staging` → `main`
+3. **Automatic Release**: The GitHub Action will automatically:
+   - Create a release tag (version is already bumped from staging)
+   - Create a GitHub release
+   - Push a commit starting with `chore: release` to `main`
+   - Trigger a Vercel production build
+4. **Automatic Migration**: During the build, pending migrations are automatically applied to production
 
 #### Option 2: Manual Deployment
 
@@ -220,28 +244,32 @@ bun run release
 
 This will:
 
-- Bump the version (patch by default)
-- Create a commit starting with `chore: release`
+- Create a release commit starting with `chore: release`
+- Tag the release
 - Push to the `main` branch
-- Trigger a Vercel production build
+- Trigger a Vercel production build (which applies migrations)
+
+**Note**: If you're using the staging workflow, versions should already be bumped in staging. Manual releases are typically only needed for hotfixes.
 
 #### Version Control
 
-Available version bump scripts:
+Version bumps happen during development in the `staging` branch, not during release. Available version bump scripts:
 
 ```bash
-bun run version:patch   # 0.3.0 -> 0.3.1 (bug fixes)
-bun run version:minor   # 0.3.0 -> 0.4.0 (new features)
-bun run version:major  # 0.3.0 -> 1.0.0 (breaking changes)
+bun run version:patch   # 1.1.0 -> 1.1.1 (bug fixes)
+bun run version:minor   # 1.1.0 -> 1.2.0 (new features)
+bun run version:major   # 1.1.0 -> 2.0.0 (breaking changes)
 ```
 
 ### Build Configuration
 
 The build process is controlled by:
 
-- **Vercel config** (`vercel.json`): Defines custom build commands and cron jobs
+- **Vercel config** (`vercel.json`): Defines custom build commands including `prisma migrate deploy` for automatic migration application
 - **Build condition** (`vercel-build-condition.sh`): Determines when to build based on branch and commit message
-- **GitHub Action** (`.github/workflows/release.yml`): Automates releases on PR merge
+- **GitHub Action** (`.github/workflows/release.yml`): Automates releases on PR merge from staging to main
+
+For more details on the staging workflow and migration process, see [Staging Workflow Documentation](docs/staging-workflow.md).
 
 For more details on the release process, see [release-it documentation](release-it/README.md).
 

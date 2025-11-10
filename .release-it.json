@@ -23,6 +23,6 @@
     "after:bump": "bunx prisma generate"
   },
   "plugins": {},
-  "increment": "patch",
+  "increment": false,
   "verbose": 2
 }
