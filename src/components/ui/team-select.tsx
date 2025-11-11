@@ -61,7 +61,7 @@ export function TeamSelect({
 
   const renderTeamOption = (team: Team) => {
     return (
-      <div className='flex items-center gap-2'>
+      <div className='flex items-center gap-md'>
         <TeamAvatar name={team.name} avatar={team.avatar} size='xs' />
         <span>{team.name}</span>
       </div>

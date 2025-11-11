@@ -27,7 +27,7 @@ export function PageTitle({
   return (
     <div
       className={cn(
-        'flex gap-3',
+        'flex gap-lg',
         iconComponent ? 'items-start' : 'items-center',
         className
       )}

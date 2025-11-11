@@ -72,7 +72,7 @@ export function InitiativeSelect({
   }, [autoFocus, loading, initiatives.length])
 
   const renderInitiativeItem = (initiative: Initiative) => (
-    <div className='flex items-center justify-between gap-2 w-full'>
+    <div className='flex items-center justify-between gap-md w-full'>
       <div className='text-left flex-1 min-w-0'>
         <div className='font-medium truncate'>{initiative.title}</div>
         {(showStatus || showTeam) && (
@@ -117,7 +117,7 @@ export function InitiativeSelect({
           </SelectItem>
         ))}
         {!loading && initiatives.length === 0 && (
-          <div className='py-6 text-center text-sm text-muted-foreground'>
+          <div className='py-2xl text-center text-sm text-muted-foreground'>
             No initiatives found
           </div>
         )}

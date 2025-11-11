@@ -71,7 +71,7 @@ export function MultiSelect({
           className={cn('w-full justify-between', className)}
         >
           <span className='truncate'>{displayText}</span>
-          <div className='flex items-center gap-2'>
+          <div className='flex items-center gap-md'>
             {selected.length > 0 && (
               <X
                 className='h-4 w-4 shrink-0 opacity-50 hover:opacity-100'
@@ -83,11 +83,11 @@ export function MultiSelect({
         </Button>
       </PopoverTrigger>
       <PopoverContent className='w-[var(--radix-popover-trigger-width)] p-0'>
-        <div className='max-h-64 overflow-y-auto p-1'>
+        <div className='max-h-64 overflow-y-auto p-sm'>
           {options.map(option => (
             <div
               key={option.value}
-              className='flex items-center space-x-2 rounded-sm px-2 py-1.5 cursor-pointer hover:bg-accent'
+              className='flex items-center space-x-md rounded-sm px-md py-md cursor-pointer hover:bg-accent'
               onClick={() => handleToggle(option.value)}
             >
               <Checkbox

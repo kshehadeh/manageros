@@ -48,7 +48,7 @@ export function Loading({
 
   if (variant === 'dots') {
     return (
-      <div className={cn('flex space-x-1', className)}>
+      <div className={cn('flex space-x-sm', className)}>
         <div className='h-2 w-2 bg-current rounded-full animate-bounce [animation-delay:-0.3s]' />
         <div className='h-2 w-2 bg-current rounded-full animate-bounce [animation-delay:-0.15s]' />
         <div className='h-2 w-2 bg-current rounded-full animate-bounce' />
@@ -79,7 +79,7 @@ export function PageLoading({ className }: { className?: string }) {
         className
       )}
     >
-      <div className='flex flex-col items-center space-y-4'>
+      <div className='flex flex-col items-center space-y-xl'>
         <Loading size='lg' />
         <p className='text-sm text-muted-foreground'>Loading...</p>
       </div>
