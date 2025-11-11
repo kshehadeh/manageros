@@ -43,7 +43,7 @@ export function SectionHeader({
       className={`flex items-start justify-between md:mx-0 md:px-md ${className} mb-md bg-muted p-md`}
     >
       <div className='flex-1 flex items-start gap-md'>
-        <Icon className='w-6 h-6 shrink-0 mt-0.5' />
+        <Icon className='w-6 h-6 shrink-0 mt-xs' />
         <div className='flex-1 min-w-0'>
           <h3 className={`text-xl font-bold ${geistMono.className}`}>
             {title}

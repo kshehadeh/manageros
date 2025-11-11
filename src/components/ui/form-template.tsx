@@ -49,10 +49,10 @@ export function FormTemplate({
   const HeaderIcon = header?.icon
 
   return (
-    <form onSubmit={onSubmit} className={`space-y-6 ${className}`}>
+    <form onSubmit={onSubmit} className={`space-y-2xl ${className}`}>
       {/* Form Header */}
       {header && (
-        <div className='flex items-start justify-between gap-4 pb-2 border-b border-border/50 relative'>
+        <div className='flex items-start justify-between gap-xl pb-md border-b border-border/50 relative'>
           <div
             className='absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent'
             style={{
@@ -60,7 +60,7 @@ export function FormTemplate({
             }}
           />
           <div className='flex-1'>
-            <div className='flex items-center gap-3 mb-2'>
+            <div className='flex items-center gap-lg mb-md'>
               {HeaderIcon && (
                 <HeaderIcon className='h-6 w-6 text-muted-foreground' />
               )}
@@ -76,17 +76,17 @@ export function FormTemplate({
 
       {/* General Error Message */}
       {generalError && (
-        <div className='bg-destructive/10 border border-destructive/20 rounded-lg p-3 text-destructive text-sm flex items-center gap-2'>
+        <div className='bg-destructive/10 border border-destructive/20 rounded-lg p-lg text-destructive text-sm flex items-center gap-md'>
           <AlertCircle className='h-4 w-4' />
           {generalError}
         </div>
       )}
 
-      <div className='flex flex-col lg:flex-row gap-6'>
+      <div className='flex flex-col lg:flex-row gap-2xl'>
         {/* Main Form Content */}
-        <div className='flex-1 space-y-6'>
+        <div className='flex-1 space-y-2xl'>
           {sections.map((section, index) => (
-            <div key={index} className='space-y-4'>
+            <div key={index} className='space-y-xl'>
               {section.title && section.icon && (
                 <SectionHeader
                   icon={section.icon}
@@ -94,12 +94,12 @@ export function FormTemplate({
                   action={section.action}
                 />
               )}
-              <div className='space-y-4'>{section.content}</div>
+              <div className='space-y-xl'>{section.content}</div>
             </div>
           ))}
 
           {/* Submit Button */}
-          <div className='flex justify-end gap-2'>
+          <div className='flex justify-end gap-md'>
             <Button
               type='submit'
               disabled={isSubmitting || submitButton.disabled}
@@ -107,7 +107,7 @@ export function FormTemplate({
             >
               {SubmitIcon && (
                 <SubmitIcon
-                  className={isSubmitting ? 'hidden' : 'mr-2 h-4 w-4'}
+                  className={isSubmitting ? 'hidden' : 'mr-md h-4 w-4'}
                 />
               )}
               {isSubmitting
@@ -118,7 +118,7 @@ export function FormTemplate({
         </div>
 
         {/* Right Sidebar */}
-        {sidebar && <div className='w-full lg:w-80 space-y-6'>{sidebar}</div>}
+        {sidebar && <div className='w-full lg:w-80 space-y-2xl'>{sidebar}</div>}
       </div>
     </form>
   )

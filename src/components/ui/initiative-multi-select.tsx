@@ -62,7 +62,7 @@ export function InitiativeMultiSelect({
 
   if (loading) {
     return (
-      <div className='text-sm text-muted-foreground py-2'>
+      <div className='text-sm text-muted-foreground py-md'>
         Loading initiatives...
       </div>
     )

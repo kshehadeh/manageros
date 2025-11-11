@@ -247,13 +247,13 @@ export function DateTimePickerWithNaturalInput({
       )}
       disabled={disabled}
     >
-      <CalendarIcon className='mr-2 h-4 w-4' />
+      <CalendarIcon className='mr-md h-4 w-4' />
       {formatDisplayValue()}
     </Button>
   )
 
   const pickerContent = (
-    <div className='p-3 flex flex-col'>
+    <div className='p-lg flex flex-col'>
       {/* Natural language input */}
       <Input
         placeholder={
@@ -264,11 +264,11 @@ export function DateTimePickerWithNaturalInput({
         value={inputValue}
         onChange={handleInputChange}
         onKeyDown={handleInputKeyDown}
-        className='text-sm mb-3'
+        className='text-sm mb-lg'
       />
 
       {/* Calendar and Time selection side by side on desktop, stacked on mobile */}
-      <div className='flex flex-col md:flex-row gap-4 flex-1 md:flex-initial'>
+      <div className='flex flex-col md:flex-row gap-xl flex-1 md:flex-initial'>
         {/* Calendar */}
         <Calendar
           mode='single'
@@ -280,10 +280,10 @@ export function DateTimePickerWithNaturalInput({
 
         {/* Time selection - only show if not in dateOnly mode */}
         {selectedDate && !dateOnly && (
-          <div className='flex flex-col gap-3 w-full md:w-auto md:min-w-[200px]'>
-            <div className='space-y-2'>
+          <div className='flex flex-col gap-lg w-full md:w-auto md:min-w-[200px]'>
+            <div className='space-y-md'>
               <Label className='text-xs text-muted-foreground'>Time</Label>
-              <div className='flex gap-2'>
+              <div className='flex gap-md'>
                 <div className='flex-1'>
                   <Select
                     value={selectedTime.hours}
@@ -328,12 +328,12 @@ export function DateTimePickerWithNaturalInput({
             </div>
 
             {/* Quick time buttons */}
-            <div className='space-y-3'>
-              <div className='space-y-1'>
+            <div className='space-y-lg'>
+              <div className='space-y-sm'>
                 <Label className='text-xs text-muted-foreground'>
                   Quick Times
                 </Label>
-                <div className='grid grid-cols-2 gap-1'>
+                <div className='grid grid-cols-2 gap-sm'>
                   {[
                     {
                       time: '9 AM',
@@ -384,7 +384,7 @@ export function DateTimePickerWithNaturalInput({
                         }
                       }}
                     >
-                      <Clock className='mr-1 h-3 w-3' />
+                      <Clock className='mr-sm h-3 w-3' />
                       {time}
                     </Button>
                   ))}
@@ -392,11 +392,11 @@ export function DateTimePickerWithNaturalInput({
               </div>
 
               {/* Quick date buttons */}
-              <div className='space-y-1'>
+              <div className='space-y-sm'>
                 <Label className='text-xs text-muted-foreground'>
                   Quick Dates
                 </Label>
-                <div className='grid grid-cols-1 gap-1'>
+                <div className='grid grid-cols-1 gap-sm'>
                   <Button
                     variant='outline'
                     size='sm'
@@ -414,7 +414,7 @@ export function DateTimePickerWithNaturalInput({
                       updateDateTime(tomorrow, 9, 0)
                     }}
                   >
-                    <CalendarIcon className='mr-1 h-3 w-3' />
+                    <CalendarIcon className='mr-sm h-3 w-3' />
                     Tomorrow morning
                   </Button>
                   <Button
@@ -437,7 +437,7 @@ export function DateTimePickerWithNaturalInput({
                       updateDateTime(nextMonday, 9, 0)
                     }}
                   >
-                    <CalendarIcon className='mr-1 h-3 w-3' />
+                    <CalendarIcon className='mr-sm h-3 w-3' />
                     Next week
                   </Button>
                   <Button
@@ -470,7 +470,7 @@ export function DateTimePickerWithNaturalInput({
                       updateDateTime(nextMonth, 9, 0)
                     }}
                   >
-                    <CalendarIcon className='mr-1 h-3 w-3' />
+                    <CalendarIcon className='mr-sm h-3 w-3' />
                     Next month
                   </Button>
                 </div>
@@ -483,7 +483,7 @@ export function DateTimePickerWithNaturalInput({
   )
 
   return (
-    <div className={cn('space-y-2', className)}>
+    <div className={cn('space-y-md', className)}>
       {label && (
         <Label className={cn(error && 'text-destructive')}>
           {label} {required && <span className='text-destructive'>*</span>}

@@ -43,7 +43,7 @@ export function AnimatedLoadingPage({
       </div>
 
       {/* Content */}
-      <div className='relative z-10 flex flex-col items-center space-y-8'>
+      <div className='relative z-10 flex flex-col items-center space-y-3xl'>
         {/* Animated logo */}
         <div className='relative'>
           {/* Glow effect behind logo */}
@@ -67,7 +67,7 @@ export function AnimatedLoadingPage({
         </div>
 
         {/* Loading spinner */}
-        <div className='flex flex-col items-center space-y-4'>
+        <div className='flex flex-col items-center space-y-xl'>
           <Loading size='lg' />
           <p className='text-base text-muted-foreground animate-pulse'>
             {text}

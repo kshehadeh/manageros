@@ -22,7 +22,7 @@ export function PageSection({
         'page-section',
         variant === 'bordered' &&
           !hasHeader &&
-          'border border-muted rounded-sm p-6',
+          'border border-muted rounded-sm p-2xl',
         variant === 'bordered' && hasHeader && 'border border-muted rounded-sm',
         className
       )}
@@ -30,7 +30,9 @@ export function PageSection({
       {header}
       {hasHeader ? (
         <div
-          className={cn(variant === 'bordered' && 'px-2 pb-4 md:px-6 md:pb-6')}
+          className={cn(
+            variant === 'bordered' && 'px-md pb-xl md:px-2xl md:pb-2xl'
+          )}
         >
           {children}
         </div>
