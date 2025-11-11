@@ -68,10 +68,14 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'bun run dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-  },
+  /* Only start local server if not in CI and no BASE_URL is set */
+  webServer:
+    process.env.CI || process.env.PLAYWRIGHT_TEST_BASE_URL
+      ? undefined
+      : {
+          command: 'bun run dev',
+          url: 'http://localhost:3000',
+          reuseExistingServer: !process.env.CI,
+          timeout: 120 * 1000,
+        },
 })
