@@ -128,7 +128,7 @@ async function checkGitHubStatus(
  * Wait for deployment to be ready
  */
 async function waitForDeployment(prNumber: string): Promise<string> {
-  console.log(`🔍 Waiting for Vercel deployment for PR #${prNumber}...`)
+  console.error(`🔍 Waiting for Vercel deployment for PR #${prNumber}...`)
 
   // Try to get GitHub repo info from environment (set by GitHub Actions)
   const githubRepo = process.env.GITHUB_REPOSITORY
@@ -141,7 +141,7 @@ async function waitForDeployment(prNumber: string): Promise<string> {
     if (GITHUB_TOKEN && owner && repo && githubRef) {
       const status = await checkGitHubStatus(owner, repo, githubRef)
       if (status.completed && status.conclusion === 'success') {
-        console.log('✅ Vercel status check completed successfully')
+        console.error('✅ Vercel status check completed successfully')
         // Status check passed, now get the deployment URL
         const deployment = await getDeployment(prNumber)
         if (deployment && deployment.readyState === 'READY') {
@@ -160,7 +160,7 @@ async function waitForDeployment(prNumber: string): Promise<string> {
 
     if (deployment) {
       const { url, readyState } = deployment
-      console.log(`📦 Deployment found: ${url} (State: ${readyState})`)
+      console.error(`📦 Deployment found: ${url} (State: ${readyState})`)
 
       if (readyState === 'READY') {
         return url
@@ -168,12 +168,12 @@ async function waitForDeployment(prNumber: string): Promise<string> {
         console.error(`❌ Deployment failed with state: ${readyState}`)
         process.exit(1)
       } else {
-        console.log(
+        console.error(
           `⏳ Deployment not ready yet (State: ${readyState}). Waiting ${INTERVAL_MS / 1000} seconds... (Attempt ${attempt}/${MAX_ATTEMPTS})`
         )
       }
     } else {
-      console.log(
+      console.error(
         `⏳ No deployment found yet. Waiting ${INTERVAL_MS / 1000} seconds... (Attempt ${attempt}/${MAX_ATTEMPTS})`
       )
     }
@@ -199,13 +199,13 @@ async function main() {
         ? url
         : `https://${url}`
 
-    console.log(`✅ Deployment is ready!`)
-    console.log(`URL: ${finalUrl}`)
+    console.error(`✅ Deployment is ready!`)
+    console.error(`URL: ${finalUrl}`)
 
-    // Output URL for GitHub Actions to capture
-    console.log(`::set-output name=url::${finalUrl}`)
+    // Output URL for GitHub Actions to capture (legacy format)
+    console.error(`::set-output name=url::${finalUrl}`)
 
-    // Also output in the format GitHub Actions expects
+    // Output in the format GitHub Actions expects
     if (process.env.GITHUB_OUTPUT) {
       const fs = await import('fs')
       await fs.promises.appendFile(
@@ -214,7 +214,7 @@ async function main() {
       )
     }
 
-    // Print to stdout for easy capture
+    // Print ONLY the URL to stdout for easy capture (no logs)
     process.stdout.write(finalUrl)
   } catch (error) {
     console.error('❌ Error:', error)

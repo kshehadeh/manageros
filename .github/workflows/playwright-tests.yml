@@ -36,8 +36,8 @@ jobs:
                   GITHUB_REPOSITORY: ${{ github.repository }}
                   GITHUB_SHA: ${{ github.event.pull_request.head.sha }}
               run: |
-                  URL=$(bun scripts/wait-for-vercel-deployment.ts ${{ github.event.pull_request.number }})
-                  echo "url=$URL" >> $GITHUB_OUTPUT
+                  bun scripts/wait-for-vercel-deployment.ts ${{ github.event.pull_request.number }}
+                  # Script already writes to GITHUB_OUTPUT, no need to capture stdout
 
     playwright-tests:
         name: Run Playwright Tests
