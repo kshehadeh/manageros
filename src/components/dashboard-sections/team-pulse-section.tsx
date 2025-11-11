@@ -79,7 +79,7 @@ export function TeamPulseSection({ members }: TeamPulseSectionProps) {
             icon={Activity}
             title='Team Pulse'
             description={
-              <div className='hidden md:flex items-center gap-2 text-[10px] text-muted-foreground'>
+              <div className='hidden md:flex items-center gap-2 text-xs text-muted-foreground'>
                 <Link href='/direct-reports' className='hover:underline'>
                   View Direct Reports
                 </Link>

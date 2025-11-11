@@ -49,7 +49,7 @@ export default function TopBar() {
                   <span className='flex-1 text-left text-sm text-muted-foreground truncate'>
                     Search organization
                   </span>
-                  <kbd className='pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-background px-1.5 font-mono text-[10px] font-medium text-foreground shadow-sm shrink-0'>
+                  <kbd className='pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-background px-1.5 font-mono text-xs font-medium text-foreground shadow-sm shrink-0'>
                     <span className='text-xs'>⌘</span>K
                   </kbd>
                 </button>
