@@ -112,13 +112,18 @@ export function ConfirmAction({
 
   return (
     <div
-      className={cn('flex gap-2', directionClass, alignClass, wrapperClassName)}
+      className={cn(
+        'flex gap-md',
+        directionClass,
+        alignClass,
+        wrapperClassName
+      )}
     >
       {confirmMessage ? (
         <div className='text-sm text-muted-foreground'>
           {confirmMessage}
           {confirmDescription ? (
-            <div className='text-xs text-muted-foreground/80 mt-1'>
+            <div className='text-xs text-muted-foreground/80 mt-sm'>
               {confirmDescription}
             </div>
           ) : null}
@@ -126,7 +131,7 @@ export function ConfirmAction({
       ) : null}
       <div
         className={cn(
-          'flex gap-2',
+          'flex gap-md',
           layout === 'stacked' ? 'flex-col md:flex-row' : 'flex-row',
           alignClass
         )}

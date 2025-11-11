@@ -38,7 +38,7 @@ export function ActiveInitiativesSection({
           icon={Rocket}
           title='Active Initiatives'
           description={
-            <div className='hidden md:flex items-center gap-2 text-xs text-muted-foreground'>
+            <div className='hidden md:flex items-center gap-md text-xs text-muted-foreground'>
               <Link href='/initiatives' className='hover:underline'>
                 View Initiatives
               </Link>
@@ -47,24 +47,24 @@ export function ActiveInitiativesSection({
         />
       }
     >
-      <div className='flex flex-col gap-1.5'>
+      <div className='flex flex-col gap-md'>
         {activeInitiatives.slice(0, 5).map(initiative => (
           <Link
             key={initiative.id}
             href={`/initiatives/${initiative.id}`}
             className='block'
           >
-            <Card className='p-3 bg-muted/20 border-0 rounded-md shadow-none hover:bg-muted/30 transition-colors cursor-pointer'>
-              <div className='flex items-center justify-between gap-3'>
-                <div className='flex items-center gap-3 flex-1 min-w-0'>
+            <Card className='p-lg bg-muted/20 border-0 rounded-md shadow-none hover:bg-muted/30 transition-colors cursor-pointer'>
+              <div className='flex items-center justify-between gap-lg'>
+                <div className='flex items-center gap-lg flex-1 min-w-0'>
                   <Rocket className='h-4 w-4 text-purple-500 shrink-0' />
                   <div className='flex-1 min-w-0'>
-                    <div className='flex items-center gap-2 flex-wrap'>
+                    <div className='flex items-center gap-md flex-wrap'>
                       <span className='text-sm font-medium truncate'>
                         {initiative.title}
                       </span>
                     </div>
-                    <div className='flex items-center gap-2 text-xs text-muted-foreground mt-1'>
+                    <div className='flex items-center gap-md text-xs text-muted-foreground mt-sm'>
                       {initiative.team && (
                         <>
                           <span className='truncate'>

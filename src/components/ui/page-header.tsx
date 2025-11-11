@@ -38,15 +38,15 @@ export function PageHeader({
       <div className='flex items-start justify-between'>
         <div className='flex-1'>
           {hasIcon && subtitle ? (
-            <div className='flex gap-3 items-start'>
+            <div className='flex gap-lg items-start'>
               {iconComponent ? (
                 <div className='flex items-start'>{iconComponent}</div>
               ) : TitleIcon ? (
-                <TitleIcon className='h-6 w-6 text-muted-foreground hidden md:block flex-shrink-0 mt-1' />
+                <TitleIcon className='h-6 w-6 text-muted-foreground hidden md:block flex-shrink-0 mt-sm' />
               ) : null}
               <div className='flex-1 flex flex-col'>
                 {title && (
-                  <div className='flex items-start gap-2'>
+                  <div className='flex items-start gap-md'>
                     <h1
                       className={`page-title ${geistMono.className} m-0 leading-tight`}
                     >
@@ -56,7 +56,7 @@ export function PageHeader({
                       <HelpIcon
                         helpId={helpId}
                         size='md'
-                        className='mt-1 flex-shrink-0'
+                        className='mt-sm flex-shrink-0'
                       />
                     )}
                   </div>
@@ -79,7 +79,7 @@ export function PageHeader({
                   icon={TitleIcon}
                   iconComponent={iconComponent}
                   helpId={helpId}
-                  className='mb-2'
+                  className='mb-md'
                 >
                   {title}
                 </PageTitle>
@@ -92,7 +92,7 @@ export function PageHeader({
             </>
           )}
         </div>
-        {actions && <div className='flex items-center gap-2'>{actions}</div>}
+        {actions && <div className='flex items-center gap-md'>{actions}</div>}
       </div>
     </div>
   )

@@ -52,10 +52,10 @@ export function HelpDialog({
         )}
       >
         {/* Sticky Header */}
-        <div className='sticky top-0 z-10 bg-background border-b px-6 py-4 rounded-t-lg'>
+        <div className='sticky top-0 z-10 bg-background border-b px-2xl py-xl rounded-t-lg'>
           <DialogHeader className='pb-0'>
             <div className='flex items-center justify-between'>
-              <DialogTitle className='flex items-center gap-2'>
+              <DialogTitle className='flex items-center gap-md'>
                 <Icon className='h-5 w-5 text-muted-foreground' />
                 {helpContent.title}
                 {helpContent.category && (
@@ -73,38 +73,38 @@ export function HelpDialog({
         </div>
 
         {/* Scrollable Content */}
-        <div className='flex-1 overflow-y-auto px-6 pb-6'>
+        <div className='flex-1 overflow-y-auto px-2xl pb-2xl'>
           <div className='prose prose-sm max-w-none dark:prose-invert'>
             <ReactMarkdown
               components={{
                 // Customize markdown rendering for better styling
                 h1: ({ children }) => (
-                  <h1 className='text-lg font-semibold mb-3 text-foreground'>
+                  <h1 className='text-lg font-semibold mb-lg text-foreground'>
                     {children}
                   </h1>
                 ),
                 h2: ({ children }) => (
-                  <h2 className='text-base font-semibold mb-2 mt-4 text-foreground'>
+                  <h2 className='text-base font-semibold mb-md mt-xl text-foreground'>
                     {children}
                   </h2>
                 ),
                 h3: ({ children }) => (
-                  <h3 className='text-sm font-semibold mb-2 mt-3 text-foreground'>
+                  <h3 className='text-sm font-semibold mb-md mt-lg text-foreground'>
                     {children}
                   </h3>
                 ),
                 p: ({ children }) => (
-                  <p className='mb-3 text-sm leading-relaxed text-muted-foreground'>
+                  <p className='mb-lg text-sm leading-relaxed text-muted-foreground'>
                     {children}
                   </p>
                 ),
                 ul: ({ children }) => (
-                  <ul className='mb-3 ml-4 list-disc space-y-1 text-sm text-muted-foreground'>
+                  <ul className='mb-lg ml-xl list-disc space-y-sm text-sm text-muted-foreground'>
                     {children}
                   </ul>
                 ),
                 ol: ({ children }) => (
-                  <ol className='mb-3 ml-4 list-decimal space-y-1 text-sm text-muted-foreground'>
+                  <ol className='mb-lg ml-xl list-decimal space-y-sm text-sm text-muted-foreground'>
                     {children}
                   </ol>
                 ),
@@ -120,17 +120,17 @@ export function HelpDialog({
                   <em className='italic text-foreground'>{children}</em>
                 ),
                 code: ({ children }) => (
-                  <code className='bg-muted px-1.5 py-0.5 rounded text-xs font-mono text-foreground'>
+                  <code className='bg-muted px-md py-xs rounded text-xs font-mono text-foreground'>
                     {children}
                   </code>
                 ),
                 pre: ({ children }) => (
-                  <pre className='bg-muted p-3 rounded-md overflow-x-auto text-xs font-mono text-foreground'>
+                  <pre className='bg-muted p-lg rounded-md overflow-x-auto text-xs font-mono text-foreground'>
                     {children}
                   </pre>
                 ),
                 blockquote: ({ children }) => (
-                  <blockquote className='border-l-4 border-muted-foreground/20 pl-4 italic text-muted-foreground'>
+                  <blockquote className='border-l-4 border-muted-foreground/20 pl-xl italic text-muted-foreground'>
                     {children}
                   </blockquote>
                 ),

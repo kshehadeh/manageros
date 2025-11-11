@@ -87,16 +87,16 @@ export function OrganizationSetupCards({
   }
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-2xl'>
       <div className='text-center'>
-        <h2 className='text-2xl font-semibold mb-2'>Welcome to mpath!</h2>
+        <h2 className='text-2xl font-semibold mb-md'>Welcome to mpath!</h2>
         <p className='text-muted-foreground'>
           To get started, you&apos;ll need to create an organization or join an
           existing one.
         </p>
       </div>
 
-      <div className='grid gap-6 md:grid-cols-2'>
+      <div className='grid gap-2xl md:grid-cols-2'>
         {/* Create New Organization Card */}
         <Card className='hover:shadow-md transition-shadow'>
           <CardHeader>

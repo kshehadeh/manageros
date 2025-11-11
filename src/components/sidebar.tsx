@@ -106,8 +106,8 @@ export default function Sidebar({
         }`}
       >
         {/* Header */}
-        <div className='flex h-16 items-center px-6 border-b'>
-          <div className='flex items-center gap-3'>
+        <div className='flex h-16 items-center px-2xl border-b'>
+          <div className='flex items-center gap-lg'>
             <IndigoIcon width={40} height={33} color='currentColor' />
             <h1
               className={`text-xl font-semibold text-foreground ${geistMono.className}`}
@@ -118,9 +118,9 @@ export default function Sidebar({
         </div>
 
         {/* User Info */}
-        <div className='px-6 py-4 border-b'>
+        <div className='px-2xl py-xl border-b'>
           {serverSession ? (
-            <div className='flex items-start gap-3'>
+            <div className='flex items-start gap-lg'>
               {personData ? (
                 <PersonAvatar
                   name={personData.name}
@@ -151,15 +151,15 @@ export default function Sidebar({
                   </div>
                 ) : null}
                 {!personData && serverSession?.organizationId && (
-                  <div className='text-xs text-muted-foreground mt-0.5'>
+                  <div className='text-xs text-muted-foreground mt-xs'>
                     No linked person
                   </div>
                 )}
-                <div className='flex items-center gap-2 mt-1'>
+                <div className='flex items-center gap-md mt-sm'>
                   <Link
                     href='/settings'
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className='flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground underline'
+                    className='flex items-center gap-sm text-xs text-muted-foreground hover:text-foreground underline'
                   >
                     <Settings className='h-3 w-3' />
                     <span>Settings</span>
@@ -179,12 +179,12 @@ export default function Sidebar({
               </div>
             </div>
           ) : (
-            <div className='flex items-start gap-3'>
+            <div className='flex items-start gap-lg'>
               <Skeleton className='h-8 w-8 rounded-full shrink-0' />
-              <div className='flex-1 min-w-0 space-y-2'>
+              <div className='flex-1 min-w-0 space-y-md'>
                 <Skeleton className='h-4 w-32' />
                 <Skeleton className='h-3 w-40' />
-                <div className='flex items-center gap-2 mt-1'>
+                <div className='flex items-center gap-md mt-sm'>
                   <Skeleton className='h-3 w-16' />
                   <Skeleton className='h-3 w-1' />
                   <Skeleton className='h-3 w-20' />
@@ -195,7 +195,7 @@ export default function Sidebar({
         </div>
 
         {/* Navigation */}
-        <nav className='flex-1 px-3 py-4 space-y-1'>
+        <nav className='flex-1 px-lg py-xl space-y-sm'>
           {serverSession ? (
             <>
               {filteredNavigation.map(item => {
@@ -206,7 +206,7 @@ export default function Sidebar({
                     key={item.name}
                     href={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${geistMono.className} ${
+                    className={`flex items-center gap-lg px-lg py-md text-sm rounded-lg transition-colors ${geistMono.className} ${
                       isActive
                         ? 'bg-highlight-bg text-highlight border border-highlight/20'
                         : 'text-muted-foreground hover:bg-accent hover:text-highlight'
@@ -224,7 +224,7 @@ export default function Sidebar({
                   setIsMobileMenuOpen(false)
                   toggleAIChat()
                 }}
-                className={`flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
+                className={`flex items-center gap-lg px-lg py-md text-sm text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
               >
                 <Bot className='h-5 w-5' />
                 <span>AI Chat</span>
@@ -235,7 +235,7 @@ export default function Sidebar({
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
-                  className='flex items-center gap-3 px-3 py-2 rounded-lg'
+                  className='flex items-center gap-lg px-lg py-md rounded-lg'
                 >
                   <Skeleton className='h-5 w-5 rounded' />
                   <Skeleton className='h-4 w-24' />
@@ -251,7 +251,7 @@ export default function Sidebar({
         </nav>
 
         {/* Footer Actions */}
-        <div className='px-3 py-4 border-t space-y-1'>
+        <div className='px-lg py-xl border-t space-y-sm'>
           {serverSession ? (
             <>
               <button
@@ -259,7 +259,7 @@ export default function Sidebar({
                   setIsMobileMenuOpen(false)
                   setIsKeyboardShortcutsOpen(true)
                 }}
-                className={`flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
+                className={`flex items-center gap-lg px-lg py-md text-sm text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
               >
                 <Keyboard className='h-5 w-5' />
                 <span>Keyboard Shortcuts</span>
@@ -269,7 +269,7 @@ export default function Sidebar({
                   setIsMobileMenuOpen(false)
                   setIsGettingStartedOpen(true)
                 }}
-                className={`flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
+                className={`flex items-center gap-lg px-lg py-md text-sm text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
               >
                 <BookOpen className='h-5 w-5' />
                 <span>Help</span>
@@ -279,7 +279,7 @@ export default function Sidebar({
                   setIsMobileMenuOpen(false)
                   setIsBugOpen(true)
                 }}
-                className={`flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
+                className={`flex items-center gap-lg px-lg py-md text-sm text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
               >
                 <Bug className='h-5 w-5' />
                 <span>Report a bug</span>
@@ -290,7 +290,7 @@ export default function Sidebar({
               {Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
-                  className='flex items-center gap-3 px-3 py-2 rounded-lg'
+                  className='flex items-center gap-lg px-lg py-md rounded-lg'
                 >
                   <Skeleton className='h-5 w-5 rounded' />
                   <Skeleton className='h-4 w-32' />
@@ -301,7 +301,7 @@ export default function Sidebar({
         </div>
 
         {/* Version Footer */}
-        <div className='px-3 py-2 border-t'>
+        <div className='px-lg py-md border-t'>
           <div className='text-xs text-muted-foreground text-center'>
             v{APP_VERSION}
           </div>

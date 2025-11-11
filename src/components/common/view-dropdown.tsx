@@ -91,11 +91,11 @@ export function ViewDropdown({
   const hasActiveSettings = activeCount > 0
 
   const dialogContent = (
-    <div className='space-y-6'>
+    <div className='space-y-2xl'>
       {/* Grouping Section - only show if there are grouping options */}
       {hasGroupingOptions && (
-        <div className='space-y-3'>
-          <div className='flex items-center gap-2'>
+        <div className='space-y-lg'>
+          <div className='flex items-center gap-md'>
             <Group className='h-4 w-4' />
             <h3 className='font-medium'>Grouping</h3>
           </div>
@@ -116,12 +116,12 @@ export function ViewDropdown({
 
       {/* Sorting Section - only show if there are sort options */}
       {hasSortOptions && (
-        <div className='space-y-3'>
-          <div className='flex items-center gap-2'>
+        <div className='space-y-lg'>
+          <div className='flex items-center gap-md'>
             <ArrowUpDown className='h-4 w-4' />
             <h3 className='font-medium'>Sorting</h3>
           </div>
-          <div className='space-y-2'>
+          <div className='space-y-md'>
             <Select
               value={sortField || 'none'}
               onValueChange={value =>
@@ -163,9 +163,9 @@ export function ViewDropdown({
 
       {/* Filtering Section - only show if there is filter content */}
       {hasFilterContent && (
-        <div className='space-y-3'>
+        <div className='space-y-lg'>
           <div className='flex items-center justify-between'>
-            <div className='flex items-center gap-2'>
+            <div className='flex items-center gap-md'>
               <Filter className='h-4 w-4' />
               <h3 className='font-medium'>Filters</h3>
             </div>
@@ -196,7 +196,7 @@ export function ViewDropdown({
               variant='outline'
               size='icon-lg'
               className={cn(
-                'flex items-center gap-2 px-2',
+                'flex items-center gap-md px-md',
                 hasActiveSettings && 'border-primary bg-primary/5',
                 className
               )}
@@ -212,7 +212,7 @@ export function ViewDropdown({
             </Button>
           </PopoverTrigger>
           <PopoverContent align='end' side='bottom' sideOffset={4}>
-            <div className='space-y-4'>
+            <div className='space-y-xl'>
               <div className='flex items-center justify-between'>
                 <h3 className='font-medium'>View Settings</h3>
                 <Button
@@ -238,7 +238,7 @@ export function ViewDropdown({
               variant='outline'
               size='sm'
               className={cn(
-                'flex items-center gap-2',
+                'flex items-center gap-md',
                 hasActiveSettings && 'border-primary bg-primary/5',
                 className
               )}
