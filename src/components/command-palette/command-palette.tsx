@@ -176,7 +176,7 @@ export function CommandPalette() {
     <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogContent
         size='sm'
-        className='p-0 overflow-hidden inset-0 h-full translate-x-0 translate-y-0 rounded-none sm:inset-auto sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:h-auto'
+        className='p-0! overflow-hidden inset-0 h-full translate-x-0 translate-y-0 rounded-none sm:inset-0 sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:h-auto'
       >
         <VisuallyHidden>
           <DialogTitle>Command Palette</DialogTitle>
@@ -204,7 +204,7 @@ export function CommandPalette() {
               </div>
             )}
           </div>
-          <CommandList className='flex-1 max-h-none sm:max-h-[400px]'>
+          <CommandList className='flex-1 max-h-none'>
             <CommandEmpty>
               {isLoading
                 ? currentSearchEntity
