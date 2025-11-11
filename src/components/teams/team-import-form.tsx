@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import { importTeamsFromCSV } from '@/lib/actions/csv-import'
 import { Button } from '@/components/ui/button'
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
+import { FileText } from 'lucide-react'
 
 interface ImportResult {
   success: boolean
@@ -102,187 +105,199 @@ export function TeamImportForm() {
 
   return (
     <div className='space-y-6'>
-      <div>
-        <h3 className='text-lg font-semibold mb-4'>CSV Format</h3>
-        <p className='text-muted-foreground mb-4'>
-          Your CSV file should have the following columns:
-        </p>
-        <div className='overflow-x-auto mb-4'>
-          <table className='min-w-full border rounded-lg'>
-            <thead className='bg-accent/30'>
-              <tr>
-                <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
-                  Column Name
-                </th>
-                <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
-                  Description
-                </th>
-                <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
-                  Required
-                </th>
-                <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
-                  Example
-                </th>
-              </tr>
-            </thead>
-            <tbody className='divide-y'>
-              <tr>
-                <td className='px-4 py-3 text-sm font-medium text-foreground border-r'>
-                  name
-                </td>
-                <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
-                  Team name
-                </td>
-                <td className='px-4 py-3 text-sm text-destructive border-r'>
-                  Yes
-                </td>
-                <td className='px-4 py-3 text-sm text-muted-foreground'>
-                  Engineering
-                </td>
-              </tr>
-              <tr>
-                <td className='px-4 py-3 text-sm font-medium text-foreground border-r'>
-                  description
-                </td>
-                <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
-                  Team description
-                </td>
-                <td className='px-4 py-3 text-sm text-emerald-400 border-r'>
-                  No
-                </td>
-                <td className='px-4 py-3 text-sm text-muted-foreground'>
-                  Software development team
-                </td>
-              </tr>
-              <tr>
-                <td className='px-4 py-3 text-sm font-medium text-foreground border-r'>
-                  parent
-                </td>
-                <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
-                  Parent team name (must match existing team)
-                </td>
-                <td className='px-4 py-3 text-sm text-emerald-400 border-r'>
-                  No
-                </td>
-                <td className='px-4 py-3 text-sm text-muted-foreground'>
-                  Engineering
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div className='card mb-4'>
-          <h3 className='font-semibold text-foreground mb-2'>
-            Important Notes:
-          </h3>
-          <ul className='text-muted-foreground text-sm space-y-1'>
-            <li>• Team names must be unique within your organization</li>
-            <li>
-              • If a team name is similar to an existing team, the import will
-              fail to prevent duplicates
-            </li>
-            <li>
-              • Parent teams will be created automatically if they don&apos;t
-              exist
-            </li>
-            <li>
-              • You can import teams in any order - parent teams are created as
-              needed
-            </li>
-            <li>
-              • If a team already exists (including automatically created parent
-              teams), it will be updated with new information instead of
-              creating a duplicate
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit} className='space-y-6'>
-        <div>
-          <label htmlFor='file' className='block text-sm font-medium mb-2'>
-            Select CSV File
-          </label>
-          <div className='relative'>
-            <input
-              type='file'
-              id='file'
-              name='file'
-              accept='.csv'
-              onChange={handleFileChange}
-              className='absolute inset-0 w-full h-full opacity-0 cursor-pointer'
-              required
-            />
-            <div className='input flex items-center justify-between cursor-pointer hover:bg-accent transition-colors'>
-              <span className='text-muted-foreground'>
-                {file ? file.name : 'Choose CSV file...'}
-              </span>
-              <svg
-                className='w-5 h-5 text-muted-foreground'
-                fill='none'
-                stroke='currentColor'
-                viewBox='0 0 24 24'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12'
-                />
-              </svg>
-            </div>
-          </div>
-          {file && (
-            <p className='mt-2 text-sm text-muted-foreground'>
-              Selected file: {file.name} ({(file.size / 1024).toFixed(1)} KB)
-            </p>
-          )}
-        </div>
-
-        <div className='flex space-x-4'>
-          <Button type='submit' disabled={!file || isLoading}>
-            {isLoading ? (
-              <>
+      <PageSection
+        header={<SectionHeader icon={FileText} title='Select CSV File' />}
+        variant='bordered'
+      >
+        <form onSubmit={handleSubmit} className='space-y-6'>
+          <div>
+            <div className='relative'>
+              <input
+                type='file'
+                id='file'
+                name='file'
+                accept='.csv'
+                onChange={handleFileChange}
+                className='absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10'
+                required
+              />
+              <div className='input flex items-center justify-between cursor-pointer hover:bg-accent transition-colors pointer-events-none'>
+                <span className='text-muted-foreground'>
+                  {file ? file.name : 'Choose CSV file...'}
+                </span>
                 <svg
-                  className='animate-spin -ml-1 mr-3 h-5 w-5'
-                  xmlns='http://www.w3.org/2000/svg'
+                  className='w-5 h-5 text-muted-foreground'
                   fill='none'
+                  stroke='currentColor'
                   viewBox='0 0 24 24'
                 >
-                  <circle
-                    className='opacity-25'
-                    cx='12'
-                    cy='12'
-                    r='10'
-                    stroke='currentColor'
-                    strokeWidth='4'
-                  ></circle>
                   <path
-                    className='opacity-75'
-                    fill='currentColor'
-                    d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                  ></path>
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12'
+                  />
                 </svg>
-                Importing...
-              </>
-            ) : (
-              'Import Teams'
+              </div>
+            </div>
+            {file && (
+              <p className='mt-2 text-sm text-muted-foreground'>
+                Selected file: {file.name} ({(file.size / 1024).toFixed(1)} KB)
+              </p>
             )}
-          </Button>
-          <Button type='button' onClick={downloadTemplate} variant='outline'>
-            Download Template CSV
-          </Button>
+          </div>
+
+          <div className='flex space-x-4'>
+            <Button type='submit' disabled={!file || isLoading}>
+              {isLoading ? (
+                <>
+                  <svg
+                    className='animate-spin -ml-1 mr-3 h-5 w-5'
+                    xmlns='http://www.w3.org/2000/svg'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                  >
+                    <circle
+                      className='opacity-25'
+                      cx='12'
+                      cy='12'
+                      r='10'
+                      stroke='currentColor'
+                      strokeWidth='4'
+                    ></circle>
+                    <path
+                      className='opacity-75'
+                      fill='currentColor'
+                      d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                    ></path>
+                  </svg>
+                  Importing...
+                </>
+              ) : (
+                'Import Teams'
+              )}
+            </Button>
+            <Button type='button' onClick={downloadTemplate} variant='outline'>
+              Download Template CSV
+            </Button>
+          </div>
+        </form>
+      </PageSection>
+
+      <PageSection
+        variant='bordered'
+        header={
+          <SectionHeader
+            icon={FileText}
+            title='CSV Format Documentation'
+            description='Learn about the required CSV format, column specifications, and important import guidelines'
+          />
+        }
+      >
+        <div className='space-y-4'>
+          <p className='text-muted-foreground'>
+            Your CSV file should have the following columns:
+          </p>
+          <div className='overflow-x-auto'>
+            <table className='min-w-full border rounded-lg'>
+              <thead className='bg-accent/30'>
+                <tr>
+                  <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
+                    Column Name
+                  </th>
+                  <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
+                    Description
+                  </th>
+                  <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
+                    Required
+                  </th>
+                  <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
+                    Example
+                  </th>
+                </tr>
+              </thead>
+              <tbody className='divide-y'>
+                <tr>
+                  <td className='px-4 py-3 text-sm font-medium text-foreground border-r'>
+                    name
+                  </td>
+                  <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
+                    Team name
+                  </td>
+                  <td className='px-4 py-3 text-sm text-destructive border-r'>
+                    Yes
+                  </td>
+                  <td className='px-4 py-3 text-sm text-muted-foreground'>
+                    Engineering
+                  </td>
+                </tr>
+                <tr>
+                  <td className='px-4 py-3 text-sm font-medium text-foreground border-r'>
+                    description
+                  </td>
+                  <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
+                    Team description
+                  </td>
+                  <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
+                    No
+                  </td>
+                  <td className='px-4 py-3 text-sm text-muted-foreground'>
+                    Software development team
+                  </td>
+                </tr>
+                <tr>
+                  <td className='px-4 py-3 text-sm font-medium text-foreground border-r'>
+                    parent
+                  </td>
+                  <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
+                    Parent team name (must match existing team)
+                  </td>
+                  <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
+                    No
+                  </td>
+                  <td className='px-4 py-3 text-sm text-muted-foreground'>
+                    Engineering
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div className='bg-accent/30 rounded-lg p-4'>
+            <h3 className='font-semibold text-foreground mb-2'>
+              Important Notes:
+            </h3>
+            <ul className='text-muted-foreground text-sm space-y-1'>
+              <li>• Team names must be unique within your organization</li>
+              <li>
+                • If a team name is similar to an existing team, the import will
+                fail to prevent duplicates
+              </li>
+              <li>
+                • Parent teams will be created automatically if they don&apos;t
+                exist
+              </li>
+              <li>
+                • You can import teams in any order - parent teams are created
+                as needed
+              </li>
+              <li>
+                • If a team already exists (including automatically created
+                parent teams), it will be updated with new information instead
+                of creating a duplicate
+              </li>
+            </ul>
+          </div>
         </div>
-      </form>
+      </PageSection>
 
       {result && (
         <div className='space-y-6'>
           <div className={`card ${result.success ? 'rag-green' : 'rag-red'}`}>
             <div className='flex'>
-              <div className='flex-shrink-0'>
+              <div className='shrink-0'>
                 {result.success ? (
                   <svg
-                    className='h-5 w-5 text-emerald-400'
+                    className='h-5 w-5 text-badge-success-text'
                     xmlns='http://www.w3.org/2000/svg'
                     viewBox='0 0 20 20'
                     fill='currentColor'
@@ -321,7 +336,9 @@ export function TeamImportForm() {
 
           {result.errors.length > 0 && (
             <div>
-              <h3 className='text-lg font-semibold mb-2'>Errors:</h3>
+              <h3 className='text-lg font-semibold text-foreground mb-2'>
+                Errors:
+              </h3>
               <div className='card rag-red'>
                 <ul className='text-sm space-y-1'>
                   {result.errors.map((error, index) => (
@@ -335,7 +352,7 @@ export function TeamImportForm() {
           {result.errorRows.length > 0 && (
             <div>
               <div className='flex justify-between items-center mb-4'>
-                <h3 className='text-lg font-semibold'>
+                <h3 className='text-lg font-semibold text-foreground'>
                   Row Errors ({result.errorRows.length} rows with errors)
                 </h3>
                 <Button onClick={downloadErrorReport} variant='outline'>

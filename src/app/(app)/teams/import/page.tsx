@@ -1,6 +1,11 @@
 import { redirect } from 'next/navigation'
 import { TeamImportForm } from '@/components/teams/team-import-form'
 import { getCurrentUser } from '@/lib/auth-utils'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
+import { PageSection } from '@/components/ui/page-section'
+import { Upload } from 'lucide-react'
 
 export default async function ImportTeamsPage() {
   const user = await getCurrentUser()
@@ -14,12 +19,18 @@ export default async function ImportTeamsPage() {
   }
 
   return (
-    <div className='space-y-6'>
-      <div className='flex items-center justify-between'>
-        <h2 className='text-lg font-semibold'>Import Teams</h2>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title='Import Teams'
+        titleIcon={Upload}
+        subtitle='Bulk import teams from a CSV file'
+      />
 
-      <TeamImportForm />
-    </div>
+      <PageContent>
+        <PageSection>
+          <TeamImportForm />
+        </PageSection>
+      </PageContent>
+    </PageContainer>
   )
 }

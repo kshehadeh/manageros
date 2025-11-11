@@ -1,11 +1,12 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
-import { NextResponse } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 
 // Define public routes in a single location to avoid duplication
+// Routes ending with '/' will match that path and all sub-paths
 const PUBLIC_ROUTES = [
   '/',
   '/landing/',
-  '/feedback-form/',
+  '/feedback-form/', // Matches /feedback-form and all sub-routes like /feedback-form/[token]
   '/auth/signin',
   '/auth/signup',
   '/auth/forgot-password',
@@ -14,6 +15,22 @@ const PUBLIC_ROUTES = [
 
 // Create a matcher for public routes
 const isPublicRouteMatcher = createRouteMatcher(PUBLIC_ROUTES)
+
+// Helper to check if a pathname matches any public route (including prefix matching)
+function isPublicRoute(pathname: string, req: NextRequest): boolean {
+  // First check with the matcher
+  if (isPublicRouteMatcher(req)) {
+    return true
+  }
+
+  // Also check for routes that end with '/' - they should match all sub-paths
+  return PUBLIC_ROUTES.some(route => {
+    if (route.endsWith('/') && route !== '/') {
+      return pathname.startsWith(route)
+    }
+    return false
+  })
+}
 
 export default clerkMiddleware(async (auth, req) => {
   const { pathname } = req.nextUrl
@@ -31,7 +48,7 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   // Allow public routes without authentication
-  if (isPublicRouteMatcher(req)) {
+  if (isPublicRoute(pathname, req)) {
     console.log('Public route:', pathname)
     return response
   }

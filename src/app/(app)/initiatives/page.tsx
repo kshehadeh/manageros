@@ -6,11 +6,14 @@ import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
 
 export default async function InitiativesPage() {
   const user = await getCurrentUser()
-  const canCreateInitiatives = user.role === 'ADMIN' || !!user.personId
+  const canCreateInitiatives = await getActionPermission(
+    user,
+    'initiative.create'
+  )
 
   return (
     <PageContainer>

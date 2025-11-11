@@ -1,22 +1,26 @@
 import { TeamsFlowChart } from '@/components/teams/teams-flow-chart'
 import { getTeamHierarchyOptimized } from '@/lib/actions/team'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { PageContent } from '@/components/ui/page-content'
+import { PageSection } from '@/components/ui/page-section'
+import { Workflow } from 'lucide-react'
 
 export default async function TeamsFlowPage() {
   const teams = await getTeamHierarchyOptimized()
 
   return (
-    <div className='space-y-4'>
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-4'>
-          <div>
-            <h2 className='text-lg font-semibold'>Team Hierarchy</h2>
-            <p className='text-sm text-neutral-400 mt-1'>
-              Interactive team hierarchy visualization
-            </p>
-          </div>
-        </div>
-      </div>
-      <TeamsFlowChart teams={teams} />
-    </div>
+    <PageContainer>
+      <PageHeader
+        title='Team Hierarchy'
+        titleIcon={Workflow}
+        subtitle='Interactive team hierarchy visualization'
+      />
+      <PageContent>
+        <PageSection>
+          <TeamsFlowChart teams={teams} />
+        </PageSection>
+      </PageContent>
+    </PageContainer>
   )
 }

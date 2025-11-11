@@ -98,6 +98,10 @@ When `staging` is merged to `main`, release-it automatically:
 - Creates a release tag and GitHub release
 - Generates a changelog from conventional commits
 
+Then Vercel will build the production application.
+
+Currently, migrations are not applied automatically.
+
 ## Database Migrations
 
 ### Creating Migrations
