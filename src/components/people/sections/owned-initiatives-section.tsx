@@ -6,7 +6,7 @@ import {
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
 import { Rocket, Eye } from 'lucide-react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 
 interface OwnedInitiativesSectionProps {

@@ -17,7 +17,7 @@ import {
   ListTodo,
   Link as LinkIcon,
 } from 'lucide-react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { useRouter } from 'next/navigation'
 import {
   updateTaskStatus,
@@ -192,7 +192,7 @@ export function TaskSidebar({
                     <td className='py-1'>
                       <Link
                         href={`/initiatives/${initiative.id}`}
-                        className='text-primary hover:text-primary/80 font-medium'
+                        className='text-primary hover:text-highlight/80 font-medium'
                       >
                         {initiative.title}
                       </Link>

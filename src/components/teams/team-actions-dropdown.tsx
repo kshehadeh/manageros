@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { Edit, Trash2 } from 'lucide-react'
 import { deleteTeam } from '@/lib/actions/team'
 import { ActionDropdown } from '@/components/common/action-dropdown'

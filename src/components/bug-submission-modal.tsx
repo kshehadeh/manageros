@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { submitGitHubIssue } from '@/lib/actions/github'
+import { ExternalLink } from '@/components/ui/link'
 import { toast } from 'sonner'
 import { Bug, Loader2, X, Image as ImageIcon } from 'lucide-react'
 
@@ -126,14 +127,12 @@ export function BugSubmissionModal({
               <p>
                 Issue #{result.issueNumber}: {result.issueTitle}
               </p>
-              <a
+              <ExternalLink
                 href={result.issueUrl}
-                target='_blank'
-                rel='noopener noreferrer'
-                className='text-blue-600 hover:text-blue-800 underline'
+                className='text-blue-600 underline'
               >
                 View on GitHub →
-              </a>
+              </ExternalLink>
             </div>
           ),
           duration: 8000,
@@ -228,7 +227,7 @@ export function BugSubmissionModal({
                 <button
                   type='button'
                   onClick={() => fileInputRef.current?.click()}
-                  className='text-primary hover:underline'
+                  className='text-primary hover:underline hover:text-highlight'
                   disabled={isSubmitting}
                 >
                   browse files

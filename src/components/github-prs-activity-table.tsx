@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { fetchGithubPullRequests } from '@/lib/actions/github'
+import { ExternalLink } from '@/components/ui/link'
 
 interface GithubPrsActivityTableProps {
   personId: string
@@ -149,14 +150,12 @@ export function GithubPrsActivityTable({
               {pullRequests.map(item => (
                 <TableRow key={item.id}>
                   <TableCell>
-                    <a
+                    <ExternalLink
                       href={item.htmlUrl}
-                      target='_blank'
-                      rel='noopener noreferrer'
                       className='font-medium text-primary hover:underline'
                     >
                       #{item.number}
-                    </a>
+                    </ExternalLink>
                   </TableCell>
                   <TableCell>
                     <div className='max-w-[300px]'>

@@ -3,7 +3,7 @@ import { getEntityLinks } from '@/lib/actions/entity-links'
 
 import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { Calendar, StickyNote, ChevronRight, Users } from 'lucide-react'
 import { LinkListSection } from '@/components/links/link-list-section'
 import { MeetingInstanceDetailBreadcrumbClient } from '@/components/meetings/meeting-instance-detail-breadcrumb-client'

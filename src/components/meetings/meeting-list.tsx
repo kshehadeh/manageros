@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { MoreHorizontal } from 'lucide-react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { format } from 'date-fns'
 import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
 import {

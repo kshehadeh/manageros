@@ -2,7 +2,12 @@
 
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { MoreHorizontal, ExternalLink, Edit } from 'lucide-react'
+import {
+  MoreHorizontal,
+  ExternalLink as ExternalLinkIcon,
+  Edit,
+} from 'lucide-react'
+import { ExternalLink } from '@/components/ui/link'
 import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { getIconForUrl, getUrlTitle } from '@/lib/utils/link-icons'
@@ -128,10 +133,8 @@ export function SimpleLinkList({
 
     return (
       <SimpleListItem key={link.id}>
-        <a
+        <ExternalLink
           href={link.url}
-          target='_blank'
-          rel='noopener noreferrer'
           className='flex items-start gap-3 flex-1 min-w-0'
         >
           <div className='shrink-0 mt-0.5'>
@@ -156,8 +159,8 @@ export function SimpleLinkList({
               </span>
             </div>
           </div>
-          <ExternalLink className='h-4 w-4 text-muted-foreground shrink-0 ml-2' />
-        </a>
+          <ExternalLinkIcon className='h-4 w-4 text-muted-foreground shrink-0 ml-2' />
+        </ExternalLink>
 
         <Button
           variant='ghost'

@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { prisma } from '@/lib/db'
 import { ExpandableSection } from '@/components/expandable-section'
 
@@ -44,15 +44,19 @@ export async function DashboardRecentFeedbackSection({
                   {feedback.kind === 'praise' && '✨ '}
                   {feedback.kind === 'constructive' && '💡 '}
                   {feedback.kind === 'general' && '💬 '}
-                  {feedback.body.length > 100 ? feedback.body.substring(0, 100) + '...' : feedback.body}
+                  {feedback.body.length > 100
+                    ? feedback.body.substring(0, 100) + '...'
+                    : feedback.body}
                 </div>
                 <div className='flex items-center gap-2 mt-1'>
                   <span className='text-xs text-muted-foreground'>
-                    About <span className='text-primary'>{feedback.about.name}</span>
+                    About{' '}
+                    <span className='text-primary'>{feedback.about.name}</span>
                   </span>
                   {feedback.from.id !== feedback.about.id && (
                     <span className='text-xs text-muted-foreground'>
-                      • From <span className='text-primary'>{feedback.from.name}</span>
+                      • From{' '}
+                      <span className='text-primary'>{feedback.from.name}</span>
                     </span>
                   )}
                   <span className='text-xs text-muted-foreground'>
@@ -61,7 +65,9 @@ export async function DashboardRecentFeedbackSection({
                 </div>
               </div>
               {feedback.isPrivate && (
-                <span className='text-xs text-muted-foreground italic'>Private</span>
+                <span className='text-xs text-muted-foreground italic'>
+                  Private
+                </span>
               )}
             </div>
           </Link>
@@ -70,4 +76,3 @@ export async function DashboardRecentFeedbackSection({
     </ExpandableSection>
   )
 }
-

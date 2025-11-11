@@ -6,7 +6,7 @@ import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
 import { Button } from '@/components/ui/button'
 import { MessageCircle, Eye } from 'lucide-react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { getFeedbackForPerson } from '@/lib/actions/feedback'
 
 interface FeedbackSectionProps {

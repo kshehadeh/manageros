@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { MeetingDataTable } from '@/components/meetings/data-table'
 import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'

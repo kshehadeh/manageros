@@ -6,7 +6,7 @@ import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PersonAvatar } from '@/components/people/person-avatar'
 import { PersonDetailModal } from '@/components/people/person-detail-modal'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { format, isFuture, differenceInDays } from 'date-fns'
 import { Activity } from 'lucide-react'
 

@@ -9,23 +9,17 @@ import { Button } from '@/components/ui/button'
 import { ListTodo, Plus } from 'lucide-react'
 import { TaskQuickEditDialog } from '@/components/tasks/task-quick-edit-dialog'
 
-interface InitiativeTasksProps {
+interface InitiativeTasksClientProps {
   initiativeId: string
   tasks: Task[]
-  objectives: Array<{
-    id: string
-    title: string
-    keyResult: string | null
-    sortIndex: number
-  }>
   canEdit?: boolean
 }
 
-export function InitiativeTasks({
+export function InitiativeTasksClient({
   initiativeId,
   tasks: initialTasks,
   canEdit = false,
-}: InitiativeTasksProps) {
+}: InitiativeTasksClientProps) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 

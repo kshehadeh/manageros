@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { Handshake } from 'lucide-react'
 import { OneOnOneDataTable } from '@/components/oneonones/data-table'
 import { PageSection } from '@/components/ui/page-section'

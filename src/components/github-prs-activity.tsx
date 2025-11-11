@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { fetchGithubPullRequests } from '@/lib/actions/github'
+import { ExternalLink } from '@/components/ui/link'
 
 interface GithubPrsActivityProps {
   personId: string
@@ -208,14 +209,12 @@ export function GithubPrsActivity({
                   <h5 className='mt-1 text-sm font-medium text-card-foreground'>
                     {item.title}
                   </h5>
-                  <a
+                  <ExternalLink
                     href={item.repository.htmlUrl}
-                    target='_blank'
-                    rel='noopener noreferrer'
                     className='text-xs text-muted-foreground hover:text-foreground'
                   >
                     {item.repository.fullName}
-                  </a>
+                  </ExternalLink>
                 </div>
                 <div className='ml-4 text-right'>
                   <div className='text-sm font-medium text-card-foreground'>
@@ -237,14 +236,12 @@ export function GithubPrsActivity({
               </div>
 
               <div className='mt-3 flex items-center justify-between'>
-                <a
+                <ExternalLink
                   href={item.htmlUrl}
-                  target='_blank'
-                  rel='noopener noreferrer'
                   className='text-xs text-primary hover:underline'
                 >
                   View on GitHub →
-                </a>
+                </ExternalLink>
                 <div className='text-xs text-muted-foreground'>
                   Created {formatDate(item.createdAt)}
                 </div>

@@ -2,7 +2,7 @@ import { getMeeting } from '@/lib/actions/meeting'
 import { getEntityLinks } from '@/lib/data/entity-links'
 
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
@@ -124,7 +124,7 @@ export default async function MeetingDetailPage({
                   <User className='h-4 w-4' />
                   <Link
                     href={`/people/${meeting.owner.id}`}
-                    className='hover:text-primary transition-colors'
+                    className='hover:text-highlight transition-colors'
                   >
                     {meeting.owner.name}
                   </Link>
@@ -135,7 +135,7 @@ export default async function MeetingDetailPage({
                   <Building2 className='h-4 w-4' />
                   <Link
                     href={`/teams/${meeting.team.id}`}
-                    className='hover:text-primary transition-colors'
+                    className='hover:text-highlight transition-colors'
                   >
                     {meeting.team.name}
                   </Link>

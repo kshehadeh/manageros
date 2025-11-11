@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { useState } from 'react'
 import { FeedbackForm } from '@/components/feedback/feedback-form'
 import { type Person, type Team } from '@prisma/client'

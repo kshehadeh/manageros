@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 import { InitiativeDataTable } from '@/components/initiatives/data-table'
 import { Rocket, Plus } from 'lucide-react'
@@ -18,6 +18,7 @@ export default async function InitiativesPage() {
         title='Initiatives'
         titleIcon={Rocket}
         helpId='initiatives'
+        subtitle='Manage long-term goals and objectives'
         actions={
           canCreateInitiatives ? (
             <Button asChild className='flex items-center gap-2'>

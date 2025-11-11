@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 import { MoreHorizontal, Briefcase } from 'lucide-react'
 import { useJobRoles } from '@/hooks/use-job-roles'
@@ -72,7 +72,7 @@ export const jobRolesDataTableConfig: DataTableConfig<
             <div className='flex flex-col gap-1'>
               <Link
                 href={`/job-roles/${jobRole.id}`}
-                className='font-medium text-primary hover:text-primary/90 transition-colors'
+                className='font-medium text-primary hover:text-highlight/90 transition-colors'
                 onClick={e => e.stopPropagation()}
               >
                 {jobRole.title}

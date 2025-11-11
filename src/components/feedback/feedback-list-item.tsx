@@ -4,7 +4,7 @@ import { Trash2, Eye, MoreHorizontal, Edit } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { useState, useRef, useEffect } from 'react'
 import { getKindLabel } from '@/lib/utils/feedback'
 
@@ -160,7 +160,7 @@ export function FeedbackListItem({
           about{' '}
           <Link
             href={`/people/${feedback.about.id}`}
-            className='text-primary hover:text-primary/90 transition-colors'
+            className='text-primary hover:text-highlight/90 transition-colors'
           >
             {feedback.about.name}
           </Link>

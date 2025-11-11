@@ -12,7 +12,7 @@ import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 import { User, Settings, Shield } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 
 export default function SettingsPage() {

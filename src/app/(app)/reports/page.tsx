@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { listAvailableReports, listReportInstances } from '@/lib/actions/report'
 import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { BarChart3 } from 'lucide-react'
 import {
   Card,
@@ -109,7 +109,7 @@ export default async function ReportsPage() {
                       <div className='space-y-1'>
                         <Link
                           href={`/reports/instances/${i.id}`}
-                          className='hover:text-primary transition-colors'
+                          className='hover:text-highlight transition-colors'
                         >
                           {i.reportName}
                         </Link>

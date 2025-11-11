@@ -1,7 +1,16 @@
-export function Rag({ rag }: { rag: string }) {
+import { Badge } from './ui/badge'
+
+export function Rag({
+  rag,
+  size = 'default',
+}: {
+  rag: string
+  size?: 'small' | 'default'
+}) {
+  const sizeClass = size === 'small' ? 'text-xs' : 'text-sm'
   const cls =
     rag === 'green' ? 'rag-green' : rag === 'amber' ? 'rag-amber' : 'rag-red'
-  return <span className={`badge ${cls}`}>{rag.toUpperCase()}</span>
+  return <Badge className={`${cls} ${sizeClass}`}>{rag.toUpperCase()}</Badge>
 }
 
 export function RagCircle({

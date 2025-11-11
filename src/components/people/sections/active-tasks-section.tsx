@@ -3,7 +3,7 @@ import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
 import { Button } from '@/components/ui/button'
 import { ListTodo, Eye } from 'lucide-react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { getTasksForAssignee } from '@/lib/data/tasks'
 import { getOptionalUser } from '@/lib/auth-utils'
 

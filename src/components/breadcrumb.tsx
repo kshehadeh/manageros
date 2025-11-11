@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { ChevronRight, ChevronDown, Loader2 } from 'lucide-react'
 import { useBreadcrumb } from './breadcrumb-provider'
 import {

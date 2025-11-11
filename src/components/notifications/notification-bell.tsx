@@ -17,7 +17,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { markNotificationAsRead } from '@/lib/actions/notification'
 import { formatDistanceToNow } from 'date-fns'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { useNotifications } from '@/hooks/use-notifications'
 
 interface NotificationBellProps {

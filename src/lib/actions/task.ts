@@ -303,6 +303,64 @@ export async function getAllTasksForInitiative(initiativeId: string) {
   })
 }
 
+/**
+ * Get task completion counts for an initiative (both direct and through objectives)
+ * Optimized query that only returns counts, not full task data
+ * @param initiativeId The initiative ID
+ * @returns Object with total and completed task counts
+ */
+export async function getInitiativeTaskCompletionCounts(initiativeId: string) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    throw new Error('User must belong to an organization to view tasks')
+  }
+
+  const baseWhere = {
+    AND: [
+      {
+        OR: [{ initiativeId }, { objective: { initiativeId } }],
+      },
+      {
+        OR: [
+          { initiative: { organizationId: user.organizationId } },
+          {
+            objective: {
+              initiative: { organizationId: user.organizationId },
+            },
+          },
+        ],
+      },
+      getTaskAccessWhereClause(
+        user.organizationId,
+        user.id,
+        user.personId || undefined
+      ),
+    ],
+  }
+
+  // Get total count
+  const total = await prisma.task.count({
+    where: baseWhere,
+  })
+
+  // Get completed count (status is 'done' or 'dropped')
+  const completed = await prisma.task.count({
+    where: {
+      ...baseWhere,
+      status: {
+        in: ['done', 'dropped'],
+      },
+    },
+  })
+
+  return {
+    total,
+    completed,
+  }
+}
+
 export async function getTask(taskId: string) {
   const user = await getCurrentUser()
 

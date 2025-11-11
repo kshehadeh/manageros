@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { requireAuth } from '@/lib/auth-utils'
 import { Button } from '@/components/ui/button'
 import { Upload, Plus, Workflow, Users2 } from 'lucide-react'

@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { PersonAvatarWrapper } from './person-avatar-wrapper'
 import { PersonStatusBadge } from './person-status-badge'
 import { PersonActionsDropdown } from './person-actions-dropdown'
@@ -130,7 +130,7 @@ export function PersonDetailContent({
                   <Building2 className='w-4 h-4' />
                   <Link
                     href={`/teams/${person.team.id}`}
-                    className='hover:text-primary transition-colors'
+                    className='hover:text-highlight transition-colors'
                   >
                     {person.team.name}
                   </Link>
@@ -141,7 +141,7 @@ export function PersonDetailContent({
                   <UserIcon className='w-4 h-4' />
                   <Link
                     href={`/people/${person.manager.id}`}
-                    className='hover:text-primary transition-colors'
+                    className='hover:text-highlight transition-colors'
                   >
                     {person.manager.name}
                   </Link>
@@ -183,7 +183,7 @@ export function PersonDetailContent({
                 <MessageCircle className='w-4 h-4' />
                 <Link
                   href={`/feedback/about/${person.id}`}
-                  className='hover:text-primary transition-colors'
+                  className='hover:text-highlight transition-colors'
                 >
                   {feedbackCount}{' '}
                   {feedbackCount === 1 ? 'Feedback' : 'Feedbacks'}

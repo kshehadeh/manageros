@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createOneOnOne, updateOneOnOne } from '@/lib/actions/oneonone'
 import { type OneOnOneFormData } from '@/lib/validations'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { MarkdownEditor } from './markdown-editor'
 import { Button } from '@/components/ui/button'
 import {

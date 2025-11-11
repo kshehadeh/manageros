@@ -56,7 +56,7 @@ export function PersonListItem({
         <div className='flex-1 min-w-0'>
           <button
             onClick={handleClick}
-            className='text-sm font-medium hover:text-primary transition-colors text-left'
+            className='text-sm font-medium hover:text-highlight transition-colors text-left'
           >
             {person.name}
           </button>

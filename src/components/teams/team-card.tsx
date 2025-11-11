@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { Users, Target, ChevronDown, ChevronRight } from 'lucide-react'
 import { Team, Person, Initiative } from '@prisma/client'
 import { TeamActionsDropdown } from '@/components/teams/team-actions-dropdown'
@@ -91,7 +91,7 @@ export function TeamCard({
                 <TeamAvatar name={team.name} avatar={team.avatar} size='sm' />
                 <Link
                   href={`/teams/${team.id}`}
-                  className='font-medium hover:text-primary transition-colors'
+                  className='font-medium hover:text-highlight transition-colors'
                 >
                   {team.name}
                 </Link>

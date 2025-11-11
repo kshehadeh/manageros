@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { fetchJiraAssignedTickets, getJiraBaseUrl } from '@/lib/actions/jira'
+import { ExternalLink } from '@/components/ui/link'
 
 interface JiraWorkActivityTableProps {
   personId: string
@@ -149,14 +150,12 @@ export function JiraWorkActivityTable({
               {assignedTickets.map(item => (
                 <TableRow key={item.id}>
                   <TableCell>
-                    <a
+                    <ExternalLink
                       href={getJiraUrl(item.jiraIssueKey)}
-                      target='_blank'
-                      rel='noopener noreferrer'
                       className='font-medium text-primary hover:underline'
                     >
                       {item.jiraIssueKey}
-                    </a>
+                    </ExternalLink>
                   </TableCell>
                   <TableCell>
                     <div>

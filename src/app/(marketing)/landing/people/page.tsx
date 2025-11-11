@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 
 import { FadeInOnScroll } from '@/components/marketing/fade-in'
 import { Button } from '@/components/ui/button'

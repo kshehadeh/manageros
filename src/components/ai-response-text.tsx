@@ -1,4 +1,5 @@
 import ReactMarkdown from 'react-markdown'
+import { ExternalLink } from '@/components/ui/link'
 
 interface AiResponseTextProps {
   text: string
@@ -62,14 +63,9 @@ export function AiResponseText({ text }: AiResponseTextProps) {
 
         // Links
         a: ({ children, href }) => (
-          <a
-            href={href}
-            target='_blank'
-            rel='noopener noreferrer'
-            className='text-primary underline hover:text-primary/80'
-          >
+          <ExternalLink href={href} className='text-primary underline'>
             {children}
-          </a>
+          </ExternalLink>
         ),
 
         // Horizontal rule

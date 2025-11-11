@@ -4,7 +4,7 @@ import {
   getOrganizationInvitations,
   getOrganizationMembers,
 } from '@/lib/actions/organization'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'

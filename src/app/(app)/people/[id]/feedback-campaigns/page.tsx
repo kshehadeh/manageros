@@ -4,7 +4,7 @@ import { FeedbackCampaignList } from '@/components/feedback/feedback-campaign-li
 import { FeedbackCampaignsBreadcrumbClient } from '@/components/feedback/feedback-campaigns-breadcrumb-client'
 import { Button } from '@/components/ui/button'
 import { Plus, MessageSquare } from 'lucide-react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { checkIfManagerOrSelf } from '@/lib/utils/people-utils'
 import { getPersonById, getPersonByUserId } from '@/lib/data/people'
 import { getFeedbackCampaignsForPerson } from '@/lib/data/feedback-campaigns'

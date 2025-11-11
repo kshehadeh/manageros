@@ -8,7 +8,7 @@ import {
 import { Card } from '@/components/ui/card'
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 
 interface HighlightsSectionProps {
   overdueTasksCount: number

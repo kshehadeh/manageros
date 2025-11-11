@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { TeamActionsDropdown } from './team-actions-dropdown'
 import { ClickableTeamAvatar } from './clickable-team-avatar'
 import { TeamAvatarEditDialog } from './team-avatar-edit-dialog'
@@ -62,7 +62,7 @@ export function TeamDetailContent({ team, isAdmin }: TeamDetailContentProps) {
           subtitle={
             <>
               {team.description && (
-                <p className='page-section-subtitle'>{team.description}</p>
+                <div className='page-section-subtitle'>{team.description}</div>
               )}
               {team.parent && (
                 <div className='text-sm text-muted-foreground mt-1'>

@@ -9,7 +9,7 @@ import { ManageOwnersModal } from './manage-owners-modal'
 import { Users, Link as LinkIcon, User } from 'lucide-react'
 import { SimplePeopleList } from '@/components/people/person-list'
 import { TeamAvatar } from '@/components/teams/team-avatar'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import type { Person } from '@/types/person'
 import { useRouter } from 'next/navigation'
 import type { Prisma } from '@prisma/client'
@@ -179,7 +179,6 @@ export function InitiativeSidebar({
     <div className='w-full lg:w-80 space-y-6'>
       {/* Team Section */}
       <PageSection
-        variant='bordered'
         header={
           <SectionHeader
             icon={Users}
@@ -214,7 +213,6 @@ export function InitiativeSidebar({
 
       {/* Associated People Section */}
       <PageSection
-        variant='bordered'
         header={
           <SectionHeader
             icon={User}
@@ -258,7 +256,6 @@ export function InitiativeSidebar({
 
       {/* Links Section */}
       <PageSection
-        variant='bordered'
         header={
           <SectionHeader
             icon={LinkIcon}

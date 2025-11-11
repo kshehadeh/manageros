@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { FeedbackCampaignStatusBadge } from '@/components/feedback/feedback-campaign-status-badge'
 import { format } from 'date-fns'
-import Link from 'next/link'
+import { Link } from '@/components/ui/link'
 import { useState, useEffect, useRef } from 'react'
 
 interface FeedbackCampaign {
@@ -99,7 +99,7 @@ export function FeedbackCampaignCard({ campaign }: FeedbackCampaignCardProps) {
               {campaign.name && (
                 <Link
                   href={`/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`}
-                  className='font-medium text-foreground hover:text-primary transition-colors block truncate'
+                  className='font-medium text-foreground hover:text-highlight transition-colors block truncate'
                 >
                   {campaign.name}
                 </Link>
