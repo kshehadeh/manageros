@@ -40,7 +40,7 @@ export function SectionHeader({
 
   return (
     <div
-      className={`flex items-start justify-between md:mx-0 md:px-2 ${className} mb-2 bg-muted p-2 rounded-md`}
+      className={`flex items-start justify-between md:mx-0 md:px-2 ${className} mb-2 bg-muted p-2`}
     >
       <div className='flex-1 flex items-start gap-2'>
         <Icon className='w-6 h-6 shrink-0 mt-0.5' />

@@ -69,6 +69,23 @@
 
   --rdp-accent-color: var(--color-primary);
   --rdp-background-color: var(--color-background);
+
+  /* Badge color mappings for Tailwind */
+  --badge-success: var(--color-badge-success);
+  --badge-success-foreground: var(--color-badge-success-foreground);
+  --badge-success-text: var(--color-badge-success-text);
+  --badge-warning: var(--color-badge-warning);
+  --badge-warning-foreground: var(--color-badge-warning-foreground);
+  --badge-warning-text: var(--color-badge-warning-text);
+  --badge-error: var(--color-badge-error);
+  --badge-error-foreground: var(--color-badge-error-foreground);
+  --badge-error-text: var(--color-badge-error-text);
+  --badge-info: var(--color-badge-info);
+  --badge-info-foreground: var(--color-badge-info-foreground);
+  --badge-info-text: var(--color-badge-info-text);
+  --badge-neutral: var(--color-badge-neutral);
+  --badge-neutral-foreground: var(--color-badge-neutral-foreground);
+  --badge-neutral-text: var(--color-badge-neutral-text);
 }
 
 .dark {
@@ -119,6 +136,23 @@
   --calendar-icon-hue: 93deg;
   --calendar-icon-brightness: 103%;
   --calendar-icon-contrast: 103%;
+
+  /* Badge color mappings for Tailwind */
+  --badge-success: var(--color-badge-success);
+  --badge-success-foreground: var(--color-badge-success-foreground);
+  --badge-success-text: var(--color-badge-success-text);
+  --badge-warning: var(--color-badge-warning);
+  --badge-warning-foreground: var(--color-badge-warning-foreground);
+  --badge-warning-text: var(--color-badge-warning-text);
+  --badge-error: var(--color-badge-error);
+  --badge-error-foreground: var(--color-badge-error-foreground);
+  --badge-error-text: var(--color-badge-error-text);
+  --badge-info: var(--color-badge-info);
+  --badge-info-foreground: var(--color-badge-info-foreground);
+  --badge-info-text: var(--color-badge-info-text);
+  --badge-neutral: var(--color-badge-neutral);
+  --badge-neutral-foreground: var(--color-badge-neutral-foreground);
+  --badge-neutral-text: var(--color-badge-neutral-text);
 }
 
 .rdp-root {
