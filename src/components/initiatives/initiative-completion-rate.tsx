@@ -1,5 +1,4 @@
-import { getAllTasksForInitiative } from '@/lib/actions/task'
-import { calculateTaskCompletionPercentage } from '@/lib/completion-utils'
+import { getInitiativeTaskCompletionCounts } from '@/lib/actions/task'
 
 interface InitiativeCompletionRateProps {
   initiativeId: string
@@ -8,9 +7,12 @@ interface InitiativeCompletionRateProps {
 export async function InitiativeCompletionRate({
   initiativeId,
 }: InitiativeCompletionRateProps) {
-  // Fetch all tasks for completion rate calculation
-  const allTasks = await getAllTasksForInitiative(initiativeId)
-  const completionRate = calculateTaskCompletionPercentage(allTasks)
+  // Get task completion counts using optimized query
+  const { total, completed } =
+    await getInitiativeTaskCompletionCounts(initiativeId)
+
+  // Calculate completion percentage
+  const completionRate = total === 0 ? 0 : Math.round((completed / total) * 100)
 
   return <div>{completionRate}% complete</div>
 }

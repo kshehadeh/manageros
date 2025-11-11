@@ -62,7 +62,7 @@ export function PageHeader({
                   </div>
                 )}
                 {subtitle && (
-                  <div className='page-section-subtitle'>
+                  <div className='text-muted-foreground text-sm'>
                     {typeof subtitle === 'string' ? (
                       <p>{subtitle}</p>
                     ) : (

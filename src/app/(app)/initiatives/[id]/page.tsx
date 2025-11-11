@@ -29,6 +29,7 @@ import {
   InitiativeSidebarSkeleton,
   InitiativeCompletionRateSkeleton,
 } from '@/components/initiatives/initiative-detail-skeletons'
+import { Rag } from '../../../../components/rag'
 
 export default async function InitiativeDetail({
   params,
@@ -50,6 +51,7 @@ export default async function InitiativeDetail({
       id: true,
       title: true,
       summary: true,
+      rag: true,
     },
   })
 
@@ -70,9 +72,12 @@ export default async function InitiativeDetail({
           title={init.title}
           titleIcon={Rocket}
           subtitle={
-            <Suspense fallback={<InitiativeCompletionRateSkeleton />}>
-              <InitiativeCompletionRate initiativeId={init.id} />
-            </Suspense>
+            <div className='flex items-center gap-2'>
+              <Rag rag={init.rag} size='small' />
+              <Suspense fallback={<InitiativeCompletionRateSkeleton />}>
+                <InitiativeCompletionRate initiativeId={init.id} />
+              </Suspense>
+            </div>
           }
           actions={
             <InitiativeActionsDropdown

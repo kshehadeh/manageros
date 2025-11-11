@@ -411,17 +411,6 @@ input[type='time']::-webkit-calendar-picker-indicator {
   color: var(--color-foreground);
 }
 
-.page-section-subtitle {
-  font-size: 0.875rem;
-  color: var(--color-muted-foreground);
-  display: none;
-}
-@media (min-width: 768px) {
-  .page-section-subtitle {
-    display: block;
-  }
-}
-
 /* Standardized link hover colors */
 .link-hover {
   transition: color 0.15s ease-in-out;
