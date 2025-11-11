@@ -110,7 +110,7 @@ export function TaskSidebar({
   }))
 
   return (
-    <div className='w-full lg:w-80 space-y-6'>
+    <div className='w-full lg:w-80 space-y-2xl'>
       {/* Details Section */}
       {hasDetails && (
         <PageSection header={<SectionHeader icon={Clock} title='Details' />}>
@@ -118,13 +118,13 @@ export function TaskSidebar({
             <table className='w-full'>
               <tbody>
                 <tr>
-                  <td className='py-1 pr-3'>
-                    <div className='flex items-center gap-2 text-muted-foreground'>
+                  <td className='py-sm pr-lg'>
+                    <div className='flex items-center gap-md text-muted-foreground'>
                       <ListTodo className='w-3.5 h-3.5' />
                       <span className='font-medium'>Status</span>
                     </div>
                   </td>
-                  <td className='py-1'>
+                  <td className='py-sm'>
                     <InlineEditableDropdown
                       value={status}
                       options={statusOptions}
@@ -141,13 +141,13 @@ export function TaskSidebar({
                 </tr>
 
                 <tr>
-                  <td className='py-1 pr-3'>
-                    <div className='flex items-center gap-2 text-muted-foreground'>
+                  <td className='py-sm pr-lg'>
+                    <div className='flex items-center gap-md text-muted-foreground'>
                       <Flag className='w-3.5 h-3.5' />
                       <span className='font-medium'>Priority</span>
                     </div>
                   </td>
-                  <td className='py-1'>
+                  <td className='py-sm'>
                     <InlineEditableDropdown
                       value={priority}
                       options={priorityOptions}
@@ -170,7 +170,7 @@ export function TaskSidebar({
                         <span className='font-medium'>Assignee</span>
                       </div>
                     </td>
-                    <td className='py-1'>
+                    <td className='py-sm'>
                       <Link
                         href={`/people/${assignee.id}`}
                         className='text-primary hover:underline'
@@ -189,7 +189,7 @@ export function TaskSidebar({
                         <span className='font-medium'>Initiative</span>
                       </div>
                     </td>
-                    <td className='py-1'>
+                    <td className='py-sm'>
                       <Link
                         href={`/initiatives/${initiative.id}`}
                         className='text-primary hover:text-highlight/80 font-medium'
@@ -208,7 +208,7 @@ export function TaskSidebar({
                         <span className='font-medium'>Objective</span>
                       </div>
                     </td>
-                    <td className='py-1'>{objective.title}</td>
+                    <td className='py-sm'>{objective.title}</td>
                   </tr>
                 )}
 
@@ -220,18 +220,18 @@ export function TaskSidebar({
                         <span className='font-medium'>Estimate</span>
                       </div>
                     </td>
-                    <td className='py-1'>{estimate} hours</td>
+                    <td className='py-sm'>{estimate} hours</td>
                   </tr>
                 )}
 
                 <tr>
-                  <td className='py-1 pr-3'>
-                    <div className='flex items-center gap-2 text-muted-foreground'>
+                  <td className='py-sm pr-lg'>
+                    <div className='flex items-center gap-md text-muted-foreground'>
                       <Calendar className='w-3.5 h-3.5' />
                       <span className='font-medium'>Due</span>
                     </div>
                   </td>
-                  <td className='py-1'>
+                  <td className='py-sm'>
                     <InlineEditableDate
                       value={dueDate || null}
                       onValueChange={handleDueDateChange}
@@ -249,18 +249,18 @@ export function TaskSidebar({
                         <span className='font-medium'>Creator</span>
                       </div>
                     </td>
-                    <td className='py-1'>{createdBy.name}</td>
+                    <td className='py-sm'>{createdBy.name}</td>
                   </tr>
                 )}
 
                 <tr>
-                  <td className='py-1 pr-3'>
-                    <div className='flex items-center gap-2 text-muted-foreground'>
+                  <td className='py-sm pr-lg'>
+                    <div className='flex items-center gap-md text-muted-foreground'>
                       <Clock className='w-3.5 h-3.5' />
                       <span className='font-medium'>Updated</span>
                     </div>
                   </td>
-                  <td className='py-1'>
+                  <td className='py-sm'>
                     {new Date(updatedAt).toLocaleString()}
                   </td>
                 </tr>

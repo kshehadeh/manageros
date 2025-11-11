@@ -204,88 +204,88 @@ export function PersonImportForm() {
             <table className='min-w-full border rounded-lg'>
               <thead className='bg-accent/30'>
                 <tr>
-                  <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
+                  <th className='px-xl py-lg text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
                     Column Name
                   </th>
-                  <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
+                  <th className='px-xl py-lg text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
                     Description
                   </th>
-                  <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
+                  <th className='px-xl py-lg text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
                     Required
                   </th>
-                  <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
+                  <th className='px-xl py-lg text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
                     Example
                   </th>
                 </tr>
               </thead>
               <tbody className='divide-y'>
                 <tr>
-                  <td className='px-4 py-3 text-sm font-medium text-foreground border-r'>
+                  <td className='px-xl py-lg text-sm font-medium text-foreground border-r'>
                     name
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground border-r'>
                     Person&apos;s full name
                   </td>
-                  <td className='px-4 py-3 text-sm text-destructive border-r'>
+                  <td className='px-xl py-lg text-sm text-destructive border-r'>
                     Yes
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground'>
                     John Doe
                   </td>
                 </tr>
                 <tr>
-                  <td className='px-4 py-3 text-sm font-medium text-foreground border-r'>
+                  <td className='px-xl py-lg text-sm font-medium text-foreground border-r'>
                     email
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground border-r'>
                     Person&apos;s email address
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground border-r'>
                     No
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground'>
                     john.doe@company.com
                   </td>
                 </tr>
                 <tr>
-                  <td className='px-4 py-3 text-sm font-medium text-foreground border-r'>
+                  <td className='px-xl py-lg text-sm font-medium text-foreground border-r'>
                     role
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground border-r'>
                     Person&apos;s job title/role
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground border-r'>
                     No
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground'>
                     Senior Engineer
                   </td>
                 </tr>
                 <tr>
-                  <td className='px-4 py-3 text-sm font-medium text-foreground border-r'>
+                  <td className='px-xl py-lg text-sm font-medium text-foreground border-r'>
                     team
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground border-r'>
                     Team name (must match existing team)
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground border-r'>
                     No
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground'>
                     Engineering
                   </td>
                 </tr>
                 <tr>
-                  <td className='px-4 py-3 text-sm font-medium text-foreground border-r'>
+                  <td className='px-xl py-lg text-sm font-medium text-foreground border-r'>
                     manager
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground border-r'>
                     Manager&apos;s name (must match existing person)
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground border-r'>
                     No
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground'>
                     Jane Smith
                   </td>
                 </tr>

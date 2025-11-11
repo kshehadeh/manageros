@@ -79,7 +79,7 @@ export function TeamPulseSection({ members }: TeamPulseSectionProps) {
             icon={Activity}
             title='Team Pulse'
             description={
-              <div className='hidden md:flex items-center gap-2 text-xs text-muted-foreground'>
+              <div className='hidden md:flex items-center gap-md text-xs text-muted-foreground'>
                 <Link href='/direct-reports' className='hover:underline'>
                   View Direct Reports
                 </Link>
@@ -92,14 +92,14 @@ export function TeamPulseSection({ members }: TeamPulseSectionProps) {
           />
         }
       >
-        <div className='flex flex-col gap-2.5'>
+        <div className='flex flex-col gap-lg'>
           {members.map(member => (
             <Card
               key={member.id}
               onClick={() => handleMemberClick(member.id)}
-              className='p-3 bg-muted/20 border-0 rounded-md shadow-none hover:bg-muted/30 transition-colors cursor-pointer'
+              className='p-lg bg-muted/20 border-0 rounded-md shadow-none hover:bg-muted/30 transition-colors cursor-pointer'
             >
-              <div className='flex items-center gap-3'>
+              <div className='flex items-center gap-lg'>
                 <PersonAvatar
                   name={member.name}
                   avatar={member.avatar}
@@ -110,14 +110,14 @@ export function TeamPulseSection({ members }: TeamPulseSectionProps) {
                   <div className='font-medium text-sm truncate'>
                     {member.name}
                   </div>
-                  <div className='text-xs text-muted-foreground mt-1'>
+                  <div className='text-xs text-muted-foreground mt-sm'>
                     {formatOneOnOneInfo(
                       member.nextOneOnOne,
                       member.lastOneOnOne
                     )}
                   </div>
                   {(member.taskCount > 0 || member.feedbackPending) && (
-                    <div className='text-xs text-muted-foreground mt-1'>
+                    <div className='text-xs text-muted-foreground mt-sm'>
                       {member.taskCount > 0 &&
                         `• ${member.taskCount} task${member.taskCount === 1 ? '' : 's'}`}
                       {member.feedbackPending && `• Feedback pending`}

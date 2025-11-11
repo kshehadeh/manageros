@@ -27,9 +27,9 @@ const statusConfig = {
 }
 
 const sizeConfig = {
-  sm: 'text-2xs px-1.5 py-0.5',
-  md: 'text-xs px-2.5 py-0.5',
-  lg: 'text-sm px-3 py-1',
+  sm: 'text-2xs px-md py-xs',
+  md: 'text-xs px-lg py-xs',
+  lg: 'text-sm px-lg py-sm',
 }
 
 export function PersonStatusBadge({

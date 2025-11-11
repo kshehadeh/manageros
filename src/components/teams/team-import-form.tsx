@@ -202,60 +202,60 @@ export function TeamImportForm() {
             <table className='min-w-full border rounded-lg'>
               <thead className='bg-accent/30'>
                 <tr>
-                  <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
+                  <th className='px-xl py-lg text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
                     Column Name
                   </th>
-                  <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
+                  <th className='px-xl py-lg text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
                     Description
                   </th>
-                  <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
+                  <th className='px-xl py-lg text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
                     Required
                   </th>
-                  <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
+                  <th className='px-xl py-lg text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-b'>
                     Example
                   </th>
                 </tr>
               </thead>
               <tbody className='divide-y'>
                 <tr>
-                  <td className='px-4 py-3 text-sm font-medium text-foreground border-r'>
+                  <td className='px-xl py-lg text-sm font-medium text-foreground border-r'>
                     name
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground border-r'>
                     Team name
                   </td>
-                  <td className='px-4 py-3 text-sm text-destructive border-r'>
+                  <td className='px-xl py-lg text-sm text-destructive border-r'>
                     Yes
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground'>
                     Engineering
                   </td>
                 </tr>
                 <tr>
-                  <td className='px-4 py-3 text-sm font-medium text-foreground border-r'>
+                  <td className='px-xl py-lg text-sm font-medium text-foreground border-r'>
                     description
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground border-r'>
                     Team description
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground border-r'>
                     No
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground'>
                     Software development team
                   </td>
                 </tr>
                 <tr>
-                  <td className='px-4 py-3 text-sm font-medium text-foreground border-r'>
+                  <td className='px-xl py-lg text-sm font-medium text-foreground border-r'>
                     parent
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground border-r'>
                     Parent team name (must match existing team)
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground border-r'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground border-r'>
                     No
                   </td>
-                  <td className='px-4 py-3 text-sm text-muted-foreground'>
+                  <td className='px-xl py-lg text-sm text-muted-foreground'>
                     Engineering
                   </td>
                 </tr>
@@ -363,19 +363,19 @@ export function TeamImportForm() {
                 <table className='min-w-full divide-y'>
                   <thead className='bg-accent/30'>
                     <tr>
-                      <th className='px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
+                      <th className='px-2xl py-lg text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                         Row
                       </th>
-                      <th className='px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
+                      <th className='px-2xl py-lg text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                         Name
                       </th>
-                      <th className='px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
+                      <th className='px-2xl py-lg text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                         Description
                       </th>
-                      <th className='px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
+                      <th className='px-2xl py-lg text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                         Parent
                       </th>
-                      <th className='px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
+                      <th className='px-2xl py-lg text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                         Errors
                       </th>
                     </tr>
@@ -383,19 +383,19 @@ export function TeamImportForm() {
                   <tbody className='divide-y'>
                     {result.errorRows.map((row, index) => (
                       <tr key={index}>
-                        <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground'>
+                        <td className='px-2xl py-xl whitespace-nowrap text-sm font-medium text-foreground'>
                           {row.rowNumber}
                         </td>
-                        <td className='px-6 py-4 whitespace-nowrap text-sm text-foreground'>
+                        <td className='px-2xl py-xl whitespace-nowrap text-sm text-foreground'>
                           {row.data.name}
                         </td>
-                        <td className='px-6 py-4 whitespace-nowrap text-sm text-foreground'>
+                        <td className='px-2xl py-xl whitespace-nowrap text-sm text-foreground'>
                           {row.data.description}
                         </td>
-                        <td className='px-6 py-4 whitespace-nowrap text-sm text-foreground'>
+                        <td className='px-2xl py-xl whitespace-nowrap text-sm text-foreground'>
                           {row.data.parent}
                         </td>
-                        <td className='px-6 py-4 text-sm text-destructive'>
+                        <td className='px-2xl py-xl text-sm text-destructive'>
                           {row.errors.join(', ')}
                         </td>
                       </tr>

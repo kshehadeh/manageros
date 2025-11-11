@@ -18,13 +18,13 @@ export default function TopBar() {
   const { toggle } = useCommandPalette()
 
   return (
-    <header className='h-16 bg-card text-card-foreground border-b px-6 flex items-center'>
+    <header className='h-16 bg-card text-card-foreground border-b px-2xl flex items-center'>
       <div className='flex w-full items-center justify-between'>
-        <div className='flex items-center gap-4'>
+        <div className='flex items-center gap-xl'>
           {/* Mobile hamburger menu button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className='lg:hidden p-2 bg-secondary border rounded-lg text-secondary-foreground hover:bg-secondary/80 transition-colors'
+            className='lg:hidden p-md bg-secondary border rounded-lg text-secondary-foreground hover:bg-secondary/80 transition-colors'
           >
             {isMobileMenuOpen ? (
               <X className='h-5 w-5' />
@@ -37,19 +37,19 @@ export default function TopBar() {
             <Breadcrumb />
           </div>
         </div>
-        <div className='flex items-center gap-2'>
+        <div className='flex items-center gap-md'>
           {/* Search organization button - shown on both mobile and desktop */}
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
                   onClick={toggle}
-                  className='flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 flex-1 md:w-[280px] max-w-[200px] md:max-w-none bg-secondary/50 border rounded-lg hover:bg-secondary/70 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
+                  className='flex items-center gap-md px-lg py-md md:px-xl md:py-lg flex-1 md:w-[280px] max-w-[200px] md:max-w-none bg-secondary/50 border rounded-lg hover:bg-secondary/70 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
                 >
                   <span className='flex-1 text-left text-sm text-muted-foreground truncate'>
                     Search organization
                   </span>
-                  <kbd className='pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-background px-1.5 font-mono text-xs font-medium text-foreground shadow-sm shrink-0'>
+                  <kbd className='pointer-events-none inline-flex h-5 select-none items-center gap-sm rounded border bg-background px-md font-mono text-xs font-medium text-foreground shadow-sm shrink-0'>
                     <span className='text-xs'>⌘</span>K
                   </kbd>
                 </button>
@@ -61,7 +61,7 @@ export default function TopBar() {
           </TooltipProvider>
 
           {/* Desktop right-side actions */}
-          <div className='hidden md:flex items-center gap-2'>
+          <div className='hidden md:flex items-center gap-md'>
             <NotificationBell />
             <ModeToggle />
           </div>

@@ -83,7 +83,7 @@ export function InlineEditableDate({
   if (isEditing) {
     return (
       <div className={cn('w-full', className)}>
-        <div className='flex items-center gap-2 w-full'>
+        <div className='flex items-center gap-md w-full'>
           <div className='flex-1 min-w-0'>
             <DateTimePickerWithNaturalInput
               value={editValue}
@@ -119,7 +119,7 @@ export function InlineEditableDate({
   return (
     <div
       className={cn(
-        'group cursor-pointer rounded-md px-1 py-0.5 -mx-1 -my-0.5 hover:bg-muted/50 transition-colors',
+        'group cursor-pointer rounded-md px-sm py-xs -mx-sm -my-xs hover:bg-muted/50 transition-colors',
         disabled && 'cursor-not-allowed opacity-50',
         className
       )}
@@ -137,7 +137,7 @@ export function InlineEditableDate({
             </div>
           )}
         </div>
-        <Edit2 className='h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0' />
+        <Edit2 className='h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-md flex-shrink-0' />
       </div>
     </div>
   )

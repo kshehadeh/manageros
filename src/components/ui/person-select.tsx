@@ -82,11 +82,11 @@ export function PersonSelect({
   }, [autoFocus, isLoading, availablePeople.length])
 
   const renderPersonItem = (person: Person) => (
-    <div className='flex items-center gap-3'>
+    <div className='flex items-center gap-lg'>
       {showAvatar && (
         <PersonAvatar name={person.name} avatar={person.avatar} size='xs' />
       )}
-      <div className='flex items-center gap-2 flex-1 min-w-0'>
+      <div className='flex items-center gap-md flex-1 min-w-0'>
         <span className='font-medium whitespace-nowrap'>{person.name}</span>
         {showRole && person.role && (
           <span className='text-xs text-muted-foreground truncate'>
@@ -124,7 +124,7 @@ export function PersonSelect({
         className='overflow-y-auto'
       >
         {searchQuery && (
-          <div className='px-2 py-1 text-xs text-muted-foreground border-b'>
+          <div className='px-md py-sm text-xs text-muted-foreground border-b'>
             Searching: &ldquo;{searchQuery}&rdquo;
           </div>
         )}
@@ -136,7 +136,7 @@ export function PersonSelect({
           </SelectItem>
         ))}
         {filteredPeople.length === 0 && searchQuery && (
-          <div className='py-6 text-center text-sm text-muted-foreground'>
+          <div className='py-2xl text-center text-sm text-muted-foreground'>
             No people found matching &ldquo;{searchQuery}&rdquo;
           </div>
         )}

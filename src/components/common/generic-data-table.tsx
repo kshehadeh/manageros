@@ -573,13 +573,13 @@ export function GenericDataTable<
 
   if (error) {
     return (
-      <div className='flex items-center justify-center py-8'>
+      <div className='flex items-center justify-center py-3xl'>
         <div className='text-center'>
           <p className='text-destructive font-medium'>
             Error loading {config.entityNamePlural.toLowerCase()}
           </p>
-          <p className='text-sm text-muted-foreground mt-1'>{error}</p>
-          <Button onClick={refetch} variant='outline' className='mt-4'>
+          <p className='text-sm text-muted-foreground mt-sm'>{error}</p>
+          <Button onClick={refetch} variant='outline' className='mt-xl'>
             Try Again
           </Button>
         </div>
@@ -588,11 +588,11 @@ export function GenericDataTable<
   }
 
   return (
-    <div className='space-y-4'>
+    <div className='space-y-xl'>
       {/* Filter Controls */}
       {!hideFilters && (
-        <div className='space-y-4 px-3 md:px-0'>
-          <div className='flex items-center gap-4'>
+        <div className='space-y-xl px-lg md:px-0'>
+          <div className='flex items-center gap-xl'>
             {/* Search Input - Takes up most space */}
             {!immutableFilters?.search && (
               <div className='relative flex-1 min-w-0'>
@@ -603,7 +603,7 @@ export function GenericDataTable<
                   placeholder={config.searchPlaceholder}
                   value={searchInput}
                   onChange={e => setSearchInput(e.target.value)}
-                  className='pl-9'
+                  className='pl-2xl'
                 />
                 {isSearching && (
                   <div className='absolute right-2 top-2.5'>
@@ -662,15 +662,15 @@ export function GenericDataTable<
                   return (
                     <div className='flex flex-wrap items-center gap-x-3 gap-y-1'>
                       <span>{countText}</span>
-                      <span className='inline-flex items-center gap-1'>
+                      <span className='inline-flex items-center gap-sm'>
                         <Layers className='h-3.5 w-3.5' />
                         <span>{groupingLabel}</span>
                       </span>
-                      <span className='inline-flex items-center gap-1'>
+                      <span className='inline-flex items-center gap-sm'>
                         <ArrowUpDown className='h-3.5 w-3.5' />
                         <span>{sortingLabel}</span>
                       </span>
-                      <span className='inline-flex items-center gap-1'>
+                      <span className='inline-flex items-center gap-sm'>
                         <Filter className='h-3.5 w-3.5' />
                         <span>{filtersSummary}</span>
                       </span>
@@ -685,7 +685,7 @@ export function GenericDataTable<
       <div className='-mx-3 md:mx-0 md:rounded-md border-y md:border relative'>
         {/* Loading Spinner in top right corner */}
         {loading && (
-          <div className='absolute top-2 right-2 z-10 bg-background/80 rounded-full p-2'>
+          <div className='absolute top-md right-md z-10 bg-background/80 rounded-full p-md'>
             <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent' />
           </div>
         )}
@@ -735,7 +735,7 @@ export function GenericDataTable<
                 >
                   <div className='flex items-center justify-center'>
                     <div className='h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent' />
-                    <span className='ml-2 text-sm text-muted-foreground'>
+                    <span className='ml-md text-sm text-muted-foreground'>
                       {config.loadingMessage}
                     </span>
                   </div>
@@ -758,7 +758,7 @@ export function GenericDataTable<
                           }).length
                         }
                       >
-                        <div className='flex items-center gap-2'>
+                        <div className='flex items-center gap-md'>
                           <Button
                             variant='ghost'
                             size='sm'
@@ -861,7 +861,7 @@ export function GenericDataTable<
                 ).pagination.totalPages
               }
             </div>
-            <div className='flex items-center gap-2'>
+            <div className='flex items-center gap-md'>
               <Button
                 variant='outline'
                 size='sm'

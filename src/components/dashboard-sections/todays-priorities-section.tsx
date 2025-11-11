@@ -247,7 +247,7 @@ export function TodaysPrioritiesSection({
             icon={ListTodo}
             title="Today's Priorities"
             description={
-              <div className='hidden md:flex items-center gap-2 text-xs text-muted-foreground'>
+              <div className='hidden md:flex items-center gap-md text-xs text-muted-foreground'>
                 <Link href='/my-tasks' className='hover:underline'>
                   View My Tasks
                 </Link>
@@ -268,7 +268,7 @@ export function TodaysPrioritiesSection({
           />
         }
       >
-        <div className='flex flex-col gap-1.5'>
+        <div className='flex flex-col gap-md'>
           {priorities.map(item => {
             if (item.type === 'task') {
               return (
@@ -277,23 +277,23 @@ export function TodaysPrioritiesSection({
                   onClick={e => handleTaskClick(e, item)}
                   className='block cursor-pointer'
                 >
-                  <Card className='p-3 bg-muted/20 border-0 rounded-md shadow-none hover:bg-muted/30 transition-colors cursor-pointer'>
-                    <div className='flex items-center justify-between gap-3'>
-                      <div className='flex items-center gap-3 flex-1 min-w-0'>
+                  <Card className='p-lg bg-muted/20 border-0 rounded-md shadow-none hover:bg-muted/30 transition-colors cursor-pointer'>
+                    <div className='flex items-center justify-between gap-lg'>
+                      <div className='flex items-center gap-lg flex-1 min-w-0'>
                         {getPriorityIcon(item)}
                         <div className='flex-1 min-w-0'>
-                          <div className='flex items-center gap-2 flex-wrap'>
+                          <div className='flex items-center gap-md flex-wrap'>
                             <span className='text-sm font-medium truncate'>
                               {item.title}
                             </span>
                           </div>
-                          <div className='flex items-center gap-2 text-xs text-muted-foreground mt-1'>
+                          <div className='flex items-center gap-md text-xs text-muted-foreground mt-sm'>
                             <span>{getPriorityLabel(item)}</span>
                             {item.metadata && <span>• {item.metadata}</span>}
                           </div>
                         </div>
                       </div>
-                      <div className='flex items-center gap-2 shrink-0'>
+                      <div className='flex items-center gap-md shrink-0'>
                         {item.status && (
                           <Badge
                             variant={taskStatusUtils.getVariant(
@@ -327,18 +327,18 @@ export function TodaysPrioritiesSection({
                 href={item.href}
                 className='block'
               >
-                <Card className='p-3 bg-muted/20 border-0 rounded-md shadow-none hover:bg-muted/30 transition-colors cursor-pointer'>
-                  <div className='flex items-center justify-between gap-3'>
-                    <div className='flex items-center gap-3 flex-1 min-w-0'>
+                <Card className='p-lg bg-muted/20 border-0 rounded-md shadow-none hover:bg-muted/30 transition-colors cursor-pointer'>
+                  <div className='flex items-center justify-between gap-lg'>
+                    <div className='flex items-center gap-lg flex-1 min-w-0'>
                       {getPriorityIcon(item)}
                       <div className='flex-1 min-w-0'>
-                        <div className='flex items-center gap-2 flex-wrap'>
+                        <div className='flex items-center gap-md flex-wrap'>
                           <span className='text-sm font-medium truncate'>
                             {item.title}
                           </span>
                           {getPriorityBadge(item)}
                         </div>
-                        <div className='flex items-center gap-2 text-xs text-muted-foreground mt-1'>
+                        <div className='flex items-center gap-md text-xs text-muted-foreground mt-sm'>
                           <span>{getPriorityLabel(item)}</span>
                           {item.metadata && <span>• {item.metadata}</span>}
                         </div>

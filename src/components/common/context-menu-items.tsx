@@ -24,7 +24,7 @@ export function ContextMenuItem({
   className = '',
 }: ContextMenuItemProps) {
   const baseClass =
-    'w-full px-3 py-2 text-sm hover:bg-accent flex items-center gap-2 text-left transition-colors'
+    'w-full px-lg py-md text-sm hover:bg-accent flex items-center gap-md text-left transition-colors'
   const variantClass =
     variant === 'destructive'
       ? 'text-destructive hover:bg-destructive/10 hover:text-destructive'
@@ -219,8 +219,8 @@ export function SetDueDateMenuItem({
 
   return (
     <>
-      <Separator className='my-1' />
-      <div className='px-2 py-1.5 text-xs font-semibold text-muted-foreground'>
+      <Separator className='my-sm' />
+      <div className='px-md py-md text-xs font-semibold text-muted-foreground'>
         Set Due Date
       </div>
       <ContextMenuItem

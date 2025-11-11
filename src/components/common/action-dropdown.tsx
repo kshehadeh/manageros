@@ -91,7 +91,7 @@ export function ActionDropdown({
         <Button
           variant='ghost'
           size={size}
-          className={cn('flex items-center gap-2', triggerClassName)}
+          className={cn('flex items-center gap-md', triggerClassName)}
           onClick={toggle}
         >
           <Pickaxe className='h-4 w-4' />
@@ -103,7 +103,7 @@ export function ActionDropdown({
       {open && (
         <div
           className={cn(
-            'absolute top-full mt-2 bg-popover text-popover-foreground border rounded-md shadow-lg z-10 min-w-48',
+            'absolute top-full mt-md bg-popover text-popover-foreground border rounded-md shadow-lg z-10 min-w-48',
             align === 'right' ? 'right-0' : 'left-0',
             menuClassName
           )}

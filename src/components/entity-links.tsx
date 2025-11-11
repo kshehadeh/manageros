@@ -82,8 +82,8 @@ export function LinkDisplay({
 
   return (
     <Card className='hover:shadow-md transition-shadow'>
-      <CardContent className='p-4'>
-        <div className='flex items-start gap-3'>
+      <CardContent className='p-xl'>
+        <div className='flex items-start gap-lg'>
           <div className='flex-shrink-0'>
             <div className='w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center'>
               <IconComponent className='w-5 h-5 text-gray-600' />
@@ -91,7 +91,7 @@ export function LinkDisplay({
           </div>
 
           <div className='flex-1 min-w-0'>
-            <div className='flex items-start justify-between gap-2'>
+            <div className='flex items-start justify-between gap-md'>
               <div className='flex-1 min-w-0'>
                 <h4 className='font-medium text-sm truncate'>{urlTitle}</h4>
                 <ExternalLink
@@ -101,7 +101,7 @@ export function LinkDisplay({
                   {link.url}
                 </ExternalLink>
                 {link.description && (
-                  <p className='text-xs text-gray-600 mt-1 line-clamp-2'>
+                  <p className='text-xs text-gray-600 mt-sm line-clamp-2'>
                     {link.description}
                   </p>
                 )}
@@ -116,14 +116,14 @@ export function LinkDisplay({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align='end'>
                     <DropdownMenuItem onClick={handleEdit}>
-                      <Edit className='h-4 w-4 mr-2' />
+                      <Edit className='h-4 w-4 mr-md' />
                       Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={handleDelete}
                       className='text-red-600'
                     >
-                      <Trash2 className='h-4 w-4 mr-2' />
+                      <Trash2 className='h-4 w-4 mr-md' />
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -131,7 +131,7 @@ export function LinkDisplay({
               )}
             </div>
 
-            <div className='flex items-center gap-2 mt-2'>
+            <div className='flex items-center gap-md mt-md'>
               <Badge variant='secondary' className='text-xs'>
                 {urlType}
               </Badge>
@@ -221,9 +221,9 @@ export function LinkForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className='space-y-4'>
+    <form onSubmit={handleSubmit} className='space-y-xl'>
       {errors.general && (
-        <div className='bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg'>
+        <div className='bg-red-50 border border-red-200 text-red-700 px-xl py-lg rounded-lg'>
           {errors.general}
         </div>
       )}
@@ -240,7 +240,7 @@ export function LinkForm({
           required
         />
         {errors.url && (
-          <p className='text-red-600 text-sm mt-1'>{errors.url}</p>
+          <p className='text-red-600 text-sm mt-sm'>{errors.url}</p>
         )}
       </div>
 
@@ -274,7 +274,7 @@ export function LinkForm({
         )}
       </div>
 
-      <div className='flex justify-end gap-2'>
+      <div className='flex justify-end gap-md'>
         {onCancel && (
           <Button type='button' variant='outline' onClick={onCancel}>
             Cancel
@@ -341,13 +341,13 @@ export function LinkManager({
   }
 
   return (
-    <div className='space-y-4'>
+    <div className='space-y-xl'>
       <SectionHeader
         icon={LinkIcon}
         title={`Links (${links.length})`}
         action={
           <Button onClick={handleAddLink} size='sm'>
-            <Plus className='h-4 w-4 mr-2' />
+            <Plus className='h-4 w-4 mr-md' />
             Add Link
           </Button>
         }
@@ -359,7 +359,7 @@ export function LinkManager({
           <p>No links added yet</p>
         </div>
       ) : (
-        <div className='space-y-3'>
+        <div className='space-y-lg'>
           {links.map(link => (
             <LinkDisplay
               key={link.id}
