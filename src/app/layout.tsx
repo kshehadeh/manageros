@@ -1,7 +1,19 @@
+/* eslint-disable camelcase */
 import './globals.css'
 import type { ReactNode } from 'react'
 import '@/lib/reports/register-all'
 import { Metadata } from 'next'
+import { Geist, Geist_Mono } from 'next/font/google'
+
+const geist = Geist({
+  subsets: ['latin'],
+  variable: '--font-geist',
+})
+
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  variable: '--font-geist-mono',
+})
 
 export const metadata: Metadata = {
   title: {
@@ -34,7 +46,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang='en' suppressHydrationWarning>
+    <html
+      lang='en'
+      suppressHydrationWarning
+      className={`${geist.variable} ${geistMono.variable}`}
+    >
       <body className='min-h-screen bg-background text-foreground antialiased'>
         {children}
       </body>

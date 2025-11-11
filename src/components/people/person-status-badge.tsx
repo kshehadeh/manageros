@@ -27,7 +27,7 @@ const statusConfig = {
 }
 
 const sizeConfig = {
-  sm: 'text-[0.5rem] px-1.5 py-0.5',
+  sm: 'text-2xs px-1.5 py-0.5',
   md: 'text-xs px-2.5 py-0.5',
   lg: 'text-sm px-3 py-1',
 }
