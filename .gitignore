@@ -24,3 +24,9 @@ tsconfig.tsbuildinfo
 .env.sentry-build-plugin
 
 next-env.d.ts
+
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/screenshots/
