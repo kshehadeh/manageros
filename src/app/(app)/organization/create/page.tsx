@@ -1,9 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { useRouter } from 'next/navigation'
+import { Building } from 'lucide-react'
 import { createOrganization } from '@/lib/actions/organization'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader } from '@/components/ui/page-header'
+import { FormTemplate, type FormSection } from '@/components/ui/form-template'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 export default function CreateOrganizationPage() {
   const [formData, setFormData] = useState({
@@ -12,7 +16,6 @@ export default function CreateOrganizationPage() {
   })
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -22,10 +25,9 @@ export default function CreateOrganizationPage() {
     try {
       await createOrganization(formData)
 
-      // Redirect to dashboard
-      // Clerk will automatically update the user data
-      router.push('/')
-      router.refresh() // Refresh to get updated user data
+      // Redirect to dashboard with a full page reload to ensure fresh data
+      // This ensures the session is refreshed and the dashboard shows the new organization
+      window.location.href = '/dashboard'
     } catch (error) {
       setError(
         error instanceof Error
@@ -37,86 +39,70 @@ export default function CreateOrganizationPage() {
     }
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
+  const handleInputChange = (field: 'name' | 'slug', value: string) => {
     setFormData(prev => ({
       ...prev,
-      [name]: value,
+      [field]: value,
     }))
   }
 
-  return (
-    <div className='min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8'>
-      <div className='max-w-xl w-full space-y-8'>
-        <div>
-          <h2 className='mt-6 text-center text-3xl font-extrabold text-neutral-100'>
-            Create Organization
-          </h2>
-          <p className='mt-2 text-center text-sm text-neutral-400'>
-            Create a new organization to get started with mpath
-          </p>
-        </div>
-        <form className='mt-8 space-y-6' onSubmit={handleSubmit}>
-          {error && (
-            <div className='bg-red-900/30 border border-red-700 text-red-300 px-4 py-3 rounded'>
-              {error}
-            </div>
-          )}
-          <div className='space-y-4'>
-            <div>
-              <label
-                htmlFor='name'
-                className='block text-sm font-medium text-neutral-300'
-              >
-                Organization Name
-              </label>
-              <input
-                id='name'
-                name='name'
-                type='text'
-                required
-                className='input mt-1'
-                placeholder='Acme Corp'
-                value={formData.name}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor='slug'
-                className='block text-sm font-medium text-neutral-300'
-              >
-                Organization Slug
-              </label>
-              <input
-                id='slug'
-                name='slug'
-                type='text'
-                required
-                className='input mt-1'
-                placeholder='acme-corp'
-                value={formData.slug}
-                onChange={handleInputChange}
-              />
-              <p className='mt-1 text-xs text-neutral-500'>
-                Used in URLs. Only lowercase letters, numbers, and hyphens
-                allowed.
-              </p>
-            </div>
+  const sections: FormSection[] = [
+    {
+      content: (
+        <>
+          <div className='space-y-2'>
+            <Label htmlFor='name'>
+              Organization Name <span className='text-destructive'>*</span>
+            </Label>
+            <Input
+              id='name'
+              type='text'
+              required
+              placeholder='Acme Corp'
+              value={formData.name}
+              onChange={e => handleInputChange('name', e.target.value)}
+            />
           </div>
+          <div className='space-y-2'>
+            <Label htmlFor='slug'>
+              Organization Slug <span className='text-destructive'>*</span>
+            </Label>
+            <Input
+              id='slug'
+              type='text'
+              required
+              placeholder='acme-corp'
+              value={formData.slug}
+              onChange={e => handleInputChange('slug', e.target.value)}
+            />
+            <p className='text-xs text-muted-foreground'>
+              Used in URLs. Only lowercase letters, numbers, and hyphens
+              allowed.
+            </p>
+          </div>
+        </>
+      ),
+    },
+  ]
 
-          <div>
-            <Button
-              type='submit'
-              disabled={isLoading}
-              variant='outline'
-              className='w-full justify-center'
-            >
-              {isLoading ? 'Creating organization...' : 'Create organization'}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
+  return (
+    <PageContainer>
+      <PageHeader
+        title='Create Organization'
+        titleIcon={Building}
+        subtitle='Create a new organization to get started with ManagerOS'
+      />
+      <FormTemplate
+        sections={sections}
+        onSubmit={handleSubmit}
+        submitButton={{
+          text: 'Create Organization',
+          loadingText: 'Creating organization...',
+          icon: Building,
+        }}
+        generalError={error}
+        isSubmitting={isLoading}
+      />
+    </PageContainer>
   )
 }

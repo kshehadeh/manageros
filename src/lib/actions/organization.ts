@@ -55,7 +55,9 @@ export async function createOrganization(formData: {
     await syncUserDataToClerk(userId)
   }
 
+  // Revalidate paths that depend on organization status
   revalidatePath('/')
+  revalidatePath('/dashboard')
   return result
 }
 

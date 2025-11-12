@@ -15,6 +15,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
 
 interface GithubCredentialsFormProps {
   initialCredentials?: {
@@ -132,14 +134,9 @@ export function GithubCredentialsForm({
                     </DialogDescription>
                   </DialogHeader>
                   <form onSubmit={handleSubmit} className='space-y-4'>
-                    <div>
-                      <label
-                        htmlFor='githubUsername'
-                        className='block text-sm font-medium text-foreground'
-                      >
-                        GitHub Username
-                      </label>
-                      <input
+                    <div className='space-y-2'>
+                      <Label htmlFor='githubUsername'>GitHub Username</Label>
+                      <Input
                         type='text'
                         id='githubUsername'
                         value={formData.githubUsername}
@@ -150,22 +147,16 @@ export function GithubCredentialsForm({
                           }))
                         }
                         placeholder='your-github-username'
-                        className='input'
                         required
                       />
-                      <p className='mt-1 text-xs text-muted-foreground'>
+                      <p className='text-xs text-muted-foreground'>
                         Your GitHub username
                       </p>
                     </div>
 
-                    <div>
-                      <label
-                        htmlFor='githubPat'
-                        className='block text-sm font-medium text-foreground'
-                      >
-                        Personal Access Token
-                      </label>
-                      <input
+                    <div className='space-y-2'>
+                      <Label htmlFor='githubPat'>Personal Access Token</Label>
+                      <Input
                         type='password'
                         id='githubPat'
                         value={formData.githubPat}
@@ -176,10 +167,9 @@ export function GithubCredentialsForm({
                           }))
                         }
                         placeholder='Enter your GitHub Personal Access Token'
-                        className='input'
                         required
                       />
-                      <p className='mt-1 text-xs text-muted-foreground'>
+                      <p className='text-xs text-muted-foreground'>
                         Generate a Personal Access Token from your GitHub
                         account settings
                       </p>
@@ -284,14 +274,9 @@ export function GithubCredentialsForm({
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className='space-y-4'>
-                  <div>
-                    <label
-                      htmlFor='githubUsername'
-                      className='block text-sm font-medium text-foreground'
-                    >
-                      GitHub Username
-                    </label>
-                    <input
+                  <div className='space-y-2'>
+                    <Label htmlFor='githubUsername'>GitHub Username</Label>
+                    <Input
                       type='text'
                       id='githubUsername'
                       value={formData.githubUsername}
@@ -302,22 +287,16 @@ export function GithubCredentialsForm({
                         }))
                       }
                       placeholder='your-github-username'
-                      className='input'
                       required
                     />
-                    <p className='mt-1 text-xs text-muted-foreground'>
+                    <p className='text-xs text-muted-foreground'>
                       Your GitHub username
                     </p>
                   </div>
 
-                  <div>
-                    <label
-                      htmlFor='githubPat'
-                      className='block text-sm font-medium text-foreground'
-                    >
-                      Personal Access Token
-                    </label>
-                    <input
+                  <div className='space-y-2'>
+                    <Label htmlFor='githubPat'>Personal Access Token</Label>
+                    <Input
                       type='password'
                       id='githubPat'
                       value={formData.githubPat}
@@ -328,10 +307,9 @@ export function GithubCredentialsForm({
                         }))
                       }
                       placeholder='Enter your GitHub Personal Access Token'
-                      className='input'
                       required
                     />
-                    <p className='mt-1 text-xs text-muted-foreground'>
+                    <p className='text-xs text-muted-foreground'>
                       Generate a Personal Access Token from your GitHub account
                       settings
                     </p>

@@ -70,21 +70,9 @@ export function MarketingHeader() {
             Home
           </Link>
         )}
-        {isHomePage && (
-          <Link href='#features' className='transition-colors hover:text-white'>
-            Features
-          </Link>
-        )}
-        {isHomePage && (
-          <Link href='#proof' className='transition-colors hover:text-white'>
-            Outcomes
-          </Link>
-        )}
-        {isHomePage && (
-          <Link href='#cta' className='transition-colors hover:text-white'>
-            Get Started
-          </Link>
-        )}
+        <Link href='/pricing' className='transition-colors hover:text-white'>
+          Pricing
+        </Link>
         <DropdownMenu>
           <DropdownMenuTrigger
             className={`flex items-center gap-1 transition-colors hover:text-white outline-none ${geistMono.className}`}
@@ -143,33 +131,13 @@ export function MarketingHeader() {
                 Home
               </Link>
             )}
-            {isHomePage && (
-              <Link
-                href='#features'
-                onClick={() => setIsMobileMenuOpen(false)}
-                className='text-sm font-medium text-white/70 transition-colors hover:text-white'
-              >
-                Features
-              </Link>
-            )}
-            {isHomePage && (
-              <Link
-                href='#proof'
-                onClick={() => setIsMobileMenuOpen(false)}
-                className='text-sm font-medium text-white/70 transition-colors hover:text-white'
-              >
-                Outcomes
-              </Link>
-            )}
-            {isHomePage && (
-              <Link
-                href='#cta'
-                onClick={() => setIsMobileMenuOpen(false)}
-                className='text-sm font-medium text-white/70 transition-colors hover:text-white'
-              >
-                Get Started
-              </Link>
-            )}
+            <Link
+              href='/pricing'
+              onClick={() => setIsMobileMenuOpen(false)}
+              className='text-sm font-medium text-white/70 transition-colors hover:text-white'
+            >
+              Pricing
+            </Link>
             <div className='flex flex-col gap-2'>
               <p className='text-sm font-medium text-white/70'>Product Tour</p>
               <Link
