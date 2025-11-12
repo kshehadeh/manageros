@@ -1016,13 +1016,24 @@ export async function removeUserFromOrganization(userId: string) {
     if (!currentUser.organizationId) {
       throw new Error('Organization ID is required')
     }
-     
+
     await tx.organizationMember.delete({
       where: {
         userId_organizationId: {
           userId,
           organizationId: currentUser.organizationId,
         },
+      },
+    })
+
+    // Clear organizationId and reset role on User record to prevent stale permissions
+    // This is important because getCurrentUser() falls back to User.role when no
+    // OrganizationMember record exists, so we need to clear these fields
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        organizationId: null,
+        role: 'USER', // Reset to default role
       },
     })
   })
