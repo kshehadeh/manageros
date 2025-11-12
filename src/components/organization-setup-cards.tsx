@@ -2,13 +2,8 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
+import { HelpBlock } from '@/components/common/help-block'
 import { OrganizationCreationDialog } from '@/components/organization-creation-dialog'
 import { acceptInvitationForUser } from '@/lib/actions/organization'
 import { Building2, Users, Mail, CheckCircle2, AlertCircle } from 'lucide-react'
@@ -88,161 +83,125 @@ export function OrganizationSetupCards({
 
   return (
     <div className='space-y-2xl'>
-      <div className='text-center'>
-        <h2 className='text-2xl font-semibold mb-md'>Welcome to mpath!</h2>
-        <p className='text-muted-foreground'>
-          To get started, you&apos;ll need to create an organization or join an
-          existing one.
-        </p>
-      </div>
-
-      <div className='grid gap-2xl md:grid-cols-2'>
-        {/* Create New Organization Card */}
-        <Card className='hover:shadow-md transition-shadow'>
-          <CardHeader>
-            <div className='flex items-center gap-3'>
-              <div className='p-2 bg-primary/10 rounded-lg'>
-                <Building2 className='h-6 w-6 text-primary' />
-              </div>
-              <div>
-                <CardTitle className='text-lg'>
-                  Create New Organization
-                </CardTitle>
-                <CardDescription>
-                  Start fresh with your own organization
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className='space-y-4'>
+      <div className='space-y-6'>
+        <HelpBlock
+          title='Create New Organization'
+          description={
             <div className='space-y-2'>
-              <h4 className='font-medium text-sm'>
-                Why create a new organization?
-              </h4>
-              <ul className='text-sm text-muted-foreground space-y-1'>
-                <li>• You&apos;re starting a new company or team</li>
-                <li>• You want to be the organization admin</li>
-                <li>• You need full control over settings and members</li>
-                <li>• You&apos;re setting up a demo or test environment</li>
+              <p>Start fresh with your own organization.</p>
+              <ul className='text-sm space-y-1 list-disc list-inside'>
+                <li>You&apos;re starting a new company or team</li>
+                <li>You want to be the organization admin</li>
+                <li>You need full control over settings and members</li>
+                <li>You&apos;re setting up a demo or test environment</li>
               </ul>
             </div>
-            <Button
-              onClick={() => setIsCreateDialogOpen(true)}
-              className='w-full'
-            >
-              Create Organization
-            </Button>
-          </CardContent>
-        </Card>
+          }
+          icon={Building2}
+          variant='info'
+          action={{
+            label: 'Create Organization',
+            onClick: () => setIsCreateDialogOpen(true),
+            variant: 'default',
+            size: 'default',
+          }}
+        />
 
-        {/* Join Existing Organization Card */}
-        <Card className='hover:shadow-md transition-shadow'>
-          <CardHeader>
-            <div className='flex items-center gap-3'>
-              <div className='p-2 bg-blue-500/10 rounded-lg'>
-                <Users className='h-6 w-6 text-blue-500' />
-              </div>
-              <div>
-                <CardTitle className='text-lg'>
-                  Join Existing Organization
-                </CardTitle>
-                <CardDescription>
-                  Accept an invitation or request to join
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className='space-y-4'>
-            {error && (
-              <div className='flex items-center gap-2 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 text-sm'>
-                <AlertCircle className='h-4 w-4 flex-shrink-0' />
-                <span>{error}</span>
-              </div>
-            )}
+        {error && (
+          <HelpBlock
+            title='Error'
+            description={error}
+            icon={AlertCircle}
+            variant='warning'
+          />
+        )}
 
-            {pendingInvitations.length > 0 ? (
-              <div className='space-y-3'>
-                <h4 className='font-medium text-sm'>Pending Invitations</h4>
-                <div className='space-y-2'>
-                  {pendingInvitations.map(invitation => (
-                    <div
-                      key={invitation.id}
-                      className='p-3 border rounded-lg bg-card'
-                    >
-                      <div className='flex items-start justify-between'>
-                        <div className='flex-1'>
-                          <div className='flex items-center gap-2 mb-1'>
-                            <h5 className='font-medium text-sm'>
-                              {invitation.organization.name}
-                            </h5>
-                            {isExpiringSoon(invitation.expiresAt) && (
-                              <span className='badge rag-amber text-xs'>
-                                EXPIRES SOON
-                              </span>
-                            )}
-                          </div>
-                          {invitation.organization.description && (
-                            <p className='text-xs text-muted-foreground mb-2'>
-                              {invitation.organization.description}
-                            </p>
-                          )}
-                          <div className='text-xs text-muted-foreground'>
-                            <div>
-                              Invited by{' '}
-                              <span className='text-foreground'>
-                                {invitation.invitedBy.name}
-                              </span>
-                            </div>
-                            <div>
-                              Expires {formatDate(invitation.expiresAt)}
-                            </div>
-                          </div>
+        {pendingInvitations.length > 0 ? (
+          <div className='space-y-4'>
+            <HelpBlock
+              title='Join Existing Organization'
+              description='You have pending invitations. Accept an invitation to join an organization.'
+              icon={Users}
+              variant='info'
+            />
+            <div className='space-y-2'>
+              {pendingInvitations.map(invitation => (
+                <Card key={invitation.id} className='p-4'>
+                  <div className='flex items-start justify-between'>
+                    <div className='flex-1'>
+                      <div className='flex items-center gap-2 mb-1'>
+                        <h5 className='font-medium text-sm'>
+                          {invitation.organization.name}
+                        </h5>
+                        {isExpiringSoon(invitation.expiresAt) && (
+                          <span className='badge rag-amber text-xs'>
+                            EXPIRES SOON
+                          </span>
+                        )}
+                      </div>
+                      {invitation.organization.description && (
+                        <p className='text-xs text-muted-foreground mb-2'>
+                          {invitation.organization.description}
+                        </p>
+                      )}
+                      <div className='text-xs text-muted-foreground'>
+                        <div>
+                          Invited by{' '}
+                          <span className='text-foreground'>
+                            {invitation.invitedBy.name}
+                          </span>
                         </div>
-                        <Button
-                          size='sm'
-                          variant='outline'
-                          onClick={() => handleAcceptInvitation(invitation.id)}
-                          disabled={acceptingInvitation === invitation.id}
-                        >
-                          {acceptingInvitation === invitation.id ? (
-                            <>
-                              <svg
-                                className='animate-spin -ml-1 mr-2 h-4 w-4'
-                                xmlns='http://www.w3.org/2000/svg'
-                                fill='none'
-                                viewBox='0 0 24 24'
-                              >
-                                <circle
-                                  className='opacity-25'
-                                  cx='12'
-                                  cy='12'
-                                  r='10'
-                                  stroke='currentColor'
-                                  strokeWidth='4'
-                                ></circle>
-                                <path
-                                  className='opacity-75'
-                                  fill='currentColor'
-                                  d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                                ></path>
-                              </svg>
-                              Accepting...
-                            </>
-                          ) : (
-                            <>
-                              <CheckCircle2 className='h-4 w-4 mr-1' />
-                              Accept
-                            </>
-                          )}
-                        </Button>
+                        <div>Expires {formatDate(invitation.expiresAt)}</div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
+                    <Button
+                      size='sm'
+                      variant='outline'
+                      onClick={() => handleAcceptInvitation(invitation.id)}
+                      disabled={acceptingInvitation === invitation.id}
+                    >
+                      {acceptingInvitation === invitation.id ? (
+                        <>
+                          <svg
+                            className='animate-spin -ml-1 mr-2 h-4 w-4'
+                            xmlns='http://www.w3.org/2000/svg'
+                            fill='none'
+                            viewBox='0 0 24 24'
+                          >
+                            <circle
+                              className='opacity-25'
+                              cx='12'
+                              cy='12'
+                              r='10'
+                              stroke='currentColor'
+                              strokeWidth='4'
+                            ></circle>
+                            <path
+                              className='opacity-75'
+                              fill='currentColor'
+                              d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                            ></path>
+                          </svg>
+                          Accepting...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className='h-4 w-4 mr-1' />
+                          Accept
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <HelpBlock
+            title='Join Existing Organization'
+            description={
               <div className='space-y-3'>
-                <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+                <div className='flex items-center gap-2 text-sm'>
                   <Mail className='h-4 w-4' />
                   <span>No pending invitations</span>
                 </div>
@@ -250,7 +209,7 @@ export function OrganizationSetupCards({
                   <h4 className='font-medium text-sm'>
                     How to join an existing organization:
                   </h4>
-                  <ol className='text-sm text-muted-foreground space-y-1 list-decimal list-inside'>
+                  <ol className='text-sm space-y-1 list-decimal list-inside'>
                     <li>
                       Contact the admin of the organization you want to join
                     </li>
@@ -270,9 +229,11 @@ export function OrganizationSetupCards({
                   </p>
                 </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            }
+            icon={Users}
+            variant='info'
+          />
+        )}
       </div>
 
       <OrganizationCreationDialog

@@ -104,11 +104,25 @@ export default async function MarketingHome() {
               variant='outline'
               className='border-white/20 bg-white/5 text-white/80 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/40 hover:text-white'
             >
-              <Link href='/landing/initiatives'>
-                See why initiatives matter
-              </Link>
+              <Link href='/pricing'>View pricing</Link>
             </Button>
           </div>
+        </FadeInOnScroll>
+        <FadeInOnScroll delay={400}>
+          <nav className='flex flex-wrap items-center justify-center gap-6 text-sm text-white/70'>
+            <Link
+              href='#features'
+              className='transition-colors hover:text-white'
+            >
+              Features
+            </Link>
+            <Link href='#proof' className='transition-colors hover:text-white'>
+              Outcomes
+            </Link>
+            <Link href='#cta' className='transition-colors hover:text-white'>
+              Get Started
+            </Link>
+          </nav>
         </FadeInOnScroll>
       </section>
 
@@ -184,21 +198,6 @@ export default async function MarketingHome() {
             </FadeInOnScroll>
           ))}
         </div>
-        <FadeInOnScroll
-          delay={360}
-          className='mt-12 rounded-3xl border border-white/10 bg-[linear-gradient(135deg,_rgba(56,189,248,0.12),_rgba(88,86,255,0.18))] p-10 text-left shadow-[0_30px_60px_rgba(15,23,42,0.45)] backdrop-blur'
-        >
-          <blockquote className='space-y-6 text-lg text-white/80'>
-            <p>
-              "mpath helped us connect the dots between delivery, people health,
-              and leadership rituals. Our managers prep faster, uncover risks
-              earlier, and our engineers finally see a clear growth path."
-            </p>
-            <footer className='text-sm text-white/60'>
-              Priya K., Director of Engineering
-            </footer>
-          </blockquote>
-        </FadeInOnScroll>
       </section>
 
       <section id='cta' className='mx-auto max-w-4xl px-6 pb-24 sm:px-8'>

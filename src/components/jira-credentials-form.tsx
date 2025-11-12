@@ -12,6 +12,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
 
 interface JiraCredentialsFormProps {
   initialCredentials?: {
@@ -131,14 +133,9 @@ export function JiraCredentialsForm({
                     </DialogDescription>
                   </DialogHeader>
                   <form onSubmit={handleSubmit} className='space-y-4'>
-                    <div>
-                      <label
-                        htmlFor='jiraBaseUrl'
-                        className='block text-sm font-medium text-foreground'
-                      >
-                        Jira Base URL
-                      </label>
-                      <input
+                    <div className='space-y-2'>
+                      <Label htmlFor='jiraBaseUrl'>Jira Base URL</Label>
+                      <Input
                         type='url'
                         id='jiraBaseUrl'
                         value={formData.jiraBaseUrl}
@@ -149,22 +146,16 @@ export function JiraCredentialsForm({
                           }))
                         }
                         placeholder='https://yourcompany.atlassian.net'
-                        className='input'
                         required
                       />
-                      <p className='mt-1 text-xs text-muted-foreground'>
+                      <p className='text-xs text-muted-foreground'>
                         The base URL of your Jira instance
                       </p>
                     </div>
 
-                    <div>
-                      <label
-                        htmlFor='jiraUsername'
-                        className='block text-sm font-medium text-foreground'
-                      >
-                        Username or Email
-                      </label>
-                      <input
+                    <div className='space-y-2'>
+                      <Label htmlFor='jiraUsername'>Username or Email</Label>
+                      <Input
                         type='text'
                         id='jiraUsername'
                         value={formData.jiraUsername}
@@ -175,22 +166,16 @@ export function JiraCredentialsForm({
                           }))
                         }
                         placeholder='your.email@company.com'
-                        className='input'
                         required
                       />
-                      <p className='mt-1 text-xs text-muted-foreground'>
+                      <p className='text-xs text-muted-foreground'>
                         Your Jira username or email address
                       </p>
                     </div>
 
-                    <div>
-                      <label
-                        htmlFor='jiraApiKey'
-                        className='block text-sm font-medium text-foreground'
-                      >
-                        API Token
-                      </label>
-                      <input
+                    <div className='space-y-2'>
+                      <Label htmlFor='jiraApiKey'>API Token</Label>
+                      <Input
                         type='password'
                         id='jiraApiKey'
                         value={formData.jiraApiKey}
@@ -201,10 +186,9 @@ export function JiraCredentialsForm({
                           }))
                         }
                         placeholder='Enter your Jira API token'
-                        className='input'
                         required
                       />
-                      <p className='mt-1 text-xs text-muted-foreground'>
+                      <p className='text-xs text-muted-foreground'>
                         Generate an API token from your Jira account settings
                       </p>
                     </div>
@@ -308,14 +292,9 @@ export function JiraCredentialsForm({
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className='space-y-4'>
-                  <div>
-                    <label
-                      htmlFor='jiraBaseUrl'
-                      className='block text-sm font-medium text-foreground'
-                    >
-                      Jira Base URL
-                    </label>
-                    <input
+                  <div className='space-y-2'>
+                    <Label htmlFor='jiraBaseUrl'>Jira Base URL</Label>
+                    <Input
                       type='url'
                       id='jiraBaseUrl'
                       value={formData.jiraBaseUrl}
@@ -326,22 +305,16 @@ export function JiraCredentialsForm({
                         }))
                       }
                       placeholder='https://yourcompany.atlassian.net'
-                      className='input'
                       required
                     />
-                    <p className='mt-1 text-xs text-muted-foreground'>
+                    <p className='text-xs text-muted-foreground'>
                       The base URL of your Jira instance
                     </p>
                   </div>
 
-                  <div>
-                    <label
-                      htmlFor='jiraUsername'
-                      className='block text-sm font-medium text-foreground'
-                    >
-                      Username or Email
-                    </label>
-                    <input
+                  <div className='space-y-2'>
+                    <Label htmlFor='jiraUsername'>Username or Email</Label>
+                    <Input
                       type='text'
                       id='jiraUsername'
                       value={formData.jiraUsername}
@@ -352,22 +325,16 @@ export function JiraCredentialsForm({
                         }))
                       }
                       placeholder='your.email@company.com'
-                      className='input'
                       required
                     />
-                    <p className='mt-1 text-xs text-muted-foreground'>
+                    <p className='text-xs text-muted-foreground'>
                       Your Jira username or email address
                     </p>
                   </div>
 
-                  <div>
-                    <label
-                      htmlFor='jiraApiKey'
-                      className='block text-sm font-medium text-foreground'
-                    >
-                      API Token
-                    </label>
-                    <input
+                  <div className='space-y-2'>
+                    <Label htmlFor='jiraApiKey'>API Token</Label>
+                    <Input
                       type='password'
                       id='jiraApiKey'
                       value={formData.jiraApiKey}
@@ -378,10 +345,9 @@ export function JiraCredentialsForm({
                         }))
                       }
                       placeholder='Enter your Jira API token'
-                      className='input'
                       required
                     />
-                    <p className='mt-1 text-xs text-muted-foreground'>
+                    <p className='text-xs text-muted-foreground'>
                       Generate an API token from your Jira account settings
                     </p>
                   </div>

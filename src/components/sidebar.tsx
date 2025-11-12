@@ -1,7 +1,7 @@
 'use client'
 
 import { Link } from '@/components/ui/link'
-import { useClerk } from '@clerk/nextjs'
+import { useClerk, useUser } from '@clerk/nextjs'
 import { signOutWithCleanup } from '@/lib/auth-client-utils'
 import { usePathname } from 'next/navigation'
 import { useMobileMenu } from '@/components/mobile-menu-provider'
@@ -76,6 +76,7 @@ export default function Sidebar({
   serverSession,
   personData,
 }: SidebarProps) {
+  const { user } = useUser()
   const pathname = usePathname()
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useMobileMenu()
   const [isKeyboardShortcutsOpen, setIsKeyboardShortcutsOpen] = useState(false)
@@ -129,32 +130,62 @@ export default function Sidebar({
                 />
               ) : (
                 <PersonAvatar
-                  name={serverSession.name || serverSession.email || 'User'}
+                  name={user?.firstName || user?.lastName || 'User'}
                   size='sm'
                 />
               )}
               <div className={`flex-1 min-w-0 ${geistMono.className}`}>
-                {personData ? (
-                  <Link href={`/people/${personData.id}`}>
-                    <div className='text-sm text-foreground font-medium truncate hover:underline cursor-pointer'>
-                      {personData.name}
+                {/* Case 1: No organization - show email, Create Organization link */}
+                {!serverSession.organizationId && (
+                  <>
+                    <div className='text-sm text-foreground font-medium truncate'>
+                      {serverSession.email
+                        ? serverSession.email
+                        : user?.emailAddresses[0].emailAddress}
                     </div>
-                  </Link>
-                ) : (
-                  <div className='text-sm text-foreground font-medium truncate'>
-                    {serverSession?.name || serverSession?.email}
-                  </div>
+                    <Link
+                      href='/organization/create'
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className='text-xs text-muted-foreground hover:text-foreground underline block mt-xs'
+                    >
+                      Create Organization
+                    </Link>
+                  </>
                 )}
-                {personData?.email || serverSession?.email ? (
-                  <div className='text-xs text-muted-foreground truncate'>
-                    {personData?.email || serverSession?.email}
-                  </div>
-                ) : null}
-                {!personData && serverSession?.organizationId && (
-                  <div className='text-xs text-muted-foreground mt-xs'>
-                    No linked person
-                  </div>
+
+                {/* Case 2: Has organization but no person - show email, organization, Link to Person */}
+                {serverSession.organizationId && !personData && (
+                  <>
+                    <div className='text-sm text-foreground font-medium truncate'>
+                      {serverSession.email
+                        ? serverSession.email
+                        : user?.emailAddresses[0].emailAddress}
+                    </div>
+                    {serverSession.organizationName && (
+                      <div className='text-xs text-muted-foreground truncate mt-xs'>
+                        {serverSession.organizationName}
+                      </div>
+                    )}
+                  </>
                 )}
+
+                {/* Case 3: Has organization and person - show name, organization */}
+                {serverSession.organizationId && personData && (
+                  <>
+                    <Link href={`/people/${personData.id}`}>
+                      <div className='text-sm text-foreground font-medium truncate hover:underline cursor-pointer'>
+                        {personData.name}
+                      </div>
+                    </Link>
+                    {serverSession.organizationName && (
+                      <div className='text-xs text-muted-foreground truncate mt-xs'>
+                        {serverSession.organizationName}
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {/* Settings and Sign out links - always shown */}
                 <div className='flex items-center gap-md mt-sm'>
                   <Link
                     href='/settings'

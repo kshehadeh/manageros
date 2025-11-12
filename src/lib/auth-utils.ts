@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { prisma } from './db'
@@ -64,6 +65,12 @@ export async function getCurrentUser(): Promise<User> {
           id: true,
         },
       },
+      organizationMemberships: {
+        select: {
+          role: true,
+          organizationId: true,
+        },
+      },
     },
   })
 
@@ -109,6 +116,12 @@ export async function getCurrentUser(): Promise<User> {
                 id: true,
               },
             },
+            organizationMemberships: {
+              select: {
+                role: true,
+                organizationId: true,
+              },
+            },
           },
         })
 
@@ -127,6 +140,12 @@ export async function getCurrentUser(): Promise<User> {
               person: {
                 select: {
                   id: true,
+                },
+              },
+              organizationMemberships: {
+                select: {
+                  role: true,
+                  organizationId: true,
                 },
               },
             },
@@ -162,8 +181,48 @@ export async function getCurrentUser(): Promise<User> {
                   id: true,
                 },
               },
+              organizationMemberships: {
+                select: {
+                  role: true,
+                  organizationId: true,
+                },
+              },
             },
           })
+
+          // If there's a pending invitation, create OrganizationMember record
+          if (pendingInvitation && user.organizationId) {
+            await prisma.organizationMember.create({
+              data: {
+                userId: user.id,
+                organizationId: user.organizationId,
+                role: 'USER',
+              },
+            })
+            // Reload user with memberships
+            user = await prisma.user.findUnique({
+              where: { id: user.id },
+              include: {
+                organization: {
+                  select: {
+                    name: true,
+                    slug: true,
+                  },
+                },
+                person: {
+                  select: {
+                    id: true,
+                  },
+                },
+                organizationMemberships: {
+                  select: {
+                    role: true,
+                    organizationId: true,
+                  },
+                },
+              },
+            })
+          }
 
           // If there's a pending invitation, mark it as accepted
           if (pendingInvitation) {
@@ -190,6 +249,18 @@ export async function getCurrentUser(): Promise<User> {
     throw new Error('User not found in database')
   }
 
+  // Get role from OrganizationMember table if user has an organization
+  // Fall back to user.role for backward compatibility
+  let userRole = user.role
+  if (user.organizationId) {
+    const membership = user.organizationMemberships?.find(
+      m => m.organizationId === user.organizationId
+    )
+    if (membership) {
+      userRole = membership.role
+    }
+  }
+
   // Sync user data to Clerk metadata (for future JWT token inclusion)
   // This is async but we don't wait for it to complete
   syncUserDataToClerk(userId).catch(err => {
@@ -200,7 +271,7 @@ export async function getCurrentUser(): Promise<User> {
     id: user.id,
     email: user.email,
     name: user.name,
-    role: user.role,
+    role: userRole,
     organizationId: user.organizationId,
     organizationName: user.organization?.name || null,
     organizationSlug: user.organization?.slug || null,
@@ -237,6 +308,12 @@ export async function getOptionalUser(): Promise<User | null> {
             id: true,
           },
         },
+        organizationMemberships: {
+          select: {
+            role: true,
+            organizationId: true,
+          },
+        },
       },
     })
 
@@ -244,11 +321,23 @@ export async function getOptionalUser(): Promise<User | null> {
       return null
     }
 
+    // Get role from OrganizationMember table if user has an organization
+    // Fall back to user.role for backward compatibility
+    let userRole = user.role
+    if (user.organizationId) {
+      const membership = user.organizationMemberships?.find(
+        m => m.organizationId === user.organizationId
+      )
+      if (membership) {
+        userRole = membership.role
+      }
+    }
+
     return {
       id: user.id,
       email: user.email,
       name: user.name,
-      role: user.role,
+      role: userRole,
       organizationId: user.organizationId,
       organizationName: user.organization?.name || null,
       organizationSlug: user.organization?.slug || null,
@@ -368,7 +457,50 @@ export async function canAccessSynopsesForPerson(
   return await checkIfManagerOrSelf(user.personId, personId)
 }
 
+/**
+ * Check if a user is an admin in a specific organization
+ * @param userId - The user ID
+ * @param organizationId - The organization ID
+ * @returns Promise<boolean> indicating if the user is an admin in that organization
+ */
+export async function isAdminInOrganization(
+  userId: string,
+  organizationId: string
+): Promise<boolean> {
+  const membership = await prisma.organizationMember.findUnique({
+    where: {
+      userId_organizationId: {
+        userId,
+        organizationId,
+      },
+    },
+  })
+  return membership?.role === 'ADMIN'
+}
+
+/**
+ * Get the role of a user in a specific organization
+ * @param userId - The user ID
+ * @param organizationId - The organization ID
+ * @returns Promise<string | null> The role ('ADMIN' or 'USER') or null if not a member
+ */
+export async function getUserRoleInOrganization(
+  userId: string,
+  organizationId: string
+): Promise<string | null> {
+  const membership = await prisma.organizationMember.findUnique({
+    where: {
+      userId_organizationId: {
+        userId,
+        organizationId,
+      },
+    },
+  })
+  return membership?.role || null
+}
+
 // Helper functions for role-based access control
+// These use the role from the User object which is already org-scoped via getCurrentUser
 export function isAdmin(user: { role: string }) {
   return user.role === 'ADMIN'
 }

@@ -69,6 +69,17 @@ export async function POST(request: NextRequest) {
         },
       })
 
+      // Create OrganizationMember record if user has an organization
+      if (organization) {
+        await tx.organizationMember.create({
+          data: {
+            userId: user.id,
+            organizationId: organization.id,
+            role: userRole,
+          },
+        })
+      }
+
       return { user, organization, wasInvited: !!pendingInvitation }
     })
 

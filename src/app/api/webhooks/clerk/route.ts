@@ -115,13 +115,31 @@ export async function POST(req: Request) {
           createdOrUpdatedUserId = newUser.id
         }
 
-        // If there's a pending invitation, mark it as accepted
+        // If there's a pending invitation, mark it as accepted and create OrganizationMember
         if (pendingInvitation) {
           await tx.organizationInvitation.update({
             where: { id: pendingInvitation.id },
             data: {
               status: 'accepted',
               acceptedAt: new Date(),
+            },
+          })
+
+          // Create OrganizationMember record
+          await tx.organizationMember.upsert({
+            where: {
+              userId_organizationId: {
+                userId: createdOrUpdatedUserId,
+                organizationId: pendingInvitation.organization.id,
+              },
+            },
+            create: {
+              userId: createdOrUpdatedUserId,
+              organizationId: pendingInvitation.organization.id,
+              role: 'USER',
+            },
+            update: {
+              role: 'USER', // Ensure role is USER for invited users
             },
           })
         }

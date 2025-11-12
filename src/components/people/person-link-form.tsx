@@ -42,13 +42,9 @@ interface Person {
 
 interface PersonLinkFormProps {
   refreshTrigger?: number
-  onButtonRender?: (_button: React.ReactNode) => void
 }
 
-export function PersonLinkForm({
-  refreshTrigger,
-  onButtonRender,
-}: PersonLinkFormProps) {
+export function PersonLinkForm({ refreshTrigger }: PersonLinkFormProps) {
   const router = useRouter()
   const [availablePersons, setAvailablePersons] = useState<Person[]>([])
   const [selectedPersonId, setSelectedPersonId] = useState('')
@@ -139,68 +135,6 @@ export function PersonLinkForm({
     }
   }, [router])
 
-  // Render button for SectionHeader
-  useEffect(() => {
-    if (!onButtonRender || !userData) return
-
-    const { person } = userData
-
-    if (person) {
-      // Unlink button
-      const unlinkButton = (
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant='outline' size='sm' disabled={isLoading}>
-              <Unlink className='h-4 w-4' />
-              Unlink Account
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Unlink Account</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to unlink your account from{' '}
-                <strong>{person.name}</strong>? This will remove access to
-                personal features until you link to another person.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleUnlink} disabled={isLoading}>
-                {isLoading ? 'Unlinking...' : 'Unlink Account'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )
-      onButtonRender(unlinkButton)
-    } else if (availablePersons.length > 0) {
-      // Link button
-      const linkButton = (
-        <Button
-          onClick={handleLink}
-          disabled={isLoading || !selectedPersonId}
-          size='sm'
-        >
-          <Link className='h-4 w-4' />
-          {isLoading ? 'Linking...' : 'Link Account'}
-        </Button>
-      )
-      onButtonRender(linkButton)
-    } else {
-      // No button when no persons available
-      onButtonRender(null)
-    }
-  }, [
-    userData,
-    availablePersons,
-    selectedPersonId,
-    isLoading,
-    onButtonRender,
-    handleLink,
-    handleUnlink,
-  ])
-
   if (!userData) {
     return (
       <div className='text-center py-4'>
@@ -225,10 +159,39 @@ export function PersonLinkForm({
 
       {person ? (
         <div className='space-y-4'>
-          <div className='flex items-center gap-2 mb-2'>
-            <Link className='h-4 w-4 text-success' />
-            <span className='font-medium'>Currently Linked</span>
-            <Badge variant='success'>Active</Badge>
+          <div className='flex items-center justify-between mb-2'>
+            <div className='flex items-center gap-2'>
+              <Link className='h-4 w-4 text-success' />
+              <span className='font-medium'>Currently Linked</span>
+              <Badge variant='success'>Active</Badge>
+            </div>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant='outline' size='sm' disabled={isLoading}>
+                  <Unlink className='h-4 w-4' />
+                  Unlink Account
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Unlink Account</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to unlink your account from{' '}
+                    <strong>{person.name}</strong>? This will remove access to
+                    personal features until you link to another person.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleUnlink}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Unlinking...' : 'Unlink Account'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
           <PersonListItem
             person={{
@@ -267,6 +230,16 @@ export function PersonLinkForm({
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className='flex justify-end'>
+                <Button
+                  onClick={handleLink}
+                  disabled={isLoading || !selectedPersonId}
+                  size='sm'
+                >
+                  <Link className='h-4 w-4' />
+                  {isLoading ? 'Linking...' : 'Link Account'}
+                </Button>
               </div>
             </>
           ) : (

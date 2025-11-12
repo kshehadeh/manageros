@@ -25,6 +25,8 @@
     "help:index": "bun scripts/help-content-manager.ts index",
     "help:clear": "bun scripts/help-content-manager.ts clear",
     "cleanup:tokens": "bun scripts/cleanup-expired-tokens.ts",
+    "user:delete": "bun scripts/delete-user.ts",
+    "org:delete": "bun scripts/delete-organization.ts",
     "test:email": "bun scripts/test-email-config.ts",
     "test": "playwright test",
     "test:ui": "playwright test --ui",

@@ -27,7 +27,7 @@ export async function createOrganization(formData: {
     throw new Error('Organization slug already exists')
   }
 
-  // Create organization and update user in a transaction
+  // Create organization and add user as admin in a transaction
   const result = await prisma.$transaction(async tx => {
     // Create organization
     const organization = await tx.organization.create({
@@ -37,10 +37,19 @@ export async function createOrganization(formData: {
       },
     })
 
-    // Update user to be admin of the organization
+    // Update user's organizationId (for backward compatibility)
     await tx.user.update({
       where: { id: user.id },
       data: {
+        organizationId: organization.id,
+        role: 'ADMIN', // Keep for backward compatibility
+      },
+    })
+
+    // Create OrganizationMember record with ADMIN role
+    await tx.organizationMember.create({
+      data: {
+        userId: user.id,
         organizationId: organization.id,
         role: 'ADMIN',
       },
@@ -55,7 +64,9 @@ export async function createOrganization(formData: {
     await syncUserDataToClerk(userId)
   }
 
+  // Revalidate paths that depend on organization status
   revalidatePath('/')
+  revalidatePath('/dashboard')
   return result
 }
 
@@ -719,14 +730,27 @@ export async function acceptInvitationForUser(invitationId: string) {
 
   // Update user and invitation in a transaction
   const result = await prisma.$transaction(async tx => {
-    // Update user to join the organization
+    // Update user's organizationId (for backward compatibility)
     const updatedUser = await tx.user.update({
       where: { id: user?.id },
       data: {
         organizationId: invitation.organizationId,
+        role: 'USER', // Keep for backward compatibility
       },
       include: {
         organization: true,
+      },
+    })
+
+    // Create OrganizationMember record with USER role
+    if (!user) {
+      throw new Error('User is required to accept invitation')
+    }
+    await tx.organizationMember.create({
+      data: {
+        userId: user.id,
+        organizationId: invitation.organizationId,
+        role: 'USER',
       },
     })
 
@@ -754,6 +778,38 @@ export async function acceptInvitationForUser(invitationId: string) {
 
 // Organization Member Management Actions
 
+/**
+ * Get organization details including name, slug, description, and member count
+ */
+export async function getOrganizationDetails() {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.organizationId) {
+    return null
+  }
+
+  const organization = await prisma.organization.findUnique({
+    where: { id: user.organizationId },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      createdAt: true,
+      _count: {
+        select: {
+          members: true,
+          people: true,
+          teams: true,
+        },
+      },
+    },
+  })
+
+  return organization
+}
+
 export async function getOrganizationMembers() {
   const user = await getCurrentUser()
 
@@ -767,34 +823,51 @@ export async function getOrganizationMembers() {
     return []
   }
 
-  // Get all users in the organization with their linked person info
-  return await prisma.user.findMany({
+  // Get all organization members with their user and person info
+  const members = await prisma.organizationMember.findMany({
     where: {
       organizationId: user.organizationId,
     },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      createdAt: true,
-      person: {
+    include: {
+      user: {
         select: {
           id: true,
           name: true,
-          role: true,
-          status: true,
-          team: {
+          email: true,
+          createdAt: true,
+          person: {
             select: {
               id: true,
               name: true,
+              role: true,
+              status: true,
+              team: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
             },
           },
         },
       },
     },
-    orderBy: { name: 'asc' },
+    orderBy: {
+      user: {
+        name: 'asc',
+      },
+    },
   })
+
+  // Transform to match the expected format
+  return members.map(member => ({
+    id: member.user.id,
+    name: member.user.name,
+    email: member.user.email,
+    role: member.role,
+    createdAt: member.user.createdAt,
+    person: member.user.person,
+  }))
 }
 
 export async function updateUserRole(
@@ -813,15 +886,24 @@ export async function updateUserRole(
     throw new Error('User must belong to an organization to manage roles')
   }
 
-  // Verify the target user belongs to the same organization
-  const targetUser = await prisma.user.findFirst({
+  // Verify the target user is a member of the same organization
+  const targetMembership = await prisma.organizationMember.findUnique({
     where: {
-      id: userId,
-      organizationId: currentUser.organizationId,
+      userId_organizationId: {
+        userId,
+        organizationId: currentUser.organizationId,
+      },
+    },
+    include: {
+      user: {
+        select: {
+          clerkUserId: true,
+        },
+      },
     },
   })
 
-  if (!targetUser) {
+  if (!targetMembership) {
     throw new Error('User not found or access denied')
   }
 
@@ -831,8 +913,8 @@ export async function updateUserRole(
   }
 
   // Prevent removing the last admin
-  if (targetUser.role === 'ADMIN' && newRole === 'USER') {
-    const adminCount = await prisma.user.count({
+  if (targetMembership.role === 'ADMIN' && newRole === 'USER') {
+    const adminCount = await prisma.organizationMember.count({
       where: {
         organizationId: currentUser.organizationId,
         role: 'ADMIN',
@@ -844,15 +926,20 @@ export async function updateUserRole(
     }
   }
 
-  // Update the user's role
-  await prisma.user.update({
-    where: { id: userId },
+  // Update the user's role in the OrganizationMember table
+  await prisma.organizationMember.update({
+    where: {
+      userId_organizationId: {
+        userId,
+        organizationId: currentUser.organizationId,
+      },
+    },
     data: { role: newRole },
   })
 
   // Sync updated user data to Clerk (role changed)
-  if (targetUser.clerkUserId) {
-    await syncUserDataToClerk(targetUser.clerkUserId)
+  if (targetMembership.user.clerkUserId) {
+    await syncUserDataToClerk(targetMembership.user.clerkUserId)
   }
 
   revalidatePath('/organization/members')
@@ -874,15 +961,25 @@ export async function removeUserFromOrganization(userId: string) {
     throw new Error('User must belong to an organization to manage members')
   }
 
-  // Verify the target user belongs to the same organization
-  const targetUser = await prisma.user.findFirst({
+  // Verify the target user is a member of the same organization
+  const targetMembership = await prisma.organizationMember.findUnique({
     where: {
-      id: userId,
-      organizationId: currentUser.organizationId,
+      userId_organizationId: {
+        userId,
+        organizationId: currentUser.organizationId,
+      },
+    },
+    include: {
+      user: {
+        select: {
+          clerkUserId: true,
+          personId: true,
+        },
+      },
     },
   })
 
-  if (!targetUser) {
+  if (!targetMembership) {
     throw new Error('User not found or access denied')
   }
 
@@ -892,8 +989,8 @@ export async function removeUserFromOrganization(userId: string) {
   }
 
   // Prevent removing the last admin
-  if (targetUser.role === 'ADMIN') {
-    const adminCount = await prisma.user.count({
+  if (targetMembership.role === 'ADMIN') {
+    const adminCount = await prisma.organizationMember.count({
       where: {
         organizationId: currentUser.organizationId,
         role: 'ADMIN',
@@ -908,26 +1005,42 @@ export async function removeUserFromOrganization(userId: string) {
   // Remove user from organization in a transaction
   await prisma.$transaction(async tx => {
     // Unlink user from person if linked
-    if (targetUser.personId) {
+    if (targetMembership.user.personId) {
       await tx.user.update({
         where: { id: userId },
         data: { personId: null },
       })
     }
 
-    // Remove user from organization
+    // Remove OrganizationMember record (this removes the user from the organization)
+    if (!currentUser.organizationId) {
+      throw new Error('Organization ID is required')
+    }
+
+    await tx.organizationMember.delete({
+      where: {
+        userId_organizationId: {
+          userId,
+          organizationId: currentUser.organizationId,
+        },
+      },
+    })
+
+    // Clear organizationId and reset role on User record to prevent stale permissions
+    // This is important because getCurrentUser() falls back to User.role when no
+    // OrganizationMember record exists, so we need to clear these fields
     await tx.user.update({
       where: { id: userId },
       data: {
         organizationId: null,
-        role: 'USER', // Reset role to default
+        role: 'USER', // Reset to default role
       },
     })
   })
 
   // Sync updated user data to Clerk (organizationId and role changed)
-  if (targetUser.clerkUserId) {
-    await syncUserDataToClerk(targetUser.clerkUserId)
+  if (targetMembership.user.clerkUserId) {
+    await syncUserDataToClerk(targetMembership.user.clerkUserId)
   }
 
   revalidatePath('/organization/members')

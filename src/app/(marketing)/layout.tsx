@@ -3,6 +3,8 @@ import { AnimatedGeometricPattern } from '@/components/marketing/animated-geomet
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { ThemeProvider } from 'next-themes'
+import { ClerkProvider } from '@clerk/nextjs'
+import { dark } from '@clerk/themes'
 
 export default async function MarketingLayout({
   children,
@@ -16,22 +18,24 @@ export default async function MarketingLayout({
   }
 
   return (
-    <ThemeProvider
-      attribute='class'
-      defaultTheme='dark'
-      enableSystem={true}
-      storageKey='manageros-theme'
-      disableTransitionOnChange
-    >
-      <main className='relative min-h-screen overflow-hidden bg-[#05070f] text-white'>
-        <div className='pointer-events-none absolute inset-0 overflow-hidden'>
-          <AnimatedGeometricPattern />
-        </div>
-        <div className='relative z-10'>
-          <MarketingHeader />
-          {children}
-        </div>
-      </main>
-    </ThemeProvider>
+    <ClerkProvider appearance={dark}>
+      <ThemeProvider
+        attribute='class'
+        defaultTheme='dark'
+        enableSystem={true}
+        storageKey='manageros-theme'
+        disableTransitionOnChange
+      >
+        <main className='relative min-h-screen overflow-hidden bg-[#05070f] text-white'>
+          <div className='pointer-events-none absolute inset-0 overflow-hidden'>
+            <AnimatedGeometricPattern />
+          </div>
+          <div className='relative z-10'>
+            <MarketingHeader />
+            {children}
+          </div>
+        </main>
+      </ThemeProvider>
+    </ClerkProvider>
   )
 }

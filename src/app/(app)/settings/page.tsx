@@ -1,9 +1,8 @@
-'use client'
-
 import { getJiraCredentials } from '@/lib/actions/jira'
 import { getGithubCredentials } from '@/lib/actions/github'
-import { JiraCredentialsForm } from '@/components/jira-credentials-form'
-import { GithubCredentialsForm } from '@/components/github-credentials-form'
+import { JiraCredentialsSection } from '@/components/settings/jira-credentials-section'
+import { GithubCredentialsSection } from '@/components/settings/github-credentials-section'
+import { UserInfoSection } from '@/components/settings/user-info-section'
 import { PersonLinkForm } from '@/components/people/person-link-form'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
@@ -11,48 +10,16 @@ import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 import { User, Settings, Shield } from 'lucide-react'
-import { useState, useEffect } from 'react'
 import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
+import { getCurrentUser } from '../../../lib/auth-utils'
 
-export default function SettingsPage() {
-  const [jiraCredentials, setJiraCredentials] = useState<{
-    jiraUsername: string
-    jiraBaseUrl: string
-  } | null>(null)
-  const [githubCredentials, setGithubCredentials] = useState<{
-    githubUsername: string
-  } | null>(null)
-  const [accountLinkingButton, setAccountLinkingButton] =
-    useState<React.ReactNode>(null)
-  const [userId, setUserId] = useState<string | null>(null)
-
-  useEffect(() => {
-    const loadCredentials = async () => {
-      const [jira, github] = await Promise.all([
-        getJiraCredentials(),
-        getGithubCredentials(),
-      ])
-      setJiraCredentials(jira)
-      setGithubCredentials(github)
-    }
-    loadCredentials()
-  }, [])
-
-  useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const response = await fetch('/api/user/current')
-        const data = await response.json()
-        if (data.user?.id) {
-          setUserId(data.user.id)
-        }
-      } catch (error) {
-        console.error('Failed to load user:', error)
-      }
-    }
-    loadUser()
-  }, [])
+export default async function SettingsPage() {
+  const user = await getCurrentUser()
+  const [jiraCredentials, githubCredentials] = await Promise.all([
+    getJiraCredentials(),
+    getGithubCredentials(),
+  ])
 
   return (
     <PageContainer>
@@ -66,22 +33,9 @@ export default function SettingsPage() {
           {/* User Info */}
           <PageSection
             variant='bordered'
-            header={
-              <SectionHeader
-                icon={User}
-                title='User Info'
-                description='Basic information about your account'
-              />
-            }
+            header={<SectionHeader icon={User} title='User Info' />}
           >
-            <div className='space-y-2'>
-              {userId && (
-                <div>
-                  <p className='text-sm font-medium'>User ID</p>
-                  <p className='text-sm text-muted-foreground'>{userId}</p>
-                </div>
-              )}
-            </div>
+            <UserInfoSection email={user.email} userId={user.id} />
           </PageSection>
 
           {/* Account Linking and Permissions - Side by side on larger screens */}
@@ -89,15 +43,9 @@ export default function SettingsPage() {
             {/* Person Linking Section */}
             <PageSection
               variant='bordered'
-              header={
-                <SectionHeader
-                  icon={User}
-                  title='Account Linking'
-                  action={accountLinkingButton}
-                />
-              }
+              header={<SectionHeader icon={User} title='Account Linking' />}
             >
-              <PersonLinkForm onButtonRender={setAccountLinkingButton} />
+              <PersonLinkForm />
             </PageSection>
 
             {/* Permissions Section */}
@@ -128,8 +76,10 @@ export default function SettingsPage() {
             }
           >
             <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-              <JiraCredentialsForm initialCredentials={jiraCredentials} />
-              <GithubCredentialsForm initialCredentials={githubCredentials} />
+              <JiraCredentialsSection initialCredentials={jiraCredentials} />
+              <GithubCredentialsSection
+                initialCredentials={githubCredentials}
+              />
             </div>
           </PageSection>
         </div>

@@ -1,11 +1,11 @@
 generator client {
-  provider = "prisma-client-js"  
-  binaryTargets   = ["native", "rhel-openssl-3.0.x"]
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
@@ -23,64 +23,82 @@ model Organization {
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   // Relationships
-  users       User[]
-  teams       Team[]
-  people      Person[]
-  initiatives Initiative[]
-  invitations OrganizationInvitation[]
-  meetings    Meeting[]
-  meetingInstances MeetingInstance[]
-  entityLinks EntityLink[]
-  jobRoles    JobRole[]
-  levels      JobLevel[]
-  domains     JobDomain[]
-  notifications Notification[]
-  reportInstances ReportInstance[]
+  users             User[]
+  members           OrganizationMember[]
+  teams             Team[]
+  people            Person[]
+  initiatives       Initiative[]
+  invitations       OrganizationInvitation[]
+  meetings          Meeting[]
+  meetingInstances  MeetingInstance[]
+  entityLinks       EntityLink[]
+  jobRoles          JobRole[]
+  levels            JobLevel[]
+  domains           JobDomain[]
+  notifications     Notification[]
+  reportInstances   ReportInstance[]
   cronJobExecutions CronJobExecution[]
-  notes          Note[]
-  fileAttachments FileAttachment[]
-  githubOrgs  OrganizationGithubOrg[]
+  notes             Note[]
+  fileAttachments   FileAttachment[]
+  githubOrgs        OrganizationGithubOrg[]
 }
 
 model User {
-  id             String        @id @default(cuid())
-  email          String        @unique
-  name           String
-  passwordHash   String?       // Optional for Clerk-managed users
-  clerkUserId    String?       @unique // Clerk user ID
-  role           String        @default("USER") // ADMIN or USER
-  organizationId String?
-  organization   Organization? @relation(fields: [organizationId], references: [id])
-  personId       String?       @unique
-  person         Person?       @relation(fields: [personId], references: [id])
-  sentInvitations OrganizationInvitation[]
-  jiraCredentials UserJiraCredentials?
-  githubCredentials UserGithubCredentials?
-  feedbackCampaigns FeedbackCampaign[]
-  createdTasks   Task[]
-  createdMeetings Meeting[]
-  createdEntityLinks EntityLink[]
-  notifications  Notification[]
-  notificationResponses NotificationResponse[]
-  ownedReports   Report[]      @relation("ReportOwner")
-  reportRuns     ReportInstance[]
-  notes          Note[]
-  fileAttachments FileAttachment[]
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  
+  id                      String                   @id @default(cuid())
+  email                   String                   @unique
+  name                    String
+  passwordHash            String? // Optional for Clerk-managed users
+  clerkUserId             String?                  @unique // Clerk user ID
+  role                    String                   @default("USER") // ADMIN or USER - DEPRECATED: Use OrganizationMember.role instead
+  organizationId          String? // DEPRECATED: Users can belong to multiple orgs via OrganizationMember
+  organization            Organization?            @relation(fields: [organizationId], references: [id])
+  personId                String?                  @unique
+  person                  Person?                  @relation(fields: [personId], references: [id])
+  sentInvitations         OrganizationInvitation[]
+  organizationMemberships OrganizationMember[]
+  jiraCredentials         UserJiraCredentials?
+  githubCredentials       UserGithubCredentials?
+  feedbackCampaigns       FeedbackCampaign[]
+  createdTasks            Task[]
+  createdMeetings         Meeting[]
+  createdEntityLinks      EntityLink[]
+  notifications           Notification[]
+  notificationResponses   NotificationResponse[]
+  ownedReports            Report[]                 @relation("ReportOwner")
+  reportRuns              ReportInstance[]
+  notes                   Note[]
+  fileAttachments         FileAttachment[]
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+
   @@index([organizationId])
   @@index([personId])
   @@index([clerkUserId])
+}
+
+model OrganizationMember {
+  id             String       @id @default(cuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role           String       @default("USER") // ADMIN or USER
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([userId, organizationId])
+  @@index([userId])
+  @@index([organizationId])
+  @@index([role])
 }
 
 model Team {
   id             String       @id @default(cuid())
   name           String
   description    String?
-  avatar         String?      // Avatar URL (external URL or R2 storage URL)
+  avatar         String? // Avatar URL (external URL or R2 storage URL)
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
   parentId       String?
@@ -91,51 +109,51 @@ model Team {
   meetings       Meeting[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  
+
   @@index([organizationId])
   @@index([parentId])
 }
 
 model Person {
-  id                 String            @id @default(cuid())
+  id                 String               @id @default(cuid())
   email              String?
   name               String
   role               String?
-  status             String            @default("active")
+  status             String               @default("active")
   birthday           DateTime?
-  avatar             String?           // Avatar URL (external URL or R2 storage URL)
-  employeeType       EmployeeType?     // Type of employee (Full Time, Part Time, Intern, Consultant)
+  avatar             String? // Avatar URL (external URL or R2 storage URL)
+  employeeType       EmployeeType? // Type of employee (Full Time, Part Time, Intern, Consultant)
   organizationId     String
-  organization       Organization      @relation(fields: [organizationId], references: [id])
+  organization       Organization         @relation(fields: [organizationId], references: [id])
   teamId             String?
-  team               Team?             @relation(fields: [teamId], references: [id])
+  team               Team?                @relation(fields: [teamId], references: [id])
   managerId          String?
-  manager            Person?           @relation("MgrReports", fields: [managerId], references: [id])
-  reports            Person[]          @relation("MgrReports")
+  manager            Person?              @relation("MgrReports", fields: [managerId], references: [id])
+  reports            Person[]             @relation("MgrReports")
   jobRoleId          String?
-  jobRole            JobRole?          @relation(fields: [jobRoleId], references: [id])
+  jobRole            JobRole?             @relation(fields: [jobRoleId], references: [id])
   startedAt          DateTime?
   tasks              Task[]
-  oneOnOnes          OneOnOne[]        @relation("OOOReport")
-  oneOnOnesAsManager OneOnOne[]        @relation("OOOManager")
+  oneOnOnes          OneOnOne[]           @relation("OOOReport")
+  oneOnOnesAsManager OneOnOne[]           @relation("OOOManager")
   idps               IDP[]
-  feedback           Feedback[]        @relation("About")
-  feedbackFrom       Feedback[]        @relation("From")
+  feedback           Feedback[]           @relation("About")
+  feedbackFrom       Feedback[]           @relation("From")
   initiativeOwners   InitiativeOwner[]
   checkIns           CheckIn[]
   events             Event[]
   user               User?
   jiraAccount        PersonJiraAccount?
   githubAccount      PersonGithubAccount?
-  feedbackCampaigns  FeedbackCampaign[] @relation("CampaignTarget")
-  ownedMeetings      Meeting[]         @relation("MeetingOwner")
-    
-  meetingParticipants MeetingParticipant[] @relation("MeetingParticipant")
+  feedbackCampaigns  FeedbackCampaign[]   @relation("CampaignTarget")
+  ownedMeetings      Meeting[]            @relation("MeetingOwner")
+
+  meetingParticipants         MeetingParticipant[]         @relation("MeetingParticipant")
   meetingInstanceParticipants MeetingInstanceParticipant[] @relation("MeetingInstanceParticipant")
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
-  synopses           PersonSynopsis[]
-  
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @updatedAt
+  synopses                    PersonSynopsis[]
+
   @@index([organizationId])
   @@index([jobRoleId])
 }
@@ -162,7 +180,7 @@ model Initiative {
   meetings       Meeting[]
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
-  
+
   @@index([organizationId])
 }
 
@@ -306,7 +324,7 @@ model OrganizationInvitation {
   acceptedAt     DateTime?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  
+
   @@unique([email, organizationId])
   @@index([organizationId])
   @@index([email])
@@ -325,71 +343,71 @@ model Event {
 }
 
 model UserJiraCredentials {
-  id           String   @id @default(cuid())
-  userId       String   @unique
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  jiraUsername String
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jiraUsername    String
   encryptedApiKey String
-  jiraBaseUrl  String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  jiraBaseUrl     String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model PersonJiraAccount {
-  id           String   @id @default(cuid())
-  personId     String   @unique
-  person       Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
-  jiraAccountId String
-  jiraEmail    String
+  id              String   @id @default(cuid())
+  personId        String   @unique
+  person          Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  jiraAccountId   String
+  jiraEmail       String
   jiraDisplayName String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
   @@index([jiraAccountId])
   @@index([jiraEmail])
 }
 
 model UserGithubCredentials {
-  id           String   @id @default(cuid())
-  userId       String   @unique
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   githubUsername String
-  encryptedPat String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  encryptedPat   String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model PersonGithubAccount {
-  id           String   @id @default(cuid())
-  personId     String   @unique
-  person       Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
-  githubUsername String
+  id                String   @id @default(cuid())
+  personId          String   @unique
+  person            Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  githubUsername    String
   githubDisplayName String?
-  githubEmail  String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  
+  githubEmail       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
   @@index([githubUsername])
 }
 
 model FeedbackCampaign {
-  id             String            @id @default(cuid())
-  name           String?            // Custom name for the campaign (e.g., "Performance Review 2026")
+  id             String             @id @default(cuid())
+  name           String? // Custom name for the campaign (e.g., "Performance Review 2026")
   userId         String
-  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   targetPersonId String
-  targetPerson   Person            @relation("CampaignTarget", fields: [targetPersonId], references: [id], onDelete: Cascade)
+  targetPerson   Person             @relation("CampaignTarget", fields: [targetPersonId], references: [id], onDelete: Cascade)
   templateId     String?
-  template       FeedbackTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  template       FeedbackTemplate?  @relation(fields: [templateId], references: [id], onDelete: SetNull)
   startDate      DateTime
   endDate        DateTime
-  inviteEmails   String[]          // Array of email addresses to invite
-  inviteLink     String?           // Unique link for invitees to access the feedback form
-  status         String            @default("draft") // draft|active|completed|cancelled
+  inviteEmails   String[] // Array of email addresses to invite
+  inviteLink     String? // Unique link for invitees to access the feedback form
+  status         String             @default("draft") // draft|active|completed|cancelled
   responses      FeedbackResponse[]
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
-  
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
   @@index([userId])
   @@index([targetPersonId])
   @@index([templateId])
@@ -400,28 +418,28 @@ model FeedbackCampaign {
 }
 
 model FeedbackResponse {
-  id           String           @id @default(cuid())
-  campaignId   String
-  campaign     FeedbackCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  id             String           @id @default(cuid())
+  campaignId     String
+  campaign       FeedbackCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   responderEmail String
-  responses    Json             // Store the structured feedback responses as JSON
-  submittedAt  DateTime         @default(now())
-  
+  responses      Json // Store the structured feedback responses as JSON
+  submittedAt    DateTime         @default(now())
+
+  @@unique([campaignId, responderEmail]) // Prevent duplicate responses from same email
   @@index([campaignId])
   @@index([responderEmail])
-  @@unique([campaignId, responderEmail]) // Prevent duplicate responses from same email
 }
 
 model FeedbackTemplate {
-  id          String            @id @default(cuid())
+  id          String             @id @default(cuid())
   name        String
   description String?
-  isDefault   Boolean           @default(false)
+  isDefault   Boolean            @default(false)
   questions   FeedbackQuestion[]
   campaigns   FeedbackCampaign[]
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
   @@index([isDefault])
 }
 
@@ -432,11 +450,11 @@ model FeedbackQuestion {
   question   String
   type       String           @default("text") // text|rating|multiple_choice
   required   Boolean          @default(true)
-  options    Json?            // For multiple choice questions
+  options    Json? // For multiple choice questions
   sortOrder  Int              @default(0)
   createdAt  DateTime         @default(now())
   updatedAt  DateTime         @updatedAt
-  
+
   @@index([templateId])
   @@index([sortOrder])
 }
@@ -446,27 +464,27 @@ model Meeting {
   title          String
   description    String?
   scheduledAt    DateTime
-  duration       Int?         // Duration in minutes
-  location       String?      // Physical or virtual location
-  notes          String?      // Open area for notes
-  isRecurring    Boolean      @default(false)
-  recurrenceType String?      // daily|weekly|monthly|bi_monthly|semi_annually
-  isPrivate      Boolean      @default(true) // Private meetings are only visible to creator and participants
+  duration       Int? // Duration in minutes
+  location       String? // Physical or virtual location
+  notes          String? // Open area for notes
+  isRecurring    Boolean              @default(false)
+  recurrenceType String? // daily|weekly|monthly|bi_monthly|semi_annually
+  isPrivate      Boolean              @default(true) // Private meetings are only visible to creator and participants
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  teamId         String?      // Optional team association
-  team           Team?        @relation(fields: [teamId], references: [id])
-  initiativeId   String?      // Optional initiative association
-  initiative     Initiative?  @relation(fields: [initiativeId], references: [id])
-  ownerId        String?      // Meeting owner (assigned to a person)
-  owner          Person?      @relation("MeetingOwner", fields: [ownerId], references: [id])
-  createdById    String       // User who created the meeting
-  createdBy      User         @relation(fields: [createdById], references: [id])
+  organization   Organization         @relation(fields: [organizationId], references: [id])
+  teamId         String? // Optional team association
+  team           Team?                @relation(fields: [teamId], references: [id])
+  initiativeId   String? // Optional initiative association
+  initiative     Initiative?          @relation(fields: [initiativeId], references: [id])
+  ownerId        String? // Meeting owner (assigned to a person)
+  owner          Person?              @relation("MeetingOwner", fields: [ownerId], references: [id])
+  createdById    String // User who created the meeting
+  createdBy      User                 @relation(fields: [createdById], references: [id])
   participants   MeetingParticipant[]
   instances      MeetingInstance[]
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
   @@index([organizationId])
   @@index([teamId])
   @@index([initiativeId])
@@ -485,7 +503,7 @@ model MeetingParticipant {
   status    String   @default("invited") // invited|accepted|declined|tentative
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@unique([meetingId, personId])
   @@index([meetingId])
   @@index([personId])
@@ -493,33 +511,33 @@ model MeetingParticipant {
 }
 
 model MeetingInstance {
-  id             String       @id @default(cuid())
+  id             String                       @id @default(cuid())
   meetingId      String
-  meeting        Meeting      @relation(fields: [meetingId], references: [id], onDelete: Cascade)
-  scheduledAt    DateTime     // Specific date/time for this instance
-  notes          String?      // Notes for this specific instance
-  isPrivate      Boolean      @default(true) // Inherits privacy from parent meeting
+  meeting        Meeting                      @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  scheduledAt    DateTime // Specific date/time for this instance
+  notes          String? // Notes for this specific instance
+  isPrivate      Boolean                      @default(true) // Inherits privacy from parent meeting
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
+  organization   Organization                 @relation(fields: [organizationId], references: [id])
   participants   MeetingInstanceParticipant[]
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  
+  createdAt      DateTime                     @default(now())
+  updatedAt      DateTime                     @updatedAt
+
   @@index([meetingId])
   @@index([organizationId])
   @@index([scheduledAt])
 }
 
 model MeetingInstanceParticipant {
-  id                String           @id @default(cuid())
+  id                String          @id @default(cuid())
   meetingInstanceId String
-  meetingInstance   MeetingInstance  @relation(fields: [meetingInstanceId], references: [id], onDelete: Cascade)
+  meetingInstance   MeetingInstance @relation(fields: [meetingInstanceId], references: [id], onDelete: Cascade)
   personId          String
-  person            Person           @relation("MeetingInstanceParticipant", fields: [personId], references: [id])
-  status            String           @default("invited") // invited|accepted|declined|tentative|attended|absent
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  
+  person            Person          @relation("MeetingInstanceParticipant", fields: [personId], references: [id])
+  status            String          @default("invited") // invited|accepted|declined|tentative|attended|absent
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
   @@unique([meetingInstanceId, personId])
   @@index([meetingInstanceId])
   @@index([personId])
@@ -544,18 +562,18 @@ model PersonSynopsis {
 }
 
 model EntityLink {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   url            String
   title          String?
   description    String?
-  entityType     String   // The type of entity (e.g., "Initiative", "Task", "Meeting", "MeetingInstance", "Team", "Person", "OneOnOne")
-  entityId       String   // The ID of the entity
+  entityType     String // The type of entity (e.g., "Initiative", "Task", "Meeting", "MeetingInstance", "Team", "Person", "OneOnOne")
+  entityId       String // The ID of the entity
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   createdById    String
-  createdBy      User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdBy      User         @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   @@index([entityType, entityId])
   @@index([organizationId])
@@ -563,18 +581,18 @@ model EntityLink {
 }
 
 model JobRole {
-  id           String   @id @default(cuid())
-  title        String
-  description  String?  // Markdown-enabled job description
+  id             String       @id @default(cuid())
+  title          String
+  description    String? // Markdown-enabled job description
   organizationId String
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  levelId      String
-  level        JobLevel @relation("JobRoleLevel", fields: [levelId], references: [id], onDelete: Restrict)
-  domainId     String
-  domain       JobDomain @relation("JobRoleDomain", fields: [domainId], references: [id], onDelete: Restrict)
-  people       Person[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  levelId        String
+  level          JobLevel     @relation("JobRoleLevel", fields: [levelId], references: [id], onDelete: Restrict)
+  domainId       String
+  domain         JobDomain    @relation("JobRoleDomain", fields: [domainId], references: [id], onDelete: Restrict)
+  people         Person[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   @@index([organizationId])
   @@index([levelId])
@@ -582,14 +600,14 @@ model JobRole {
 }
 
 model JobLevel {
-  id           String   @id @default(cuid())
-  name         String
-  order        Int      @default(0)
+  id             String       @id @default(cuid())
+  name           String
+  order          Int          @default(0)
   organizationId String
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  jobRoles     JobRole[] @relation("JobRoleLevel")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  jobRoles       JobRole[]    @relation("JobRoleLevel")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   @@unique([name, organizationId])
   @@index([organizationId])
@@ -597,13 +615,13 @@ model JobLevel {
 }
 
 model JobDomain {
-  id           String   @id @default(cuid())
-  name         String
+  id             String       @id @default(cuid())
+  name           String
   organizationId String
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  jobRoles     JobRole[] @relation("JobRoleDomain")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  jobRoles       JobRole[]    @relation("JobRoleDomain")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   @@unique([name, organizationId])
   @@index([organizationId])
@@ -615,27 +633,27 @@ model PasswordResetToken {
   token     String   @unique
   expires   DateTime
   createdAt DateTime @default(now())
-  
+
   @@index([email])
   @@index([token])
 }
 
 model Notification {
-  id             String   @id @default(cuid())
+  id             String        @id @default(cuid())
   title          String
   message        String
-  type           String   @default("info") // info|warning|success|error
+  type           String        @default("info") // info|warning|success|error
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id])
-  userId         String?  // If null, it's an organization-wide notification
-  user           User?    @relation(fields: [userId], references: [id])
-  metadata       Json?    // Additional data for deduplication and job tracking
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  
+  userId         String? // If null, it's an organization-wide notification
+  user           User?         @relation(fields: [userId], references: [id])
+  metadata       Json? // Additional data for deduplication and job tracking
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
   // Relationships
-  responses      NotificationResponse[]
-  
+  responses NotificationResponse[]
+
   @@index([organizationId])
   @@index([userId])
   @@index([createdAt])
@@ -652,7 +670,7 @@ model NotificationResponse {
   dismissedAt    DateTime?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  
+
   @@unique([notificationId, userId])
   @@index([notificationId])
   @@index([userId])
@@ -660,20 +678,20 @@ model NotificationResponse {
 }
 
 model CronJobExecution {
-  id             String   @id @default(cuid())
-  jobId          String
-  jobName        String
-  organizationId String?
-  organization   Organization? @relation(fields: [organizationId], references: [id])
-  status         String   @default("running") // running|completed|failed
-  startedAt      DateTime @default(now())
-  completedAt    DateTime?
-  notificationsCreated Int @default(0)
-  error          String?
-  metadata       Json?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  
+  id                   String        @id @default(cuid())
+  jobId                String
+  jobName              String
+  organizationId       String?
+  organization         Organization? @relation(fields: [organizationId], references: [id])
+  status               String        @default("running") // running|completed|failed
+  startedAt            DateTime      @default(now())
+  completedAt          DateTime?
+  notificationsCreated Int           @default(0)
+  error                String?
+  metadata             Json?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
   @@index([jobId])
   @@index([organizationId])
   @@index([startedAt])
@@ -682,38 +700,38 @@ model CronJobExecution {
 
 /// Reports define executable, extensible data aggregations.
 model Report {
-  id              String         @id @default(cuid())
-  codeId          String         @unique // Stable code identifier that maps to implementation/registry
-  name            String
-  description     String?
-  ownerId         String?
-  owner           User?          @relation("ReportOwner", fields: [ownerId], references: [id], onDelete: SetNull)
-  inputSchema     Json?          // Optional JSON schema/Zod-like descriptor for dynamic forms
-  enabled         Boolean        @default(true)
-  renderers       String[]       // Supported renderer identifiers (e.g., ["markdown"]) 
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  instances       ReportInstance[]
+  id          String           @id @default(cuid())
+  codeId      String           @unique // Stable code identifier that maps to implementation/registry
+  name        String
+  description String?
+  ownerId     String?
+  owner       User?            @relation("ReportOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  inputSchema Json? // Optional JSON schema/Zod-like descriptor for dynamic forms
+  enabled     Boolean          @default(true)
+  renderers   String[] // Supported renderer identifiers (e.g., ["markdown"]) 
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  instances   ReportInstance[]
 
   @@index([ownerId])
 }
 
 /// A single execution of a report with captured inputs and outputs
 model ReportInstance {
-  id              String    @id @default(cuid())
-  reportId        String
-  report          Report    @relation(fields: [reportId], references: [id], onDelete: Cascade)
-  userId          String    // The user who executed the report
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organizationId  String    // Redundant but used for strong org isolation filters
-  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  renderer        String    // Renderer used for this instance (e.g., "markdown")
-  input           Json      // Input values used to execute the report
-  output          Json      // Raw JSON output of the report execution
-  status          String    @default("completed") // queued|running|failed|completed
-  errorMessage    String?
-  startedAt       DateTime  @default(now())
-  completedAt     DateTime?
+  id             String       @id @default(cuid())
+  reportId       String
+  report         Report       @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  userId         String // The user who executed the report
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String // Redundant but used for strong org isolation filters
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  renderer       String // Renderer used for this instance (e.g., "markdown")
+  input          Json // Input values used to execute the report
+  output         Json // Raw JSON output of the report execution
+  status         String       @default("completed") // queued|running|failed|completed
+  errorMessage   String?
+  startedAt      DateTime     @default(now())
+  completedAt    DateTime?
 
   @@index([reportId])
   @@index([userId])
@@ -724,16 +742,16 @@ model ReportInstance {
 }
 
 model Note {
-  id             String   @id @default(cuid())
-  entityType     String   // The type of entity (e.g., "Initiative", "Task", "Meeting", "Person")
-  entityId       String   // The ID of the entity
+  id             String           @id @default(cuid())
+  entityType     String // The type of entity (e.g., "Initiative", "Task", "Meeting", "Person")
+  entityId       String // The ID of the entity
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   content        String
   createdById    String
-  createdBy      User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdBy      User             @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
   attachments    FileAttachment[]
 
   @@index([entityType, entityId])
@@ -743,22 +761,22 @@ model Note {
 }
 
 model FileAttachment {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   noteId         String?
-  note           Note?    @relation(fields: [noteId], references: [id], onDelete: Cascade)
-  entityType     String   // The type of entity (e.g., "Initiative", "Task", "Meeting", "Person")
-  entityId       String   // The ID of the entity
+  note           Note?        @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  entityType     String // The type of entity (e.g., "Initiative", "Task", "Meeting", "Person")
+  entityId       String // The ID of the entity
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   fileName       String
   originalName   String
   fileSize       Int
   mimeType       String
-  r2Key          String   // Cloudflare R2 object key
-  r2Url          String   // Public URL for the file
+  r2Key          String // Cloudflare R2 object key
+  r2Url          String // Public URL for the file
   uploadedById   String
-  uploadedBy     User     @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
-  createdAt      DateTime @default(now())
+  uploadedBy     User         @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
 
   @@index([noteId])
   @@index([entityType, entityId])
@@ -771,12 +789,11 @@ model OrganizationGithubOrg {
   id             String       @id @default(cuid())
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  githubOrgName  String       // GitHub organization name (e.g., "acme-corp")
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  githubOrgName  String // GitHub organization name (e.g., "acme-corp")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   @@unique([organizationId, githubOrgName])
   @@index([organizationId])
   @@index([githubOrgName])
 }
-

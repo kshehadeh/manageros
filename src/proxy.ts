@@ -6,6 +6,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 const PUBLIC_ROUTES = [
   '/',
   '/landing/',
+  '/pricing',
   '/feedback-form/', // Matches /feedback-form and all sub-routes like /feedback-form/[token]
   '/auth/signin',
   '/auth/signup',
