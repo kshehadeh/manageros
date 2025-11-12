@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-11-11T21:28:12.784Z
+ * Generated on: 2025-11-12T12:45:39.176Z
  */
 
 export interface HelpContent {
@@ -21,19 +21,19 @@ import { helpContent as reports } from './reports'
 import { helpContent as personOverviewReport } from './person-overview-report'
 import { helpContent as aiSynopsisReport } from './ai-synopsis-report'
 import { helpContent as keyboardShortcuts } from './keyboard-shortcuts'
-import { helpContent as peopleHierarchy } from './people-hierarchy'
+import { helpContent as oneOnOnes } from './one-on-ones'
+import { helpContent as meetingInstances } from './meeting-instances'
+import { helpContent as meetingsAndInstances } from './meetings-and-instances'
+import { helpContent as meetings } from './meetings'
+import { helpContent as synopsisGeneration } from './synopsis-generation'
+import { helpContent as feedbackCampaignsAndResponses } from './feedback-campaigns-and-responses'
+import { helpContent as feedbackCampaigns } from './feedback-campaigns'
+import { helpContent as gettingStarted } from './getting-started'
 import { helpContent as directReports } from './direct-reports'
 import { helpContent as people } from './people'
-import { helpContent as oneOnOnes } from './one-on-ones'
-import { helpContent as meetings } from './meetings'
-import { helpContent as meetingsAndInstances } from './meetings-and-instances'
-import { helpContent as meetingInstances } from './meeting-instances'
-import { helpContent as gettingStarted } from './getting-started'
+import { helpContent as peopleHierarchy } from './people-hierarchy'
 import { helpContent as githubIntegration } from './github-integration'
 import { helpContent as jiraIntegration } from './jira-integration'
-import { helpContent as feedbackCampaignsAndResponses } from './feedback-campaigns-and-responses'
-import { helpContent as synopsisGeneration } from './synopsis-generation'
-import { helpContent as feedbackCampaigns } from './feedback-campaigns'
 import { helpContent as taskStatus } from './task-status'
 import { helpContent as initiatives } from './initiatives'
 import { helpContent as taskPriorities } from './task-priorities'
@@ -44,19 +44,19 @@ export const helpContent: Record<string, HelpContent> = {
   'person-overview-report': personOverviewReport,
   'ai-synopsis-report': aiSynopsisReport,
   'keyboard-shortcuts': keyboardShortcuts,
-  'people-hierarchy': peopleHierarchy,
+  'one-on-ones': oneOnOnes,
+  'meeting-instances': meetingInstances,
+  'meetings-and-instances': meetingsAndInstances,
+  meetings: meetings,
+  'synopsis-generation': synopsisGeneration,
+  'feedback-campaigns-and-responses': feedbackCampaignsAndResponses,
+  'feedback-campaigns': feedbackCampaigns,
+  'getting-started': gettingStarted,
   'direct-reports': directReports,
   people: people,
-  'one-on-ones': oneOnOnes,
-  meetings: meetings,
-  'meetings-and-instances': meetingsAndInstances,
-  'meeting-instances': meetingInstances,
-  'getting-started': gettingStarted,
+  'people-hierarchy': peopleHierarchy,
   'github-integration': githubIntegration,
   'jira-integration': jiraIntegration,
-  'feedback-campaigns-and-responses': feedbackCampaignsAndResponses,
-  'synopsis-generation': synopsisGeneration,
-  'feedback-campaigns': feedbackCampaigns,
   'task-status': taskStatus,
   initiatives: initiatives,
   'task-priorities': taskPriorities,
@@ -91,10 +91,10 @@ export function getHelpCategories(): string[] {
     new Set([
       'Reports & Analytics',
       'Getting Started',
-      'People & Teams',
       'Meetings & Communication',
-      'Integrations',
       'Feedback & Development',
+      'People & Teams',
+      'Integrations',
       'Tasks & Projects',
     ])
   ).sort()
@@ -116,19 +116,19 @@ export function getHelpIds(): string[] {
     'person-overview-report',
     'ai-synopsis-report',
     'keyboard-shortcuts',
-    'people-hierarchy',
+    'one-on-ones',
+    'meeting-instances',
+    'meetings-and-instances',
+    'meetings',
+    'synopsis-generation',
+    'feedback-campaigns-and-responses',
+    'feedback-campaigns',
+    'getting-started',
     'direct-reports',
     'people',
-    'one-on-ones',
-    'meetings',
-    'meetings-and-instances',
-    'meeting-instances',
-    'getting-started',
+    'people-hierarchy',
     'github-integration',
     'jira-integration',
-    'feedback-campaigns-and-responses',
-    'synopsis-generation',
-    'feedback-campaigns',
     'task-status',
     'initiatives',
     'task-priorities',

@@ -1,5 +1,15 @@
 # Changelog
 
+# [1.3.0](https://github.com/kshehadeh/manageros/compare/v1.2.4...v1.3.0) (2025-11-12)
+
+### Bug Fixes
+
+- **organizations:** Reset legacy fields after removal from organization ([dd55b8c](https://github.com/kshehadeh/manageros/commit/dd55b8c6734c14f5969ac6944e1bb95338250f75))
+
+### Features
+
+- **organizaitons:** Change the way that we associate permissions with orgs and users ([9c3205d](https://github.com/kshehadeh/manageros/commit/9c3205d7017a44ab673550219473d20b84e1ccbf))
+
 ## [1.2.4](https://github.com/kshehadeh/manageros/compare/v1.2.3...v1.2.4) (2025-11-11)
 
 ### Bug Fixes
