@@ -246,6 +246,9 @@ async function seedDemoData() {
       await prisma.jobDomain.deleteMany({
         where: { organizationId: acmeOrg.id },
       })
+      await prisma.organizationMember.deleteMany({
+        where: { organizationId: acmeOrg.id },
+      })
       console.log(`✓ Cleaned up existing data\n`)
     }
 
@@ -273,8 +276,8 @@ async function seedDemoData() {
         email: 'admin@acme.com',
         name: 'Admin User',
         passwordHash,
-        role: 'ADMIN',
-        organizationId: organization.id,
+        role: 'ADMIN', // Keep for backward compatibility
+        organizationId: organization.id, // Keep for backward compatibility
       },
     })
 
@@ -285,11 +288,48 @@ async function seedDemoData() {
         email: 'demo@acme.com',
         name: 'Demo User',
         passwordHash,
-        role: 'USER',
-        organizationId: organization.id,
+        role: 'USER', // Keep for backward compatibility
+        organizationId: organization.id, // Keep for backward compatibility
       },
     })
-    console.log(`✓ Created ${2} users\n`)
+
+    // Create OrganizationMember records for the users
+
+    await prisma.organizationMember.upsert({
+      where: {
+        userId_organizationId: {
+          userId: adminUser.id,
+          organizationId: organization.id,
+        },
+      },
+      update: {
+        role: 'ADMIN',
+      },
+      create: {
+        userId: adminUser.id,
+        organizationId: organization.id,
+        role: 'ADMIN',
+      },
+    })
+
+    await prisma.organizationMember.upsert({
+      where: {
+        userId_organizationId: {
+          userId: regularUser.id,
+          organizationId: organization.id,
+        },
+      },
+      update: {
+        role: 'USER',
+      },
+      create: {
+        userId: regularUser.id,
+        organizationId: organization.id,
+        role: 'USER',
+      },
+    })
+
+    console.log(`✓ Created ${2} users with organization memberships\n`)
 
     // Step 3: Create job levels
     console.log('📊 Creating job levels and domains...')

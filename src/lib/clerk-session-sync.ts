@@ -36,12 +36,30 @@ export async function syncUserDataToClerk(clerkUserId: string) {
             id: true,
           },
         },
+        organizationMemberships: {
+          select: {
+            role: true,
+            organizationId: true,
+          },
+        },
       },
     })
 
     if (!user) {
       console.warn(`User not found for clerkUserId: ${clerkUserId}`)
       return
+    }
+
+    // Get role from OrganizationMember table if user has an organization
+    // Fall back to user.role for backward compatibility
+    let userRole = user.role
+    if (user.organizationId) {
+      const membership = user.organizationMemberships?.find(
+        m => m.organizationId === user.organizationId
+      )
+      if (membership) {
+        userRole = membership.role
+      }
     }
 
     // Check if CLERK_SECRET_KEY is configured
@@ -63,7 +81,7 @@ export async function syncUserDataToClerk(clerkUserId: string) {
         organizationName: user.organization?.name || null,
         organizationSlug: user.organization?.slug || null,
         personId: user.person?.id || null,
-        role: user.role,
+        role: userRole, // Use org-scoped role
       },
     })
   } catch (error) {
