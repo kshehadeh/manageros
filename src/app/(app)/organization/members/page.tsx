@@ -13,13 +13,13 @@ import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
 import { PageSidebar } from '@/components/ui/page-sidebar'
 import { Building, Users, UserCheck, Calendar } from 'lucide-react'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 
 export default async function OrganizationDetailsPage() {
   const user = await getCurrentUser()
 
-  // Check if user is admin
-  if (user.role !== 'ADMIN') {
+  // Check if user is admin or owner
+  if (!isAdminOrOwner(user)) {
     redirect('/dashboard')
   }
 

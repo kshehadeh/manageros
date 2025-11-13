@@ -1,4 +1,4 @@
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 import { redirect } from 'next/navigation'
 import {
   getOrganizationInvitations,
@@ -32,7 +32,7 @@ export default async function OrganizationSettingsPage() {
   const user = await getCurrentUser()
 
   // Check if user is admin
-  if (user.role !== 'ADMIN') {
+  if (!isAdminOrOwner(user)) {
     redirect('/dashboard')
   }
 

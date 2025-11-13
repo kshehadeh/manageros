@@ -2,6 +2,7 @@
 
 import { Link } from '@/components/ui/link'
 import { useClerk, useUser } from '@clerk/nextjs'
+import { useSubscription } from '@clerk/nextjs/experimental'
 import { signOutWithCleanup } from '@/lib/auth-client-utils'
 import { usePathname } from 'next/navigation'
 import { useMobileMenu } from '@/components/mobile-menu-provider'
@@ -29,6 +30,8 @@ import {
   Keyboard,
   Bug,
   BookOpen,
+  Package,
+  Building2,
 } from 'lucide-react'
 import { useState } from 'react'
 import { HelpDialog } from '@/components/shared'
@@ -77,6 +80,8 @@ export default function Sidebar({
   personData,
 }: SidebarProps) {
   const { user } = useUser()
+  const { data: subscription, isLoading: subscriptionLoading } =
+    useSubscription()
   const pathname = usePathname()
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useMobileMenu()
   const [isKeyboardShortcutsOpen, setIsKeyboardShortcutsOpen] = useState(false)
@@ -137,7 +142,7 @@ export default function Sidebar({
               <div className={`flex-1 min-w-0 ${geistMono.className}`}>
                 {/* Case 1: No organization - show email, Create Organization link */}
                 {!serverSession.organizationId && (
-                  <>
+                  <div className='flex flex-row gap-sm'>
                     <div className='text-sm text-foreground font-medium truncate'>
                       {serverSession.email
                         ? serverSession.email
@@ -150,7 +155,7 @@ export default function Sidebar({
                     >
                       Create Organization
                     </Link>
-                  </>
+                  </div>
                 )}
 
                 {/* Case 2: Has organization but no person - show email, organization, Link to Person */}
@@ -161,11 +166,29 @@ export default function Sidebar({
                         ? serverSession.email
                         : user?.emailAddresses[0].emailAddress}
                     </div>
-                    {serverSession.organizationName && (
-                      <div className='text-xs text-muted-foreground truncate mt-xs'>
-                        {serverSession.organizationName}
-                      </div>
-                    )}
+                    <div className='flex flex-row gap-sm'>
+                      {serverSession.organizationName && (
+                        <div className='text-xs text-muted-foreground truncate mt-xs flex items-center gap-sm'>
+                          <Building2 className='h-3 w-3' />
+                          {serverSession.organizationName}
+                        </div>
+                      )}
+                      {/* Subscription info */}
+                      {!subscriptionLoading && subscription && (
+                        <div className='text-xs truncate mt-xs bg-[var(--color-badge-info)] text-[var(--color-badge-info-foreground)] px-sm py-xs flex items-center gap-sm'>
+                          <Package className='h-3 w-3' />
+                          {subscription.subscriptionItems?.[0].plan.name ||
+                            'No subscription'}
+                        </div>
+                      )}
+                      {!subscriptionLoading &&
+                        !subscription &&
+                        serverSession.organizationId && (
+                          <div className='text-xs text-muted-foreground truncate mt-xs'>
+                            No subscription
+                          </div>
+                        )}
+                    </div>
                   </>
                 )}
 
@@ -182,6 +205,20 @@ export default function Sidebar({
                         {serverSession.organizationName}
                       </div>
                     )}
+                    {/* Subscription info */}
+                    {!subscriptionLoading && subscription && (
+                      <div className='text-xs text-muted-foreground truncate mt-xs'>
+                        {subscription.subscriptionItems?.[0].plan.name ||
+                          'No subscription'}
+                      </div>
+                    )}
+                    {!subscriptionLoading &&
+                      !subscription &&
+                      serverSession.organizationId && (
+                        <div className='text-xs text-muted-foreground truncate mt-xs'>
+                          Free Plan
+                        </div>
+                      )}
                   </>
                 )}
 

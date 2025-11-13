@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 
 import { redirect } from 'next/navigation'
 import { getTeamById } from '@/lib/data/teams'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 
 interface TeamDetailPageProps {
   params: Promise<{
@@ -26,14 +26,16 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
     notFound()
   }
 
+  const isAdmin = isAdminOrOwner(user)
+
   return (
     <TeamDetailClient
       teamName={team.name}
       teamId={team.id}
       teamAvatar={team.avatar}
-      isAdmin={user.role === 'ADMIN'}
+      isAdmin={isAdmin}
     >
-      <TeamDetailContent team={team} isAdmin={user.role === 'ADMIN'} />
+      <TeamDetailContent team={team} isAdmin={isAdmin} />
     </TeamDetailClient>
   )
 }

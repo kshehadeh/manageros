@@ -1,7 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/db'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 import { generateText } from '@/lib/ai'
 import { GithubApiService } from '@/lib/github-api'
 import { JiraApiService } from '@/lib/jira-api'
@@ -89,13 +89,13 @@ export async function generatePersonSynopsis(
 
   // Access control: Only allow synopsis generation for:
   // 1. The user's linked person (currentPersonId)
-  // 2. Organization admins can generate synopses for any person
+  // 2. Organization admins or owners can generate synopses for any person
   const isOwnPerson = currentPersonId === person.id
-  const isOrgAdmin = user.role === 'ADMIN'
+  const isOrgAdmin = isAdminOrOwner(user)
 
   if (!isOwnPerson && !isOrgAdmin) {
     throw new Error(
-      'You can only generate synopses for your linked person or you must be an organization admin'
+      'You can only generate synopses for your linked person or you must be an organization admin or owner'
     )
   }
 
@@ -272,13 +272,13 @@ export async function listPersonSynopses(
 
   // Access control: Only allow viewing synopses for:
   // 1. The user's linked person (currentPersonId)
-  // 2. Organization admins can view synopses for any person
+  // 2. Organization admins or owners can view synopses for any person
   const isOwnPerson = currentPersonId === person.id
-  const isOrgAdmin = user.role === 'ADMIN'
+  const isOrgAdmin = isAdminOrOwner(user)
 
   if (!isOwnPerson && !isOrgAdmin) {
     throw new Error(
-      'You can only view synopses for your linked person or you must be an organization admin'
+      'You can only view synopses for your linked person or you must be an organization admin or owner'
     )
   }
 
@@ -324,11 +324,11 @@ export async function deleteSynopsis(synopsisId: string): Promise<void> {
   // 1. The user's linked person (currentPersonId)
   // 2. Organization admins can delete synopses for any person
   const isOwnPerson = currentPersonId === synopsis.personId
-  const isOrgAdmin = user.role === 'ADMIN'
+  const isOrgAdmin = isAdminOrOwner(user)
 
   if (!isOwnPerson && !isOrgAdmin) {
     throw new Error(
-      'You can only delete synopses for your linked person or you must be an organization admin'
+      'You can only delete synopses for your linked person or you must be an organization admin or owner'
     )
   }
 

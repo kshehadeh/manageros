@@ -45,26 +45,43 @@ function getProviderInfo(provider: string): ProviderInfo {
 interface UserInfoSectionProps {
   email: string
   userId?: string
+  role?: string
 }
 
-export function UserInfoSection({ userId }: UserInfoSectionProps) {
+function getRoleLabel(role: string): string {
+  if (role === 'OWNER') return 'Owner'
+  if (role === 'ADMIN') return 'Admin'
+  return 'User'
+}
+
+export function UserInfoSection({ userId, role }: UserInfoSectionProps) {
   const { user } = useUser()
   return (
     <div className='space-y-2'>
-      <div>
-        <p className='text-sm font-medium'>Email</p>
-        <p className='text-sm text-muted-foreground'>
-          <div className='flex flex-row gap-sm items-center'>
-            <span>{user?.emailAddresses[0].emailAddress}</span>
-            <span>
-              {user?.externalAccounts?.map(account => {
-                const providerInfo = getProviderInfo(account.provider)
-                const Icon = providerInfo.icon
-                return <Icon className='h-4 w-4' />
-              })}
-            </span>
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
+        <div>
+          <p className='text-sm font-medium'>Email</p>
+          <p className='text-sm text-muted-foreground'>
+            <div className='flex flex-row gap-sm items-center'>
+              <span>{user?.emailAddresses[0].emailAddress}</span>
+              <span>
+                {user?.externalAccounts?.map(account => {
+                  const providerInfo = getProviderInfo(account.provider)
+                  const Icon = providerInfo.icon
+                  return <Icon className='h-4 w-4' />
+                })}
+              </span>
+            </div>
+          </p>
+        </div>
+        {role && (
+          <div>
+            <p className='text-sm font-medium'>Role</p>
+            <p className='text-sm text-muted-foreground'>
+              {getRoleLabel(role)}
+            </p>
           </div>
-        </p>
+        )}
       </div>
       {userId && (
         <div>

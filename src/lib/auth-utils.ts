@@ -419,7 +419,7 @@ export async function getFilteredNavigation(user: User | null) {
       }
 
       // If user has organization, filter by admin role for admin-only items
-      if (item.adminOnly && user.role !== 'ADMIN') {
+      if (item.adminOnly && !isAdminOrOwner(user)) {
         return null
       }
 
@@ -458,12 +458,12 @@ export async function canAccessSynopsesForPerson(
 }
 
 /**
- * Check if a user is an admin in a specific organization
+ * Check if a user is an admin or owner in a specific organization
  * @param userId - The user ID
  * @param organizationId - The organization ID
- * @returns Promise<boolean> indicating if the user is an admin in that organization
+ * @returns Promise<boolean> indicating if the user is an admin or owner in that organization
  */
-export async function isAdminInOrganization(
+export async function isAdminOrOwnerInOrganization(
   userId: string,
   organizationId: string
 ): Promise<boolean> {
@@ -475,14 +475,28 @@ export async function isAdminInOrganization(
       },
     },
   })
-  return membership?.role === 'ADMIN'
+  return membership?.role === 'ADMIN' || membership?.role === 'OWNER'
+}
+
+/**
+ * Check if a user is an admin in a specific organization
+ * @param userId - The user ID
+ * @param organizationId - The organization ID
+ * @returns Promise<boolean> indicating if the user is an admin in that organization
+ * @deprecated Use isAdminOrOwnerInOrganization instead - OWNER has the same permissions as ADMIN
+ */
+export async function isAdminInOrganization(
+  userId: string,
+  organizationId: string
+): Promise<boolean> {
+  return isAdminOrOwnerInOrganization(userId, organizationId)
 }
 
 /**
  * Get the role of a user in a specific organization
  * @param userId - The user ID
  * @param organizationId - The organization ID
- * @returns Promise<string | null> The role ('ADMIN' or 'USER') or null if not a member
+ * @returns Promise<string | null> The role ('ADMIN', 'OWNER', or 'USER') or null if not a member
  */
 export async function getUserRoleInOrganization(
   userId: string,
@@ -503,6 +517,24 @@ export async function getUserRoleInOrganization(
 // These use the role from the User object which is already org-scoped via getCurrentUser
 export function isAdmin(user: { role: string }) {
   return user.role === 'ADMIN'
+}
+
+/**
+ * Check if a user is an owner (has admin rights and is the billable user)
+ * @param user - User object with role property
+ * @returns boolean indicating if the user is an owner
+ */
+export function isOwner(user: { role: string }) {
+  return user.role === 'OWNER'
+}
+
+/**
+ * Check if a user is an admin or owner (both have admin-level permissions)
+ * @param user - User object with role property
+ * @returns boolean indicating if the user has admin-level permissions
+ */
+export function isAdminOrOwner(user: { role: string }) {
+  return user.role === 'ADMIN' || user.role === 'OWNER'
 }
 
 export function isUser(user: { role: string }) {
@@ -528,11 +560,11 @@ type PermissionCheck = (user: User, id?: string) => boolean | Promise<boolean>
 const PermissionMap: Record<string, PermissionCheck> = {
   // Task permissions
   'task.create': user => {
-    return (user.role === 'ADMIN' || !!user.personId) && !!user.organizationId
+    return (isAdminOrOwner(user) || !!user.personId) && !!user.organizationId
   },
   'task.edit': async (user, id) => {
     if (!user.organizationId || !id) return false
-    if (user.role === 'ADMIN') return true
+    if (isAdminOrOwner(user)) return true
     if (!user.personId) return false
 
     // Check if user created task OR user is assigned to task
@@ -566,7 +598,7 @@ const PermissionMap: Record<string, PermissionCheck> = {
   },
   'task.delete': async (user, id) => {
     if (!user.organizationId || !id) return false
-    if (user.role === 'ADMIN') return true
+    if (isAdminOrOwner(user)) return true
     if (!user.personId) return false
 
     // Check if user created task OR user is assigned to task
@@ -623,7 +655,7 @@ const PermissionMap: Record<string, PermissionCheck> = {
       where: {
         id,
         organizationId: user.organizationId,
-        ...(user.role === 'ADMIN'
+        ...(isAdminOrOwner(user)
           ? {}
           : {
               OR: [
@@ -645,7 +677,7 @@ const PermissionMap: Record<string, PermissionCheck> = {
   },
   'meeting.delete': async (user, id) => {
     if (!user.organizationId || !id) return false
-    if (user.role === 'ADMIN') return true
+    if (isAdminOrOwner(user)) return true
     if (!user.personId) return false
 
     // Get current user's person record
@@ -731,7 +763,7 @@ const PermissionMap: Record<string, PermissionCheck> = {
     if (isInstanceParticipant) return true
 
     // Check parent meeting permissions (same as meeting.edit)
-    if (user.role === 'ADMIN') return true
+    if (isAdminOrOwner(user)) return true
 
     const meeting = await prisma.meeting.findFirst({
       where: {
@@ -755,7 +787,7 @@ const PermissionMap: Record<string, PermissionCheck> = {
   },
   'meeting-instance.delete': async (user, id) => {
     if (!user.organizationId || !id) return false
-    if (user.role === 'ADMIN') return true
+    if (isAdminOrOwner(user)) return true
     if (!user.personId) return false
 
     // Get current user's person record
@@ -873,13 +905,13 @@ const PermissionMap: Record<string, PermissionCheck> = {
 
   // Initiative permissions
   'initiative.create': user => {
-    return (user.role === 'ADMIN' || !!user.personId) && !!user.organizationId
+    return (isAdminOrOwner(user) || !!user.personId) && !!user.organizationId
   },
   'initiative.edit': user => {
-    return user.role === 'ADMIN' && !!user.organizationId
+    return isAdminOrOwner(user) && !!user.organizationId
   },
   'initiative.delete': user => {
-    return user.role === 'ADMIN' && !!user.organizationId
+    return isAdminOrOwner(user) && !!user.organizationId
   },
   'initiative.view': user => {
     return !!user.organizationId
@@ -887,16 +919,16 @@ const PermissionMap: Record<string, PermissionCheck> = {
 
   // Report permissions
   'report.access': user => {
-    return user.role === 'ADMIN' && !!user.organizationId
+    return isAdminOrOwner(user) && !!user.organizationId
   },
   'report.create': user => {
-    return user.role === 'ADMIN' && !!user.organizationId
+    return isAdminOrOwner(user) && !!user.organizationId
   },
   'report.edit': user => {
-    return user.role === 'ADMIN' && !!user.organizationId
+    return isAdminOrOwner(user) && !!user.organizationId
   },
   'report.delete': user => {
-    return user.role === 'ADMIN' && !!user.organizationId
+    return isAdminOrOwner(user) && !!user.organizationId
   },
   'report.view': user => {
     return !!user.organizationId
@@ -904,11 +936,11 @@ const PermissionMap: Record<string, PermissionCheck> = {
 
   // Feedback permissions
   'feedback.create': user => {
-    return (user.role === 'ADMIN' || !!user.personId) && !!user.organizationId
+    return (isAdminOrOwner(user) || !!user.personId) && !!user.organizationId
   },
   'feedback.edit': async (user, id) => {
     if (!user.organizationId || !id) return false
-    if (user.role === 'ADMIN') return true
+    if (isAdminOrOwner(user)) return true
     if (!user.personId) return false
 
     // Get current user's person record
@@ -933,7 +965,7 @@ const PermissionMap: Record<string, PermissionCheck> = {
   },
   'feedback.delete': async (user, id) => {
     if (!user.organizationId || !id) return false
-    if (user.role === 'ADMIN') return true
+    if (isAdminOrOwner(user)) return true
     if (!user.personId) return false
 
     // Get current user's person record
@@ -962,11 +994,11 @@ const PermissionMap: Record<string, PermissionCheck> = {
 
   // One-on-One permissions
   'oneonone.create': user => {
-    return (user.role === 'ADMIN' || !!user.personId) && !!user.organizationId
+    return (isAdminOrOwner(user) || !!user.personId) && !!user.organizationId
   },
   'oneonone.edit': async (user, id) => {
     if (!user.organizationId || !id) return false
-    if (user.role === 'ADMIN') return true
+    if (isAdminOrOwner(user)) return true
     if (!user.personId) return false
 
     // Check if user is a participant (managerId or reportId)
@@ -993,7 +1025,7 @@ const PermissionMap: Record<string, PermissionCheck> = {
   },
   'oneonone.delete': async (user, id) => {
     if (!user.organizationId || !id) return false
-    if (user.role === 'ADMIN') return true
+    if (isAdminOrOwner(user)) return true
     if (!user.personId) return false
 
     // Check if user is a participant (managerId or reportId)
@@ -1020,7 +1052,7 @@ const PermissionMap: Record<string, PermissionCheck> = {
   },
   'oneonone.view': async (user, id) => {
     if (!user.organizationId) return false
-    if (user.role === 'ADMIN') return true
+    if (isAdminOrOwner(user)) return true
     if (!user.personId || !id) return false
 
     // Check if user is a participant (managerId or reportId)
@@ -1048,11 +1080,11 @@ const PermissionMap: Record<string, PermissionCheck> = {
 
   // Feedback Campaign permissions
   'feedback-campaign.create': user => {
-    return (user.role === 'ADMIN' || !!user.personId) && !!user.organizationId
+    return (isAdminOrOwner(user) || !!user.personId) && !!user.organizationId
   },
   'feedback-campaign.edit': async (user, id) => {
     if (!user.organizationId || !id) return false
-    if (user.role === 'ADMIN') return true
+    if (isAdminOrOwner(user)) return true
     if (!user.personId) return false
 
     // Check if user is the creator (userId)
@@ -1070,7 +1102,7 @@ const PermissionMap: Record<string, PermissionCheck> = {
   },
   'feedback-campaign.delete': async (user, id) => {
     if (!user.organizationId || !id) return false
-    if (user.role === 'ADMIN') return true
+    if (isAdminOrOwner(user)) return true
     if (!user.personId) return false
 
     // Check if user is the creator (userId)
@@ -1088,7 +1120,7 @@ const PermissionMap: Record<string, PermissionCheck> = {
   },
   'feedback-campaign.view': async (user, id) => {
     if (!user.organizationId) return false
-    if (user.role === 'ADMIN') return true
+    if (isAdminOrOwner(user)) return true
     if (!user.personId) return false
 
     if (!id) {
@@ -1112,7 +1144,7 @@ const PermissionMap: Record<string, PermissionCheck> = {
 
   // User linking permissions
   'user.link-person': user => {
-    return user.role === 'ADMIN'
+    return isAdminOrOwner(user)
   },
 }
 

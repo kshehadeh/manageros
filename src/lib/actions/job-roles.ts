@@ -3,7 +3,7 @@
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/db'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 
 // Validation schemas
 const jobRoleSchema = z.object({
@@ -157,8 +157,10 @@ export async function createJobRole(data: JobRoleFormData) {
     const validatedData = jobRoleSchema.parse(data)
 
     // Check permissions - only admins can create job roles
-    if (user.role !== 'ADMIN') {
-      throw new Error('Only organization administrators can create job roles')
+    if (!isAdminOrOwner(user)) {
+      throw new Error(
+        'Only organization administrators or owners can create job roles'
+      )
     }
 
     // Validate that level and domain belong to this organization
@@ -234,8 +236,10 @@ export async function updateJobRole(
       throw new Error('User must belong to an organization to update job roles')
     }
 
-    if (user.role !== 'ADMIN') {
-      throw new Error('Only organization administrators can update job roles')
+    if (!isAdminOrOwner(user)) {
+      throw new Error(
+        'Only organization administrators or owners can update job roles'
+      )
     }
 
     const validatedData = jobRoleSchema.partial().parse(data)
@@ -323,8 +327,10 @@ export async function deleteJobRole(id: string) {
       throw new Error('User must belong to an organization to delete job roles')
     }
 
-    if (user.role !== 'ADMIN') {
-      throw new Error('Only organization administrators can delete job roles')
+    if (!isAdminOrOwner(user)) {
+      throw new Error(
+        'Only organization administrators or owners can delete job roles'
+      )
     }
 
     // Validate that job role belongs to this organization
@@ -412,8 +418,10 @@ export async function createJobLevel(data: JobLevelFormData) {
       )
     }
 
-    if (user.role !== 'ADMIN') {
-      throw new Error('Only organization administrators can manage job levels')
+    if (!isAdminOrOwner(user)) {
+      throw new Error(
+        'Only organization administrators or owners can manage job levels'
+      )
     }
 
     const validatedData = jobLevelSchema.parse(data)
@@ -470,8 +478,10 @@ export async function updateJobLevel(
       )
     }
 
-    if (user.role !== 'ADMIN') {
-      throw new Error('Only organization administrators can update job levels')
+    if (!isAdminOrOwner(user)) {
+      throw new Error(
+        'Only organization administrators or owners can update job levels'
+      )
     }
 
     const validatedData = jobLevelSchema.partial().parse(data)
@@ -567,8 +577,10 @@ export async function deleteJobLevel(id: string) {
       )
     }
 
-    if (user.role !== 'ADMIN') {
-      throw new Error('Only organization administrators can delete job levels')
+    if (!isAdminOrOwner(user)) {
+      throw new Error(
+        'Only organization administrators or owners can delete job levels'
+      )
     }
 
     // Validate that level belongs to this organization
@@ -654,8 +666,10 @@ export async function createJobDomain(data: JobDomainFormData) {
       )
     }
 
-    if (user.role !== 'ADMIN') {
-      throw new Error('Only organization administrators can manage job domains')
+    if (!isAdminOrOwner(user)) {
+      throw new Error(
+        'Only organization administrators or owners can manage job domains'
+      )
     }
 
     const validatedData = jobDomainSchema.parse(data)
@@ -702,8 +716,10 @@ export async function updateJobDomain(
       )
     }
 
-    if (user.role !== 'ADMIN') {
-      throw new Error('Only organization administrators can update job domains')
+    if (!isAdminOrOwner(user)) {
+      throw new Error(
+        'Only organization administrators or owners can update job domains'
+      )
     }
 
     const validatedData = jobDomainSchema.partial().parse(data)
@@ -760,8 +776,10 @@ export async function deleteJobDomain(id: string) {
       )
     }
 
-    if (user.role !== 'ADMIN') {
-      throw new Error('Only organization administrators can delete job domains')
+    if (!isAdminOrOwner(user)) {
+      throw new Error(
+        'Only organization administrators or owners can delete job domains'
+      )
     }
 
     // Validate that domain belongs to this organization

@@ -1,5 +1,5 @@
 import { InitiativeForm } from '@/components/initiatives/initiative-form'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 import { redirect } from 'next/navigation'
 
 interface NewInitiativePageProps {
@@ -14,8 +14,8 @@ export default async function NewInitiativePage({
 }: NewInitiativePageProps) {
   const user = await getCurrentUser()
 
-  // Check if user can create initiatives (admin or has linked person)
-  const canCreateInitiatives = user.role === 'ADMIN' || !!user.personId
+  // Check if user can create initiatives (admin/owner or has linked person)
+  const canCreateInitiatives = isAdminOrOwner(user) || !!user.personId
   if (!canCreateInitiatives) {
     redirect('/initiatives')
   }

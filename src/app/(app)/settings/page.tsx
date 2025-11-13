@@ -35,7 +35,11 @@ export default async function SettingsPage() {
             variant='bordered'
             header={<SectionHeader icon={User} title='User Info' />}
           >
-            <UserInfoSection email={user.email} userId={user.id} />
+            <UserInfoSection
+              email={user.email}
+              userId={user.id}
+              role={user.role}
+            />
           </PageSection>
 
           {/* Account Linking and Permissions - Side by side on larger screens */}

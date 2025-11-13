@@ -1,6 +1,6 @@
 'use server'
 
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { InputJsonValue } from '@prisma/client/runtime/library'
@@ -393,9 +393,9 @@ export async function deleteNotification(notificationId: string) {
     )
   }
 
-  // Only admins can delete notifications
-  if (user.role !== 'ADMIN') {
-    throw new Error('Only administrators can delete notifications')
+  // Only admins or owners can delete notifications
+  if (!isAdminOrOwner(user)) {
+    throw new Error('Only administrators or owners can delete notifications')
   }
 
   // Verify the notification exists and belongs to the user's organization

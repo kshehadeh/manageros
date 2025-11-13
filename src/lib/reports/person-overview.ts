@@ -108,10 +108,10 @@ export const PersonOverviewReport: ReportDefinition<
     if (!person) throw new Error('Person not found or access denied')
 
     const isOwn = ctx.user.personId === input.personId
-    const isAdmin = ctx.user.role === 'ADMIN'
+    const isAdmin = ctx.user.role === 'ADMIN' || ctx.user.role === 'OWNER'
     if (!isOwn && !isAdmin) {
       throw new Error(
-        'You can only run this report for yourself or be an org admin'
+        'You can only run this report for yourself or be an org admin or owner'
       )
     }
   },

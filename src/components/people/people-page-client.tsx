@@ -26,7 +26,7 @@ export function PeoplePageClient() {
     }
   }, [user])
 
-  const isAdmin = userData?.role === 'ADMIN'
+  const isAdmin = userData?.role === 'ADMIN' || userData?.role === 'OWNER'
 
   return (
     <PageContainer className='px-3 md:px-0'>

@@ -9,7 +9,7 @@ import {
 } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 import { Prisma } from '@prisma/client'
 import { getTasksForAssignee } from '@/lib/data/tasks'
 import { getLinkedAccountAvatars } from '@/lib/actions/avatar'
@@ -161,9 +161,9 @@ export async function getPeopleHierarchy() {
 export async function createPerson(formData: PersonFormData) {
   const user = await getCurrentUser()
 
-  // Check if user is admin
-  if (user.role !== 'ADMIN') {
-    throw new Error('Only organization admins can create people')
+  // Check if user is admin or owner
+  if (!isAdminOrOwner(user)) {
+    throw new Error('Only organization admins or owners can create people')
   }
 
   // Check if user belongs to an organization
@@ -264,8 +264,8 @@ export async function updatePerson(id: string, formData: PersonFormData) {
   const user = await getCurrentUser()
 
   // Check if user is admin
-  if (user.role !== 'ADMIN') {
-    throw new Error('Only organization admins can update people')
+  if (!isAdminOrOwner(user)) {
+    throw new Error('Only organization admins or owners can update people')
   }
 
   // Check if user belongs to an organization
@@ -379,8 +379,8 @@ export async function updatePersonPartial(
   const user = await getCurrentUser()
 
   // Check if user is admin
-  if (user.role !== 'ADMIN') {
-    throw new Error('Only organization admins can update people')
+  if (!isAdminOrOwner(user)) {
+    throw new Error('Only organization admins or owners can update people')
   }
 
   // Check if user belongs to an organization
@@ -521,8 +521,8 @@ export async function deletePerson(id: string) {
   const user = await getCurrentUser()
 
   // Check if user is admin
-  if (user.role !== 'ADMIN') {
-    throw new Error('Only organization admins can delete people')
+  if (!isAdminOrOwner(user)) {
+    throw new Error('Only organization admins or owners can delete people')
   }
 
   // Check if user belongs to an organization

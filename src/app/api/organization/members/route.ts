@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 import { getOrganizationMembers } from '@/lib/actions/organization'
 
 export async function GET(request: NextRequest) {
   const user = await getCurrentUser()
 
   try {
-    // Check if user is admin
-    if (user.role !== 'ADMIN') {
+    // Check if user is admin or owner
+    if (!isAdminOrOwner(user)) {
       return NextResponse.json(
-        { error: 'Only organization admins can view organization members' },
+        {
+          error:
+            'Only organization admins or owners can view organization members',
+        },
         { status: 403 }
       )
     }

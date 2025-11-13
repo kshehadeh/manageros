@@ -8,7 +8,7 @@ import {
   type CSVTeamData,
 } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 import { z } from 'zod'
 
 function parseCSV(csvText: string): {
@@ -140,9 +140,9 @@ function parseCSV(csvText: string): {
 export async function importPersonsFromCSV(formData: FormData) {
   const user = await getCurrentUser()
 
-  // Check if user is admin
-  if (user.role !== 'ADMIN') {
-    throw new Error('Only organization admins can import people')
+  // Check if user is admin or owner
+  if (!isAdminOrOwner(user)) {
+    throw new Error('Only organization admins or owners can import people')
   }
 
   // Check if user belongs to an organization

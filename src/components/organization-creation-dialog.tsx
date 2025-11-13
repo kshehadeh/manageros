@@ -32,13 +32,27 @@ export function OrganizationCreationDialog({
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
+  // Redirect to subscription page when dialog opens
+  // Users must select a subscription before creating an organization
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen) {
+      // Redirect to subscription page instead of opening dialog
+      router.push('/organization/subscribe')
+      onOpenChange(false)
+      return
+    }
+    onOpenChange(newOpen)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError('')
 
     try {
-      await createOrganization(formData)
+      // This should not be called anymore since we redirect to subscription page
+      // But keeping for backward compatibility
+      await createOrganization(formData, { plan: 'free' })
 
       // Close dialog and redirect to dashboard
       // Clerk will automatically update the user data
@@ -64,17 +78,15 @@ export function OrganizationCreationDialog({
     }))
   }
 
-  const handleOpenChange = (newOpen: boolean) => {
-    if (!newOpen) {
-      // Reset form when closing
-      setFormData({ name: '', slug: '' })
-      setError('')
-    }
-    onOpenChange(newOpen)
+  // Don't render dialog - redirect to subscription page instead
+  // This component is kept for backward compatibility but redirects immediately
+  if (open) {
+    router.push('/organization/subscribe')
+    return null
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={false} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create New Organization</DialogTitle>
