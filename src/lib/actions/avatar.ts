@@ -1,7 +1,7 @@
 'use server'
 
 import { uploadFileToR2 } from '@/lib/r2-upload'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
 import { JiraApiService } from '@/lib/jira-api'
 
@@ -11,9 +11,9 @@ import { JiraApiService } from '@/lib/jira-api'
 export async function uploadAvatar(formData: FormData, personId: string) {
   const user = await getCurrentUser()
 
-  // Check if user is admin
-  if (user.role !== 'ADMIN') {
-    throw new Error('Only organization admins can upload avatars')
+  // Check if user is admin or owner
+  if (!isAdminOrOwner(user)) {
+    throw new Error('Only organization admins or owners can upload avatars')
   }
 
   // Check if user belongs to an organization

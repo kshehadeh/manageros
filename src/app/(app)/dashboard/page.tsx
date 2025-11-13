@@ -32,7 +32,9 @@ async function DashboardContent() {
   const hasNoPeople = peopleCount === 0
 
   // Check if user needs to be linked to a person
-  const needsPersonLink = !user.personId && user.role !== 'ADMIN'
+  // Admins and owners don't need to be linked to a person
+  const needsPersonLink =
+    !user.personId && user.role !== 'ADMIN' && user.role !== 'OWNER'
 
   return (
     <PageContainer>

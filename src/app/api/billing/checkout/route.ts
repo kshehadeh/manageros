@@ -14,9 +14,9 @@ import { NextRequest, NextResponse } from 'next/server'
  * For more information, see: https://clerk.com/docs/guides/billing/overview
  */
 export async function GET(request: NextRequest) {
-  try {
-    const { userId } = await auth()
+  const { userId } = await auth()
 
+  try {
     if (!userId) {
       const signInUrl = new URL('/auth/signin', request.url)
       signInUrl.searchParams.set('redirect_url', request.url)

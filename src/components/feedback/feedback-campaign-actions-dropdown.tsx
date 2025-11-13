@@ -2,6 +2,7 @@
 
 import { Link } from '@/components/ui/link'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Edit,
   Eye,
@@ -12,14 +13,13 @@ import {
   AlertCircle,
   Sparkles,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import {
   updateCampaignStatus,
   deleteFeedbackCampaign,
   generateFeedbackCampaignSummary,
 } from '@/lib/actions/feedback-campaign'
 import { ActionDropdown } from '@/components/common/action-dropdown'
-import { ConfirmAction } from '@/components/common/confirm-action'
+import { DeleteModal } from '@/components/common/delete-modal'
 import { toast } from 'sonner'
 import { FeedbackCampaignSummaryModal } from './feedback-campaign-summary-modal'
 
@@ -46,11 +46,14 @@ export function FeedbackCampaignActionsDropdown({
   totalResponses,
   onCampaignUpdate,
 }: FeedbackCampaignActionsDropdownProps) {
+  const router = useRouter()
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null)
   const [copiedLink, setCopiedLink] = useState(false)
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false)
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false)
   const [summary, setSummary] = useState<string | null>(null)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const handleStatusUpdate = async (
     newStatus: 'active' | 'completed' | 'cancelled',
@@ -69,10 +72,14 @@ export function FeedbackCampaignActionsDropdown({
   }
 
   const handleDeleteCampaign = async () => {
+    setIsDeleting(true)
     try {
       await deleteFeedbackCampaign(campaignId)
       toast.success('Feedback campaign deleted successfully')
       onCampaignUpdate?.()
+      // Navigate to feedback campaigns list if user has access,
+      // otherwise the page will redirect to person detail view
+      router.push(`/people/${personId}/feedback-campaigns`)
     } catch (error) {
       console.error('Failed to delete campaign:', error)
       toast.error(
@@ -80,6 +87,11 @@ export function FeedbackCampaignActionsDropdown({
           ? error.message
           : 'Failed to delete feedback campaign'
       )
+      // On error, navigate to person detail view as fallback
+      router.push(`/people/${personId}`)
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteModal(false)
     }
   }
 
@@ -216,25 +228,29 @@ export function FeedbackCampaignActionsDropdown({
 
             <div className='border-t border-border my-1' />
 
-            <ConfirmAction
-              onConfirm={handleDeleteCampaign}
-              renderTrigger={({ open }) => (
-                <Button
-                  onClick={open}
-                  variant='destructive'
-                  size='sm'
-                  className='mx-3 my-2 flex w-[calc(100%-1.5rem)] items-center justify-center gap-2'
-                >
-                  <Trash2 className='w-4 h-4' />
-                  Delete Campaign
-                </Button>
-              )}
-              confirmMessage='Are you sure you want to delete this campaign?'
-              confirmDescription='This action cannot be undone.'
-            />
+            <button
+              className='flex w-full items-center gap-3 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors text-left'
+              onClick={() => {
+                setShowDeleteModal(true)
+                close()
+              }}
+            >
+              <Trash2 className='w-4 h-4' />
+              Delete Campaign
+            </button>
           </div>
         )}
       </ActionDropdown>
+
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteCampaign}
+        title='Delete Feedback Campaign'
+        entityName='feedback campaign'
+        description='Are you sure you want to delete this feedback campaign? This action cannot be undone.'
+        isLoading={isDeleting}
+      />
 
       <FeedbackCampaignSummaryModal
         campaignName={campaignName}

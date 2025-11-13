@@ -3,19 +3,39 @@
 
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
-import { getCurrentUser, getOptionalUser } from '@/lib/auth-utils'
+import {
+  getCurrentUser,
+  getOptionalUser,
+  isAdminOrOwner,
+} from '@/lib/auth-utils'
 import { syncUserDataToClerk } from '@/lib/clerk-session-sync'
 import { auth } from '@clerk/nextjs/server'
 
-export async function createOrganization(formData: {
-  name: string
-  slug: string
-}) {
+export async function createOrganization(
+  formData: {
+    name: string
+    slug: string
+  },
+  subscriptionInfo?: {
+    plan?: string // 'free' for free tier
+    planId?: string // Clerk plan ID for paid plans
+  }
+) {
   const user = await getCurrentUser()
 
   // Check if user already has an organization
   if (user.organizationId) {
     throw new Error('User already belongs to an organization')
+  }
+
+  // Validate that subscription was selected (required for creating new organizations)
+  if (
+    !subscriptionInfo ||
+    (!subscriptionInfo.plan && !subscriptionInfo.planId)
+  ) {
+    throw new Error(
+      'Subscription selection is required to create an organization'
+    )
   }
 
   // Check if organization slug already exists
@@ -27,7 +47,16 @@ export async function createOrganization(formData: {
     throw new Error('Organization slug already exists')
   }
 
-  // Create organization and add user as admin in a transaction
+  // Note: Subscription data is managed by Clerk, so we don't store it in the database
+  // The subscription is linked to the user's Clerk account, not the organization
+  // If needed, we can validate subscription status via Clerk API here
+
+  // Determine role based on subscription type
+  // OWNER role is assigned when user selects a paid plan (planId present)
+  // ADMIN role is assigned when user selects free tier (plan === 'free')
+  const userRole = subscriptionInfo.planId ? 'OWNER' : 'ADMIN'
+
+  // Create organization and add user as admin/owner in a transaction
   const result = await prisma.$transaction(async tx => {
     // Create organization
     const organization = await tx.organization.create({
@@ -42,16 +71,16 @@ export async function createOrganization(formData: {
       where: { id: user.id },
       data: {
         organizationId: organization.id,
-        role: 'ADMIN', // Keep for backward compatibility
+        role: userRole, // Keep for backward compatibility
       },
     })
 
-    // Create OrganizationMember record with ADMIN role
+    // Create OrganizationMember record with OWNER role for paid plans, ADMIN for free tier
     await tx.organizationMember.create({
       data: {
         userId: user.id,
         organizationId: organization.id,
-        role: 'ADMIN',
+        role: userRole,
       },
     })
 
@@ -73,9 +102,11 @@ export async function createOrganization(formData: {
 export async function linkUserToPerson(userId: string, personId: string) {
   const currentUser = await getCurrentUser()
 
-  // Check if user is admin
-  if (currentUser.role !== 'ADMIN') {
-    throw new Error('Only organization admins can link users to persons')
+  // Check if user is admin or owner
+  if (!isAdminOrOwner(currentUser)) {
+    throw new Error(
+      'Only organization admins or owners can link users to persons'
+    )
   }
 
   // Check if user belongs to an organization
@@ -123,9 +154,11 @@ export async function linkUserToPerson(userId: string, personId: string) {
 export async function unlinkUserFromPerson(userId: string) {
   const currentUser = await getCurrentUser()
 
-  // Check if user is admin
-  if (currentUser.role !== 'ADMIN') {
-    throw new Error('Only organization admins can unlink users from persons')
+  // Check if user is admin or owner
+  if (!isAdminOrOwner(currentUser)) {
+    throw new Error(
+      'Only organization admins or owners can unlink users from persons'
+    )
   }
 
   // Check if user belongs to an organization
@@ -148,10 +181,10 @@ export async function unlinkUserFromPerson(userId: string) {
 export async function getAvailableUsersForLinking() {
   const currentUser = await getCurrentUser()
 
-  // Check if user is admin
-  if (currentUser.role !== 'ADMIN') {
+  // Check if user is admin or owner
+  if (!isAdminOrOwner(currentUser)) {
     throw new Error(
-      'Only organization admins can view available users for linking'
+      'Only organization admins or owners can view available users for linking'
     )
   }
 
@@ -181,9 +214,9 @@ export async function getAvailableUsersForLinking() {
 export async function createOrganizationInvitation(email: string) {
   const user = await getCurrentUser()
 
-  // Check if user is admin
-  if (user.role !== 'ADMIN') {
-    throw new Error('Only organization admins can send invitations')
+  // Check if user is admin or owner
+  if (!isAdminOrOwner(user)) {
+    throw new Error('Only organization admins or owners can send invitations')
   }
 
   // Check if user belongs to an organization
@@ -460,9 +493,9 @@ export async function createOrganizationInvitation(email: string) {
 export async function getOrganizationInvitations() {
   const user = await getCurrentUser()
 
-  // Check if user is admin
-  if (user.role !== 'ADMIN') {
-    throw new Error('Only organization admins can view invitations')
+  // Check if user is admin or owner
+  if (!isAdminOrOwner(user)) {
+    throw new Error('Only organization admins or owners can view invitations')
   }
 
   // Check if user belongs to an organization
@@ -498,9 +531,9 @@ export async function getOrganizationInvitations() {
 export async function revokeOrganizationInvitation(invitationId: string) {
   const user = await getCurrentUser()
 
-  // Check if user is admin
-  if (user.role !== 'ADMIN') {
-    throw new Error('Only organization admins can revoke invitations')
+  // Check if user is admin or owner
+  if (!isAdminOrOwner(user)) {
+    throw new Error('Only organization admins or owners can revoke invitations')
   }
 
   // Check if user belongs to an organization
@@ -536,9 +569,11 @@ export async function revokeOrganizationInvitation(invitationId: string) {
 export async function reactivateOrganizationInvitation(invitationId: string) {
   const user = await getCurrentUser()
 
-  // Check if user is admin
-  if (user.role !== 'ADMIN') {
-    throw new Error('Only organization admins can reactivate invitations')
+  // Check if user is admin or owner
+  if (!isAdminOrOwner(user)) {
+    throw new Error(
+      'Only organization admins or owners can reactivate invitations'
+    )
   }
 
   // Check if user belongs to an organization
@@ -813,9 +848,11 @@ export async function getOrganizationDetails() {
 export async function getOrganizationMembers() {
   const user = await getCurrentUser()
 
-  // Check if user is admin
-  if (user.role !== 'ADMIN') {
-    throw new Error('Only organization admins can view organization members')
+  // Check if user is admin or owner
+  if (!isAdminOrOwner(user)) {
+    throw new Error(
+      'Only organization admins or owners can view organization members'
+    )
   }
 
   // Check if user belongs to an organization
@@ -872,13 +909,13 @@ export async function getOrganizationMembers() {
 
 export async function updateUserRole(
   userId: string,
-  newRole: 'ADMIN' | 'USER'
+  newRole: 'ADMIN' | 'OWNER' | 'USER'
 ) {
   const currentUser = await getCurrentUser()
 
-  // Check if current user is admin
-  if (currentUser.role !== 'ADMIN') {
-    throw new Error('Only organization admins can change user roles')
+  // Check if current user is admin or owner
+  if (!isAdminOrOwner(currentUser)) {
+    throw new Error('Only organization admins or owners can change user roles')
   }
 
   // Check if current user belongs to an organization
@@ -912,17 +949,35 @@ export async function updateUserRole(
     throw new Error('You cannot change your own role')
   }
 
-  // Prevent removing the last admin
+  // Prevent changing OWNER role (ownership transfer not yet implemented)
+  if (targetMembership.role === 'OWNER' && newRole !== 'OWNER') {
+    throw new Error(
+      'Cannot change the organization owner role. Ownership transfer is not yet implemented.'
+    )
+  }
+
+  // Prevent assigning OWNER role (ownership transfer not yet implemented)
+  if (targetMembership.role !== 'OWNER' && newRole === 'OWNER') {
+    throw new Error(
+      'Cannot assign OWNER role. Ownership transfer is not yet implemented.'
+    )
+  }
+
+  // Prevent removing the last admin or owner
   if (targetMembership.role === 'ADMIN' && newRole === 'USER') {
-    const adminCount = await prisma.organizationMember.count({
+    const adminOrOwnerCount = await prisma.organizationMember.count({
       where: {
         organizationId: currentUser.organizationId,
-        role: 'ADMIN',
+        role: {
+          in: ['ADMIN', 'OWNER'],
+        },
       },
     })
 
-    if (adminCount <= 1) {
-      throw new Error('Cannot remove the last admin from the organization')
+    if (adminOrOwnerCount <= 1) {
+      throw new Error(
+        'Cannot remove the last admin or owner from the organization'
+      )
     }
   }
 
@@ -949,10 +1004,10 @@ export async function updateUserRole(
 export async function removeUserFromOrganization(userId: string) {
   const currentUser = await getCurrentUser()
 
-  // Check if current user is admin
-  if (currentUser.role !== 'ADMIN') {
+  // Check if current user is admin or owner
+  if (!isAdminOrOwner(currentUser)) {
     throw new Error(
-      'Only organization admins can remove users from the organization'
+      'Only organization admins or owners can remove users from the organization'
     )
   }
 
@@ -988,17 +1043,28 @@ export async function removeUserFromOrganization(userId: string) {
     throw new Error('You cannot remove yourself from the organization')
   }
 
-  // Prevent removing the last admin
+  // Prevent removing the owner (billable user - ownership transfer not yet implemented)
+  if (targetMembership.role === 'OWNER') {
+    throw new Error(
+      'Cannot remove the organization owner. Ownership transfer is not yet implemented.'
+    )
+  }
+
+  // Prevent removing the last admin or owner
   if (targetMembership.role === 'ADMIN') {
-    const adminCount = await prisma.organizationMember.count({
+    const adminOrOwnerCount = await prisma.organizationMember.count({
       where: {
         organizationId: currentUser.organizationId,
-        role: 'ADMIN',
+        role: {
+          in: ['ADMIN', 'OWNER'],
+        },
       },
     })
 
-    if (adminCount <= 1) {
-      throw new Error('Cannot remove the last admin from the organization')
+    if (adminOrOwnerCount <= 1) {
+      throw new Error(
+        'Cannot remove the last admin or owner from the organization'
+      )
     }
   }
 
@@ -1309,10 +1375,10 @@ export async function getSidebarData() {
 export async function getGithubOrganizations() {
   const user = await getCurrentUser()
 
-  // Check if user is admin
-  if (user.role !== 'ADMIN') {
+  // Check if user is admin or owner
+  if (!isAdminOrOwner(user)) {
     throw new Error(
-      'Only organization admins can view GitHub organization settings'
+      'Only organization admins or owners can view GitHub organization settings'
     )
   }
 
@@ -1349,9 +1415,11 @@ export async function getGithubOrganizations() {
 export async function addGithubOrganization(githubOrgName: string) {
   const user = await getCurrentUser()
 
-  // Check if user is admin
-  if (user.role !== 'ADMIN') {
-    throw new Error('Only organization admins can add GitHub organizations')
+  // Check if user is admin or owner
+  if (!isAdminOrOwner(user)) {
+    throw new Error(
+      'Only organization admins or owners can add GitHub organizations'
+    )
   }
 
   // Check if user belongs to an organization
@@ -1414,9 +1482,11 @@ export async function addGithubOrganization(githubOrgName: string) {
 export async function removeGithubOrganization(githubOrgId: string) {
   const user = await getCurrentUser()
 
-  // Check if user is admin
-  if (user.role !== 'ADMIN') {
-    throw new Error('Only organization admins can remove GitHub organizations')
+  // Check if user is admin or owner
+  if (!isAdminOrOwner(user)) {
+    throw new Error(
+      'Only organization admins or owners can remove GitHub organizations'
+    )
   }
 
   // Check if user belongs to an organization

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Building } from 'lucide-react'
 import { createOrganization } from '@/lib/actions/organization'
 import { PageContainer } from '@/components/ui/page-container'
@@ -10,12 +11,29 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 export default function CreateOrganizationPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
   })
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isChecking, setIsChecking] = useState(true)
+
+  // Check for subscription selection in URL params
+  useEffect(() => {
+    const plan = searchParams.get('plan')
+    const planId = searchParams.get('planId')
+
+    // If no subscription selected, redirect to subscription page
+    if (!plan && !planId) {
+      router.push('/organization/subscribe')
+      return
+    }
+
+    setIsChecking(false)
+  }, [searchParams, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -23,7 +41,14 @@ export default function CreateOrganizationPage() {
     setError('')
 
     try {
-      await createOrganization(formData)
+      const plan = searchParams.get('plan')
+      const planId = searchParams.get('planId')
+
+      // Pass subscription info to createOrganization
+      await createOrganization(formData, {
+        plan: plan || undefined,
+        planId: planId || undefined,
+      })
 
       // Redirect to dashboard with a full page reload to ensure fresh data
       // This ensures the session is refreshed and the dashboard shows the new organization
@@ -84,6 +109,16 @@ export default function CreateOrganizationPage() {
       ),
     },
   ]
+
+  if (isChecking) {
+    return (
+      <PageContainer>
+        <div className='flex items-center justify-center py-12'>
+          <div className='text-muted-foreground'>Loading...</div>
+        </div>
+      </PageContainer>
+    )
+  }
 
   return (
     <PageContainer>

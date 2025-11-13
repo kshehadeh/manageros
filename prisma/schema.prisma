@@ -51,7 +51,7 @@ model User {
   name                    String
   passwordHash            String? // Optional for Clerk-managed users
   clerkUserId             String?                  @unique // Clerk user ID
-  role                    String                   @default("USER") // ADMIN or USER - DEPRECATED: Use OrganizationMember.role instead
+  role                    String                   @default("USER") // ADMIN, OWNER, or USER - DEPRECATED: Use OrganizationMember.role instead
   organizationId          String? // DEPRECATED: Users can belong to multiple orgs via OrganizationMember
   organization            Organization?            @relation(fields: [organizationId], references: [id])
   personId                String?                  @unique
@@ -84,7 +84,7 @@ model OrganizationMember {
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  role           String       @default("USER") // ADMIN or USER
+  role           String       @default("USER") // ADMIN, OWNER, or USER - OWNER has admin rights and is the billable user
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 

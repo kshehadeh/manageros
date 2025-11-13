@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server'
-import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
+import {
+  getCurrentUser,
+  getActionPermission,
+  isAdminOrOwner,
+} from '@/lib/auth-utils'
 
 /**
  * API endpoint to get permissions for command palette actions
@@ -29,7 +33,7 @@ export async function GET() {
         'oneonone.create': permissions[4],
         'feedback-campaign.create': permissions[5],
         'report.create': permissions[6],
-        isAdmin: user.role === 'ADMIN',
+        isAdmin: isAdminOrOwner(user),
       },
     })
   } catch {

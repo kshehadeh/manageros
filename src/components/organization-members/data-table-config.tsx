@@ -10,6 +10,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { updateUserRole } from '@/lib/actions/organization'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useOrganizationMembersTableSettings } from '@/hooks/use-organization-members-table-settings'
@@ -73,6 +80,17 @@ export const organizationMembersDataTableConfig: DataTableConfig<
     onDeleteClick,
   }) => {
     const getRoleBadge = (role: string) => {
+      if (role === 'OWNER') {
+        return (
+          <Badge
+            variant='default'
+            className='bg-purple-100 text-purple-800 border-purple-200'
+          >
+            <Shield className='h-3 w-3 mr-1' />
+            Owner
+          </Badge>
+        )
+      }
       if (role === 'ADMIN') {
         return (
           <Badge
@@ -253,7 +271,7 @@ export const organizationMembersDataTableConfig: DataTableConfig<
 
           const handleRoleChange = async (
             userId: string,
-            newRole: 'ADMIN' | 'USER'
+            newRole: 'ADMIN' | 'OWNER' | 'USER'
           ) => {
             try {
               applyOptimisticUpdate(userId, { role: newRole })
@@ -291,14 +309,22 @@ export const organizationMembersDataTableConfig: DataTableConfig<
                   onClick={e => e.stopPropagation()}
                 >
                   {member.role === 'USER' ? (
-                    <DropdownMenuItem
-                      onClick={e => {
-                        e.stopPropagation()
-                        handleRoleChange(member.id, 'ADMIN')
-                      }}
-                    >
+                    <>
+                      <DropdownMenuItem
+                        onClick={e => {
+                          e.stopPropagation()
+                          handleRoleChange(member.id, 'ADMIN')
+                        }}
+                      >
+                        <Shield className='h-4 w-4 mr-2' />
+                        Make Admin
+                      </DropdownMenuItem>
+                      {/* Note: OWNER role assignment requires paid subscription and ownership transfer is not yet implemented */}
+                    </>
+                  ) : member.role === 'OWNER' ? (
+                    <DropdownMenuItem disabled>
                       <Shield className='h-4 w-4 mr-2' />
-                      Make Admin
+                      Owner (Cannot change - billable user)
                     </DropdownMenuItem>
                   ) : (
                     <DropdownMenuItem
@@ -377,6 +403,38 @@ export const organizationMembersDataTableConfig: DataTableConfig<
     if (groupingColumn === 'hasPerson') {
       return groupValue === 'linked' ? 'Linked' : 'Not Linked'
     }
+    if (groupingColumn === 'role') {
+      if (groupValue === 'OWNER') return 'Owner'
+      if (groupValue === 'ADMIN') return 'Admin'
+      if (groupValue === 'USER') return 'User'
+    }
     return groupValue || 'Unassigned'
+  },
+
+  // Filter content - role filter dropdown
+  filterContent: ({ settings, updateFilters }) => {
+    return (
+      <div className='space-y-md'>
+        <div className='space-y-sm'>
+          <label className='text-sm font-medium'>Role</label>
+          <Select
+            value={settings.filters.role || 'all'}
+            onValueChange={value =>
+              updateFilters({ role: value === 'all' ? '' : value })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder='All roles' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='all'>All roles</SelectItem>
+              <SelectItem value='OWNER'>Owner</SelectItem>
+              <SelectItem value='ADMIN'>Admin</SelectItem>
+              <SelectItem value='USER'>User</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    )
   },
 }

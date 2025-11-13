@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { HelpBlock } from '@/components/common/help-block'
-import { OrganizationCreationDialog } from '@/components/organization-creation-dialog'
 import { acceptInvitationForUser } from '@/lib/actions/organization'
 import { Building2, Users, Mail, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -37,12 +36,16 @@ interface OrganizationSetupCardsProps {
 export function OrganizationSetupCards({
   pendingInvitations,
 }: OrganizationSetupCardsProps) {
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [acceptingInvitation, setAcceptingInvitation] = useState<string | null>(
     null
   )
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+
+  // Handle create organization - redirect to subscription page first
+  const handleCreateOrganization = () => {
+    router.push('/organization/subscribe')
+  }
 
   const handleAcceptInvitation = async (invitationId: string) => {
     try {
@@ -101,7 +104,7 @@ export function OrganizationSetupCards({
           variant='info'
           action={{
             label: 'Create Organization',
-            onClick: () => setIsCreateDialogOpen(true),
+            onClick: handleCreateOrganization,
             variant: 'default',
             size: 'default',
           }}
@@ -235,11 +238,6 @@ export function OrganizationSetupCards({
           />
         )}
       </div>
-
-      <OrganizationCreationDialog
-        open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
-      />
     </div>
   )
 }

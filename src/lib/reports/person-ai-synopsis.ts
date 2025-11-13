@@ -60,10 +60,10 @@ export const PersonAiSynopsisReport: ReportDefinition<
     if (!person) throw new Error('Person not found or access denied')
 
     const isOwn = ctx.user.personId === input.personId
-    const isAdmin = ctx.user.role === 'ADMIN'
+    const isAdmin = ctx.user.role === 'ADMIN' || ctx.user.role === 'OWNER'
     if (!isOwn && !isAdmin) {
       throw new Error(
-        'You can only generate synopses for your own person record or you must be an organization admin'
+        'You can only generate synopses for your own person record or you must be an organization admin or owner'
       )
     }
   },

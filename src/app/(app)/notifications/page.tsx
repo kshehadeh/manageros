@@ -25,7 +25,7 @@ export default function NotificationsPage() {
     }
   }, [isLoaded, user])
 
-  const isAdmin = userData?.role === 'ADMIN'
+  const isAdmin = userData?.role === 'ADMIN' || userData?.role === 'OWNER'
 
   const handleRefresh = () => {
     window.location.reload()

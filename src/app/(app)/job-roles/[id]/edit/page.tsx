@@ -8,7 +8,7 @@ import { notFound } from 'next/navigation'
 import { redirect } from 'next/navigation'
 import { JobRoleDetailClient } from '@/components/jobs/job-role-detail-client'
 import { JobRoleEditForm } from '@/components/jobs/job-role-edit-form'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 
 interface JobRoleEditPageProps {
   params: Promise<{ id: string }>
@@ -19,8 +19,8 @@ export default async function JobRoleEditPage({
 }: JobRoleEditPageProps) {
   const user = await getCurrentUser()
 
-  // Check if user is admin
-  if (user.role !== 'ADMIN') {
+  // Check if user is admin or owner
+  if (!isAdminOrOwner(user)) {
     redirect('/dashboard')
   }
 

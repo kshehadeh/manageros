@@ -1,6 +1,10 @@
 'use server'
 
-import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
+import {
+  getCurrentUser,
+  getActionPermission,
+  isAdminOrOwner,
+} from '@/lib/auth-utils'
 import { cacheLife, cacheTag } from 'next/cache'
 
 /**
@@ -57,7 +61,7 @@ export async function getFilteredNavigation() {
       }
 
       // If user has organization, filter by admin role for admin-only items
-      if (item.adminOnly && user.role !== 'ADMIN') {
+      if (item.adminOnly && !isAdminOrOwner(user)) {
         return null
       }
 

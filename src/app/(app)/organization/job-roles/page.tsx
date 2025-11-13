@@ -7,13 +7,13 @@ import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 
 export default async function JobRoleManagementPage() {
   const user = await getCurrentUser()
 
-  // Check if user is admin
-  if (user.role !== 'ADMIN') {
+  // Check if user is admin or owner
+  if (!isAdminOrOwner(user)) {
     redirect('/dashboard')
   }
 

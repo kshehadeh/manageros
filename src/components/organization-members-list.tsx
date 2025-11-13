@@ -114,6 +114,17 @@ export default function OrganizationMembersList({
   }
 
   const getRoleBadge = (role: string) => {
+    if (role === 'OWNER') {
+      return (
+        <Badge
+          variant='default'
+          className='bg-purple-100 text-purple-800 border-purple-200'
+        >
+          <Shield className='h-3 w-3 mr-1' />
+          Owner
+        </Badge>
+      )
+    }
     if (role === 'ADMIN') {
       return (
         <Badge
