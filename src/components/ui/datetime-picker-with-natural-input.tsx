@@ -275,6 +275,8 @@ export function DateTimePickerWithNaturalInput({
           captionLayout='dropdown'
           selected={selectedDate}
           onSelect={handleDateSelect}
+          fromYear={new Date().getFullYear() - 20}
+          toYear={new Date().getFullYear() + 10}
           className='rounded-md border [--cell-size:1.5rem] mx-auto md:mx-0'
         />
 
