@@ -1,5 +1,16 @@
 # Changelog
 
+# [1.4.0](https://github.com/kshehadeh/manageros/compare/v1.3.0...v1.4.0) (2025-11-13)
+
+### Bug Fixes
+
+- **dates:** Fixed an issue where users couldn't select a future date ([eedb5e8](https://github.com/kshehadeh/manageros/commit/eedb5e81c6823920c08d11cc9165fb0cfd99e664))
+- **feedback:** Delete confirmation for feedback campaign was not working properly ([eb6ceda](https://github.com/kshehadeh/manageros/commit/eb6ceda608d5afd0d2e5a5e15b36975b439e9baf))
+
+### Features
+
+- **billing:** Added support for ownership role and setup new flow for onboarding ([4cc576d](https://github.com/kshehadeh/manageros/commit/4cc576d76a6c4270535c859bc132c998c438de7d))
+
 # [1.3.0](https://github.com/kshehadeh/manageros/compare/v1.2.4...v1.3.0) (2025-11-12)
 
 ### Bug Fixes
