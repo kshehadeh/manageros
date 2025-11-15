@@ -25,5 +25,5 @@ jobs:
             - name: Deploy migrations
               run: bun run db:migrate:deploy --verbose
               env:
-                  DIRECT_URL: ${{ secrets.DIRECT_URL }}
-                  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+                  DIRECT_URL: ${{ vars.DIRECT_URL }}
+                  DATABASE_URL: ${{ vars.DATABASE_URL }}
