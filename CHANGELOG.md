@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.1](https://github.com/kshehadeh/manageros/compare/v1.5.0...v1.5.1) (2025-11-15)
+
+### Bug Fixes
+
+- **security:** Issue with the way that we fetch subscription information ([96d6993](https://github.com/kshehadeh/manageros/commit/96d6993a74170a0da9c2cf9ce47845c7ef908662))
+
 # [1.5.0](https://github.com/kshehadeh/manageros/compare/v1.4.0...v1.5.0) (2025-11-15)
 
 ### Features
