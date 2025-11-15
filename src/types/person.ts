@@ -46,3 +46,8 @@ export interface Person {
     role: string
   } | null
 }
+
+export type PersonBrief = Pick<
+  Person,
+  'id' | 'name' | 'email' | 'role' | 'avatar'
+>

@@ -37,6 +37,7 @@ export interface CommandSource {
     _userRole?: string,
     _pathname?: string,
     _currentUserPersonId?: string,
-    _permissions?: CommandPermissions
+    _permissions?: CommandPermissions,
+    _organizationId?: string | null
   ) => Promise<CommandItemDescriptor[]>
 }

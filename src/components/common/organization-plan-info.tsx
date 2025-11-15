@@ -1,7 +1,8 @@
 'use client'
 
-import { useSubscription } from '@clerk/nextjs/experimental'
+import { useEffect, useState } from 'react'
 import { Building2, Package } from 'lucide-react'
+import { getOrganizationSubscription } from '@/lib/subscription-utils'
 
 interface OrganizationPlanInfoProps {
   organizationName: string | null | undefined
@@ -23,17 +24,36 @@ export function OrganizationPlanInfo({
   variant = 'vertical',
   className = '',
 }: OrganizationPlanInfoProps) {
-  const { data: subscription, isLoading: subscriptionLoading } =
-    useSubscription()
+  const [planName, setPlanName] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    if (!organizationId) {
+      setIsLoading(false)
+      return
+    }
+
+    async function fetchSubscription() {
+      try {
+        const subscription = await getOrganizationSubscription(organizationId!)
+        setPlanName(subscription?.subscriptionPlanName || null)
+      } catch (error) {
+        console.error('Error fetching organization subscription:', error)
+        setPlanName(null)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchSubscription()
+  }, [organizationId])
 
   if (!organizationId) {
     return null
   }
 
-  const planName = subscription?.subscriptionItems?.[0]?.plan?.name || null
-  const hasSubscription = !subscriptionLoading && subscription && planName
-  const showNoSubscription =
-    !subscriptionLoading && !subscription && organizationId
+  const hasPlan = !isLoading && planName
+  const showNoPlan = !isLoading && !planName
 
   if (variant === 'horizontal') {
     return (
@@ -45,13 +65,13 @@ export function OrganizationPlanInfo({
           </div>
         )}
         {/* Subscription info */}
-        {hasSubscription && (
+        {hasPlan && (
           <div className='text-xs truncate mt-xs bg-[var(--color-badge-info)] text-[var(--color-badge-info-foreground)] px-sm py-xs flex items-center gap-sm'>
             <Package className='h-3 w-3' />
             {planName}
           </div>
         )}
-        {showNoSubscription && (
+        {showNoPlan && (
           <div className='text-xs text-muted-foreground truncate mt-xs'>
             No subscription
           </div>
@@ -60,24 +80,37 @@ export function OrganizationPlanInfo({
     )
   }
 
-  // Vertical variant
+  // Vertical variant - displays items side-by-side when they fit
   return (
-    <div className={className}>
+    <div className={`flex flex-wrap items-center gap-xs mt-xs ${className}`}>
       {organizationName && (
-        <div className='text-xs text-muted-foreground truncate mt-xs'>
+        <div className='text-xs text-muted-foreground truncate flex items-center gap-xs'>
+          <Building2 className='h-3 w-3 shrink-0' />
           {organizationName}
         </div>
       )}
       {/* Subscription info */}
-      {hasSubscription && (
-        <div className='text-xs text-muted-foreground truncate mt-xs'>
-          {planName}
-        </div>
+      {hasPlan && (
+        <>
+          {organizationName && (
+            <span className='text-xs text-muted-foreground'>•</span>
+          )}
+          <div className='text-xs text-muted-foreground truncate flex items-center gap-xs'>
+            <Package className='h-3 w-3 shrink-0' />
+            {planName}
+          </div>
+        </>
       )}
-      {showNoSubscription && (
-        <div className='text-xs text-muted-foreground truncate mt-xs'>
-          Free Plan
-        </div>
+      {showNoPlan && (
+        <>
+          {organizationName && (
+            <span className='text-xs text-muted-foreground'>•</span>
+          )}
+          <div className='text-xs text-muted-foreground truncate flex items-center gap-xs'>
+            <Package className='h-3 w-3 shrink-0' />
+            Free Plan
+          </div>
+        </>
       )}
     </div>
   )

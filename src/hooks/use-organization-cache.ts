@@ -85,7 +85,9 @@ export function usePeopleCache() {
 export function usePeople() {
   const { people, isLoading, error } = usePeopleCache()
 
+  const peopleWithoutUser = people.filter(person => !person.user)
   return {
+    peopleWithoutUser,
     people,
     isLoading,
     error,

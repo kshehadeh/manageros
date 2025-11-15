@@ -1,13 +1,12 @@
 'use client'
 
 import ReactMarkdown from 'react-markdown'
-import { HelpCircle, X, LucideIcon } from 'lucide-react'
+import { HelpCircle, LucideIcon } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogClose,
 } from '@/components/ui/dialog'
 import { getHelpContent } from '@/lib/help-content-loader'
 import { cn } from '@/lib/utils'
@@ -47,33 +46,24 @@ export function HelpDialog({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
-          'max-w-[95vw] sm:max-w-[50vw] sm:max-h-[90vh] flex flex-col p-0',
+          'max-w-[95vw] sm:max-w-[50vw] sm:max-h-[90vh] flex flex-col',
           className
         )}
       >
-        {/* Sticky Header */}
-        <div className='sticky top-0 z-10 bg-background border-b px-2xl py-xl rounded-t-lg'>
-          <DialogHeader className='pb-0'>
-            <div className='flex items-center justify-between'>
-              <DialogTitle className='flex items-center gap-md'>
-                <Icon className='h-5 w-5 text-muted-foreground' />
-                {helpContent.title}
-                {helpContent.category && (
-                  <span className='text-sm font-normal text-muted-foreground'>
-                    • {helpContent.category}
-                  </span>
-                )}
-              </DialogTitle>
-              <DialogClose className='rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground'>
-                <X className='h-4 w-4' />
-                <span className='sr-only'>Close</span>
-              </DialogClose>
-            </div>
-          </DialogHeader>
-        </div>
+        <DialogHeader>
+          <DialogTitle className='flex items-center gap-md'>
+            <Icon className='h-5 w-5 text-muted-foreground' />
+            {helpContent.title}
+            {helpContent.category && (
+              <span className='text-sm font-normal text-muted-foreground'>
+                • {helpContent.category}
+              </span>
+            )}
+          </DialogTitle>
+        </DialogHeader>
 
         {/* Scrollable Content */}
-        <div className='flex-1 overflow-y-auto px-2xl pb-2xl'>
+        <div className='flex-1 overflow-y-auto -mx-2xl px-2xl'>
           <div className='prose prose-sm max-w-none dark:prose-invert'>
             <ReactMarkdown
               components={{

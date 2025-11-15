@@ -24,25 +24,36 @@ model Organization {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Subscription fields
+  billingUserId       String?  // Reference to User who owns the subscription
+  subscriptionPlanId  String?  // Clerk plan ID (e.g., "plan_xxxxx" or "free")
+  subscriptionPlanName String? // Human-readable plan name (e.g., "Solo", "Orchestrator")
+  subscriptionStatus  String?  // Active subscription status from Clerk
+
   // Relationships
-  users             User[]
-  members           OrganizationMember[]
-  teams             Team[]
-  people            Person[]
-  initiatives       Initiative[]
-  invitations       OrganizationInvitation[]
-  meetings          Meeting[]
-  meetingInstances  MeetingInstance[]
-  entityLinks       EntityLink[]
-  jobRoles          JobRole[]
-  levels            JobLevel[]
-  domains           JobDomain[]
-  notifications     Notification[]
-  reportInstances   ReportInstance[]
-  cronJobExecutions CronJobExecution[]
-  notes             Note[]
-  fileAttachments   FileAttachment[]
-  githubOrgs        OrganizationGithubOrg[]
+  billingUser         User?    @relation("BillingUser", fields: [billingUserId], references: [id])
+  users               User[]
+  members             OrganizationMember[]
+  teams               Team[]
+  people              Person[]
+  initiatives         Initiative[]
+  invitations         OrganizationInvitation[]
+  meetings            Meeting[]
+  meetingInstances    MeetingInstance[]
+  entityLinks         EntityLink[]
+  jobRoles            JobRole[]
+  levels              JobLevel[]
+  domains             JobDomain[]
+  notifications       Notification[]
+  reportInstances     ReportInstance[]
+  cronJobExecutions   CronJobExecution[]
+  notes               Note[]
+  fileAttachments     FileAttachment[]
+  githubOrgs          OrganizationGithubOrg[]
+
+  @@index([billingUserId])
+  @@index([subscriptionPlanId])
+  @@index([subscriptionStatus])
 }
 
 model User {
@@ -58,6 +69,7 @@ model User {
   person                  Person?                  @relation(fields: [personId], references: [id])
   sentInvitations         OrganizationInvitation[]
   organizationMemberships OrganizationMember[]
+  billingOrganizations    Organization[]           @relation("BillingUser")
   jiraCredentials         UserJiraCredentials?
   githubCredentials       UserGithubCredentials?
   feedbackCampaigns       FeedbackCampaign[]

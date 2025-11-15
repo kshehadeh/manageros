@@ -37,8 +37,13 @@ export const searchCommandSource: CommandSource = {
     _userRole?: string,
     _pathname?: string,
     _currentUserPersonId?: string,
-    _permissions?: CommandPermissions
+    _permissions?: CommandPermissions,
+    organizationId?: string | null
   ) => {
+    // If no organization, don't show search results
+    if (!organizationId) {
+      return []
+    }
     const results = await searchAll(query)
     const items: CommandItemDescriptor[] = results.map(r => {
       const base = {

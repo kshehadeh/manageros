@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import Sidebar from './sidebar'
 import { getSidebarData } from '@/lib/actions/organization'
 import type { User } from '@/lib/auth-types'
+import { PersonBrief } from '../types/person'
 
 interface NavItem {
   name: string
@@ -13,17 +14,9 @@ interface NavItem {
   adminOnly?: boolean
   requiresPermission?: string
 }
-
-interface PersonData {
-  id: string
-  name: string
-  email: string | null
-  avatar: string | null
-}
-
 interface SidebarData {
   user: User | null
-  person: PersonData | null
+  person: PersonBrief | null
   navigation: NavItem[]
 }
 
@@ -103,6 +96,7 @@ export default function SidebarClient() {
               name: sidebarData.person.name,
               email: sidebarData.person.email,
               avatar: sidebarData.person.avatar,
+              role: sidebarData.person.role,
             }
           : null
       }

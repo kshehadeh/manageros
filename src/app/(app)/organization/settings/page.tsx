@@ -4,6 +4,7 @@ import {
   getOrganizationInvitations,
   getOrganizationMembers,
 } from '@/lib/actions/organization'
+import { getOrganizationSubscription } from '@/lib/subscription-utils'
 import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 import { SectionHeader } from '@/components/ui/section-header'
@@ -13,20 +14,19 @@ import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 import {
   Building,
-  Shield,
   Bell,
   Briefcase,
-  Calendar,
   UserCheck,
   User,
-  Users2,
-  ListTodo,
-  Rocket,
   Github,
+  Package,
+  CreditCard,
 } from 'lucide-react'
+import { prisma } from '@/lib/db'
 import { CreateNotificationModal } from '@/components/notifications/create-notification-modal'
 import { OrganizationSettingsBreadcrumbClient } from '@/components/organization/organization-settings-breadcrumb-client'
 import { GithubOrganizationsManager } from '@/components/organization/github-organizations-manager'
+import { OrganizationSubscriptionButton } from '@/components/organization/organization-subscription-button'
 
 export default async function OrganizationSettingsPage() {
   const user = await getCurrentUser()
@@ -48,6 +48,22 @@ export default async function OrganizationSettingsPage() {
   // Get members for management
   const members = await getOrganizationMembers()
 
+  // Get subscription information
+  const subscription = await getOrganizationSubscription(user.organizationId)
+
+  // Get billing user information
+  const billingUser = subscription?.billingUserId
+    ? await prisma.user.findUnique({
+        where: { id: subscription.billingUserId },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          personId: true,
+        },
+      })
+    : null
+
   return (
     <OrganizationSettingsBreadcrumbClient>
       <PageContainer>
@@ -61,132 +77,122 @@ export default async function OrganizationSettingsPage() {
             {/* Organization Info */}
             <PageSection
               header={
-                <SectionHeader
-                  icon={Building}
-                  title='Organization Info'
-                  description='Basic information about your organization'
-                />
+                <SectionHeader icon={Building} title='Organization Info' />
               }
             >
-              <div className='space-y-2'>
-                <div>
-                  <p className='text-sm font-medium'>Name</p>
-                  <p className='text-sm text-muted-foreground'>
-                    {user.organizationName}
-                  </p>
+              <div className='space-y-4'>
+                <div className='space-y-2'>
+                  <div>
+                    <p className='text-sm font-medium'>Name</p>
+                    <p className='text-sm text-muted-foreground'>
+                      {user.organizationName}
+                    </p>
+                  </div>
+                  <div>
+                    <p className='text-sm font-medium'>Organization ID</p>
+                    <p className='text-sm text-muted-foreground'>
+                      {user.organizationId}
+                    </p>
+                  </div>
+                  <div>
+                    <p className='text-sm font-medium'>Your Role</p>
+                    <p className='text-sm text-muted-foreground'>{user.role}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className='text-sm font-medium'>Organization ID</p>
-                  <p className='text-sm text-muted-foreground'>
-                    {user.organizationId}
-                  </p>
-                </div>
-                <div>
-                  <p className='text-sm font-medium'>Your Role</p>
-                  <p className='text-sm text-muted-foreground'>{user.role}</p>
+                <div className='border-t pt-4 flex flex-wrap gap-3'>
+                  <Button asChild variant='outline'>
+                    <Link
+                      href='/organization/members'
+                      className='flex items-center gap-2'
+                    >
+                      <UserCheck className='w-4 h-4' />
+                      Manage Users
+                    </Link>
+                  </Button>
+                  <Button asChild variant='outline'>
+                    <Link
+                      href='/organization/job-roles'
+                      className='flex items-center gap-2'
+                    >
+                      <Briefcase className='w-4 h-4' />
+                      Manage Job Roles
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </PageSection>
 
-            {/* User Management */}
+            {/* Billing */}
             <PageSection
-              header={
-                <SectionHeader
-                  icon={Shield}
-                  title='User Management'
-                  description='Change user roles and remove users from your organization'
-                />
-              }
+              header={<SectionHeader icon={CreditCard} title='Billing' />}
             >
-              <div className='flex flex-wrap gap-3'>
-                <Button asChild variant='outline'>
-                  <Link
-                    href='/organization/members'
-                    className='flex items-center gap-2'
-                  >
-                    <UserCheck className='w-4 h-4' />
-                    Manage Users
-                  </Link>
-                </Button>
-                <Button asChild variant='outline'>
-                  <Link href='/people' className='flex items-center gap-2'>
-                    <User className='w-4 h-4' />
-                    People
-                  </Link>
-                </Button>
-                <Button asChild variant='outline'>
-                  <Link href='/teams' className='flex items-center gap-2'>
-                    <Users2 className='w-4 h-4' />
-                    Teams
-                  </Link>
-                </Button>
-              </div>
-            </PageSection>
+              <div className='space-y-4'>
+                {/* Subscription Plan Info and Billing User - Side by Side */}
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                  {/* Subscription Plan Info */}
+                  <div className='space-y-2'>
+                    <div className='flex items-center gap-2 mb-2'>
+                      <Package className='w-4 h-4 text-muted-foreground' />
+                      <p className='text-sm font-medium'>Subscription Plan</p>
+                    </div>
+                    <div>
+                      <p className='text-sm font-medium'>Plan Name</p>
+                      <p className='text-sm text-muted-foreground'>
+                        {subscription?.subscriptionPlanName || 'Free Plan'}
+                      </p>
+                    </div>
+                    {subscription?.subscriptionStatus && (
+                      <div>
+                        <p className='text-sm font-medium'>Status</p>
+                        <p className='text-sm text-muted-foreground capitalize'>
+                          {subscription.subscriptionStatus}
+                        </p>
+                      </div>
+                    )}
+                  </div>
 
-            {/* Job Role Management */}
-            <PageSection
-              header={
-                <SectionHeader
-                  icon={Briefcase}
-                  title='Job Role Management'
-                  description='Set up job levels, domains, and roles to organize your team structure'
-                />
-              }
-            >
-              <div className='flex flex-wrap gap-3'>
-                <Button asChild variant='outline'>
-                  <Link
-                    href='/organization/job-roles'
-                    className='flex items-center gap-2'
-                  >
-                    <Briefcase className='w-4 h-4' />
-                    Manage Job Roles
-                  </Link>
-                </Button>
-              </div>
-            </PageSection>
+                  {/* Billing User */}
+                  {billingUser && (
+                    <div className='space-y-2'>
+                      <div className='flex items-center gap-2 mb-2'>
+                        <User className='w-4 h-4 text-muted-foreground' />
+                        <p className='text-sm font-medium'>Billing User</p>
+                      </div>
+                      <div>
+                        <p className='text-sm font-medium'>Name</p>
+                        {billingUser.personId ? (
+                          <Link
+                            href={`/people/${billingUser.personId}`}
+                            className='text-sm text-muted-foreground hover:text-foreground hover:underline'
+                          >
+                            {billingUser.name}
+                          </Link>
+                        ) : (
+                          <p className='text-sm text-muted-foreground'>
+                            {billingUser.name}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <p className='text-sm font-medium'>Email</p>
+                        <p className='text-sm text-muted-foreground'>
+                          {billingUser.email}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
-            {/* Planning */}
-            <PageSection
-              header={
-                <SectionHeader
-                  icon={Calendar}
-                  title='Planning'
-                  description='Organize and track work across your organization'
-                />
-              }
-            >
-              <div className='flex flex-wrap gap-3'>
-                <Button asChild variant='outline'>
-                  <Link href='/tasks' className='flex items-center gap-2'>
-                    <ListTodo className='w-4 h-4' />
-                    Tasks
-                  </Link>
-                </Button>
-                <Button asChild variant='outline'>
-                  <Link href='/meetings' className='flex items-center gap-2'>
-                    <Calendar className='w-4 h-4' />
-                    Meetings
-                  </Link>
-                </Button>
-                <Button asChild variant='outline'>
-                  <Link href='/initiatives' className='flex items-center gap-2'>
-                    <Rocket className='w-4 h-4' />
-                    Initiatives
-                  </Link>
-                </Button>
+                {/* Clerk Subscription Button */}
+                <div className='border-t pt-4'>
+                  <OrganizationSubscriptionButton />
+                </div>
               </div>
             </PageSection>
 
             {/* Notifications */}
             <PageSection
-              header={
-                <SectionHeader
-                  icon={Bell}
-                  title='Notifications'
-                  description='Send notifications to specific users or broadcast to all organization members'
-                />
-              }
+              header={<SectionHeader icon={Bell} title='Notifications' />}
             >
               <div className='flex flex-wrap gap-3'>
                 <CreateNotificationModal
@@ -211,11 +217,7 @@ export default async function OrganizationSettingsPage() {
             {/* GitHub Organizations */}
             <PageSection
               header={
-                <SectionHeader
-                  icon={Github}
-                  title='GitHub Organizations'
-                  description='Configure which GitHub organizations are associated with your mpath organization'
-                />
+                <SectionHeader icon={Github} title='GitHub Organizations' />
               }
             >
               <GithubOrganizationsManager />

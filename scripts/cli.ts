@@ -39,9 +39,187 @@ if (process.env.NODE_ENV !== 'production') {
 // Clerk Helper Functions
 // ============================================================================
 
-async function deleteClerkUser(clerkUserId: string): Promise<boolean> {
+type UserPresence = 'both' | 'clerk-only' | 'database-only'
+
+interface UserWithPresence {
+  email: string
+  clerkUserId?: string
+  databaseUserId?: string
+  name?: string
+  presence: UserPresence
+}
+
+function getClerkConfig() {
   const apiKey = process.env.CLERK_SECRET_KEY
   const baseUrl = process.env.CLERK_API_URL || 'https://api.clerk.com/v1'
+  return { apiKey, baseUrl }
+}
+
+/**
+ * Fetch all users from Clerk (with pagination)
+ */
+async function fetchAllClerkUsers(): Promise<
+  Array<{
+    id: string
+    email_addresses: Array<{ email_address: string }>
+    first_name?: string
+    last_name?: string
+  }>
+> {
+  const { apiKey, baseUrl } = getClerkConfig()
+
+  if (!apiKey) {
+    console.warn('WARNING: CLERK_SECRET_KEY not set. Cannot fetch Clerk users.')
+    return []
+  }
+
+  const allUsers: Array<{
+    id: string
+    email_addresses: Array<{ email_address: string }>
+    first_name?: string
+    last_name?: string
+  }> = []
+  const limit = 500
+  let offset = 0
+  let hasMore = true
+
+  try {
+    while (hasMore) {
+      const response = await fetch(
+        `${baseUrl}/users?limit=${limit}&offset=${offset}`,
+        {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+          },
+        }
+      )
+
+      if (!response.ok) {
+        const error = await response.text()
+        throw new Error(
+          `Failed to fetch Clerk users: ${response.status} ${error}`
+        )
+      }
+
+      const data = await response.json()
+      const users = Array.isArray(data) ? data : data.data || []
+
+      allUsers.push(...users)
+
+      // Check if there are more users to fetch
+      if (Array.isArray(data)) {
+        hasMore = users.length === limit
+      } else {
+        hasMore = data.has_more === true
+      }
+
+      offset += limit
+    }
+
+    return allUsers
+  } catch (error) {
+    console.error('Error fetching Clerk users:', error)
+    return []
+  }
+}
+
+/**
+ * Compare Clerk and database users to determine presence status
+ */
+async function compareUsers(): Promise<UserWithPresence[]> {
+  console.log('Loading users from Clerk...')
+  const clerkUsers = await fetchAllClerkUsers()
+  console.log(`Found ${clerkUsers.length} user(s) in Clerk`)
+
+  console.log('Loading users from database...')
+  const dbUsers = await prisma.user.findMany({
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      clerkUserId: true,
+    },
+    orderBy: {
+      email: 'asc',
+    },
+  })
+  console.log(`Found ${dbUsers.length} user(s) in database\n`)
+
+  // Create maps for quick lookup
+  const clerkMap = new Map<string, (typeof clerkUsers)[0]>()
+  const dbMap = new Map<string, (typeof dbUsers)[0]>()
+
+  // Index Clerk users by ID and email
+  for (const clerkUser of clerkUsers) {
+    clerkMap.set(clerkUser.id, clerkUser)
+    const primaryEmail =
+      clerkUser.email_addresses?.[0]?.email_address?.toLowerCase()
+    if (primaryEmail) {
+      clerkMap.set(`email:${primaryEmail}`, clerkUser)
+    }
+  }
+
+  // Index database users by ID, clerkUserId, and email
+  for (const dbUser of dbUsers) {
+    dbMap.set(dbUser.id, dbUser)
+    if (dbUser.clerkUserId) {
+      dbMap.set(`clerk:${dbUser.clerkUserId}`, dbUser)
+    }
+    dbMap.set(`email:${dbUser.email.toLowerCase()}`, dbUser)
+  }
+
+  const result: UserWithPresence[] = []
+  const processedEmails = new Set<string>()
+
+  // Process Clerk users
+  for (const clerkUser of clerkUsers) {
+    const primaryEmail =
+      clerkUser.email_addresses?.[0]?.email_address?.toLowerCase()
+    if (!primaryEmail || processedEmails.has(primaryEmail)) continue
+
+    processedEmails.add(primaryEmail)
+    const dbUser =
+      dbMap.get(`clerk:${clerkUser.id}`) || dbMap.get(`email:${primaryEmail}`)
+
+    result.push({
+      email: primaryEmail,
+      clerkUserId: clerkUser.id,
+      databaseUserId: dbUser?.id,
+      name:
+        dbUser?.name ||
+        `${clerkUser.first_name || ''} ${clerkUser.last_name || ''}`.trim() ||
+        undefined,
+      presence: dbUser ? 'both' : 'clerk-only',
+    })
+  }
+
+  // Process database users not found in Clerk
+  for (const dbUser of dbUsers) {
+    const email = dbUser.email.toLowerCase()
+    if (processedEmails.has(email)) continue
+
+    processedEmails.add(email)
+    const clerkUser = dbUser.clerkUserId
+      ? clerkMap.get(dbUser.clerkUserId)
+      : clerkMap.get(`email:${email}`)
+
+    result.push({
+      email,
+      clerkUserId: clerkUser?.id || dbUser.clerkUserId || undefined,
+      databaseUserId: dbUser.id,
+      name: dbUser.name || undefined,
+      presence: clerkUser ? 'both' : 'database-only',
+    })
+  }
+
+  // Sort by email
+  result.sort((a, b) => a.email.localeCompare(b.email))
+
+  return result
+}
+
+async function deleteClerkUser(clerkUserId: string): Promise<boolean> {
+  const { apiKey, baseUrl } = getClerkConfig()
 
   if (!apiKey) {
     console.warn(
@@ -125,34 +303,124 @@ async function listUsersCommand() {
       process.exit(1)
     }
 
-    console.log('Loading users...\n')
-    const users = await listUsers()
+    // Get users with presence status
+    const usersWithPresence = await compareUsers()
 
-    if (users.length === 0) {
-      console.log('No users found in the database.')
+    if (usersWithPresence.length === 0) {
+      console.log('No users found.')
       return
     }
 
-    console.log(`Found ${users.length} user(s):\n`)
+    // Group by presence
+    const both = usersWithPresence.filter(u => u.presence === 'both')
+    const clerkOnly = usersWithPresence.filter(u => u.presence === 'clerk-only')
+    const dbOnly = usersWithPresence.filter(u => u.presence === 'database-only')
 
-    // Display users in a formatted table
-    users.forEach((user, index) => {
-      const orgs = user.organizationMemberships
-        .map(m => `${m.organization.name} (${m.role})`)
-        .join(', ')
-      const person = user.person
-        ? `${user.person.name} (${user.person.email})`
-        : 'Not linked'
-      const clerkId = user.clerkUserId || 'N/A'
+    console.log('='.repeat(80))
+    console.log('USER PRESENCE SUMMARY')
+    console.log('='.repeat(80))
+    console.log(`Total users: ${usersWithPresence.length}`)
+    console.log(`  ✓ In both Clerk and database: ${both.length}`)
+    console.log(`  ⚠ Only in Clerk: ${clerkOnly.length}`)
+    console.log(`  ⚠ Only in database: ${dbOnly.length}`)
+    console.log('')
 
-      console.log(`${index + 1}. ${user.name}`)
-      console.log(`   Email: ${user.email}`)
-      console.log(`   ID: ${user.id}`)
-      console.log(`   Clerk User ID: ${clerkId}`)
-      console.log(`   Organizations: ${orgs || 'None'}`)
-      console.log(`   Linked Person: ${person}`)
-      console.log('')
-    })
+    // Get full database user details for users that exist in database
+    const dbUserIds = usersWithPresence
+      .filter(u => u.databaseUserId)
+      .map(u => u.databaseUserId!)
+    const dbUsers =
+      dbUserIds.length > 0
+        ? await prisma.user.findMany({
+            where: { id: { in: dbUserIds } },
+            include: {
+              person: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                },
+              },
+              organizationMemberships: {
+                include: {
+                  organization: {
+                    select: {
+                      id: true,
+                      name: true,
+                      slug: true,
+                    },
+                  },
+                },
+              },
+            },
+          })
+        : []
+
+    const dbUserMap = new Map(dbUsers.map(u => [u.id, u]))
+
+    if (both.length > 0) {
+      console.log('='.repeat(80))
+      console.log(`USERS IN BOTH CLERK AND DATABASE (${both.length})`)
+      console.log('='.repeat(80))
+      both.forEach((user, index) => {
+        const dbUser = user.databaseUserId
+          ? dbUserMap.get(user.databaseUserId)
+          : null
+        const orgs =
+          dbUser?.organizationMemberships
+            .map(m => `${m.organization.name} (${m.role})`)
+            .join(', ') || 'None'
+        const person = dbUser?.person
+          ? `${dbUser.person.name} (${dbUser.person.email})`
+          : 'Not linked'
+
+        console.log(`${index + 1}. ${user.name || user.email}`)
+        console.log(`   Email: ${user.email}`)
+        console.log(`   Database ID: ${user.databaseUserId}`)
+        console.log(`   Clerk ID: ${user.clerkUserId}`)
+        console.log(`   Organizations: ${orgs}`)
+        console.log(`   Linked Person: ${person}`)
+        console.log('')
+      })
+    }
+
+    if (clerkOnly.length > 0) {
+      console.log('='.repeat(80))
+      console.log(`USERS ONLY IN CLERK (${clerkOnly.length})`)
+      console.log('='.repeat(80))
+      clerkOnly.forEach((user, index) => {
+        console.log(`${index + 1}. ${user.name || user.email}`)
+        console.log(`   Email: ${user.email}`)
+        console.log(`   Clerk ID: ${user.clerkUserId}`)
+        console.log('')
+      })
+    }
+
+    if (dbOnly.length > 0) {
+      console.log('='.repeat(80))
+      console.log(`USERS ONLY IN DATABASE (${dbOnly.length})`)
+      console.log('='.repeat(80))
+      dbOnly.forEach((user, index) => {
+        const dbUser = user.databaseUserId
+          ? dbUserMap.get(user.databaseUserId)
+          : null
+        const orgs =
+          dbUser?.organizationMemberships
+            .map(m => `${m.organization.name} (${m.role})`)
+            .join(', ') || 'None'
+        const person = dbUser?.person
+          ? `${dbUser.person.name} (${dbUser.person.email})`
+          : 'Not linked'
+
+        console.log(`${index + 1}. ${user.name || user.email}`)
+        console.log(`   Email: ${user.email}`)
+        console.log(`   Database ID: ${user.databaseUserId}`)
+        console.log(`   Clerk ID: ${user.clerkUserId || 'N/A'}`)
+        console.log(`   Organizations: ${orgs}`)
+        console.log(`   Linked Person: ${person}`)
+        console.log('')
+      })
+    }
   } catch (error) {
     console.error('Error listing users:', error)
     throw error
@@ -162,8 +430,35 @@ async function listUsersCommand() {
 }
 
 async function deleteUserByIdentifier(identifier: string) {
-  console.log(`Looking up user: ${identifier}`)
+  console.log(`Looking up user: ${identifier}\n`)
 
+  // First, check presence status
+  const allUsers = await compareUsers()
+  const matchingUser = allUsers.find(
+    u =>
+      u.email.toLowerCase() === identifier.toLowerCase() ||
+      u.clerkUserId === identifier ||
+      u.databaseUserId === identifier
+  )
+
+  if (matchingUser) {
+    console.log('='.repeat(80))
+    console.log('USER PRESENCE STATUS')
+    console.log('='.repeat(80))
+    console.log(`Email: ${matchingUser.email}`)
+    console.log(`Name: ${matchingUser.name || 'N/A'}`)
+    console.log(`Presence: ${matchingUser.presence}`)
+    console.log(
+      `  ${matchingUser.clerkUserId ? '✓' : '✗'} Clerk: ${matchingUser.clerkUserId || 'Not found'}`
+    )
+    console.log(
+      `  ${matchingUser.databaseUserId ? '✓' : '✗'} Database: ${matchingUser.databaseUserId || 'Not found'}`
+    )
+    console.log('='.repeat(80))
+    console.log('')
+  }
+
+  // Try to find user in database
   const user = await prisma.user.findFirst({
     where: {
       OR: [
@@ -192,22 +487,83 @@ async function deleteUserByIdentifier(identifier: string) {
     },
   })
 
-  if (!user) {
-    throw new Error(`User not found: ${identifier}`)
+  // Try to find user in Clerk
+  let clerkUser: {
+    id: string
+    email_addresses: Array<{ email_address: string }>
+  } | null = null
+  const { apiKey, baseUrl } = getClerkConfig()
+  if (apiKey) {
+    try {
+      // If we found a database user with clerkUserId, try that first
+      if (user?.clerkUserId) {
+        const response = await fetch(`${baseUrl}/users/${user.clerkUserId}`, {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+          },
+        })
+        if (response.ok) {
+          clerkUser = await response.json()
+        }
+      }
+
+      // If we didn't find it by clerkUserId, try by identifier
+      if (!clerkUser) {
+        // Try by ID first
+        const response = await fetch(`${baseUrl}/users/${identifier}`, {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+          },
+        })
+        if (response.ok) {
+          clerkUser = await response.json()
+        } else {
+          // Try by email
+          const emailToSearch = user?.email || identifier
+          const emailResponse = await fetch(
+            `${baseUrl}/users?email_address=${encodeURIComponent(emailToSearch)}`,
+            {
+              headers: {
+                Authorization: `Bearer ${apiKey}`,
+              },
+            }
+          )
+          if (emailResponse.ok) {
+            const emailData = await emailResponse.json()
+            clerkUser =
+              Array.isArray(emailData) && emailData.length > 0
+                ? emailData[0]
+                : null
+          }
+        }
+      }
+    } catch {
+      // Ignore errors, we'll just skip Clerk deletion
+    }
   }
 
-  console.log(`\nFound user:`)
-  console.log(`  ID: ${user.id}`)
-  console.log(`  Email: ${user.email}`)
-  console.log(`  Name: ${user.name}`)
-  console.log(`  Clerk User ID: ${user.clerkUserId || 'N/A'}`)
-  console.log(
-    `  Organizations: ${user.organizationMemberships.map(m => m.organization.name).join(', ') || 'N/A'}`
-  )
-  console.log(`  Person: ${user.person?.name || 'N/A'}`)
+  if (!user && !clerkUser) {
+    throw new Error(`User not found in database or Clerk: ${identifier}`)
+  }
+
+  if (user) {
+    console.log('DATABASE USER FOUND:')
+    console.log(`  ID: ${user.id}`)
+    console.log(`  Email: ${user.email}`)
+    console.log(`  Name: ${user.name}`)
+    console.log(`  Clerk User ID: ${user.clerkUserId || 'N/A'}`)
+    console.log(
+      `  Organizations: ${user.organizationMemberships.map(m => m.organization.name).join(', ') || 'N/A'}`
+    )
+    console.log(`  Person: ${user.person?.name || 'N/A'}`)
+    console.log('')
+  } else {
+    console.log('No database user found (user only exists in Clerk)')
+    console.log('')
+  }
 
   // Unlink person if linked
-  if (user.personId) {
+  if (user && user.personId) {
     console.log(
       `\nUnlinking user from person: ${user.person?.name} (${user.personId})`
     )
@@ -219,9 +575,11 @@ async function deleteUserByIdentifier(identifier: string) {
   }
 
   // Delete Clerk user if exists
-  if (user.clerkUserId) {
-    console.log(`\nDeleting Clerk user: ${user.clerkUserId}`)
-    const clerkDeleted = await deleteClerkUser(user.clerkUserId)
+  // Prioritize the Clerk user we found via API lookup, then fall back to database clerkUserId
+  const clerkIdToDelete = clerkUser?.id || user?.clerkUserId
+  if (clerkIdToDelete) {
+    console.log(`\nDeleting Clerk user: ${clerkIdToDelete}`)
+    const clerkDeleted = await deleteClerkUser(clerkIdToDelete)
     if (clerkDeleted) {
       console.log('✓ Clerk user deleted')
     } else {
@@ -232,7 +590,7 @@ async function deleteUserByIdentifier(identifier: string) {
   }
 
   // Delete organization memberships
-  if (user.organizationMemberships.length > 0) {
+  if (user && user.organizationMemberships.length > 0) {
     console.log(
       `\nDeleting ${user.organizationMemberships.length} organization membership(s)...`
     )
@@ -242,12 +600,16 @@ async function deleteUserByIdentifier(identifier: string) {
     console.log('✓ Organization memberships deleted')
   }
 
-  // Delete database user
-  console.log(`\nDeleting database user: ${user.id}`)
-  await prisma.user.delete({
-    where: { id: user.id },
-  })
-  console.log('✓ Database user deleted')
+  // Delete database user if exists
+  if (user) {
+    console.log(`\nDeleting database user: ${user.id}`)
+    await prisma.user.delete({
+      where: { id: user.id },
+    })
+    console.log('✓ Database user deleted')
+  } else {
+    console.log('\nNo database user found, skipping database deletion')
+  }
 
   console.log('\n✓ User deletion completed successfully!')
 }
@@ -269,19 +631,39 @@ async function deleteUser(email?: string) {
       // Direct deletion by email
       userIdentifier = email
     } else {
-      // Interactive selection
-      console.log('Loading users...')
-      const users = await listUsers()
+      // Interactive selection - show users with presence status
+      console.log('Loading users from Clerk and database...')
+      const usersWithPresence = await compareUsers()
 
-      if (users.length === 0) {
-        console.log('No users found in the database.')
+      if (usersWithPresence.length === 0) {
+        console.log('No users found.')
         return
       }
 
-      const choices = users.map(user => ({
-        name: formatUserForDisplay(user),
-        value: user.email,
-      }))
+      // Get full database user details for formatting
+      const dbUserIds = usersWithPresence
+        .filter(u => u.databaseUserId)
+        .map(u => u.databaseUserId!)
+      const dbUsers = dbUserIds.length > 0 ? await listUsers() : []
+
+      const dbUserMap = new Map(dbUsers.map(u => [u.email.toLowerCase(), u]))
+
+      const choices = usersWithPresence.map(user => {
+        const dbUser = dbUserMap.get(user.email.toLowerCase())
+        const presenceLabel =
+          user.presence === 'both'
+            ? '✓ Both'
+            : user.presence === 'clerk-only'
+              ? '⚠ Clerk only'
+              : '⚠ DB only'
+        const displayName = dbUser
+          ? formatUserForDisplay(dbUser)
+          : `${user.email} - ${user.name || 'N/A'}`
+        return {
+          name: `${presenceLabel} | ${displayName}`,
+          value: user.email,
+        }
+      })
 
       userIdentifier = await select({
         message: 'Select a user to delete:',

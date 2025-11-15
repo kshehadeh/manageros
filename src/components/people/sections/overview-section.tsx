@@ -3,6 +3,7 @@ import { getCurrentUser } from '@/lib/auth-utils'
 import { OverviewSectionClient } from './overview-section-client'
 import { PageSection } from '@/components/ui/page-section'
 import { canAccessSynopsesForPerson } from '@/lib/auth-utils'
+import { getPersonById } from '@/lib/data/people'
 import Markdown from 'react-markdown'
 
 interface OverviewSectionProps {
@@ -40,10 +41,7 @@ export async function OverviewSection({
   }
 
   // Get person name
-  const { getPersonById } = await import('@/lib/data/people')
-  const person = await getPersonById(personId, organizationId, {
-    includeNameOnly: true,
-  })
+  const person = await getPersonById(personId, organizationId)
 
   if (!person) {
     return null

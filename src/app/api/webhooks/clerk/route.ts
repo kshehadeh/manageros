@@ -222,5 +222,114 @@ export async function POST(req: Request) {
     }
   }
 
+  // Handle subscription webhooks
+  if (
+    eventType === 'subscription.created' ||
+    eventType === 'subscription.updated'
+  ) {
+    const { user_id, plan_id, plan_name, status } = evt.data as {
+      user_id?: string
+      plan_id?: string
+      plan_name?: string
+      status?: string
+    }
+
+    if (!user_id) {
+      return new Response('Missing user ID in subscription webhook', {
+        status: 400,
+      })
+    }
+
+    try {
+      // Find the user by Clerk user ID
+      const user = await prisma.user.findUnique({
+        where: { clerkUserId: user_id },
+      })
+
+      if (!user) {
+        console.warn(
+          `User not found for Clerk user ID ${user_id} in subscription webhook`
+        )
+        return new Response('User not found', { status: 404 })
+      }
+
+      // Find organization where this user is the billing user
+      const organization = await prisma.organization.findFirst({
+        where: { billingUserId: user.id },
+      })
+
+      if (!organization) {
+        console.warn(
+          `No organization found with billingUserId ${user.id} for subscription webhook`
+        )
+        return new Response('Organization not found', { status: 404 })
+      }
+
+      // Update organization subscription information
+      await prisma.organization.update({
+        where: { id: organization.id },
+        data: {
+          subscriptionPlanId: plan_id || null,
+          subscriptionPlanName: plan_name || null,
+          subscriptionStatus: status || 'active',
+        },
+      })
+
+      return new Response('Subscription updated successfully', { status: 200 })
+    } catch (error) {
+      console.error('Error updating subscription:', error)
+      return new Response('Error updating subscription', { status: 500 })
+    }
+  }
+
+  if (eventType === 'subscriptionItem.canceled') {
+    const { user_id } = evt.data as { user_id?: string }
+
+    if (!user_id) {
+      return new Response('Missing user ID in subscription webhook', {
+        status: 400,
+      })
+    }
+
+    try {
+      // Find the user by Clerk user ID
+      const user = await prisma.user.findUnique({
+        where: { clerkUserId: user_id },
+      })
+
+      if (!user) {
+        console.warn(
+          `User not found for Clerk user ID ${user_id} in subscription cancellation webhook`
+        )
+        return new Response('User not found', { status: 404 })
+      }
+
+      // Find organization where this user is the billing user
+      const organization = await prisma.organization.findFirst({
+        where: { billingUserId: user.id },
+      })
+
+      if (!organization) {
+        console.warn(
+          `No organization found with billingUserId ${user.id} for subscription cancellation webhook`
+        )
+        return new Response('Organization not found', { status: 404 })
+      }
+
+      // Update organization subscription status to canceled
+      await prisma.organization.update({
+        where: { id: organization.id },
+        data: {
+          subscriptionStatus: 'canceled',
+        },
+      })
+
+      return new Response('Subscription canceled successfully', { status: 200 })
+    } catch (error) {
+      console.error('Error canceling subscription:', error)
+      return new Response('Error canceling subscription', { status: 500 })
+    }
+  }
+
   return new Response('Webhook received', { status: 200 })
 }

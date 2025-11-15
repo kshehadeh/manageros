@@ -41,18 +41,13 @@ export default function CreateOrganizationPage() {
     setError('')
 
     try {
-      const plan = searchParams.get('plan')
-      const planId = searchParams.get('planId')
-
       // Pass subscription info to createOrganization
-      await createOrganization(formData, {
-        plan: plan || undefined,
-        planId: planId || undefined,
-      })
+      await createOrganization(formData)
 
       // Redirect to dashboard with a full page reload to ensure fresh data
       // This ensures the session is refreshed and the dashboard shows the new organization
-      window.location.href = '/dashboard'
+      router.push('/dashboard')
+      router.refresh() // Refresh to get updated user data
     } catch (error) {
       setError(
         error instanceof Error

@@ -61,7 +61,7 @@ export function UserInfoSection({ userId, role }: UserInfoSectionProps) {
       <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
         <div>
           <p className='text-sm font-medium'>Email</p>
-          <p className='text-sm text-muted-foreground'>
+          <div className='text-sm text-muted-foreground'>
             <div className='flex flex-row gap-sm items-center'>
               <span>{user?.emailAddresses[0].emailAddress}</span>
               <span>
@@ -72,7 +72,7 @@ export function UserInfoSection({ userId, role }: UserInfoSectionProps) {
                 })}
               </span>
             </div>
-          </p>
+          </div>
         </div>
         {role && (
           <div>

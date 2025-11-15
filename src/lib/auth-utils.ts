@@ -12,8 +12,12 @@ export type { User }
  * Get the current authenticated user from Clerk
  * Throws an error if no user is authenticated
  * Use this for server actions and components that must have authentication
+ * @param options.skipSessionClaims - If true, bypasses session claims and always queries the database.
+ *   Useful when data might be stale (e.g., after person link changes) and you need fresh data immediately.
  */
-export async function getCurrentUser(): Promise<User> {
+export async function getCurrentUser(options?: {
+  skipSessionClaims?: boolean
+}): Promise<User> {
   // Use treatPendingAsSignedOut: false to handle pending sessions
   const authResult = await auth({ treatPendingAsSignedOut: false })
   const { userId, sessionClaims } = authResult
@@ -26,17 +30,18 @@ export async function getCurrentUser(): Promise<User> {
   // This avoids a database lookup if the data is in the token
   // NOTE: Custom claims only appear in sessionClaims if the Session Token is customized in
   // Clerk Dashboard (Sessions → Customize session token), NOT just JWT Templates
-  const claimsData = sessionClaims.metadata as {
-    managerOSUserId?: string
-    organizationId?: string | null
-    organizationName?: string | null
-    organizationSlug?: string | null
-    personId?: string | null
-    role?: string
-  }
+  const claimsData = sessionClaims.metadata as User
 
+  // If skipSessionClaims is true, always query the database (useful when data might be stale)
   // If we have ManagerOS user ID in claims, use it (data is in JWT)
-  if (claimsData?.managerOSUserId) {
+  // However, if organizationId is null in claims, always query database to check for updates
+  // This handles the case where an organization was just created but session claims haven't refreshed yet
+  if (
+    !options?.skipSessionClaims &&
+    claimsData?.managerOSUserId &&
+    claimsData.organizationId !== null &&
+    claimsData.organizationId !== undefined
+  ) {
     return {
       id: claimsData.managerOSUserId,
       email: (sessionClaims?.email as string) || '',
@@ -46,10 +51,12 @@ export async function getCurrentUser(): Promise<User> {
       organizationName: claimsData.organizationName || null,
       organizationSlug: claimsData.organizationSlug || null,
       personId: claimsData.personId || null,
+      clerkUserId: userId,
+      managerOSUserId: claimsData.managerOSUserId,
     }
   }
 
-  // Fallback to database lookup if not in session claims
+  // Fallback to database lookup if not in session claims or skipSessionClaims is true
   // Look up user in database by Clerk user ID
   let user = await prisma.user.findUnique({
     where: { clerkUserId: userId },
@@ -276,6 +283,8 @@ export async function getCurrentUser(): Promise<User> {
     organizationName: user.organization?.name || null,
     organizationSlug: user.organization?.slug || null,
     personId: user.person?.id || null,
+    clerkUserId: userId,
+    managerOSUserId: user.id,
   }
 }
 
@@ -342,6 +351,8 @@ export async function getOptionalUser(): Promise<User | null> {
       organizationName: user.organization?.name || null,
       organizationSlug: user.organization?.slug || null,
       personId: user.person?.id || null,
+      clerkUserId: userId,
+      managerOSUserId: user.id,
     }
   } catch {
     return null
@@ -380,11 +391,13 @@ export async function getFilteredNavigation(user: User | null) {
     { name: 'My Tasks', href: '/my-tasks', icon: 'CheckSquare' },
     { name: 'Initiatives', href: '/initiatives', icon: 'Rocket' },
     { name: 'Meetings', href: '/meetings', icon: 'Calendar' },
+    { name: 'People', href: '/people', icon: 'User' },
+    { name: 'Teams', href: '/teams', icon: 'Users2' },
     {
       name: 'Reports',
       href: '/reports',
       icon: 'BarChart3',
-      requiresPermission: 'report.access',
+      requiresPermission: 'report.access' as PermissionType,
     },
     {
       name: 'Org Settings',
@@ -555,9 +568,60 @@ export function canAccessOrganization(
 type PermissionCheck = (user: User, id?: string) => boolean | Promise<boolean>
 
 /**
+ * All possible permission keys in the system
+ * This is the single source of truth for all permission identifiers
+ */
+const _PERMISSION_KEYS = [
+  'task.create',
+  'task.edit',
+  'task.delete',
+  'task.view',
+  'meeting.create',
+  'meeting.edit',
+  'meeting.delete',
+  'meeting.view',
+  'person.create',
+  'person.import',
+  'person.edit',
+  'person.delete',
+  'person.view',
+  'meeting-instance.create',
+  'meeting-instance.edit',
+  'meeting-instance.delete',
+  'meeting-instance.view',
+  'initiative.create',
+  'initiative.edit',
+  'initiative.delete',
+  'initiative.view',
+  'report.access',
+  'report.create',
+  'report.edit',
+  'report.delete',
+  'report.view',
+  'feedback.create',
+  'feedback.edit',
+  'feedback.delete',
+  'feedback.view',
+  'oneonone.create',
+  'oneonone.edit',
+  'oneonone.delete',
+  'oneonone.view',
+  'feedback-campaign.create',
+  'feedback-campaign.edit',
+  'feedback-campaign.delete',
+  'feedback-campaign.view',
+  'user.link-person',
+] as const
+
+/**
+ * Union type of all possible permission keys
+ */
+export type PermissionType = (typeof _PERMISSION_KEYS)[number]
+
+/**
  * Permission map that maps action IDs to their permission check functions
  */
-const PermissionMap: Record<string, PermissionCheck> = {
+const PermissionMap: Record<PermissionType, PermissionCheck> = {
   // Task permissions
   'task.create': user => {
     return (isAdminOrOwner(user) || !!user.personId) && !!user.organizationId
@@ -1142,11 +1206,67 @@ const PermissionMap: Record<string, PermissionCheck> = {
     return !!campaign
   },
 
+  // Person permissions
+  'person.create': user => {
+    return isAdminOrOwner(user) && !!user.organizationId
+  },
+  'person.import': user => {
+    return isAdminOrOwner(user) && !!user.organizationId
+  },
+  'person.edit': async (user, id) => {
+    if (!user.organizationId || !id) return false
+    if (!isAdminOrOwner(user)) return false
+
+    // Verify person belongs to user's organization
+    const person = await prisma.person.findFirst({
+      where: {
+        id,
+        organizationId: user.organizationId,
+      },
+    })
+
+    return !!person
+  },
+  'person.delete': async (user, id) => {
+    if (!user.organizationId || !id) return false
+    if (!isAdminOrOwner(user)) return false
+
+    // Verify person belongs to user's organization
+    const person = await prisma.person.findFirst({
+      where: {
+        id,
+        organizationId: user.organizationId,
+      },
+    })
+
+    return !!person
+  },
+  'person.view': async (user, id) => {
+    if (!user.organizationId) return false
+
+    // If no ID provided, user can view people list if they belong to organization
+    if (!id) return true
+
+    // If ID provided, verify person belongs to user's organization
+    const person = await prisma.person.findFirst({
+      where: {
+        id,
+        organizationId: user.organizationId,
+      },
+    })
+
+    return !!person
+  },
+
   // User linking permissions
   'user.link-person': user => {
     return isAdminOrOwner(user)
   },
 }
+
+export type PermissionKey = PermissionType
+
+export type ActionPermissionOption = PermissionType
 
 /**
  * Central permission function to check if a user can perform a specific action
@@ -1157,7 +1277,7 @@ const PermissionMap: Record<string, PermissionCheck> = {
  */
 export async function getActionPermission(
   user: User,
-  actionId: string,
+  actionId: PermissionType,
   id?: string
 ): Promise<boolean> {
   if (actionId in PermissionMap) {

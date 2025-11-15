@@ -70,10 +70,23 @@ const pricingTiers = [
 
 ## How It Works
 
+### Organization-Based Subscription Model
+
+Subscriptions are now tied to organizations rather than individual users. When a user creates an organization, they become the billing user for that organization, and the subscription information is stored on the organization record.
+
+**Key Points:**
+
+- Each organization has a `billingUserId` that references the user who owns the subscription
+- Subscription details (`subscriptionPlanId`, `subscriptionPlanName`, `subscriptionStatus`) are stored on the organization
+- Limits are enforced at the organization level based on the stored subscription plan
+- Users can view existing entities even if over limit, but cannot create new ones (per rule #10)
+
 ### Free Plan (Solo)
 
 - Clicking "Get started" redirects users to `/auth/signup`
-- No billing integration needed
+- When creating an organization, users select the free plan
+- Subscription info is stored on the organization with `subscriptionPlanId: 'free'` and `subscriptionPlanName: 'Solo'`
+- The creating user becomes the billing user and is assigned the ADMIN role
 
 ### Paid Plan (Orchestrator)
 
@@ -81,20 +94,33 @@ const pricingTiers = [
 2. Clerk's `CheckoutButton` handles authentication automatically
 3. If not signed in, Clerk redirects to signup first
 4. If signed in, Clerk opens the checkout drawer/modal
-5. After successful subscription, Clerk handles the webhook
-6. The component uses Clerk's official billing UI for a seamless experience
+5. After successful subscription, Clerk sends a webhook
+6. The webhook handler updates the organization's subscription information
+7. The component uses Clerk's official billing UI for a seamless experience
 
 ## Webhook Setup
 
-Clerk will send webhooks for subscription events. You may want to handle these in your existing webhook handler at `src/app/api/webhooks/clerk/route.ts`.
+Clerk sends webhooks for subscription events, which are handled in `src/app/api/webhooks/clerk/route.ts`.
 
-Common webhook events to handle:
+### Implemented Webhook Handlers
 
-- `billing.subscription.created`
-- `billing.subscription.updated`
-- `billing.subscription.canceled`
+- **`billing.subscription.created`**: Updates organization subscription when a new subscription is created
+- **`billing.subscription.updated`**: Updates organization subscription when subscription changes (plan upgrade/downgrade)
+- **`billing.subscription.canceled`**: Marks organization subscription as canceled
+
+### How Webhooks Work
+
+1. Clerk sends webhook with `user_id` (Clerk user ID), `plan_id`, `plan_name`, and `status`
+2. Webhook handler finds the user by Clerk user ID
+3. Finds the organization where `billingUserId` matches the user
+4. Updates the organization's subscription fields (`subscriptionPlanId`, `subscriptionPlanName`, `subscriptionStatus`)
+
+### Additional Webhook Events (Not Yet Implemented)
+
 - `billing.payment.succeeded`
 - `billing.payment.failed`
+
+These can be added later if needed for payment tracking or notifications.
 
 ## Testing
 
@@ -129,6 +155,41 @@ If the URL format changes, update `src/app/api/billing/checkout/route.ts`.
 - Check that billing is enabled in Clerk Dashboard
 - Verify the user is authenticated before checkout
 - Check browser console for errors
+
+## Subscription Limits
+
+Subscription limits are enforced at the organization level. Limits are defined in `src/lib/subscription-utils.ts`:
+
+### Solo Plan (Free)
+
+- Max People: 5
+- Max Initiatives: 10
+- Max Teams: 2
+- Max Feedback Campaigns: 2
+
+### Orchestrator Plan (Paid)
+
+- All limits: Unlimited (null)
+
+### Limit Enforcement
+
+- Limits are checked before creating new entities (people, initiatives, teams, feedback campaigns)
+- If a limit is exceeded, creation is blocked with an error message
+- Users can still view existing entities even if over limit (per rule #10)
+- Limit checking is implemented in:
+  - `src/lib/actions/person.ts` (createPerson)
+  - `src/lib/actions/initiative.ts` (createInitiative)
+  - `src/lib/actions/team.ts` (createTeam)
+  - `src/lib/actions/feedback-campaign.ts` (createFeedbackCampaign)
+
+## Migration Notes
+
+For existing organizations created before this subscription system was implemented:
+
+- The migration script sets `billingUserId` to the first OWNER member found
+- If no OWNER exists, it sets it to the first ADMIN member
+- Subscription fields are set to null for existing organizations
+- These organizations will default to free tier limits until subscription is updated
 
 ## Additional Resources
 

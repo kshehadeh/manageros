@@ -13,6 +13,10 @@ import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 import { Prisma } from '@prisma/client'
 import { getTasksForAssignee } from '@/lib/data/tasks'
 import { getLinkedAccountAvatars } from '@/lib/actions/avatar'
+import {
+  checkOrganizationLimit,
+  getOrganizationCounts,
+} from '@/lib/subscription-utils'
 import { getFeedbackForPerson } from '@/lib/actions/feedback'
 
 /**
@@ -221,6 +225,18 @@ export async function createPerson(formData: PersonFormData) {
     if (!jobRole) {
       throw new Error('Job role not found or access denied')
     }
+  }
+
+  // Check organization limits before creating
+  const counts = await getOrganizationCounts(user.organizationId)
+  const limitCheck = await checkOrganizationLimit(
+    user.organizationId,
+    'maxPeople',
+    counts.people
+  )
+
+  if (!limitCheck.allowed) {
+    throw new Error(limitCheck.message || 'People limit exceeded')
   }
 
   // Create the person

@@ -11,6 +11,10 @@ import type {
   TeamWithRelations,
   TeamWithCounts,
 } from '@/types/team'
+import {
+  checkOrganizationLimit,
+  getOrganizationCounts,
+} from '@/lib/subscription-utils'
 
 export async function getTeams() {
   try {
@@ -209,6 +213,18 @@ export async function createTeam(formData: TeamFormData) {
     if (!parentTeam) {
       throw new Error('Parent team not found or access denied')
     }
+  }
+
+  // Check organization limits before creating
+  const counts = await getOrganizationCounts(user.organizationId)
+  const limitCheck = await checkOrganizationLimit(
+    user.organizationId,
+    'maxTeams',
+    counts.teams
+  )
+
+  if (!limitCheck.allowed) {
+    throw new Error(limitCheck.message || 'Teams limit exceeded')
   }
 
   // Create the team
