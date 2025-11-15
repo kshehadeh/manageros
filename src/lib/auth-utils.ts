@@ -57,6 +57,8 @@ export async function getCurrentUser(options?: {
   }
 
   // Fallback to database lookup if not in session claims or skipSessionClaims is true
+  // Note: We don't auto-create Clerk orgs here to avoid performance impact on every auth check
+  // Clerk orgs are auto-created in getOrganizationDetails() and other organization access points
   // Look up user in database by Clerk user ID
   let user = await prisma.user.findUnique({
     where: { clerkUserId: userId },

@@ -6,6 +6,7 @@ import {
   ClerkCommercePlan,
   ClerkCommerceSubscription,
 } from './clerk-types'
+import { getClerkOrganizationSubscription } from './clerk-organization-utils'
 
 export interface PlanLimits {
   maxPeople: number | null // null = unlimited
@@ -91,6 +92,7 @@ export async function getPlanLimits(
 
 /**
  * Get subscription information for an organization
+ * Fetches from Clerk organization subscription if available, otherwise falls back to stored data
  */
 export async function getOrganizationSubscription(
   organizationId: string
@@ -99,6 +101,7 @@ export async function getOrganizationSubscription(
     where: { id: organizationId },
     select: {
       billingUserId: true,
+      clerkOrganizationId: true,
       subscriptionPlanId: true,
       subscriptionPlanName: true,
       subscriptionStatus: true,
@@ -109,6 +112,51 @@ export async function getOrganizationSubscription(
     return null
   }
 
+  // If organization has a Clerk organization ID, fetch subscription from Clerk
+  if (organization.clerkOrganizationId) {
+    try {
+      const clerkSubscription = await getClerkOrganizationSubscription(
+        organization.clerkOrganizationId
+      )
+
+      if (
+        clerkSubscription &&
+        clerkSubscription.subscription_items &&
+        clerkSubscription.subscription_items.length > 0 &&
+        clerkSubscription.subscription_items[0]?.plan
+      ) {
+        // Update stored subscription info from Clerk (async, don't wait)
+        const plan = clerkSubscription.subscription_items[0].plan
+        prisma.organization
+          .update({
+            where: { id: organizationId },
+            data: {
+              subscriptionPlanId: plan.id || null,
+              subscriptionPlanName: plan.name || null,
+              subscriptionStatus: clerkSubscription.status || 'active',
+            },
+          })
+          .catch(error => {
+            console.error(
+              'Failed to update organization subscription from Clerk:',
+              error
+            )
+          })
+
+        return {
+          billingUserId: organization.billingUserId,
+          subscriptionPlanId: plan.id || null,
+          subscriptionPlanName: plan.name || null,
+          subscriptionStatus: clerkSubscription.status || 'active',
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching Clerk organization subscription:', error)
+      // Fall through to return stored data
+    }
+  }
+
+  // Fallback to stored subscription data
   return {
     billingUserId: organization.billingUserId,
     subscriptionPlanId: organization.subscriptionPlanId,

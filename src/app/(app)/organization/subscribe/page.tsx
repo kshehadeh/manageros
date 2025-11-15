@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { PricingTable } from '@clerk/nextjs'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
@@ -11,11 +11,15 @@ import { SectionHeader } from '@/components/ui/section-header'
 import { CreditCard, Building, CheckCircle2, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@clerk/nextjs'
+import { becomeOrganizationOwner } from '@/lib/actions/organization'
 
 export default function SubscribePage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { isLoaded, userId } = useAuth()
   const [isChecking, setIsChecking] = useState(true)
+  const [isBecomingOwner, setIsBecomingOwner] = useState(false)
+  const becomeOwner = searchParams.get('becomeOwner') === 'true'
   const [subscription, setSubscription] = useState<{
     planId: string
     status: string
@@ -23,14 +27,54 @@ export default function SubscribePage() {
   } | null>(null)
 
   // Handle free tier selection - user explicitly chooses free plan
-  const handleFreeTier = () => {
-    router.push('/organization/create?plan=free')
+  const handleFreeTier = async () => {
+    if (becomeOwner) {
+      // For becomeOwner flow, call the server action directly
+      setIsBecomingOwner(true)
+      try {
+        await becomeOrganizationOwner()
+        router.push('/organization/settings')
+        router.refresh()
+      } catch (error) {
+        console.error('Error becoming owner:', error)
+        alert(
+          error instanceof Error
+            ? error.message
+            : 'Failed to become owner. Please try again.'
+        )
+        setIsBecomingOwner(false)
+      }
+    } else {
+      router.push('/organization/create?plan=free')
+    }
   }
 
   // Handle create organization for users who have subscribed
   const handleCreateOrganization = () => {
     if (subscription?.planId) {
       router.push(`/organization/create?planId=${subscription.planId}`)
+    }
+  }
+
+  // Handle becoming organization owner after subscription
+  const handleBecomeOwner = async () => {
+    if (!subscription?.planId) {
+      return
+    }
+
+    setIsBecomingOwner(true)
+    try {
+      await becomeOrganizationOwner()
+      router.push('/organization/settings')
+      router.refresh()
+    } catch (error) {
+      console.error('Error becoming owner:', error)
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Failed to become owner. Please try again.'
+      )
+      setIsBecomingOwner(false)
     }
   }
 
@@ -51,13 +95,51 @@ export default function SubscribePage() {
         if (userResponse.ok) {
           const userData = await userResponse.json()
           if (userData.user?.organizationId) {
-            // User already has an organization, redirect to dashboard
-            router.push('/dashboard')
-            return
+            // If becomeOwner is true, user is trying to become owner of existing org
+            // Don't redirect, allow them to select subscription
+            if (!becomeOwner) {
+              router.push('/dashboard')
+              return
+            }
+            // If user has an organization, also check organization subscription
+            try {
+              const orgSubscriptionResponse = await fetch(
+                `/api/organization/subscription?organizationId=${userData.user.organizationId}`
+              )
+              if (orgSubscriptionResponse.ok) {
+                const orgSubData = await orgSubscriptionResponse.json()
+                const orgSub = orgSubData.subscription
+                if (orgSub?.planId && orgSub?.status === 'active') {
+                  setSubscription({
+                    planId: orgSub.planId,
+                    status: orgSub.status,
+                    planName: orgSub.planName || null,
+                  })
+                  // If becomeOwner is true and org subscription is active, automatically become owner
+                  if (becomeOwner) {
+                    try {
+                      await becomeOrganizationOwner()
+                      router.push('/organization/settings')
+                      router.refresh()
+                      return
+                    } catch (error) {
+                      console.error('Error becoming owner:', error)
+                      // Continue to show page with error message
+                    }
+                  }
+                  setIsChecking(false)
+                  return
+                }
+              }
+            } catch (error) {
+              console.error('Error checking organization subscription:', error)
+              // Continue to check user subscription as fallback
+            }
           }
         }
 
         // Check for subscription (but don't auto-redirect)
+        // This checks user subscription as fallback (for users without orgs yet)
         if (subscriptionResponse.ok) {
           const subscriptionData = await subscriptionResponse.json()
           const sub = subscriptionData.subscription
@@ -69,6 +151,19 @@ export default function SubscribePage() {
               status: sub.status,
               planName: sub.planName || null,
             })
+
+            // If becomeOwner is true and subscription is active, automatically become owner
+            if (becomeOwner) {
+              try {
+                await becomeOrganizationOwner()
+                router.push('/organization/settings')
+                router.refresh()
+                return
+              } catch (error) {
+                console.error('Error becoming owner:', error)
+                // Continue to show page with error message
+              }
+            }
           }
         }
       } catch (error) {
@@ -79,7 +174,7 @@ export default function SubscribePage() {
       }
     }
     checkUser()
-  }, [isLoaded, userId, router])
+  }, [isLoaded, userId, router, becomeOwner])
 
   if (isChecking) {
     return (
@@ -94,9 +189,13 @@ export default function SubscribePage() {
   return (
     <PageContainer>
       <PageHeader
-        title='Choose Your Plan'
+        title={becomeOwner ? 'Become Organization Owner' : 'Choose Your Plan'}
         titleIcon={CreditCard}
-        subtitle='Select a subscription plan before creating your organization'
+        subtitle={
+          becomeOwner
+            ? 'Select a subscription plan to become the organization owner'
+            : 'Select a subscription plan before creating your organization'
+        }
       />
       <PageContent>
         <div className='space-y-6'>
@@ -110,13 +209,26 @@ export default function SubscribePage() {
                     icon={CheckCircle2}
                     title='Subscription Active'
                     action={
-                      <Button
-                        onClick={handleCreateOrganization}
-                        variant='default'
-                      >
-                        <Building className='w-4 h-4 mr-2' />
-                        Create Organization
-                      </Button>
+                      becomeOwner ? (
+                        <Button
+                          onClick={handleBecomeOwner}
+                          variant='default'
+                          disabled={isBecomingOwner}
+                        >
+                          <CreditCard className='w-4 h-4 mr-2' />
+                          {isBecomingOwner
+                            ? 'Becoming Owner...'
+                            : 'Become Owner'}
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={handleCreateOrganization}
+                          variant='default'
+                        >
+                          <Building className='w-4 h-4 mr-2' />
+                          Create Organization
+                        </Button>
+                      )
                     }
                   />
                 }
@@ -124,7 +236,9 @@ export default function SubscribePage() {
                 <p className='text-sm text-muted-foreground'>
                   You&apos;re subscribed to{' '}
                   <span className='font-medium'>{subscription.planName}</span>.
-                  Create your organization to get started.
+                  {becomeOwner
+                    ? ' Click "Become Owner" to complete the process.'
+                    : ' Create your organization to get started.'}
                 </p>
               </PageSection>
 
@@ -150,7 +264,11 @@ export default function SubscribePage() {
                   <SectionHeader
                     icon={Package}
                     title='Choose Your Plan'
-                    description='Before creating a new organization, please choose a subscription plan. You can continue with the free plan or upgrade to a paid plan with additional features.'
+                    description={
+                      becomeOwner
+                        ? 'Choose a subscription plan to become the organization owner. You can continue with the free plan or upgrade to a paid plan with additional features.'
+                        : 'Before creating a new organization, please choose a subscription plan. You can continue with the free plan or upgrade to a paid plan with additional features.'
+                    }
                   />
                 }
               >
@@ -167,8 +285,16 @@ export default function SubscribePage() {
                         teams.
                       </p>
                     </div>
-                    <Button onClick={handleFreeTier} variant='default'>
-                      Continue with Free Plan
+                    <Button
+                      onClick={handleFreeTier}
+                      variant='default'
+                      disabled={isBecomingOwner}
+                    >
+                      {becomeOwner
+                        ? isBecomingOwner
+                          ? 'Becoming Owner...'
+                          : 'Become Owner with Free Plan'
+                        : 'Continue with Free Plan'}
                     </Button>
                   </div>
                 </div>
@@ -181,7 +307,11 @@ export default function SubscribePage() {
                   <SectionHeader
                     icon={CreditCard}
                     title='Upgrade to Paid Plan'
-                    description='Upgrade to unlock unlimited features. After subscribing, click "Create Organization" above to get started.'
+                    description={
+                      becomeOwner
+                        ? 'Upgrade to unlock unlimited features. After subscribing, click "Become Owner" above to complete the process.'
+                        : 'Upgrade to unlock unlimited features. After subscribing, click "Create Organization" above to get started.'
+                    }
                   />
                 }
               >

@@ -64,6 +64,11 @@ export default async function OrganizationSettingsPage() {
       })
     : null
 
+  // Show "Make me the owner" button if:
+  // 1. Organization has no owner
+  // 2. Current user is an admin (not owner)
+  const showBecomeOwnerButton = user.role === 'ADMIN'
+
   return (
     <OrganizationSettingsBreadcrumbClient>
       <PageContainer>
@@ -184,8 +189,19 @@ export default async function OrganizationSettingsPage() {
                 </div>
 
                 {/* Clerk Subscription Button */}
-                <div className='border-t pt-4'>
+                <div className='border-t pt-4 space-y-3'>
                   <OrganizationSubscriptionButton />
+                  {showBecomeOwnerButton && (
+                    <Button asChild variant='default'>
+                      <Link
+                        href='/organization/subscribe?becomeOwner=true'
+                        className='flex items-center gap-2'
+                      >
+                        <CreditCard className='w-4 h-4' />
+                        Make me the owner
+                      </Link>
+                    </Button>
+                  )}
                 </div>
               </div>
             </PageSection>

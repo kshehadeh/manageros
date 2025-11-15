@@ -29,6 +29,7 @@ model Organization {
   subscriptionPlanId  String?  // Clerk plan ID (e.g., "plan_xxxxx" or "free")
   subscriptionPlanName String? // Human-readable plan name (e.g., "Solo", "Orchestrator")
   subscriptionStatus  String?  // Active subscription status from Clerk
+  clerkOrganizationId String?  @unique // Clerk organization ID for billing
 
   // Relationships
   billingUser         User?    @relation("BillingUser", fields: [billingUserId], references: [id])
@@ -54,6 +55,7 @@ model Organization {
   @@index([billingUserId])
   @@index([subscriptionPlanId])
   @@index([subscriptionStatus])
+  @@index([clerkOrganizationId])
 }
 
 model User {

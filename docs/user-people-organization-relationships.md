@@ -213,33 +213,35 @@ An **Organization** represents a company, team, or group that uses ManagerOS. Or
 
 ### Overview
 
-Subscriptions in ManagerOS are **organization-based**, not user-based. This means:
+Subscriptions in ManagerOS are **Clerk organization-based**. Each ManagerOS organization has a corresponding Clerk organization, and subscriptions are tied to Clerk organizations rather than individual users.
 
-- The subscription is tied to the organization
-- One user (the billing user) owns the subscription
+**Key Points:**
+
+- Each ManagerOS organization has a `clerkOrganizationId` that links to a Clerk organization
+- Subscriptions are created and managed at the Clerk organization level
 - All users in the organization share the same subscription limits
 - Limits apply to the entire organization's data
+- When users are added to a ManagerOS organization, they are also added to the corresponding Clerk organization
 
 ### Billing User
 
 **What is a Billing User?**
 
-- The User who owns the subscription for an organization
+- The User who selected/manages the subscription for an organization (for reference)
 - Set when the organization is created (the creator becomes the billing user)
 - Stored in `Organization.billingUserId`
 - Must be an OWNER role in the organization
 
 **Responsibilities:**
 
-- Subscription is billed to this user's Clerk account
-- This user can manage the subscription through Clerk
-- If this user leaves, the subscription needs to be transferred
+- This user typically manages the subscription through Clerk's organization billing interface
+- The `billingUserId` field is kept for reference but subscriptions are managed at the Clerk organization level
 
 **How It's Set:**
 
 - When creating an organization, the creating user becomes the billing user
-- The user's subscription selection (free or paid) is stored on the organization
-- The organization's subscription fields are populated from the user's Clerk subscription
+- The subscription is created for the Clerk organization, not the individual user
+- The organization's subscription fields are populated from the Clerk organization's subscription
 
 ### Subscription Storage
 
@@ -247,12 +249,19 @@ Subscription information is stored on the Organization record:
 
 ```typescript
 {
-  billingUserId: string | null // User who owns subscription
+  clerkOrganizationId: string | null // Clerk organization ID for billing
+  billingUserId: string | null // User who selected subscription (for reference)
   subscriptionPlanId: string | null // Clerk plan ID (e.g., "plan_xxxxx" or "free")
   subscriptionPlanName: string | null // "Solo", "Team", etc.
   subscriptionStatus: string | null // "active", "canceled", etc.
 }
 ```
+
+**Subscription Sync:**
+
+- Subscription data is fetched from Clerk organization subscriptions when available
+- Stored subscription data is used as a fallback
+- Webhooks automatically update stored subscription data when Clerk subscriptions change
 
 ### Subscription Plans
 
@@ -289,9 +298,11 @@ Subscription information is stored on the Organization record:
 
 **Webhook Events:**
 
-- `billing.subscription.created`: New subscription created
-- `billing.subscription.updated`: Subscription changed (upgrade/downgrade)
-- `billing.subscription.canceled`: Subscription canceled
+- `subscription.created`: New subscription created for a Clerk organization
+- `subscription.updated`: Subscription changed (upgrade/downgrade)
+- `subscriptionItem.canceled`: Subscription canceled
+- `organizationMembership.created`: User added to Clerk organization (synced to ManagerOS)
+- `organizationMembership.deleted`: User removed from Clerk organization (synced to ManagerOS)
 
 **Manual Updates:**
 

@@ -12,6 +12,12 @@ import { syncUserDataToClerk } from '@/lib/clerk-session-sync'
 import { auth } from '@clerk/nextjs/server'
 import { getUserSubscriptionInfo } from '../subscription-utils'
 import { PersonBrief } from '@/types/person'
+import {
+  createClerkOrganization,
+  addUserToClerkOrganization,
+  mapManagerOSRoleToClerkRole,
+  getClerkOrganizationSubscription,
+} from '../clerk-organization-utils'
 export async function createOrganization(formData: {
   name: string
   slug: string
@@ -23,20 +29,6 @@ export async function createOrganization(formData: {
     throw new Error('User already belongs to an organization')
   }
 
-  // Look up the plan id from cler
-  const userSubscriptionInfo = await getUserSubscriptionInfo(user.clerkUserId)
-
-  // Validate that subscription was selected (required for creating new organizations)
-  if (
-    !userSubscriptionInfo ||
-    userSubscriptionInfo.subscription_items?.length === 0 ||
-    !userSubscriptionInfo.subscription_items?.[0]?.plan
-  ) {
-    throw new Error(
-      'Subscription selection is required to create an organization'
-    )
-  }
-
   // Check if organization slug already exists
   const existingOrg = await prisma.organization.findUnique({
     where: { slug: formData.slug },
@@ -46,14 +38,63 @@ export async function createOrganization(formData: {
     throw new Error('Organization slug already exists')
   }
 
-  // Determine plan name and subscription details
-  const subscriptionPlanId =
-    userSubscriptionInfo.subscription_items[0].plan_id || null
-  const subscriptionPlanName =
-    userSubscriptionInfo.subscription_items[0].plan.name || null
-
-  // Determine role based on subscription typefree tier (plan === 'free')
+  // Determine role - creator is always OWNER
   const userRole = 'OWNER'
+
+  // Create Clerk organization first
+  let clerkOrgId: string
+  try {
+    const clerkOrg = await createClerkOrganization(formData.name, formData.slug)
+    clerkOrgId = clerkOrg.id
+  } catch (error) {
+    console.error('Failed to create Clerk organization:', error)
+    throw new Error(
+      'Failed to create organization. Please try again or contact support.'
+    )
+  }
+
+  // Get subscription from Clerk organization (may be null initially)
+  const orgSubscriptionInfo = await getClerkOrganizationSubscription(clerkOrgId)
+
+  // Determine plan name and subscription details from org subscription or user subscription
+  let subscriptionPlanId: string | null = null
+  let subscriptionPlanName: string | null = null
+  let subscriptionStatus: string = 'active'
+
+  if (
+    orgSubscriptionInfo &&
+    orgSubscriptionInfo.subscription_items &&
+    orgSubscriptionInfo.subscription_items.length > 0 &&
+    orgSubscriptionInfo.subscription_items[0]?.plan
+  ) {
+    // Organization has a subscription
+    subscriptionPlanId =
+      orgSubscriptionInfo.subscription_items[0].plan_id || null
+    subscriptionPlanName =
+      orgSubscriptionInfo.subscription_items[0].plan.name || null
+    subscriptionStatus = orgSubscriptionInfo.status || 'active'
+  } else {
+    // Fallback: check user subscription (for migration/backward compatibility)
+    const userSubscriptionInfo = await getUserSubscriptionInfo(
+      user.clerkUserId || ''
+    )
+    if (
+      userSubscriptionInfo &&
+      userSubscriptionInfo.subscription_items &&
+      userSubscriptionInfo.subscription_items.length > 0 &&
+      userSubscriptionInfo.subscription_items[0]?.plan
+    ) {
+      subscriptionPlanId =
+        userSubscriptionInfo.subscription_items[0].plan_id || null
+      subscriptionPlanName =
+        userSubscriptionInfo.subscription_items[0].plan.name || null
+      subscriptionStatus = userSubscriptionInfo.status || 'active'
+    } else {
+      // No subscription - default to free plan
+      subscriptionPlanName = 'Solo'
+      subscriptionStatus = 'active'
+    }
+  }
 
   // Create organization and add user as admin/owner in a transaction
   const result = await prisma.$transaction(async tx => {
@@ -62,10 +103,11 @@ export async function createOrganization(formData: {
       data: {
         name: formData.name,
         slug: formData.slug,
-        billingUserId: user.id, // Set creating user as billing user
+        billingUserId: user.id, // Set creating user as billing user (for reference)
+        clerkOrganizationId: clerkOrgId,
         subscriptionPlanId,
         subscriptionPlanName,
-        subscriptionStatus: userSubscriptionInfo.status,
+        subscriptionStatus,
       },
     })
 
@@ -89,6 +131,20 @@ export async function createOrganization(formData: {
 
     return organization
   })
+
+  // Add user to Clerk organization with admin role (OWNER maps to org:admin)
+  if (user.clerkUserId) {
+    try {
+      await addUserToClerkOrganization(
+        clerkOrgId,
+        user.clerkUserId,
+        await mapManagerOSRoleToClerkRole(userRole)
+      )
+    } catch (error) {
+      console.error('Failed to add user to Clerk organization:', error)
+      // Don't fail the whole operation - user is already in ManagerOS org
+    }
+  }
 
   // Sync updated user data to Clerk (organizationId and role changed)
   // Wait for sync to complete to ensure Clerk metadata is updated
@@ -769,6 +825,28 @@ export async function acceptInvitationForUser(invitationId: string) {
     throw new Error('Invitation not found or expired')
   }
 
+  // Get organization with Clerk org ID
+  const organization = await prisma.organization.findUnique({
+    where: { id: invitation.organizationId },
+    select: {
+      id: true,
+      clerkOrganizationId: true,
+    },
+  })
+
+  if (!organization) {
+    throw new Error('Organization not found')
+  }
+
+  // Ensure Clerk organization exists
+  let clerkOrgId = organization.clerkOrganizationId
+  if (!clerkOrgId) {
+    const { ensureClerkOrganization } = await import(
+      '../clerk-organization-utils'
+    )
+    clerkOrgId = await ensureClerkOrganization(organization.id)
+  }
+
   // Update user and invitation in a transaction
   const result = await prisma.$transaction(async tx => {
     // Update user's organizationId (for backward compatibility)
@@ -807,6 +885,20 @@ export async function acceptInvitationForUser(invitationId: string) {
     return updatedUser
   })
 
+  // Add user to Clerk organization
+  if (user?.clerkUserId && clerkOrgId) {
+    try {
+      await addUserToClerkOrganization(
+        clerkOrgId,
+        user.clerkUserId,
+        await mapManagerOSRoleToClerkRole('USER')
+      )
+    } catch (error) {
+      console.error('Failed to add user to Clerk organization:', error)
+      // Don't fail the operation - user is already in ManagerOS org
+    }
+  }
+
   // Sync updated user data to Clerk (organizationId changed)
   // Wait for sync to complete to ensure Clerk metadata is updated
   const { userId } = await auth()
@@ -828,6 +920,7 @@ export async function acceptInvitationForUser(invitationId: string) {
 
 /**
  * Get organization details including name, slug, description, and member count
+ * Auto-creates Clerk organization if missing
  */
 export async function getOrganizationDetails() {
   const user = await getCurrentUser()
@@ -835,6 +928,17 @@ export async function getOrganizationDetails() {
   // Check if user belongs to an organization
   if (!user.organizationId) {
     return null
+  }
+
+  // Ensure Clerk organization exists (auto-create if missing)
+  try {
+    const { ensureClerkOrganization } = await import(
+      '../clerk-organization-utils'
+    )
+    await ensureClerkOrganization(user.organizationId)
+  } catch (error) {
+    console.error('Failed to ensure Clerk organization exists:', error)
+    // Continue anyway - organization details can still be returned
   }
 
   const organization = await prisma.organization.findUnique({
@@ -936,6 +1040,19 @@ export async function updateUserRole(
     throw new Error('User must belong to an organization to manage roles')
   }
 
+  // Get organization with Clerk org ID
+  const organization = await prisma.organization.findUnique({
+    where: { id: currentUser.organizationId },
+    select: {
+      id: true,
+      clerkOrganizationId: true,
+    },
+  })
+
+  if (!organization) {
+    throw new Error('Organization not found')
+  }
+
   // Verify the target user is a member of the same organization
   const targetMembership = await prisma.organizationMember.findUnique({
     where: {
@@ -1005,6 +1122,22 @@ export async function updateUserRole(
     data: { role: newRole },
   })
 
+  // Update user's role in Clerk organization
+  if (targetMembership.user.clerkUserId && organization.clerkOrganizationId) {
+    try {
+      const { updateUserRoleInClerkOrganization, mapManagerOSRoleToClerkRole } =
+        await import('../clerk-organization-utils')
+      await updateUserRoleInClerkOrganization(
+        organization.clerkOrganizationId,
+        targetMembership.user.clerkUserId,
+        await mapManagerOSRoleToClerkRole(newRole)
+      )
+    } catch (error) {
+      console.error('Failed to update user role in Clerk organization:', error)
+      // Don't fail the operation - role is already updated in ManagerOS
+    }
+  }
+
   // Sync updated user data to Clerk (role changed)
   if (targetMembership.user.clerkUserId) {
     await syncUserDataToClerk(targetMembership.user.clerkUserId)
@@ -1012,6 +1145,218 @@ export async function updateUserRole(
 
   revalidatePath('/organization/members')
   revalidatePath('/organization/settings')
+}
+
+/**
+ * Make the current user the organization owner
+ * This function:
+ * 1. Checks if organization has no owner
+ * 2. Checks if current user is an admin
+ * 3. Updates billingUserId to current user
+ * 4. Sets current user's role to OWNER
+ * 5. If there's already an owner, sets that user's role to ADMIN
+ */
+export async function becomeOrganizationOwner() {
+  const currentUser = await getCurrentUser()
+
+  // Check if current user is admin
+  if (!isAdminOrOwner(currentUser)) {
+    throw new Error('Only organization admins can become the owner')
+  }
+
+  // Check if current user belongs to an organization
+  if (!currentUser.organizationId) {
+    throw new Error('User must belong to an organization to become owner')
+  }
+
+  const organizationId = currentUser.organizationId
+
+  // Check if user already has a subscription (required to become owner)
+  if (!currentUser.clerkUserId) {
+    throw new Error('User must have a Clerk account to become owner')
+  }
+
+  // Get organization
+  const organization = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: {
+      id: true,
+      clerkOrganizationId: true,
+    },
+  })
+
+  if (!organization) {
+    throw new Error('Organization not found')
+  }
+
+  // Ensure Clerk organization exists
+  let clerkOrgId = organization.clerkOrganizationId
+  if (!clerkOrgId) {
+    const { ensureClerkOrganization } = await import(
+      '../clerk-organization-utils'
+    )
+    clerkOrgId = await ensureClerkOrganization(organizationId)
+  }
+
+  // Get subscription from Clerk organization (preferred) or user subscription (fallback)
+  const { getClerkOrganizationSubscription } = await import(
+    '../clerk-organization-utils'
+  )
+  const orgSubscriptionInfo = clerkOrgId
+    ? await getClerkOrganizationSubscription(clerkOrgId)
+    : null
+
+  // Determine plan name and subscription details
+  // Allow both paid subscriptions and free plans
+  let subscriptionPlanId: string | null = null
+  let subscriptionPlanName: string | null = null
+  let subscriptionStatus: string = 'active'
+
+  if (
+    orgSubscriptionInfo &&
+    orgSubscriptionInfo.subscription_items &&
+    orgSubscriptionInfo.subscription_items.length > 0 &&
+    orgSubscriptionInfo.subscription_items[0]?.plan
+  ) {
+    // Organization has a subscription
+    const plan = orgSubscriptionInfo.subscription_items[0].plan
+    subscriptionPlanId = plan.id || null
+    subscriptionPlanName = plan.name || null
+    subscriptionStatus = orgSubscriptionInfo.status || 'active'
+  } else {
+    // Fallback: check user subscription (for backward compatibility)
+    const userSubscriptionInfo = await getUserSubscriptionInfo(
+      currentUser.clerkUserId
+    )
+    if (
+      userSubscriptionInfo &&
+      userSubscriptionInfo.subscription_items &&
+      userSubscriptionInfo.subscription_items.length > 0 &&
+      userSubscriptionInfo.subscription_items[0]?.plan
+    ) {
+      // User has a paid subscription
+      const plan = userSubscriptionInfo.subscription_items[0].plan
+      subscriptionPlanId = plan.id || null
+      subscriptionPlanName = plan.name || null
+      subscriptionStatus = userSubscriptionInfo.status || 'active'
+    } else {
+      // No paid subscription - allow free plan (Solo)
+      subscriptionPlanId = null
+      subscriptionPlanName = 'Solo'
+      subscriptionStatus = 'active'
+    }
+  }
+
+  // Check for existing owner
+  const existingOwner = await prisma.organizationMember.findFirst({
+    where: {
+      organizationId,
+      role: 'OWNER',
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          clerkUserId: true,
+        },
+      },
+    },
+  })
+
+  // Get current user's membership
+  const currentUserMembership = await prisma.organizationMember.findUnique({
+    where: {
+      userId_organizationId: {
+        userId: currentUser.id,
+        organizationId,
+      },
+    },
+  })
+
+  if (!currentUserMembership) {
+    throw new Error('User is not a member of this organization')
+  }
+
+  // Update organization and user roles in a transaction
+  await prisma.$transaction(async tx => {
+    // If there's an existing owner, demote them to ADMIN
+    if (existingOwner && existingOwner.user.id !== currentUser.id) {
+      await tx.organizationMember.update({
+        where: {
+          userId_organizationId: {
+            userId: existingOwner.user.id,
+            organizationId,
+          },
+        },
+        data: { role: 'ADMIN' },
+      })
+
+      // Update User.role for backward compatibility
+      await tx.user.update({
+        where: { id: existingOwner.user.id },
+        data: { role: 'ADMIN' },
+      })
+
+      // Sync updated user data to Clerk
+      if (existingOwner.user.clerkUserId) {
+        await syncUserDataToClerk(existingOwner.user.clerkUserId)
+      }
+    }
+
+    // Update current user's role to OWNER
+    await tx.organizationMember.update({
+      where: {
+        userId_organizationId: {
+          userId: currentUser.id,
+          organizationId,
+        },
+      },
+      data: { role: 'OWNER' },
+    })
+
+    // Update User.role for backward compatibility
+    await tx.user.update({
+      where: { id: currentUser.id },
+      data: { role: 'OWNER' },
+    })
+
+    // Update organization billingUserId and subscription info
+    await tx.organization.update({
+      where: { id: organizationId },
+      data: {
+        billingUserId: currentUser.id,
+        clerkOrganizationId: clerkOrgId || undefined,
+        subscriptionPlanId: subscriptionPlanId || undefined,
+        subscriptionPlanName: subscriptionPlanName || undefined,
+        subscriptionStatus: subscriptionStatus || undefined,
+      },
+    })
+  })
+
+  // Update user's role in Clerk organization if Clerk org exists
+  if (clerkOrgId && currentUser.clerkUserId) {
+    try {
+      const { updateUserRoleInClerkOrganization, mapManagerOSRoleToClerkRole } =
+        await import('../clerk-organization-utils')
+      await updateUserRoleInClerkOrganization(
+        clerkOrgId,
+        currentUser.clerkUserId,
+        await mapManagerOSRoleToClerkRole('OWNER')
+      )
+    } catch (error) {
+      console.error('Failed to update user role in Clerk organization:', error)
+      // Don't fail the operation
+    }
+  }
+
+  // Sync updated user data to Clerk
+  if (currentUser.clerkUserId) {
+    await syncUserDataToClerk(currentUser.clerkUserId)
+  }
+
+  revalidatePath('/organization/settings')
+  revalidatePath('/organization/members')
+  revalidatePath('/dashboard')
 }
 
 export async function removeUserFromOrganization(userId: string) {
@@ -1027,6 +1372,19 @@ export async function removeUserFromOrganization(userId: string) {
   // Check if current user belongs to an organization
   if (!currentUser.organizationId) {
     throw new Error('User must belong to an organization to manage members')
+  }
+
+  // Get organization with Clerk org ID
+  const organization = await prisma.organization.findUnique({
+    where: { id: currentUser.organizationId },
+    select: {
+      id: true,
+      clerkOrganizationId: true,
+    },
+  })
+
+  if (!organization) {
+    throw new Error('Organization not found')
   }
 
   // Verify the target user is a member of the same organization
@@ -1116,6 +1474,22 @@ export async function removeUserFromOrganization(userId: string) {
       },
     })
   })
+
+  // Remove user from Clerk organization
+  if (targetMembership.user.clerkUserId && organization.clerkOrganizationId) {
+    try {
+      const { removeUserFromClerkOrganization } = await import(
+        '../clerk-organization-utils'
+      )
+      await removeUserFromClerkOrganization(
+        organization.clerkOrganizationId,
+        targetMembership.user.clerkUserId
+      )
+    } catch (error) {
+      console.error('Failed to remove user from Clerk organization:', error)
+      // Don't fail the operation - user is already removed from ManagerOS org
+    }
+  }
 
   // Sync updated user data to Clerk (organizationId and role changed)
   if (targetMembership.user.clerkUserId) {
