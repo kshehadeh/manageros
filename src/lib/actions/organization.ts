@@ -1135,7 +1135,7 @@ export async function getAvailablePersonsForSelfLinking(): Promise<
 
   // Check if user belongs to an organization
   if (!currentUser.organizationId) {
-    throw new Error('User must belong to an organization to link to a person')
+    return []
   }
 
   // Get persons in the same organization who aren't linked to a user
