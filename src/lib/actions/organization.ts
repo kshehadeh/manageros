@@ -29,8 +29,8 @@ export async function createOrganization(formData: {
   // Validate that subscription was selected (required for creating new organizations)
   if (
     !userSubscriptionInfo ||
-    userSubscriptionInfo.subscription_items.length === 0 ||
-    !userSubscriptionInfo.subscription_items[0].plan
+    userSubscriptionInfo.subscription_items?.length === 0 ||
+    !userSubscriptionInfo.subscription_items?.[0]?.plan
   ) {
     throw new Error(
       'Subscription selection is required to create an organization'
