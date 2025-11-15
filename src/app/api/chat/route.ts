@@ -17,11 +17,6 @@ import { toolIds } from '../../../lib/ai/tool-ids'
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json()
-    console.log('🔧 Chat API called with messages:', messages.length)
-    console.log(
-      '🔧 Last message:',
-      messages[messages.length - 1]?.content || 'No content'
-    )
 
     const convertedMessages = convertToModelMessages(messages)
 

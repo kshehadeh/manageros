@@ -85,7 +85,6 @@ export function TaskSidebar({
     assignee || initiative || objective || estimate || dueDate || createdBy
 
   const handleStatusChange = async (newStatus: string | number) => {
-    console.log('handleStatusChange', newStatus)
     await updateTaskStatus(entityId, newStatus as TaskStatus)
   }
 

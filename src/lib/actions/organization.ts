@@ -26,7 +26,6 @@ export async function createOrganization(formData: {
   // Look up the plan id from cler
   const userSubscriptionInfo = await getUserSubscriptionInfo(user.clerkUserId)
 
-  console.log('userSubscriptionInfo', userSubscriptionInfo)
   // Validate that subscription was selected (required for creating new organizations)
   if (
     !userSubscriptionInfo ||
