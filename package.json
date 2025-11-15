@@ -18,6 +18,7 @@
     "db:init": "bun scripts/init-database.ts",
     "db:backup": "bun scripts/backup-database.ts --verbose",
     "db:restore": "bun scripts/restore-database.ts",
+    "db:migrate:deploy": "bun scripts/deploy-migrations.ts",
     "db:seed-demo": "bun scripts/seed-demo-data.ts",
     "help:generate": "bun scripts/generate-help-content.ts",
     "help:list": "bun scripts/help-content-manager.ts list",

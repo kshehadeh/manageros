@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Building2, Package } from 'lucide-react'
-import { getOrganizationSubscription } from '@/lib/subscription-utils'
+import { getOrganizationSubscriptionAction } from '@/lib/actions/subscription'
 
 interface OrganizationPlanInfoProps {
   organizationName: string | null | undefined
@@ -35,7 +35,9 @@ export function OrganizationPlanInfo({
 
     async function fetchSubscription() {
       try {
-        const subscription = await getOrganizationSubscription(organizationId!)
+        const subscription = await getOrganizationSubscriptionAction(
+          organizationId!
+        )
         setPlanName(subscription?.subscriptionPlanName || null)
       } catch (error) {
         console.error('Error fetching organization subscription:', error)
