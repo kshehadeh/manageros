@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.5.0](https://github.com/kshehadeh/manageros/compare/v1.4.0...v1.5.0) (2025-11-15)
+
+### Features
+
+- **subscriptions:** Added support for subscriptions and improved the permissions system ([5aaf0de](https://github.com/kshehadeh/manageros/commit/5aaf0de00e36cd62270aa157ec67418362f8f828))
+
 # [1.4.0](https://github.com/kshehadeh/manageros/compare/v1.3.0...v1.4.0) (2025-11-13)
 
 ### Bug Fixes
