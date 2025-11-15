@@ -5,6 +5,10 @@ import { initiativeSchema, type InitiativeFormData } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
+import {
+  checkOrganizationLimit,
+  getOrganizationCounts,
+} from '@/lib/subscription-utils'
 
 export async function createInitiative(formData: InitiativeFormData) {
   const user = await getCurrentUser()
@@ -53,6 +57,18 @@ export async function createInitiative(formData: InitiativeFormData) {
         'One or more selected owners are invalid or do not belong to your organization'
       )
     }
+  }
+
+  // Check organization limits before creating
+  const counts = await getOrganizationCounts(user.organizationId)
+  const limitCheck = await checkOrganizationLimit(
+    user.organizationId,
+    'maxInitiatives',
+    counts.initiatives
+  )
+
+  if (!limitCheck.allowed) {
+    throw new Error(limitCheck.message || 'Initiatives limit exceeded')
   }
 
   // Create the initiative with objectives and owners

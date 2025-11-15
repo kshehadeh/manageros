@@ -28,75 +28,19 @@ export async function getActivePeopleForOrganization(organizationId: string) {
   })
 }
 
-export async function getPersonById(
-  personId: string,
-  organizationId: string,
-  options?: {
-    includeTeam?: boolean
-    includeManager?: boolean
-    includeReports?: boolean
-    includeJobRole?: boolean
-    includeUser?: boolean
-    includeJiraAccount?: boolean
-    includeGithubAccount?: boolean
-    includeNameOnly?: boolean
-  }
-) {
-  if (options?.includeNameOnly) {
-    return prisma.person.findFirst({
-      where: {
-        id: personId,
-        organizationId,
-      },
-      select: { name: true },
-    })
-  }
-
-  const include: Record<string, unknown> = {}
-  if (options?.includeTeam) {
-    include.team = true
-  }
-  if (options?.includeManager) {
-    include.manager = {
-      include: {
-        reports: true,
-      },
-    }
-  }
-  if (options?.includeReports) {
-    include.reports = true
-  }
-  if (options?.includeJobRole) {
-    include.jobRole = {
-      include: {
-        level: true,
-        domain: true,
-      },
-    }
-  }
-  if (options?.includeUser) {
-    include.user = {
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-      },
-    }
-  }
-  if (options?.includeJiraAccount) {
-    include.jiraAccount = true
-  }
-  if (options?.includeGithubAccount) {
-    include.githubAccount = true
-  }
-
+export async function getPersonById(personId: string, organizationId: string) {
   return prisma.person.findFirst({
     where: {
       id: personId,
       organizationId,
     },
-    include: Object.keys(include).length > 0 ? include : undefined,
+    include: {
+      team: true,
+      manager: true,
+      reports: true,
+      jobRole: true,
+      user: true,
+    },
   })
 }
 

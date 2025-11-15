@@ -2,7 +2,6 @@
 
 import { Link } from '@/components/ui/link'
 import { useClerk, useUser } from '@clerk/nextjs'
-import { useSubscription } from '@clerk/nextjs/experimental'
 import { signOutWithCleanup } from '@/lib/auth-client-utils'
 import { usePathname } from 'next/navigation'
 import { useMobileMenu } from '@/components/mobile-menu-provider'
@@ -30,8 +29,6 @@ import {
   Keyboard,
   Bug,
   BookOpen,
-  Package,
-  Building2,
 } from 'lucide-react'
 import { useState } from 'react'
 import { HelpDialog } from '@/components/shared'
@@ -40,6 +37,8 @@ import { useAIChat } from '@/components/ai-chat-provider'
 import { APP_VERSION } from '@/lib/version'
 import { PersonAvatar } from '@/components/people/person-avatar'
 import { Skeleton } from '@/components/ui/skeleton'
+import { OrganizationPlanInfo } from '@/components/common/organization-plan-info'
+import { PersonBrief } from '../types/person'
 interface NavItem {
   name: string
   href: string
@@ -48,17 +47,10 @@ interface NavItem {
   requiresPermission?: string
 }
 
-interface PersonData {
-  id: string
-  name: string
-  email: string | null
-  avatar: string | null
-}
-
 interface SidebarProps {
   navigation?: NavItem[]
   serverSession?: UserType | null
-  personData?: PersonData | null
+  personData?: PersonBrief | null
 }
 
 const iconMap = {
@@ -80,8 +72,6 @@ export default function Sidebar({
   personData,
 }: SidebarProps) {
   const { user } = useUser()
-  const { data: subscription, isLoading: subscriptionLoading } =
-    useSubscription()
   const pathname = usePathname()
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useMobileMenu()
   const [isKeyboardShortcutsOpen, setIsKeyboardShortcutsOpen] = useState(false)
@@ -140,86 +130,44 @@ export default function Sidebar({
                 />
               )}
               <div className={`flex-1 min-w-0 ${geistMono.className}`}>
-                {/* Case 1: No organization - show email, Create Organization link */}
-                {!serverSession.organizationId && (
-                  <div className='flex flex-row gap-sm'>
-                    <div className='text-sm text-foreground font-medium truncate'>
-                      {serverSession.email
-                        ? serverSession.email
-                        : user?.emailAddresses[0].emailAddress}
-                    </div>
-                    <Link
-                      href='/organization/create'
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className='text-xs text-muted-foreground hover:text-foreground underline block mt-xs'
-                    >
-                      Create Organization
-                    </Link>
+                {/* Email - only shown if no person is associated */}
+                {!personData && (
+                  <div className='text-sm text-foreground font-medium truncate'>
+                    {serverSession.email
+                      ? serverSession.email
+                      : user?.emailAddresses[0].emailAddress}
                   </div>
                 )}
 
-                {/* Case 2: Has organization but no person - show email, organization, Link to Person */}
-                {serverSession.organizationId && !personData && (
-                  <>
-                    <div className='text-sm text-foreground font-medium truncate'>
-                      {serverSession.email
-                        ? serverSession.email
-                        : user?.emailAddresses[0].emailAddress}
+                {/* Person name - shown if person exists */}
+                {personData && (
+                  <Link href={`/people/${personData.id}`}>
+                    <div className='text-sm text-foreground font-medium truncate hover:underline cursor-pointer'>
+                      {personData.name}
                     </div>
-                    <div className='flex flex-row gap-sm'>
-                      {serverSession.organizationName && (
-                        <div className='text-xs text-muted-foreground truncate mt-xs flex items-center gap-sm'>
-                          <Building2 className='h-3 w-3' />
-                          {serverSession.organizationName}
-                        </div>
-                      )}
-                      {/* Subscription info */}
-                      {!subscriptionLoading && subscription && (
-                        <div className='text-xs truncate mt-xs bg-[var(--color-badge-info)] text-[var(--color-badge-info-foreground)] px-sm py-xs flex items-center gap-sm'>
-                          <Package className='h-3 w-3' />
-                          {subscription.subscriptionItems?.[0].plan.name ||
-                            'No subscription'}
-                        </div>
-                      )}
-                      {!subscriptionLoading &&
-                        !subscription &&
-                        serverSession.organizationId && (
-                          <div className='text-xs text-muted-foreground truncate mt-xs'>
-                            No subscription
-                          </div>
-                        )}
-                    </div>
-                  </>
+                  </Link>
                 )}
 
-                {/* Case 3: Has organization and person - show name, organization */}
-                {serverSession.organizationId && personData && (
-                  <>
-                    <Link href={`/people/${personData.id}`}>
-                      <div className='text-sm text-foreground font-medium truncate hover:underline cursor-pointer'>
-                        {personData.name}
-                      </div>
-                    </Link>
-                    {serverSession.organizationName && (
-                      <div className='text-xs text-muted-foreground truncate mt-xs'>
-                        {serverSession.organizationName}
-                      </div>
-                    )}
-                    {/* Subscription info */}
-                    {!subscriptionLoading && subscription && (
-                      <div className='text-xs text-muted-foreground truncate mt-xs'>
-                        {subscription.subscriptionItems?.[0].plan.name ||
-                          'No subscription'}
-                      </div>
-                    )}
-                    {!subscriptionLoading &&
-                      !subscription &&
-                      serverSession.organizationId && (
-                        <div className='text-xs text-muted-foreground truncate mt-xs'>
-                          Free Plan
-                        </div>
-                      )}
-                  </>
+                {/* Organization information - shown if organization exists */}
+                {serverSession.organizationId && (
+                  <div className='mt-xs'>
+                    <OrganizationPlanInfo
+                      organizationName={serverSession.organizationName}
+                      organizationId={serverSession.organizationId}
+                      variant='vertical'
+                    />
+                  </div>
+                )}
+
+                {/* Create Organization link - shown if no organization */}
+                {!serverSession.organizationId && (
+                  <Link
+                    href='/organization/create'
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className='text-xs text-muted-foreground hover:text-foreground underline block mt-xs'
+                  >
+                    Create Organization
+                  </Link>
                 )}
 
                 {/* Settings and Sign out links - always shown */}
@@ -286,17 +234,19 @@ export default function Sidebar({
                 )
               })}
 
-              {/* AI Chat Button */}
-              <button
-                onClick={() => {
-                  setIsMobileMenuOpen(false)
-                  toggleAIChat()
-                }}
-                className={`flex items-center gap-lg px-lg py-md text-sm text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
-              >
-                <Bot className='h-5 w-5' />
-                <span>AI Chat</span>
-              </button>
+              {/* AI Chat Button - only show if user has an organization */}
+              {serverSession.organizationId && (
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false)
+                    toggleAIChat()
+                  }}
+                  className={`flex items-center gap-lg px-lg py-md text-sm text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
+                >
+                  <Bot className='h-5 w-5' />
+                  <span>AI Chat</span>
+                </button>
+              )}
             </>
           ) : (
             <>
@@ -309,11 +259,6 @@ export default function Sidebar({
                   <Skeleton className='h-4 w-24' />
                 </div>
               ))}
-              {/* AI Chat Button Skeleton */}
-              <div className='flex items-center gap-3 px-3 py-2 rounded-lg'>
-                <Skeleton className='h-5 w-5 rounded' />
-                <Skeleton className='h-4 w-20' />
-              </div>
             </>
           )}
         </nav>

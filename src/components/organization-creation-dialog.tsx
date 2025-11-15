@@ -52,7 +52,7 @@ export function OrganizationCreationDialog({
     try {
       // This should not be called anymore since we redirect to subscription page
       // But keeping for backward compatibility
-      await createOrganization(formData, { plan: 'free' })
+      await createOrganization(formData)
 
       // Close dialog and redirect to dashboard
       // Clerk will automatically update the user data

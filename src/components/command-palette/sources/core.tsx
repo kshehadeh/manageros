@@ -14,6 +14,7 @@ import {
   Calendar,
   Briefcase,
   ClipboardList,
+  Building,
 } from 'lucide-react'
 import {
   type CommandItemDescriptor,
@@ -27,11 +28,39 @@ function createStaticItems(
   userRole?: string,
   pathname?: string,
   currentUserPersonId?: string,
-  permissions?: CommandPermissions
+  permissions?: CommandPermissions,
+  organizationId?: string | null
 ): CommandItemDescriptor[] {
   const q = query.toLowerCase()
+  const hasOrganization = !!organizationId
   const isAdmin = permissions?.isAdmin ?? userRole === 'ADMIN'
   const hasLinkedPerson = !!currentUserPersonId
+
+  // If no organization, only show Create Organization action
+  if (!hasOrganization) {
+    const items: CommandItemDescriptor[] = []
+    items.push({
+      id: 'organization.create',
+      title: 'Create Organization',
+      subtitle: 'Set up your organization',
+      icon: <Building className='h-4 w-4' />,
+      keywords: ['organization', 'org', 'create', 'setup', 'new'],
+      group: 'Quick Actions',
+      perform: ({ closePalette, router }) => {
+        router.push('/organization/create')
+        closePalette()
+      },
+    })
+    return items.filter(item => {
+      if (!q) return true
+      const hay = [
+        item.title.toLowerCase(),
+        item.subtitle?.toLowerCase() || '',
+        ...(item.keywords || []).map(k => k.toLowerCase()),
+      ].join(' ')
+      return hay.includes(q)
+    })
+  }
 
   // Use permissions from server if available, otherwise fall back to client-side checks
   const canCreateTasks =
@@ -378,14 +407,16 @@ export const coreCommandSource: CommandSource = {
     userRole?: string,
     pathname?: string,
     currentUserPersonId?: string,
-    permissions?: CommandPermissions
+    permissions?: CommandPermissions,
+    organizationId?: string | null
   ) => {
     return createStaticItems(
       query,
       userRole,
       pathname,
       currentUserPersonId,
-      permissions
+      permissions,
+      organizationId
     )
   },
 }

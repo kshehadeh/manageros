@@ -27,15 +27,7 @@ export default async function PersonDetailPage({
     redirect('/organization/create')
   }
 
-  const personResult = await getPersonById(id, user.organizationId, {
-    includeTeam: true,
-    includeManager: true,
-    includeReports: true,
-    includeJobRole: true,
-    includeUser: true,
-    includeJiraAccount: true,
-    includeGithubAccount: true,
-  })
+  const personResult = await getPersonById(id, user.organizationId)
 
   if (
     !personResult ||

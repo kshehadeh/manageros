@@ -35,6 +35,7 @@ interface OrganizationSetupCardsProps {
 
 export function OrganizationSetupCards({
   pendingInvitations,
+  onInvitationAccepted,
 }: OrganizationSetupCardsProps) {
   const [acceptingInvitation, setAcceptingInvitation] = useState<string | null>(
     null
@@ -54,10 +55,15 @@ export function OrganizationSetupCards({
 
       await acceptInvitationForUser(invitationId)
 
-      // Redirect to dashboard after successful acceptance
-      // Clerk will automatically update the user data
-      router.push('/dashboard')
-      router.refresh() // Refresh to get updated user data
+      // Call custom callback if provided, otherwise redirect to dashboard
+      if (onInvitationAccepted) {
+        onInvitationAccepted()
+      } else {
+        // Redirect to dashboard after successful acceptance
+        // Clerk will automatically update the user data
+        router.push('/dashboard')
+        router.refresh() // Refresh to get updated user data
+      }
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Failed to accept invitation'
@@ -86,7 +92,16 @@ export function OrganizationSetupCards({
 
   return (
     <div className='space-y-2xl'>
-      <div className='space-y-6'>
+      {error && (
+        <HelpBlock
+          title='Error'
+          description={error}
+          icon={AlertCircle}
+          variant='warning'
+        />
+      )}
+
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
         <HelpBlock
           title='Create New Organization'
           description={
@@ -110,95 +125,93 @@ export function OrganizationSetupCards({
           }}
         />
 
-        {error && (
-          <HelpBlock
-            title='Error'
-            description={error}
-            icon={AlertCircle}
-            variant='warning'
-          />
-        )}
-
         {pendingInvitations.length > 0 ? (
-          <div className='space-y-4'>
-            <HelpBlock
-              title='Join Existing Organization'
-              description='You have pending invitations. Accept an invitation to join an organization.'
-              icon={Users}
-              variant='info'
-            />
-            <div className='space-y-2'>
-              {pendingInvitations.map(invitation => (
-                <Card key={invitation.id} className='p-4'>
-                  <div className='flex items-start justify-between'>
-                    <div className='flex-1'>
-                      <div className='flex items-center gap-2 mb-1'>
-                        <h5 className='font-medium text-sm'>
-                          {invitation.organization.name}
-                        </h5>
-                        {isExpiringSoon(invitation.expiresAt) && (
-                          <span className='badge rag-amber text-xs'>
-                            EXPIRES SOON
-                          </span>
-                        )}
-                      </div>
-                      {invitation.organization.description && (
-                        <p className='text-xs text-muted-foreground mb-2'>
-                          {invitation.organization.description}
-                        </p>
-                      )}
-                      <div className='text-xs text-muted-foreground'>
-                        <div>
-                          Invited by{' '}
-                          <span className='text-foreground'>
-                            {invitation.invitedBy.name}
-                          </span>
+          <HelpBlock
+            title='Join Existing Organization'
+            description={
+              <div className='space-y-3'>
+                <p>
+                  You have pending invitations. Accept an invitation to join an
+                  organization.
+                </p>
+                <div className='space-y-2'>
+                  {pendingInvitations.map(invitation => (
+                    <Card key={invitation.id} className='p-4'>
+                      <div className='flex items-start justify-between'>
+                        <div className='flex-1'>
+                          <div className='flex items-center gap-2 mb-1'>
+                            <h5 className='font-medium text-sm'>
+                              {invitation.organization.name}
+                            </h5>
+                            {isExpiringSoon(invitation.expiresAt) && (
+                              <span className='badge rag-amber text-xs'>
+                                EXPIRES SOON
+                              </span>
+                            )}
+                          </div>
+                          {invitation.organization.description && (
+                            <p className='text-xs text-muted-foreground mb-2'>
+                              {invitation.organization.description}
+                            </p>
+                          )}
+                          <div className='text-xs text-muted-foreground'>
+                            <div>
+                              Invited by{' '}
+                              <span className='text-foreground'>
+                                {invitation.invitedBy.name}
+                              </span>
+                            </div>
+                            <div>
+                              Expires {formatDate(invitation.expiresAt)}
+                            </div>
+                          </div>
                         </div>
-                        <div>Expires {formatDate(invitation.expiresAt)}</div>
+                        <Button
+                          size='sm'
+                          variant='outline'
+                          onClick={() => handleAcceptInvitation(invitation.id)}
+                          disabled={acceptingInvitation === invitation.id}
+                        >
+                          {acceptingInvitation === invitation.id ? (
+                            <>
+                              <svg
+                                className='animate-spin -ml-1 mr-2 h-4 w-4'
+                                xmlns='http://www.w3.org/2000/svg'
+                                fill='none'
+                                viewBox='0 0 24 24'
+                              >
+                                <circle
+                                  className='opacity-25'
+                                  cx='12'
+                                  cy='12'
+                                  r='10'
+                                  stroke='currentColor'
+                                  strokeWidth='4'
+                                ></circle>
+                                <path
+                                  className='opacity-75'
+                                  fill='currentColor'
+                                  d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                                ></path>
+                              </svg>
+                              Accepting...
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle2 className='h-4 w-4 mr-1' />
+                              Accept
+                            </>
+                          )}
+                        </Button>
                       </div>
-                    </div>
-                    <Button
-                      size='sm'
-                      variant='outline'
-                      onClick={() => handleAcceptInvitation(invitation.id)}
-                      disabled={acceptingInvitation === invitation.id}
-                    >
-                      {acceptingInvitation === invitation.id ? (
-                        <>
-                          <svg
-                            className='animate-spin -ml-1 mr-2 h-4 w-4'
-                            xmlns='http://www.w3.org/2000/svg'
-                            fill='none'
-                            viewBox='0 0 24 24'
-                          >
-                            <circle
-                              className='opacity-25'
-                              cx='12'
-                              cy='12'
-                              r='10'
-                              stroke='currentColor'
-                              strokeWidth='4'
-                            ></circle>
-                            <path
-                              className='opacity-75'
-                              fill='currentColor'
-                              d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                            ></path>
-                          </svg>
-                          Accepting...
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle2 className='h-4 w-4 mr-1' />
-                          Accept
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            }
+            icon={Users}
+            variant='info'
+          />
         ) : (
           <HelpBlock
             title='Join Existing Organization'

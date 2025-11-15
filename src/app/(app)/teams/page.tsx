@@ -1,5 +1,5 @@
 import { Link } from '@/components/ui/link'
-import { requireAuth } from '@/lib/auth-utils'
+import { isAdminOrOwner, requireAuth } from '@/lib/auth-utils'
 import { Button } from '@/components/ui/button'
 import { Upload, Plus, Workflow, Users2 } from 'lucide-react'
 import { TeamsDataTable } from '@/components/teams/data-table'
@@ -9,7 +9,7 @@ import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 
 export default async function TeamsPage() {
-  await requireAuth({ requireOrganization: true })
+  const user = await requireAuth({ requireOrganization: true })
 
   return (
     <PageContainer>
@@ -25,18 +25,22 @@ export default async function TeamsPage() {
                 Chart
               </Link>
             </Button>
-            <Button asChild variant='outline'>
-              <Link href='/teams/import'>
-                <Upload className='w-4 h-4' />
-                Import Teams
-              </Link>
-            </Button>
-            <Button asChild className='flex items-center gap-2'>
-              <Link href='/teams/new'>
-                <Plus className='w-4 h-4' />
-                Create Team
-              </Link>
-            </Button>
+            {isAdminOrOwner(user) && (
+              <Button asChild variant='outline'>
+                <Link href='/teams/import'>
+                  <Upload className='w-4 h-4' />
+                  Import Teams
+                </Link>
+              </Button>
+            )}
+            {isAdminOrOwner(user) && (
+              <Button asChild className='flex items-center gap-2'>
+                <Link href='/teams/new'>
+                  <Plus className='w-4 h-4' />
+                  Create Team
+                </Link>
+              </Button>
+            )}
           </div>
         }
       />

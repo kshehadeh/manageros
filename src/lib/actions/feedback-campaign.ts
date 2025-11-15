@@ -12,6 +12,10 @@ import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 import { generateInviteLinkToken } from '@/lib/utils/invite-link'
 import { checkIfManagerOrSelf } from '../utils/people-utils'
 import { generateText } from '@/lib/ai'
+import {
+  checkOrganizationLimit,
+  getOrganizationCounts,
+} from '@/lib/subscription-utils'
 
 export async function createFeedbackCampaign(
   formData: FeedbackCampaignFormData
@@ -62,6 +66,18 @@ export async function createFeedbackCampaign(
     throw new Error(
       'You must be a manager of the target person to create a feedback campaign'
     )
+  }
+
+  // Check organization limits before creating
+  const counts = await getOrganizationCounts(user.organizationId)
+  const limitCheck = await checkOrganizationLimit(
+    user.organizationId,
+    'maxFeedbackCampaigns',
+    counts.feedbackCampaigns
+  )
+
+  if (!limitCheck.allowed) {
+    throw new Error(limitCheck.message || 'Feedback campaigns limit exceeded')
   }
 
   // Generate a unique invite link token

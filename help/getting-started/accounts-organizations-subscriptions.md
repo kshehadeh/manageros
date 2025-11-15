@@ -1,0 +1,226 @@
+---
+id: accounts-organizations-subscriptions
+title: Accounts, Organizations, and Subscriptions
+category: Getting Started
+---
+
+Understanding how accounts, organizations, and subscriptions work in mpath is essential for getting the most out of the platform. This guide explains these core concepts and how they relate to each other.
+
+## Overview
+
+mpath organizes everything around three key concepts:
+
+- **Your Account**: Your login credentials and personal access
+- **Your Organization**: Your company or team's workspace
+- **Your Subscription**: The plan that determines what features and limits you have
+
+## Your Account
+
+Your **account** is your personal login to mpath. It's tied to your email address and allows you to access the platform.
+
+### Key Points About Accounts
+
+- **One account per email**: Each email address can only have one account
+- **Account vs. Person**: Your account is separate from your "Person" record in the organization
+- **Organization membership**: You can belong to one organization (or none)
+- **Personal link**: You can link your account to your Person record to access personal features
+
+### Account Roles
+
+When you join an organization, you're assigned a role:
+
+- **User**: Standard member with basic access
+- **Admin**: Can manage organization settings, members, and most data
+- **Owner**: Same as Admin, plus manages the subscription and billing
+
+## Your Organization
+
+An **organization** is your company or team's workspace in mpath. All your data—people, teams, tasks, initiatives, meetings—lives within your organization.
+
+### Key Points About Organizations
+
+- **Data isolation**: You can only see data from your own organization
+- **Unique identifier**: Each organization has a unique name and URL slug
+- **Shared workspace**: All members of your organization share the same data and limits
+- **Subscription holder**: One person (the billing user) manages the subscription
+
+### Creating an Organization
+
+When you first sign up, you'll need to either:
+
+1. **Create a new organization**: Start fresh with your own workspace
+2. **Join an existing organization**: Accept an invitation from someone who already has an organization
+
+### Organization Membership
+
+- **Invitations**: Organization admins can invite people by email
+- **Automatic access**: Once you join, you can see all organization data (within your permissions)
+- **Leaving**: You can leave an organization, but you'll lose access to all its data
+
+## Your Person Record
+
+Your **Person** record represents you as a member of the organization—separate from your account. This is the "you" that appears in org charts, gets assigned tasks, and participates in meetings.
+
+### Key Points About Person Records
+
+- **Organization member**: Every Person belongs to exactly one organization
+- **Can exist independently**: Person records can exist even if someone doesn't have an account yet
+- **Linking**: Your account can be linked to your Person record to unlock personal features
+- **One-to-one**: Each Person can only be linked to one account (and vice versa)
+
+### Why Link Your Account to Your Person?
+
+When your account is linked to your Person record, you can:
+
+- Create and manage one-on-ones with your manager or reports
+- Access personal reports and data
+- See your own tasks, initiatives, and feedback
+- Use personal features throughout the platform
+
+**Note**: Organization admins can link accounts to Person records, or you can link yourself if your Person record isn't already linked.
+
+## Subscriptions
+
+Subscriptions in mpath are **organization-based**, not individual. This means the entire organization shares one subscription plan and its limits.
+
+### How Subscriptions Work
+
+- **One subscription per organization**: Each organization has one subscription plan
+- **Billing user**: One person (usually the organization creator) owns the subscription
+- **Shared limits**: All members share the same subscription limits
+- **Automatic updates**: Subscription changes apply to the entire organization
+
+### Subscription Plans
+
+#### Solo Plan (Free)
+
+- **Perfect for**: Small teams getting started
+- **Limits**:
+  - Up to 5 people
+  - Up to 10 initiatives
+  - Up to 2 teams
+  - Up to 2 feedback campaigns
+- **Features**: All core features with limits
+
+#### Team Plan (Paid)
+
+- **Perfect for**: Growing teams and larger organizations
+- **Limits**: Unlimited people, initiatives, teams, and feedback campaigns
+- **Features**: All features with no limits
+
+### Understanding Limits
+
+**What happens when you reach a limit?**
+
+- You can still **view** all existing data
+- You **cannot create** new items of that type
+- You'll see a message explaining the limit
+- You can upgrade your plan to increase limits
+
+**Example**: If you have 5 people (Solo plan limit) and try to add a 6th:
+
+- ✅ You can still view and edit all 5 existing people
+- ❌ You cannot create a 6th person
+- 💡 Upgrade to Team plan to add unlimited people
+
+### Managing Your Subscription
+
+The **billing user** (usually the organization owner) can:
+
+- View subscription details in Organization Settings
+- See current usage and limits
+- Manage the subscription through the billing provider
+- Upgrade or change plans
+
+**Note**: Only the billing user can manage the subscription. If you need to change plans, contact your organization's billing user.
+
+## Common Scenarios
+
+### I Just Signed Up
+
+1. Create an account with your email
+2. Choose a subscription plan (free or paid)
+3. Create your organization
+4. You become the organization owner and billing user
+5. Start inviting team members
+
+### I Was Invited to Join
+
+1. Receive an invitation email
+2. Accept the invitation
+3. Your account is automatically added to the organization
+4. You can now see organization data
+5. Ask an admin to link your account to your Person record (if needed)
+
+### I Need to Link My Account
+
+If you can't access personal features (like one-on-ones):
+
+1. Go to Settings → Account Linking
+2. If you see your Person record, select it and click "Link Account"
+3. If you don't see your Person record, ask an admin to create it first
+4. Once linked, personal features will be available
+
+### I Want to Upgrade Our Plan
+
+1. Go to Organization Settings → Billing
+2. View current usage and limits
+3. Click to manage subscription
+4. Follow the prompts to upgrade
+5. New limits apply immediately to the entire organization
+
+### I'm Reaching My Limits
+
+If you're hitting subscription limits:
+
+1. Check your current usage in Organization Settings → Billing
+2. Review what's using up your limits
+3. Consider upgrading if you need more capacity
+4. Remember: You can still view everything, just can't create new items
+
+## Key Takeaways
+
+### Account vs. Person
+
+- **Account** = Your login credentials (email, password)
+- **Person** = Your record as a member of the organization
+- **Link them** = Unlock personal features
+
+### Organization Structure
+
+```
+Organization
+  ├── Has many Accounts (people who can log in)
+  ├── Has many People (members of the organization)
+  ├── Has one Subscription (shared by everyone)
+  └── Has one Billing User (manages the subscription)
+```
+
+### Subscription Rules
+
+- ✅ Subscriptions are organization-wide (not per-user)
+- ✅ All members share the same limits
+- ✅ You can view data even if over limit
+- ✅ Only billing user can manage subscription
+- ✅ Limits apply when creating new items
+
+## Getting Help
+
+- **Account issues**: Check Settings → User Info
+- **Organization questions**: Check Organization Settings
+- **Subscription help**: Contact your organization's billing user
+- **Linking problems**: Ask an organization admin for help
+
+## Related Topics
+
+- **[Getting Started](/help/getting-started)**: Overview of mpath features
+- **[People](/help/people)**: Managing people in your organization
+- **[People Hierarchy](/help/people-hierarchy)**: Understanding organizational structure
+
+## Tips
+
+- Link your account to your Person record to unlock personal features
+- Check Organization Settings → Billing to see your current usage
+- Remember that limits only affect creating new items, not viewing existing ones
+- Contact your organization's billing user for subscription changes
+- Organization admins can help with account linking and permissions

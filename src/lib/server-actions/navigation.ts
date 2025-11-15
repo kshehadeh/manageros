@@ -4,6 +4,7 @@ import {
   getCurrentUser,
   getActionPermission,
   isAdminOrOwner,
+  PermissionType,
 } from '@/lib/auth-utils'
 import { cacheLife, cacheTag } from 'next/cache'
 
@@ -23,7 +24,15 @@ export async function getFilteredNavigation() {
     cacheTag(`navigation-org-${user.organizationId}`)
   }
 
-  const navigation = [
+  interface NavigationItem {
+    name: string
+    href: string
+    icon: string
+    requiresPermission?: PermissionType
+    adminOnly?: boolean
+  }
+
+  const navigation: NavigationItem[] = [
     { name: 'Dashboard', href: '/dashboard', icon: 'Home' },
     { name: 'My Tasks', href: '/my-tasks', icon: 'CheckSquare' },
     { name: 'Initiatives', href: '/initiatives', icon: 'Rocket' },
@@ -44,11 +53,6 @@ export async function getFilteredNavigation() {
   // Filter navigation based on organization membership and admin role
   const filteredNavigation = await Promise.all(
     navigation.map(async item => {
-      // If user has no organization, only show Dashboard
-      if (!user.organizationId) {
-        return item.href === '/dashboard' ? item : null
-      }
-
       // Check permission-based access
       if (item.requiresPermission) {
         const hasPermission = await getActionPermission(

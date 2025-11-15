@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
@@ -28,32 +28,24 @@ import type { User } from '@/lib/auth-types'
 import {
   linkSelfToPerson,
   unlinkSelfFromPerson,
-  getAvailablePersonsForSelfLinking,
-  getCurrentUserWithPerson,
 } from '@/lib/actions/organization'
-
-interface Person {
-  id: string
-  name: string
-  email: string | null
-  role: string | null
-  status: string
-}
+import { PersonBrief } from '@/types/person'
 
 interface PersonLinkFormProps {
-  refreshTrigger?: number
+  availablePersons: PersonBrief[]
+  currentUser: User
+  currentPerson?: PersonBrief | null
 }
 
-export function PersonLinkForm({ refreshTrigger }: PersonLinkFormProps) {
+export function PersonLinkForm({
+  availablePersons,
+  currentUser,
+  currentPerson,
+}: PersonLinkFormProps) {
   const router = useRouter()
-  const [availablePersons, setAvailablePersons] = useState<Person[]>([])
   const [selectedPersonId, setSelectedPersonId] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const [userData, setUserData] = useState<{
-    user: User
-    person: Person | null
-  } | null>(null)
 
   const handleLink = useCallback(async () => {
     if (!selectedPersonId) return
@@ -65,13 +57,6 @@ export function PersonLinkForm({ refreshTrigger }: PersonLinkFormProps) {
       await linkSelfToPerson(selectedPersonId)
       // Refresh the router to invalidate any cached data
       router.refresh()
-      // Refresh the component data - getCurrentUserWithPerson now queries DB directly
-      const [availablePersonsData, userWithPerson] = await Promise.all([
-        getAvailablePersonsForSelfLinking(),
-        getCurrentUserWithPerson(),
-      ])
-      setAvailablePersons(availablePersonsData)
-      setUserData(userWithPerson)
       setSelectedPersonId('')
       // Dispatch event to notify other components (like sidebar) to refresh
       // Small delay to ensure database transaction is fully committed
@@ -85,29 +70,6 @@ export function PersonLinkForm({ refreshTrigger }: PersonLinkFormProps) {
     }
   }, [selectedPersonId, router])
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setIsLoading(true)
-        setError('')
-
-        const [availablePersonsData, userWithPerson] = await Promise.all([
-          getAvailablePersonsForSelfLinking(),
-          getCurrentUserWithPerson(),
-        ])
-
-        setAvailablePersons(availablePersonsData)
-        setUserData(userWithPerson)
-        setSelectedPersonId('')
-      } catch (error) {
-        setError(error instanceof Error ? error.message : 'An error occurred')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    loadData()
-  }, [refreshTrigger])
-
   const handleUnlink = useCallback(async () => {
     setIsLoading(true)
     setError('')
@@ -116,13 +78,6 @@ export function PersonLinkForm({ refreshTrigger }: PersonLinkFormProps) {
       await unlinkSelfFromPerson()
       // Refresh the router to invalidate any cached data
       router.refresh()
-      // Refresh the component data - getCurrentUserWithPerson now queries DB directly
-      const [availablePersonsData, userWithPerson] = await Promise.all([
-        getAvailablePersonsForSelfLinking(),
-        getCurrentUserWithPerson(),
-      ])
-      setAvailablePersons(availablePersonsData)
-      setUserData(userWithPerson)
       // Dispatch event to notify other components (like sidebar) to refresh
       // Small delay to ensure database transaction is fully committed
       setTimeout(() => {
@@ -135,15 +90,18 @@ export function PersonLinkForm({ refreshTrigger }: PersonLinkFormProps) {
     }
   }, [router])
 
-  if (!userData) {
+  // If user doesn't have an organization, show message
+  if (!currentUser.organizationId) {
     return (
-      <div className='text-center py-4'>
-        <p className='text-sm text-muted-foreground'>Loading...</p>
+      <div className='space-y-4'>
+        <p className='text-sm text-muted-foreground'>
+          You need to be a member of an organization before you can link your
+          account to a person. Once you join or create an organization,
+          you&apos;ll be able to link yourself to a person record.
+        </p>
       </div>
     )
   }
-
-  const { person } = userData
 
   return (
     <div className='space-y-4'>
@@ -157,7 +115,7 @@ export function PersonLinkForm({ refreshTrigger }: PersonLinkFormProps) {
         </div>
       )}
 
-      {person ? (
+      {currentPerson ? (
         <div className='space-y-4'>
           <div className='flex items-center justify-between mb-2'>
             <div className='flex items-center gap-2'>
@@ -177,8 +135,9 @@ export function PersonLinkForm({ refreshTrigger }: PersonLinkFormProps) {
                   <AlertDialogTitle>Unlink Account</AlertDialogTitle>
                   <AlertDialogDescription>
                     Are you sure you want to unlink your account from{' '}
-                    <strong>{person.name}</strong>? This will remove access to
-                    personal features until you link to another person.
+                    <strong>{currentPerson.name}</strong>? This will remove
+                    access to personal features until you link to another
+                    person.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -195,10 +154,10 @@ export function PersonLinkForm({ refreshTrigger }: PersonLinkFormProps) {
           </div>
           <PersonListItem
             person={{
-              id: person.id,
-              name: person.name,
-              email: person.email,
-              role: person.role,
+              id: currentPerson.id,
+              name: currentPerson.name,
+              email: currentPerson.email,
+              role: currentPerson.role,
             }}
             showRole={true}
             showEmail={true}

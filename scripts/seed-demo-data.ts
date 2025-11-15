@@ -293,6 +293,18 @@ async function seedDemoData() {
       },
     })
 
+    const ownerUser = await prisma.user.upsert({
+      where: { email: 'owner@acme.com' },
+      update: {},
+      create: {
+        email: 'owner@acme.com',
+        name: 'Owner User',
+        passwordHash,
+        role: 'OWNER', // Keep for backward compatibility
+        organizationId: organization.id, // Keep for backward compatibility
+      },
+    })
+
     // Create OrganizationMember records for the users
 
     await prisma.organizationMember.upsert({
@@ -329,7 +341,24 @@ async function seedDemoData() {
       },
     })
 
-    console.log(`✓ Created ${2} users with organization memberships\n`)
+    await prisma.organizationMember.upsert({
+      where: {
+        userId_organizationId: {
+          userId: ownerUser.id,
+          organizationId: organization.id,
+        },
+      },
+      update: {
+        role: 'OWNER',
+      },
+      create: {
+        userId: ownerUser.id,
+        organizationId: organization.id,
+        role: 'OWNER',
+      },
+    })
+
+    console.log(`✓ Created ${3} users with organization memberships\n`)
 
     // Step 3: Create job levels
     console.log('📊 Creating job levels and domains...')
@@ -925,7 +954,7 @@ async function seedDemoData() {
     console.log('✨ Demo data seeding completed successfully!\n')
     console.log('📊 Summary of created data:')
     console.log(`   - Organization: 1 (${organization.name})`)
-    console.log(`   - Users: 2`)
+    console.log(`   - Users: 3`)
     console.log(`   - Teams: ${teams.length}`)
     console.log(`   - People: ${people.length}`)
     console.log(`   - Job Roles: ${jobRoles.length}`)
@@ -936,6 +965,9 @@ async function seedDemoData() {
     console.log(`   - Feedback: ${feedbackCount}`)
     console.log(`   - Meetings: ${meetingCount}`)
     console.log(`\nLogin credentials:`)
+    console.log(
+      `   Owner: owner@acme.com / password123 (not linked to a person)`
+    )
     console.log(`   Admin: admin@acme.com / password123`)
     console.log(`   User: demo@acme.com / password123`)
   } catch (error) {

@@ -10,28 +10,27 @@ import {
 } from '@/lib/auth-utils'
 import { syncUserDataToClerk } from '@/lib/clerk-session-sync'
 import { auth } from '@clerk/nextjs/server'
-
-export async function createOrganization(
-  formData: {
-    name: string
-    slug: string
-  },
-  subscriptionInfo?: {
-    plan?: string // 'free' for free tier
-    planId?: string // Clerk plan ID for paid plans
-  }
-) {
+import { getUserSubscriptionInfo } from '../subscription-utils'
+import { PersonBrief } from '@/types/person'
+export async function createOrganization(formData: {
+  name: string
+  slug: string
+}) {
   const user = await getCurrentUser()
 
   // Check if user already has an organization
-  if (user.organizationId) {
+  if (user.clerkUserId && user.organizationId) {
     throw new Error('User already belongs to an organization')
   }
 
+  // Look up the plan id from cler
+  const userSubscriptionInfo = await getUserSubscriptionInfo(user.clerkUserId)
+
   // Validate that subscription was selected (required for creating new organizations)
   if (
-    !subscriptionInfo ||
-    (!subscriptionInfo.plan && !subscriptionInfo.planId)
+    !userSubscriptionInfo ||
+    userSubscriptionInfo.subscription_items.length === 0 ||
+    !userSubscriptionInfo.subscription_items[0].plan
   ) {
     throw new Error(
       'Subscription selection is required to create an organization'
@@ -47,22 +46,26 @@ export async function createOrganization(
     throw new Error('Organization slug already exists')
   }
 
-  // Note: Subscription data is managed by Clerk, so we don't store it in the database
-  // The subscription is linked to the user's Clerk account, not the organization
-  // If needed, we can validate subscription status via Clerk API here
+  // Determine plan name and subscription details
+  const subscriptionPlanId =
+    userSubscriptionInfo.subscription_items[0].plan_id || null
+  const subscriptionPlanName =
+    userSubscriptionInfo.subscription_items[0].plan.name || null
 
-  // Determine role based on subscription type
-  // OWNER role is assigned when user selects a paid plan (planId present)
-  // ADMIN role is assigned when user selects free tier (plan === 'free')
-  const userRole = subscriptionInfo.planId ? 'OWNER' : 'ADMIN'
+  // Determine role based on subscription typefree tier (plan === 'free')
+  const userRole = 'OWNER'
 
   // Create organization and add user as admin/owner in a transaction
   const result = await prisma.$transaction(async tx => {
-    // Create organization
+    // Create organization with subscription information
     const organization = await tx.organization.create({
       data: {
         name: formData.name,
         slug: formData.slug,
+        billingUserId: user.id, // Set creating user as billing user
+        subscriptionPlanId,
+        subscriptionPlanName,
+        subscriptionStatus: userSubscriptionInfo.status,
       },
     })
 
@@ -88,14 +91,19 @@ export async function createOrganization(
   })
 
   // Sync updated user data to Clerk (organizationId and role changed)
+  // Wait for sync to complete to ensure Clerk metadata is updated
   const { userId } = await auth()
   if (userId) {
     await syncUserDataToClerk(userId)
   }
 
   // Revalidate paths that depend on organization status
-  revalidatePath('/')
-  revalidatePath('/dashboard')
+  revalidatePath('/', 'layout')
+  revalidatePath('/dashboard', 'page')
+  revalidatePath('/organization/create', 'page')
+  revalidatePath('/organization/subscribe', 'page')
+  revalidatePath('/settings', 'page')
+
   return result
 }
 
@@ -742,8 +750,6 @@ export async function acceptInvitationForUser(invitationId: string) {
     throw new Error('User email is required to accept invitation')
   }
 
-  console.log('normalizedEmail', normalizedEmail, invitationId)
-
   // Find the invitation
   const invitation = await prisma.organizationInvitation.findFirst({
     where: {
@@ -802,12 +808,19 @@ export async function acceptInvitationForUser(invitationId: string) {
   })
 
   // Sync updated user data to Clerk (organizationId changed)
+  // Wait for sync to complete to ensure Clerk metadata is updated
   const { userId } = await auth()
   if (userId) {
     await syncUserDataToClerk(userId)
   }
 
-  revalidatePath('/')
+  // Revalidate paths that depend on organization status
+  revalidatePath('/', 'layout')
+  revalidatePath('/dashboard', 'page')
+  revalidatePath('/organization/create', 'page')
+  revalidatePath('/organization/subscribe', 'page')
+  revalidatePath('/settings', 'page')
+
   return result
 }
 
@@ -1115,7 +1128,9 @@ export async function removeUserFromOrganization(userId: string) {
 
 // User Settings Actions - Allow users to link themselves to a person
 
-export async function getAvailablePersonsForSelfLinking() {
+export async function getAvailablePersonsForSelfLinking(): Promise<
+  PersonBrief[]
+> {
   const currentUser = await getCurrentUser()
 
   // Check if user belongs to an organization
@@ -1135,6 +1150,7 @@ export async function getAvailablePersonsForSelfLinking() {
       email: true,
       role: true,
       status: true,
+      avatar: true,
     },
     orderBy: { name: 'asc' },
   })
@@ -1265,42 +1281,19 @@ export async function unlinkSelfFromPerson() {
 }
 
 export async function getCurrentUserWithPerson() {
-  const currentUser = await getCurrentUser()
-
-  if (!currentUser.organizationId) {
-    return {
-      user: currentUser,
-      person: null,
-    }
-  }
-
-  // Query the database directly to get the fresh personId value
-  // This bypasses any cached session claims that might be stale
-  const { userId } = await auth()
-  if (!userId) {
-    return {
-      user: currentUser,
-      person: null,
-    }
-  }
-
-  const dbUser = await prisma.user.findUnique({
-    where: { clerkUserId: userId },
+  // Skip session claims to get fresh person link data from database
+  // This ensures we get the latest personId even if session claims haven't refreshed yet
+  const currentUser = await getCurrentUser({ skipSessionClaims: true })
+  const person = await prisma.person.findUnique({
+    where: { id: currentUser.personId || '' },
     select: {
-      personId: true,
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      avatar: true,
     },
   })
-
-  // Get the linked person if it exists, using the fresh personId from database
-  const person = dbUser?.personId
-    ? await prisma.person.findUnique({
-        where: { id: dbUser.personId },
-        include: {
-          jobRole: true,
-        },
-      })
-    : null
-
   return {
     user: currentUser,
     person,
@@ -1309,53 +1302,26 @@ export async function getCurrentUserWithPerson() {
 
 export async function getSidebarData() {
   try {
-    const currentUser = await getCurrentUser()
+    // Skip session claims to get fresh person link data from database
+    // This ensures we get the latest personId even if session claims haven't refreshed yet
+    // This is especially important for the sidebar which is refreshed after person link changes
+    const { user, person } = await getCurrentUserWithPerson()
     const { getFilteredNavigation } = await import('@/lib/auth-utils')
 
-    const navigation = await getFilteredNavigation(currentUser)
+    const navigation = await getFilteredNavigation(user)
 
-    if (!currentUser.organizationId) {
+    if (!user.organizationId) {
       return {
-        user: currentUser,
+        user: user,
         person: null,
         navigation,
       }
     }
 
-    // Query the database directly to get the fresh personId value
-    // This bypasses any cached session claims that might be stale
-    const { userId } = await auth()
-    if (!userId) {
-      return {
-        user: currentUser,
-        person: null,
-        navigation,
-      }
-    }
-
-    const dbUser = await prisma.user.findUnique({
-      where: { clerkUserId: userId },
-      select: {
-        personId: true,
-      },
-    })
-
-    // Get the linked person if it exists, using the fresh personId from database
-    const person = dbUser?.personId
-      ? await prisma.person.findUnique({
-          where: { id: dbUser.personId },
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            avatar: true,
-          },
-        })
-      : null
-
+    // Get the linked person if it exists, using the fresh personId from getCurrentUser
     return {
-      user: currentUser,
-      person,
+      user: user,
+      person: person,
       navigation,
     }
   } catch (error) {

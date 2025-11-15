@@ -57,7 +57,10 @@ export function CommandPalette() {
   // Debounce the search query to avoid frequent API calls
   const debouncedQuery = useDebounce(query, 300)
 
-  const [userData, setUserData] = useState<{ role?: string } | null>(null)
+  const [userData, setUserData] = useState<{
+    role?: string
+    organizationId?: string | null
+  } | null>(null)
   const [permissions, setPermissions] = useState<CommandPermissions | null>(
     null
   )
@@ -133,7 +136,8 @@ export function CommandPalette() {
               userRole,
               pathname,
               currentUserPersonId,
-              permissions || undefined
+              permissions || undefined,
+              userData?.organizationId
             )
           )
         )
@@ -153,6 +157,7 @@ export function CommandPalette() {
   }, [
     debouncedQuery,
     userData?.role,
+    userData?.organizationId,
     pathname,
     currentUserPersonId,
     permissions,

@@ -1,46 +1,70 @@
 import { getJiraCredentials } from '@/lib/actions/jira'
 import { getGithubCredentials } from '@/lib/actions/github'
+import {
+  getAvailablePersonsForSelfLinking,
+  getCurrentUserWithPerson,
+  getPendingInvitationsForUser,
+} from '@/lib/actions/organization'
 import { JiraCredentialsSection } from '@/components/settings/jira-credentials-section'
 import { GithubCredentialsSection } from '@/components/settings/github-credentials-section'
 import { UserInfoSection } from '@/components/settings/user-info-section'
+import { OrganizationSection } from '@/components/settings/organization-section'
 import { PersonLinkForm } from '@/components/people/person-link-form'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
-import { User, Settings, Shield } from 'lucide-react'
+import { User, Settings, Shield, Building } from 'lucide-react'
 import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
-import { getCurrentUser } from '../../../lib/auth-utils'
 
 export default async function SettingsPage() {
-  const user = await getCurrentUser()
-  const [jiraCredentials, githubCredentials] = await Promise.all([
-    getJiraCredentials(),
-    getGithubCredentials(),
-  ])
+  const { user, person } = await getCurrentUserWithPerson()
+  const availablePersons = await getAvailablePersonsForSelfLinking()
+  const [jiraCredentials, githubCredentials, pendingInvitations] =
+    await Promise.all([
+      getJiraCredentials(),
+      getGithubCredentials(),
+      getPendingInvitationsForUser(user.email),
+    ])
 
   return (
     <PageContainer>
       <PageHeader
         title='Settings'
         subtitle='Manage your account settings and integrations.'
+        helpId='accounts-organizations-subscriptions'
       />
 
       <PageContent>
         <div className='space-y-6'>
-          {/* User Info */}
-          <PageSection
-            variant='bordered'
-            header={<SectionHeader icon={User} title='User Info' />}
-          >
-            <UserInfoSection
-              email={user.email}
-              userId={user.id}
-              role={user.role}
-            />
-          </PageSection>
+          {/* User Info and Organization - Side by side on larger screens */}
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+            {/* User Info */}
+            <PageSection
+              variant='bordered'
+              header={<SectionHeader icon={User} title='User Info' />}
+            >
+              <UserInfoSection
+                email={user.email}
+                userId={user.id}
+                role={user.role}
+              />
+            </PageSection>
+
+            {/* Organization Section */}
+            <PageSection
+              variant='bordered'
+              header={<SectionHeader icon={Building} title='Organization' />}
+            >
+              <OrganizationSection
+                organizationId={user.organizationId}
+                organizationName={user.organizationName}
+                pendingInvitations={pendingInvitations}
+              />
+            </PageSection>
+          </div>
 
           {/* Account Linking and Permissions - Side by side on larger screens */}
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
@@ -49,7 +73,11 @@ export default async function SettingsPage() {
               variant='bordered'
               header={<SectionHeader icon={User} title='Account Linking' />}
             >
-              <PersonLinkForm />
+              <PersonLinkForm
+                currentUser={user}
+                currentPerson={person}
+                availablePersons={availablePersons}
+              />
             </PageSection>
 
             {/* Permissions Section */}

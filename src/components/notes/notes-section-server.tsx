@@ -1,6 +1,10 @@
 import { NotesSection } from './notes-section'
 import { getNotesForEntity } from '@/lib/actions/notes'
-import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
+import {
+  getActionPermission,
+  getCurrentUser,
+  PermissionType,
+} from '@/lib/auth-utils'
 
 interface NotesSectionServerProps {
   entityType: string
@@ -12,9 +16,24 @@ export async function NotesSectionServer({
   entityId,
 }: NotesSectionServerProps) {
   const user = await getCurrentUser()
+  let entityTypePermission: PermissionType | null = null
+  switch (entityType) {
+    case 'task':
+      entityTypePermission = 'task.edit'
+      break
+    case 'meeting':
+      entityTypePermission = 'meeting.edit'
+      break
+    default:
+      entityTypePermission = null
+      break
+  }
+  if (!entityTypePermission) {
+    return null
+  }
   const canEdit = await getActionPermission(
     user,
-    `${entityType.toLowerCase()}.edit`,
+    entityTypePermission,
     entityId
   )
 
