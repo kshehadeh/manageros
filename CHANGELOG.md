@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.6.1](https://github.com/kshehadeh/manageros/compare/v1.6.0...v1.6.1) (2025-11-17)
+
+### Bug Fixes
+
+- **organization:** Problems with organization/user association after big change ([74734c6](https://github.com/kshehadeh/manageros/commit/74734c6dea40572dd90bd3295960e67a0a3ae4d0))
+
 # [1.6.0](https://github.com/kshehadeh/manageros/compare/v1.5.1...v1.6.0) (2025-11-17)
 
 ### Bug Fixes
