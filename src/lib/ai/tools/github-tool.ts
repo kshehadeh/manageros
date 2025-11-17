@@ -86,7 +86,7 @@ export const githubTool = {
     })
     try {
       const user = await getCurrentUser()
-      if (!user.organizationId) {
+      if (!user.managerOSOrganizationId) {
         throw new Error(
           'User must belong to an organization to use GitHub integration'
         )
@@ -94,7 +94,7 @@ export const githubTool = {
 
       // Get user's GitHub credentials
       const credentials = await prisma.userGithubCredentials.findUnique({
-        where: { userId: user.id },
+        where: { userId: user.managerOSUserId },
       })
 
       if (!credentials) {
@@ -122,8 +122,8 @@ export const githubTool = {
 
       // If no personId provided, try to use current user's linked person
       if (!targetPersonId) {
-        if (user.personId) {
-          targetPersonId = user.personId
+        if (user.managerOSPersonId) {
+          targetPersonId = user.managerOSPersonId
         }
       }
 
@@ -134,7 +134,7 @@ export const githubTool = {
         const person = await prisma.person.findFirst({
           where: {
             id: targetPersonId,
-            organizationId: user.organizationId,
+            organizationId: user.managerOSOrganizationId,
           },
           include: {
             githubAccount: true,
@@ -147,7 +147,7 @@ export const githubTool = {
 
         if (!person.githubAccount) {
           const personName =
-            targetPersonId === user.personId ? 'You' : person.name
+            targetPersonId === user.managerOSPersonId ? 'You' : person.name
           throw new Error(
             `${personName} do not have a GitHub account linked. Please link a GitHub account first in Settings.`
           )

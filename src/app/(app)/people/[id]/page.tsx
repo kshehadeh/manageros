@@ -23,11 +23,11 @@ export default async function PersonDetailPage({
 
   const { id } = await params
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     redirect('/organization/create')
   }
 
-  const personResult = await getPersonById(id, user.organizationId)
+  const personResult = await getPersonById(id, user.managerOSOrganizationId)
 
   if (
     !personResult ||
@@ -38,10 +38,10 @@ export default async function PersonDetailPage({
   }
 
   // Get feedback count for this person (respecting privacy rules)
-  // Use user.personId directly - no need to fetch from database
+  // Use user.managerOSPersonId directly - no need to fetch from database
   const feedbackCount = await getFeedbackCountForPerson(
     personResult.id,
-    user.personId || undefined
+    user.managerOSPersonId || undefined
   )
 
   // Add level field to match Person type requirements
@@ -68,9 +68,9 @@ export default async function PersonDetailPage({
         person={personWithLevel as PersonWithDetailRelations}
         linkedAvatars={linkedAvatars}
         isAdmin={isAdmin(user)}
-        currentPersonId={user.personId || undefined}
-        organizationId={user.organizationId}
-        currentUserId={user.id}
+        currentPersonId={user.managerOSPersonId || undefined}
+        organizationId={user.managerOSOrganizationId}
+        currentUserId={user.managerOSUserId || ''}
         feedbackCount={feedbackCount}
       />
     </PersonDetailClient>

@@ -18,8 +18,6 @@ enum EmployeeType {
 
 model Organization {
   id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -29,10 +27,10 @@ model Organization {
   subscriptionPlanId  String?  // Clerk plan ID (e.g., "plan_xxxxx" or "free")
   subscriptionPlanName String? // Human-readable plan name (e.g., "Solo", "Orchestrator")
   subscriptionStatus  String?  // Active subscription status from Clerk
+  clerkOrganizationId String   @unique // Clerk organization ID (required) - name and slug are stored in Clerk
 
   // Relationships
   billingUser         User?    @relation("BillingUser", fields: [billingUserId], references: [id])
-  users               User[]
   members             OrganizationMember[]
   teams               Team[]
   people              Person[]
@@ -54,6 +52,7 @@ model Organization {
   @@index([billingUserId])
   @@index([subscriptionPlanId])
   @@index([subscriptionStatus])
+  @@index([clerkOrganizationId])
 }
 
 model User {
@@ -62,9 +61,6 @@ model User {
   name                    String
   passwordHash            String? // Optional for Clerk-managed users
   clerkUserId             String?                  @unique // Clerk user ID
-  role                    String                   @default("USER") // ADMIN, OWNER, or USER - DEPRECATED: Use OrganizationMember.role instead
-  organizationId          String? // DEPRECATED: Users can belong to multiple orgs via OrganizationMember
-  organization            Organization?            @relation(fields: [organizationId], references: [id])
   personId                String?                  @unique
   person                  Person?                  @relation(fields: [personId], references: [id])
   sentInvitations         OrganizationInvitation[]
@@ -85,7 +81,6 @@ model User {
   createdAt               DateTime                 @default(now())
   updatedAt               DateTime                 @updatedAt
 
-  @@index([organizationId])
   @@index([personId])
   @@index([clerkUserId])
 }

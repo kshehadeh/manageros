@@ -21,7 +21,7 @@ export default async function FeedbackEditPage({
 
   const { id, feedbackId } = await params
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     redirect('/organization/create')
   }
 
@@ -29,7 +29,7 @@ export default async function FeedbackEditPage({
   const currentPerson = await prisma.person.findFirst({
     where: {
       user: {
-        id: user.id,
+        id: user.managerOSUserId || '',
       },
     },
   })
@@ -42,7 +42,7 @@ export default async function FeedbackEditPage({
   const person = await prisma.person.findFirst({
     where: {
       id,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 

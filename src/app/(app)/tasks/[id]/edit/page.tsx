@@ -7,7 +7,7 @@ import { TaskForm } from '@/components/tasks/task-form'
 import { TaskDetailBreadcrumbClient } from '@/components/tasks/task-detail-breadcrumb-client'
 import { PageSection } from '@/components/ui/page-section'
 import { type TaskStatus } from '@/lib/task-status'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
 
 export default async function EditTaskPage({
   params,
@@ -16,11 +16,11 @@ export default async function EditTaskPage({
 }) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
-    redirect('/organization/create')
+  const { id } = await params
+  if (!(await getActionPermission(user, 'task.edit', id))) {
+    redirect('/dashboard')
   }
 
-  const { id } = await params
   const task = await getTask(id)
 
   if (!task) {
@@ -31,14 +31,14 @@ export default async function EditTaskPage({
   const [people, objectives] = await Promise.all([
     prisma.person.findMany({
       where: {
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId || '',
       },
       orderBy: { name: 'asc' },
     }),
     prisma.objective.findMany({
       where: {
         initiative: {
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId || '',
         },
       },
       orderBy: { title: 'asc' },

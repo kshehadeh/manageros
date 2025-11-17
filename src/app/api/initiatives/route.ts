@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Check if user belongs to an organization
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return NextResponse.json(
         { error: 'User must belong to an organization to view initiatives' },
         { status: 403 }
@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
 
     // Build where conditions for SQL query
     const whereConditions: Prisma.Sql[] = [
-      Prisma.sql`i."organizationId" = ${user.organizationId}`,
+      Prisma.sql`i."organizationId" = ${user.managerOSOrganizationId}`,
     ]
 
     // Apply search filter (immutable takes precedence)

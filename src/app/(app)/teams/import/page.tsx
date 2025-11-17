@@ -14,7 +14,7 @@ export default async function ImportTeamsPage() {
     redirect('/auth/signin')
   }
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     redirect('/organization/create')
   }
 

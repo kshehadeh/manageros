@@ -19,7 +19,7 @@ export async function createMeetingInstance(formData: MeetingInstanceFormData) {
     'meeting-instance.create'
   )
 
-  if (!hasPermission || !user.organizationId) {
+  if (!hasPermission || !user.managerOSOrganizationId) {
     throw new Error('You do not have permission to create meeting instances')
   }
 
@@ -33,7 +33,7 @@ export async function createMeetingInstance(formData: MeetingInstanceFormData) {
   const meeting = await prisma.meeting.findFirst({
     where: {
       id: validatedData.meetingId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -47,7 +47,7 @@ export async function createMeetingInstance(formData: MeetingInstanceFormData) {
     const participants = await prisma.person.findMany({
       where: {
         id: { in: participantIds },
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
     if (participants.length !== participantIds.length) {
@@ -62,7 +62,7 @@ export async function createMeetingInstance(formData: MeetingInstanceFormData) {
       scheduledAt,
       notes: validatedData.notes,
       isPrivate: meeting.isPrivate, // Inherit privacy from parent meeting
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
       participants: {
         create: validatedData.participants.map(participant => ({
           personId: participant.personId,
@@ -104,7 +104,7 @@ export async function updateMeetingInstance(
     id
   )
 
-  if (!hasPermission || !user.organizationId) {
+  if (!hasPermission || !user.managerOSOrganizationId) {
     throw new Error('You do not have permission to edit this meeting instance')
   }
 
@@ -115,7 +115,7 @@ export async function updateMeetingInstance(
   const existingInstance = await prisma.meetingInstance.findFirst({
     where: {
       id,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -134,7 +134,7 @@ export async function updateMeetingInstance(
     const participants = await prisma.person.findMany({
       where: {
         id: { in: participantIds },
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
     if (participants.length !== participantIds.length) {
@@ -190,7 +190,7 @@ export async function deleteMeetingInstance(id: string) {
     id
   )
 
-  if (!hasPermission || !user.organizationId) {
+  if (!hasPermission || !user.managerOSOrganizationId) {
     throw new Error(
       'You do not have permission to delete this meeting instance'
     )
@@ -200,7 +200,7 @@ export async function deleteMeetingInstance(id: string) {
   const meetingInstance = await prisma.meetingInstance.findFirst({
     where: {
       id,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -258,7 +258,7 @@ export async function getMeetingInstances(meetingId: string) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to view meeting instances'
     )
@@ -268,7 +268,7 @@ export async function getMeetingInstances(meetingId: string) {
   const currentPerson = await prisma.person.findFirst({
     where: {
       user: {
-        id: user.id,
+        id: user.managerOSUserId || '',
       },
     },
   })
@@ -277,10 +277,10 @@ export async function getMeetingInstances(meetingId: string) {
   const meeting = await prisma.meeting.findFirst({
     where: {
       id: meetingId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
       OR: [
         { isPrivate: false }, // Public meetings
-        { createdById: user.id }, // Private meetings created by current user
+        { createdById: user.managerOSUserId || '' }, // Private meetings created by current user
         ...(currentPerson
           ? [
               {
@@ -303,7 +303,7 @@ export async function getMeetingInstances(meetingId: string) {
   const meetingInstances = await prisma.meetingInstance.findMany({
     where: {
       meetingId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
     include: {
       participants: {
@@ -328,7 +328,7 @@ export async function addMeetingInstanceParticipant(
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to manage meeting instance participants'
     )
@@ -338,7 +338,7 @@ export async function addMeetingInstanceParticipant(
   const meetingInstance = await prisma.meetingInstance.findFirst({
     where: {
       id: meetingInstanceId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -350,7 +350,7 @@ export async function addMeetingInstanceParticipant(
   const person = await prisma.person.findFirst({
     where: {
       id: personId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -399,7 +399,7 @@ export async function updateMeetingInstanceParticipantStatus(
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to manage meeting instance participants'
     )
@@ -409,7 +409,7 @@ export async function updateMeetingInstanceParticipantStatus(
   const meetingInstance = await prisma.meetingInstance.findFirst({
     where: {
       id: meetingInstanceId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -446,7 +446,7 @@ export async function removeMeetingInstanceParticipant(
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to manage meeting instance participants'
     )
@@ -456,7 +456,7 @@ export async function removeMeetingInstanceParticipant(
   const meetingInstance = await prisma.meetingInstance.findFirst({
     where: {
       id: meetingInstanceId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -503,7 +503,7 @@ export async function importMeetingInstanceFromICS(
 ): Promise<ImportedMeetingInstanceData> {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to import meeting instances'
     )

@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
   const user = await getCurrentUser()
   try {
     // Check if user belongs to an organization
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return NextResponse.json(
         { error: 'User must belong to an organization to view teams' },
         { status: 403 }
@@ -91,14 +91,14 @@ export async function GET(request: NextRequest) {
     // Get the current user's person record for filtering
     const currentPerson = await prisma.person.findFirst({
       where: {
-        user: { id: user.id },
-        organizationId: user.organizationId,
+        user: { id: user.managerOSUserId || '' },
+        organizationId: user.managerOSOrganizationId,
       },
     })
 
     // Build where conditions for SQL query
     const whereConditions: Prisma.Sql[] = [
-      Prisma.sql`t."organizationId" = ${user.organizationId}`,
+      Prisma.sql`t."organizationId" = ${user.managerOSOrganizationId}`,
     ]
 
     // Apply search filter (immutable takes precedence)

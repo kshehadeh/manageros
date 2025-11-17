@@ -22,7 +22,7 @@ export async function createFeedbackCampaign(
 ) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to create feedback campaigns'
     )
@@ -34,9 +34,7 @@ export async function createFeedbackCampaign(
   // Get the current user's person record
   const currentPerson = await prisma.person.findFirst({
     where: {
-      user: {
-        id: user.id,
-      },
+      id: user.managerOSPersonId || '',
     },
   })
 
@@ -48,7 +46,7 @@ export async function createFeedbackCampaign(
   const targetPerson = await prisma.person.findFirst({
     where: {
       id: validatedData.targetPersonId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -69,9 +67,9 @@ export async function createFeedbackCampaign(
   }
 
   // Check organization limits before creating
-  const counts = await getOrganizationCounts(user.organizationId)
+  const counts = await getOrganizationCounts(user.managerOSOrganizationId)
   const limitCheck = await checkOrganizationLimit(
-    user.organizationId,
+    user.managerOSOrganizationId,
     'maxFeedbackCampaigns',
     counts.feedbackCampaigns
   )
@@ -87,7 +85,7 @@ export async function createFeedbackCampaign(
   const campaign = await prisma.feedbackCampaign.create({
     data: {
       name: validatedData.name,
-      userId: user.id,
+      userId: user.managerOSUserId || '',
       targetPersonId: validatedData.targetPersonId,
       templateId: validatedData.templateId,
       startDate: new Date(validatedData.startDate),
@@ -131,7 +129,7 @@ export async function updateFeedbackCampaign(
 ) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to update feedback campaigns'
     )
@@ -144,7 +142,7 @@ export async function updateFeedbackCampaign(
   const currentPerson = await prisma.person.findFirst({
     where: {
       user: {
-        id: user.id,
+        id: user.managerOSUserId || '',
       },
     },
   })
@@ -157,7 +155,7 @@ export async function updateFeedbackCampaign(
   const existingCampaign = await prisma.feedbackCampaign.findFirst({
     where: {
       id,
-      userId: user.id,
+      userId: user.managerOSUserId || '',
     },
     include: {
       targetPerson: true,
@@ -172,7 +170,7 @@ export async function updateFeedbackCampaign(
   const targetPerson = await prisma.person.findFirst({
     where: {
       id: validatedData.targetPersonId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -235,7 +233,7 @@ export async function updateFeedbackCampaign(
 export async function deleteFeedbackCampaign(id: string) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to delete feedback campaigns'
     )
@@ -245,7 +243,7 @@ export async function deleteFeedbackCampaign(id: string) {
   const existingCampaign = await prisma.feedbackCampaign.findFirst({
     where: {
       id,
-      userId: user.id,
+      userId: user.managerOSUserId || '',
     },
     include: {
       targetPerson: true,
@@ -267,7 +265,7 @@ export async function deleteFeedbackCampaign(id: string) {
 export async function getFeedbackCampaignsForPerson(personId: string) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to view feedback campaigns'
     )
@@ -277,7 +275,7 @@ export async function getFeedbackCampaignsForPerson(personId: string) {
   const currentPerson = await prisma.person.findFirst({
     where: {
       user: {
-        id: user.id,
+        id: user.managerOSUserId || '',
       },
     },
   })
@@ -290,7 +288,7 @@ export async function getFeedbackCampaignsForPerson(personId: string) {
   const person = await prisma.person.findFirst({
     where: {
       id: personId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -311,7 +309,7 @@ export async function getFeedbackCampaignsForPerson(personId: string) {
   const campaigns = await prisma.feedbackCampaign.findMany({
     where: {
       targetPersonId: personId,
-      userId: user.id,
+      userId: user.managerOSUserId || '',
     },
     include: {
       targetPerson: {
@@ -500,7 +498,7 @@ export async function updateCampaignStatus(
 ) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to update campaign status'
     )
@@ -510,7 +508,7 @@ export async function updateCampaignStatus(
   const existingCampaign = await prisma.feedbackCampaign.findFirst({
     where: {
       id,
-      userId: user.id,
+      userId: user.managerOSUserId || '',
     },
   })
 
@@ -581,7 +579,7 @@ export async function getFeedbackCampaignResponses(campaignId: string) {
   const campaign = await prisma.feedbackCampaign.findFirst({
     where: {
       id: campaignId,
-      userId: user.id, // Only allow the campaign creator to view responses
+      userId: user.managerOSUserId || '', // Only allow the campaign creator to view responses
     },
     include: {
       targetPerson: {
@@ -614,7 +612,7 @@ export async function getAllFeedbackCampaignsForOrganization() {
     throw new Error('Unauthorized')
   }
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization')
   }
 
@@ -622,7 +620,7 @@ export async function getAllFeedbackCampaignsForOrganization() {
   const currentPerson = await prisma.person.findFirst({
     where: {
       user: {
-        id: user.id,
+        id: user.managerOSUserId || '',
       },
     },
   })
@@ -634,9 +632,9 @@ export async function getAllFeedbackCampaignsForOrganization() {
   // Get all campaigns in the organization created by the current user where the current user is a manager of the target person
   const campaigns = await prisma.feedbackCampaign.findMany({
     where: {
-      userId: user.id,
+      userId: user.managerOSUserId || '',
       targetPerson: {
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     },
     include: {
@@ -700,7 +698,7 @@ export async function generateFeedbackCampaignSummary(
     throw new Error('Unauthorized')
   }
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization')
   }
 
@@ -708,7 +706,7 @@ export async function generateFeedbackCampaignSummary(
   const campaign = await prisma.feedbackCampaign.findFirst({
     where: {
       id: campaignId,
-      userId: user.id, // Only allow the campaign creator to generate summaries
+      userId: user.managerOSUserId || '', // Only allow the campaign creator to generate summaries
     },
     include: {
       targetPerson: {

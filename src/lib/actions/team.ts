@@ -19,11 +19,11 @@ import {
 export async function getTeams() {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return []
     }
     return await prisma.team.findMany({
-      where: { organizationId: user.organizationId },
+      where: { organizationId: user.managerOSOrganizationId },
       orderBy: { name: 'asc' },
     })
   } catch (error) {
@@ -39,11 +39,11 @@ export async function getTeams() {
 export async function getAllTeamsWithRelations(): Promise<TeamWithCounts[]> {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return []
     }
     return await prisma.team.findMany({
-      where: { organizationId: user.organizationId },
+      where: { organizationId: user.managerOSOrganizationId },
       include: {
         parent: {
           select: {
@@ -110,11 +110,11 @@ export async function getTeamHierarchy(
 export async function getCompleteTeamHierarchy(): Promise<TeamWithHierarchy[]> {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return []
     }
 
-    return await getTeamHierarchy(user.organizationId, null)
+    return await getTeamHierarchy(user.managerOSOrganizationId || '', null)
   } catch (error) {
     console.error('Error fetching team hierarchy:', error)
     return []
@@ -130,13 +130,13 @@ export async function getTeamHierarchyOptimized(): Promise<
 > {
   const user = await getCurrentUser()
   try {
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return []
     }
 
     // Fetch all teams for the organization in a single query
     const allTeams = await prisma.team.findMany({
-      where: { organizationId: user.organizationId },
+      where: { organizationId: user.managerOSOrganizationId },
       include: {
         people: true,
         initiatives: true,
@@ -181,19 +181,19 @@ export async function createTeam(formData: TeamFormData) {
   const user = await getCurrentUser()
 
   // Additional validation
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     console.error('❌ User has no organizationId!', user)
     throw new Error('User is not associated with an organization')
   }
 
   // Verify organization exists
   const organization = await prisma.organization.findUnique({
-    where: { id: user.organizationId },
+    where: { id: user.managerOSOrganizationId },
   })
 
   if (!organization) {
     console.error('❌ Organization not found!', {
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     })
     throw new Error('Organization not found')
   }
@@ -206,7 +206,7 @@ export async function createTeam(formData: TeamFormData) {
     const parentTeam = await prisma.team.findFirst({
       where: {
         id: validatedData.parentId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
 
@@ -216,9 +216,9 @@ export async function createTeam(formData: TeamFormData) {
   }
 
   // Check organization limits before creating
-  const counts = await getOrganizationCounts(user.organizationId)
+  const counts = await getOrganizationCounts(user.managerOSOrganizationId)
   const limitCheck = await checkOrganizationLimit(
-    user.organizationId,
+    user.managerOSOrganizationId,
     'maxTeams',
     counts.teams
   )
@@ -236,7 +236,7 @@ export async function createTeam(formData: TeamFormData) {
         validatedData.avatar && validatedData.avatar.trim() !== ''
           ? validatedData.avatar
           : null,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
       parentId:
         validatedData.parentId && validatedData.parentId.trim() !== ''
           ? validatedData.parentId
@@ -261,7 +261,7 @@ export async function updateTeam(id: string, formData: TeamFormData) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to update teams')
   }
 
@@ -272,7 +272,7 @@ export async function updateTeam(id: string, formData: TeamFormData) {
   const existingTeam = await prisma.team.findFirst({
     where: {
       id,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
   if (!existingTeam) {
@@ -289,7 +289,7 @@ export async function updateTeam(id: string, formData: TeamFormData) {
     const parentTeam = await prisma.team.findFirst({
       where: {
         id: validatedData.parentId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
 
@@ -332,7 +332,7 @@ export async function deleteTeam(id: string) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to delete teams')
   }
 
@@ -340,7 +340,7 @@ export async function deleteTeam(id: string) {
   const existingTeam = await prisma.team.findFirst({
     where: {
       id,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
     include: {
       people: true,
@@ -385,13 +385,13 @@ export async function deleteTeam(id: string) {
 export async function getTeam(id: string): Promise<TeamWithRelations | null> {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return null
     }
     return await prisma.team.findFirst({
       where: {
         id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
       include: {
         people: true,
@@ -411,12 +411,12 @@ export async function getTeamsForSelection(
 ): Promise<TeamForSelection[]> {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return []
     }
     return await prisma.team.findMany({
       where: {
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
         ...(excludeId && { id: { not: excludeId } }),
       },
       select: {

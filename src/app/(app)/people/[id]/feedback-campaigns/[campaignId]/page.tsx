@@ -43,7 +43,7 @@ export default async function FeedbackCampaignDetailPage({
 
   const { id, campaignId } = await params
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     redirect('/organization/create')
   }
 
@@ -51,7 +51,7 @@ export default async function FeedbackCampaignDetailPage({
   const person = await prisma.person.findFirst({
     where: {
       id,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
     select: {
       id: true,
@@ -68,7 +68,7 @@ export default async function FeedbackCampaignDetailPage({
   const currentPerson = await prisma.person.findFirst({
     where: {
       user: {
-        id: user.id,
+        id: user.managerOSUserId || '',
       },
     },
   })
@@ -89,7 +89,7 @@ export default async function FeedbackCampaignDetailPage({
     where: {
       id: campaignId,
       targetPersonId: id,
-      userId: user.id,
+      userId: user.managerOSUserId || '',
     },
     include: {
       template: {

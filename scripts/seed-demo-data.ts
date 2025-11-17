@@ -2,9 +2,46 @@
 /* eslint-disable camelcase */
 
 import { PrismaClient, EmployeeType, Person } from '@prisma/client'
-import bcrypt from 'bcryptjs'
+import {
+  createClerkOrganization,
+  deleteClerkOrganization,
+  addUserToClerkOrganization,
+} from '../src/lib/clerk-organization-utils'
+import { getClerkHelper } from '../tests/setup/clerk-helpers'
 
 const prisma = new PrismaClient()
+const CLERK_API_BASE = 'https://api.clerk.com/v1'
+
+// Helper to get Clerk organization by slug
+async function getClerkOrganizationBySlug(
+  slug: string
+): Promise<{ id: string; name: string; slug: string } | null> {
+  if (!process.env.CLERK_SECRET_KEY) {
+    return null
+  }
+
+  try {
+    const response = await fetch(
+      `${CLERK_API_BASE}/organizations?slug=${encodeURIComponent(slug)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
+        },
+      }
+    )
+
+    if (!response.ok) {
+      return null
+    }
+
+    const data = (await response.json()) as {
+      data: Array<{ id: string; name: string; slug: string }>
+    }
+    return data.data && data.data.length > 0 ? data.data[0] : null
+  } catch {
+    return null
+  }
+}
 
 // Helper functions for generating relative dates
 const getRelativeDate = (daysOffset: number): Date => {
@@ -189,176 +226,205 @@ const sampleData = {
 async function seedDemoData() {
   console.log('🌱 Starting demo data seeding for Acme organization...\n')
 
-  try {
-    // Step 0: Clear existing demo data for Acme
-    console.log('🧹 Cleaning up existing demo data...')
-    const acmeOrg = await prisma.organization.findUnique({
-      where: { slug: 'acme-corp' },
-    })
+  const clerkHelper = getClerkHelper()
+  const DEMO_ORG_SLUG = 'acme-corp'
+  const DEMO_ORG_NAME = 'Acme Corp'
+  const DEMO_PASSWORD = 'password123'
 
-    if (acmeOrg) {
-      // Delete in dependency order
-      await prisma.meetingInstanceParticipant.deleteMany({
-        where: { meetingInstance: { organizationId: acmeOrg.id } },
-      })
-      await prisma.meetingInstance.deleteMany({
-        where: { organizationId: acmeOrg.id },
-      })
-      await prisma.meetingParticipant.deleteMany({
-        where: { meeting: { organizationId: acmeOrg.id } },
-      })
-      await prisma.meeting.deleteMany({
-        where: { organizationId: acmeOrg.id },
-      })
-      await prisma.feedback.deleteMany({
-        where: { about: { organizationId: acmeOrg.id } },
-      })
-      await prisma.oneOnOne.deleteMany({
-        where: { manager: { organizationId: acmeOrg.id } },
-      })
-      await prisma.task.deleteMany({
-        where: { createdBy: { organizationId: acmeOrg.id } },
-      })
-      await prisma.checkIn.deleteMany({
-        where: { initiative: { organizationId: acmeOrg.id } },
-      })
-      await prisma.objective.deleteMany({
-        where: { initiative: { organizationId: acmeOrg.id } },
-      })
-      await prisma.initiativeOwner.deleteMany({
-        where: { initiative: { organizationId: acmeOrg.id } },
-      })
-      await prisma.initiative.deleteMany({
-        where: { organizationId: acmeOrg.id },
-      })
-      await prisma.person.deleteMany({
-        where: { organizationId: acmeOrg.id },
-      })
-      await prisma.team.deleteMany({
-        where: { organizationId: acmeOrg.id },
-      })
-      await prisma.jobRole.deleteMany({
-        where: { organizationId: acmeOrg.id },
-      })
-      await prisma.jobLevel.deleteMany({
-        where: { organizationId: acmeOrg.id },
-      })
-      await prisma.jobDomain.deleteMany({
-        where: { organizationId: acmeOrg.id },
-      })
-      await prisma.organizationMember.deleteMany({
-        where: { organizationId: acmeOrg.id },
-      })
-      console.log(`✓ Cleaned up existing data\n`)
+  try {
+    // Step 0: Clean up existing Clerk data
+    console.log('🧹 Cleaning up existing Clerk data...')
+
+    // Delete existing Clerk users
+    const demoUserEmails = ['admin@acme.com', 'demo@acme.com', 'owner@acme.com']
+    for (const email of demoUserEmails) {
+      try {
+        await clerkHelper.deleteUserByEmail(email)
+        console.log(`  ✓ Deleted Clerk user: ${email}`)
+      } catch {
+        // User might not exist, that's fine
+        console.log(`  ℹ Clerk user not found: ${email}`)
+      }
     }
 
-    // Step 1: Ensure Acme organization exists
-    console.log('📦 Setting up organization...')
-    const organization = await prisma.organization.upsert({
-      where: { slug: 'acme-corp' },
-      update: {},
-      create: {
-        name: 'Acme Corp',
-        slug: 'acme-corp',
+    // Find and delete existing Clerk organization
+    const existingClerkOrg = await getClerkOrganizationBySlug(DEMO_ORG_SLUG)
+    if (existingClerkOrg) {
+      try {
+        await deleteClerkOrganization(existingClerkOrg.id)
+        console.log(`  ✓ Deleted Clerk organization: ${existingClerkOrg.name}`)
+      } catch (error) {
+        console.warn(`  ⚠ Failed to delete Clerk organization: ${error}`)
+      }
+    }
+
+    // Clean up database organization if it exists
+    const existingDbOrg = await prisma.organization.findFirst({
+      where: {
+        OR: [
+          { clerkOrganizationId: existingClerkOrg?.id || '' },
+          { clerkOrganizationId: { contains: 'acme' } },
+        ],
+      },
+    })
+
+    if (existingDbOrg) {
+      // Delete in dependency order
+      await prisma.meetingInstanceParticipant.deleteMany({
+        where: { meetingInstance: { organizationId: existingDbOrg.id } },
+      })
+      await prisma.meetingInstance.deleteMany({
+        where: { organizationId: existingDbOrg.id },
+      })
+      await prisma.meetingParticipant.deleteMany({
+        where: { meeting: { organizationId: existingDbOrg.id } },
+      })
+      await prisma.meeting.deleteMany({
+        where: { organizationId: existingDbOrg.id },
+      })
+      await prisma.feedback.deleteMany({
+        where: { about: { organizationId: existingDbOrg.id } },
+      })
+      await prisma.oneOnOne.deleteMany({
+        where: { manager: { organizationId: existingDbOrg.id } },
+      })
+      await prisma.task.deleteMany({
+        where: {
+          OR: [
+            { initiative: { organizationId: existingDbOrg.id } },
+            { objective: { initiative: { organizationId: existingDbOrg.id } } },
+          ],
+        },
+      })
+      await prisma.checkIn.deleteMany({
+        where: { initiative: { organizationId: existingDbOrg.id } },
+      })
+      await prisma.objective.deleteMany({
+        where: { initiative: { organizationId: existingDbOrg.id } },
+      })
+      await prisma.initiativeOwner.deleteMany({
+        where: { initiative: { organizationId: existingDbOrg.id } },
+      })
+      await prisma.initiative.deleteMany({
+        where: { organizationId: existingDbOrg.id },
+      })
+      await prisma.person.deleteMany({
+        where: { organizationId: existingDbOrg.id },
+      })
+      await prisma.team.deleteMany({
+        where: { organizationId: existingDbOrg.id },
+      })
+      await prisma.jobRole.deleteMany({
+        where: { organizationId: existingDbOrg.id },
+      })
+      await prisma.jobLevel.deleteMany({
+        where: { organizationId: existingDbOrg.id },
+      })
+      await prisma.jobDomain.deleteMany({
+        where: { organizationId: existingDbOrg.id },
+      })
+      await prisma.user.deleteMany({
+        where: {
+          email: { in: demoUserEmails },
+        },
+      })
+      await prisma.organization.delete({
+        where: { id: existingDbOrg.id },
+      })
+      console.log(`  ✓ Cleaned up existing database data\n`)
+    } else {
+      console.log(`  ℹ No existing database organization found\n`)
+    }
+
+    // Step 1: Create Clerk organization
+    console.log('📦 Creating Clerk organization...')
+    const clerkOrg = await createClerkOrganization(DEMO_ORG_NAME, DEMO_ORG_SLUG)
+    console.log(
+      `✓ Created Clerk organization: ${clerkOrg.name} (${clerkOrg.id})\n`
+    )
+
+    // Step 2: Create Clerk users
+    console.log('👥 Creating Clerk users...')
+    const ownerClerkUser = await clerkHelper.createTestUser(
+      'owner@acme.com',
+      'Owner User',
+      DEMO_PASSWORD
+    )
+    const adminClerkUser = await clerkHelper.createTestUser(
+      'admin@acme.com',
+      'Admin User',
+      DEMO_PASSWORD
+    )
+    const demoClerkUser = await clerkHelper.createTestUser(
+      'demo@acme.com',
+      'Demo User',
+      DEMO_PASSWORD
+    )
+    console.log(`✓ Created 3 Clerk users\n`)
+
+    // Step 3: Add users to Clerk organization with appropriate roles
+    console.log('🔗 Adding users to Clerk organization...')
+    await addUserToClerkOrganization(
+      clerkOrg.id,
+      ownerClerkUser.id,
+      'org:admin'
+    )
+    await addUserToClerkOrganization(
+      clerkOrg.id,
+      adminClerkUser.id,
+      'org:admin'
+    )
+    await addUserToClerkOrganization(
+      clerkOrg.id,
+      demoClerkUser.id,
+      'org:member'
+    )
+    console.log(`✓ Added users to Clerk organization\n`)
+
+    // Step 4: Create database organization
+    console.log('📦 Creating database organization...')
+    const organization = await prisma.organization.create({
+      data: {
+        clerkOrganizationId: clerkOrg.id,
+        billingUserId: null, // Will be set after creating owner user
         description: 'Demo organization with comprehensive sample data',
       },
     })
-    console.log(`✓ Organization: ${organization.name}\n`)
+    console.log(`✓ Created database organization: ${organization.id}\n`)
 
-    // Step 2: Create users for the organization
-    console.log('👥 Creating users...')
-    const passwordHash = await bcrypt.hash('trw_yjr8jme.vek4AEG', 12)
-
-    const adminUser = await prisma.user.upsert({
-      where: { email: 'admin@acme.com' },
-      update: {},
-      create: {
-        email: 'admin@acme.com',
-        name: 'Admin User',
-        passwordHash,
-        role: 'ADMIN', // Keep for backward compatibility
-        organizationId: organization.id, // Keep for backward compatibility
-      },
-    })
-
-    const regularUser = await prisma.user.upsert({
-      where: { email: 'demo@acme.com' },
-      update: {},
-      create: {
-        email: 'demo@acme.com',
-        name: 'Demo User',
-        passwordHash,
-        role: 'USER', // Keep for backward compatibility
-        organizationId: organization.id, // Keep for backward compatibility
-      },
-    })
-
-    const ownerUser = await prisma.user.upsert({
-      where: { email: 'owner@acme.com' },
-      update: {},
-      create: {
+    // Step 5: Create database users linked to Clerk users
+    console.log('👥 Creating database users...')
+    const ownerUser = await prisma.user.create({
+      data: {
         email: 'owner@acme.com',
         name: 'Owner User',
-        passwordHash,
-        role: 'OWNER', // Keep for backward compatibility
-        organizationId: organization.id, // Keep for backward compatibility
+        clerkUserId: ownerClerkUser.id,
       },
     })
 
-    // Create OrganizationMember records for the users
-
-    await prisma.organizationMember.upsert({
-      where: {
-        userId_organizationId: {
-          userId: adminUser.id,
-          organizationId: organization.id,
-        },
-      },
-      update: {
-        role: 'ADMIN',
-      },
-      create: {
-        userId: adminUser.id,
-        organizationId: organization.id,
-        role: 'ADMIN',
+    const adminUser = await prisma.user.create({
+      data: {
+        email: 'admin@acme.com',
+        name: 'Admin User',
+        clerkUserId: adminClerkUser.id,
       },
     })
 
-    await prisma.organizationMember.upsert({
-      where: {
-        userId_organizationId: {
-          userId: regularUser.id,
-          organizationId: organization.id,
-        },
-      },
-      update: {
-        role: 'USER',
-      },
-      create: {
-        userId: regularUser.id,
-        organizationId: organization.id,
-        role: 'USER',
+    const regularUser = await prisma.user.create({
+      data: {
+        email: 'demo@acme.com',
+        name: 'Demo User',
+        clerkUserId: demoClerkUser.id,
       },
     })
 
-    await prisma.organizationMember.upsert({
-      where: {
-        userId_organizationId: {
-          userId: ownerUser.id,
-          organizationId: organization.id,
-        },
-      },
-      update: {
-        role: 'OWNER',
-      },
-      create: {
-        userId: ownerUser.id,
-        organizationId: organization.id,
-        role: 'OWNER',
-      },
+    // Set owner as billing user
+    await prisma.organization.update({
+      where: { id: organization.id },
+      data: { billingUserId: ownerUser.id },
     })
 
-    console.log(`✓ Created ${3} users with organization memberships\n`)
+    console.log(`✓ Created 3 database users\n`)
 
     // Step 3: Create job levels
     console.log('📊 Creating job levels and domains...')
@@ -953,8 +1019,9 @@ async function seedDemoData() {
     // Summary
     console.log('✨ Demo data seeding completed successfully!\n')
     console.log('📊 Summary of created data:')
-    console.log(`   - Organization: 1 (${organization.name})`)
-    console.log(`   - Users: 3`)
+    console.log(`   - Clerk Organization: ${clerkOrg.name} (${clerkOrg.slug})`)
+    console.log(`   - Database Organization: ${organization.id}`)
+    console.log(`   - Users: 3 (all linked to Clerk)`)
     console.log(`   - Teams: ${teams.length}`)
     console.log(`   - People: ${people.length}`)
     console.log(`   - Job Roles: ${jobRoles.length}`)
@@ -964,12 +1031,10 @@ async function seedDemoData() {
     console.log(`   - One-on-ones: ${oneOnOnes.length}`)
     console.log(`   - Feedback: ${feedbackCount}`)
     console.log(`   - Meetings: ${meetingCount}`)
-    console.log(`\nLogin credentials:`)
-    console.log(
-      `   Owner: owner@acme.com / password123 (not linked to a person)`
-    )
-    console.log(`   Admin: admin@acme.com / password123`)
-    console.log(`   User: demo@acme.com / password123`)
+    console.log(`\nLogin credentials (all passwords: ${DEMO_PASSWORD}):`)
+    console.log(`   Owner: owner@acme.com (org:admin, billing user)`)
+    console.log(`   Admin: admin@acme.com (org:admin)`)
+    console.log(`   User: demo@acme.com (org:member)`)
   } catch (error) {
     console.error('❌ Error seeding demo data:', error)
     throw error

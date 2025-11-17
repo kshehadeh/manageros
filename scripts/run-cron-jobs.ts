@@ -104,12 +104,14 @@ async function runSpecificJob(options: RunOptions) {
   } else {
     // Run for all organizations
     const organizations = await prisma.organization.findMany({
-      select: { id: true, name: true },
+      select: { id: true, clerkOrganizationId: true },
     })
 
     for (const org of organizations) {
       if (verbose) {
-        console.log(`Processing organization: ${org.name} (${org.id})`)
+        console.log(
+          `Processing organization: ${org.clerkOrganizationId} (${org.id})`
+        )
       }
 
       await runJobForOrganization(jobId, job.name, org.id, verbose || false)
@@ -138,12 +140,14 @@ async function runAllJobs(options: RunOptions) {
   } else {
     // Run all jobs for all organizations
     const organizations = await prisma.organization.findMany({
-      select: { id: true, name: true },
+      select: { id: true, clerkOrganizationId: true },
     })
 
     for (const org of organizations) {
       if (verbose) {
-        console.log(`Processing organization: ${org.name} (${org.id})`)
+        console.log(
+          `Processing organization: ${org.clerkOrganizationId} (${org.id})`
+        )
       }
 
       const jobs = cronJobRegistry.getAllJobs()

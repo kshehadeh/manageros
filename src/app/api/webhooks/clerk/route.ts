@@ -108,14 +108,12 @@ export async function POST(req: Request) {
               email: email.toLowerCase(),
               name,
               clerkUserId: id,
-              role: 'USER',
-              organizationId: pendingInvitation?.organization.id || null,
             },
           })
           createdOrUpdatedUserId = newUser.id
         }
 
-        // If there's a pending invitation, mark it as accepted and create OrganizationMember
+        // If there's a pending invitation, mark it as accepted
         if (pendingInvitation) {
           await tx.organizationInvitation.update({
             where: { id: pendingInvitation.id },
@@ -125,30 +123,85 @@ export async function POST(req: Request) {
             },
           })
 
-          // Create OrganizationMember record
-          await tx.organizationMember.upsert({
-            where: {
-              userId_organizationId: {
-                userId: createdOrUpdatedUserId,
-                organizationId: pendingInvitation.organization.id,
-              },
-            },
-            create: {
-              userId: createdOrUpdatedUserId,
-              organizationId: pendingInvitation.organization.id,
-              role: 'USER',
-            },
-            update: {
-              role: 'USER', // Ensure role is USER for invited users
+          // Get organization with Clerk org ID
+          const org = await tx.organization.findUnique({
+            where: { id: pendingInvitation.organization.id },
+            select: {
+              id: true,
+              clerkOrganizationId: true,
             },
           })
+
+          // Store org info for adding to Clerk org after transaction
+          if (org) {
+            // We'll add the user to Clerk org after the transaction completes
+            // Store this info temporarily
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ;(pendingInvitation.organization as any).clerkOrgId =
+              org.clerkOrganizationId
+          }
         }
 
         console.log('Created or updated user ID:', createdOrUpdatedUserId)
       })
 
+      // Add user to Clerk organization if they were invited
+      if (
+        pendingInvitation &&
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (pendingInvitation.organization as any).clerkOrgId
+      ) {
+        try {
+          const { addUserToClerkOrganization, mapManagerOSRoleToClerkRole } =
+            await import('@/lib/clerk-organization-utils')
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const clerkOrgId = (pendingInvitation.organization as any).clerkOrgId
+          if (clerkOrgId) {
+            await addUserToClerkOrganization(
+              clerkOrgId,
+              id,
+              await mapManagerOSRoleToClerkRole('USER')
+            )
+          }
+        } catch (error) {
+          console.error(
+            'Failed to add user to Clerk organization in webhook:',
+            error
+          )
+          // Don't fail the webhook - user is already in ManagerOS org
+        }
+      }
+
       // Sync user data to Clerk metadata (for JWT token inclusion)
-      await syncUserDataToClerk(id)
+      // Fetch user to construct UserBrief
+      const userForSync = await prisma.user.findUnique({
+        where: { clerkUserId: id },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          clerkUserId: true,
+          personId: true,
+        },
+      })
+      if (userForSync) {
+        const org = pendingInvitation
+          ? await prisma.organization.findUnique({
+              where: { id: pendingInvitation.organization.id },
+              select: { clerkOrganizationId: true },
+            })
+          : null
+        await syncUserDataToClerk({
+          managerOSUserId: userForSync.id,
+          email: userForSync.email,
+          name: userForSync.name,
+          clerkUserId: userForSync.clerkUserId || '',
+          clerkOrganizationId: org?.clerkOrganizationId || null,
+          managerOSOrganizationId: pendingInvitation?.organization.id || null,
+          managerOSPersonId: userForSync.personId,
+          role: 'user', // Default role, will be updated by Clerk session claims
+        })
+      }
 
       return new Response('User created/linked successfully', { status: 200 })
     } catch (error) {
@@ -185,13 +238,32 @@ export async function POST(req: Request) {
         updateData.email = email.toLowerCase()
       }
 
-      await prisma.user.update({
+      const updatedUser = await prisma.user.update({
         where: { clerkUserId: id },
         data: updateData,
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          clerkUserId: true,
+          personId: true,
+        },
       })
 
       // Sync updated user data to Clerk metadata
-      await syncUserDataToClerk(id)
+      if (updatedUser) {
+        // Note: organization info would need to come from Clerk session claims
+        await syncUserDataToClerk({
+          managerOSUserId: updatedUser.id,
+          email: updatedUser.email,
+          name: updatedUser.name,
+          clerkUserId: updatedUser.clerkUserId || '',
+          clerkOrganizationId: null, // Will be set from Clerk session
+          managerOSOrganizationId: null, // Will be set from Clerk session
+          managerOSPersonId: updatedUser.personId,
+          role: 'user', // Will be updated by Clerk session claims
+        })
+      }
 
       return new Response('User updated successfully', { status: 200 })
     } catch (error) {
@@ -227,42 +299,59 @@ export async function POST(req: Request) {
     eventType === 'subscription.created' ||
     eventType === 'subscription.updated'
   ) {
-    const { user_id, plan_id, plan_name, status } = evt.data as {
-      user_id?: string
-      plan_id?: string
-      plan_name?: string
-      status?: string
-    }
-
-    if (!user_id) {
-      return new Response('Missing user ID in subscription webhook', {
-        status: 400,
-      })
-    }
-
-    try {
-      // Find the user by Clerk user ID
-      const user = await prisma.user.findUnique({
-        where: { clerkUserId: user_id },
-      })
-
-      if (!user) {
-        console.warn(
-          `User not found for Clerk user ID ${user_id} in subscription webhook`
-        )
-        return new Response('User not found', { status: 404 })
+    const { user_id, organization_id, plan_id, plan_name, status } =
+      evt.data as {
+        user_id?: string
+        organization_id?: string
+        plan_id?: string
+        plan_name?: string
+        status?: string
       }
 
-      // Find organization where this user is the billing user
-      const organization = await prisma.organization.findFirst({
-        where: { billingUserId: user.id },
-      })
+    try {
+      let organization = null
 
-      if (!organization) {
-        console.warn(
-          `No organization found with billingUserId ${user.id} for subscription webhook`
+      // Priority 1: If organization_id is present, this is an organization subscription
+      if (organization_id) {
+        organization = await prisma.organization.findUnique({
+          where: { clerkOrganizationId: organization_id },
+        })
+
+        if (!organization) {
+          console.warn(
+            `No organization found with clerkOrganizationId ${organization_id} for subscription webhook`
+          )
+          return new Response('Organization not found', { status: 404 })
+        }
+      } else if (user_id) {
+        // Priority 2: Fallback to user-based lookup (for backward compatibility)
+        const user = await prisma.user.findUnique({
+          where: { clerkUserId: user_id },
+        })
+
+        if (!user) {
+          console.warn(
+            `User not found for Clerk user ID ${user_id} in subscription webhook`
+          )
+          return new Response('User not found', { status: 404 })
+        }
+
+        // Find organization where this user is the billing user
+        organization = await prisma.organization.findFirst({
+          where: { billingUserId: user.id },
+        })
+
+        if (!organization) {
+          console.warn(
+            `No organization found with billingUserId ${user.id} for subscription webhook`
+          )
+          return new Response('Organization not found', { status: 404 })
+        }
+      } else {
+        return new Response(
+          'Missing user_id or organization_id in subscription webhook',
+          { status: 400 }
         )
-        return new Response('Organization not found', { status: 404 })
       }
 
       // Update organization subscription information
@@ -282,38 +371,59 @@ export async function POST(req: Request) {
     }
   }
 
-  if (eventType === 'subscriptionItem.canceled') {
-    const { user_id } = evt.data as { user_id?: string }
+  // Organization membership webhooks are no longer needed since Clerk is the source of truth
+  // Membership is managed directly through Clerk API calls
 
-    if (!user_id) {
-      return new Response('Missing user ID in subscription webhook', {
-        status: 400,
-      })
+  if (eventType === 'subscriptionItem.canceled') {
+    const { user_id, organization_id } = evt.data as {
+      user_id?: string
+      organization_id?: string
     }
 
     try {
-      // Find the user by Clerk user ID
-      const user = await prisma.user.findUnique({
-        where: { clerkUserId: user_id },
-      })
+      let organization = null
 
-      if (!user) {
-        console.warn(
-          `User not found for Clerk user ID ${user_id} in subscription cancellation webhook`
+      // Priority 1: If organization_id is present, this is an organization subscription
+      if (organization_id) {
+        organization = await prisma.organization.findUnique({
+          where: { clerkOrganizationId: organization_id },
+        })
+
+        if (!organization) {
+          console.warn(
+            `No organization found with clerkOrganizationId ${organization_id} for subscription cancellation webhook`
+          )
+          return new Response('Organization not found', { status: 404 })
+        }
+      } else if (user_id) {
+        // Priority 2: Fallback to user-based lookup (for backward compatibility)
+        const user = await prisma.user.findUnique({
+          where: { clerkUserId: user_id },
+        })
+
+        if (!user) {
+          console.warn(
+            `User not found for Clerk user ID ${user_id} in subscription cancellation webhook`
+          )
+          return new Response('User not found', { status: 404 })
+        }
+
+        // Find organization where this user is the billing user
+        organization = await prisma.organization.findFirst({
+          where: { billingUserId: user.id },
+        })
+
+        if (!organization) {
+          console.warn(
+            `No organization found with billingUserId ${user.id} for subscription cancellation webhook`
+          )
+          return new Response('Organization not found', { status: 404 })
+        }
+      } else {
+        return new Response(
+          'Missing user_id or organization_id in subscription cancellation webhook',
+          { status: 400 }
         )
-        return new Response('User not found', { status: 404 })
-      }
-
-      // Find organization where this user is the billing user
-      const organization = await prisma.organization.findFirst({
-        where: { billingUserId: user.id },
-      })
-
-      if (!organization) {
-        console.warn(
-          `No organization found with billingUserId ${user.id} for subscription cancellation webhook`
-        )
-        return new Response('Organization not found', { status: 404 })
       }
 
       // Update organization subscription status to canceled

@@ -26,11 +26,11 @@ export default async function MeetingInstanceDetailPage({
 }) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
-    redirect('/organization/create')
+  const { instanceId } = await params
+  if (!(await getActionPermission(user, 'meeting-instance.view', instanceId))) {
+    redirect('/dashboard')
   }
 
-  const { instanceId } = await params
   const [meetingInstance, entityLinks] = await Promise.all([
     getMeetingInstance(instanceId),
     getEntityLinks('MeetingInstance', instanceId),

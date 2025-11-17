@@ -89,7 +89,7 @@ export const feedbackTool = {
 
     try {
       const user = await getCurrentUser()
-      if (!user.organizationId) {
+      if (!user.managerOSOrganizationId) {
         throw new Error(
           'User must belong to an organization to search feedback'
         )
@@ -99,7 +99,7 @@ export const feedbackTool = {
       const currentPerson = await prisma.person.findFirst({
         where: {
           user: {
-            id: user.id,
+            id: user.managerOSUserId,
           },
         },
       })
@@ -139,7 +139,7 @@ export const feedbackTool = {
             { fromId: currentPerson.id }, // Private feedback by current user
           ],
           about: {
-            organizationId: user.organizationId, // Ensure about person is in same org
+            organizationId: user.managerOSOrganizationId, // Ensure about person is in same org
           },
         }
 
@@ -165,7 +165,7 @@ export const feedbackTool = {
               contains: fromPersonName,
               mode: 'insensitive',
             },
-            organizationId: user.organizationId,
+            organizationId: user.managerOSOrganizationId,
           } as Prisma.PersonWhereInput
         }
 
@@ -224,9 +224,9 @@ export const feedbackTool = {
       if (includeCampaigns) {
         // Build where clause for feedback campaigns
         const campaignWhere: Prisma.FeedbackCampaignWhereInput = {
-          userId: user.id, // Only campaigns created by current user
+          userId: user.managerOSUserId, // Only campaigns created by current user
           targetPerson: {
-            organizationId: user.organizationId, // Ensure target person is in same org
+            organizationId: user.managerOSOrganizationId, // Ensure target person is in same org
           },
         }
 

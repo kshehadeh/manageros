@@ -13,19 +13,19 @@ export const currentUserTool = {
       throw new Error('User not authenticated')
     }
 
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       throw new Error('User must belong to an organization')
     }
 
-    if (!user.personId) {
+    if (!user.managerOSPersonId) {
       throw new Error('User is not linked to a person record')
     }
 
     // Get the person record linked to this user
     const person = await prisma.person.findFirst({
       where: {
-        id: user.personId,
-        organizationId: user.organizationId,
+        id: user.managerOSPersonId,
+        organizationId: user.managerOSOrganizationId,
       },
       include: {
         manager: {
@@ -66,10 +66,10 @@ export const currentUserTool = {
 
     return {
       user: {
-        id: user.id,
+        id: user.managerOSUserId,
         email: user.email,
         role: user.role,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
       person: {
         id: person.id,

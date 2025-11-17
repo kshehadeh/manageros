@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { useUser } from '@clerk/nextjs'
 import { Command as CommandPrimitive } from 'cmdk'
 import { Search } from 'lucide-react'
 import {
@@ -24,7 +23,8 @@ import {
 import { coreCommandSource } from './sources/core'
 import { searchCommandSource } from './sources/search'
 import { useDebounce } from '@/hooks/use-debounce'
-import { getCurrentUserWithPerson } from '@/lib/actions/organization'
+import { UserBrief, OrganizationBrief } from '@/lib/auth-types'
+import { PersonBrief } from '@/types/person'
 
 const sources: CommandSource[] = [coreCommandSource, searchCommandSource]
 
@@ -40,27 +40,27 @@ const SEARCH_ENTITY_TYPES = [
 
 type SearchEntityType = (typeof SEARCH_ENTITY_TYPES)[number]
 
-export function CommandPalette() {
+export function CommandPalette({
+  user,
+  person,
+  organization,
+}: {
+  user: UserBrief
+  person: PersonBrief | null
+  organization: OrganizationBrief | null
+}) {
   const { isOpen, setOpen } = useCommandPalette()
   const router = useRouter()
   const pathname = usePathname()
-  const { user, isLoaded } = useUser()
   const [query, setQuery] = useState('')
   const [items, setItems] = useState<CommandItemDescriptor[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [currentSearchEntity, setCurrentSearchEntity] =
     useState<SearchEntityType | null>(null)
-  const [currentUserPersonId, setCurrentUserPersonId] = useState<
-    string | undefined
-  >()
 
   // Debounce the search query to avoid frequent API calls
   const debouncedQuery = useDebounce(query, 300)
 
-  const [userData, setUserData] = useState<{
-    role?: string
-    organizationId?: string | null
-  } | null>(null)
   const [permissions, setPermissions] = useState<CommandPermissions | null>(
     null
   )
@@ -70,29 +70,23 @@ export function CommandPalette() {
 
   // Fetch current user's person ID, role, and permissions when user is available
   useEffect(() => {
-    if (!isLoaded || !user) return
+    if (!user) return
 
     const fetchCurrentUserData = async () => {
       try {
-        const [personData, userDataRes, permissionsRes] = await Promise.all([
-          getCurrentUserWithPerson(),
-          fetch('/api/user/current').then(res => res.json()),
-          fetch('/api/command-palette/permissions').then(res => res.json()),
-        ])
-        setCurrentUserPersonId(personData.person?.id)
-        setUserData(userDataRes.user)
-        if (permissionsRes.permissions) {
+        const permissionsRes = await fetch(
+          '/api/command-palette/permissions'
+        ).then(res => res.json())
+        if (permissionsRes?.permissions) {
           setPermissions(permissionsRes.permissions)
         }
       } catch (error) {
-        console.error('Failed to fetch current user data:', error)
-        setCurrentUserPersonId(undefined)
+        console.error('Failed to fetch permissions:', error)
         setPermissions(null)
       }
     }
-
     fetchCurrentUserData()
-  }, [isLoaded, user])
+  }, [user])
 
   // Rotate through entity types during search to show progress
   useEffect(() => {
@@ -128,16 +122,15 @@ export function CommandPalette() {
     async function run() {
       setIsLoading(true)
       try {
-        const userRole = userData?.role
         const all = await Promise.all(
           sources.map(s =>
             s.getItems(
               debouncedQuery,
-              userRole,
+              user?.role || undefined,
               pathname,
-              currentUserPersonId,
+              person?.id,
               permissions || undefined,
-              userData?.organizationId
+              organization?.id
             )
           )
         )
@@ -156,10 +149,10 @@ export function CommandPalette() {
     }
   }, [
     debouncedQuery,
-    userData?.role,
-    userData?.organizationId,
+    user?.role,
+    organization?.id,
     pathname,
-    currentUserPersonId,
+    person?.id,
     permissions,
   ])
 

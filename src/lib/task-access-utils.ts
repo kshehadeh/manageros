@@ -15,7 +15,6 @@ export function getTaskAccessWhereClause(
     // Tasks created by the current user in their organization
     {
       createdBy: {
-        organizationId,
         id: userId,
       },
     },

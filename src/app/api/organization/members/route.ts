@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if user belongs to an organization
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return NextResponse.json({ members: [] })
     }
 

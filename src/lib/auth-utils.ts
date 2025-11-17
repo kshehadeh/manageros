@@ -1,23 +1,51 @@
-/* eslint-disable camelcase */
-import { auth, clerkClient } from '@clerk/nextjs/server'
+import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { prisma } from './db'
-import type { User } from './auth-types'
-import { syncUserDataToClerk } from './clerk-session-sync'
+import {
+  OrganizationBrief,
+  UserBriefSchema,
+  type UserBrief,
+} from './auth-types'
+import { getUserFromClerk, syncUserDataToClerk } from './clerk-session-sync'
+import z from 'zod'
+import { checkIfManagerOrSelf } from '@/lib/utils/people-utils'
+import { getClerkOrganization } from './clerk-organization-utils'
+import { combineName } from '@/lib/utils/name-utils'
 
-// Re-export User type for convenience
-export type { User }
+const SessionClaimsSchema = z.object({
+  email: z.string().optional().nullable(),
+  name: z.string().optional().nullable(),
+  azp: z.string().optional().nullable(),
+  exp: z.number(),
+  fea: z.string().optional().nullable(),
+  fva: z.array(z.number()).optional().nullable(),
+  iat: z.number().optional().nullable(),
+  iss: z.string().optional().nullable(),
+  jti: z.string().optional().nullable(),
+  nbf: z.number().optional().nullable(),
+  pla: z.string().optional().nullable(),
+  sid: z.string().optional().nullable(),
+  sts: z.string().optional().nullable(),
+  sub: z.string().optional().nullable(),
+  v: z.number().optional().nullable(),
+  o: z.object({
+    id: z.string().optional().nullable(),
+    rol: z.string().optional().nullable(),
+    slg: z.string().optional().nullable(),
+  }),
+  metadata: z.union([UserBriefSchema.optional().nullable(), z.object({})]),
+})
+
+export type SessionClaims = z.infer<typeof SessionClaimsSchema>
 
 /**
  * Get the current authenticated user from Clerk
  * Throws an error if no user is authenticated
  * Use this for server actions and components that must have authentication
- * @param options.skipSessionClaims - If true, bypasses session claims and always queries the database.
- *   Useful when data might be stale (e.g., after person link changes) and you need fresh data immediately.
  */
-export async function getCurrentUser(options?: {
-  skipSessionClaims?: boolean
-}): Promise<User> {
+export async function getCurrentUser(
+  options: { revalidateLinks?: boolean } = {}
+): Promise<UserBrief> {
   // Use treatPendingAsSignedOut: false to handle pending sessions
   const authResult = await auth({ treatPendingAsSignedOut: false })
   const { userId, sessionClaims } = authResult
@@ -26,336 +54,163 @@ export async function getCurrentUser(options?: {
     throw new Error('Unauthorized')
   }
 
-  // Try to get user data from session claims first (if Session Token is customized in Clerk Dashboard)
-  // This avoids a database lookup if the data is in the token
-  // NOTE: Custom claims only appear in sessionClaims if the Session Token is customized in
-  // Clerk Dashboard (Sessions → Customize session token), NOT just JWT Templates
-  const claimsData = sessionClaims.metadata as User
-
-  // If skipSessionClaims is true, always query the database (useful when data might be stale)
-  // If we have ManagerOS user ID in claims, use it (data is in JWT)
-  // However, if organizationId is null in claims, always query database to check for updates
-  // This handles the case where an organization was just created but session claims haven't refreshed yet
-  if (
-    !options?.skipSessionClaims &&
-    claimsData?.managerOSUserId &&
-    claimsData.organizationId !== null &&
-    claimsData.organizationId !== undefined
-  ) {
-    return {
-      id: claimsData.managerOSUserId,
-      email: (sessionClaims?.email as string) || '',
-      name: (sessionClaims?.name as string) || '',
-      role: claimsData.role || 'USER',
-      organizationId: claimsData.organizationId || null,
-      organizationName: claimsData.organizationName || null,
-      organizationSlug: claimsData.organizationSlug || null,
-      personId: claimsData.personId || null,
-      clerkUserId: userId,
-      managerOSUserId: claimsData.managerOSUserId,
-    }
+  const sessionClaimsValidated = SessionClaimsSchema.safeParse(sessionClaims)
+  if (!sessionClaimsValidated.success) {
+    throw new Error('Invalid session claims')
   }
 
-  // Fallback to database lookup if not in session claims or skipSessionClaims is true
-  // Look up user in database by Clerk user ID
-  let user = await prisma.user.findUnique({
-    where: { clerkUserId: userId },
-    include: {
-      organization: {
-        select: {
-          name: true,
-          slug: true,
-        },
-      },
-      person: {
-        select: {
-          id: true,
-        },
-      },
-      organizationMemberships: {
-        select: {
-          role: true,
-          organizationId: true,
-        },
-      },
-    },
-  })
-
-  // If user not found by clerkUserId, try to link by email or create on-the-fly
-  // This handles:
-  // 1. Users that existed before Clerk migration (link by email)
-  // 2. Race condition where user registered via Clerk but webhook hasn't processed yet
-  if (!user) {
-    try {
-      // Check if CLERK_SECRET_KEY is configured
-      if (!process.env.CLERK_SECRET_KEY) {
-        console.error(
-          'CLERK_SECRET_KEY environment variable is not set. Cannot fetch user from Clerk.'
-        )
-        throw new Error(
-          'Clerk secret key not configured. Please set CLERK_SECRET_KEY in your environment variables.'
-        )
-      }
-
-      // Get user email from Clerk using the Clerk client
-      const client = await clerkClient()
-      const clerkUser = await client.users.getUser(userId)
-
-      if (clerkUser?.emailAddresses?.[0]?.emailAddress) {
-        const email = clerkUser.emailAddresses[0].emailAddress.toLowerCase()
-        const name =
-          clerkUser.firstName && clerkUser.lastName
-            ? `${clerkUser.firstName} ${clerkUser.lastName}`
-            : clerkUser.firstName || clerkUser.lastName || email.split('@')[0]
-
-        // Try to find existing user by email
-        const existingUser = await prisma.user.findUnique({
-          where: { email },
-          include: {
-            organization: {
-              select: {
-                name: true,
-                slug: true,
-              },
-            },
-            person: {
-              select: {
-                id: true,
-              },
-            },
-            organizationMemberships: {
-              select: {
-                role: true,
-                organizationId: true,
-              },
-            },
-          },
-        })
-
-        // If found, link the Clerk user ID to the existing user
-        if (existingUser && !existingUser.clerkUserId) {
-          user = await prisma.user.update({
-            where: { id: existingUser.id },
-            data: { clerkUserId: userId },
-            include: {
-              organization: {
-                select: {
-                  name: true,
-                  slug: true,
-                },
-              },
-              person: {
-                select: {
-                  id: true,
-                },
-              },
-              organizationMemberships: {
-                select: {
-                  role: true,
-                  organizationId: true,
-                },
-              },
-            },
-          })
-          // Sync the linked user data to Clerk
-          await syncUserDataToClerk(userId)
-        } else if (!existingUser) {
-          // User doesn't exist - create on-the-fly (handles webhook race condition)
-          // Check for pending invitation
-          const { checkPendingInvitation } = await import(
-            '@/lib/actions/organization'
-          )
-          const pendingInvitation = await checkPendingInvitation(email)
-
-          // Create user in database
-          user = await prisma.user.create({
-            data: {
-              email,
-              name,
-              clerkUserId: userId,
-              role: 'USER',
-              organizationId: pendingInvitation?.organization.id || null,
-            },
-            include: {
-              organization: {
-                select: {
-                  name: true,
-                  slug: true,
-                },
-              },
-              person: {
-                select: {
-                  id: true,
-                },
-              },
-              organizationMemberships: {
-                select: {
-                  role: true,
-                  organizationId: true,
-                },
-              },
-            },
-          })
-
-          // If there's a pending invitation, create OrganizationMember record
-          if (pendingInvitation && user.organizationId) {
-            await prisma.organizationMember.create({
-              data: {
-                userId: user.id,
-                organizationId: user.organizationId,
-                role: 'USER',
-              },
-            })
-            // Reload user with memberships
-            user = await prisma.user.findUnique({
-              where: { id: user.id },
-              include: {
-                organization: {
-                  select: {
-                    name: true,
-                    slug: true,
-                  },
-                },
-                person: {
-                  select: {
-                    id: true,
-                  },
-                },
-                organizationMemberships: {
-                  select: {
-                    role: true,
-                    organizationId: true,
-                  },
-                },
-              },
-            })
-          }
-
-          // If there's a pending invitation, mark it as accepted
-          if (pendingInvitation) {
-            await prisma.organizationInvitation.update({
-              where: { id: pendingInvitation.id },
-              data: {
-                status: 'accepted',
-                acceptedAt: new Date(),
-              },
-            })
-          }
-
-          // Sync user data to Clerk metadata
-          await syncUserDataToClerk(userId)
-        }
-      }
-    } catch (error) {
-      // If we can't fetch from Clerk, log and continue
-      console.error('Error fetching user from Clerk:', error)
-    }
-  }
-
-  if (!user) {
-    throw new Error('User not found in database')
-  }
-
-  // Get role from OrganizationMember table if user has an organization
-  // Fall back to user.role for backward compatibility
-  let userRole = user.role
-  if (user.organizationId) {
-    const membership = user.organizationMemberships?.find(
-      m => m.organizationId === user.organizationId
-    )
-    if (membership) {
-      userRole = membership.role
-    }
-  }
-
-  // Sync user data to Clerk metadata (for future JWT token inclusion)
-  // This is async but we don't wait for it to complete
-  syncUserDataToClerk(userId).catch(err => {
-    console.error('Failed to sync user data to Clerk:', err)
-  })
-
-  return {
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    role: userRole,
-    organizationId: user.organizationId,
-    organizationName: user.organization?.name || null,
-    organizationSlug: user.organization?.slug || null,
-    personId: user.person?.id || null,
+  // Now assemble a user brief object based on what we have so far.
+  let resync = false
+  const syncObject = {
+    email: sessionClaimsValidated.data.metadata?.email,
+    name: sessionClaimsValidated.data.metadata?.name,
     clerkUserId: userId,
-    managerOSUserId: user.id,
-  }
-}
-
-/**
- * Get the current authenticated user from Clerk
- * Returns null if no user is authenticated (does not throw)
- * Use this for server components wrapped in Suspense to enable static rendering
- */
-export async function getOptionalUser(): Promise<User | null> {
-  // Use treatPendingAsSignedOut: false to handle pending sessions
-  const { userId } = await auth({ treatPendingAsSignedOut: false })
-
-  if (!userId) {
-    return null
+    clerkOrganizationId: sessionClaimsValidated.data.o?.id || null,
+    managerOSOrganizationId:
+      sessionClaimsValidated.data.metadata?.managerOSOrganizationId || null,
+    managerOSPersonId:
+      sessionClaimsValidated.data.metadata?.managerOSPersonId || null,
+    role: sessionClaimsValidated.data.o?.rol,
+    managerOSUserId:
+      sessionClaimsValidated.data.metadata?.managerOSUserId || '',
   }
 
-  try {
-    // Look up user in database by Clerk user ID
-    const user = await prisma.user.findUnique({
+  // If we don't have a user ID then try to get it.
+  if (
+    options.revalidateLinks ||
+    !sessionClaimsValidated?.data.metadata?.managerOSUserId
+  ) {
+    // First check if we have a user object in the database for the clerk user.
+    let user = await prisma.user.findUnique({
       where: { clerkUserId: userId },
-      include: {
-        organization: {
-          select: {
-            name: true,
-            slug: true,
-          },
-        },
-        person: {
-          select: {
-            id: true,
-          },
-        },
-        organizationMemberships: {
-          select: {
-            role: true,
-            organizationId: true,
-          },
-        },
-      },
     })
 
     if (!user) {
-      return null
-    }
-
-    // Get role from OrganizationMember table if user has an organization
-    // Fall back to user.role for backward compatibility
-    let userRole = user.role
-    if (user.organizationId) {
-      const membership = user.organizationMemberships?.find(
-        m => m.organizationId === user.organizationId
-      )
-      if (membership) {
-        userRole = membership.role
+      // If we don't have a user object in the database then we need to create one.
+      const clerkUser = await getUserFromClerk(userId)
+      if (clerkUser && clerkUser.primaryEmailAddress?.emailAddress) {
+        user = await prisma.user.create({
+          data: {
+            clerkUserId: userId,
+            email: clerkUser.primaryEmailAddress?.emailAddress,
+            name: combineName(clerkUser.firstName, clerkUser.lastName),
+          },
+        })
+      } else {
+        // The clerk user could not be found.  This is a fatal error and
+        //  means that we cannot proceed.
+        throw new Error('Clerk user could not be found - this is a fatal error')
       }
     }
 
-    return {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: userRole,
-      organizationId: user.organizationId,
-      organizationName: user.organization?.name || null,
-      organizationSlug: user.organization?.slug || null,
-      personId: user.person?.id || null,
-      clerkUserId: userId,
-      managerOSUserId: user.id,
+    // Now set the managerOSUserId and clerkUserId in the sync object.
+    syncObject.managerOSUserId = user.id
+    syncObject.clerkUserId = userId
+  }
+
+  // Now we check if there's an organization associated with the user AND
+  //  if there's one associated with the session claims (meaning one has been setup in clerk)
+  if (
+    options.revalidateLinks ||
+    (sessionClaimsValidated.data.o?.id && !syncObject.managerOSOrganizationId)
+  ) {
+    // First see if we can find one based on the organization in clerk.
+    let organization = await prisma.organization.findUnique({
+      where: {
+        clerkOrganizationId: sessionClaimsValidated.data.o?.id || undefined,
+      },
+    })
+
+    if (!organization) {
+      // if there isn't one in our database then let's create it by getting the details
+      // from clerk.
+      const clerkOrganization = await getClerkOrganization(
+        sessionClaimsValidated.data.o?.id || ''
+      )
+      if (!clerkOrganization) {
+        throw new Error(
+          'Clerk organization could not be found - this is a fatal error'
+        )
+      }
+
+      // Now we can create it using the clerk organization details. If we
+      //  have to create it now then let's assume that the billing user is the
+      //  current user.
+      organization = await prisma.organization.create({
+        data: {
+          clerkOrganizationId: clerkOrganization.id,
+          billingUserId: syncObject.managerOSUserId,
+        },
+      })
+
+      syncObject.managerOSOrganizationId = organization.id
+      syncObject.clerkOrganizationId = organization.clerkOrganizationId
+      resync = true
     }
-  } catch {
-    return null
+  }
+
+  if (options.revalidateLinks || !syncObject.managerOSPersonId) {
+    // Check if the current user is linked to a person.
+    const user = await prisma.user.findUnique({
+      where: { id: syncObject.managerOSUserId || '' },
+    })
+    if (user && user.personId) {
+      syncObject.managerOSPersonId = user.personId
+      resync = true
+    }
+  }
+
+  if (resync) {
+    await syncUserDataToClerk(syncObject)
+  }
+
+  return syncObject
+}
+
+export async function getCurrentUserWithPersonAndOrganization() {
+  // Get current user - session claims may be stale, so we'll query person directly
+  const user = await getCurrentUser({ revalidateLinks: true })
+  const person = await prisma.person.findUnique({
+    where: { id: user.managerOSPersonId || '' },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      avatar: true,
+    },
+  })
+
+  let organizationBrief: OrganizationBrief | null = null
+
+  if (user.managerOSOrganizationId) {
+    const organization = await prisma.organization.findUnique({
+      where: { id: user.managerOSOrganizationId || '' },
+      select: {
+        id: true,
+        clerkOrganizationId: true,
+      },
+    })
+
+    if (organization) {
+      const clerkOrganization = await getClerkOrganization(
+        organization.clerkOrganizationId || ''
+      )
+      if (clerkOrganization) {
+        organizationBrief = {
+          id: organization.id,
+          clerkOrganizationId: organization.clerkOrganizationId,
+          name: clerkOrganization.name,
+          slug: clerkOrganization.slug,
+        } satisfies OrganizationBrief
+      }
+    }
+  }
+
+  return {
+    user,
+    person,
+    organization: organizationBrief,
   }
 }
 
@@ -369,7 +224,7 @@ export async function requireAuth(options?: {
 }) {
   const user = await getCurrentUser()
 
-  if (options?.requireOrganization && !user.organizationId) {
+  if (options?.requireOrganization && !user.managerOSOrganizationId) {
     redirect(options.redirectTo || '/organization/create')
   }
 
@@ -381,7 +236,7 @@ export async function requireAuth(options?: {
  * This ensures server-side security for navigation filtering
  * Returns empty array if user is not authenticated (for use in Suspense boundaries)
  */
-export async function getFilteredNavigation(user: User | null) {
+export async function getFilteredNavigation(user: UserBrief | null) {
   if (!user) {
     return []
   }
@@ -411,12 +266,12 @@ export async function getFilteredNavigation(user: User | null) {
   const filteredNavigation = await Promise.all(
     navigation.map(async item => {
       // If user has no organization, only show Dashboard
-      if (!user.organizationId) {
+      if (!user.managerOSOrganizationId) {
         return item.href === '/dashboard' ? item : null
       }
 
       // Hide "My Tasks" if user doesn't have a linked person
-      if (item.href === '/my-tasks' && !user.personId) {
+      if (item.href === '/my-tasks' && !user.managerOSPersonId) {
         return null
       }
 
@@ -446,63 +301,17 @@ export async function getFilteredNavigation(user: User | null) {
 }
 
 /**
- * Check if the current user can access overviews/synopses for a person.
- * Access is granted if:
- * 1. The user is linked to the person themselves
- * 2. The user is a manager (direct or indirect) of that person
- */
-export async function canAccessSynopsesForPerson(
-  personId: string
-): Promise<boolean> {
-  const user = await getCurrentUser()
-
-  if (!user.organizationId || !user.personId) {
-    return false
-  }
-
-  // Check if user is linked to the person themselves
-  if (user.personId === personId) {
-    return true
-  }
-
-  // Check if user is a manager (direct or indirect) of that person
-  const { checkIfManagerOrSelf } = await import('@/lib/utils/people-utils')
-  return await checkIfManagerOrSelf(user.personId, personId)
-}
-
-/**
  * Check if a user is an admin or owner in a specific organization
  * @param userId - The user ID
  * @param organizationId - The organization ID
  * @returns Promise<boolean> indicating if the user is an admin or owner in that organization
  */
 export async function isAdminOrOwnerInOrganization(
-  userId: string,
-  organizationId: string
+  user: UserBrief
 ): Promise<boolean> {
-  const membership = await prisma.organizationMember.findUnique({
-    where: {
-      userId_organizationId: {
-        userId,
-        organizationId,
-      },
-    },
-  })
-  return membership?.role === 'ADMIN' || membership?.role === 'OWNER'
-}
-
-/**
- * Check if a user is an admin in a specific organization
- * @param userId - The user ID
- * @param organizationId - The organization ID
- * @returns Promise<boolean> indicating if the user is an admin in that organization
- * @deprecated Use isAdminOrOwnerInOrganization instead - OWNER has the same permissions as ADMIN
- */
-export async function isAdminInOrganization(
-  userId: string,
-  organizationId: string
-): Promise<boolean> {
-  return isAdminOrOwnerInOrganization(userId, organizationId)
+  return (
+    user.role?.toLowerCase() === 'admin' || user.role?.toLowerCase() === 'owner'
+  )
 }
 
 /**
@@ -512,24 +321,15 @@ export async function isAdminInOrganization(
  * @returns Promise<string | null> The role ('ADMIN', 'OWNER', or 'USER') or null if not a member
  */
 export async function getUserRoleInOrganization(
-  userId: string,
-  organizationId: string
+  user: UserBrief
 ): Promise<string | null> {
-  const membership = await prisma.organizationMember.findUnique({
-    where: {
-      userId_organizationId: {
-        userId,
-        organizationId,
-      },
-    },
-  })
-  return membership?.role || null
+  return user.role?.toLowerCase() || null
 }
 
 // Helper functions for role-based access control
 // These use the role from the User object which is already org-scoped via getCurrentUser
-export function isAdmin(user: { role: string }) {
-  return user.role === 'ADMIN'
+export function isAdmin(user: UserBrief) {
+  return user.role?.toLowerCase() === 'admin'
 }
 
 /**
@@ -537,8 +337,8 @@ export function isAdmin(user: { role: string }) {
  * @param user - User object with role property
  * @returns boolean indicating if the user is an owner
  */
-export function isOwner(user: { role: string }) {
-  return user.role === 'OWNER'
+export function isOwner(user: UserBrief) {
+  return user.role?.toLowerCase() === 'owner'
 }
 
 /**
@@ -546,26 +346,26 @@ export function isOwner(user: { role: string }) {
  * @param user - User object with role property
  * @returns boolean indicating if the user has admin-level permissions
  */
-export function isAdminOrOwner(user: { role: string }) {
-  return user.role === 'ADMIN' || user.role === 'OWNER'
+export function isAdminOrOwner(user: UserBrief) {
+  return isAdmin(user) || isOwner(user)
 }
 
-export function isUser(user: { role: string }) {
-  return user.role === 'USER'
+export function isUser(user: UserBrief) {
+  return user.role?.toLowerCase() === 'user'
 }
 
-export function canAccessOrganization(
-  user: { organizationId: string | null },
-  organizationId: string
-) {
-  return user.organizationId === organizationId
+export function canAccessOrganization(user: UserBrief, organizationId: string) {
+  return user.managerOSOrganizationId === organizationId
 }
 
 /**
  * Type for permission check functions
  * Can be synchronous (for simple checks) or asynchronous (for entity lookups)
  */
-type PermissionCheck = (user: User, id?: string) => boolean | Promise<boolean>
+type PermissionCheck = (
+  user: UserBrief,
+  id?: string
+) => boolean | Promise<boolean>
 
 /**
  * All possible permission keys in the system
@@ -611,6 +411,12 @@ const _PERMISSION_KEYS = [
   'feedback-campaign.delete',
   'feedback-campaign.view',
   'user.link-person',
+  'person.overview.view',
+  'job-role.create',
+  'job-role.edit',
+  'job-role.delete',
+  'job-role.view',
+  'organization.invitation.view',
 ] as const
 
 /**
@@ -624,12 +430,15 @@ export type PermissionType = (typeof _PERMISSION_KEYS)[number]
 const PermissionMap: Record<PermissionType, PermissionCheck> = {
   // Task permissions
   'task.create': user => {
-    return (isAdminOrOwner(user) || !!user.personId) && !!user.organizationId
+    return (
+      (isAdminOrOwner(user) || !!user.managerOSPersonId) &&
+      !!user.managerOSOrganizationId
+    )
   },
   'task.edit': async (user, id) => {
-    if (!user.organizationId || !id) return false
+    if (!user.managerOSOrganizationId || !id) return false
     if (isAdminOrOwner(user)) return true
-    if (!user.personId) return false
+    if (!user.managerOSPersonId) return false
 
     // Check if user created task OR user is assigned to task
     // Also verify task belongs to user's organization
@@ -638,18 +447,19 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
         id,
         OR: [
           {
-            createdById: user.id,
-            createdBy: {
-              organizationId: user.organizationId,
-            },
+            createdById: user.managerOSUserId || '',
           },
           {
-            assigneeId: user.personId,
+            assigneeId: user.managerOSPersonId,
             OR: [
-              { initiative: { organizationId: user.organizationId } },
+              {
+                initiative: {
+                  organizationId: user.managerOSOrganizationId || '',
+                },
+              },
               {
                 objective: {
-                  initiative: { organizationId: user.organizationId },
+                  initiative: { organizationId: user.managerOSOrganizationId },
                 },
               },
             ],
@@ -661,9 +471,9 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
     return !!task
   },
   'task.delete': async (user, id) => {
-    if (!user.organizationId || !id) return false
+    if (!user.managerOSOrganizationId || !id) return false
     if (isAdminOrOwner(user)) return true
-    if (!user.personId) return false
+    if (!user.managerOSPersonId) return false
 
     // Check if user created task OR user is assigned to task
     // Also verify task belongs to user's organization
@@ -672,18 +482,21 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
         id,
         OR: [
           {
-            createdById: user.id,
-            createdBy: {
-              organizationId: user.organizationId,
-            },
+            createdById: user.managerOSUserId || '',
           },
           {
-            assigneeId: user.personId,
+            assigneeId: user.managerOSPersonId,
             OR: [
-              { initiative: { organizationId: user.organizationId } },
+              {
+                initiative: {
+                  organizationId: user.managerOSOrganizationId || '',
+                },
+              },
               {
                 objective: {
-                  initiative: { organizationId: user.organizationId },
+                  initiative: {
+                    organizationId: user.managerOSOrganizationId || '',
+                  },
                 },
               },
             ],
@@ -695,20 +508,20 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
     return !!task
   },
   'task.view': user => {
-    return !!user.organizationId
+    return !!user.managerOSOrganizationId
   },
 
   // Meeting permissions
   'meeting.create': user => {
-    return !!user.personId && !!user.organizationId
+    return !!user.managerOSPersonId && !!user.managerOSOrganizationId
   },
   'meeting.edit': async (user, id) => {
-    if (!user.organizationId || !id) return false
-    if (!user.personId) return false
+    if (!user.managerOSOrganizationId || !id) return false
+    if (!user.managerOSPersonId) return false
 
     // Get current user's person record
     const currentPerson = await prisma.person.findFirst({
-      where: { user: { id: user.id } },
+      where: { id: user.managerOSPersonId || '' },
     })
 
     if (!currentPerson) return false
@@ -718,12 +531,12 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
     const meeting = await prisma.meeting.findFirst({
       where: {
         id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
         ...(isAdminOrOwner(user)
           ? {}
           : {
               OR: [
-                { createdById: user.id },
+                { createdById: user.managerOSUserId || '' },
                 { ownerId: currentPerson.id },
                 {
                   participants: {
@@ -740,13 +553,13 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
     return !!meeting
   },
   'meeting.delete': async (user, id) => {
-    if (!user.organizationId || !id) return false
+    if (!user.managerOSOrganizationId || !id) return false
     if (isAdminOrOwner(user)) return true
-    if (!user.personId) return false
+    if (!user.managerOSPersonId) return false
 
     // Get current user's person record
     const currentPerson = await prisma.person.findFirst({
-      where: { user: { id: user.id } },
+      where: { id: user.managerOSPersonId },
     })
 
     if (!currentPerson) return false
@@ -755,31 +568,34 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
     const meeting = await prisma.meeting.findFirst({
       where: {
         id,
-        organizationId: user.organizationId,
-        OR: [{ createdById: user.id }, { ownerId: currentPerson.id }],
+        organizationId: user.managerOSOrganizationId,
+        OR: [
+          { createdById: user.managerOSUserId || '' },
+          { ownerId: currentPerson.id },
+        ],
       },
     })
 
     return !!meeting
   },
   'meeting.view': async (user, id) => {
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return false
     }
 
-    if (!id || !user.personId) {
-      return !!user.organizationId
+    if (!id || !user.managerOSPersonId) {
+      return !!user.managerOSOrganizationId
     } else {
       // If the meeting exists AND is in the user's organization AND the user is an admin OR the user is the creator, owner or participant then
       // allow the user to view the meeting
       const meeting = await prisma.meeting.findFirst({
         where: {
           id,
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
           OR: [
-            { createdById: user.id },
-            { ownerId: user.personId },
-            { participants: { some: { personId: user.personId } } },
+            { createdById: user.managerOSUserId || '' },
+            { ownerId: user.managerOSPersonId },
+            { participants: { some: { personId: user.managerOSPersonId } } },
           ],
         },
       })
@@ -790,15 +606,15 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
 
   // Meeting Instance permissions
   'meeting-instance.create': user => {
-    return !!user.personId && !!user.organizationId
+    return !!user.managerOSPersonId && !!user.managerOSOrganizationId
   },
   'meeting-instance.edit': async (user, id) => {
-    if (!user.organizationId || !id) return false
-    if (!user.personId) return false
+    if (!user.managerOSOrganizationId || !id) return false
+    if (!user.managerOSPersonId) return false
 
     // Get current user's person record
     const currentPerson = await prisma.person.findFirst({
-      where: { user: { id: user.id } },
+      where: { id: user.managerOSPersonId || '' },
     })
 
     if (!currentPerson) return false
@@ -809,7 +625,7 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
     const meetingInstance = await prisma.meetingInstance.findFirst({
       where: {
         id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId || '',
       },
       include: {
         meeting: true,
@@ -821,25 +637,22 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
 
     // Check if user is participant of the instance
     const isInstanceParticipant = meetingInstance.participants.some(
-      p => p.personId === currentPerson.id
+      p => p.personId === user.managerOSPersonId
     )
 
     if (isInstanceParticipant) return true
-
-    // Check parent meeting permissions (same as meeting.edit)
     if (isAdminOrOwner(user)) return true
-
     const meeting = await prisma.meeting.findFirst({
       where: {
         id: meetingInstance.meetingId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId || '',
         OR: [
-          { createdById: user.id },
-          { ownerId: currentPerson.id },
+          { createdById: user.managerOSUserId || '' },
+          { ownerId: user.managerOSPersonId || '' },
           {
             participants: {
               some: {
-                personId: currentPerson.id,
+                personId: user.managerOSPersonId || '',
               },
             },
           },
@@ -850,13 +663,13 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
     return !!meeting
   },
   'meeting-instance.delete': async (user, id) => {
-    if (!user.organizationId || !id) return false
+    if (!user.managerOSOrganizationId || !id) return false
     if (isAdminOrOwner(user)) return true
-    if (!user.personId) return false
+    if (!user.managerOSPersonId) return false
 
     // Get current user's person record
     const currentPerson = await prisma.person.findFirst({
-      where: { user: { id: user.id } },
+      where: { id: user.managerOSPersonId || '' },
     })
 
     if (!currentPerson) return false
@@ -865,7 +678,7 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
     const meetingInstance = await prisma.meetingInstance.findFirst({
       where: {
         id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId || '',
       },
       include: {
         meeting: true,
@@ -879,26 +692,34 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
     const meeting = await prisma.meeting.findFirst({
       where: {
         id: meetingInstance.meetingId,
-        organizationId: user.organizationId,
-        OR: [{ createdById: user.id }, { ownerId: currentPerson.id }],
+        organizationId: user.managerOSOrganizationId || '',
+        OR: [
+          { createdById: user.managerOSUserId || '' },
+          { ownerId: currentPerson.id },
+        ],
       },
     })
 
     return !!meeting
   },
   'meeting-instance.view': async (user, id) => {
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return false
     }
 
     if (!id) {
-      return !!user.organizationId
+      return !!user.managerOSOrganizationId
     }
 
     // Get current user's person record (may be null if not linked)
-    const currentPerson = await prisma.person.findFirst({
-      where: { user: { id: user.id }, organizationId: user.organizationId },
-    })
+    const currentPerson = user.managerOSPersonId
+      ? await prisma.person.findFirst({
+          where: {
+            id: user.managerOSPersonId,
+            organizationId: user.managerOSOrganizationId,
+          },
+        })
+      : null
 
     // Check if meeting instance exists and user has access
     // User can view if:
@@ -910,7 +731,7 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
     const meetingInstance = await prisma.meetingInstance.findFirst({
       where: {
         id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
         OR: [
           // Meeting is public
           {
@@ -921,7 +742,7 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
           // User is creator of the meeting
           {
             meeting: {
-              createdById: user.id,
+              createdById: user.managerOSUserId || '',
             },
           },
           // User is owner of the meeting
@@ -969,47 +790,53 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
 
   // Initiative permissions
   'initiative.create': user => {
-    return (isAdminOrOwner(user) || !!user.personId) && !!user.organizationId
+    return (
+      (isAdminOrOwner(user) || !!user.managerOSPersonId) &&
+      !!user.managerOSOrganizationId
+    )
   },
   'initiative.edit': user => {
-    return isAdminOrOwner(user) && !!user.organizationId
+    return isAdminOrOwner(user) && !!user.managerOSOrganizationId
   },
   'initiative.delete': user => {
-    return isAdminOrOwner(user) && !!user.organizationId
+    return isAdminOrOwner(user) && !!user.managerOSOrganizationId
   },
   'initiative.view': user => {
-    return !!user.organizationId
+    return !!user.managerOSOrganizationId
   },
 
   // Report permissions
   'report.access': user => {
-    return isAdminOrOwner(user) && !!user.organizationId
+    return isAdminOrOwner(user) && !!user.managerOSOrganizationId
   },
   'report.create': user => {
-    return isAdminOrOwner(user) && !!user.organizationId
+    return isAdminOrOwner(user) && !!user.managerOSOrganizationId
   },
   'report.edit': user => {
-    return isAdminOrOwner(user) && !!user.organizationId
+    return isAdminOrOwner(user) && !!user.managerOSOrganizationId
   },
   'report.delete': user => {
-    return isAdminOrOwner(user) && !!user.organizationId
+    return isAdminOrOwner(user) && !!user.managerOSOrganizationId
   },
   'report.view': user => {
-    return !!user.organizationId
+    return !!user.managerOSOrganizationId
   },
 
   // Feedback permissions
   'feedback.create': user => {
-    return (isAdminOrOwner(user) || !!user.personId) && !!user.organizationId
+    return (
+      (isAdminOrOwner(user) || !!user.managerOSPersonId) &&
+      !!user.managerOSOrganizationId
+    )
   },
   'feedback.edit': async (user, id) => {
-    if (!user.organizationId || !id) return false
+    if (!user.managerOSOrganizationId || !id) return false
     if (isAdminOrOwner(user)) return true
-    if (!user.personId) return false
+    if (!user.managerOSPersonId) return false
 
     // Get current user's person record
     const currentPerson = await prisma.person.findFirst({
-      where: { user: { id: user.id } },
+      where: { id: user.managerOSPersonId },
     })
 
     if (!currentPerson) return false
@@ -1020,7 +847,7 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
         id,
         fromId: currentPerson.id,
         about: {
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
         },
       },
     })
@@ -1028,13 +855,13 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
     return !!feedback
   },
   'feedback.delete': async (user, id) => {
-    if (!user.organizationId || !id) return false
+    if (!user.managerOSOrganizationId || !id) return false
     if (isAdminOrOwner(user)) return true
-    if (!user.personId) return false
+    if (!user.managerOSPersonId) return false
 
     // Get current user's person record
     const currentPerson = await prisma.person.findFirst({
-      where: { user: { id: user.id } },
+      where: { id: user.managerOSPersonId },
     })
 
     if (!currentPerson) return false
@@ -1045,7 +872,7 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
         id,
         fromId: currentPerson.id,
         about: {
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
         },
       },
     })
@@ -1053,17 +880,20 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
     return !!feedback
   },
   'feedback.view': user => {
-    return !!user.organizationId
+    return !!user.managerOSOrganizationId
   },
 
   // One-on-One permissions
   'oneonone.create': user => {
-    return (isAdminOrOwner(user) || !!user.personId) && !!user.organizationId
+    return (
+      (isAdminOrOwner(user) || !!user.managerOSPersonId) &&
+      !!user.managerOSOrganizationId
+    )
   },
   'oneonone.edit': async (user, id) => {
-    if (!user.organizationId || !id) return false
+    if (!user.managerOSOrganizationId || !id) return false
     if (isAdminOrOwner(user)) return true
-    if (!user.personId) return false
+    if (!user.managerOSPersonId) return false
 
     // Check if user is a participant (managerId or reportId)
     // Also verify both participants belong to user's organization
@@ -1072,14 +902,14 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
         id,
         OR: [
           {
-            managerId: user.personId,
-            manager: { organizationId: user.organizationId },
-            report: { organizationId: user.organizationId },
+            managerId: user.managerOSPersonId,
+            manager: { organizationId: user.managerOSOrganizationId },
+            report: { organizationId: user.managerOSOrganizationId },
           },
           {
-            reportId: user.personId,
-            manager: { organizationId: user.organizationId },
-            report: { organizationId: user.organizationId },
+            reportId: user.managerOSPersonId,
+            manager: { organizationId: user.managerOSOrganizationId },
+            report: { organizationId: user.managerOSOrganizationId },
           },
         ],
       },
@@ -1088,9 +918,9 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
     return !!oneOnOne
   },
   'oneonone.delete': async (user, id) => {
-    if (!user.organizationId || !id) return false
+    if (!user.managerOSOrganizationId || !id) return false
     if (isAdminOrOwner(user)) return true
-    if (!user.personId) return false
+    if (!user.managerOSPersonId) return false
 
     // Check if user is a participant (managerId or reportId)
     // Also verify both participants belong to user's organization
@@ -1099,14 +929,14 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
         id,
         OR: [
           {
-            managerId: user.personId,
-            manager: { organizationId: user.organizationId },
-            report: { organizationId: user.organizationId },
+            managerId: user.managerOSPersonId,
+            manager: { organizationId: user.managerOSOrganizationId },
+            report: { organizationId: user.managerOSOrganizationId },
           },
           {
-            reportId: user.personId,
-            manager: { organizationId: user.organizationId },
-            report: { organizationId: user.organizationId },
+            reportId: user.managerOSPersonId,
+            manager: { organizationId: user.managerOSOrganizationId },
+            report: { organizationId: user.managerOSOrganizationId },
           },
         ],
       },
@@ -1115,9 +945,9 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
     return !!oneOnOne
   },
   'oneonone.view': async (user, id) => {
-    if (!user.organizationId) return false
+    if (!user.managerOSOrganizationId) return false
     if (isAdminOrOwner(user)) return true
-    if (!user.personId || !id) return false
+    if (!user.managerOSPersonId || !id) return false
 
     // Check if user is a participant (managerId or reportId)
     // Also verify both participants belong to user's organization
@@ -1126,14 +956,14 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
         id,
         OR: [
           {
-            managerId: user.personId,
-            manager: { organizationId: user.organizationId },
-            report: { organizationId: user.organizationId },
+            managerId: user.managerOSPersonId,
+            manager: { organizationId: user.managerOSOrganizationId },
+            report: { organizationId: user.managerOSOrganizationId },
           },
           {
-            reportId: user.personId,
-            manager: { organizationId: user.organizationId },
-            report: { organizationId: user.organizationId },
+            reportId: user.managerOSPersonId,
+            manager: { organizationId: user.managerOSOrganizationId },
+            report: { organizationId: user.managerOSOrganizationId },
           },
         ],
       },
@@ -1144,20 +974,23 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
 
   // Feedback Campaign permissions
   'feedback-campaign.create': user => {
-    return (isAdminOrOwner(user) || !!user.personId) && !!user.organizationId
+    return (
+      (isAdminOrOwner(user) || !!user.managerOSPersonId) &&
+      !!user.managerOSOrganizationId
+    )
   },
   'feedback-campaign.edit': async (user, id) => {
-    if (!user.organizationId || !id) return false
+    if (!user.managerOSOrganizationId || !id) return false
     if (isAdminOrOwner(user)) return true
-    if (!user.personId) return false
+    if (!user.managerOSPersonId) return false
 
     // Check if user is the creator (userId)
     const campaign = await prisma.feedbackCampaign.findFirst({
       where: {
         id,
-        userId: user.id,
+        userId: user.managerOSUserId || '',
         targetPerson: {
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
         },
       },
     })
@@ -1165,17 +998,17 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
     return !!campaign
   },
   'feedback-campaign.delete': async (user, id) => {
-    if (!user.organizationId || !id) return false
+    if (!user.managerOSOrganizationId || !id) return false
     if (isAdminOrOwner(user)) return true
-    if (!user.personId) return false
+    if (!user.managerOSPersonId) return false
 
     // Check if user is the creator (userId)
     const campaign = await prisma.feedbackCampaign.findFirst({
       where: {
         id,
-        userId: user.id,
+        userId: user.managerOSUserId || '',
         targetPerson: {
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
         },
       },
     })
@@ -1183,9 +1016,9 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
     return !!campaign
   },
   'feedback-campaign.view': async (user, id) => {
-    if (!user.organizationId) return false
+    if (!user.managerOSOrganizationId) return false
     if (isAdminOrOwner(user)) return true
-    if (!user.personId) return false
+    if (!user.managerOSPersonId) return false
 
     if (!id) {
       // Viewing list - user can see their own campaigns
@@ -1196,9 +1029,9 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
     const campaign = await prisma.feedbackCampaign.findFirst({
       where: {
         id,
-        userId: user.id,
+        userId: user.managerOSUserId || '',
         targetPerson: {
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
         },
       },
     })
@@ -1208,41 +1041,41 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
 
   // Person permissions
   'person.create': user => {
-    return isAdminOrOwner(user) && !!user.organizationId
+    return isAdminOrOwner(user) && !!user.managerOSOrganizationId
   },
   'person.import': user => {
-    return isAdminOrOwner(user) && !!user.organizationId
+    return isAdminOrOwner(user) && !!user.managerOSOrganizationId
   },
   'person.edit': async (user, id) => {
-    if (!user.organizationId || !id) return false
+    if (!user.managerOSOrganizationId || !id) return false
     if (!isAdminOrOwner(user)) return false
 
     // Verify person belongs to user's organization
     const person = await prisma.person.findFirst({
       where: {
         id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
 
     return !!person
   },
   'person.delete': async (user, id) => {
-    if (!user.organizationId || !id) return false
+    if (!user.managerOSOrganizationId || !id) return false
     if (!isAdminOrOwner(user)) return false
 
     // Verify person belongs to user's organization
     const person = await prisma.person.findFirst({
       where: {
         id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
 
     return !!person
   },
   'person.view': async (user, id) => {
-    if (!user.organizationId) return false
+    if (!user.managerOSOrganizationId) return false
 
     // If no ID provided, user can view people list if they belong to organization
     if (!id) return true
@@ -1251,16 +1084,42 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
     const person = await prisma.person.findFirst({
       where: {
         id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
 
     return !!person
   },
 
+  // Person overview permissions
+  'person.overview.view': async (user, id) => {
+    if (!user.managerOSOrganizationId) return false
+    if (isAdminOrOwner(user)) return true
+    if (!user.managerOSPersonId || !id) return false
+    return await checkIfManagerOrSelf(user.managerOSPersonId, id)
+  },
+
   // User linking permissions
   'user.link-person': user => {
     return isAdminOrOwner(user)
+  },
+
+  // Job Role permissions
+  'job-role.create': user => {
+    return isAdminOrOwner(user) && !!user.managerOSOrganizationId
+  },
+  'job-role.edit': async (user, _id) => {
+    return isAdminOrOwner(user) && !!user.managerOSOrganizationId
+  },
+  'job-role.delete': async (user, _id) => {
+    return isAdminOrOwner(user) && !!user.managerOSOrganizationId
+  },
+  'job-role.view': user => {
+    return !!user.managerOSOrganizationId
+  },
+  // Organization invitation permissions
+  'organization.invitation.view': user => {
+    return isAdminOrOwner(user) && !!user.managerOSOrganizationId
   },
 }
 
@@ -1276,7 +1135,7 @@ export type ActionPermissionOption = PermissionType
  * @returns Promise<boolean> indicating if the user can perform the action
  */
 export async function getActionPermission(
-  user: User,
+  user: UserBrief,
   actionId: PermissionType,
   id?: string
 ): Promise<boolean> {

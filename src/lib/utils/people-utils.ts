@@ -50,7 +50,7 @@ function groupByManager(people: Person[]): PeopleGroup[] {
   const managerGroups = new Map<string, Person[]>()
 
   people.forEach(person => {
-    const key = person.manager?.id || 'no-manager'
+    const key = person.managerId || 'no-manager'
     if (!managerGroups.has(key)) {
       managerGroups.set(key, [])
     }
@@ -60,11 +60,11 @@ function groupByManager(people: Person[]): PeopleGroup[] {
   // Create groups
   managerGroups.forEach((people, key) => {
     // Find the manager from the first person in the group
-    const manager = people[0]?.manager
+    const manager = people[0]?.managerId
 
     const group: PeopleGroup = {
       key,
-      label: manager?.name || 'No Manager',
+      label: manager || 'No Manager',
       people: people.sort((a, b) => a.name.localeCompare(b.name)),
       count: people.length,
     }
@@ -98,7 +98,7 @@ function groupByTeam(people: Person[]): PeopleGroup[] {
   const teamGroups = new Map<string, Person[]>()
 
   people.forEach(person => {
-    const key = person.team?.id || 'no-team'
+    const key = person.teamId || 'no-team'
     if (!teamGroups.has(key)) {
       teamGroups.set(key, [])
     }
@@ -107,11 +107,11 @@ function groupByTeam(people: Person[]): PeopleGroup[] {
 
   // Create groups
   teamGroups.forEach((people, key) => {
-    const team = people.find(p => p.team?.id === key)?.team
+    const team = people.find(p => p.teamId === key)?.teamId
 
     const group: PeopleGroup = {
       key,
-      label: team?.name || 'No Team',
+      label: team || 'No Team',
       people: people.sort((a, b) => a.name.localeCompare(b.name)),
       count: people.length,
     }
@@ -178,7 +178,7 @@ function groupByJobRole(people: Person[]): PeopleGroup[] {
   const jobRoleGroups = new Map<string, Person[]>()
 
   people.forEach(person => {
-    const key = person.jobRole?.id || 'no-job-role'
+    const key = person.jobRoleId || 'no-job-role'
     if (!jobRoleGroups.has(key)) {
       jobRoleGroups.set(key, [])
     }
@@ -187,11 +187,11 @@ function groupByJobRole(people: Person[]): PeopleGroup[] {
 
   // Create groups
   jobRoleGroups.forEach((people, key) => {
-    const jobRole = people.find(p => p.jobRole?.id === key)?.jobRole
+    const jobRole = people.find(p => p.jobRoleId === key)?.jobRoleId
 
     const group: PeopleGroup = {
       key,
-      label: jobRole?.title || 'No Job Role',
+      label: jobRole || 'No Job Role',
       people: people.sort((a, b) => a.name.localeCompare(b.name)),
       count: people.length,
     }

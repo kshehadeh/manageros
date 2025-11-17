@@ -8,7 +8,7 @@ import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 export async function createFeedback(formData: FeedbackFormData) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to create feedback')
   }
 
@@ -18,9 +18,7 @@ export async function createFeedback(formData: FeedbackFormData) {
   // Get the current user's person record
   const currentPerson = await prisma.person.findFirst({
     where: {
-      user: {
-        id: user.id,
-      },
+      id: user.managerOSPersonId || '',
     },
   })
 
@@ -32,7 +30,7 @@ export async function createFeedback(formData: FeedbackFormData) {
   const aboutPerson = await prisma.person.findFirst({
     where: {
       id: validatedData.aboutId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -72,7 +70,7 @@ export async function createFeedback(formData: FeedbackFormData) {
 export async function updateFeedback(id: string, formData: FeedbackFormData) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to update feedback')
   }
 
@@ -82,9 +80,7 @@ export async function updateFeedback(id: string, formData: FeedbackFormData) {
   // Get the current user's person record
   const currentPerson = await prisma.person.findFirst({
     where: {
-      user: {
-        id: user.id,
-      },
+      id: user.managerOSPersonId || '',
     },
   })
 
@@ -110,7 +106,7 @@ export async function updateFeedback(id: string, formData: FeedbackFormData) {
   const aboutPerson = await prisma.person.findFirst({
     where: {
       id: validatedData.aboutId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -150,16 +146,14 @@ export async function updateFeedback(id: string, formData: FeedbackFormData) {
 export async function deleteFeedback(id: string) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to delete feedback')
   }
 
   // Get the current user's person record
   const currentPerson = await prisma.person.findFirst({
     where: {
-      user: {
-        id: user.id,
-      },
+      id: user.managerOSPersonId || '',
     },
   })
 
@@ -192,16 +186,14 @@ export async function deleteFeedback(id: string) {
 export async function getFeedbackForPerson(personId: string) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to view feedback')
   }
 
   // Get the current user's person record
   const currentPerson = await prisma.person.findFirst({
     where: {
-      user: {
-        id: user.id,
-      },
+      id: user.managerOSPersonId || '',
     },
   })
 
@@ -213,7 +205,7 @@ export async function getFeedbackForPerson(personId: string) {
   const person = await prisma.person.findFirst({
     where: {
       id: personId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 

@@ -146,7 +146,7 @@ export async function importPersonsFromCSV(formData: FormData) {
   }
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to import people')
   }
 
@@ -194,11 +194,11 @@ export async function importPersonsFromCSV(formData: FormData) {
   // Get existing teams and people for validation
   const [existingTeams, existingPeople] = await Promise.all([
     prisma.team.findMany({
-      where: { organizationId: user.organizationId },
+      where: { organizationId: user.managerOSOrganizationId },
       select: { id: true, name: true },
     }),
     prisma.person.findMany({
-      where: { organizationId: user.organizationId },
+      where: { organizationId: user.managerOSOrganizationId },
       select: { id: true, name: true, email: true },
     }),
   ])
@@ -268,7 +268,7 @@ export async function importPersonsFromCSV(formData: FormData) {
             teamId: managerRow.team
               ? teamMap.get(managerRow.team.toLowerCase()) || null
               : null,
-            organizationId: user.organizationId,
+            organizationId: user.managerOSOrganizationId,
             status: 'active',
           },
         })
@@ -399,7 +399,7 @@ export async function importPersonsFromCSV(formData: FormData) {
             managerId: row.manager
               ? personNameMap.get(row.manager.toLowerCase()) || null
               : null,
-            organizationId: user.organizationId,
+            organizationId: user.managerOSOrganizationId,
             status: 'active',
           },
         })
@@ -611,7 +611,7 @@ export async function importTeamsFromCSV(formData: FormData) {
   }
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to import teams')
   }
 
@@ -656,7 +656,7 @@ export async function importTeamsFromCSV(formData: FormData) {
 
   // Get existing teams for validation
   const existingTeams = await prisma.team.findMany({
-    where: { organizationId: user.organizationId },
+    where: { organizationId: user.managerOSOrganizationId },
     select: { id: true, name: true },
   })
 
@@ -769,7 +769,7 @@ export async function importTeamsFromCSV(formData: FormData) {
               name: row.parent,
               description: null,
               parentId: null, // Parent teams are created as top-level initially
-              organizationId: user.organizationId,
+              organizationId: user.managerOSOrganizationId,
             },
           })
           parentId = parentTeam.id
@@ -798,7 +798,7 @@ export async function importTeamsFromCSV(formData: FormData) {
             name: row.name,
             description: row.description || null,
             parentId: parentId,
-            organizationId: user.organizationId,
+            organizationId: user.managerOSOrganizationId,
           },
         })
         importedCount++

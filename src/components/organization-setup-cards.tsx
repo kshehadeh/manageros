@@ -7,26 +7,7 @@ import { HelpBlock } from '@/components/common/help-block'
 import { acceptInvitationForUser } from '@/lib/actions/organization'
 import { Building2, Users, Mail, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-
-interface PendingInvitation {
-  id: string
-  email: string
-  organizationId: string
-  status: string
-  expiresAt: string
-  createdAt: string
-  updatedAt: string
-  organization: {
-    id: string
-    name: string
-    slug: string
-    description: string | null
-  }
-  invitedBy: {
-    name: string
-    email: string
-  }
-}
+import type { PendingInvitation } from '@/types/organization'
 
 interface OrganizationSetupCardsProps {
   pendingInvitations: PendingInvitation[]

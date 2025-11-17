@@ -11,20 +11,20 @@ import { PageSidebar } from '@/components/ui/page-sidebar'
 import { HelpBlock } from '@/components/common/help-block'
 import { User, Users } from 'lucide-react'
 import { prisma } from '@/lib/db'
-import { getCurrentUserWithPerson } from '../../../lib/actions/organization'
+import { getCurrentUserWithPersonAndOrganization } from '../../../lib/auth-utils'
 
 async function DashboardContent() {
-  const { user } = await getCurrentUserWithPerson()
+  const { user } = await getCurrentUserWithPersonAndOrganization()
 
   // If user doesn't have an organization, show organization setup cards
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     return <DashboardOrganizationSetup />
   }
 
   // Check if there are any people in the organization
   const peopleCount = await prisma.person.count({
     where: {
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -33,7 +33,7 @@ async function DashboardContent() {
   // Check if user needs to be linked to a person
   // Admins and owners don't need to be linked to a person
   const needsPersonLink =
-    !user.personId && user.role !== 'ADMIN' && user.role !== 'OWNER'
+    !user.managerOSPersonId && user.role !== 'ADMIN' && user.role !== 'OWNER'
 
   return (
     <PageContainer>
@@ -88,8 +88,8 @@ async function DashboardContent() {
               }
             >
               <ActiveInitiativesSectionServer
-                organizationId={user.organizationId}
-                personId={user.personId}
+                organizationId={user.managerOSOrganizationId}
+                personId={user.managerOSPersonId || null}
               />
             </Suspense>
           </div>

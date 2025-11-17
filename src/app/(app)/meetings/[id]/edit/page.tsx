@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import { MeetingForm } from '@/components/meetings/meeting-form'
 import { utcToLocalDateTimeString } from '@/lib/timezone-utils'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
 
 export default async function EditMeetingPage({
   params,
@@ -14,11 +14,12 @@ export default async function EditMeetingPage({
 }) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
-    redirect('/organization/create')
+  const { id } = await params
+
+  if (!(await getActionPermission(user, 'meeting.edit', id))) {
+    redirect('/dashboard')
   }
 
-  const { id } = await params
   const [meeting, teams] = await Promise.all([getMeeting(id), getTeams()])
 
   if (!meeting) {

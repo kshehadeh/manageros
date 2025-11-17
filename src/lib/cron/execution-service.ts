@@ -79,7 +79,7 @@ export class CronJobExecutionService {
       take: limit,
       include: {
         organization: {
-          select: { id: true, name: true },
+          select: { id: true },
         },
       },
     })

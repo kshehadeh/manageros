@@ -19,15 +19,15 @@ import ReactFlow, {
 } from 'reactflow'
 import dagre from 'dagre'
 import 'reactflow/dist/style.css'
-import { Person } from '@/types/person'
 import { PersonStatusBadge } from '@/components/people/person-status-badge'
+import { PersonWithRelations } from '@/types/person'
 
 interface OrgChartReactFlowProps {
-  people: Person[]
+  people: PersonWithRelations[]
 }
 
 // Custom Person Node Component
-function PersonNode({ data }: { data: Person }) {
+function PersonNode({ data }: { data: PersonWithRelations }) {
   const router = useRouter()
 
   const handleClick = useCallback(() => {
@@ -200,7 +200,7 @@ export function OrgChartReactFlow({ people }: OrgChartReactFlowProps) {
 
       // Find the top-level node (root of hierarchy)
       const topLevelNode = layoutedNodes.find(node => {
-        const person = node.data as Person
+        const person = node.data as PersonWithRelations
         return !person.manager // No manager means this is the top-level node
       })
 

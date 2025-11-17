@@ -20,7 +20,7 @@ export default async function EditFeedbackCampaignPage({
 
   const { id, campaignId } = await params
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     redirect('/organization/create')
   }
 
@@ -28,7 +28,7 @@ export default async function EditFeedbackCampaignPage({
   const person = await prisma.person.findFirst({
     where: {
       id,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -40,7 +40,7 @@ export default async function EditFeedbackCampaignPage({
   const currentPerson = await prisma.person.findFirst({
     where: {
       user: {
-        id: user.id,
+        id: user.managerOSUserId || '',
       },
     },
   })
@@ -61,7 +61,7 @@ export default async function EditFeedbackCampaignPage({
     where: {
       id: campaignId,
       targetPersonId: id,
-      userId: user.id, // Only allow editing campaigns created by the current user
+      userId: user.managerOSUserId || '', // Only allow editing campaigns created by the current user
     },
     include: {
       template: {

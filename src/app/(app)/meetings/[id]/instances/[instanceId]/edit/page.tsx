@@ -14,11 +14,11 @@ export default async function EditMeetingInstancePage({
 }) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
-    redirect('/organization/create')
+  const { id, instanceId } = await params
+  if (!(await getActionPermission(user, 'meeting-instance.edit', instanceId))) {
+    redirect('/dashboard')
   }
 
-  const { id, instanceId } = await params
   const [meetingInstance, parentMeeting] = await Promise.all([
     getMeetingInstance(instanceId),
     getMeeting(id),

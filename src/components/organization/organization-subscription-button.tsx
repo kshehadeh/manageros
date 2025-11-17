@@ -9,6 +9,7 @@ export function OrganizationSubscriptionButton() {
   return (
     <SignedIn>
       <SubscriptionDetailsButton
+        for={'organization'}
         subscriptionDetailsProps={{
           appearance: dark,
         }}

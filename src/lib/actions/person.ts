@@ -18,6 +18,7 @@ import {
   getOrganizationCounts,
 } from '@/lib/subscription-utils'
 import { getFeedbackForPerson } from '@/lib/actions/feedback'
+import { PersonWithRelations } from '../../types/person'
 
 /**
  * Get all people for an organization with relations needed for components
@@ -25,13 +26,13 @@ import { getFeedbackForPerson } from '@/lib/actions/feedback'
 export async function getPeopleForOrganization() {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     return []
   }
 
   return await prisma.person.findMany({
     where: {
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
     include: {
       team: true,
@@ -56,14 +57,14 @@ export async function getPeopleHierarchy() {
   const user = await getCurrentUser()
 
   try {
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return []
     }
 
     // Get all people with their manager and reports relationships
     const people = await prisma.person.findMany({
       where: {
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
       include: {
         manager: {
@@ -71,7 +72,6 @@ export async function getPeopleHierarchy() {
             id: true,
             name: true,
             email: true,
-            role: true,
             status: true,
             birthday: true,
             reports: {
@@ -100,6 +100,12 @@ export async function getPeopleHierarchy() {
           select: {
             id: true,
             name: true,
+            description: true,
+            createdAt: true,
+            updatedAt: true,
+            organizationId: true,
+            avatar: true,
+            parentId: true,
           },
         },
         user: {
@@ -107,7 +113,6 @@ export async function getPeopleHierarchy() {
             id: true,
             name: true,
             email: true,
-            role: true,
           },
         },
         jobRole: {
@@ -122,16 +127,10 @@ export async function getPeopleHierarchy() {
       orderBy: { name: 'asc' },
     })
 
-    // Define the type for a person with all included relations
-    type PersonWithRelations = (typeof people)[0]
-
     // Define the hierarchy item type
-    type HierarchyItem = PersonWithRelations & {
-      level: number
-    }
 
     // Build hierarchical structure
-    const hierarchy: HierarchyItem[] = []
+    const hierarchy: PersonWithRelations[] = []
 
     // Find top-level people (those without managers)
     const topLevelPeople = people.filter(person => !person.managerId)
@@ -147,13 +146,18 @@ export async function getPeopleHierarchy() {
       person.reports.forEach(report => {
         const fullReport = people.find(p => p.id === report.id)
         if (fullReport) {
-          buildHierarchy(fullReport, level + 1)
+          buildHierarchy(
+            fullReport as unknown as PersonWithRelations,
+            level + 1
+          )
         }
       })
     }
 
     // Build hierarchy starting from top-level people
-    topLevelPeople.forEach(person => buildHierarchy(person))
+    topLevelPeople.forEach(person =>
+      buildHierarchy(person as unknown as PersonWithRelations)
+    )
 
     return hierarchy
   } catch (error) {
@@ -171,7 +175,7 @@ export async function createPerson(formData: PersonFormData) {
   }
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to create people')
   }
 
@@ -193,7 +197,7 @@ export async function createPerson(formData: PersonFormData) {
     const team = await prisma.team.findFirst({
       where: {
         id: validatedData.teamId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
     if (!team) {
@@ -206,7 +210,7 @@ export async function createPerson(formData: PersonFormData) {
     const manager = await prisma.person.findFirst({
       where: {
         id: validatedData.managerId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
     if (!manager) {
@@ -219,7 +223,7 @@ export async function createPerson(formData: PersonFormData) {
     const jobRole = await prisma.jobRole.findFirst({
       where: {
         id: validatedData.jobRoleId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
     if (!jobRole) {
@@ -228,9 +232,9 @@ export async function createPerson(formData: PersonFormData) {
   }
 
   // Check organization limits before creating
-  const counts = await getOrganizationCounts(user.organizationId)
+  const counts = await getOrganizationCounts(user.managerOSOrganizationId)
   const limitCheck = await checkOrganizationLimit(
-    user.organizationId,
+    user.managerOSOrganizationId,
     'maxPeople',
     counts.people
   )
@@ -253,7 +257,7 @@ export async function createPerson(formData: PersonFormData) {
       managerId: validatedData.managerId || null,
       jobRoleId: validatedData.jobRoleId || null,
       startedAt,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
     include: {
       team: true,
@@ -285,7 +289,7 @@ export async function updatePerson(id: string, formData: PersonFormData) {
   }
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to update people')
   }
 
@@ -306,7 +310,7 @@ export async function updatePerson(id: string, formData: PersonFormData) {
   const existingPerson = await prisma.person.findFirst({
     where: {
       id,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
   if (!existingPerson) {
@@ -318,7 +322,7 @@ export async function updatePerson(id: string, formData: PersonFormData) {
     const team = await prisma.team.findFirst({
       where: {
         id: validatedData.teamId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
     if (!team) {
@@ -331,7 +335,7 @@ export async function updatePerson(id: string, formData: PersonFormData) {
     const manager = await prisma.person.findFirst({
       where: {
         id: validatedData.managerId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
     if (!manager) {
@@ -344,7 +348,7 @@ export async function updatePerson(id: string, formData: PersonFormData) {
     const jobRole = await prisma.jobRole.findFirst({
       where: {
         id: validatedData.jobRoleId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
     if (!jobRole) {
@@ -400,7 +404,7 @@ export async function updatePersonPartial(
   }
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to update people')
   }
 
@@ -411,7 +415,7 @@ export async function updatePersonPartial(
   const existingPerson = await prisma.person.findFirst({
     where: {
       id,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
   if (!existingPerson) {
@@ -423,7 +427,7 @@ export async function updatePersonPartial(
     const team = await prisma.team.findFirst({
       where: {
         id: validatedData.teamId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
     if (!team) {
@@ -436,7 +440,7 @@ export async function updatePersonPartial(
     const manager = await prisma.person.findFirst({
       where: {
         id: validatedData.managerId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
     if (!manager) {
@@ -449,7 +453,7 @@ export async function updatePersonPartial(
     const jobRole = await prisma.jobRole.findFirst({
       where: {
         id: validatedData.jobRoleId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
     if (!jobRole) {
@@ -542,7 +546,7 @@ export async function deletePerson(id: string) {
   }
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to delete people')
   }
 
@@ -550,7 +554,7 @@ export async function deletePerson(id: string) {
   const existingPerson = await prisma.person.findFirst({
     where: {
       id,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
     include: {
       reports: true,
@@ -582,13 +586,13 @@ export async function deletePerson(id: string) {
 export async function getPerson(id: string) {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return null
     }
     return await prisma.person.findFirst({
       where: {
         id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
       include: {
         team: true,
@@ -599,7 +603,6 @@ export async function getPerson(id: string) {
             id: true,
             name: true,
             email: true,
-            role: true,
           },
         },
       },
@@ -613,13 +616,13 @@ export async function getPerson(id: string) {
 export async function getDirectReports() {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId || !user.personId) {
+    if (!user.managerOSOrganizationId || !user.managerOSPersonId) {
       return []
     }
 
     // Get the current user's person record
     const currentPerson = await prisma.person.findUnique({
-      where: { id: user.personId },
+      where: { id: user.managerOSPersonId },
       include: {
         reports: {
           where: {
@@ -667,7 +670,6 @@ export async function getDirectReports() {
                 id: true,
                 name: true,
                 email: true,
-                role: true,
               },
             },
             jobRole: {
@@ -717,7 +719,7 @@ export async function getDirectReports() {
 export async function getPersonSummaryForModal(personId: string) {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return null
     }
 
@@ -725,7 +727,7 @@ export async function getPersonSummaryForModal(personId: string) {
     const person = await prisma.person.findFirst({
       where: {
         id: personId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
       select: {
         id: true,
@@ -758,7 +760,7 @@ export async function getPersonSummaryForModal(personId: string) {
     // Get initiatives owned by this person
     const initiatives = await prisma.initiative.findMany({
       where: {
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
         owners: {
           some: { personId },
         },
@@ -791,8 +793,8 @@ export async function getPersonSummaryForModal(personId: string) {
     // Get active tasks for this person
     const tasksResult = await getTasksForAssignee(
       personId,
-      user.organizationId,
-      user.id,
+      user.managerOSOrganizationId,
+      user.managerOSUserId || '',
       {
         statusFilter: ['todo', 'in_progress'],
         include: {

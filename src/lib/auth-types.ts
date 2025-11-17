@@ -1,13 +1,31 @@
+import { z } from 'zod'
+
 // User type matching the previous NextAuth session user structure
-export type User = {
-  id: string
-  email: string
-  name: string
-  role: string
-  managerOSUserId: string | null
-  organizationId: string | null
-  organizationName: string | null
-  organizationSlug: string | null
-  personId: string | null
-  clerkUserId: string
-}
+export const UserBriefSchema = z.object({
+  email: z.string().optional().nullable(),
+  name: z.string().optional().nullable(),
+  role: z.string().optional().nullable(),
+  managerOSUserId: z.string(),
+  managerOSOrganizationId: z.string().optional().nullable(),
+  managerOSPersonId: z.string().optional().nullable(),
+  clerkUserId: z.string().optional().nullable(),
+  clerkOrganizationId: z.string().optional().nullable(),
+})
+export type UserBrief = z.infer<typeof UserBriefSchema>
+
+export const OrganizationBriefSchema = z.object({
+  id: z.string().optional().nullable(),
+  clerkOrganizationId: z.string().optional().nullable(),
+  name: z.string().optional().nullable(),
+  slug: z.string().optional().nullable(),
+})
+export type OrganizationBrief = z.infer<typeof OrganizationBriefSchema>
+
+export const PersonBriefSchema = z.object({
+  id: z.string().optional().nullable(),
+  name: z.string().optional().nullable(),
+  email: z.string().optional().nullable(),
+  role: z.string().optional().nullable(),
+  avatar: z.string().optional().nullable(),
+})
+export type PersonBrief = z.infer<typeof PersonBriefSchema>

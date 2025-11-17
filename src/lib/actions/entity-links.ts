@@ -37,7 +37,7 @@ export async function createEntityLink(data: CreateEntityLinkData) {
     throw new Error('Authentication required')
   }
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to create links')
   }
 
@@ -52,8 +52,8 @@ export async function createEntityLink(data: CreateEntityLinkData) {
         description: validatedData.description,
         entityType: validatedData.entityType,
         entityId: validatedData.entityId,
-        organizationId: user.organizationId,
-        createdById: user.id,
+        organizationId: user.managerOSOrganizationId,
+        createdById: user.managerOSUserId || '',
       },
     })
 
@@ -74,7 +74,7 @@ export async function updateEntityLink(data: UpdateEntityLinkData) {
     throw new Error('Authentication required')
   }
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to update links')
   }
 
@@ -86,7 +86,7 @@ export async function updateEntityLink(data: UpdateEntityLinkData) {
     const existingLink = await prisma.entityLink.findFirst({
       where: {
         id: validatedData.id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
 
@@ -124,7 +124,7 @@ export async function deleteEntityLink(data: DeleteEntityLinkData) {
     throw new Error('Authentication required')
   }
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to delete links')
   }
 
@@ -136,7 +136,7 @@ export async function deleteEntityLink(data: DeleteEntityLinkData) {
     const existingLink = await prisma.entityLink.findFirst({
       where: {
         id: validatedData.id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
 
@@ -165,7 +165,7 @@ export async function getEntityLinks(entityType: string, entityId: string) {
     throw new Error('Authentication required')
   }
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to view links')
   }
 
@@ -174,7 +174,7 @@ export async function getEntityLinks(entityType: string, entityId: string) {
       where: {
         entityType,
         entityId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
       include: {
         createdBy: {
@@ -206,7 +206,7 @@ export async function getEntityLinkById(id: string) {
     throw new Error('Authentication required')
   }
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to view links')
   }
 
@@ -214,7 +214,7 @@ export async function getEntityLinkById(id: string) {
     const link = await prisma.entityLink.findFirst({
       where: {
         id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
       include: {
         createdBy: {

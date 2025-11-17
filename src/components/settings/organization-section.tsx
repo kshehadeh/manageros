@@ -5,26 +5,7 @@ import { OrganizationSetupCards } from '@/components/organization-setup-cards'
 import { Settings } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Link } from '@/components/ui/link'
-
-interface PendingInvitation {
-  id: string
-  email: string
-  organizationId: string
-  status: string
-  expiresAt: string
-  createdAt: string
-  updatedAt: string
-  organization: {
-    id: string
-    name: string
-    slug: string
-    description: string | null
-  }
-  invitedBy: {
-    name: string
-    email: string
-  }
-}
+import type { PendingInvitation } from '@/types/organization'
 
 interface OrganizationSectionProps {
   organizationId: string | null

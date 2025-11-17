@@ -17,7 +17,7 @@ export async function uploadAvatar(formData: FormData, personId: string) {
   }
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to upload avatars')
   }
 
@@ -25,7 +25,7 @@ export async function uploadAvatar(formData: FormData, personId: string) {
   const person = await prisma.person.findFirst({
     where: {
       id: personId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -66,7 +66,7 @@ export async function updatePersonAvatar(
   }
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to update avatars')
   }
 
@@ -74,7 +74,7 @@ export async function updatePersonAvatar(
   const person = await prisma.person.findFirst({
     where: {
       id: personId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -98,7 +98,7 @@ export async function getLinkedAccountAvatars(personId: string) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization')
   }
 
@@ -106,7 +106,7 @@ export async function getLinkedAccountAvatars(personId: string) {
   const person = await prisma.person.findFirst({
     where: {
       id: personId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
     include: {
       jiraAccount: true,
@@ -128,7 +128,7 @@ export async function getLinkedAccountAvatars(personId: string) {
     try {
       // Get user's Jira credentials
       const credentials = await prisma.userJiraCredentials.findUnique({
-        where: { userId: user.id },
+        where: { userId: user.managerOSUserId || '' },
       })
 
       if (credentials) {
@@ -175,7 +175,7 @@ export async function uploadTeamAvatar(formData: FormData, teamId: string) {
   }
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to upload team avatars'
     )
@@ -185,7 +185,7 @@ export async function uploadTeamAvatar(formData: FormData, teamId: string) {
   const team = await prisma.team.findFirst({
     where: {
       id: teamId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -226,7 +226,7 @@ export async function updateTeamAvatar(
   }
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to update team avatars'
     )
@@ -236,7 +236,7 @@ export async function updateTeamAvatar(
   const team = await prisma.team.findFirst({
     where: {
       id: teamId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 

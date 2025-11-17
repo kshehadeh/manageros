@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
   const user = await getCurrentUser()
   try {
     // Check if user belongs to an organization
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return NextResponse.json(
         {
           error:
@@ -123,9 +123,9 @@ export async function GET(request: NextRequest) {
     // Build where conditions for SQL query
     const whereConditions: Prisma.Sql[] = [
       // Only show campaigns created by current user
-      Prisma.sql`fc."userId" = ${user.id}`,
+      Prisma.sql`fc."userId" = ${user.managerOSUserId || ''}`,
       // Ensure target person is in the same organization
-      Prisma.sql`tp."organizationId" = ${user.organizationId}`,
+      Prisma.sql`tp."organizationId" = ${user.managerOSOrganizationId}`,
     ]
 
     // Apply status filter (immutable takes precedence)

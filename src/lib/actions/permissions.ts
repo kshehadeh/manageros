@@ -50,6 +50,12 @@ const ALL_PERMISSIONS = [
   'feedback-campaign.view',
   // User linking permissions
   'user.link-person',
+  // Person permissions
+  'person.create',
+  'person.edit',
+  'person.delete',
+  'person.view',
+  'person.overview.view',
 ] as const
 
 /**

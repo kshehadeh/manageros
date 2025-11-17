@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import {
   getOrganizationInvitations,
   getOrganizationMembers,
+  getOrganizationDetails,
 } from '@/lib/actions/organization'
 import { getOrganizationSubscription } from '@/lib/subscription-utils'
 import { Link } from '@/components/ui/link'
@@ -21,6 +22,7 @@ import {
   Github,
   Package,
   CreditCard,
+  Users,
 } from 'lucide-react'
 import { prisma } from '@/lib/db'
 import { CreateNotificationModal } from '@/components/notifications/create-notification-modal'
@@ -31,13 +33,14 @@ import { OrganizationSubscriptionButton } from '@/components/organization/organi
 export default async function OrganizationSettingsPage() {
   const user = await getCurrentUser()
 
+  console.log('user', user)
   // Check if user is admin
   if (!isAdminOrOwner(user)) {
     redirect('/dashboard')
   }
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     redirect('/organization/create')
   }
 
@@ -45,11 +48,16 @@ export default async function OrganizationSettingsPage() {
   const invitations = await getOrganizationInvitations()
   const _openInvitations = invitations.filter(inv => inv.status === 'pending')
 
-  // Get members for management
+  // Get organization members
   const members = await getOrganizationMembers()
 
+  // Get organization details for statistics
+  const organization = await getOrganizationDetails()
+
   // Get subscription information
-  const subscription = await getOrganizationSubscription(user.organizationId)
+  const subscription = await getOrganizationSubscription(
+    user.managerOSOrganizationId
+  )
 
   // Get billing user information
   const billingUser = subscription?.billingUserId
@@ -74,6 +82,55 @@ export default async function OrganizationSettingsPage() {
 
         <PageContent>
           <div className='grid gap-6 md:grid-cols-2'>
+            {/* Organization Statistics */}
+            {organization && (
+              <PageSection
+                header={
+                  <SectionHeader
+                    icon={Users}
+                    title='Organization Statistics'
+                    description='Overview of your organization'
+                  />
+                }
+              >
+                <div className='grid gap-4 md:grid-cols-3'>
+                  <div className='flex items-center gap-3 p-4 border rounded-lg'>
+                    <div className='p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg'>
+                      <Users className='w-5 h-5 text-blue-600 dark:text-blue-400' />
+                    </div>
+                    <div>
+                      <p className='text-2xl font-bold'>
+                        {organization.organizationStats.membersCount}
+                      </p>
+                      <p className='text-sm text-muted-foreground'>Members</p>
+                    </div>
+                  </div>
+                  <div className='flex items-center gap-3 p-4 border rounded-lg'>
+                    <div className='p-2 bg-green-100 dark:bg-green-900/20 rounded-lg'>
+                      <UserCheck className='w-5 h-5 text-green-600 dark:text-green-400' />
+                    </div>
+                    <div>
+                      <p className='text-2xl font-bold'>
+                        {organization.organizationStats.personsCount}
+                      </p>
+                      <p className='text-sm text-muted-foreground'>People</p>
+                    </div>
+                  </div>
+                  <div className='flex items-center gap-3 p-4 border rounded-lg'>
+                    <div className='p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg'>
+                      <Building className='w-5 h-5 text-purple-600 dark:text-purple-400' />
+                    </div>
+                    <div>
+                      <p className='text-2xl font-bold'>
+                        {organization.organizationStats.teamsCount}
+                      </p>
+                      <p className='text-sm text-muted-foreground'>Teams</p>
+                    </div>
+                  </div>
+                </div>
+              </PageSection>
+            )}
+
             {/* Organization Info */}
             <PageSection
               header={
@@ -81,17 +138,18 @@ export default async function OrganizationSettingsPage() {
               }
             >
               <div className='space-y-4'>
-                <div className='space-y-2'>
+                <div className='space-y-2 grid grid-cols-1 md:grid-cols-2 gap-2'>
                   <div>
                     <p className='text-sm font-medium'>Name</p>
                     <p className='text-sm text-muted-foreground'>
-                      {user.organizationName}
+                      {organization?.clerkOrganization?.name}
                     </p>
                   </div>
                   <div>
                     <p className='text-sm font-medium'>Organization ID</p>
                     <p className='text-sm text-muted-foreground'>
-                      {user.organizationId}
+                      {user.managerOSOrganizationId} (
+                      {organization?.clerkOrganization?.id})
                     </p>
                   </div>
                   <div>
@@ -99,6 +157,7 @@ export default async function OrganizationSettingsPage() {
                     <p className='text-sm text-muted-foreground'>{user.role}</p>
                   </div>
                 </div>
+
                 <div className='border-t pt-4 flex flex-wrap gap-3'>
                   <Button asChild variant='outline'>
                     <Link
@@ -184,8 +243,12 @@ export default async function OrganizationSettingsPage() {
                 </div>
 
                 {/* Clerk Subscription Button */}
-                <div className='border-t pt-4'>
-                  <OrganizationSubscriptionButton />
+                <div className='border-t pt-4 space-y-3'>
+                  {organization?.clerkOrganization?.id ? (
+                    <OrganizationSubscriptionButton />
+                  ) : (
+                    <div>No Clerk organization found</div>
+                  )}
                 </div>
               </div>
             </PageSection>

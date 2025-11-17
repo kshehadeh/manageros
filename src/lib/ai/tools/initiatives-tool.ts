@@ -48,12 +48,12 @@ export const initiativesTool = {
       query,
     })
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       throw new Error('User must belong to an organization')
     }
 
     const whereClause: Prisma.InitiativeWhereInput = {
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     }
 
     if (status) whereClause.status = status

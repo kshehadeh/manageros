@@ -12,7 +12,7 @@ export async function saveGithubCredentials(formData: {
 }) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to configure GitHub')
   }
 
@@ -34,9 +34,9 @@ export async function saveGithubCredentials(formData: {
 
   // Upsert the credentials
   await prisma.userGithubCredentials.upsert({
-    where: { userId: user.id },
+    where: { userId: user.managerOSUserId || '' },
     create: {
-      userId: user.id,
+      userId: user.managerOSUserId || '',
       githubUsername: formData.githubUsername,
       encryptedPat,
     },
@@ -54,7 +54,7 @@ export async function getGithubCredentials() {
   const user = await getCurrentUser()
 
   const credentials = await prisma.userGithubCredentials.findUnique({
-    where: { userId: user.id },
+    where: { userId: user.managerOSUserId || '' },
     select: {
       githubUsername: true,
     },
@@ -67,7 +67,7 @@ export async function deleteGithubCredentials() {
   const user = await getCurrentUser()
 
   await prisma.userGithubCredentials.delete({
-    where: { userId: user.id },
+    where: { userId: user.managerOSUserId || '' },
   })
 
   revalidatePath('/settings')
@@ -80,7 +80,7 @@ export async function linkPersonToGithubAccount(
 ) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization')
   }
 
@@ -88,7 +88,7 @@ export async function linkPersonToGithubAccount(
   const person = await prisma.person.findFirst({
     where: {
       id: personId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -98,7 +98,7 @@ export async function linkPersonToGithubAccount(
 
   // Get user's GitHub credentials
   const credentials = await prisma.userGithubCredentials.findUnique({
-    where: { userId: user.id },
+    where: { userId: user.managerOSUserId || '' },
   })
 
   if (!credentials) {
@@ -140,7 +140,7 @@ export async function linkPersonToGithubAccount(
 export async function unlinkPersonFromGithubAccount(personId: string) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization')
   }
 
@@ -148,7 +148,7 @@ export async function unlinkPersonFromGithubAccount(personId: string) {
   const person = await prisma.person.findFirst({
     where: {
       id: personId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -255,7 +255,7 @@ export async function fetchGithubPullRequests(
 ) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization')
   }
 
@@ -263,7 +263,7 @@ export async function fetchGithubPullRequests(
   const person = await prisma.person.findFirst({
     where: {
       id: personId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
     include: {
       githubAccount: true,
@@ -280,7 +280,7 @@ export async function fetchGithubPullRequests(
 
   // Get user's GitHub credentials
   const credentials = await prisma.userGithubCredentials.findUnique({
-    where: { userId: user.id },
+    where: { userId: user.managerOSUserId || '' },
   })
 
   if (!credentials) {
@@ -290,7 +290,7 @@ export async function fetchGithubPullRequests(
   // Get allowed GitHub organizations for filtering
   const githubOrgs = await prisma.organizationGithubOrg.findMany({
     where: {
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
     select: {
       githubOrgName: true,
@@ -334,7 +334,7 @@ export async function fetchGithubMetrics(
 ) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization')
   }
 
@@ -342,7 +342,7 @@ export async function fetchGithubMetrics(
   const person = await prisma.person.findFirst({
     where: {
       id: personId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
     include: {
       githubAccount: true,
@@ -359,7 +359,7 @@ export async function fetchGithubMetrics(
 
   // Get user's GitHub credentials
   const credentials = await prisma.userGithubCredentials.findUnique({
-    where: { userId: user.id },
+    where: { userId: user.managerOSUserId || '' },
   })
 
   if (!credentials) {
@@ -369,7 +369,7 @@ export async function fetchGithubMetrics(
   // Get allowed GitHub organizations for filtering
   const githubOrgs = await prisma.organizationGithubOrg.findMany({
     where: {
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
     select: {
       githubOrgName: true,

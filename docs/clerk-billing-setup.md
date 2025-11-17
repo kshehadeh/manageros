@@ -70,14 +70,16 @@ const pricingTiers = [
 
 ## How It Works
 
-### Organization-Based Subscription Model
+### Clerk Organization-Based Subscription Model
 
-Subscriptions are now tied to organizations rather than individual users. When a user creates an organization, they become the billing user for that organization, and the subscription information is stored on the organization record.
+Subscriptions are tied to Clerk organizations, which correspond to ManagerOS organizations. Each ManagerOS organization has a corresponding Clerk organization, and subscriptions are managed at the Clerk organization level.
 
 **Key Points:**
 
-- Each organization has a `billingUserId` that references the user who owns the subscription
-- Subscription details (`subscriptionPlanId`, `subscriptionPlanName`, `subscriptionStatus`) are stored on the organization
+- Each ManagerOS organization has a `clerkOrganizationId` that links to a Clerk organization
+- Each organization has a `billingUserId` that references the user who selected the subscription (for reference)
+- Subscription details (`subscriptionPlanId`, `subscriptionPlanName`, `subscriptionStatus`) are stored on the organization and synced from Clerk
+- Subscriptions are created and managed through Clerk's organization billing system
 - Limits are enforced at the organization level based on the stored subscription plan
 - Users can view existing entities even if over limit, but cannot create new ones (per rule #10)
 
@@ -104,16 +106,18 @@ Clerk sends webhooks for subscription events, which are handled in `src/app/api/
 
 ### Implemented Webhook Handlers
 
-- **`billing.subscription.created`**: Updates organization subscription when a new subscription is created
-- **`billing.subscription.updated`**: Updates organization subscription when subscription changes (plan upgrade/downgrade)
-- **`billing.subscription.canceled`**: Marks organization subscription as canceled
+- **`subscription.created`**: Updates organization subscription when a new subscription is created for a Clerk organization
+- **`subscription.updated`**: Updates organization subscription when subscription changes (plan upgrade/downgrade)
+- **`subscriptionItem.canceled`**: Marks organization subscription as canceled
+- **`organizationMembership.created`**: No longer used - membership is managed directly via Clerk API
+- **`organizationMembership.deleted`**: No longer used - membership is managed directly via Clerk API
 
 ### How Webhooks Work
 
-1. Clerk sends webhook with `user_id` (Clerk user ID), `plan_id`, `plan_name`, and `status`
-2. Webhook handler finds the user by Clerk user ID
-3. Finds the organization where `billingUserId` matches the user
-4. Updates the organization's subscription fields (`subscriptionPlanId`, `subscriptionPlanName`, `subscriptionStatus`)
+1. Clerk sends webhook with `organization_id` (Clerk organization ID), `plan_id`, `plan_name`, and `status`
+2. Webhook handler finds the ManagerOS organization by `clerkOrganizationId`
+3. Updates the organization's subscription fields (`subscriptionPlanId`, `subscriptionPlanName`, `subscriptionStatus`)
+4. Falls back to user-based lookup for backward compatibility (if `organization_id` is not present)
 
 ### Additional Webhook Events (Not Yet Implemented)
 
@@ -184,12 +188,21 @@ Subscription limits are enforced at the organization level. Limits are defined i
 
 ## Migration Notes
 
-For existing organizations created before this subscription system was implemented:
+### Existing Organizations
 
-- The migration script sets `billingUserId` to the first OWNER member found
-- If no OWNER exists, it sets it to the first ADMIN member
-- Subscription fields are set to null for existing organizations
-- These organizations will default to free tier limits until subscription is updated
+For existing ManagerOS organizations created before Clerk organization-based billing:
+
+- Clerk organizations are automatically created on first access (when `getOrganizationDetails()` is called)
+- The organization slug is used as the Clerk organization slug
+- Existing subscription data is preserved
+- Users are automatically added to Clerk organizations when they access organization features
+
+### Clerk Organization Creation
+
+- Clerk organizations are created automatically when:
+  - A new ManagerOS organization is created
+  - An existing organization is accessed for the first time after migration
+  - A user accepts an invitation to an organization that doesn't have a Clerk org yet
 
 ## Additional Resources
 

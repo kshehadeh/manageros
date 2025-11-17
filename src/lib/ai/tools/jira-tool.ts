@@ -58,7 +58,7 @@ export const jiraTool = {
     })
     try {
       const user = await getCurrentUser()
-      if (!user.organizationId) {
+      if (!user.managerOSOrganizationId) {
         throw new Error(
           'User must belong to an organization to use Jira integration'
         )
@@ -66,7 +66,7 @@ export const jiraTool = {
 
       // Get user's Jira credentials
       const credentials = await prisma.userJiraCredentials.findUnique({
-        where: { userId: user.id },
+        where: { userId: user.managerOSUserId },
       })
 
       if (!credentials) {
@@ -81,8 +81,8 @@ export const jiraTool = {
 
       // If no personId provided, try to use current user's linked person
       if (!targetPersonId && !assignee) {
-        if (user.personId) {
-          targetPersonId = user.personId
+        if (user.managerOSPersonId) {
+          targetPersonId = user.managerOSPersonId
         }
       }
 
@@ -104,14 +104,17 @@ export const jiraTool = {
 
         if (!personJiraAccount) {
           const personName =
-            targetPersonId === user.personId ? 'You' : 'This person'
+            targetPersonId === user.managerOSPersonId ? 'You' : 'This person'
           throw new Error(
             `${personName} do not have a Jira account linked. Please link a Jira account first in Settings.`
           )
         }
 
         // Verify the person belongs to the same organization
-        if (personJiraAccount.person.organizationId !== user.organizationId) {
+        if (
+          personJiraAccount.person.organizationId !==
+          user.managerOSOrganizationId
+        ) {
           throw new Error(
             'You can only look up Jira accounts for people in your organization'
           )

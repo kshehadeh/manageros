@@ -36,14 +36,12 @@ export async function POST(request: NextRequest) {
     // Create user in a transaction
     const result = await prisma.$transaction(async tx => {
       let organization = null
-      let userRole = 'USER'
 
       // If user has a pending invitation, accept it and join that organization
       if (pendingInvitation) {
         organization = await tx.organization.findUnique({
           where: { id: pendingInvitation.organization.id },
         })
-        userRole = 'USER' // Invited users are regular users, not admins
 
         // Mark invitation as accepted
         await tx.organizationInvitation.update({
@@ -61,26 +59,24 @@ export async function POST(request: NextRequest) {
           name: validatedData.name,
           email: validatedData.email,
           passwordHash,
-          role: userRole,
-          organizationId: organization?.id || null,
-        },
-        include: {
-          organization: true,
         },
       })
 
-      // Create OrganizationMember record if user has an organization
-      if (organization) {
-        await tx.organizationMember.create({
-          data: {
-            userId: user.id,
-            organizationId: organization.id,
-            role: userRole,
-          },
-        })
-      }
+      // Reload user with organization for response
+      const userWithOrg = await tx.user.findUnique({
+        where: { id: user.id },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      })
 
-      return { user, organization, wasInvited: !!pendingInvitation }
+      return {
+        user: userWithOrg || user,
+        organization,
+        wasInvited: !!pendingInvitation,
+      }
     })
 
     return NextResponse.json({
@@ -91,7 +87,7 @@ export async function POST(request: NextRequest) {
         id: result.user.id,
         name: result.user.name,
         email: result.user.email,
-        role: result.user.role,
+        role: 'USER', // Role is managed by Clerk
         organization: result.organization,
       },
       wasInvited: result.wasInvited,

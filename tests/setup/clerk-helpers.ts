@@ -134,6 +134,37 @@ export class ClerkTestHelper {
   }
 
   /**
+   * Get organization details from Clerk
+   */
+  async getClerkOrganization(clerkOrgId: string) {
+    const response = await fetch(
+      `${this.baseUrl}/organizations/${clerkOrgId}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+        },
+      }
+    )
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null
+      }
+      const error = await response.text()
+      throw new Error(
+        `Failed to get Clerk organization: ${response.status} ${error}`
+      )
+    }
+
+    return (await response.json()) as {
+      id: string
+      name: string
+      slug: string
+    }
+  }
+
+  /**
    * Update user metadata in Clerk
    * This is used to sync ManagerOS user data to Clerk
    */

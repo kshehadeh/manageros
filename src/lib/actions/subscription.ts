@@ -18,7 +18,7 @@ export async function getOrganizationSubscriptionAction(
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to view subscription information'
     )
@@ -26,7 +26,7 @@ export async function getOrganizationSubscriptionAction(
 
   // Verify that the requested organizationId matches the user's organizationId
   // This prevents users from accessing other organizations' subscription data
-  if (organizationId !== user.organizationId) {
+  if (organizationId !== user.managerOSOrganizationId) {
     throw new Error('Organization subscription not found or access denied')
   }
 

@@ -1,9 +1,9 @@
 import Sidebar from './sidebar'
 import { getFilteredNavigation } from '@/lib/auth-utils'
-import { getCurrentUserWithPerson } from '@/lib/actions/organization'
+import { getCurrentUserWithPersonAndOrganization } from '@/lib/auth-utils'
 import { Suspense } from 'react'
 export default async function SidebarServer() {
-  const userWithPerson = await getCurrentUserWithPerson()
+  const userWithPerson = await getCurrentUserWithPersonAndOrganization()
   const filteredNavigation = await getFilteredNavigation(userWithPerson.user)
 
   return (

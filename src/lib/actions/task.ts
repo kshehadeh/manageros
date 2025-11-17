@@ -13,7 +13,7 @@ export async function createTask(formData: TaskFormData) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to create tasks')
   }
 
@@ -28,7 +28,7 @@ export async function createTask(formData: TaskFormData) {
     const assignee = await prisma.person.findFirst({
       where: {
         id: validatedData.assigneeId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
     if (!assignee) {
@@ -41,7 +41,7 @@ export async function createTask(formData: TaskFormData) {
     const initiative = await prisma.initiative.findFirst({
       where: {
         id: validatedData.initiativeId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
     if (!initiative) {
@@ -55,7 +55,7 @@ export async function createTask(formData: TaskFormData) {
       where: {
         id: validatedData.objectiveId,
         initiative: {
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
         },
       },
     })
@@ -70,7 +70,7 @@ export async function createTask(formData: TaskFormData) {
       title: validatedData.title,
       description: validatedData.description || null,
       assigneeId: validatedData.assigneeId || null,
-      createdById: user.id,
+      createdById: user.managerOSUserId || '',
       status: validatedData.status,
       priority: validatedData.priority,
       estimate: null,
@@ -98,7 +98,7 @@ export async function updateTask(taskId: string, formData: TaskFormData) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to update tasks')
   }
 
@@ -113,9 +113,9 @@ export async function updateTask(taskId: string, formData: TaskFormData) {
     where: {
       id: taskId,
       ...getTaskAccessWhereClause(
-        user.organizationId,
-        user.id,
-        user.personId || undefined
+        user.managerOSOrganizationId,
+        user.managerOSUserId || '',
+        user.managerOSPersonId || undefined
       ),
     },
   })
@@ -129,7 +129,7 @@ export async function updateTask(taskId: string, formData: TaskFormData) {
     const assignee = await prisma.person.findFirst({
       where: {
         id: validatedData.assigneeId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
     if (!assignee) {
@@ -142,7 +142,7 @@ export async function updateTask(taskId: string, formData: TaskFormData) {
     const initiative = await prisma.initiative.findFirst({
       where: {
         id: validatedData.initiativeId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
     if (!initiative) {
@@ -156,7 +156,7 @@ export async function updateTask(taskId: string, formData: TaskFormData) {
       where: {
         id: validatedData.objectiveId,
         initiative: {
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
         },
       },
     })
@@ -201,7 +201,7 @@ export async function deleteTask(taskId: string) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to delete tasks')
   }
 
@@ -210,9 +210,9 @@ export async function deleteTask(taskId: string) {
     where: {
       id: taskId,
       ...getTaskAccessWhereClause(
-        user.organizationId,
-        user.id,
-        user.personId || undefined
+        user.managerOSOrganizationId,
+        user.managerOSUserId || '',
+        user.managerOSPersonId || undefined
       ),
     },
   })
@@ -235,7 +235,7 @@ export async function getTasksForInitiative(initiativeId: string) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to view tasks')
   }
 
@@ -243,9 +243,9 @@ export async function getTasksForInitiative(initiativeId: string) {
     where: {
       initiativeId,
       ...getTaskAccessWhereClause(
-        user.organizationId,
-        user.id,
-        user.personId || undefined
+        user.managerOSOrganizationId,
+        user.managerOSUserId || '',
+        user.managerOSPersonId || undefined
       ),
     },
     include: {
@@ -271,7 +271,7 @@ export async function getAllTasksForInitiative(initiativeId: string) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to view tasks')
   }
 
@@ -283,10 +283,10 @@ export async function getAllTasksForInitiative(initiativeId: string) {
         },
         {
           OR: [
-            { initiative: { organizationId: user.organizationId } },
+            { initiative: { organizationId: user.managerOSOrganizationId } },
             {
               objective: {
-                initiative: { organizationId: user.organizationId },
+                initiative: { organizationId: user.managerOSOrganizationId },
               },
             },
           ],
@@ -313,7 +313,7 @@ export async function getInitiativeTaskCompletionCounts(initiativeId: string) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to view tasks')
   }
 
@@ -324,18 +324,18 @@ export async function getInitiativeTaskCompletionCounts(initiativeId: string) {
       },
       {
         OR: [
-          { initiative: { organizationId: user.organizationId } },
+          { initiative: { organizationId: user.managerOSOrganizationId } },
           {
             objective: {
-              initiative: { organizationId: user.organizationId },
+              initiative: { organizationId: user.managerOSOrganizationId },
             },
           },
         ],
       },
       getTaskAccessWhereClause(
-        user.organizationId,
-        user.id,
-        user.personId || undefined
+        user.managerOSOrganizationId,
+        user.managerOSUserId || '',
+        user.managerOSPersonId || undefined
       ),
     ],
   }
@@ -393,7 +393,7 @@ export async function createQuickTask(
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to create tasks')
   }
 
@@ -408,16 +408,16 @@ export async function createQuickTask(
 
   // Verify the person belongs to the user's organization if user is linked to a person
   let assigneeId = null
-  if (user.personId) {
+  if (user.managerOSPersonId) {
     const person = await prisma.person.findFirst({
       where: {
-        id: user.personId,
-        organizationId: user.organizationId,
+        id: user.managerOSPersonId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
 
     if (person) {
-      assigneeId = user.personId
+      assigneeId = user.managerOSPersonId
     }
   }
 
@@ -428,7 +428,7 @@ export async function createQuickTask(
       status: 'todo',
       priority: priority || DEFAULT_TASK_PRIORITY,
       assigneeId,
-      createdById: user.id,
+      createdById: user.managerOSUserId || '',
       dueDate: dueDate || null,
     },
     include: {
@@ -456,7 +456,7 @@ export async function createQuickTaskForInitiative(
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to create tasks')
   }
 
@@ -473,7 +473,7 @@ export async function createQuickTaskForInitiative(
   const initiative = await prisma.initiative.findFirst({
     where: {
       id: initiativeId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
   if (!initiative) {
@@ -497,16 +497,16 @@ export async function createQuickTaskForInitiative(
 
   // Verify the person belongs to the user's organization if user is linked to a person
   let assigneeId = null
-  if (user.personId) {
+  if (user.managerOSPersonId) {
     const person = await prisma.person.findFirst({
       where: {
-        id: user.personId,
-        organizationId: user.organizationId,
+        id: user.managerOSPersonId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
 
     if (person) {
-      assigneeId = user.personId
+      assigneeId = user.managerOSPersonId
     }
   }
 
@@ -517,7 +517,7 @@ export async function createQuickTaskForInitiative(
       status: 'todo',
       priority: priority || DEFAULT_TASK_PRIORITY,
       assigneeId,
-      createdById: user.id,
+      createdById: user.managerOSUserId || '',
       initiativeId,
       objectiveId: objectiveId || null,
       dueDate: dueDate || null,
@@ -542,7 +542,7 @@ export async function updateTaskStatus(taskId: string, status: TaskStatus) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to update tasks')
   }
 
@@ -551,9 +551,9 @@ export async function updateTaskStatus(taskId: string, status: TaskStatus) {
     where: {
       id: taskId,
       ...getTaskAccessWhereClause(
-        user.organizationId,
-        user.id,
-        user.personId || undefined
+        user.managerOSOrganizationId,
+        user.managerOSUserId || '',
+        user.managerOSPersonId || undefined
       ),
     },
   })
@@ -589,7 +589,7 @@ export async function updateTaskTitle(taskId: string, title: string) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to update tasks')
   }
 
@@ -607,9 +607,9 @@ export async function updateTaskTitle(taskId: string, title: string) {
     where: {
       id: taskId,
       ...getTaskAccessWhereClause(
-        user.organizationId,
-        user.id,
-        user.personId || undefined
+        user.managerOSOrganizationId,
+        user.managerOSUserId || '',
+        user.managerOSPersonId || undefined
       ),
     },
   })
@@ -647,7 +647,7 @@ export async function updateTaskAssignee(
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to update tasks')
   }
 
@@ -656,9 +656,9 @@ export async function updateTaskAssignee(
     where: {
       id: taskId,
       ...getTaskAccessWhereClause(
-        user.organizationId,
-        user.id,
-        user.personId || undefined
+        user.managerOSOrganizationId,
+        user.managerOSUserId || '',
+        user.managerOSPersonId || undefined
       ),
     },
   })
@@ -672,7 +672,7 @@ export async function updateTaskAssignee(
     const assignee = await prisma.person.findFirst({
       where: {
         id: assigneeId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
     if (!assignee) {
@@ -706,7 +706,7 @@ export async function updateTaskPriority(taskId: string, priority: number) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to update tasks')
   }
 
@@ -720,9 +720,9 @@ export async function updateTaskPriority(taskId: string, priority: number) {
     where: {
       id: taskId,
       ...getTaskAccessWhereClause(
-        user.organizationId,
-        user.id,
-        user.personId || undefined
+        user.managerOSOrganizationId,
+        user.managerOSUserId || '',
+        user.managerOSPersonId || undefined
       ),
     },
   })
@@ -767,7 +767,7 @@ export async function updateTaskQuickEdit(
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to update tasks')
   }
 
@@ -776,9 +776,9 @@ export async function updateTaskQuickEdit(
     where: {
       id: taskId,
       ...getTaskAccessWhereClause(
-        user.organizationId,
-        user.id,
-        user.personId || undefined
+        user.managerOSOrganizationId,
+        user.managerOSUserId || '',
+        user.managerOSPersonId || undefined
       ),
     },
   })
@@ -792,7 +792,7 @@ export async function updateTaskQuickEdit(
     const assignee = await prisma.person.findFirst({
       where: {
         id: updates.assigneeId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
     if (!assignee) {
@@ -847,7 +847,7 @@ export async function updateTaskDescription(
 ) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to update tasks')
   }
 
@@ -855,9 +855,9 @@ export async function updateTaskDescription(
     where: {
       id: taskId,
       ...getTaskAccessWhereClause(
-        user.organizationId,
-        user.id,
-        user.personId || undefined
+        user.managerOSOrganizationId,
+        user.managerOSUserId || '',
+        user.managerOSPersonId || undefined
       ),
     },
   })
@@ -889,7 +889,7 @@ export async function updateTaskDescription(
 export async function updateTaskDueDate(taskId: string, dueDate: Date | null) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to update tasks')
   }
 
@@ -897,9 +897,9 @@ export async function updateTaskDueDate(taskId: string, dueDate: Date | null) {
     where: {
       id: taskId,
       ...getTaskAccessWhereClause(
-        user.organizationId,
-        user.id,
-        user.personId || undefined
+        user.managerOSOrganizationId,
+        user.managerOSUserId || '',
+        user.managerOSPersonId || undefined
       ),
     },
   })

@@ -38,17 +38,17 @@ export async function generatePersonSynopsis(
 ): Promise<GenerateSynopsisResponse> {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization')
   }
 
   const { personId, fromDate, toDate, includeFeedback = false } = params
 
   // Get current person ID from session to enforce access control and feedback privacy
-  const currentPersonId = user.personId
+  const currentPersonId = user.managerOSPersonId
 
   const person = await prisma.person.findFirst({
-    where: { id: personId, organizationId: user.organizationId },
+    where: { id: personId, organizationId: user.managerOSOrganizationId },
     include: {
       tasks: {
         where: {
@@ -111,7 +111,7 @@ export async function generatePersonSynopsis(
   }> = []
   if (person.githubAccount) {
     const userCreds = await prisma.userGithubCredentials.findUnique({
-      where: { userId: user.id },
+      where: { userId: user.managerOSUserId || '' },
     })
     if (userCreds) {
       const gh = GithubApiService.fromEncryptedCredentials(
@@ -148,7 +148,7 @@ export async function generatePersonSynopsis(
   }> = []
   if (person.jiraAccount) {
     const creds = await prisma.userJiraCredentials.findUnique({
-      where: { userId: user.id },
+      where: { userId: user.managerOSUserId || '' },
     })
     if (creds) {
       const jira = JiraApiService.fromEncryptedCredentials(
@@ -258,14 +258,14 @@ export async function listPersonSynopses(
   limit = 10
 ): Promise<ListSynopsesResponse> {
   const user = await getCurrentUser()
-  if (!user.organizationId)
+  if (!user.managerOSOrganizationId)
     throw new Error('User must belong to an organization')
 
   // Get current person ID from session to enforce access control
-  const currentPersonId = user.personId
+  const currentPersonId = user.managerOSPersonId
 
   const person = await prisma.person.findFirst({
-    where: { id: personId, organizationId: user.organizationId },
+    where: { id: personId, organizationId: user.managerOSOrganizationId },
     select: { id: true },
   })
   if (!person) throw new Error('Person not found or access denied')
@@ -303,17 +303,17 @@ export async function listPersonSynopses(
 
 export async function deleteSynopsis(synopsisId: string): Promise<void> {
   const user = await getCurrentUser()
-  if (!user.organizationId)
+  if (!user.managerOSOrganizationId)
     throw new Error('User must belong to an organization')
 
   // Get current person ID from session to enforce access control
-  const currentPersonId = user.personId
+  const currentPersonId = user.managerOSPersonId
 
   // Verify the synopsis belongs to a person in the user's organization
   const synopsis = await prisma.personSynopsis.findFirst({
     where: {
       id: synopsisId,
-      person: { organizationId: user.organizationId },
+      person: { organizationId: user.managerOSOrganizationId },
     },
     select: { id: true, personId: true },
   })

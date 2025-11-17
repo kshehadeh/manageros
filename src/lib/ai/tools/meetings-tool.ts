@@ -75,7 +75,7 @@ export const meetingsTool = {
       createdBefore,
     })
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       throw new Error('User must belong to an organization')
     }
 
@@ -83,7 +83,7 @@ export const meetingsTool = {
     const currentPerson = await prisma.person.findFirst({
       where: {
         user: {
-          id: user.id,
+          id: user.managerOSUserId,
         },
       },
     })
@@ -91,7 +91,7 @@ export const meetingsTool = {
     // Build access control for privacy
     const accessControlOr: Prisma.MeetingWhereInput[] = [
       { isPrivate: false }, // Public meetings
-      { createdById: user.id }, // Private meetings created by current user
+      { createdById: user.managerOSUserId }, // Private meetings created by current user
     ]
 
     if (currentPerson) {
@@ -108,7 +108,7 @@ export const meetingsTool = {
     }
 
     const whereClause: Prisma.MeetingWhereInput = {
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
       OR: accessControlOr,
     }
 

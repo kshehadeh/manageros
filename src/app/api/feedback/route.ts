@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
   const user = await getCurrentUser()
   try {
     // Check if user belongs to an organization
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return NextResponse.json(
         { error: 'User must belong to an organization to view feedback' },
         { status: 403 }
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
     const currentPerson = await prisma.person.findFirst({
       where: {
         user: {
-          id: user.id,
+          id: user.managerOSUserId || '',
         },
       },
     })
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
       // 2. Private feedback written by the current user
       Prisma.sql`(f."isPrivate" = false OR f."fromId" = ${currentPerson.id})`,
       // Ensure feedback is about people in the same organization
-      Prisma.sql`about_person."organizationId" = ${user.organizationId}`,
+      Prisma.sql`about_person."organizationId" = ${user.managerOSOrganizationId}`,
     ]
 
     // Apply search filter (immutable takes precedence)

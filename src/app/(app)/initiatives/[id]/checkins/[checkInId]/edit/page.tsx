@@ -12,7 +12,7 @@ export default async function EditCheckInPage({
 }) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     redirect('/organization/create')
   }
 
@@ -24,7 +24,7 @@ export default async function EditCheckInPage({
       id: checkInId,
       initiative: {
         id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     },
     include: {

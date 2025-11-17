@@ -18,7 +18,7 @@ export default async function NewFeedbackPage({
 
   const { id } = await params
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     redirect('/organization/create')
   }
 
@@ -26,7 +26,7 @@ export default async function NewFeedbackPage({
   const person = await prisma.person.findFirst({
     where: {
       id,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
