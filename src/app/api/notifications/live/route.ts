@@ -14,7 +14,7 @@ export async function GET(_request: NextRequest) {
     return NextResponse.json({
       count,
       timestamp: new Date().toISOString(),
-      userId: user.id,
+      userId: user.managerOSUserId || '',
     })
   } catch (error) {
     console.error('Error fetching notification count:', error)

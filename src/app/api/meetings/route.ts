@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Check if user belongs to an organization
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return NextResponse.json(
         { error: 'User must belong to an organization to view meetings' },
         { status: 403 }
@@ -105,8 +105,8 @@ export async function GET(request: NextRequest) {
     // Get the current user's person record (may be null if not linked)
     const currentPerson = await prisma.person.findFirst({
       where: {
-        user: { id: user.id },
-        organizationId: user.organizationId,
+        user: { id: user.managerOSUserId || '' },
+        organizationId: user.managerOSOrganizationId,
       },
     })
 
@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
     // Build where clause for meeting instances
     const buildInstanceWhereClause = (): Prisma.MeetingInstanceWhereInput => {
       const baseWhere: Prisma.MeetingInstanceWhereInput = {
-        organizationId: user.organizationId!,
+        organizationId: user.managerOSOrganizationId!,
       }
 
       // Only apply date filters if explicitly provided
@@ -196,7 +196,7 @@ export async function GET(request: NextRequest) {
       // 2. User is the creator of the meeting (and matches filters)
       accessControlOr.push({
         meeting: {
-          createdById: user.id,
+          createdById: user.managerOSUserId || '',
           ...meetingFilters,
         },
       })
@@ -242,7 +242,7 @@ export async function GET(request: NextRequest) {
     // Build where clause for regular meetings
     const buildMeetingWhereClause = (): Prisma.MeetingWhereInput => {
       const baseWhere: Prisma.MeetingWhereInput = {
-        organizationId: user.organizationId!,
+        organizationId: user.managerOSOrganizationId!,
       }
 
       // Apply meeting type filter
@@ -294,7 +294,7 @@ export async function GET(request: NextRequest) {
       })
       // 2. User is the creator (and matches filters)
       accessControlOr.push({
-        createdById: user.id,
+        createdById: user.managerOSUserId || '',
         ...additionalFilters,
       })
       // 3. User is the owner (and matches filters)

@@ -18,12 +18,25 @@ import { CacheProvider } from '@/components/cache-provider'
 import SidebarClient from '@/components/sidebar-client'
 import { ClerkProvider } from '@clerk/nextjs'
 import { dark } from '@clerk/themes'
+import {
+  getCurrentUserWithPersonAndOrganization,
+  getFilteredNavigation,
+} from '../../lib/auth-utils'
 
 interface AppLayoutProps {
   children: ReactNode
 }
 
 export default async function AppLayout({ children }: AppLayoutProps) {
+  const { user, person, organization } =
+    await getCurrentUserWithPersonAndOrganization()
+  const filteredNavigation = await getFilteredNavigation(user)
+
+  console.log('user', user)
+  console.log('person', person)
+  console.log('organization', organization)
+  console.log('filteredNavigation', filteredNavigation)
+
   // Render full layout for authenticated routes
   return (
     <ClerkProvider appearance={dark}>
@@ -43,7 +56,12 @@ export default async function AppLayout({ children }: AppLayoutProps) {
                     <DefaultBreadcrumbHandler />
                     <OfflineAwareLayout>
                       <div className='flex min-h-screen'>
-                        <SidebarClient />
+                        <SidebarClient
+                          user={user}
+                          person={person}
+                          organization={organization}
+                          navigation={filteredNavigation}
+                        />
                         <div className='flex-1 flex flex-col overflow-hidden lg:ml-0'>
                           <TopBar />
                           <main className='flex-1 overflow-auto p-3 md:p-6'>
@@ -53,7 +71,11 @@ export default async function AppLayout({ children }: AppLayoutProps) {
                         <AIChatSidebarWrapper />
                       </div>
                     </OfflineAwareLayout>
-                    <CommandPalette />
+                    <CommandPalette
+                      user={user}
+                      person={person}
+                      organization={organization}
+                    />
                     <CreateTaskModal />
                     <PersonSelectorModal />
                     <EditFormNavigator />

@@ -8,14 +8,14 @@ import { getCurrentUser } from '@/lib/auth-utils'
 export default async function NewTaskPage() {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     redirect('/organization/create')
   }
 
   // Get all people and objectives for the form
   const [people, objectives] = await Promise.all([
-    getPeopleForOrganization(user.organizationId),
-    getObjectivesForOrganization(user.organizationId),
+    getPeopleForOrganization(user.managerOSOrganizationId),
+    getObjectivesForOrganization(user.managerOSOrganizationId),
   ])
 
   return (

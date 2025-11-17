@@ -5,7 +5,7 @@ import { InitiativeObjectivesServer } from '@/components/initiatives/initiative-
 import { InitiativeTasks } from '@/components/initiatives/initiative-tasks-server'
 import { InitiativeCheckInsServer } from '@/components/initiatives/initiative-checkins-server'
 import { InitiativeMeetingsServer } from '@/components/initiatives/initiative-meetings-server'
-import { InitiativeSidebarServer } from '@/components/initiatives/initiative-sidebar-server'
+import { InitiativeSidebar } from '@/components/initiatives/initiative-sidebar'
 import { NotesSectionServer } from '@/components/notes/notes-section-server'
 import { InitiativeCompletionRate } from '@/components/initiatives/initiative-completion-rate'
 import { SectionHeader } from '@/components/ui/section-header'
@@ -133,7 +133,7 @@ export default async function InitiativeDetail({
 
           <PageSidebar>
             <Suspense fallback={<InitiativeSidebarSkeleton />}>
-              <InitiativeSidebarServer initiativeId={init.id} />
+              <InitiativeSidebar initiativeId={init.id} />
             </Suspense>
           </PageSidebar>
         </PageContent>

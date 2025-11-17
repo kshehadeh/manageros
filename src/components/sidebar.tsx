@@ -6,7 +6,7 @@ import { signOutWithCleanup } from '@/lib/auth-client-utils'
 import { usePathname } from 'next/navigation'
 import { useMobileMenu } from '@/components/mobile-menu-provider'
 import { IndigoIcon } from '@/components/indigo-icon'
-import type { User as UserType } from '@/lib/auth-types'
+import type { OrganizationBrief, UserBrief } from '@/lib/auth-types'
 import { Geist_Mono as GeistMono } from 'next/font/google'
 
 const geistMono = GeistMono({
@@ -49,8 +49,9 @@ interface NavItem {
 
 interface SidebarProps {
   navigation?: NavItem[]
-  serverSession?: UserType | null
+  serverSession?: UserBrief | null
   personData?: PersonBrief | null
+  organizationData?: OrganizationBrief | null
 }
 
 const iconMap = {
@@ -70,6 +71,7 @@ export default function Sidebar({
   navigation = [],
   serverSession,
   personData,
+  organizationData,
 }: SidebarProps) {
   const { user } = useUser()
   const pathname = usePathname()
@@ -82,6 +84,9 @@ export default function Sidebar({
 
   // Use the navigation passed from server-side filtering
   const filteredNavigation = navigation
+
+  const organizationName = organizationData?.name
+  const organizationId = organizationData?.id
 
   return (
     <>
@@ -149,18 +154,18 @@ export default function Sidebar({
                 )}
 
                 {/* Organization information - shown if organization exists */}
-                {serverSession.organizationId && (
+                {organizationId && (
                   <div className='mt-xs'>
                     <OrganizationPlanInfo
-                      organizationName={serverSession.organizationName}
-                      organizationId={serverSession.organizationId}
+                      organizationName={organizationName}
+                      organizationId={organizationId}
                       variant='vertical'
                     />
                   </div>
                 )}
 
                 {/* Create Organization link - shown if no organization */}
-                {!serverSession.organizationId && (
+                {!organizationId && (
                   <Link
                     href='/organization/create'
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -235,7 +240,7 @@ export default function Sidebar({
               })}
 
               {/* AI Chat Button - only show if user has an organization */}
-              {serverSession.organizationId && (
+              {organizationId && (
                 <button
                   onClick={() => {
                     setIsMobileMenuOpen(false)

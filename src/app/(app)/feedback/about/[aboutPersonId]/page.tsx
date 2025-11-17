@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/db'
 import { notFound } from 'next/navigation'
 import { PersonFeedbackPageClient } from '@/components/feedback/person-feedback-page-client'
-import { getOptionalUser } from '@/lib/auth-utils'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 interface PersonFeedbackPageProps {
   params: Promise<{
@@ -13,10 +13,10 @@ export default async function PersonFeedbackPage({
   params,
 }: PersonFeedbackPageProps) {
   const { aboutPersonId } = await params
-  const user = await getOptionalUser()
+  const user = await getCurrentUser()
 
   // Middleware ensures authentication, but we check organizationId for type safety
-  if (!user?.organizationId) {
+  if (!user.managerOSOrganizationId) {
     notFound()
   }
 
@@ -24,7 +24,7 @@ export default async function PersonFeedbackPage({
   const person = await prisma.person.findFirst({
     where: {
       id: aboutPersonId,
-      organizationId: user.organizationId, // Ensure same organization
+      organizationId: user.managerOSOrganizationId, // Ensure same organization
     },
     select: {
       id: true,

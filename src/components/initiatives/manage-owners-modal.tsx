@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -21,8 +21,11 @@ import { Edit2, Users, X } from 'lucide-react'
 import {
   addInitiativeOwner,
   removeInitiativeOwner,
+  getInitiativeOwners,
 } from '@/lib/actions/initiative'
+import { getPeopleForOrganization } from '@/lib/actions/person'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 interface Person {
   id: string
@@ -40,19 +43,39 @@ interface InitiativeOwner {
 
 interface ManageOwnersModalProps {
   initiativeId: string
-  owners: InitiativeOwner[]
-  people: Person[]
 }
 
-export function ManageOwnersModal({
-  initiativeId,
-  owners,
-  people,
-}: ManageOwnersModalProps) {
+export function ManageOwnersModal({ initiativeId }: ManageOwnersModalProps) {
+  const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingData, setIsLoadingData] = useState(false)
+  const [owners, setOwners] = useState<InitiativeOwner[]>([])
+  const [people, setPeople] = useState<Person[]>([])
   const [selectedPersonId, setSelectedPersonId] = useState('')
   const [selectedRole, setSelectedRole] = useState('owner')
+
+  // Fetch data when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setIsLoadingData(true)
+      Promise.all([
+        getInitiativeOwners(initiativeId),
+        getPeopleForOrganization(),
+      ])
+        .then(([fetchedOwners, fetchedPeople]) => {
+          setOwners(fetchedOwners)
+          setPeople(fetchedPeople)
+        })
+        .catch(error => {
+          console.error('Failed to fetch data:', error)
+          toast.error('Failed to load data')
+        })
+        .finally(() => {
+          setIsLoadingData(false)
+        })
+    }
+  }, [isOpen, initiativeId])
 
   // Get people who are not already owners
   const availablePeople = people.filter(
@@ -68,6 +91,10 @@ export function ManageOwnersModal({
       toast.success('Owner added successfully')
       setSelectedPersonId('')
       setSelectedRole('owner')
+      // Refresh owners list
+      const fetchedOwners = await getInitiativeOwners(initiativeId)
+      setOwners(fetchedOwners)
+      router.refresh()
     } catch (error) {
       console.error('Failed to add owner:', error)
       toast.error(
@@ -83,6 +110,10 @@ export function ManageOwnersModal({
     try {
       await removeInitiativeOwner(initiativeId, personId)
       toast.success('Owner removed successfully')
+      // Refresh owners list
+      const fetchedOwners = await getInitiativeOwners(initiativeId)
+      setOwners(fetchedOwners)
+      router.refresh()
     } catch (error) {
       console.error('Failed to remove owner:', error)
       toast.error(
@@ -120,98 +151,106 @@ export function ManageOwnersModal({
         </DialogHeader>
 
         <div className='space-y-4'>
-          {/* Current Owners */}
-          <div className='space-y-2'>
-            <h4 className='text-sm font-medium'>Current People</h4>
-            {owners.length === 0 ? (
-              <p className='text-sm text-muted-foreground'>
-                No people assigned yet.
-              </p>
-            ) : (
+          {isLoadingData ? (
+            <p className='text-sm text-muted-foreground'>Loading...</p>
+          ) : (
+            <>
+              {/* Current Owners */}
               <div className='space-y-2'>
-                {owners.map(owner => (
-                  <div
-                    key={`${owner.initiativeId}-${owner.personId}`}
-                    className='flex items-center justify-between p-2 border rounded-lg'
-                  >
-                    <PersonListItem
-                      person={owner.person}
-                      roleBadge={
-                        owner.role && owner.role !== 'owner'
-                          ? owner.role
-                          : undefined
-                      }
-                    />
-                    <Button
-                      variant='ghost'
-                      size='sm'
-                      onClick={() => handleRemoveOwner(owner.personId)}
-                      disabled={isLoading}
-                      className='h-6 w-6 p-0 text-destructive hover:text-destructive'
-                    >
-                      <X className='h-3 w-3' />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Add New Owner */}
-          {availablePeople.length > 0 && (
-            <div className='space-y-3 border-t pt-4'>
-              <h4 className='text-sm font-medium'>Add New Person</h4>
-              <div className='grid grid-cols-2 gap-2'>
-                <Select
-                  value={selectedPersonId}
-                  onValueChange={setSelectedPersonId}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder='Select person' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availablePeople.map(person => (
-                      <SelectItem key={person.id} value={person.id}>
-                        {person.name}
-                      </SelectItem>
+                <h4 className='text-sm font-medium'>Current People</h4>
+                {owners.length === 0 ? (
+                  <p className='text-sm text-muted-foreground'>
+                    No people assigned yet.
+                  </p>
+                ) : (
+                  <div className='space-y-2'>
+                    {owners.map(owner => (
+                      <div
+                        key={`${owner.initiativeId}-${owner.personId}`}
+                        className='flex items-center justify-between p-2 border rounded-lg'
+                      >
+                        <PersonListItem
+                          person={owner.person}
+                          roleBadge={
+                            owner.role && owner.role !== 'owner'
+                              ? owner.role
+                              : undefined
+                          }
+                        />
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          onClick={() => handleRemoveOwner(owner.personId)}
+                          disabled={isLoading}
+                          className='h-6 w-6 p-0 text-destructive hover:text-destructive'
+                        >
+                          <X className='h-3 w-3' />
+                        </Button>
+                      </div>
                     ))}
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={selectedRole}
-                  onValueChange={setSelectedRole}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='owner'>Owner</SelectItem>
-                    <SelectItem value='sponsor'>Sponsor</SelectItem>
-                    <SelectItem value='collaborator'>Collaborator</SelectItem>
-                  </SelectContent>
-                </Select>
+                  </div>
+                )}
               </div>
 
-              <Button
-                onClick={handleAddOwner}
-                disabled={isLoading || !selectedPersonId}
-                className='w-full'
-              >
-                {isLoading ? 'Adding...' : 'Add Person'}
-              </Button>
-            </div>
-          )}
+              {/* Add New Owner */}
+              {availablePeople.length > 0 && (
+                <div className='space-y-3 border-t pt-4'>
+                  <h4 className='text-sm font-medium'>Add New Person</h4>
+                  <div className='grid grid-cols-2 gap-2'>
+                    <Select
+                      value={selectedPersonId}
+                      onValueChange={setSelectedPersonId}
+                      disabled={isLoading}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select person' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availablePeople.map(person => (
+                          <SelectItem key={person.id} value={person.id}>
+                            {person.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
 
-          {availablePeople.length === 0 && owners.length > 0 && (
-            <div className='text-center py-4 border-t'>
-              <p className='text-sm text-muted-foreground'>
-                All organization members are already associated with this
-                initiative.
-              </p>
-            </div>
+                    <Select
+                      value={selectedRole}
+                      onValueChange={setSelectedRole}
+                      disabled={isLoading}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='owner'>Owner</SelectItem>
+                        <SelectItem value='sponsor'>Sponsor</SelectItem>
+                        <SelectItem value='collaborator'>
+                          Collaborator
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Button
+                    onClick={handleAddOwner}
+                    disabled={isLoading || !selectedPersonId}
+                    className='w-full'
+                  >
+                    {isLoading ? 'Adding...' : 'Add Person'}
+                  </Button>
+                </div>
+              )}
+
+              {availablePeople.length === 0 && owners.length > 0 && (
+                <div className='text-center py-4 border-t'>
+                  <p className='text-sm text-muted-foreground'>
+                    All organization members are already associated with this
+                    initiative.
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
 

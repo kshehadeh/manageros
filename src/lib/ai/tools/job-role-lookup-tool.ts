@@ -89,7 +89,7 @@ export const jobRoleLookupTool = {
     console.log('🔧 jobRoleLookupTool called with parameters:', { query })
     try {
       const user = await getCurrentUser()
-      if (!user.organizationId) {
+      if (!user.managerOSOrganizationId) {
         throw new Error('User must belong to an organization')
       }
 
@@ -102,7 +102,7 @@ export const jobRoleLookupTool = {
 
       // Search for job roles by title using OR conditions for all variations
       const whereClause: Prisma.JobRoleWhereInput = {
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
         OR: Array.from(allVariations).map(variation => ({
           title: { contains: variation, mode: 'insensitive' },
         })),

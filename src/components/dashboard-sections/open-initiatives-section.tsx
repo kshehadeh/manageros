@@ -13,7 +13,9 @@ export function DashboardOpenInitiativesSection({
   organizationId: _organizationId,
 }: DashboardOpenInitiativesSectionProps) {
   const { user, isLoaded } = useUser()
-  const [userData, setUserData] = useState<{ personId?: string } | null>(null)
+  const [userData, setUserData] = useState<{
+    managerOSPersonId?: string
+  } | null>(null)
 
   useEffect(() => {
     if (isLoaded && user) {
@@ -24,7 +26,7 @@ export function DashboardOpenInitiativesSection({
     }
   }, [isLoaded, user])
 
-  const currentPersonId = userData?.personId
+  const currentPersonId = userData?.managerOSPersonId
   const personId = currentPersonId
 
   // Memoize immutableFilters to prevent infinite loop

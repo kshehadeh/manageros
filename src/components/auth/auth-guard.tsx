@@ -25,7 +25,7 @@ export function AuthGuard({
   const { isLoaded, userId } = useAuth()
   const router = useRouter()
   const [userData, setUserData] = useState<{
-    organizationId: string | null
+    managerOSOrganizationId: string | null
   } | null>(null)
 
   // Fetch user data from API to get organization info
@@ -40,7 +40,7 @@ export function AuthGuard({
         })
         .catch(() => {
           // If API fails, user might not be in database yet
-          setUserData({ organizationId: null })
+          setUserData({ managerOSOrganizationId: null })
         })
     }
   }, [isLoaded, userId])
@@ -55,7 +55,12 @@ export function AuthGuard({
       return
     }
 
-    if (userId && requireOrganization && userData && !userData.organizationId) {
+    if (
+      userId &&
+      requireOrganization &&
+      userData &&
+      !userData.managerOSOrganizationId
+    ) {
       router.push(redirectTo || '/organization/create')
       return
     }
@@ -69,7 +74,7 @@ export function AuthGuard({
     return fallback ?? null
   }
 
-  if (requireOrganization && userData && !userData.organizationId) {
+  if (requireOrganization && userData && !userData.managerOSOrganizationId) {
     return fallback ?? null
   }
 

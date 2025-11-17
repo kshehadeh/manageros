@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
   const user = await getCurrentUser()
   try {
     // Check if user belongs to an organization
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return NextResponse.json(
         { error: 'User must belong to an organization to view one-on-ones' },
         { status: 403 }
@@ -72,8 +72,8 @@ export async function GET(request: NextRequest) {
     // Get the current user's person record
     const currentPerson = await prisma.person.findFirst({
       where: {
-        user: { id: user.id },
-        organizationId: user.organizationId,
+        user: { id: user.managerOSUserId || '' },
+        organizationId: user.managerOSOrganizationId,
       },
     })
 

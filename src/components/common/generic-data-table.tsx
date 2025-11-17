@@ -268,8 +268,10 @@ export function GenericDataTable<
   const { isLoaded } = useUser()
   const sessionStatus = isLoaded ? 'authenticated' : 'loading'
 
-  // Don't fetch data if we're waiting for session or settings to load
-  const shouldFetch = sessionStatus !== 'loading' && settingsLoaded
+  // Don't fetch data if we're waiting for session to load
+  // Allow fetching even if settings aren't loaded yet - they'll use defaults
+  // Settings loading shouldn't block data fetching
+  const shouldFetch = sessionStatus !== 'loading'
 
   // Initialize search input from loaded settings only once
   useEffect(() => {
@@ -339,7 +341,15 @@ export function GenericDataTable<
     if (!entitiesData) return []
     const dataKey = config.entityNamePlural.toLowerCase()
     const data = entitiesData as Record<string, unknown>
-    const baseEntities = (data[dataKey] as TData[]) || []
+
+    // Try to get entities using the expected key
+    let baseEntities = (data[dataKey] as TData[]) || []
+
+    // Fallback: if no entities found, check if data itself is an array
+    // or if there's a different key structure
+    if (baseEntities.length === 0 && Array.isArray(data)) {
+      baseEntities = data as TData[]
+    }
 
     // Apply optimistic updates
     return baseEntities.map(entity => {

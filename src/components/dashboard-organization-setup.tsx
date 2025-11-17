@@ -3,29 +3,10 @@
 import { useEffect, useState } from 'react'
 import { OrganizationSetupCards } from '@/components/organization-setup-cards'
 import { PageContainer } from '@/components/ui/page-container'
-
-interface OrganizationInvitation {
-  id: string
-  email: string
-  organizationId: string
-  status: string
-  expiresAt: string
-  createdAt: string
-  updatedAt: string
-  organization: {
-    id: string
-    name: string
-    slug: string
-    description: string | null
-  }
-  invitedBy: {
-    name: string
-    email: string
-  }
-}
+import type { PendingInvitation } from '@/types/organization'
 
 export function DashboardOrganizationSetup() {
-  const [invitations, setInvitations] = useState<OrganizationInvitation[]>([])
+  const [invitations, setInvitations] = useState<PendingInvitation[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

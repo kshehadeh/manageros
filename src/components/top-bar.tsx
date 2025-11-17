@@ -32,7 +32,7 @@ export default function TopBar() {
       .then(res => res.json())
       .then(data => {
         if (data.user) {
-          setHasOrganization(!!data.user.organizationId)
+          setHasOrganization(!!data.user.managerOSOrganizationId)
         } else {
           setHasOrganization(false)
         }

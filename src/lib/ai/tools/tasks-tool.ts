@@ -54,7 +54,7 @@ export const tasksTool = {
       updatedBefore,
     })
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       throw new Error('User must belong to an organization')
     }
 
@@ -62,12 +62,15 @@ export const tasksTool = {
       OR: [
         {
           createdBy: {
-            organizationId: user.organizationId,
-            id: user.id,
+            id: user.managerOSUserId,
           },
         },
-        { initiative: { organizationId: user.organizationId } },
-        { objective: { initiative: { organizationId: user.organizationId } } },
+        { initiative: { organizationId: user.managerOSOrganizationId } },
+        {
+          objective: {
+            initiative: { organizationId: user.managerOSOrganizationId },
+          },
+        },
       ],
     }
 

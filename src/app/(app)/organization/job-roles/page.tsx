@@ -7,19 +7,13 @@ import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
-import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
+import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
 
 export default async function JobRoleManagementPage() {
   const user = await getCurrentUser()
 
-  // Check if user is admin or owner
-  if (!isAdminOrOwner(user)) {
+  if (!(await getActionPermission(user, 'job-role.view'))) {
     redirect('/dashboard')
-  }
-
-  // Check if user belongs to an organization
-  if (!user.organizationId) {
-    redirect('/organization/create')
   }
 
   // Get levels and domains for management

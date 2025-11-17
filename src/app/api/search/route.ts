@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   try {
     const q = (searchParams.get('q') || '').trim()
 
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return NextResponse.json({ results: [] })
     }
 
@@ -23,7 +23,18 @@ export async function GET(request: Request) {
         prisma.task.findMany({
           where: {
             title: { contains: q, mode: 'insensitive' },
-            createdBy: { organizationId: user.organizationId },
+            OR: [
+              // Tasks created by the current user
+              { createdById: user.managerOSUserId || '' },
+              // Tasks associated with initiatives in the same organization
+              { initiative: { organizationId: user.managerOSOrganizationId } },
+              // Tasks associated with objectives of initiatives in the same organization
+              {
+                objective: {
+                  initiative: { organizationId: user.managerOSOrganizationId },
+                },
+              },
+            ],
           },
           select: { id: true, title: true, description: true },
           take: 8,
@@ -31,7 +42,7 @@ export async function GET(request: Request) {
         prisma.initiative.findMany({
           where: {
             title: { contains: q, mode: 'insensitive' },
-            organizationId: user.organizationId,
+            organizationId: user.managerOSOrganizationId,
           },
           select: { id: true, title: true, summary: true },
           take: 6,
@@ -39,7 +50,7 @@ export async function GET(request: Request) {
         prisma.person.findMany({
           where: {
             name: { contains: q, mode: 'insensitive' },
-            organizationId: user.organizationId,
+            organizationId: user.managerOSOrganizationId,
           },
           select: { id: true, name: true },
           take: 6,
@@ -47,14 +58,17 @@ export async function GET(request: Request) {
         prisma.feedback.findMany({
           where: {
             body: { contains: q, mode: 'insensitive' },
-            about: { organizationId: user.organizationId },
+            about: { organizationId: user.managerOSOrganizationId },
             // Only return feedback if:
             // 1. It's not private, OR
             // 2. The current user is either the person giving feedback (from) or receiving feedback (about)
             OR: [
               { isPrivate: false },
-              ...(user.personId
-                ? [{ fromId: user.personId }, { aboutId: user.personId }]
+              ...(user.managerOSPersonId
+                ? [
+                    { fromId: user.managerOSPersonId },
+                    { aboutId: user.managerOSPersonId },
+                  ]
                 : []),
             ],
           },
@@ -69,7 +83,7 @@ export async function GET(request: Request) {
           take: 6,
         }),
         // Only query 1:1s if the user has a personId (is linked to a Person record)
-        user.personId
+        user.managerOSPersonId
           ? prisma.oneOnOne.findMany({
               where: {
                 OR: [
@@ -81,9 +95,9 @@ export async function GET(request: Request) {
                   {
                     OR: [
                       // User is the manager
-                      { managerId: user.personId },
+                      { managerId: user.managerOSPersonId },
                       // User is the report
-                      { reportId: user.personId },
+                      { reportId: user.managerOSPersonId },
                     ],
                   },
                 ],
@@ -99,7 +113,7 @@ export async function GET(request: Request) {
             })
           : Promise.resolve([]), // Return empty array if user has no personId
         // Get the current user's person record for meeting access control
-        user.personId
+        user.managerOSPersonId
           ? prisma.meeting.findMany({
               where: {
                 OR: [
@@ -108,15 +122,15 @@ export async function GET(request: Request) {
                   { notes: { contains: q, mode: 'insensitive' } },
                 ],
                 AND: [
-                  { organizationId: user.organizationId },
+                  { organizationId: user.managerOSOrganizationId },
                   {
                     OR: [
                       { isPrivate: false }, // Public meetings
-                      { createdById: user.id }, // Private meetings created by current user
+                      { createdById: user.managerOSUserId || '' }, // Private meetings created by current user
                       {
                         participants: {
                           some: {
-                            personId: user.personId,
+                            personId: user.managerOSPersonId,
                           },
                         },
                       }, // Meetings where user is a participant

@@ -9,7 +9,7 @@ import { InputJsonValue } from '@prisma/client/runtime/library'
 
 export async function listAvailableReports() {
   const user = await getCurrentUser()
-  if (!user.organizationId)
+  if (!user.managerOSOrganizationId)
     throw new Error('User must belong to an organization to list reports')
   // Static registry for now; in future, may combine with DB visibility
   return listReports()
@@ -21,7 +21,7 @@ export async function runReport(params: {
   input: unknown
 }) {
   const user = await getCurrentUser()
-  if (!user.organizationId)
+  if (!user.managerOSOrganizationId)
     throw new Error('User must belong to an organization to run reports')
 
   const def = await getReport(params.codeId)
@@ -36,10 +36,10 @@ export async function runReport(params: {
   const ctx = {
     prisma,
     user: {
-      id: user.id,
-      role: user.role,
-      organizationId: user.organizationId!,
-      personId: user.personId ?? null,
+      id: user.managerOSUserId || '',
+      role: user.role || 'USER',
+      organizationId: user.managerOSOrganizationId!,
+      personId: user.managerOSPersonId ?? null,
     },
   }
   await def.authorize(ctx, parsed)
@@ -57,15 +57,15 @@ export async function runReport(params: {
             codeId: def.codeId,
             name: def.name,
             description: def.description ?? null,
-            ownerId: user.id,
+            ownerId: user.managerOSUserId || '',
             inputSchema: def.inputSchema ? {} : {},
             enabled: true,
             renderers: def.supportedRenderers,
           },
         },
       },
-      user: { connect: { id: user.id } },
-      organization: { connect: { id: user.organizationId } },
+      user: { connect: { id: user.managerOSUserId || '' } },
+      organization: { connect: { id: user.managerOSOrganizationId } },
       renderer: params.renderer,
       input: parsed as unknown as Record<string, InputJsonValue>,
       output: outputJson as unknown as Record<string, InputJsonValue>,
@@ -93,13 +93,16 @@ export async function runReport(params: {
 
 export async function listReportInstances(limit = 20) {
   const user = await getCurrentUser()
-  if (!user.organizationId)
+  if (!user.managerOSOrganizationId)
     throw new Error(
       'User must belong to an organization to list report instances'
     )
 
   const instances = await prisma.reportInstance.findMany({
-    where: { organizationId: user.organizationId, userId: user.id },
+    where: {
+      organizationId: user.managerOSOrganizationId,
+      userId: user.managerOSUserId || '',
+    },
     orderBy: { startedAt: 'desc' },
     take: limit,
     include: { report: true },
@@ -120,10 +123,10 @@ export async function listReportInstances(limit = 20) {
               const ctx = {
                 prisma,
                 user: {
-                  id: user.id,
-                  role: user.role,
-                  organizationId: user.organizationId!,
-                  personId: user.personId ?? null,
+                  id: user.managerOSUserId || '',
+                  role: user.role || 'USER',
+                  organizationId: user.managerOSOrganizationId!,
+                  personId: user.managerOSPersonId ?? null,
                 },
               }
               const resolvedName = await field.resolveToName(value, ctx)
@@ -153,13 +156,17 @@ export async function listReportInstances(limit = 20) {
 
 export async function getReportInstance(id: string) {
   const user = await getCurrentUser()
-  if (!user.organizationId)
+  if (!user.managerOSOrganizationId)
     throw new Error(
       'User must belong to an organization to view report instances'
     )
 
   const instance = await prisma.reportInstance.findFirst({
-    where: { id, organizationId: user.organizationId, userId: user.id },
+    where: {
+      id,
+      organizationId: user.managerOSOrganizationId,
+      userId: user.managerOSUserId || '',
+    },
     include: { report: true },
   })
   if (!instance) throw new Error('Report instance not found or access denied')
@@ -187,14 +194,18 @@ export async function getReportInstance(id: string) {
 
 export async function deleteReportInstance(id: string) {
   const user = await getCurrentUser()
-  if (!user.organizationId)
+  if (!user.managerOSOrganizationId)
     throw new Error(
       'User must belong to an organization to delete report instances'
     )
 
   // Verify the instance exists and belongs to the user
   const instance = await prisma.reportInstance.findFirst({
-    where: { id, organizationId: user.organizationId, userId: user.id },
+    where: {
+      id,
+      organizationId: user.managerOSOrganizationId,
+      userId: user.managerOSUserId || '',
+    },
   })
   if (!instance) throw new Error('Report instance not found or access denied')
 

@@ -15,12 +15,12 @@ interface TeamDetailPageProps {
 export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     redirect('/organization/create')
   }
 
   const { id } = await params
-  const team = await getTeamById(id, user.organizationId)
+  const team = await getTeamById(id, user.managerOSOrganizationId)
 
   if (!team) {
     notFound()

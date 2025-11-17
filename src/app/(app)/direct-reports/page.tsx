@@ -4,13 +4,13 @@ import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
-import { getOptionalUser } from '@/lib/auth-utils'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function DirectReportsPage() {
-  const user = await getOptionalUser()
+  const user = await getCurrentUser()
 
   // If user doesn't have a personId, they can't have direct reports
-  if (!user?.personId) {
+  if (!user.managerOSPersonId) {
     return (
       <PageContainer>
         <PageHeader title='Your Direct Reports' titleIcon={Users} />
@@ -34,7 +34,7 @@ export default async function DirectReportsPage() {
           <PeopleDataTable
             settingsId='direct-reports'
             immutableFilters={{
-              managerId: user.personId,
+              managerId: user.managerOSPersonId,
               status: 'active',
             }}
           />

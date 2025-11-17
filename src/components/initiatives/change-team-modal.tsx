@@ -19,7 +19,9 @@ import {
 import { Label } from '@/components/ui/label'
 import { Edit2, Users } from 'lucide-react'
 import { updateInitiativeTeam } from '@/lib/actions/initiative'
+import { getTeams } from '@/lib/actions/team'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 interface Team {
   id: string
@@ -29,19 +31,38 @@ interface Team {
 interface ChangeTeamModalProps {
   initiativeId: string
   currentTeam: Team | null
-  teams: Team[]
 }
 
 export function ChangeTeamModal({
   initiativeId,
   currentTeam,
-  teams,
 }: ChangeTeamModalProps) {
+  const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [teams, setTeams] = useState<Team[]>([])
+  const [isLoadingTeams, setIsLoadingTeams] = useState(false)
   const [selectedTeamId, setSelectedTeamId] = useState(
     currentTeam?.id || 'none'
   )
+
+  // Fetch teams when dialog opens
+  useEffect(() => {
+    if (isOpen && teams.length === 0) {
+      setIsLoadingTeams(true)
+      getTeams()
+        .then(fetchedTeams => {
+          setTeams(fetchedTeams)
+        })
+        .catch(error => {
+          console.error('Failed to fetch teams:', error)
+          toast.error('Failed to load teams')
+        })
+        .finally(() => {
+          setIsLoadingTeams(false)
+        })
+    }
+  }, [isOpen, teams.length])
 
   // Sync selectedTeamId when currentTeam prop changes (only when dialog is closed)
   useEffect(() => {
@@ -60,6 +81,7 @@ export function ChangeTeamModal({
 
       toast.success('Team updated successfully')
       setIsOpen(false)
+      router.refresh()
     } catch (error) {
       console.error('Failed to update team:', error)
       toast.error(
@@ -101,10 +123,14 @@ export function ChangeTeamModal({
             <Select
               value={selectedTeamId}
               onValueChange={setSelectedTeamId}
-              disabled={isLoading}
+              disabled={isLoading || isLoadingTeams}
             >
               <SelectTrigger>
-                <SelectValue placeholder='Select a team' />
+                <SelectValue
+                  placeholder={
+                    isLoadingTeams ? 'Loading teams...' : 'Select a team'
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value='none'>No team assigned</SelectItem>

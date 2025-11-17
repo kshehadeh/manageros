@@ -5,7 +5,10 @@ import { redirect } from 'next/navigation'
 import { JobRoleDetailClient } from '@/components/jobs/job-role-detail-client'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { JobRoleActionsDropdown } from '@/components/jobs/job-role-actions-dropdown'
-import { SimplePeopleList } from '@/components/people/person-list'
+import {
+  PersonForList,
+  SimplePeopleList,
+} from '@/components/people/person-list'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
@@ -13,9 +16,8 @@ import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
 import { Building2, Users, Briefcase, FileText } from 'lucide-react'
-import type { Person } from '@/types/person'
 import { AssignPersonButton } from '@/components/jobs/assign-person-button'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
 
 interface JobRoleDetailPageProps {
   params: Promise<{ id: string }>
@@ -26,12 +28,11 @@ export default async function JobRoleDetailPage({
 }: JobRoleDetailPageProps) {
   const user = await getCurrentUser()
 
-  // Check if user belongs to an organization
-  if (!user.organizationId) {
-    redirect('/organization/create')
-  }
-
   const { id } = await params
+
+  if (!(await getActionPermission(user, 'job-role.view', id))) {
+    redirect('/dashboard')
+  }
 
   try {
     const jobRole = await getJobRole(id)
@@ -101,16 +102,14 @@ export default async function JobRoleDetailPage({
                       action={
                         <AssignPersonButton
                           jobRoleId={jobRole.id}
-                          excludePersonIds={(jobRole.people as Person[]).map(
-                            p => p.id
-                          )}
+                          excludePersonIds={jobRole.people.map(p => p.id)}
                         />
                       }
                     />
                   }
                 >
                   <SimplePeopleList
-                    people={jobRole.people as Person[]}
+                    people={jobRole.people as PersonForList[]}
                     variant='compact'
                     showEmail={true}
                     showRole={true}

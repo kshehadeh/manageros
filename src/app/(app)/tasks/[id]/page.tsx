@@ -28,7 +28,7 @@ export default async function TaskDetailPage({
 }) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     redirect('/organization/create')
   }
 
@@ -43,7 +43,7 @@ export default async function TaskDetailPage({
   const entityLinksResult = await getEntityLinks(
     'Task',
     id,
-    user.organizationId,
+    user.managerOSOrganizationId,
     {
       includeCreatedBy: true,
     }

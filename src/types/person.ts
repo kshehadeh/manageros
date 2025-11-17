@@ -1,50 +1,17 @@
-export interface Person {
-  id: string
-  name: string
-  email: string | null
-  role: string | null
-  status: string
-  birthday: Date | null
-  avatar: string | null
-  employeeType: 'FULL_TIME' | 'PART_TIME' | 'INTERN' | 'CONSULTANT' | null
-  team: { id: string; name: string } | null
-  jobRole: {
-    id: string
-    title: string
-    level: { id: string; name: string }
-    domain: { id: string; name: string }
-  } | null
-  manager: {
-    id: string
-    name: string
-    email: string | null
-    role: string | null
-    status: string
-    birthday: Date | null
-    reports: Array<{
-      id: string
-      name: string
-      email: string | null
-      role: string | null
-      status: string
-      birthday: Date | null
-    }>
-  } | null
-  reports: Array<{
-    id: string
-    name: string
-    email: string | null
-    role: string | null
-    status: string
-    birthday: Date | null
-  }>
-  level: number
-  user?: {
-    id: string
-    name: string
-    email: string
-    role: string
-  } | null
+import { Prisma, Person } from '@prisma/client'
+
+// Re-export Person type for convenience
+export type { Person }
+
+export type PersonWithRelations = Prisma.PersonGetPayload<{
+  include: {
+    manager: true
+    reports: true
+    team: true
+    jobRole: true
+  }
+}> & {
+  level?: number
 }
 
 export type PersonBrief = Pick<

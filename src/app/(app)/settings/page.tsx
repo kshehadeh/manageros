@@ -2,7 +2,6 @@ import { getJiraCredentials } from '@/lib/actions/jira'
 import { getGithubCredentials } from '@/lib/actions/github'
 import {
   getAvailablePersonsForSelfLinking,
-  getCurrentUserWithPerson,
   getPendingInvitationsForUser,
 } from '@/lib/actions/organization'
 import { JiraCredentialsSection } from '@/components/settings/jira-credentials-section'
@@ -18,15 +17,21 @@ import { PageContent } from '@/components/ui/page-content'
 import { User, Settings, Shield, Building } from 'lucide-react'
 import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
+import { getCurrentUserWithPersonAndOrganization } from '../../../lib/auth-utils'
 
 export default async function SettingsPage() {
-  const { user, person } = await getCurrentUserWithPerson()
+  const { user, person, organization } =
+    await getCurrentUserWithPersonAndOrganization()
+  if (!user) {
+    return <div>User not found</div>
+  }
+
   const availablePersons = await getAvailablePersonsForSelfLinking()
   const [jiraCredentials, githubCredentials, pendingInvitations] =
     await Promise.all([
       getJiraCredentials(),
       getGithubCredentials(),
-      getPendingInvitationsForUser(user.email),
+      getPendingInvitationsForUser(user.clerkUserId || null),
     ])
 
   return (
@@ -47,9 +52,9 @@ export default async function SettingsPage() {
               header={<SectionHeader icon={User} title='User Info' />}
             >
               <UserInfoSection
-                email={user.email}
-                userId={user.id}
-                role={user.role}
+                email={user.email || ''}
+                userId={user.managerOSUserId}
+                role={user.role || undefined}
               />
             </PageSection>
 
@@ -59,8 +64,8 @@ export default async function SettingsPage() {
               header={<SectionHeader icon={Building} title='Organization' />}
             >
               <OrganizationSection
-                organizationId={user.organizationId}
-                organizationName={user.organizationName}
+                organizationId={organization?.id || null}
+                organizationName={organization?.name || null}
                 pendingInvitations={pendingInvitations}
               />
             </PageSection>
@@ -75,6 +80,7 @@ export default async function SettingsPage() {
             >
               <PersonLinkForm
                 currentUser={user}
+                currentOrganization={organization}
                 currentPerson={person}
                 availablePersons={availablePersons}
               />

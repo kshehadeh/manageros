@@ -16,11 +16,11 @@ export default async function NewMeetingInstancePage({
 }) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
-    redirect('/organization/create')
+  const { id } = await params
+  if (!(await getActionPermission(user, 'meeting-instance.create', id))) {
+    redirect('/dashboard')
   }
 
-  const { id } = await params
   const meeting = await getMeeting(id)
 
   if (!meeting) {

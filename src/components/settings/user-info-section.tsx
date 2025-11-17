@@ -1,9 +1,6 @@
 'use client'
 
-import { dark } from '@clerk/themes'
-import { SignedIn, useUser } from '@clerk/nextjs'
-import { SubscriptionDetailsButton } from '@clerk/nextjs/experimental'
-import { Button } from '../ui/button'
+import { useUser } from '@clerk/nextjs'
 import {
   FaGoogle,
   FaGithub,
@@ -89,19 +86,6 @@ export function UserInfoSection({ userId, role }: UserInfoSectionProps) {
           <p className='text-sm text-muted-foreground'>{userId}</p>
         </div>
       )}
-
-      <hr className='my-4' />
-      <SignedIn>
-        <SubscriptionDetailsButton
-          subscriptionDetailsProps={{
-            appearance: dark,
-          }}
-        >
-          <Button variant='outline' size='sm'>
-            View Subscription Details
-          </Button>
-        </SubscriptionDetailsButton>
-      </SignedIn>
     </div>
   )
 }

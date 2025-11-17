@@ -3,7 +3,6 @@ import { SimplePeopleList } from '@/components/people/person-list'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { Users } from 'lucide-react'
-import type { Person } from '@/types/person'
 
 interface DirectReportsSectionProps {
   personId: string
@@ -52,41 +51,6 @@ export async function DirectReportsSection({
     return null
   }
 
-  // Transform reports to match Person type
-  const formattedReports: Person[] = reports.map(report => ({
-    id: report.id,
-    name: report.name,
-    email: report.email,
-    role: report.role,
-    status: report.status,
-    birthday: report.birthday,
-    avatar: report.avatar,
-    employeeType: report.employeeType,
-    team: report.team
-      ? {
-          id: report.team.id,
-          name: report.team.name,
-        }
-      : null,
-    jobRole: report.jobRole
-      ? {
-          id: report.jobRole.id,
-          title: report.jobRole.title,
-          level: {
-            id: report.jobRole.level.id,
-            name: report.jobRole.level.name,
-          },
-          domain: {
-            id: report.jobRole.domain.id,
-            name: report.jobRole.domain.name,
-          },
-        }
-      : null,
-    manager: null,
-    reports: report.reports,
-    level: 0,
-  }))
-
   return (
     <PageSection
       header={
@@ -97,7 +61,11 @@ export async function DirectReportsSection({
       }
     >
       <SimplePeopleList
-        people={formattedReports}
+        people={reports.map(report => ({
+          ...report,
+          manager: null,
+          level: 0,
+        }))}
         variant='compact'
         showEmail={false}
         showRole={true}

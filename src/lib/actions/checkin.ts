@@ -9,7 +9,7 @@ export async function createCheckIn(formData: CheckInFormData) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to create check-ins')
   }
 
@@ -19,9 +19,7 @@ export async function createCheckIn(formData: CheckInFormData) {
   // Get the current user's person record
   const currentPerson = await prisma.person.findFirst({
     where: {
-      user: {
-        id: user.id,
-      },
+      id: user.managerOSPersonId || '',
     },
   })
 
@@ -33,7 +31,7 @@ export async function createCheckIn(formData: CheckInFormData) {
   const initiative = await prisma.initiative.findFirst({
     where: {
       id: validatedData.initiativeId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -75,7 +73,7 @@ export async function updateCheckIn(
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to update check-ins')
   }
 
@@ -87,7 +85,7 @@ export async function updateCheckIn(
     where: {
       id: checkInId,
       initiative: {
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     },
   })
@@ -126,7 +124,7 @@ export async function deleteCheckIn(checkInId: string) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to delete check-ins')
   }
 
@@ -135,7 +133,7 @@ export async function deleteCheckIn(checkInId: string) {
     where: {
       id: checkInId,
       initiative: {
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     },
     include: {
@@ -162,7 +160,7 @@ export async function getCheckIn(checkInId: string) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to view check-ins')
   }
 
@@ -171,7 +169,7 @@ export async function getCheckIn(checkInId: string) {
     where: {
       id: checkInId,
       initiative: {
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     },
     include: {

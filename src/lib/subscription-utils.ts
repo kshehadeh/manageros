@@ -92,7 +92,11 @@ export async function getPlanLimits(
 
 /**
  * Get subscription information for an organization
- * Fetches from Clerk organization subscription if available, otherwise falls back to stored data
+ * Fetches from Clerk organization billing API if available, including:
+ * - Subscription plan details
+ * - Billing status
+ * - Payer (billing user) information
+ * Falls back to stored data if Clerk API is unavailable
  */
 export async function getOrganizationSubscription(
   organizationId: string
@@ -125,14 +129,30 @@ export async function getOrganizationSubscription(
         clerkSubscription.subscription_items.length > 0 &&
         clerkSubscription.subscription_items[0]?.plan
       ) {
+        const firstItem = clerkSubscription.subscription_items[0]
+        const plan = firstItem.plan
+
+        // Get billing user ID from Clerk's payer information
+        let billingUserId = organization.billingUserId
+        if (firstItem.payer?.user_id) {
+          // Try to find the user in our database by Clerk user ID
+          const billingUser = await prisma.user.findUnique({
+            where: { clerkUserId: firstItem.payer.user_id },
+            select: { id: true },
+          })
+          if (billingUser) {
+            billingUserId = billingUser.id
+          }
+        }
+
         // Update stored subscription info from Clerk (async, don't wait)
-        const plan = clerkSubscription.subscription_items[0].plan
         prisma.organization
           .update({
             where: { id: organizationId },
             data: {
-              subscriptionPlanId: plan.id || null,
-              subscriptionPlanName: plan.name || null,
+              billingUserId: billingUserId,
+              subscriptionPlanId: plan?.id || null,
+              subscriptionPlanName: plan?.name || null,
               subscriptionStatus: clerkSubscription.status || 'active',
             },
           })
@@ -144,9 +164,9 @@ export async function getOrganizationSubscription(
           })
 
         return {
-          billingUserId: organization.billingUserId,
-          subscriptionPlanId: plan.id || null,
-          subscriptionPlanName: plan.name || null,
+          billingUserId: billingUserId,
+          subscriptionPlanId: plan?.id || null,
+          subscriptionPlanName: plan?.name || null,
           subscriptionStatus: clerkSubscription.status || 'active',
         }
       }

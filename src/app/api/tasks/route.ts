@@ -208,7 +208,7 @@ export async function GET(request: NextRequest) {
   const user = await getCurrentUser()
   try {
     // Check if user belongs to an organization
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return NextResponse.json(
         { error: 'User must belong to an organization to view tasks' },
         { status: 403 }
@@ -248,9 +248,9 @@ export async function GET(request: NextRequest) {
 
     // Build where clause
     const whereClause = getTaskAccessWhereClause(
-      user.organizationId,
-      user.id,
-      user.personId || undefined
+      user.managerOSOrganizationId,
+      user.managerOSUserId || '',
+      user.managerOSPersonId || undefined
     )
 
     // Start with base access control and immutable filters
@@ -460,23 +460,23 @@ export async function GET(request: NextRequest) {
       LEFT JOIN "Initiative" i ON t."initiativeId" = i.id
       WHERE (
         -- Tasks created by the current user
-        t."createdById" = ${user.id}
+        t."createdById" = ${user.managerOSUserId || ''}
         -- Tasks associated with initiatives in the same organization
         OR t."initiativeId" IN (
-          SELECT id FROM "Initiative" WHERE "organizationId" = ${user.organizationId}
+          SELECT id FROM "Initiative" WHERE "organizationId" = ${user.managerOSOrganizationId}
         )
         -- Tasks associated with objectives of initiatives in the same organization
         OR t."objectiveId" IN (
           SELECT o.id FROM "Objective" o
           JOIN "Initiative" i ON o."initiativeId" = i.id
-          WHERE i."organizationId" = ${user.organizationId}
+          WHERE i."organizationId" = ${user.managerOSOrganizationId}
         )
         ${
-          user.personId
+          user.managerOSPersonId
             ? Prisma.sql`
         -- Tasks assigned to the current user AND associated with initiatives
-        OR (t."assigneeId" = ${user.personId} AND t."initiativeId" IN (
-          SELECT id FROM "Initiative" WHERE "organizationId" = ${user.organizationId}
+        OR (t."assigneeId" = ${user.managerOSPersonId} AND t."initiativeId" IN (
+          SELECT id FROM "Initiative" WHERE "organizationId" = ${user.managerOSOrganizationId}
         ))`
             : Prisma.empty
         }

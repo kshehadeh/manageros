@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation'
 import { getAllFeedbackCampaignsForOrganization } from '@/lib/actions/feedback-campaign'
 import { FeedbackCampaignList } from '@/components/feedback/feedback-campaign-list'
 import { Button } from '@/components/ui/button'
@@ -17,15 +16,8 @@ import { PageSidebar } from '@/components/ui/page-sidebar'
 import { PageSection } from '@/components/ui/page-section'
 import { Plus, MessageSquare } from 'lucide-react'
 import { Link } from '@/components/ui/link'
-import { getCurrentUser } from '@/lib/auth-utils'
 
 export default async function FeedbackCampaignsPage() {
-  const user = await getCurrentUser()
-
-  if (!user.organizationId) {
-    redirect('/organization/create')
-  }
-
   // Get all feedback campaigns for the organization
   const campaigns = await getAllFeedbackCampaignsForOrganization()
 

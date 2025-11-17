@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     const user = await getCurrentUser()
 
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return NextResponse.json(
         { error: 'User does not belong to an organization' },
         { status: 403 }
@@ -26,10 +26,10 @@ export async function GET(request: NextRequest) {
     // Get organizationId from query params or use user's organization
     const searchParams = request.nextUrl.searchParams
     const organizationId =
-      searchParams.get('organizationId') || user.organizationId
+      searchParams.get('organizationId') || user.managerOSOrganizationId
 
     // Verify user has access to this organization
-    if (organizationId !== user.organizationId) {
+    if (organizationId !== user.managerOSOrganizationId) {
       return NextResponse.json(
         { error: 'Access denied to this organization' },
         { status: 403 }

@@ -108,38 +108,18 @@ export async function POST(req: Request) {
               email: email.toLowerCase(),
               name,
               clerkUserId: id,
-              role: 'USER',
-              organizationId: pendingInvitation?.organization.id || null,
             },
           })
           createdOrUpdatedUserId = newUser.id
         }
 
-        // If there's a pending invitation, mark it as accepted and create OrganizationMember
+        // If there's a pending invitation, mark it as accepted
         if (pendingInvitation) {
           await tx.organizationInvitation.update({
             where: { id: pendingInvitation.id },
             data: {
               status: 'accepted',
               acceptedAt: new Date(),
-            },
-          })
-
-          // Create OrganizationMember record
-          await tx.organizationMember.upsert({
-            where: {
-              userId_organizationId: {
-                userId: createdOrUpdatedUserId,
-                organizationId: pendingInvitation.organization.id,
-              },
-            },
-            create: {
-              userId: createdOrUpdatedUserId,
-              organizationId: pendingInvitation.organization.id,
-              role: 'USER',
-            },
-            update: {
-              role: 'USER', // Ensure role is USER for invited users
             },
           })
 
@@ -166,26 +146,23 @@ export async function POST(req: Request) {
       })
 
       // Add user to Clerk organization if they were invited
-       
       if (
         pendingInvitation &&
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (pendingInvitation.organization as any).clerkOrgId
       ) {
         try {
-          const {
-            ensureClerkOrganization,
-            addUserToClerkOrganization,
-            mapManagerOSRoleToClerkRole,
-          } = await import('@/lib/clerk-organization-utils')
-          const clerkOrgId =
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (pendingInvitation.organization as any).clerkOrgId ||
-            (await ensureClerkOrganization(pendingInvitation.organization.id))
-          await addUserToClerkOrganization(
-            clerkOrgId,
-            id,
-            await mapManagerOSRoleToClerkRole('USER')
-          )
+          const { addUserToClerkOrganization, mapManagerOSRoleToClerkRole } =
+            await import('@/lib/clerk-organization-utils')
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const clerkOrgId = (pendingInvitation.organization as any).clerkOrgId
+          if (clerkOrgId) {
+            await addUserToClerkOrganization(
+              clerkOrgId,
+              id,
+              await mapManagerOSRoleToClerkRole('USER')
+            )
+          }
         } catch (error) {
           console.error(
             'Failed to add user to Clerk organization in webhook:',
@@ -196,7 +173,35 @@ export async function POST(req: Request) {
       }
 
       // Sync user data to Clerk metadata (for JWT token inclusion)
-      await syncUserDataToClerk(id)
+      // Fetch user to construct UserBrief
+      const userForSync = await prisma.user.findUnique({
+        where: { clerkUserId: id },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          clerkUserId: true,
+          personId: true,
+        },
+      })
+      if (userForSync) {
+        const org = pendingInvitation
+          ? await prisma.organization.findUnique({
+              where: { id: pendingInvitation.organization.id },
+              select: { clerkOrganizationId: true },
+            })
+          : null
+        await syncUserDataToClerk({
+          managerOSUserId: userForSync.id,
+          email: userForSync.email,
+          name: userForSync.name,
+          clerkUserId: userForSync.clerkUserId || '',
+          clerkOrganizationId: org?.clerkOrganizationId || null,
+          managerOSOrganizationId: pendingInvitation?.organization.id || null,
+          managerOSPersonId: userForSync.personId,
+          role: 'user', // Default role, will be updated by Clerk session claims
+        })
+      }
 
       return new Response('User created/linked successfully', { status: 200 })
     } catch (error) {
@@ -233,13 +238,32 @@ export async function POST(req: Request) {
         updateData.email = email.toLowerCase()
       }
 
-      await prisma.user.update({
+      const updatedUser = await prisma.user.update({
         where: { clerkUserId: id },
         data: updateData,
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          clerkUserId: true,
+          personId: true,
+        },
       })
 
       // Sync updated user data to Clerk metadata
-      await syncUserDataToClerk(id)
+      if (updatedUser) {
+        // Note: organization info would need to come from Clerk session claims
+        await syncUserDataToClerk({
+          managerOSUserId: updatedUser.id,
+          email: updatedUser.email,
+          name: updatedUser.name,
+          clerkUserId: updatedUser.clerkUserId || '',
+          clerkOrganizationId: null, // Will be set from Clerk session
+          managerOSOrganizationId: null, // Will be set from Clerk session
+          managerOSPersonId: updatedUser.personId,
+          role: 'user', // Will be updated by Clerk session claims
+        })
+      }
 
       return new Response('User updated successfully', { status: 200 })
     } catch (error) {
@@ -347,160 +371,8 @@ export async function POST(req: Request) {
     }
   }
 
-  // Handle organization membership webhooks
-  if (eventType === 'organizationMembership.created') {
-    const { organization_id, public_user_data } = evt.data as {
-      id?: string
-      organization_id?: string
-      public_user_data?: {
-        user_id?: string
-      }
-    }
-
-    if (!organization_id || !public_user_data?.user_id) {
-      return new Response(
-        'Missing organization_id or user_id in organizationMembership.created webhook',
-        { status: 400 }
-      )
-    }
-
-    try {
-      // Find the organization by Clerk org ID
-      const organization = await prisma.organization.findUnique({
-        where: { clerkOrganizationId: organization_id },
-      })
-
-      if (!organization) {
-        console.warn(
-          `Organization not found for Clerk org ID ${organization_id} in membership webhook`
-        )
-        return new Response('Organization not found', { status: 404 })
-      }
-
-      // Find the user by Clerk user ID
-      const user = await prisma.user.findUnique({
-        where: { clerkUserId: public_user_data.user_id },
-      })
-
-      if (!user) {
-        console.warn(
-          `User not found for Clerk user ID ${public_user_data.user_id} in membership webhook`
-        )
-        return new Response('User not found', { status: 404 })
-      }
-
-      // Check if user is already a member (shouldn't happen, but handle gracefully)
-      const existingMembership = await prisma.organizationMember.findUnique({
-        where: {
-          userId_organizationId: {
-            userId: user.id,
-            organizationId: organization.id,
-          },
-        },
-      })
-
-      if (!existingMembership) {
-        // Create OrganizationMember record
-        await prisma.organizationMember.create({
-          data: {
-            userId: user.id,
-            organizationId: organization.id,
-            role: 'USER', // Default role for webhook-created memberships
-          },
-        })
-
-        // Update user's organizationId if not set
-        if (!user.organizationId) {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: {
-              organizationId: organization.id,
-              role: 'USER',
-            },
-          })
-        }
-      }
-
-      return new Response('Organization membership created successfully', {
-        status: 200,
-      })
-    } catch (error) {
-      console.error('Error creating organization membership:', error)
-      return new Response('Error creating organization membership', {
-        status: 500,
-      })
-    }
-  }
-
-  if (eventType === 'organizationMembership.deleted') {
-    const { organization_id, public_user_data } = evt.data as {
-      organization_id?: string
-      public_user_data?: {
-        user_id?: string
-      }
-    }
-
-    if (!organization_id || !public_user_data?.user_id) {
-      return new Response(
-        'Missing organization_id or user_id in organizationMembership.deleted webhook',
-        { status: 400 }
-      )
-    }
-
-    try {
-      // Find the organization by Clerk org ID
-      const organization = await prisma.organization.findUnique({
-        where: { clerkOrganizationId: organization_id },
-      })
-
-      if (!organization) {
-        console.warn(
-          `Organization not found for Clerk org ID ${organization_id} in membership deletion webhook`
-        )
-        return new Response('Organization not found', { status: 404 })
-      }
-
-      // Find the user by Clerk user ID
-      const user = await prisma.user.findUnique({
-        where: { clerkUserId: public_user_data.user_id },
-      })
-
-      if (!user) {
-        console.warn(
-          `User not found for Clerk user ID ${public_user_data.user_id} in membership deletion webhook`
-        )
-        return new Response('User not found', { status: 404 })
-      }
-
-      // Remove OrganizationMember record
-      await prisma.organizationMember.deleteMany({
-        where: {
-          userId: user.id,
-          organizationId: organization.id,
-        },
-      })
-
-      // Clear user's organizationId if it matches this organization
-      if (user.organizationId === organization.id) {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: {
-            organizationId: null,
-            role: 'USER',
-          },
-        })
-      }
-
-      return new Response('Organization membership deleted successfully', {
-        status: 200,
-      })
-    } catch (error) {
-      console.error('Error deleting organization membership:', error)
-      return new Response('Error deleting organization membership', {
-        status: 500,
-      })
-    }
-  }
+  // Organization membership webhooks are no longer needed since Clerk is the source of truth
+  // Membership is managed directly through Clerk API calls
 
   if (eventType === 'subscriptionItem.canceled') {
     const { user_id, organization_id } = evt.data as {

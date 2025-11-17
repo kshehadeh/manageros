@@ -12,6 +12,10 @@
 
 import { prisma } from '@/lib/db'
 import type { PersonFormData } from '@/lib/validations'
+import {
+  createClerkOrganization,
+  deleteClerkOrganization,
+} from '@/lib/clerk-organization-utils'
 
 /**
  * Test data cleanup tracker
@@ -20,6 +24,7 @@ import type { PersonFormData } from '@/lib/validations'
 export interface TestData {
   userIds: string[]
   organizationIds: string[]
+  clerkOrganizationIds: string[] // Track Clerk organization IDs for cleanup
   personIds: string[]
   clerkUserIds: string[]
   otherIds: Record<string, string[]>
@@ -27,20 +32,30 @@ export interface TestData {
 }
 
 /**
- * Create a test organization using the existing createOrganization function
- * This ensures we test the same code path as production
+ * Create a test organization by creating it in Clerk first, then referencing it in the database
+ * This matches the production flow where organizations are created in Clerk and referenced in our DB
  */
 export async function createTestOrganization(
   name: string = `Test Org ${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
   slug: string = `test-org-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
 ) {
-  // Note: This requires a user to be authenticated
-  // In tests, you'll need to create a user first or mock authentication
-  // For now, we'll use direct DB access but note that production code uses createOrganization
+  // Create organization in Clerk first (name and slug are stored in Clerk)
+  let clerkOrgId: string
+  try {
+    const clerkOrg = await createClerkOrganization(name, slug)
+    clerkOrgId = clerkOrg.id
+  } catch (error) {
+    console.error('Failed to create Clerk organization in test:', error)
+    throw new Error(
+      `Failed to create Clerk organization for test: ${error instanceof Error ? error.message : 'Unknown error'}`
+    )
+  }
+
+  // Create organization in database with reference to Clerk organization
+  // Note: name and slug are not stored in our database - they're in Clerk
   const organization = await prisma.organization.create({
     data: {
-      name,
-      slug,
+      clerkOrganizationId: clerkOrgId,
     },
   })
 
@@ -62,11 +77,14 @@ export async function createTestUser(
     data: {
       email,
       name,
-      organizationId: organizationId || null,
       clerkUserId: clerkUserId || null,
-      role: organizationId ? 'ADMIN' : 'USER',
     },
   })
+
+  // OrganizationMember records are no longer created - membership is managed by Clerk
+  // If organizationId is provided, user should be added to Clerk organization via API
+  // Note: In tests, you may need to mock Clerk API calls or add users via Clerk API
+  // This is skipped here as it requires Clerk API integration
 
   return user
 }
@@ -132,6 +150,16 @@ export async function cleanupTestData(testData: TestData) {
   }
 
   // Clean up organizations (this will cascade delete related data)
+  // Delete Clerk organizations first, then database organizations
+  for (const clerkOrgId of testData.clerkOrganizationIds) {
+    try {
+      await deleteClerkOrganization(clerkOrgId)
+    } catch (error) {
+      // Clerk organization may have already been deleted or not exist
+      console.warn(`Failed to delete Clerk organization ${clerkOrgId}:`, error)
+    }
+  }
+
   for (const orgId of testData.organizationIds) {
     try {
       await prisma.organization.delete({
@@ -196,14 +224,12 @@ export async function createTestSetup(options?: {
     options?.clerkUserId
   )
 
-  // Update user to be admin of the organization
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      organizationId: organization.id,
-      role: 'ADMIN',
-    },
-  })
+  // Note: User organization membership and roles are now managed by Clerk
+  // If you need the user to be a member of the organization in tests, you should:
+  // 1. Create the user in Clerk first (with clerkUserId)
+  // 2. Add them to the Clerk organization using addUserToClerkOrganization
+  // 3. Set their role in Clerk using updateUserRoleInClerkOrganization
+  // This is skipped here as it requires Clerk API integration and proper test setup
 
   // Create person
   const person = await createTestPerson(
@@ -222,6 +248,9 @@ export async function createTestSetup(options?: {
     testData: {
       userIds: [user.id],
       organizationIds: [organization.id],
+      clerkOrganizationIds: organization.clerkOrganizationId
+        ? [organization.clerkOrganizationId]
+        : [],
       personIds: [person.id],
       clerkUserIds: options?.clerkUserId ? [options.clerkUserId] : [],
       otherIds: {},

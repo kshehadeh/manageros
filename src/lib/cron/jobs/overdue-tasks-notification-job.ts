@@ -73,12 +73,6 @@ export class OverdueTasksNotificationJob extends CronJob {
                 },
               },
             },
-            // Task was created by a user in the organization
-            {
-              createdBy: {
-                organizationId,
-              },
-            },
           ],
         },
         include: {

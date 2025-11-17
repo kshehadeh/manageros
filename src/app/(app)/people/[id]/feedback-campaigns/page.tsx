@@ -26,19 +26,19 @@ export default async function FeedbackCampaignsPage({
 
   const { id } = await params
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     redirect('/organization/create')
   }
 
   // Get the person
-  const person = await getPersonById(id, user.organizationId)
+  const person = await getPersonById(id, user.managerOSOrganizationId)
 
   if (!person || !('id' in person) || typeof person.id !== 'string') {
     notFound()
   }
 
   // Get the current user's person record
-  const currentPerson = await getPersonByUserId(user.id)
+  const currentPerson = await getPersonByUserId(user.managerOSUserId || '')
 
   if (
     !currentPerson ||
@@ -56,12 +56,16 @@ export default async function FeedbackCampaignsPage({
   }
 
   // Get feedback campaigns for this person created by the current user
-  const campaigns = await getFeedbackCampaignsForPerson(person.id, user.id, {
-    includeTargetPerson: true,
-    includeUser: true,
-    includeTemplate: true,
-    includeResponses: true,
-  })
+  const campaigns = await getFeedbackCampaignsForPerson(
+    person.id,
+    user.managerOSUserId || '',
+    {
+      includeTargetPerson: true,
+      includeUser: true,
+      includeTemplate: true,
+      includeResponses: true,
+    }
+  )
 
   // Type the campaigns with proper status typing
   const typedCampaigns = campaigns.map(campaign => {

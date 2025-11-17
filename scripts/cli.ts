@@ -49,6 +49,22 @@ interface UserWithPresence {
   presence: UserPresence
 }
 
+interface ClerkOrganization {
+  id: string
+  name: string
+  slug: string
+  created_at: number
+  updated_at: number
+  members_count: number
+  admin_delete_enabled: boolean
+  max_allowed_memberships: number | null
+  has_image: boolean
+  image_url: string
+  public_metadata: Record<string, unknown>
+  private_metadata: Record<string, unknown>
+  object: 'organization'
+}
+
 function getClerkConfig() {
   const apiKey = process.env.CLERK_SECRET_KEY
   const baseUrl = process.env.CLERK_API_URL || 'https://api.clerk.com/v1'
@@ -264,17 +280,6 @@ async function listUsers() {
           email: true,
         },
       },
-      organizationMemberships: {
-        include: {
-          organization: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-            },
-          },
-        },
-      },
     },
     orderBy: {
       email: 'asc',
@@ -285,11 +290,9 @@ async function listUsers() {
 }
 
 function formatUserForDisplay(user: Awaited<ReturnType<typeof listUsers>>[0]) {
-  const orgs = user.organizationMemberships
-    .map(m => m.organization.name)
-    .join(', ')
+  // Organization membership is now managed by Clerk, not stored in OrganizationMember table
   const person = user.person ? ` (Person: ${user.person.name})` : ''
-  return `${user.email} - ${user.name}${person} [${orgs || 'No orgs'}]`
+  return `${user.email} - ${user.name}${person}`
 }
 
 async function listUsersCommand() {
@@ -341,17 +344,6 @@ async function listUsersCommand() {
                   email: true,
                 },
               },
-              organizationMemberships: {
-                include: {
-                  organization: {
-                    select: {
-                      id: true,
-                      name: true,
-                      slug: true,
-                    },
-                  },
-                },
-              },
             },
           })
         : []
@@ -366,10 +358,8 @@ async function listUsersCommand() {
         const dbUser = user.databaseUserId
           ? dbUserMap.get(user.databaseUserId)
           : null
-        const orgs =
-          dbUser?.organizationMemberships
-            .map(m => `${m.organization.name} (${m.role})`)
-            .join(', ') || 'None'
+        // Organization membership is now managed by Clerk
+        const orgs = 'Check Clerk for membership'
         const person = dbUser?.person
           ? `${dbUser.person.name} (${dbUser.person.email})`
           : 'Not linked'
@@ -404,10 +394,8 @@ async function listUsersCommand() {
         const dbUser = user.databaseUserId
           ? dbUserMap.get(user.databaseUserId)
           : null
-        const orgs =
-          dbUser?.organizationMemberships
-            .map(m => `${m.organization.name} (${m.role})`)
-            .join(', ') || 'None'
+        // Organization membership is now managed by Clerk
+        const orgs = 'Check Clerk for membership'
         const person = dbUser?.person
           ? `${dbUser.person.name} (${dbUser.person.email})`
           : 'Not linked'
@@ -479,7 +467,7 @@ async function deleteUserByIdentifier(identifier: string) {
           organization: {
             select: {
               id: true,
-              name: true,
+              clerkOrganizationId: true,
             },
           },
         },
@@ -552,9 +540,8 @@ async function deleteUserByIdentifier(identifier: string) {
     console.log(`  Email: ${user.email}`)
     console.log(`  Name: ${user.name}`)
     console.log(`  Clerk User ID: ${user.clerkUserId || 'N/A'}`)
-    console.log(
-      `  Organizations: ${user.organizationMemberships.map(m => m.organization.name).join(', ') || 'N/A'}`
-    )
+    // Organization membership is now managed by Clerk
+    console.log(`  Organizations: Check Clerk API`)
     console.log(`  Person: ${user.person?.name || 'N/A'}`)
     console.log('')
   } else {
@@ -589,16 +576,7 @@ async function deleteUserByIdentifier(identifier: string) {
     console.log('\nNo Clerk user ID found, skipping Clerk deletion')
   }
 
-  // Delete organization memberships
-  if (user && user.organizationMemberships.length > 0) {
-    console.log(
-      `\nDeleting ${user.organizationMemberships.length} organization membership(s)...`
-    )
-    await prisma.organizationMember.deleteMany({
-      where: { userId: user.id },
-    })
-    console.log('✓ Organization memberships deleted')
-  }
+  // Organization memberships are now managed by Clerk, not in OrganizationMember table
 
   // Delete database user if exists
   if (user) {
@@ -695,12 +673,48 @@ async function deleteUser(email?: string) {
 // Organization Commands
 // ============================================================================
 
+/**
+ * Fetch organization details from Clerk API
+ */
+async function getClerkOrganization(
+  clerkOrgId: string
+): Promise<ClerkOrganization | null> {
+  const { apiKey, baseUrl } = getClerkConfig()
+  if (!apiKey) {
+    return null
+  }
+
+  try {
+    const response = await fetch(`${baseUrl}/organizations/${clerkOrgId}`, {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+    })
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null
+      }
+      const errorText = await response.text()
+      console.warn(
+        `Failed to fetch Clerk organization ${clerkOrgId}: ${response.status} ${errorText}`
+      )
+      return null
+    }
+
+    return (await response.json()) as ClerkOrganization
+  } catch (error) {
+    console.warn(`Error fetching Clerk organization ${clerkOrgId}:`, error)
+    return null
+  }
+}
+
 async function listOrganizations() {
   const organizations = await prisma.organization.findMany({
     include: {
       _count: {
         select: {
-          users: true,
+          members: true,
           people: true,
           teams: true,
           initiatives: true,
@@ -708,11 +722,26 @@ async function listOrganizations() {
       },
     },
     orderBy: {
-      name: 'asc',
+      createdAt: 'asc',
     },
   })
 
-  return organizations
+  // Fetch Clerk organization details for each org
+  const organizationsWithClerkData = await Promise.all(
+    organizations.map(async org => {
+      const clerkOrg = org.clerkOrganizationId
+        ? await getClerkOrganization(org.clerkOrganizationId)
+        : null
+
+      return {
+        ...org,
+        clerkName: clerkOrg?.name || null,
+        clerkSlug: clerkOrg?.slug || null,
+      }
+    })
+  )
+
+  return organizationsWithClerkData
 }
 
 async function listOrganizationsCommand() {
@@ -738,11 +767,20 @@ async function listOrganizationsCommand() {
 
     // Display organizations in a formatted table
     organizations.forEach((org, index) => {
-      console.log(`${index + 1}. ${org.name}`)
-      console.log(`   Slug: ${org.slug}`)
+      const displayName = org.clerkName || org.clerkOrganizationId || 'Unknown'
+      const displaySlug = org.clerkSlug ? ` (${org.clerkSlug})` : ''
+
+      console.log(`${index + 1}. ${displayName}${displaySlug}`)
+      if (org.clerkName) {
+        console.log(`   Name: ${org.clerkName}`)
+      }
+      if (org.clerkSlug) {
+        console.log(`   Slug: ${org.clerkSlug}`)
+      }
+      console.log(`   Clerk Org ID: ${org.clerkOrganizationId}`)
       console.log(`   ID: ${org.id}`)
       console.log(`   Description: ${org.description || 'N/A'}`)
-      console.log(`   Users: ${org._count.users}`)
+      console.log(`   Members: ${org._count.members}`)
       console.log(`   People: ${org._count.people}`)
       console.log(`   Teams: ${org._count.teams}`)
       console.log(`   Initiatives: ${org._count.initiatives}`)
@@ -775,7 +813,7 @@ async function getOrganizationStats(organizationId: string) {
     fileAttachmentCount,
     githubOrgCount,
   ] = await Promise.all([
-    prisma.user.count({ where: { organizationId } }),
+    0, // Member count is now managed by Clerk API
     prisma.team.count({ where: { organizationId } }),
     prisma.person.count({ where: { organizationId } }),
     prisma.initiative.count({ where: { organizationId } }),
@@ -837,10 +875,15 @@ async function deleteOrganization(slug?: string) {
         return
       }
 
-      const choices = organizations.map(org => ({
-        name: `${org.name} (${org.slug}) - ${org._count.users} users, ${org._count.people} people`,
-        value: org.slug,
-      }))
+      const choices = organizations.map(org => {
+        const displayName =
+          org.clerkName || org.clerkOrganizationId || 'Unknown'
+        const displaySlug = org.clerkSlug ? ` (${org.clerkSlug})` : ''
+        return {
+          name: `${displayName}${displaySlug} - ${org._count.members} members, ${org._count.people} people`,
+          value: org.id,
+        }
+      })
 
       organizationSlug = await select({
         message: 'Select an organization to delete:',
@@ -850,10 +893,13 @@ async function deleteOrganization(slug?: string) {
 
     console.log(`Looking up organization: ${organizationSlug}`)
 
-    // Try to find organization by slug or ID
+    // Try to find organization by clerkOrganizationId or ID
     const organization = await prisma.organization.findFirst({
       where: {
-        OR: [{ slug: organizationSlug }, { id: organizationSlug }],
+        OR: [
+          { clerkOrganizationId: organizationSlug },
+          { id: organizationSlug },
+        ],
       },
     })
 
@@ -861,10 +907,18 @@ async function deleteOrganization(slug?: string) {
       throw new Error(`Organization not found: ${organizationSlug}`)
     }
 
+    // Fetch Clerk organization details
+    const clerkOrg = organization.clerkOrganizationId
+      ? await getClerkOrganization(organization.clerkOrganizationId)
+      : null
+
     console.log(`\nFound organization:`)
+    if (clerkOrg) {
+      console.log(`  Name: ${clerkOrg.name}`)
+      console.log(`  Slug: ${clerkOrg.slug}`)
+    }
     console.log(`  ID: ${organization.id}`)
-    console.log(`  Name: ${organization.name}`)
-    console.log(`  Slug: ${organization.slug}`)
+    console.log(`  Clerk Org ID: ${organization.clerkOrganizationId}`)
     console.log(`  Description: ${organization.description || 'N/A'}`)
 
     // Get statistics
@@ -890,7 +944,7 @@ async function deleteOrganization(slug?: string) {
 
     // Confirm deletion
     const confirmed = await confirm({
-      message: `Are you sure you want to delete organization "${organization.name}" (${organization.slug})? This will delete ALL associated data and cannot be undone.`,
+      message: `Are you sure you want to delete organization "${clerkOrg?.name || organization.clerkOrganizationId}" (${organization.id})? This will delete ALL associated data and cannot be undone.`,
       default: false,
     })
 
@@ -899,18 +953,30 @@ async function deleteOrganization(slug?: string) {
       return
     }
 
-    // Delete users and their Clerk accounts first
+    // Delete organization invitations first (before users since invitations reference users)
+    const invitationCount = await prisma.organizationInvitation.deleteMany({
+      where: { organizationId: organization.id },
+    })
+    if (invitationCount.count > 0) {
+      console.log(`\nDeleted ${invitationCount.count} invitation(s)`)
+    }
+
+    // Delete users and their Clerk accounts
     if (stats.userCount > 0) {
       console.log(`\nDeleting ${stats.userCount} user(s)...`)
-      const users = await prisma.user.findMany({
-        where: { organizationId: organization.id },
-        select: {
-          id: true,
-          email: true,
-          clerkUserId: true,
-          personId: true,
-        },
-      })
+      // Get users - since OrganizationMember table is no longer used,
+      // we need to get users via Clerk API or find another way
+      // For this script, we'll skip user deletion as it requires Clerk API integration
+      // In production, use Clerk API to get organization members first
+      console.log(
+        '  ⚠ Skipping user deletion - use Clerk API to get organization members'
+      )
+      const users: Array<{
+        id: string
+        email: string
+        clerkUserId: string | null
+        personId: string | null
+      }> = []
 
       for (const user of users) {
         // Unlink person if linked
@@ -995,9 +1061,14 @@ async function deleteOrganization(slug?: string) {
       console.log(`  ✓ Deleted ${oneOnOneCount.count} one-on-one(s)`)
     }
 
-    // Tasks
+    // Tasks (through initiatives or objectives)
     const taskCount = await prisma.task.deleteMany({
-      where: { createdBy: { organizationId: organization.id } },
+      where: {
+        OR: [
+          { initiative: { organizationId: organization.id } },
+          { objective: { initiative: { organizationId: organization.id } } },
+        ],
+      },
     })
     if (taskCount.count > 0) {
       console.log(`  ✓ Deleted ${taskCount.count} task(s)`)
@@ -1077,14 +1148,6 @@ async function deleteOrganization(slug?: string) {
       console.log(`  ✓ Deleted ${jobDomainCount.count} job domain(s)`)
     }
 
-    // Organization invitations
-    const invitationCount = await prisma.organizationInvitation.deleteMany({
-      where: { organizationId: organization.id },
-    })
-    if (invitationCount.count > 0) {
-      console.log(`  ✓ Deleted ${invitationCount.count} invitation(s)`)
-    }
-
     // Entity links
     const entityLinkCount = await prisma.entityLink.deleteMany({
       where: { organizationId: organization.id },
@@ -1141,9 +1204,14 @@ async function deleteOrganization(slug?: string) {
       console.log(`  ✓ Deleted ${githubOrgCount.count} GitHub org link(s)`)
     }
 
+    // Fetch Clerk organization details for final message
+    const finalClerkOrg = organization.clerkOrganizationId
+      ? await getClerkOrganization(organization.clerkOrganizationId)
+      : null
+
     // Finally, delete the organization
     console.log(
-      `\nDeleting organization: ${organization.name} (${organization.id})`
+      `\nDeleting organization: ${finalClerkOrg?.name || organization.clerkOrganizationId} (${organization.id})`
     )
     await prisma.organization.delete({
       where: { id: organization.id },

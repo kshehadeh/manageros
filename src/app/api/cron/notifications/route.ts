@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
       } else {
         // Run for all organizations
         const organizations = await prisma.organization.findMany({
-          select: { id: true, name: true },
+          select: { id: true, clerkOrganizationId: true },
         })
 
         for (const org of organizations) {
@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
       const organizations = organizationId
         ? [{ id: organizationId, name: 'Specific Organization' }]
         : await prisma.organization.findMany({
-            select: { id: true, name: true },
+            select: { id: true, clerkOrganizationId: true },
           })
 
       const jobs = cronJobRegistry.getAllJobs()

@@ -13,7 +13,7 @@ export async function saveJiraCredentials(formData: {
 }) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to configure Jira')
   }
 
@@ -43,9 +43,9 @@ export async function saveJiraCredentials(formData: {
 
   // Upsert the credentials
   await prisma.userJiraCredentials.upsert({
-    where: { userId: user.id },
+    where: { userId: user.managerOSUserId || '' },
     create: {
-      userId: user.id,
+      userId: user.managerOSUserId || '',
       jiraUsername: formData.jiraUsername,
       encryptedApiKey,
       jiraBaseUrl: formData.jiraBaseUrl,
@@ -65,7 +65,7 @@ export async function getJiraCredentials() {
   const user = await getCurrentUser()
 
   const credentials = await prisma.userJiraCredentials.findUnique({
-    where: { userId: user.id },
+    where: { userId: user.managerOSUserId || '' },
   })
 
   if (!credentials) {
@@ -83,7 +83,7 @@ export async function getJiraBaseUrl() {
   const user = await getCurrentUser()
 
   const credentials = await prisma.userJiraCredentials.findUnique({
-    where: { userId: user.id },
+    where: { userId: user.managerOSUserId || '' },
   })
 
   if (!credentials) {
@@ -97,7 +97,7 @@ export async function deleteJiraCredentials() {
   const user = await getCurrentUser()
 
   await prisma.userJiraCredentials.delete({
-    where: { userId: user.id },
+    where: { userId: user.managerOSUserId || '' },
   })
 
   revalidatePath('/settings')
@@ -110,7 +110,7 @@ export async function linkPersonToJiraAccount(
 ) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization')
   }
 
@@ -118,7 +118,7 @@ export async function linkPersonToJiraAccount(
   const person = await prisma.person.findFirst({
     where: {
       id: personId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -128,7 +128,7 @@ export async function linkPersonToJiraAccount(
 
   // Get user's Jira credentials
   const credentials = await prisma.userJiraCredentials.findUnique({
-    where: { userId: user.id },
+    where: { userId: user.managerOSUserId || '' },
   })
 
   if (!credentials) {
@@ -177,7 +177,7 @@ export async function linkPersonToJiraAccount(
 export async function unlinkPersonFromJiraAccount(personId: string) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization')
   }
 
@@ -185,7 +185,7 @@ export async function unlinkPersonFromJiraAccount(personId: string) {
   const person = await prisma.person.findFirst({
     where: {
       id: personId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -207,7 +207,7 @@ export async function fetchJiraAssignedTickets(
 ) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization')
   }
 
@@ -215,7 +215,7 @@ export async function fetchJiraAssignedTickets(
   const person = await prisma.person.findFirst({
     where: {
       id: personId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
     include: {
       jiraAccount: true,
@@ -232,7 +232,7 @@ export async function fetchJiraAssignedTickets(
 
   // Get user's Jira credentials
   const credentials = await prisma.userJiraCredentials.findUnique({
-    where: { userId: user.id },
+    where: { userId: user.managerOSUserId || '' },
   })
 
   if (!credentials) {
@@ -283,7 +283,7 @@ export async function fetchJiraMetrics(
 ) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization')
   }
 
@@ -291,7 +291,7 @@ export async function fetchJiraMetrics(
   const person = await prisma.person.findFirst({
     where: {
       id: personId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
     include: {
       jiraAccount: true,
@@ -308,7 +308,7 @@ export async function fetchJiraMetrics(
 
   // Get user's Jira credentials
   const credentials = await prisma.userJiraCredentials.findUnique({
-    where: { userId: user.id },
+    where: { userId: user.managerOSUserId || '' },
   })
 
   if (!credentials) {

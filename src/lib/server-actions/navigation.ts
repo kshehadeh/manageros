@@ -19,9 +19,9 @@ export async function getFilteredNavigation() {
   const user = await getCurrentUser()
 
   cacheLife('hours') // Navigation doesn't change frequently
-  cacheTag(`navigation-user-${user.id}`)
-  if (user.organizationId) {
-    cacheTag(`navigation-org-${user.organizationId}`)
+  cacheTag(`navigation-user-${user.managerOSUserId}`)
+  if (user.managerOSOrganizationId) {
+    cacheTag(`navigation-org-${user.managerOSOrganizationId}`)
   }
 
   interface NavigationItem {

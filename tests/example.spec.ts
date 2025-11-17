@@ -25,7 +25,7 @@ test.describe('Example Test Suite', () => {
   }) => {
     // Test data is automatically created via fixtures
     expect(organization).toBeDefined()
-    expect(organization.name).toContain('Test Org')
+    expect(organization.clerkOrganizationId).toBeDefined()
     expect(user).toBeDefined()
     expect(person).toBeDefined()
 
@@ -60,7 +60,7 @@ test.describe('Example Test Suite', () => {
   }) => {
     // Organization is created via fixture
     expect(organization.id).toBeDefined()
-    expect(organization.slug).toBeDefined()
+    expect(organization.clerkOrganizationId).toBeDefined()
 
     // You can use the organization in your test
     // For example, navigate to organization-specific pages

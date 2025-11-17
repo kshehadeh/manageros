@@ -37,7 +37,7 @@ export async function createNote(formData: {
   files?: File[]
 }) {
   const user = await getCurrentUser()
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to create notes')
   }
 
@@ -58,21 +58,21 @@ export async function createNote(formData: {
     data: {
       entityType: validatedData.entityType,
       entityId: validatedData.entityId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
       content: validatedData.content,
-      createdById: user.id,
+      createdById: user.managerOSUserId || '',
       attachments: {
         create: fileUploadResults.map(file => ({
           entityType: validatedData.entityType,
           entityId: validatedData.entityId,
-          organizationId: user.organizationId!,
+          organizationId: user.managerOSOrganizationId!,
           fileName: file.fileName,
           originalName: file.originalName,
           fileSize: file.fileSize,
           mimeType: file.mimeType,
           r2Key: file.r2Key,
           r2Url: file.r2Url,
-          uploadedById: user.id,
+          uploadedById: user.managerOSUserId || '',
         })),
       },
     },
@@ -133,7 +133,7 @@ export async function createNote(formData: {
  */
 export async function updateNote(formData: { id: string; content: string }) {
   const user = await getCurrentUser()
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to update notes')
   }
 
@@ -143,7 +143,7 @@ export async function updateNote(formData: { id: string; content: string }) {
   const existingNote = await prisma.note.findFirst({
     where: {
       id: validatedData.id,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -217,7 +217,7 @@ export async function updateNote(formData: { id: string; content: string }) {
  */
 export async function deleteNote(formData: { id: string }) {
   const user = await getCurrentUser()
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to delete notes')
   }
 
@@ -227,7 +227,7 @@ export async function deleteNote(formData: { id: string }) {
   const existingNote = await prisma.note.findFirst({
     where: {
       id: validatedData.id,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -259,7 +259,7 @@ export async function getNotesForEntity(
   entityId: string
 ): Promise<NoteWithAttachments[]> {
   const user = await getCurrentUser()
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to view notes')
   }
 
@@ -267,7 +267,7 @@ export async function getNotesForEntity(
     where: {
       entityType,
       entityId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
     include: {
       createdBy: {
@@ -325,7 +325,7 @@ export async function addAttachmentsToNote(formData: {
   files: File[]
 }) {
   const user = await getCurrentUser()
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to add attachments')
   }
 
@@ -333,7 +333,7 @@ export async function addAttachmentsToNote(formData: {
   const existingNote = await prisma.note.findFirst({
     where: {
       id: formData.noteId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -354,14 +354,14 @@ export async function addAttachmentsToNote(formData: {
       noteId: formData.noteId,
       entityType: existingNote.entityType,
       entityId: existingNote.entityId,
-      organizationId: user.organizationId!,
+      organizationId: user.managerOSOrganizationId!,
       fileName: file.fileName,
       originalName: file.originalName,
       fileSize: file.fileSize,
       mimeType: file.mimeType,
       r2Key: file.r2Key,
       r2Url: file.r2Url,
-      uploadedById: user.id,
+      uploadedById: user.managerOSUserId || '',
     })),
   })
 
@@ -380,7 +380,7 @@ export async function addAttachmentsToNote(formData: {
  */
 export async function deleteFileAttachment(formData: { id: string }) {
   const user = await getCurrentUser()
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to delete attachments')
   }
 
@@ -390,7 +390,7 @@ export async function deleteFileAttachment(formData: { id: string }) {
   const existingAttachment = await prisma.fileAttachment.findFirst({
     where: {
       id: validatedData.id,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 

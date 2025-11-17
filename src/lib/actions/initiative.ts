@@ -14,7 +14,7 @@ export async function createInitiative(formData: InitiativeFormData) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to create initiatives')
   }
 
@@ -34,7 +34,7 @@ export async function createInitiative(formData: InitiativeFormData) {
     const team = await prisma.team.findFirst({
       where: {
         id: validatedData.teamId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
     if (!team) {
@@ -48,7 +48,7 @@ export async function createInitiative(formData: InitiativeFormData) {
     const validOwners = await prisma.person.findMany({
       where: {
         id: { in: ownerIds },
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
 
@@ -60,9 +60,9 @@ export async function createInitiative(formData: InitiativeFormData) {
   }
 
   // Check organization limits before creating
-  const counts = await getOrganizationCounts(user.organizationId)
+  const counts = await getOrganizationCounts(user.managerOSOrganizationId)
   const limitCheck = await checkOrganizationLimit(
-    user.organizationId,
+    user.managerOSOrganizationId,
     'maxInitiatives',
     counts.initiatives
   )
@@ -87,7 +87,7 @@ export async function createInitiative(formData: InitiativeFormData) {
           validatedData.teamId && validatedData.teamId.trim() !== ''
             ? validatedData.teamId
             : null,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
         objectives: {
           create:
             validatedData.objectives?.map((obj, index) => ({
@@ -151,7 +151,7 @@ export async function updateInitiative(
   const { getActionPermission } = await import('@/lib/auth-utils')
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to update initiatives')
   }
 
@@ -175,7 +175,7 @@ export async function updateInitiative(
   const existingInitiative = await prisma.initiative.findFirst({
     where: {
       id,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
   if (!existingInitiative) {
@@ -187,7 +187,7 @@ export async function updateInitiative(
     const team = await prisma.team.findFirst({
       where: {
         id: validatedData.teamId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
     if (!team) {
@@ -252,7 +252,7 @@ export async function deleteInitiative(id: string) {
   const { getActionPermission } = await import('@/lib/auth-utils')
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to delete initiatives')
   }
 
@@ -265,7 +265,7 @@ export async function deleteInitiative(id: string) {
   const existingInitiative = await prisma.initiative.findFirst({
     where: {
       id,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
   if (!existingInitiative) {
@@ -289,7 +289,7 @@ export async function createObjective(
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to create objectives')
   }
 
@@ -306,7 +306,7 @@ export async function createObjective(
   const initiative = await prisma.initiative.findFirst({
     where: {
       id: initiativeId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
   if (!initiative) {
@@ -348,7 +348,7 @@ export async function updateInitiativeTeam(
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to update initiatives')
   }
 
@@ -356,7 +356,7 @@ export async function updateInitiativeTeam(
   const existingInitiative = await prisma.initiative.findFirst({
     where: {
       id: initiativeId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
   if (!existingInitiative) {
@@ -368,7 +368,7 @@ export async function updateInitiativeTeam(
     const team = await prisma.team.findFirst({
       where: {
         id: teamId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
     if (!team) {
@@ -401,7 +401,7 @@ export async function addInitiativeOwner(
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to manage initiative owners'
     )
@@ -411,7 +411,7 @@ export async function addInitiativeOwner(
   const initiative = await prisma.initiative.findFirst({
     where: {
       id: initiativeId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
   if (!initiative) {
@@ -422,7 +422,7 @@ export async function addInitiativeOwner(
   const person = await prisma.person.findFirst({
     where: {
       id: personId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
   if (!person) {
@@ -466,7 +466,7 @@ export async function removeInitiativeOwner(
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to manage initiative owners'
     )
@@ -476,7 +476,7 @@ export async function removeInitiativeOwner(
   const initiative = await prisma.initiative.findFirst({
     where: {
       id: initiativeId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
   if (!initiative) {
@@ -493,6 +493,37 @@ export async function removeInitiativeOwner(
 
   // Revalidate the initiative page
   revalidatePath(`/initiatives/${initiativeId}`)
+}
+
+/**
+ * Get initiative owners for a specific initiative
+ */
+export async function getInitiativeOwners(initiativeId: string) {
+  const user = await getCurrentUser()
+
+  const hasPermission = await getActionPermission(
+    user,
+    'initiative.view',
+    initiativeId
+  )
+
+  if (!hasPermission) {
+    throw new Error('You do not have permission to view this initiative')
+  }
+
+  return await prisma.initiativeOwner.findMany({
+    where: { initiativeId },
+    include: {
+      person: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          avatar: true,
+        },
+      },
+    },
+  })
 }
 
 /**

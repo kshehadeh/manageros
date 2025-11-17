@@ -23,12 +23,12 @@ export async function generatePersonOverview(
 ): Promise<GeneratePersonOverviewResponse> {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization')
   }
 
   // Get current person ID from session to enforce access control
-  const currentPersonId = user.personId
+  const currentPersonId = user.managerOSPersonId
 
   if (!currentPersonId) {
     throw new Error('User must be linked to a person to generate overviews')
@@ -53,7 +53,7 @@ export async function generatePersonOverview(
   // Fetch comprehensive person data
   const person = await getPersonForOverview(
     personId,
-    user.organizationId,
+    user.managerOSOrganizationId,
     currentPersonId,
     lookbackMs
   )
@@ -204,11 +204,11 @@ Guidelines:
 export async function getLatestPersonOverview(personId: string) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization')
   }
 
-  const currentPersonId = user.personId
+  const currentPersonId = user.managerOSPersonId
 
   if (!currentPersonId) {
     throw new Error('User must be linked to a person to view overviews')
@@ -228,7 +228,7 @@ export async function getLatestPersonOverview(personId: string) {
 
   // Verify person belongs to the same organization
   const person = await prisma.person.findFirst({
-    where: { id: personId, organizationId: user.organizationId },
+    where: { id: personId, organizationId: user.managerOSOrganizationId },
     select: { id: true },
   })
 

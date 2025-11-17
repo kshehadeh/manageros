@@ -9,7 +9,7 @@ const CLERK_API_BASE = 'https://api.clerk.com/v1'
 /**
  * Clerk Organization API response types
  */
-interface ClerkOrganization {
+export interface ClerkOrganization {
   id: string
   name: string
   slug: string
@@ -78,6 +78,36 @@ export async function createClerkOrganization(
 }
 
 /**
+ * Delete a Clerk organization
+ */
+export async function deleteClerkOrganization(
+  clerkOrgId: string
+): Promise<void> {
+  if (!process.env.CLERK_SECRET_KEY) {
+    throw new Error(
+      'CLERK_SECRET_KEY environment variable is not set. Cannot delete Clerk organization.'
+    )
+  }
+
+  const response = await fetch(
+    `${CLERK_API_BASE}/organizations/${clerkOrgId}`,
+    {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
+      },
+    }
+  )
+
+  if (!response.ok && response.status !== 404) {
+    const errorText = await response.text()
+    throw new Error(
+      `Failed to delete Clerk organization: ${response.status} ${errorText}`
+    )
+  }
+}
+
+/**
  * Add a user to a Clerk organization
  */
 export async function addUserToClerkOrganization(
@@ -130,7 +160,7 @@ export async function addUserToClerkOrganization(
 /**
  * Get a user's membership in a Clerk organization
  */
-async function getClerkOrganizationMembership(
+export async function getClerkOrganizationMembership(
   clerkOrgId: string,
   clerkUserId: string
 ): Promise<ClerkOrganizationMembership | null> {
@@ -257,6 +287,43 @@ export async function updateUserRoleInClerkOrganization(
 }
 
 /**
+ * Get organization details from Clerk
+ */
+export async function getClerkOrganization(
+  clerkOrgId: string
+): Promise<ClerkOrganization | null> {
+  if (!process.env.CLERK_SECRET_KEY) {
+    return null
+  }
+
+  try {
+    const response = await fetch(
+      `${CLERK_API_BASE}/organizations/${clerkOrgId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
+        },
+      }
+    )
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null
+      }
+      const errorText = await response.text()
+      throw new Error(
+        `Failed to get Clerk organization: ${response.status} ${errorText}`
+      )
+    }
+
+    return (await response.json()) as ClerkOrganization
+  } catch (error) {
+    console.error('Error getting Clerk organization:', error)
+    return null
+  }
+}
+
+/**
  * Get subscription for a Clerk organization
  */
 export async function getClerkOrganizationSubscription(
@@ -320,17 +387,18 @@ export async function mapManagerOSRoleToClerkRole(
 
 /**
  * Ensure a Clerk organization exists for a ManagerOS organization
- * Creates it if it doesn't exist, using the organization slug
+ * Creates it if it doesn't exist
+ * Note: This function requires name and slug to be provided since they're no longer stored in DB
  */
 export async function ensureClerkOrganization(
-  organizationId: string
+  organizationId: string,
+  name: string,
+  slug: string
 ): Promise<string> {
   const organization = await prisma.organization.findUnique({
     where: { id: organizationId },
     select: {
       id: true,
-      name: true,
-      slug: true,
       clerkOrganizationId: true,
     },
   })
@@ -346,10 +414,7 @@ export async function ensureClerkOrganization(
 
   // Create Clerk organization
   try {
-    const clerkOrg = await createClerkOrganization(
-      organization.name,
-      organization.slug
-    )
+    const clerkOrg = await createClerkOrganization(name, slug)
 
     // Update ManagerOS organization with Clerk org ID
     await prisma.organization.update({
@@ -367,4 +432,62 @@ export async function ensureClerkOrganization(
     )
     throw error
   }
+}
+
+/**
+ * Get all members of a Clerk organization
+ */
+export async function getClerkOrganizationMembers(
+  clerkOrgId: string
+): Promise<ClerkOrganizationMembership[]> {
+  if (!process.env.CLERK_SECRET_KEY) {
+    return []
+  }
+
+  try {
+    const response = await fetch(
+      `${CLERK_API_BASE}/organizations/${clerkOrgId}/memberships`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
+        },
+      }
+    )
+    if (!response.ok) {
+      return []
+    }
+
+    const data = (await response.json()) as {
+      data: ClerkOrganizationMembership[]
+    }
+
+    return data.data || []
+  } catch (error) {
+    console.error('Error getting Clerk organization members:', error)
+    return []
+  }
+}
+
+/**
+ * Get the number of members of a Clerk organization
+ */
+export async function getClerkOrganizationMembersCount(
+  clerkOrgId: string
+): Promise<number> {
+  const members = await getClerkOrganizationMembers(clerkOrgId)
+  return members.length
+}
+
+/**
+ * Map Clerk role to ManagerOS role
+ * OWNER is determined by checking if user is the billing user
+ */
+export async function mapClerkRoleToManagerOSRole(
+  clerkRole: 'org:admin' | 'org:member',
+  isBillingUser: boolean = false
+): Promise<'OWNER' | 'ADMIN' | 'USER'> {
+  if (clerkRole === 'org:admin') {
+    return isBillingUser ? 'OWNER' : 'ADMIN'
+  }
+  return 'USER'
 }

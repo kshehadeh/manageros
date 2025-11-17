@@ -109,8 +109,8 @@ Clerk sends webhooks for subscription events, which are handled in `src/app/api/
 - **`subscription.created`**: Updates organization subscription when a new subscription is created for a Clerk organization
 - **`subscription.updated`**: Updates organization subscription when subscription changes (plan upgrade/downgrade)
 - **`subscriptionItem.canceled`**: Marks organization subscription as canceled
-- **`organizationMembership.created`**: Syncs when a user is added to a Clerk organization
-- **`organizationMembership.deleted`**: Syncs when a user is removed from a Clerk organization
+- **`organizationMembership.created`**: No longer used - membership is managed directly via Clerk API
+- **`organizationMembership.deleted`**: No longer used - membership is managed directly via Clerk API
 
 ### How Webhooks Work
 

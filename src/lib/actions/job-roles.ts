@@ -39,12 +39,12 @@ export type JobDomainFormData = z.infer<typeof jobDomainSchema>
 export async function getJobRoles() {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return []
     }
 
     return await prisma.jobRole.findMany({
-      where: { organizationId: user.organizationId },
+      where: { organizationId: user.managerOSOrganizationId },
       include: {
         level: true,
         domain: true,
@@ -70,14 +70,14 @@ export async function getJobRoles() {
 export async function getJobRole(id: string) {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       throw new Error('User must belong to an organization to view job roles')
     }
 
     const jobRole = await prisma.jobRole.findFirst({
       where: {
         id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
       include: {
         level: true,
@@ -115,12 +115,12 @@ export async function getJobRole(id: string) {
 export async function getJobRolesForSelection() {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return []
     }
 
     return await prisma.jobRole.findMany({
-      where: { organizationId: user.organizationId },
+      where: { organizationId: user.managerOSOrganizationId },
       select: {
         id: true,
         title: true,
@@ -150,7 +150,7 @@ export async function getJobRolesForSelection() {
 export async function createJobRole(data: JobRoleFormData) {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       throw new Error('User must belong to an organization to create job roles')
     }
 
@@ -168,13 +168,13 @@ export async function createJobRole(data: JobRoleFormData) {
       prisma.jobLevel.findFirst({
         where: {
           id: validatedData.levelId,
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
         },
       }),
       prisma.jobDomain.findFirst({
         where: {
           id: validatedData.domainId,
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
         },
       }),
     ])
@@ -191,7 +191,7 @@ export async function createJobRole(data: JobRoleFormData) {
     const existingRole = await prisma.jobRole.findFirst({
       where: {
         title: validatedData.title,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
 
@@ -207,7 +207,7 @@ export async function createJobRole(data: JobRoleFormData) {
         description: validatedData.description || null,
         levelId: validatedData.levelId,
         domainId: validatedData.domainId,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
       include: {
         level: true,
@@ -232,7 +232,7 @@ export async function updateJobRole(
 ) {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       throw new Error('User must belong to an organization to update job roles')
     }
 
@@ -248,7 +248,7 @@ export async function updateJobRole(
     const existingRole = await prisma.jobRole.findFirst({
       where: {
         id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
 
@@ -261,7 +261,7 @@ export async function updateJobRole(
       const level = await prisma.jobLevel.findFirst({
         where: {
           id: validatedData.levelId,
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
         },
       })
 
@@ -274,7 +274,7 @@ export async function updateJobRole(
       const domain = await prisma.jobDomain.findFirst({
         where: {
           id: validatedData.domainId,
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
         },
       })
 
@@ -288,7 +288,7 @@ export async function updateJobRole(
       const duplicateRole = await prisma.jobRole.findFirst({
         where: {
           title: validatedData.title,
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
           id: { not: id },
         },
       })
@@ -323,7 +323,7 @@ export async function updateJobRole(
 export async function deleteJobRole(id: string) {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       throw new Error('User must belong to an organization to delete job roles')
     }
 
@@ -337,7 +337,7 @@ export async function deleteJobRole(id: string) {
     const jobRole = await prisma.jobRole.findFirst({
       where: {
         id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
       include: {
         people: true,
@@ -374,12 +374,12 @@ export async function deleteJobRole(id: string) {
 export async function getJobLevels() {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return []
     }
 
     return await prisma.jobLevel.findMany({
-      where: { organizationId: user.organizationId },
+      where: { organizationId: user.managerOSOrganizationId },
       orderBy: { order: 'asc' },
     })
   } catch (error) {
@@ -391,12 +391,12 @@ export async function getJobLevels() {
 export async function getJobLevelsForSelection() {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return []
     }
 
     return await prisma.jobLevel.findMany({
-      where: { organizationId: user.organizationId },
+      where: { organizationId: user.managerOSOrganizationId },
       select: {
         id: true,
         name: true,
@@ -412,7 +412,7 @@ export async function getJobLevelsForSelection() {
 export async function createJobLevel(data: JobLevelFormData) {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       throw new Error(
         'User must belong to an organization to create job levels'
       )
@@ -430,7 +430,7 @@ export async function createJobLevel(data: JobLevelFormData) {
     const existingLevel = await prisma.jobLevel.findFirst({
       where: {
         name: validatedData.name,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
 
@@ -442,7 +442,7 @@ export async function createJobLevel(data: JobLevelFormData) {
 
     // Get the highest order value and add 1
     const maxOrderLevel = await prisma.jobLevel.findFirst({
-      where: { organizationId: user.organizationId },
+      where: { organizationId: user.managerOSOrganizationId },
       orderBy: { order: 'desc' },
       select: { order: true },
     })
@@ -453,7 +453,7 @@ export async function createJobLevel(data: JobLevelFormData) {
       data: {
         name: validatedData.name,
         order: nextOrder,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
 
@@ -472,7 +472,7 @@ export async function updateJobLevel(
 ) {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       throw new Error(
         'User must belong to an organization to update job levels'
       )
@@ -490,7 +490,7 @@ export async function updateJobLevel(
     const jobLevel = await prisma.jobLevel.findFirst({
       where: {
         id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
 
@@ -503,7 +503,7 @@ export async function updateJobLevel(
       const duplicateLevel = await prisma.jobLevel.findFirst({
         where: {
           name: validatedData.name,
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
           id: { not: id },
         },
       })
@@ -534,7 +534,7 @@ export async function updateJobLevelOrder(
 ) {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       throw new Error(
         'User must belong to an organization to update job level order'
       )
@@ -552,7 +552,7 @@ export async function updateJobLevelOrder(
         prisma.jobLevel.updateMany({
           where: {
             id,
-            organizationId: user.organizationId!,
+            organizationId: user.managerOSOrganizationId!,
           },
           data: { order },
         })
@@ -571,7 +571,7 @@ export async function updateJobLevelOrder(
 export async function deleteJobLevel(id: string) {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       throw new Error(
         'User must belong to an organization to delete job levels'
       )
@@ -587,7 +587,7 @@ export async function deleteJobLevel(id: string) {
     const jobLevel = await prisma.jobLevel.findFirst({
       where: {
         id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
       include: {
         jobRoles: true,
@@ -622,12 +622,12 @@ export async function deleteJobLevel(id: string) {
 export async function getJobDomains() {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return []
     }
 
     return await prisma.jobDomain.findMany({
-      where: { organizationId: user.organizationId },
+      where: { organizationId: user.managerOSOrganizationId },
       orderBy: { name: 'asc' },
     })
   } catch (error) {
@@ -639,12 +639,12 @@ export async function getJobDomains() {
 export async function getJobDomainsForSelection() {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       return []
     }
 
     return await prisma.jobDomain.findMany({
-      where: { organizationId: user.organizationId },
+      where: { organizationId: user.managerOSOrganizationId },
       select: {
         id: true,
         name: true,
@@ -660,7 +660,7 @@ export async function getJobDomainsForSelection() {
 export async function createJobDomain(data: JobDomainFormData) {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       throw new Error(
         'User must belong to an organization to create job domains'
       )
@@ -678,7 +678,7 @@ export async function createJobDomain(data: JobDomainFormData) {
     const existingDomain = await prisma.jobDomain.findFirst({
       where: {
         name: validatedData.name,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
 
@@ -691,7 +691,7 @@ export async function createJobDomain(data: JobDomainFormData) {
     const jobDomain = await prisma.jobDomain.create({
       data: {
         name: validatedData.name,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
 
@@ -710,7 +710,7 @@ export async function updateJobDomain(
 ) {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       throw new Error(
         'User must belong to an organization to update job domains'
       )
@@ -728,7 +728,7 @@ export async function updateJobDomain(
     const jobDomain = await prisma.jobDomain.findFirst({
       where: {
         id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     })
 
@@ -741,7 +741,7 @@ export async function updateJobDomain(
       const duplicateDomain = await prisma.jobDomain.findFirst({
         where: {
           name: validatedData.name,
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
           id: { not: id },
         },
       })
@@ -770,7 +770,7 @@ export async function updateJobDomain(
 export async function deleteJobDomain(id: string) {
   try {
     const user = await getCurrentUser()
-    if (!user.organizationId) {
+    if (!user.managerOSOrganizationId) {
       throw new Error(
         'User must belong to an organization to delete job domains'
       )
@@ -786,7 +786,7 @@ export async function deleteJobDomain(id: string) {
     const jobDomain = await prisma.jobDomain.findFirst({
       where: {
         id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
       include: {
         jobRoles: true,

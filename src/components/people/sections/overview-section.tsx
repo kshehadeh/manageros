@@ -1,8 +1,7 @@
 import { getLatestPersonOverview } from '@/lib/actions/person-overview'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
 import { OverviewSectionClient } from './overview-section-client'
 import { PageSection } from '@/components/ui/page-section'
-import { canAccessSynopsesForPerson } from '@/lib/auth-utils'
 import { getPersonById } from '@/lib/data/people'
 import Markdown from 'react-markdown'
 
@@ -29,12 +28,19 @@ export async function OverviewSection({
 }: OverviewSectionProps) {
   const user = await getCurrentUser()
 
-  if (!user?.organizationId || user.organizationId !== organizationId) {
+  if (
+    !user?.managerOSOrganizationId ||
+    user.managerOSOrganizationId !== organizationId
+  ) {
     return null
   }
 
   // Check if user can access overviews for this person (same as synopses)
-  const canAccessOverview = await canAccessSynopsesForPerson(personId)
+  const canAccessOverview = await getActionPermission(
+    user,
+    'person.overview.view',
+    personId
+  )
 
   if (!canAccessOverview) {
     return null

@@ -37,11 +37,11 @@ export default async function MeetingDetailPage({
 }) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
-    redirect('/organization/create')
+  const { id } = await params
+  if (!(await getActionPermission(user, 'meeting.view', id))) {
+    redirect('/dashboard')
   }
 
-  const { id } = await params
   const meeting = await getMeeting(id)
 
   if (!meeting) {
@@ -60,7 +60,7 @@ export default async function MeetingDetailPage({
   const entityLinksResult = await getEntityLinks(
     'Meeting',
     id,
-    user.organizationId,
+    user.managerOSOrganizationId || '',
     {
       includeCreatedBy: true,
     }

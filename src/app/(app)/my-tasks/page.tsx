@@ -9,7 +9,7 @@ import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 
 export default async function MyTasksPage() {
   const user = await getCurrentUser()
-  const canCreateTasks = isAdminOrOwner(user) || !!user.personId
+  const canCreateTasks = isAdminOrOwner(user) || !!user.managerOSPersonId
 
   return (
     <PageContainer>
@@ -22,7 +22,7 @@ export default async function MyTasksPage() {
 
       <PageContent>
         <PageSection>
-          <MyTasksPageClient personId={user.personId ?? null} />
+          <MyTasksPageClient personId={user.managerOSPersonId ?? null} />
         </PageSection>
       </PageContent>
     </PageContainer>

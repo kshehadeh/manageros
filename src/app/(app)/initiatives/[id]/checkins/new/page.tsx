@@ -12,7 +12,7 @@ export default async function NewCheckInPage({
 }) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     redirect('/organization/create')
   }
 
@@ -20,7 +20,7 @@ export default async function NewCheckInPage({
   const initiative = await prisma.initiative.findFirst({
     where: {
       id,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 

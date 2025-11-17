@@ -39,7 +39,7 @@ A **User** represents an authenticated person who can log into ManagerOS. Users 
 
 - Users without an organization cannot perform most actions in the system
 - Users without a linked Person cannot create one-on-ones or access personal features
-- The `role` field on User is deprecated - use `OrganizationMember.role` instead
+- The `role` field on User comes from Clerk session claims - organization membership is managed by Clerk
 
 ### Person
 
@@ -104,19 +104,15 @@ An **Organization** represents a company, team, or group that uses ManagerOS. Or
 
 ### User ↔ Organization
 
-**Relationship Type:** Many-to-One (with OrganizationMember as join table)
+**Relationship Type:** Many-to-One (managed by Clerk)
 
 **How it Works:**
 
 - A User can belong to zero or one organization (via `organizationId` field)
 - An Organization has many Users
-- The relationship is also tracked in `OrganizationMember` table for multi-org support (future)
-
-**OrganizationMember Table:**
-
-- Links Users to Organizations
-- Stores the user's role within that organization (USER, ADMIN, OWNER)
-- Allows for future multi-organization support
+- Organization membership is managed by Clerk - users are added/removed via Clerk API
+- User roles come from Clerk session claims (`org:admin` or `org:member`)
+- OWNER role is determined by checking if user is the billing user (`billingUserId`)
 
 **Roles:**
 
@@ -301,8 +297,8 @@ Subscription information is stored on the Organization record:
 - `subscription.created`: New subscription created for a Clerk organization
 - `subscription.updated`: Subscription changed (upgrade/downgrade)
 - `subscriptionItem.canceled`: Subscription canceled
-- `organizationMembership.created`: User added to Clerk organization (synced to ManagerOS)
-- `organizationMembership.deleted`: User removed from Clerk organization (synced to ManagerOS)
+- `organizationMembership.created`: User added to Clerk organization (no longer synced to OrganizationMember table)
+- `organizationMembership.deleted`: User removed from Clerk organization (no longer synced to OrganizationMember table)
 
 **Manual Updates:**
 
@@ -397,7 +393,7 @@ Subscription information is stored on the Organization record:
 4. **Result**:
    - Organization is created with subscription info
    - User becomes the billing user (`billingUserId` set)
-   - User is added as OWNER role in OrganizationMember
+   - User is added to Clerk organization with org:admin role (OWNER determined by billingUserId)
    - User's `organizationId` is set
    - Subscription limits apply to the organization
 
@@ -407,7 +403,7 @@ Subscription information is stored on the Organization record:
 2. User accepts invitation
 3. **Result**:
    - User's `organizationId` is set
-   - User is added as USER role in OrganizationMember
+   - User is added to Clerk organization with org:member role
    - User can now see organization data
    - User shares the organization's subscription limits
 
@@ -474,7 +470,7 @@ Subscription information is stored on the Organization record:
 
 ```
 Organization
-  ├── Has many Users (via OrganizationMember)
+  ├── Has many Users (via Clerk organization membership)
   │   └── User can be linked to one Person
   ├── Has many People
   │   └── Person can be linked to one User

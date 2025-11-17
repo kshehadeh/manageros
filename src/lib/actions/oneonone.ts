@@ -9,7 +9,7 @@ import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 export async function createOneOnOne(formData: OneOnOneFormData) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization')
   }
 
@@ -21,13 +21,13 @@ export async function createOneOnOne(formData: OneOnOneFormData) {
     prisma.person.findFirst({
       where: {
         id: validatedData.participant1Id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     }),
     prisma.person.findFirst({
       where: {
         id: validatedData.participant2Id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     }),
   ])
@@ -66,18 +66,18 @@ export async function createOneOnOne(formData: OneOnOneFormData) {
 export async function getOneOnOnes() {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization')
   }
 
   // Get the person ID from the user session
-  if (!user.personId) {
+  if (!user.managerOSPersonId) {
     throw new Error('No person record found for current user')
   }
 
   const currentPerson = await prisma.person.findUnique({
     where: {
-      id: user.personId,
+      id: user.managerOSPersonId || '',
     },
   })
 
@@ -137,7 +137,7 @@ export async function getOneOnOneById(id: string) {
 export async function updateOneOnOne(id: string, formData: OneOnOneFormData) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization')
   }
 
@@ -145,12 +145,12 @@ export async function updateOneOnOne(id: string, formData: OneOnOneFormData) {
   const validatedData = oneOnOneSchema.parse(formData)
 
   // Get the current user's person ID from session
-  if (!user.personId) {
+  if (!user.managerOSPersonId) {
     throw new Error('No person record found for current user')
   }
 
   const currentPerson = await prisma.person.findUnique({
-    where: { id: user.personId },
+    where: { id: user.managerOSPersonId },
   })
 
   if (!currentPerson) {
@@ -174,13 +174,13 @@ export async function updateOneOnOne(id: string, formData: OneOnOneFormData) {
     prisma.person.findFirst({
       where: {
         id: validatedData.participant1Id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     }),
     prisma.person.findFirst({
       where: {
         id: validatedData.participant2Id,
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
       },
     }),
   ])
@@ -215,17 +215,17 @@ export async function updateOneOnOne(id: string, formData: OneOnOneFormData) {
 export async function deleteOneOnOne(id: string) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization')
   }
 
   // Get the current user's person ID from session
-  if (!user.personId) {
+  if (!user.managerOSPersonId) {
     throw new Error('No person record found for current user')
   }
 
   const currentPerson = await prisma.person.findUnique({
-    where: { id: user.personId },
+    where: { id: user.managerOSPersonId },
   })
 
   if (!currentPerson) {

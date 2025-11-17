@@ -13,7 +13,7 @@ export async function createFeedbackTemplate(
 ) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to create feedback templates'
     )
@@ -51,7 +51,7 @@ export async function createFeedbackTemplate(
 export async function getFeedbackTemplates() {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to view feedback templates'
     )
@@ -72,7 +72,7 @@ export async function getFeedbackTemplates() {
 export async function getFeedbackTemplateById(id: string) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to view feedback templates'
     )
@@ -97,7 +97,7 @@ export async function getFeedbackTemplateById(id: string) {
 export async function getDefaultFeedbackTemplate() {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to view feedback templates'
     )
@@ -121,7 +121,7 @@ export async function updateFeedbackTemplate(
 ) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to update feedback templates'
     )
@@ -170,7 +170,7 @@ export async function updateFeedbackTemplate(
 export async function deleteFeedbackTemplate(id: string) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to delete feedback templates'
     )
@@ -207,7 +207,7 @@ export async function deleteFeedbackTemplate(id: string) {
 export async function setDefaultTemplate(id: string) {
   const user = await getCurrentUser()
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to set default templates'
     )

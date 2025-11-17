@@ -49,6 +49,7 @@ export const test = base.extend<TestFixtures>({
     const testData: TestData = {
       userIds: [],
       organizationIds: [],
+      clerkOrganizationIds: [],
       personIds: [],
       clerkUserIds: [],
       otherIds: {},
@@ -75,6 +76,7 @@ export const test = base.extend<TestFixtures>({
     // Merge setup data into test data
     testData.userIds.push(...setupData.userIds)
     testData.organizationIds.push(...setupData.organizationIds)
+    testData.clerkOrganizationIds.push(...setupData.clerkOrganizationIds)
     testData.personIds.push(...setupData.personIds)
     testData.clerkUserIds.push(...setupData.clerkUserIds)
 
@@ -197,11 +199,11 @@ export const test = base.extend<TestFixtures>({
     const prisma = new PrismaClient()
 
     try {
-      const dbUser = await prisma.user.findUnique({
+      const existingUser = await prisma.user.findUnique({
         where: { id: user.id },
       })
 
-      if (!dbUser?.clerkUserId) {
+      if (!existingUser?.clerkUserId) {
         await prisma.user.update({
           where: { id: user.id },
           data: { clerkUserId },
@@ -210,15 +212,9 @@ export const test = base.extend<TestFixtures>({
 
       // Sync user data to Clerk using the API directly (avoid server-side imports)
       const clerkHelper = getClerkHelper()
-      const dbUserWithOrg = await prisma.user.findUnique({
+      const dbUserWithPerson = await prisma.user.findUnique({
         where: { id: user.id },
         include: {
-          organization: {
-            select: {
-              name: true,
-              slug: true,
-            },
-          },
           person: {
             select: {
               id: true,
@@ -227,15 +223,44 @@ export const test = base.extend<TestFixtures>({
         },
       })
 
-      if (dbUserWithOrg) {
+      // Get organization membership separately
+      const membership = await prisma.organizationMember.findFirst({
+        where: { userId: user.id },
+        include: {
+          organization: {
+            select: {
+              id: true,
+              clerkOrganizationId: true,
+            },
+          },
+        },
+      })
+
+      // Get organization name and slug from Clerk if we have a membership
+      let organizationName: string | null = null
+      let organizationSlug: string | null = null
+      if (membership?.organization?.clerkOrganizationId) {
+        try {
+          const clerkOrg = await clerkHelper.getClerkOrganization(
+            membership.organization.clerkOrganizationId
+          )
+          organizationName = clerkOrg?.name || null
+          organizationSlug = clerkOrg?.slug || null
+        } catch (error) {
+          // If we can't get Clerk org, just continue with null values
+          console.warn('Could not fetch Clerk organization:', error)
+        }
+      }
+
+      if (dbUserWithPerson) {
         // Update Clerk user metadata directly via API
         await clerkHelper.updateUserMetadata(clerkUserId, {
-          managerOSUserId: dbUserWithOrg.id,
-          organizationId: dbUserWithOrg.organizationId || null,
-          organizationName: dbUserWithOrg.organization?.name || null,
-          organizationSlug: dbUserWithOrg.organization?.slug || null,
-          personId: dbUserWithOrg.person?.id || null,
-          role: dbUserWithOrg.role,
+          managerOSUserId: dbUserWithPerson.id,
+          organizationId: membership?.organizationId || null,
+          organizationName,
+          organizationSlug,
+          personId: dbUserWithPerson.person?.id || null,
+          role: membership?.role || 'USER',
         })
       }
     } finally {

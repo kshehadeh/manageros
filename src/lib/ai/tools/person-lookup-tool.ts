@@ -17,13 +17,13 @@ export const personLookupTool = {
     console.log('🔧 personLookupTool called with parameters:', { name })
     try {
       const user = await getCurrentUser()
-      if (!user.organizationId) {
+      if (!user.managerOSOrganizationId) {
         throw new Error('User must belong to an organization')
       }
 
       // Search for people by name
       const whereClause: Prisma.PersonWhereInput = {
-        organizationId: user.organizationId,
+        organizationId: user.managerOSOrganizationId,
         status: 'active',
         name: { contains: name, mode: 'insensitive' },
       }

@@ -24,7 +24,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Link, Unlink } from 'lucide-react'
 import { PersonListItem } from '@/components/people/person-list-item'
-import type { User } from '@/lib/auth-types'
+import type { OrganizationBrief, UserBrief } from '@/lib/auth-types'
 import {
   linkSelfToPerson,
   unlinkSelfFromPerson,
@@ -33,13 +33,14 @@ import { PersonBrief } from '@/types/person'
 
 interface PersonLinkFormProps {
   availablePersons: PersonBrief[]
-  currentUser: User
+  currentUser: UserBrief
+  currentOrganization?: OrganizationBrief | null
   currentPerson?: PersonBrief | null
 }
 
 export function PersonLinkForm({
   availablePersons,
-  currentUser,
+  currentOrganization,
   currentPerson,
 }: PersonLinkFormProps) {
   const router = useRouter()
@@ -91,7 +92,7 @@ export function PersonLinkForm({
   }, [router])
 
   // If user doesn't have an organization, show message
-  if (!currentUser.organizationId) {
+  if (!currentOrganization) {
     return (
       <div className='space-y-4'>
         <p className='text-sm text-muted-foreground'>

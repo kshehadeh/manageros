@@ -75,7 +75,7 @@ export async function createNotification(data: CreateNotificationData) {
   }
 
   // Check if user belongs to an organization
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to create notifications'
     )
@@ -85,7 +85,7 @@ export async function createNotification(data: CreateNotificationData) {
   if (
     data.userId &&
     data.organizationId &&
-    data.organizationId !== user.organizationId
+    data.organizationId !== user.managerOSOrganizationId
   ) {
     throw new Error(
       'Cannot create notification for user in different organization'
@@ -96,7 +96,7 @@ export async function createNotification(data: CreateNotificationData) {
   if (
     !data.userId &&
     data.organizationId &&
-    data.organizationId !== user.organizationId
+    data.organizationId !== user.managerOSOrganizationId
   ) {
     throw new Error('Cannot create notification for different organization')
   }
@@ -106,7 +106,7 @@ export async function createNotification(data: CreateNotificationData) {
       title: data.title,
       message: data.message,
       type: data.type || 'info',
-      organizationId: data.organizationId || user.organizationId,
+      organizationId: data.organizationId || user.managerOSOrganizationId,
       userId: data.userId || null,
       metadata: (data.metadata as InputJsonValue) || undefined,
     },
@@ -126,7 +126,7 @@ export async function getUserNotifications(limit: number = 10) {
     throw new Error('Authentication required')
   }
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to view notifications')
   }
 
@@ -134,10 +134,10 @@ export async function getUserNotifications(limit: number = 10) {
     where: {
       OR: [
         // User-specific notifications
-        { userId: user.id },
+        { userId: user.managerOSUserId || '' },
         // Organization-wide notifications
         {
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
           userId: null,
         },
       ],
@@ -145,7 +145,7 @@ export async function getUserNotifications(limit: number = 10) {
     include: {
       responses: {
         where: {
-          userId: user.id,
+          userId: user.managerOSUserId || '',
         },
       },
       user: {
@@ -189,7 +189,7 @@ export async function getUnreadNotifications(limit: number = 5) {
     throw new Error('Authentication required')
   }
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to view notifications')
   }
 
@@ -197,17 +197,17 @@ export async function getUnreadNotifications(limit: number = 5) {
     where: {
       OR: [
         // User-specific notifications
-        { userId: user.id },
+        { userId: user.managerOSUserId || '' },
         // Organization-wide notifications
         {
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
           userId: null,
         },
       ],
       // Only include notifications that don't have a response or have unread status
       responses: {
         none: {
-          userId: user.id,
+          userId: user.managerOSUserId || '',
           status: { in: ['read', 'dismissed'] },
         },
       },
@@ -215,7 +215,7 @@ export async function getUnreadNotifications(limit: number = 5) {
     include: {
       responses: {
         where: {
-          userId: user.id,
+          userId: user.managerOSUserId || '',
         },
       },
     },
@@ -250,9 +250,9 @@ export async function markNotificationAsRead(notificationId: string) {
     where: {
       id: notificationId,
       OR: [
-        { userId: user.id },
+        { userId: user.managerOSUserId || '' },
         {
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
           userId: null,
         },
       ],
@@ -269,7 +269,7 @@ export async function markNotificationAsRead(notificationId: string) {
       // eslint-disable-next-line camelcase
       notificationId_userId: {
         notificationId,
-        userId: user.id,
+        userId: user.managerOSUserId || '',
       },
     },
     update: {
@@ -278,7 +278,7 @@ export async function markNotificationAsRead(notificationId: string) {
     },
     create: {
       notificationId,
-      userId: user.id,
+      userId: user.managerOSUserId || '',
       status: 'read',
       readAt: new Date(),
     },
@@ -303,9 +303,9 @@ export async function markNotificationAsDismissed(notificationId: string) {
     where: {
       id: notificationId,
       OR: [
-        { userId: user.id },
+        { userId: user.managerOSUserId || '' },
         {
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
           userId: null,
         },
       ],
@@ -322,7 +322,7 @@ export async function markNotificationAsDismissed(notificationId: string) {
       // eslint-disable-next-line camelcase
       notificationId_userId: {
         notificationId,
-        userId: user.id,
+        userId: user.managerOSUserId || '',
       },
     },
     update: {
@@ -331,7 +331,7 @@ export async function markNotificationAsDismissed(notificationId: string) {
     },
     create: {
       notificationId,
-      userId: user.id,
+      userId: user.managerOSUserId || '',
       status: 'dismissed',
       dismissedAt: new Date(),
     },
@@ -350,7 +350,7 @@ export async function getUnreadNotificationCount() {
     throw new Error('Authentication required')
   }
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     return 0
   }
 
@@ -358,17 +358,17 @@ export async function getUnreadNotificationCount() {
     where: {
       OR: [
         // User-specific notifications
-        { userId: user.id },
+        { userId: user.managerOSUserId || '' },
         // Organization-wide notifications
         {
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
           userId: null,
         },
       ],
       // Only count notifications that don't have a response or have unread status
       responses: {
         none: {
-          userId: user.id,
+          userId: user.managerOSUserId || '',
           status: { in: ['read', 'dismissed'] },
         },
       },
@@ -387,7 +387,7 @@ export async function deleteNotification(notificationId: string) {
     throw new Error('Authentication required')
   }
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error(
       'User must belong to an organization to delete notifications'
     )
@@ -402,7 +402,7 @@ export async function deleteNotification(notificationId: string) {
   const notification = await prisma.notification.findFirst({
     where: {
       id: notificationId,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -432,7 +432,7 @@ export async function getAllUserNotifications(
     throw new Error('Authentication required')
   }
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to view notifications')
   }
 
@@ -442,16 +442,16 @@ export async function getAllUserNotifications(
     showAllOrganizationNotifications && user.role === 'ADMIN'
       ? {
           // Admin view: all notifications in the organization
-          organizationId: user.organizationId,
+          organizationId: user.managerOSOrganizationId,
         }
       : {
           // Regular user view: only their notifications and organization-wide ones
           OR: [
             // User-specific notifications
-            { userId: user.id },
+            { userId: user.managerOSUserId || '' },
             // Organization-wide notifications
             {
-              organizationId: user.organizationId,
+              organizationId: user.managerOSOrganizationId,
               userId: null,
             },
           ],
@@ -463,7 +463,7 @@ export async function getAllUserNotifications(
       include: {
         responses: {
           where: {
-            userId: user.id,
+            userId: user.managerOSUserId || '',
           },
         },
         user: {

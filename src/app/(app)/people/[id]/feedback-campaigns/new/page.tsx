@@ -19,7 +19,7 @@ export default async function NewFeedbackCampaignPage({
 
   const { id } = await params
 
-  if (!user.organizationId) {
+  if (!user.managerOSOrganizationId) {
     redirect('/organization/create')
   }
 
@@ -27,7 +27,7 @@ export default async function NewFeedbackCampaignPage({
   const person = await prisma.person.findFirst({
     where: {
       id,
-      organizationId: user.organizationId,
+      organizationId: user.managerOSOrganizationId,
     },
   })
 
@@ -36,14 +36,14 @@ export default async function NewFeedbackCampaignPage({
   }
 
   // Get the current user's person ID from session
-  if (!user.personId) {
+  if (!user.managerOSPersonId) {
     redirect('/people')
   }
 
   // Fetch the full person record
   const currentPerson = await prisma.person.findUnique({
     where: {
-      id: user.personId,
+      id: user.managerOSPersonId,
     },
   })
 

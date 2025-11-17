@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import { redirect } from 'next/navigation'
-import { getOptionalUser } from '@/lib/auth-utils'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 interface RequireAuthServerProps {
   children: ReactNode
@@ -18,13 +18,9 @@ export async function RequireAuthServer({
   requireOrganization = false,
   redirectTo,
 }: RequireAuthServerProps) {
-  const user = await getOptionalUser()
+  const user = await getCurrentUser()
 
-  if (!user) {
-    redirect('/auth/signin')
-  }
-
-  if (requireOrganization && !user.organizationId) {
+  if (requireOrganization && !user.managerOSOrganizationId) {
     redirect(redirectTo || '/organization/create')
   }
 
