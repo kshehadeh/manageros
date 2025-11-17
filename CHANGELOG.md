@@ -1,5 +1,17 @@
 # Changelog
 
+# [1.6.0](https://github.com/kshehadeh/manageros/compare/v1.5.1...v1.6.0) (2025-11-17)
+
+### Bug Fixes
+
+- **cicd:** Fix an issue with environment variables in the migration deployment action ([c8dc023](https://github.com/kshehadeh/manageros/commit/c8dc02375f261c702c5a41917c38b68a010a8817))
+- **linking:** Do not throw an error when fetching linkable users ([9907dee](https://github.com/kshehadeh/manageros/commit/9907dee5032f771d4efeff169bbf0f2fb9a76398))
+- **organizations:** Fixed an issue with the handling of organization creation when there's no subscription ([c0588b6](https://github.com/kshehadeh/manageros/commit/c0588b6ec792e8399ea8bb82e123c1e3f17f1e42))
+
+### Features
+
+- **organizaitons:** Complete rework of the way organizations, subscriptions and users are tracked. Still a work in progress ([49713e8](https://github.com/kshehadeh/manageros/commit/49713e8745936b4c2a164597a28baf1554e204f1))
+
 ## [1.5.1](https://github.com/kshehadeh/manageros/compare/v1.5.0...v1.5.1) (2025-11-15)
 
 ### Bug Fixes
