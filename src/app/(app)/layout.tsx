@@ -32,11 +32,6 @@ export default async function AppLayout({ children }: AppLayoutProps) {
     await getCurrentUserWithPersonAndOrganization()
   const filteredNavigation = await getFilteredNavigation(user)
 
-  console.log('user', user)
-  console.log('person', person)
-  console.log('organization', organization)
-  console.log('filteredNavigation', filteredNavigation)
-
   // Render full layout for authenticated routes
   return (
     <ClerkProvider appearance={dark}>

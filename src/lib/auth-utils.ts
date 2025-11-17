@@ -112,7 +112,8 @@ export async function getCurrentUser(
   //  if there's one associated with the session claims (meaning one has been setup in clerk)
   if (
     options.revalidateLinks ||
-    (sessionClaimsValidated.data.o?.id && !syncObject.managerOSOrganizationId)
+    (sessionClaimsValidated.data.o?.id &&
+      (!syncObject.managerOSOrganizationId || !syncObject.clerkOrganizationId))
   ) {
     // First see if we can find one based on the organization in clerk.
     let organization = await prisma.organization.findUnique({
@@ -142,11 +143,11 @@ export async function getCurrentUser(
           billingUserId: syncObject.managerOSUserId,
         },
       })
-
-      syncObject.managerOSOrganizationId = organization.id
-      syncObject.clerkOrganizationId = organization.clerkOrganizationId
-      resync = true
     }
+
+    syncObject.managerOSOrganizationId = organization.id
+    syncObject.clerkOrganizationId = organization.clerkOrganizationId
+    resync = true
   }
 
   if (options.revalidateLinks || !syncObject.managerOSPersonId) {
