@@ -15,24 +15,13 @@ import {
  * Automatically handles loading/saving settings based on the current user
  */
 export function useUserSettings() {
-  const { user, isLoaded: clerkLoaded } = useUser()
+  const { user } = useUser()
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_USER_SETTINGS)
   const [isLoaded, setIsLoaded] = useState(false)
   const settingsRef = useRef<UserSettings>(DEFAULT_USER_SETTINGS)
 
-  // Get user ID from API since we need the database user ID, not Clerk ID
-  const [userId, setUserId] = useState<string | undefined>(undefined)
-
-  useEffect(() => {
-    if (clerkLoaded && user) {
-      fetch('/api/user/current')
-        .then(res => res.json())
-        .then(data => setUserId(data.user?.id))
-        .catch(() => {})
-    } else {
-      setUserId(undefined)
-    }
-  }, [clerkLoaded, user])
+  // Use Clerk user ID directly (available immediately, no API call needed)
+  const userId = user?.id
 
   // Keep ref in sync with settings state
   useEffect(() => {

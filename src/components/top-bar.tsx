@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useAuth } from '@clerk/nextjs'
+import { useUser } from '@clerk/nextjs'
 import Breadcrumb from './breadcrumb'
 import { ModeToggle } from '@/components/mode-toggle'
 import { Menu, X } from 'lucide-react'
@@ -14,33 +13,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { UserBrief } from '../lib/auth-types'
 
 export default function TopBar() {
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useMobileMenu()
   const { toggle } = useCommandPalette()
-  const { isLoaded, userId } = useAuth()
-  const [hasOrganization, setHasOrganization] = useState<boolean | null>(null)
+  const { user } = useUser()
 
-  // Fetch user organization status
-  useEffect(() => {
-    if (!isLoaded || !userId) {
-      setHasOrganization(false)
-      return
-    }
-
-    fetch('/api/user/current')
-      .then(res => res.json())
-      .then(data => {
-        if (data.user) {
-          setHasOrganization(!!data.user.managerOSOrganizationId)
-        } else {
-          setHasOrganization(false)
-        }
-      })
-      .catch(() => {
-        setHasOrganization(false)
-      })
-  }, [isLoaded, userId])
+  // Get organization status from Clerk user metadata (no API call needed)
+  const hasOrganization = !!(user?.publicMetadata as UserBrief)
+    ?.managerOSOrganizationId
 
   return (
     <header className='h-16 bg-card text-card-foreground border-b px-2xl flex items-center'>
