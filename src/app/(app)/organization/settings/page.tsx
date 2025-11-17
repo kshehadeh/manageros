@@ -33,7 +33,6 @@ import { OrganizationSubscriptionButton } from '@/components/organization/organi
 export default async function OrganizationSettingsPage() {
   const user = await getCurrentUser()
 
-  console.log('user', user)
   // Check if user is admin
   if (!isAdminOrOwner(user)) {
     redirect('/dashboard')
