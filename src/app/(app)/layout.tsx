@@ -34,7 +34,12 @@ export default async function AppLayout({ children }: AppLayoutProps) {
 
   // Render full layout for authenticated routes
   return (
-    <ClerkProvider appearance={dark}>
+    <ClerkProvider
+      appearance={dark}
+      taskUrls={{
+        'choose-organization': '/dashboard',
+      }}
+    >
       <ThemeProvider
         attribute='class'
         defaultTheme='dark'

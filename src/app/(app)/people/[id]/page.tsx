@@ -24,7 +24,7 @@ export default async function PersonDetailPage({
   const { id } = await params
 
   if (!user.managerOSOrganizationId) {
-    redirect('/organization/create')
+    redirect('/dashboard')
   }
 
   const personResult = await getPersonById(id, user.managerOSOrganizationId)

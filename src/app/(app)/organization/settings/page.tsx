@@ -40,7 +40,7 @@ export default async function OrganizationSettingsPage() {
 
   // Check if user belongs to an organization
   if (!user.managerOSOrganizationId) {
-    redirect('/organization/create')
+    redirect('/dashboard')
   }
 
   // Get open invitations (pending status only) - not currently used

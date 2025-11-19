@@ -27,7 +27,7 @@ export default async function FeedbackCampaignsPage({
   const { id } = await params
 
   if (!user.managerOSOrganizationId) {
-    redirect('/organization/create')
+    redirect('/dashboard')
   }
 
   // Get the person

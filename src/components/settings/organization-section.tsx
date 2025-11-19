@@ -1,11 +1,17 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { OrganizationSetupCards } from '@/components/organization-setup-cards'
 import { Settings } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { Link } from '@/components/ui/link'
 import type { PendingInvitation } from '@/types/organization'
+
+interface Organization {
+  id: string
+  name: string
+  slug: string | null
+}
 
 interface OrganizationSectionProps {
   organizationId: string | null
@@ -16,14 +22,41 @@ interface OrganizationSectionProps {
 export function OrganizationSection({
   organizationId,
   organizationName,
-  pendingInvitations,
 }: OrganizationSectionProps) {
-  const router = useRouter()
+  const [loading, setLoading] = useState(true)
+  const [invitations, setInvitations] = useState<PendingInvitation[]>([])
+  const [organizations, setOrganizations] = useState<Organization[]>([])
 
-  const handleInvitationAccepted = () => {
-    // Refresh the page to show updated organization info
-    router.refresh()
-  }
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [invitationsRes, orgsRes] = await Promise.all([
+          fetch('/api/organization/invitations'),
+          fetch('/api/organization/memberships'),
+        ])
+
+        if (invitationsRes.ok) {
+          const data = await invitationsRes.json()
+          setInvitations(data.invitations || [])
+        }
+
+        if (orgsRes.ok) {
+          const data = await orgsRes.json()
+          setOrganizations(data.organizations || [])
+        }
+      } catch (error) {
+        console.error('Error fetching organization data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (!organizationId) {
+      fetchData()
+    } else {
+      setLoading(false)
+    }
+  }, [organizationId])
 
   // If user has an organization, show organization info
   if (organizationId && organizationName) {
@@ -57,11 +90,24 @@ export function OrganizationSection({
   }
 
   // If no organization, show setup cards
+  if (loading) {
+    return (
+      <div className='flex items-center justify-center py-4'>
+        <div className='text-sm text-muted-foreground'>Loading...</div>
+      </div>
+    )
+  }
+
+  const hasMemberships = organizations.length > 0
+  const hasInvitations = invitations.length > 0
+
   return (
     <div className='space-y-4'>
       <OrganizationSetupCards
-        pendingInvitations={pendingInvitations}
-        onInvitationAccepted={handleInvitationAccepted}
+        hasMemberships={hasMemberships}
+        hasInvitations={hasInvitations}
+        invitations={invitations}
+        organizations={organizations}
       />
     </div>
   )

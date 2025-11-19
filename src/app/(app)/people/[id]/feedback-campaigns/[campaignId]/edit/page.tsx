@@ -21,7 +21,7 @@ export default async function EditFeedbackCampaignPage({
   const { id, campaignId } = await params
 
   if (!user.managerOSOrganizationId) {
-    redirect('/organization/create')
+    redirect('/dashboard')
   }
 
   // Get the person

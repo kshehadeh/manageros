@@ -16,7 +16,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
   const user = await getCurrentUser()
 
   if (!user.managerOSOrganizationId) {
-    redirect('/organization/create')
+    redirect('/dashboard')
   }
 
   const { id } = await params

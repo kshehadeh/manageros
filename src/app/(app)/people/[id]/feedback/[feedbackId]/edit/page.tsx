@@ -22,7 +22,7 @@ export default async function FeedbackEditPage({
   const { id, feedbackId } = await params
 
   if (!user.managerOSOrganizationId) {
-    redirect('/organization/create')
+    redirect('/dashboard')
   }
 
   // Get the current user's person record

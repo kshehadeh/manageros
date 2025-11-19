@@ -21,7 +21,7 @@ export async function RequireAuthServer({
   const user = await getCurrentUser()
 
   if (requireOrganization && !user.managerOSOrganizationId) {
-    redirect(redirectTo || '/organization/create')
+    redirect(redirectTo || '/dashboard')
   }
 
   return <>{children}</>

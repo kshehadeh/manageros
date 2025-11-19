@@ -139,11 +139,12 @@ export async function createOrganization(formData: {
   // Revalidate paths that depend on organization status
   revalidatePath('/', 'layout')
   revalidatePath('/dashboard', 'page')
-  revalidatePath('/organization/create', 'page')
-  revalidatePath('/organization/subscribe', 'page')
   revalidatePath('/settings', 'page')
 
-  return result
+  return {
+    ...result,
+    clerkOrganizationId: clerkOrgId,
+  }
 }
 
 export async function linkUserToPerson(userId: string, personId: string) {
@@ -934,102 +935,35 @@ export async function getPendingInvitationsForUser(clerkUserId: string | null) {
   }
 }
 
-export async function acceptInvitationForUser(invitationId: string) {
-  const user = await getCurrentUser()
+/**
+ * Server action to trigger invitation acceptance
+ * The actual acceptance is handled on the client-side via Clerk
+ * This action just handles the post-acceptance sync
+ */
+export async function syncOrgDataToClerk() {
+  const updatedUser = await getCurrentUser({ revalidateLinks: true })
 
-  // Check if user already has an organization
-  if (user.managerOSOrganizationId) {
-    throw new Error('User already belongs to an organization')
+  if (!updatedUser.clerkUserId) {
+    throw new Error('User must be authenticated with Clerk')
   }
 
-  // Normalize email to lowercase for comparison (invitations are stored in lowercase)
-  const normalizedEmail = user.email?.toLowerCase()
+  try {
+    // Sync updated user data to Clerk metadata (organization may have changed)
+    // Use revalidateLinks to force refresh of organization data
+    await syncUserDataToClerk(updatedUser)
 
-  if (!normalizedEmail) {
-    throw new Error('User email is required to accept invitation')
+    // Revalidate paths that depend on organization status
+    revalidatePath('/', 'layout')
+    revalidatePath('/dashboard', 'page')
+    revalidatePath('/settings', 'page')
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error syncing after invitation acceptance:', error)
+    throw error instanceof Error
+      ? error
+      : new Error('Failed to sync after invitation acceptance')
   }
-
-  // Find the invitation
-  const invitation = await prisma.organizationInvitation.findFirst({
-    where: {
-      id: invitationId,
-      email: normalizedEmail,
-      status: 'pending',
-      expiresAt: {
-        gt: new Date(), // Not expired
-      },
-    },
-    include: {
-      organization: true,
-    },
-  })
-
-  if (!invitation) {
-    throw new Error('Invitation not found or expired')
-  }
-
-  // Get organization with Clerk org ID
-  const organization = await prisma.organization.findUnique({
-    where: { id: invitation.organizationId },
-    select: {
-      id: true,
-      clerkOrganizationId: true,
-    },
-  })
-
-  if (!organization) {
-    throw new Error('Organization not found')
-  }
-
-  // Get Clerk organization ID (should always exist now)
-  const clerkOrgId = organization.clerkOrganizationId
-  if (!clerkOrgId) {
-    throw new Error(
-      'Organization does not have a Clerk organization ID. Please contact support.'
-    )
-  }
-
-  // Update invitation in a transaction
-  const result = await prisma.$transaction(async tx => {
-    // Mark invitation as accepted
-    await tx.organizationInvitation.update({
-      where: { id: invitation.id },
-      data: {
-        status: 'accepted',
-        acceptedAt: new Date(),
-      },
-    })
-
-    return organization
-  })
-
-  // Add user to Clerk organization
-  if (user?.clerkUserId && clerkOrgId) {
-    try {
-      await addUserToClerkOrganization(
-        clerkOrgId,
-        user.clerkUserId,
-        await mapManagerOSRoleToClerkRole('USER')
-      )
-    } catch (error) {
-      console.error('Failed to add user to Clerk organization:', error)
-      // Don't fail the operation - user is already in ManagerOS org
-    }
-  }
-
-  // Sync updated user data to Clerk (organizationId changed)
-  // Wait for sync to complete to ensure Clerk metadata is updated
-  const updatedUser = await getCurrentUser()
-  await syncUserDataToClerk(updatedUser)
-
-  // Revalidate paths that depend on organization status
-  revalidatePath('/', 'layout')
-  revalidatePath('/dashboard', 'page')
-  revalidatePath('/organization/create', 'page')
-  revalidatePath('/organization/subscribe', 'page')
-  revalidatePath('/settings', 'page')
-
-  return result
 }
 
 // Organization Member Management Actions

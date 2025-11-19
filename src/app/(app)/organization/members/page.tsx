@@ -19,7 +19,7 @@ export default async function OrganizationDetailsPage() {
 
   // Check if user belongs to an organization
   if (!user.managerOSOrganizationId) {
-    redirect('/organization/create')
+    redirect('/dashboard')
   }
 
   const invitations = await getOrganizationInvitations()

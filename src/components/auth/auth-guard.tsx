@@ -42,7 +42,7 @@ export function AuthGuard({
     }
 
     if (userId && requireOrganization && !managerOSOrganizationId) {
-      router.push(redirectTo || '/organization/create')
+      router.push(redirectTo || '/dashboard')
       return
     }
   }, [

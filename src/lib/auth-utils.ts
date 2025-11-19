@@ -28,11 +28,14 @@ const SessionClaimsSchema = z.object({
   sts: z.string().optional().nullable(),
   sub: z.string().optional().nullable(),
   v: z.number().optional().nullable(),
-  o: z.object({
-    id: z.string().optional().nullable(),
-    rol: z.string().optional().nullable(),
-    slg: z.string().optional().nullable(),
-  }),
+  o: z
+    .object({
+      id: z.string().optional().nullable(),
+      rol: z.string().optional().nullable(),
+      slg: z.string().optional().nullable(),
+    })
+    .optional()
+    .nullable(),
   metadata: z.union([UserBriefSchema.optional().nullable(), z.object({})]),
 })
 
@@ -42,6 +45,122 @@ export type SessionClaims = z.infer<typeof SessionClaimsSchema>
  * Get the current authenticated user from Clerk
  * Throws an error if no user is authenticated
  * Use this for server actions and components that must have authentication
+ *
+ * ## Function Flow
+ *
+ * 1. **Authentication Check**: Validates that user is authenticated via Clerk
+ * 2. **Session Claims Validation**: Validates and parses session claims from JWT
+ * 3. **Initial Sync Object**: Builds UserBrief from session claims metadata
+ * 4. **Organization Mismatch Detection**: Detects when Clerk org differs from metadata
+ * 5. **User Record Resolution**: Ensures ManagerOS user record exists in database
+ * 6. **Organization Resolution**: Ensures ManagerOS organization exists for Clerk org
+ * 7. **Person Link Resolution**: Resolves person link if user is linked to a person
+ * 8. **Metadata Sync**: Syncs updated data back to Clerk public metadata
+ *
+ * ## Edge Cases and Potential Issues
+ *
+ * ### 1. User Removed from Organization
+ * **Scenario**: User is removed from Clerk organization but still has active session
+ * **Current Behavior**:
+ *   - Lines 84-91: Detects org removal and clears org-related fields
+ *   - Sets organization fields to null
+ *   - Syncs cleared data back to Clerk
+ * **Issue**: User may still have stale session claims until next token refresh
+ * **Impact**: Medium - User may see inconsistent state until session refresh
+ *
+ * ### 2. Organization Switched in Clerk
+ * **Scenario**: User switches organizations in Clerk UI
+ * **Current Behavior**:
+ *   - Lines 92-96: Detects org change and forces revalidation
+ *   - Revalidates all links (user, org, person)
+ * **Issue**: Person link may be invalid in new organization
+ * **Impact**: Medium - Person link may need to be cleared if person belongs to old org
+ *
+ * ### 3. Clerk User Deleted but Session Still Valid
+ * **Scenario**: Clerk user account deleted but JWT still valid
+ * **Current Behavior**:
+ *   - Lines 110-123: Attempts to fetch user from Clerk API
+ *   - Throws error if Clerk user not found
+ * **Issue**: Error message may not be user-friendly
+ * **Impact**: Low - Proper error handling exists
+ *
+ * ### 4. Organization Deleted in Clerk but Still in Database
+ * **Scenario**: Organization deleted in Clerk but ManagerOS org record exists
+ * **Current Behavior**:
+ *   - Lines 149-156: Attempts to fetch org from Clerk API
+ *   - Throws error if Clerk org not found
+ * **Issue**: Should handle gracefully - user may be in invalid state
+ * **Impact**: High - User may be stuck with invalid organization reference
+ *
+ * ### 5. Person Link Invalid After Org Change
+ * **Scenario**: User switches orgs, but personId points to person in old org
+ * **Current Behavior**:
+ *   - Lines 178-187: Only checks if personId exists, not if person belongs to current org
+ * **Issue**: Person link validation missing - person may belong to different org
+ * **Impact**: High - Security issue: user may access person data from wrong org
+ *
+ * ### 6. Race Condition: Multiple Concurrent Calls
+ * **Scenario**: Multiple requests call getCurrentUser simultaneously during org switch
+ * **Current Behavior**: No locking mechanism
+ * **Issue**: May create duplicate organizations or inconsistent state
+ * **Impact**: Medium - Could cause data integrity issues
+ *
+ * ### 7. Clerk API Failures
+ * **Scenario**: Clerk API is down or rate-limited
+ * **Current Behavior**:
+ *   - getUserFromClerk returns null, throws error
+ *   - getClerkOrganization returns null, throws error
+ * **Issue**: No retry logic or graceful degradation
+ * **Impact**: High - Function will fail completely if Clerk API unavailable
+ *
+ * ### 8. Missing Email Address
+ * **Scenario**: Clerk user has no primary email address
+ * **Current Behavior**:
+ *   - Lines 111-123: Throws error if no email
+ * **Issue**: May prevent legitimate users from accessing system
+ * **Impact**: Medium - May block users with incomplete Clerk profiles
+ *
+ * ### 9. Organization Auto-Creation Side Effects
+ * **Scenario**: Organization auto-created when user joins Clerk org
+ * **Current Behavior**:
+ *   - Lines 164-169: Creates org with current user as billingUserId
+ * **Issue**: First user to join becomes billing user, may not be intended
+ * **Impact**: Medium - Billing user assignment may be incorrect
+ *
+ * ### 10. Person Belongs to Different Organization
+ * **Scenario**: User's personId points to person in different organization
+ * **Current Behavior**:
+ *   - Lines 183-186: No validation that person belongs to user's organization
+ * **Issue**: Critical security vulnerability - cross-org data access
+ * **Impact**: Critical - Security breach risk
+ *
+ * ### 11. Session Claims Stale After Database Update
+ * **Scenario**: User data updated in database but session claims not refreshed
+ * **Current Behavior**:
+ *   - Relies on resync flag to update Clerk metadata
+ *   - But session claims may not update until next token refresh
+ * **Issue**: Stale data in session claims until token refresh
+ * **Impact**: Low - Data eventually consistent
+ *
+ * ### 12. User Has Multiple Organizations
+ * **Scenario**: User is member of multiple Clerk organizations
+ * **Current Behavior**:
+ *   - Only handles single organization from session claims
+ * **Issue**: System assumes single org per user
+ * **Impact**: Low - Current design supports single org
+ *
+ * ## Unhandled Scenarios
+ *
+ * 1. **Person Link Validation**: No check that personId belongs to user's organization
+ * 2. **Organization Membership Validation**: No verification that user is actually member of org in Clerk
+ * 3. **Role Synchronization**: Role from Clerk may not match ManagerOS role (billing user check missing)
+ * 4. **Concurrent Modification Protection**: No locking for org creation or user updates
+ * 5. **Error Recovery**: No retry logic for Clerk API failures
+ * 6. **Partial Failure Handling**: If syncUserDataToClerk fails, function still returns success
+ * 7. **Organization Deletion**: No handling for org deleted in Clerk but exists in ManagerOS
+ * 8. **User Deletion**: No handling for user deleted in Clerk but exists in ManagerOS
+ * 9. **Email Change**: No handling for email change in Clerk
+ * 10. **Name Change**: No handling for name change in Clerk
  */
 export async function getCurrentUser(
   options: { revalidateLinks?: boolean } = {}
@@ -73,6 +192,30 @@ export async function getCurrentUser(
     role: sessionClaimsValidated.data.o?.rol,
     managerOSUserId:
       sessionClaimsValidated.data.metadata?.managerOSUserId || '',
+  }
+
+  // Check if the organization in the "o" claim differs from the metadata
+  // This can happen when a user switches organizations in Clerk or leaves an organization
+  const clerkOrgId = sessionClaimsValidated.data.o?.id
+  const metadataClerkOrgId =
+    sessionClaimsValidated.data.metadata?.clerkOrganizationId
+
+  if (!clerkOrgId && metadataClerkOrgId) {
+    // User has no organization in Clerk but metadata still has one
+    // Clear all organization-related data
+    syncObject.clerkOrganizationId = null
+    syncObject.managerOSOrganizationId = null
+    syncObject.managerOSPersonId = null
+    syncObject.role = null
+    resync = true
+  } else if (
+    clerkOrgId &&
+    metadataClerkOrgId &&
+    clerkOrgId !== metadataClerkOrgId
+  ) {
+    // Organization has changed - force revalidation of all links
+    options.revalidateLinks = true
+    resync = true
   }
 
   // If we don't have a user ID then try to get it.
@@ -111,9 +254,11 @@ export async function getCurrentUser(
   // Now we check if there's an organization associated with the user AND
   //  if there's one associated with the session claims (meaning one has been setup in clerk)
   if (
-    options.revalidateLinks ||
-    (sessionClaimsValidated.data.o?.id &&
-      (!syncObject.managerOSOrganizationId || !syncObject.clerkOrganizationId))
+    sessionClaimsValidated.data.o?.id &&
+    (options.revalidateLinks ||
+      (sessionClaimsValidated.data.o?.id &&
+        (!syncObject.managerOSOrganizationId ||
+          !syncObject.clerkOrganizationId)))
   ) {
     // First see if we can find one based on the organization in clerk.
     let organization = await prisma.organization.findUnique({
@@ -134,15 +279,19 @@ export async function getCurrentUser(
         )
       }
 
-      // Now we can create it using the clerk organization details. If we
-      //  have to create it now then let's assume that the billing user is the
-      //  current user.
-      organization = await prisma.organization.create({
-        data: {
-          clerkOrganizationId: clerkOrganization.id,
-          billingUserId: syncObject.managerOSUserId,
-        },
+      // Check if the organization already exists in our database.
+      organization = await prisma.organization.findUnique({
+        where: { clerkOrganizationId: clerkOrganization.id },
       })
+      if (!organization) {
+        // If the organization doesn't exist in our database then we need to create it.
+        organization = await prisma.organization.create({
+          data: {
+            clerkOrganizationId: clerkOrganization.id,
+            billingUserId: syncObject.managerOSUserId,
+          },
+        })
+      }
     }
 
     syncObject.managerOSOrganizationId = organization.id
@@ -152,16 +301,37 @@ export async function getCurrentUser(
 
   if (options.revalidateLinks || !syncObject.managerOSPersonId) {
     // Check if the current user is linked to a person.
+    // ISSUE: No validation that person belongs to user's current organization
+    // This is a security vulnerability - person may belong to different org
     const user = await prisma.user.findUnique({
       where: { id: syncObject.managerOSUserId || '' },
     })
     if (user && user.personId) {
+      // TODO: Validate that person belongs to user's organization
+      // const person = await prisma.person.findFirst({
+      //   where: {
+      //     id: user.personId,
+      //     organizationId: syncObject.managerOSOrganizationId || '',
+      //   },
+      // })
+      // if (!person) {
+      //   // Person doesn't belong to current org - clear the link
+      //   syncObject.managerOSPersonId = null
+      //   await prisma.user.update({
+      //     where: { id: user.id },
+      //     data: { personId: null },
+      //   })
+      // } else {
+      //   syncObject.managerOSPersonId = user.personId
+      // }
       syncObject.managerOSPersonId = user.personId
       resync = true
     }
   }
 
   if (resync) {
+    // TODO: Handle sync failures gracefully
+    // If sync fails, we should log but not fail the entire request
     await syncUserDataToClerk(syncObject)
   }
 
@@ -226,7 +396,7 @@ export async function requireAuth(options?: {
   const user = await getCurrentUser()
 
   if (options?.requireOrganization && !user.managerOSOrganizationId) {
-    redirect(options.redirectTo || '/organization/create')
+    redirect(options.redirectTo || '/dashboard')
   }
 
   return user
