@@ -1,5 +1,16 @@
 # Changelog
 
+# [1.7.0](https://github.com/kshehadeh/manageros/compare/v1.6.1...v1.7.0) (2025-11-19)
+
+### Bug Fixes
+
+- **api:** Remove unnecessary calls to pull current user from an api instead of using the current session ([312881d](https://github.com/kshehadeh/manageros/commit/312881d91cae5fbcfd7a5899729772f0492df0b4))
+- **lists:** Fixed a problem with the view dropdown not working ([65d9060](https://github.com/kshehadeh/manageros/commit/65d90603442b54ef15e36aa76ff27adb9a27c764))
+
+### Features
+
+- **onboarding:** Work to handle organization onboarding and org switching through clerk (wip) ([208949a](https://github.com/kshehadeh/manageros/commit/208949a40e2a856a7bd00a430caf56a16e369488))
+
 ## [1.6.1](https://github.com/kshehadeh/manageros/compare/v1.6.0...v1.6.1) (2025-11-17)
 
 ### Bug Fixes
