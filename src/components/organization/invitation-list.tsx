@@ -3,12 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useOrganizationList } from '@clerk/nextjs'
-import { Mail, Building2, User, CheckCircle2 } from 'lucide-react'
+import { Building2, User, CheckCircle2, AlertCircle } from 'lucide-react'
 import { syncOrgDataToClerk } from '@/lib/actions/organization'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { AlertCircle } from 'lucide-react'
+import { SimpleListItem } from '@/components/common/simple-list-item'
+import { SimpleListItemsContainer } from '@/components/common/simple-list-items-container'
 import type { PendingInvitation } from '@/types/organization'
 
 interface InvitationListProps {
@@ -74,15 +74,6 @@ export function InvitationList({ invitations }: InvitationListProps) {
     }
   }
 
-  if (invitations.length === 0) {
-    return (
-      <div className='text-center py-8 text-muted-foreground'>
-        <Mail className='w-12 h-12 mx-auto mb-4 opacity-50' />
-        <p>No pending invitations</p>
-      </div>
-    )
-  }
-
   return (
     <div className='space-y-4'>
       {error && (
@@ -92,46 +83,42 @@ export function InvitationList({ invitations }: InvitationListProps) {
         </Alert>
       )}
 
-      <div className='space-y-3'>
+      <SimpleListItemsContainer
+        isEmpty={invitations.length === 0}
+        emptyStateText='No pending invitations'
+      >
         {invitations.map(invitation => (
-          <Card
-            key={invitation.id}
-            className='p-4 hover:border-primary/50 transition-colors'
-          >
-            <div className='space-y-3'>
-              <div className='flex items-start justify-between gap-4'>
-                <div className='flex-1 space-y-2'>
-                  <div className='flex items-center gap-2'>
-                    <Building2 className='w-4 h-4 text-muted-foreground' />
-                    <h3 className='font-semibold'>
-                      {invitation.organization.name}
-                    </h3>
-                  </div>
+          <SimpleListItem key={invitation.id} className='cursor-default'>
+            <div className='flex-1 space-y-1'>
+              <div className='flex items-center gap-2'>
+                <Building2 className='w-4 h-4 text-muted-foreground' />
+                <h3 className='font-semibold'>
+                  {invitation.organization.name}
+                </h3>
+              </div>
 
-                  <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-                    <User className='w-3 h-3' />
-                    <span>Invited by {invitation.invitedBy.name}</span>
-                  </div>
-                </div>
-
-                <Button
-                  onClick={() =>
-                    handleAcceptInvitation(
-                      invitation.id,
-                      invitation.organization.clerkOrganizationId
-                    )
-                  }
-                  disabled={acceptingId === invitation.id}
-                  size='sm'
-                >
-                  <CheckCircle2 className='w-4 h-4 mr-2' />
-                  {acceptingId === invitation.id ? 'Accepting...' : 'Accept'}
-                </Button>
+              <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+                <User className='w-3 h-3' />
+                <span>Invited by {invitation.invitedBy.name}</span>
               </div>
             </div>
-          </Card>
+
+            <Button
+              onClick={() =>
+                handleAcceptInvitation(
+                  invitation.id,
+                  invitation.organization.clerkOrganizationId
+                )
+              }
+              disabled={acceptingId === invitation.id}
+              size='sm'
+            >
+              <CheckCircle2 className='w-4 h-4 mr-2' />
+              {acceptingId === invitation.id ? 'Accepting...' : 'Accept'}
+            </Button>
+          </SimpleListItem>
         ))}
-      </div>
+      </SimpleListItemsContainer>
     </div>
   )
 }

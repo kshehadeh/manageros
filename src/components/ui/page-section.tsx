@@ -19,7 +19,7 @@ export function PageSection({
   return (
     <div
       className={cn(
-        'page-section',
+        'flex flex-col',
         variant === 'bordered' &&
           !hasHeader &&
           'border border-muted rounded-sm p-2xl',
@@ -28,17 +28,11 @@ export function PageSection({
       )}
     >
       {header}
-      {hasHeader ? (
-        <div
-          className={cn(
-            variant === 'bordered' && 'px-md pb-xl md:px-2xl md:pb-2xl'
-          )}
-        >
-          {children}
-        </div>
-      ) : (
-        children
-      )}
+      <div
+        className={cn('flex-1', hasHeader && 'px-md pb-xl md:px-2xl md:pb-2xl')}
+      >
+        {children}
+      </div>
     </div>
   )
 }

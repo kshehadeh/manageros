@@ -455,12 +455,6 @@ input[type='time']::-webkit-calendar-picker-indicator {
   }
 }
 
-.page-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-}
-
 .page-section-title {
   font-size: var(--font-size-lg);
   font-weight: 600;

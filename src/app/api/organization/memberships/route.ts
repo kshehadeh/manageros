@@ -4,9 +4,8 @@ import { getClerkOrganization } from '@/lib/clerk-organization-utils'
 import { clerkClient } from '@clerk/nextjs/server'
 
 export async function GET() {
+  const user = await getCurrentUser()
   try {
-    const user = await getCurrentUser()
-
     if (!user.clerkUserId) {
       return NextResponse.json({ organizations: [] })
     }

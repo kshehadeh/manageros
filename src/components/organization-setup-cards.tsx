@@ -32,7 +32,6 @@ export function OrganizationSetupCards({
     return (
       <PageSection
         variant='bordered'
-        className='w-full max-w-2xl mx-auto'
         header={
           <SectionHeader
             icon={Users}
@@ -49,10 +48,9 @@ export function OrganizationSetupCards({
   // Scenario 2: User has pending invitations (may also have memberships)
   if (hasInvitations) {
     return (
-      <div className='space-y-6'>
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
         <PageSection
           variant='bordered'
-          className='w-full mx-auto'
           header={
             <SectionHeader
               icon={Mail}
@@ -64,10 +62,9 @@ export function OrganizationSetupCards({
           <InvitationList invitations={invitations} />
         </PageSection>
 
-        {hasMemberships && (
+        {hasMemberships ? (
           <PageSection
             variant='bordered'
-            className='w-full max-w-2xl mx-auto'
             header={
               <SectionHeader
                 icon={Users}
@@ -78,6 +75,19 @@ export function OrganizationSetupCards({
           >
             <OrganizationSelector organizations={organizations} />
           </PageSection>
+        ) : (
+          <PageSection
+            variant='bordered'
+            header={
+              <SectionHeader
+                icon={Building2}
+                title='Create Your Organization'
+                description='Or create your own organization to get started.'
+              />
+            }
+          >
+            <CreateOrganizationForm />
+          </PageSection>
         )}
       </div>
     )
@@ -87,7 +97,6 @@ export function OrganizationSetupCards({
   return (
     <PageSection
       variant='bordered'
-      className='w-full mx-auto'
       header={
         <SectionHeader
           icon={Building2}
