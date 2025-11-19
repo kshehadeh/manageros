@@ -13,7 +13,7 @@ export default async function NewCheckInPage({
   const user = await getCurrentUser()
 
   if (!user.managerOSOrganizationId) {
-    redirect('/organization/create')
+    redirect('/dashboard')
   }
 
   const { id } = await params

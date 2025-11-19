@@ -34,8 +34,11 @@ export function useOrganizationMembersTableSettings({
   settingsId,
   enabled = true,
 }: UseOrganizationMembersTableSettingsOptions) {
-  const { user, isLoaded: clerkLoaded } = useUser()
-  const [userId, setUserId] = useState<string | undefined>(undefined)
+  const { user } = useUser()
+
+  // Use Clerk user ID directly (available immediately, no API call needed)
+  const userId = user?.id
+
   const [settings, setSettings] = useState<OrganizationMembersTableSettings>({
     sorting: [],
     grouping: 'none',
@@ -49,18 +52,6 @@ export function useOrganizationMembersTableSettings({
     },
   })
   const [isLoaded, setIsLoaded] = useState(false)
-
-  // Get user ID from API
-  useEffect(() => {
-    if (clerkLoaded && user) {
-      fetch('/api/user/current')
-        .then(res => res.json())
-        .then(data => setUserId(data.user?.id))
-        .catch(() => {})
-    } else {
-      setUserId(undefined)
-    }
-  }, [clerkLoaded, user])
 
   // Load settings when user changes or settingsId changes
   useEffect(() => {

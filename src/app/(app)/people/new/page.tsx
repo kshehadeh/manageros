@@ -18,7 +18,7 @@ export default async function NewPersonPage({
 
   // Check if user belongs to an organization
   if (!user.managerOSOrganizationId) {
-    redirect('/organization/create')
+    redirect('/dashboard')
   }
 
   // Check if user is admin or owner

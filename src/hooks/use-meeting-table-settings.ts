@@ -38,20 +38,10 @@ export function useMeetingTableSettings({
   settingsId,
   enabled = true,
 }: UseMeetingTableSettingsOptions) {
-  const { user, isLoaded: clerkLoaded } = useUser()
-  const [userId, setUserId] = useState<string | undefined>(undefined)
+  const { user } = useUser()
 
-  // Get user ID from API
-  useEffect(() => {
-    if (clerkLoaded && user) {
-      fetch('/api/user/current')
-        .then(res => res.json())
-        .then(data => setUserId(data.user?.id))
-        .catch(() => {})
-    } else {
-      setUserId(undefined)
-    }
-  }, [clerkLoaded, user])
+  // Use Clerk user ID directly (available immediately, no API call needed)
+  const userId = user?.id
   const [settings, setSettings] = useState<MeetingTableSettings>({
     sorting: [],
     grouping: 'none',

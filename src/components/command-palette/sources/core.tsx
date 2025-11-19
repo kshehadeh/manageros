@@ -40,14 +40,14 @@ function createStaticItems(
   if (!hasOrganization) {
     const items: CommandItemDescriptor[] = []
     items.push({
-      id: 'organization.create',
-      title: 'Create Organization',
-      subtitle: 'Set up your organization',
+      id: 'organization.setup',
+      title: 'Setup Organization',
+      subtitle: 'Create or join an organization',
       icon: <Building className='h-4 w-4' />,
-      keywords: ['organization', 'org', 'create', 'setup', 'new'],
+      keywords: ['organization', 'org', 'create', 'setup', 'new', 'join'],
       group: 'Quick Actions',
       perform: ({ closePalette, router }) => {
-        router.push('/organization/create')
+        router.push('/dashboard')
         closePalette()
       },
     })

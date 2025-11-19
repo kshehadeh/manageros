@@ -1,9 +1,10 @@
 'use client'
 
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { InitiativeDataTable } from '@/components/initiatives/data-table'
 import { ExpandableSection } from '@/components/expandable-section'
 import { useUser } from '@clerk/nextjs'
+import { UserBrief } from '../../lib/auth-types'
 
 interface DashboardOpenInitiativesSectionProps {
   organizationId: string
@@ -12,22 +13,10 @@ interface DashboardOpenInitiativesSectionProps {
 export function DashboardOpenInitiativesSection({
   organizationId: _organizationId,
 }: DashboardOpenInitiativesSectionProps) {
-  const { user, isLoaded } = useUser()
-  const [userData, setUserData] = useState<{
-    managerOSPersonId?: string
-  } | null>(null)
+  const { user } = useUser()
 
-  useEffect(() => {
-    if (isLoaded && user) {
-      fetch('/api/user/current')
-        .then(res => res.json())
-        .then(data => setUserData(data.user))
-        .catch(() => {})
-    }
-  }, [isLoaded, user])
-
-  const currentPersonId = userData?.managerOSPersonId
-  const personId = currentPersonId
+  // Get person ID from Clerk user metadata (no API call needed)
+  const personId = (user?.publicMetadata as UserBrief)?.managerOSPersonId
 
   // Memoize immutableFilters to prevent infinite loop
   const immutableFilters = useMemo(

@@ -453,7 +453,7 @@ acceptInvitationForUser(invitationId: string): Promise<User>
 **Example:**
 
 ```typescript
-const updatedUser = await acceptInvitationForUser('inv_123')
+const updatedUser = await syncOrgDataToClerk()
 ```
 
 ## Organization Member Management

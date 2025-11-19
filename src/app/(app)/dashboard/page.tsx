@@ -11,10 +11,10 @@ import { PageSidebar } from '@/components/ui/page-sidebar'
 import { HelpBlock } from '@/components/common/help-block'
 import { User, Users } from 'lucide-react'
 import { prisma } from '@/lib/db'
-import { getCurrentUserWithPersonAndOrganization } from '../../../lib/auth-utils'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 async function DashboardContent() {
-  const { user } = await getCurrentUserWithPersonAndOrganization()
+  const user = await getCurrentUser()
 
   // If user doesn't have an organization, show organization setup cards
   if (!user.managerOSOrganizationId) {

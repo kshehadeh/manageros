@@ -19,7 +19,7 @@ export default async function NewFeedbackPage({
   const { id } = await params
 
   if (!user.managerOSOrganizationId) {
-    redirect('/organization/create')
+    redirect('/dashboard')
   }
 
   // Get the person being given feedback

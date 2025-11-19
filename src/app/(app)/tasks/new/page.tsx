@@ -9,7 +9,7 @@ export default async function NewTaskPage() {
   const user = await getCurrentUser()
 
   if (!user.managerOSOrganizationId) {
-    redirect('/organization/create')
+    redirect('/dashboard')
   }
 
   // Get all people and objectives for the form

@@ -15,7 +15,7 @@ export default async function ImportTeamsPage() {
   }
 
   if (!user.managerOSOrganizationId) {
-    redirect('/organization/create')
+    redirect('/dashboard')
   }
 
   return (

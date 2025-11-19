@@ -1,8 +1,9 @@
 'use client'
 
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth, useUser } from '@clerk/nextjs'
+import { UserBrief } from '../../lib/auth-types'
 
 interface AuthGuardProps {
   children: ReactNode
@@ -23,27 +24,12 @@ export function AuthGuard({
   fallback,
 }: AuthGuardProps) {
   const { isLoaded, userId } = useAuth()
+  const { user } = useUser()
   const router = useRouter()
-  const [userData, setUserData] = useState<{
-    managerOSOrganizationId: string | null
-  } | null>(null)
 
-  // Fetch user data from API to get organization info
-  useEffect(() => {
-    if (isLoaded && userId) {
-      fetch('/api/user/current')
-        .then(res => res.json())
-        .then(data => {
-          if (data.user) {
-            setUserData(data.user)
-          }
-        })
-        .catch(() => {
-          // If API fails, user might not be in database yet
-          setUserData({ managerOSOrganizationId: null })
-        })
-    }
-  }, [isLoaded, userId])
+  // Get organization info from Clerk user metadata (no API call needed)
+  const managerOSOrganizationId = (user?.publicMetadata as UserBrief)
+    ?.managerOSOrganizationId
 
   useEffect(() => {
     if (!isLoaded) {
@@ -55,16 +41,18 @@ export function AuthGuard({
       return
     }
 
-    if (
-      userId &&
-      requireOrganization &&
-      userData &&
-      !userData.managerOSOrganizationId
-    ) {
-      router.push(redirectTo || '/organization/create')
+    if (userId && requireOrganization && !managerOSOrganizationId) {
+      router.push(redirectTo || '/dashboard')
       return
     }
-  }, [isLoaded, userId, userData, requireOrganization, redirectTo, router])
+  }, [
+    isLoaded,
+    userId,
+    managerOSOrganizationId,
+    requireOrganization,
+    redirectTo,
+    router,
+  ])
 
   if (!isLoaded) {
     return fallback ?? null
@@ -74,7 +62,7 @@ export function AuthGuard({
     return fallback ?? null
   }
 
-  if (requireOrganization && userData && !userData.managerOSOrganizationId) {
+  if (requireOrganization && !managerOSOrganizationId) {
     return fallback ?? null
   }
 

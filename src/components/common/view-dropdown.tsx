@@ -99,7 +99,11 @@ export function ViewDropdown({
             <Group className='h-4 w-4' />
             <h3 className='font-medium'>Grouping</h3>
           </div>
-          <Select value={groupingValue} onValueChange={onGroupingChange}>
+          <Select
+            key={`grouping-${groupingValue}`}
+            value={groupingValue}
+            onValueChange={onGroupingChange}
+          >
             <SelectTrigger>
               <SelectValue placeholder='Select grouping' />
             </SelectTrigger>
@@ -123,6 +127,7 @@ export function ViewDropdown({
           </div>
           <div className='space-y-md'>
             <Select
+              key={`sort-field-${sortField || 'none'}`}
               value={sortField || 'none'}
               onValueChange={value =>
                 onSortChange(value === 'none' ? '' : value, sortDirection)
@@ -143,6 +148,7 @@ export function ViewDropdown({
 
             {sortField && (
               <Select
+                key={`sort-direction-${sortDirection}`}
                 value={sortDirection}
                 onValueChange={value =>
                   onSortChange(sortField, value as 'asc' | 'desc')

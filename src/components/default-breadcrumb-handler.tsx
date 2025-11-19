@@ -19,7 +19,6 @@ const routeMap: Record<string, string> = {
   '/reports': 'Reports',
   '/direct-reports': 'Direct Reports',
   '/organization/invitations': 'Invitations',
-  '/organization/create': 'Create Organization',
   '/organization/settings': 'Settings',
   '/auth/signin': 'Sign In',
   '/auth/signup': 'Sign Up',

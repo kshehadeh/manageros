@@ -20,7 +20,7 @@ export default async function NewFeedbackCampaignPage({
   const { id } = await params
 
   if (!user.managerOSOrganizationId) {
-    redirect('/organization/create')
+    redirect('/dashboard')
   }
 
   // Get the person

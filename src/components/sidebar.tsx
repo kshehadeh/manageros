@@ -164,17 +164,6 @@ export default function Sidebar({
                   </div>
                 )}
 
-                {/* Create Organization link - shown if no organization */}
-                {!organizationId && (
-                  <Link
-                    href='/organization/create'
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className='text-xs text-muted-foreground hover:text-foreground underline block mt-xs'
-                  >
-                    Create Organization
-                  </Link>
-                )}
-
                 {/* Settings and Sign out links - always shown */}
                 <div className='flex items-center gap-md mt-sm'>
                   <Link

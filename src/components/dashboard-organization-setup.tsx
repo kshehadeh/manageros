@@ -5,26 +5,42 @@ import { OrganizationSetupCards } from '@/components/organization-setup-cards'
 import { PageContainer } from '@/components/ui/page-container'
 import type { PendingInvitation } from '@/types/organization'
 
+interface Organization {
+  id: string
+  name: string
+  slug: string | null
+}
+
 export function DashboardOrganizationSetup() {
-  const [invitations, setInvitations] = useState<PendingInvitation[]>([])
   const [loading, setLoading] = useState(true)
+  const [invitations, setInvitations] = useState<PendingInvitation[]>([])
+  const [organizations, setOrganizations] = useState<Organization[]>([])
 
   useEffect(() => {
-    const fetchInvitations = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/organization/invitations')
-        if (response.ok) {
-          const data = await response.json()
+        const [invitationsRes, orgsRes] = await Promise.all([
+          fetch('/api/organization/invitations'),
+          fetch('/api/organization/memberships'),
+        ])
+
+        if (invitationsRes.ok) {
+          const data = await invitationsRes.json()
           setInvitations(data.invitations || [])
         }
+
+        if (orgsRes.ok) {
+          const data = await orgsRes.json()
+          setOrganizations(data.organizations || [])
+        }
       } catch (error) {
-        console.error('Error fetching invitations:', error)
+        console.error('Error fetching organization data:', error)
       } finally {
         setLoading(false)
       }
     }
 
-    fetchInvitations()
+    fetchData()
   }, [])
 
   if (loading) {
@@ -37,9 +53,17 @@ export function DashboardOrganizationSetup() {
     )
   }
 
+  const hasMemberships = organizations.length > 0
+  const hasInvitations = invitations.length > 0
+
   return (
     <PageContainer>
-      <OrganizationSetupCards pendingInvitations={invitations} />
+      <OrganizationSetupCards
+        hasMemberships={hasMemberships}
+        hasInvitations={hasInvitations}
+        invitations={invitations}
+        organizations={organizations}
+      />
     </PageContainer>
   )
 }

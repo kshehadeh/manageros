@@ -1,237 +1,111 @@
 'use client'
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { HelpBlock } from '@/components/common/help-block'
-import { acceptInvitationForUser } from '@/lib/actions/organization'
-import { Building2, Users, Mail, CheckCircle2, AlertCircle } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
+import { Building2, Users, Mail } from 'lucide-react'
+import { CreateOrganizationForm } from '@/components/organization/create-organization-form'
+import { InvitationList } from '@/components/organization/invitation-list'
+import { OrganizationSelector } from '@/components/organization/organization-selector'
 import type { PendingInvitation } from '@/types/organization'
 
+interface Organization {
+  id: string
+  name: string
+  slug: string | null
+}
+
 interface OrganizationSetupCardsProps {
-  pendingInvitations: PendingInvitation[]
-  onInvitationAccepted?: () => void
+  hasMemberships: boolean
+  hasInvitations: boolean
+  invitations: PendingInvitation[]
+  organizations: Organization[]
 }
 
 export function OrganizationSetupCards({
-  pendingInvitations,
-  onInvitationAccepted,
+  hasMemberships,
+  hasInvitations,
+  invitations,
+  organizations,
 }: OrganizationSetupCardsProps) {
-  const [acceptingInvitation, setAcceptingInvitation] = useState<string | null>(
-    null
-  )
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
-
-  // Handle create organization - redirect to subscription page first
-  const handleCreateOrganization = () => {
-    router.push('/organization/subscribe')
-  }
-
-  const handleAcceptInvitation = async (invitationId: string) => {
-    try {
-      setAcceptingInvitation(invitationId)
-      setError(null)
-
-      await acceptInvitationForUser(invitationId)
-
-      // Call custom callback if provided, otherwise redirect to dashboard
-      if (onInvitationAccepted) {
-        onInvitationAccepted()
-      } else {
-        // Redirect to dashboard after successful acceptance
-        // Clerk will automatically update the user data
-        router.push('/dashboard')
-        router.refresh() // Refresh to get updated user data
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Failed to accept invitation'
-      )
-    } finally {
-      setAcceptingInvitation(null)
-    }
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    })
-  }
-
-  const isExpiringSoon = (expiresAt: string) => {
-    const expirationDate = new Date(expiresAt)
-    const now = new Date()
-    const daysUntilExpiration = Math.ceil(
-      (expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+  // Scenario 1: User is already a member of organizations - show switcher
+  if (hasMemberships && !hasInvitations) {
+    return (
+      <PageSection
+        variant='bordered'
+        header={
+          <SectionHeader
+            icon={Users}
+            title='Select Your Organization'
+            description='Choose which organization you want to work with.'
+          />
+        }
+      >
+        <OrganizationSelector organizations={organizations} />
+      </PageSection>
     )
-    return daysUntilExpiration <= 2
   }
 
-  return (
-    <div className='space-y-2xl'>
-      {error && (
-        <HelpBlock
-          title='Error'
-          description={error}
-          icon={AlertCircle}
-          variant='warning'
-        />
-      )}
-
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-        <HelpBlock
-          title='Create New Organization'
-          description={
-            <div className='space-y-2'>
-              <p>Start fresh with your own organization.</p>
-              <ul className='text-sm space-y-1 list-disc list-inside'>
-                <li>You&apos;re starting a new company or team</li>
-                <li>You want to be the organization admin</li>
-                <li>You need full control over settings and members</li>
-                <li>You&apos;re setting up a demo or test environment</li>
-              </ul>
-            </div>
+  // Scenario 2: User has pending invitations (may also have memberships)
+  if (hasInvitations) {
+    return (
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+        <PageSection
+          variant='bordered'
+          header={
+            <SectionHeader
+              icon={Mail}
+              title='Organization Invitations'
+              description='You have been invited to join organizations.'
+            />
           }
-          icon={Building2}
-          variant='info'
-          action={{
-            label: 'Create Organization',
-            onClick: handleCreateOrganization,
-            variant: 'default',
-            size: 'default',
-          }}
-        />
+        >
+          <InvitationList invitations={invitations} />
+        </PageSection>
 
-        {pendingInvitations.length > 0 ? (
-          <HelpBlock
-            title='Join Existing Organization'
-            description={
-              <div className='space-y-3'>
-                <p>
-                  You have pending invitations. Accept an invitation to join an
-                  organization.
-                </p>
-                <div className='space-y-2'>
-                  {pendingInvitations.map(invitation => (
-                    <Card key={invitation.id} className='p-4'>
-                      <div className='flex items-start justify-between'>
-                        <div className='flex-1'>
-                          <div className='flex items-center gap-2 mb-1'>
-                            <h5 className='font-medium text-sm'>
-                              {invitation.organization.name}
-                            </h5>
-                            {isExpiringSoon(invitation.expiresAt) && (
-                              <span className='badge rag-amber text-xs'>
-                                EXPIRES SOON
-                              </span>
-                            )}
-                          </div>
-                          {invitation.organization.description && (
-                            <p className='text-xs text-muted-foreground mb-2'>
-                              {invitation.organization.description}
-                            </p>
-                          )}
-                          <div className='text-xs text-muted-foreground'>
-                            <div>
-                              Invited by{' '}
-                              <span className='text-foreground'>
-                                {invitation.invitedBy.name}
-                              </span>
-                            </div>
-                            <div>
-                              Expires {formatDate(invitation.expiresAt)}
-                            </div>
-                          </div>
-                        </div>
-                        <Button
-                          size='sm'
-                          variant='outline'
-                          onClick={() => handleAcceptInvitation(invitation.id)}
-                          disabled={acceptingInvitation === invitation.id}
-                        >
-                          {acceptingInvitation === invitation.id ? (
-                            <>
-                              <svg
-                                className='animate-spin -ml-1 mr-2 h-4 w-4'
-                                xmlns='http://www.w3.org/2000/svg'
-                                fill='none'
-                                viewBox='0 0 24 24'
-                              >
-                                <circle
-                                  className='opacity-25'
-                                  cx='12'
-                                  cy='12'
-                                  r='10'
-                                  stroke='currentColor'
-                                  strokeWidth='4'
-                                ></circle>
-                                <path
-                                  className='opacity-75'
-                                  fill='currentColor'
-                                  d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                                ></path>
-                              </svg>
-                              Accepting...
-                            </>
-                          ) : (
-                            <>
-                              <CheckCircle2 className='h-4 w-4 mr-1' />
-                              Accept
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              </div>
+        {hasMemberships ? (
+          <PageSection
+            variant='bordered'
+            header={
+              <SectionHeader
+                icon={Users}
+                title='Your Organizations'
+                description='Or select from your existing organizations.'
+              />
             }
-            icon={Users}
-            variant='info'
-          />
+          >
+            <OrganizationSelector organizations={organizations} />
+          </PageSection>
         ) : (
-          <HelpBlock
-            title='Join Existing Organization'
-            description={
-              <div className='space-y-3'>
-                <div className='flex items-center gap-2 text-sm'>
-                  <Mail className='h-4 w-4' />
-                  <span>No pending invitations</span>
-                </div>
-                <div className='space-y-2'>
-                  <h4 className='font-medium text-sm'>
-                    How to join an existing organization:
-                  </h4>
-                  <ol className='text-sm space-y-1 list-decimal list-inside'>
-                    <li>
-                      Contact the admin of the organization you want to join
-                    </li>
-                    <li>
-                      Ask them to send you an invitation using your email
-                      address
-                    </li>
-                    <li>Once invited, you&apos;ll see the invitation here</li>
-                    <li>Click &quot;Accept&quot; to join the organization</li>
-                  </ol>
-                </div>
-                <div className='p-3 bg-muted/50 rounded-lg'>
-                  <p className='text-xs text-muted-foreground'>
-                    <strong>Your email:</strong> You&apos;ll need to provide the
-                    email address you used to create this account to the
-                    organization admin.
-                  </p>
-                </div>
-              </div>
+          <PageSection
+            variant='bordered'
+            header={
+              <SectionHeader
+                icon={Building2}
+                title='Create Your Organization'
+                description='Or create your own organization to get started.'
+              />
             }
-            icon={Users}
-            variant='info'
-          />
+          >
+            <CreateOrganizationForm />
+          </PageSection>
         )}
       </div>
-    </div>
+    )
+  }
+
+  // Scenario 3: User has no memberships and no invitations - show create
+  return (
+    <PageSection
+      variant='bordered'
+      header={
+        <SectionHeader
+          icon={Building2}
+          title='Welcome to mpath'
+          description="You don't have any organizations yet. Create your first organization to get started."
+        />
+      }
+    >
+      <CreateOrganizationForm />
+    </PageSection>
   )
 }

@@ -29,7 +29,7 @@ export default async function TaskDetailPage({
   const user = await getCurrentUser()
 
   if (!user.managerOSOrganizationId) {
-    redirect('/organization/create')
+    redirect('/dashboard')
   }
 
   const { id } = await params
