@@ -64,10 +64,10 @@ export async function getPlanLimits(
   // Default to free tier limits if no plan specified
   if (!planName || planName === 'free' || planName === 'Solo') {
     return {
-      maxPeople: 5,
-      maxInitiatives: 10,
-      maxTeams: 2,
-      maxFeedbackCampaigns: 2,
+      maxPeople: null,
+      maxInitiatives: null,
+      maxTeams: null,
+      maxFeedbackCampaigns: null,
     }
   }
 
