@@ -83,10 +83,10 @@ export async function getPlanLimits(
 
   // Unknown plan - default to free tier limits
   return {
-    maxPeople: 5,
-    maxInitiatives: 10,
-    maxTeams: 2,
-    maxFeedbackCampaigns: 2,
+    maxPeople: null,
+    maxInitiatives: null,
+    maxTeams: null,
+    maxFeedbackCampaigns: null,
   }
 }
 
