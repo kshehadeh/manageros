@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.7.2](https://github.com/kshehadeh/manageros/compare/v1.7.1...v1.7.2) (2025-11-20)
+
+### Bug Fixes
+
+- **subscriptions:** Removed plan limits again ([b6e9dfa](https://github.com/kshehadeh/manageros/commit/b6e9dfa3a7c759a95d01ab979582c8221837d92a))
+
 ## [1.7.1](https://github.com/kshehadeh/manageros/compare/v1.7.0...v1.7.1) (2025-11-20)
 
 ### Bug Fixes
