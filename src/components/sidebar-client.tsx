@@ -35,11 +35,6 @@ export default function SidebarClient({
   }
 
   return (
-    <Sidebar
-      navigation={navigation}
-      serverSession={user}
-      organizationData={organization}
-      personData={person}
-    />
+    <Sidebar navigation={navigation} serverSession={user} personData={person} />
   )
 }
