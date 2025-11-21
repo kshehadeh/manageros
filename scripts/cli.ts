@@ -420,7 +420,7 @@ async function listUsersCommand() {
 async function deleteUserByIdentifier(identifier: string) {
   console.log(`Looking up user: ${identifier}\n`)
 
-  // First, check presence status
+  // First, check presence status using compareUsers which properly matches Clerk and DB users
   const allUsers = await compareUsers()
   const matchingUser = allUsers.find(
     u =>
@@ -429,104 +429,81 @@ async function deleteUserByIdentifier(identifier: string) {
       u.databaseUserId === identifier
   )
 
-  if (matchingUser) {
-    console.log('='.repeat(80))
-    console.log('USER PRESENCE STATUS')
-    console.log('='.repeat(80))
-    console.log(`Email: ${matchingUser.email}`)
-    console.log(`Name: ${matchingUser.name || 'N/A'}`)
-    console.log(`Presence: ${matchingUser.presence}`)
-    console.log(
-      `  ${matchingUser.clerkUserId ? '✓' : '✗'} Clerk: ${matchingUser.clerkUserId || 'Not found'}`
-    )
-    console.log(
-      `  ${matchingUser.databaseUserId ? '✓' : '✗'} Database: ${matchingUser.databaseUserId || 'Not found'}`
-    )
-    console.log('='.repeat(80))
-    console.log('')
+  if (!matchingUser) {
+    throw new Error(`User not found in database or Clerk: ${identifier}`)
   }
 
-  // Try to find user in database
-  const user = await prisma.user.findFirst({
-    where: {
-      OR: [
-        { email: identifier.toLowerCase() },
-        { id: identifier },
-        { clerkUserId: identifier },
-      ],
-    },
-    include: {
-      person: {
-        select: {
-          id: true,
-          name: true,
+  console.log('='.repeat(80))
+  console.log('USER PRESENCE STATUS')
+  console.log('='.repeat(80))
+  console.log(`Email: ${matchingUser.email}`)
+  console.log(`Name: ${matchingUser.name || 'N/A'}`)
+  console.log(`Presence: ${matchingUser.presence}`)
+  console.log(
+    `  ${matchingUser.clerkUserId ? '✓' : '✗'} Clerk: ${matchingUser.clerkUserId || 'Not found'}`
+  )
+  console.log(
+    `  ${matchingUser.databaseUserId ? '✓' : '✗'} Database: ${matchingUser.databaseUserId || 'Not found'}`
+  )
+  console.log('='.repeat(80))
+  console.log('')
+
+  // Use the IDs from compareUsers to fetch the actual user records
+  let user = null
+  if (matchingUser.databaseUserId) {
+    user = await prisma.user.findUnique({
+      where: { id: matchingUser.databaseUserId },
+      include: {
+        person: {
+          select: {
+            id: true,
+            name: true,
+          },
         },
-      },
-      organizationMemberships: {
-        include: {
-          organization: {
-            select: {
-              id: true,
-              clerkOrganizationId: true,
+        organizationMemberships: {
+          include: {
+            organization: {
+              select: {
+                id: true,
+                clerkOrganizationId: true,
+              },
             },
           },
         },
       },
-    },
-  })
+    })
+  }
 
-  // Try to find user in Clerk
+  // Fetch Clerk user using the ID from compareUsers
   let clerkUser: {
     id: string
     email_addresses: Array<{ email_address: string }>
   } | null = null
   const { apiKey, baseUrl } = getClerkConfig()
-  if (apiKey) {
+  if (apiKey && matchingUser.clerkUserId) {
     try {
-      // If we found a database user with clerkUserId, try that first
-      if (user?.clerkUserId) {
-        const response = await fetch(`${baseUrl}/users/${user.clerkUserId}`, {
+      const response = await fetch(
+        `${baseUrl}/users/${matchingUser.clerkUserId}`,
+        {
           headers: {
             Authorization: `Bearer ${apiKey}`,
           },
-        })
-        if (response.ok) {
-          clerkUser = await response.json()
         }
+      )
+      if (response.ok) {
+        clerkUser = await response.json()
+      } else if (response.status !== 404) {
+        // Log non-404 errors but continue
+        const errorText = await response.text()
+        console.warn(
+          `Warning: Failed to fetch Clerk user ${matchingUser.clerkUserId}: ${response.status} ${errorText}`
+        )
       }
-
-      // If we didn't find it by clerkUserId, try by identifier
-      if (!clerkUser) {
-        // Try by ID first
-        const response = await fetch(`${baseUrl}/users/${identifier}`, {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-          },
-        })
-        if (response.ok) {
-          clerkUser = await response.json()
-        } else {
-          // Try by email
-          const emailToSearch = user?.email || identifier
-          const emailResponse = await fetch(
-            `${baseUrl}/users?email_address=${encodeURIComponent(emailToSearch)}`,
-            {
-              headers: {
-                Authorization: `Bearer ${apiKey}`,
-              },
-            }
-          )
-          if (emailResponse.ok) {
-            const emailData = await emailResponse.json()
-            clerkUser =
-              Array.isArray(emailData) && emailData.length > 0
-                ? emailData[0]
-                : null
-          }
-        }
-      }
-    } catch {
-      // Ignore errors, we'll just skip Clerk deletion
+    } catch (error) {
+      console.warn(
+        `Warning: Error fetching Clerk user ${matchingUser.clerkUserId}:`,
+        error
+      )
     }
   }
 
@@ -539,13 +516,30 @@ async function deleteUserByIdentifier(identifier: string) {
     console.log(`  ID: ${user.id}`)
     console.log(`  Email: ${user.email}`)
     console.log(`  Name: ${user.name}`)
-    console.log(`  Clerk User ID: ${user.clerkUserId || 'N/A'}`)
+    console.log(
+      `  Clerk User ID: ${user.clerkUserId || matchingUser.clerkUserId || 'N/A'}`
+    )
     // Organization membership is now managed by Clerk
     console.log(`  Organizations: Check Clerk API`)
     console.log(`  Person: ${user.person?.name || 'N/A'}`)
     console.log('')
   } else {
     console.log('No database user found (user only exists in Clerk)')
+    if (clerkUser) {
+      console.log(`  Clerk User ID: ${clerkUser.id}`)
+      console.log(
+        `  Email: ${clerkUser.email_addresses?.[0]?.email_address || 'N/A'}`
+      )
+    }
+    console.log('')
+  }
+
+  if (clerkUser && !user) {
+    console.log('CLERK USER FOUND:')
+    console.log(`  ID: ${clerkUser.id}`)
+    console.log(
+      `  Email: ${clerkUser.email_addresses?.[0]?.email_address || 'N/A'}`
+    )
     console.log('')
   }
 
@@ -562,8 +556,8 @@ async function deleteUserByIdentifier(identifier: string) {
   }
 
   // Delete Clerk user if exists
-  // Prioritize the Clerk user we found via API lookup, then fall back to database clerkUserId
-  const clerkIdToDelete = clerkUser?.id || user?.clerkUserId
+  // Use the Clerk user ID from compareUsers (most reliable) or from the fetched clerkUser
+  const clerkIdToDelete = matchingUser.clerkUserId || clerkUser?.id
   if (clerkIdToDelete) {
     console.log(`\nDeleting Clerk user: ${clerkIdToDelete}`)
     const clerkDeleted = await deleteClerkUser(clerkIdToDelete)
@@ -580,6 +574,59 @@ async function deleteUserByIdentifier(identifier: string) {
 
   // Delete database user if exists
   if (user) {
+    // Handle relationships that don't cascade before deleting the user
+    console.log(`\nHandling user relationships before deletion...`)
+
+    // Delete tasks created by the user
+    const taskCount = await prisma.task.count({
+      where: { createdById: user.id },
+    })
+    if (taskCount > 0) {
+      console.log(`  Deleting ${taskCount} task(s) created by user...`)
+      await prisma.task.deleteMany({
+        where: { createdById: user.id },
+      })
+      console.log(`  ✓ Deleted ${taskCount} task(s)`)
+    }
+
+    // Delete meetings created by the user
+    const meetingCount = await prisma.meeting.count({
+      where: { createdById: user.id },
+    })
+    if (meetingCount > 0) {
+      console.log(`  Deleting ${meetingCount} meeting(s) created by user...`)
+      await prisma.meeting.deleteMany({
+        where: { createdById: user.id },
+      })
+      console.log(`  ✓ Deleted ${meetingCount} meeting(s)`)
+    }
+
+    // Delete organization invitations sent by the user
+    const invitationCount = await prisma.organizationInvitation.count({
+      where: { invitedById: user.id },
+    })
+    if (invitationCount > 0) {
+      console.log(
+        `  Deleting ${invitationCount} organization invitation(s) sent by user...`
+      )
+      await prisma.organizationInvitation.deleteMany({
+        where: { invitedById: user.id },
+      })
+      console.log(`  ✓ Deleted ${invitationCount} invitation(s)`)
+    }
+
+    // Delete notifications for the user
+    const notificationCount = await prisma.notification.count({
+      where: { userId: user.id },
+    })
+    if (notificationCount > 0) {
+      console.log(`  Deleting ${notificationCount} notification(s) for user...`)
+      await prisma.notification.deleteMany({
+        where: { userId: user.id },
+      })
+      console.log(`  ✓ Deleted ${notificationCount} notification(s)`)
+    }
+
     console.log(`\nDeleting database user: ${user.id}`)
     await prisma.user.delete({
       where: { id: user.id },
