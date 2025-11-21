@@ -17,7 +17,6 @@ import { AIChatSidebarWrapper } from '@/components/ai-chat-sidebar-wrapper'
 import { CacheProvider } from '@/components/cache-provider'
 import SidebarClient from '@/components/sidebar-client'
 import { ClerkProvider } from '@clerk/nextjs'
-import { dark } from '@clerk/themes'
 import {
   getCurrentUserWithPersonAndOrganization,
   getFilteredNavigation,
@@ -35,7 +34,6 @@ export default async function AppLayout({ children }: AppLayoutProps) {
   // Render full layout for authenticated routes
   return (
     <ClerkProvider
-      appearance={dark}
       taskUrls={{
         'choose-organization': '/dashboard',
       }}

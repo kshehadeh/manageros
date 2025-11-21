@@ -55,6 +55,7 @@ export async function TeamPulseSectionServer() {
     const oneOnOnes = await getOneOnOnesForManagerAndReports(
       personId,
       reportIds,
+      organizationId,
       {
         includeScheduledAt: true,
       }

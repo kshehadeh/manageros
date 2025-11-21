@@ -6,6 +6,7 @@ import { prisma } from '@/lib/db'
 export const getOneOnOnesForPerson = cache(
   async (
     personId: string,
+    organizationId: string,
     options?: {
       limit?: number
       includeManager?: boolean
@@ -16,6 +17,8 @@ export const getOneOnOnesForPerson = cache(
   ) => {
     const where: Record<string, unknown> = {
       OR: [{ managerId: personId }, { reportId: personId }],
+      // Ensure both manager and report belong to the same organization
+      AND: [{ manager: { organizationId } }, { report: { organizationId } }],
     }
 
     if (options?.dateAfter || options?.dateBefore) {
@@ -61,6 +64,7 @@ export const getOneOnOnesForManagerAndReports = cache(
   async (
     managerId: string,
     reportIds: string[],
+    organizationId: string,
     options?: {
       dateAfter?: Date
       dateBefore?: Date
@@ -72,6 +76,8 @@ export const getOneOnOnesForManagerAndReports = cache(
         { managerId, reportId: { in: reportIds } },
         { managerId: { in: reportIds }, reportId: managerId },
       ],
+      // Ensure both manager and report belong to the same organization
+      AND: [{ manager: { organizationId } }, { report: { organizationId } }],
     }
 
     if (options?.dateAfter || options?.dateBefore) {
@@ -97,6 +103,7 @@ export const getOneOnOnesForManagerAndReports = cache(
 export const getUpcomingOneOnOnesForPerson = cache(
   async (
     personId: string,
+    organizationId: string,
     dateAfter: Date,
     dateBefore: Date,
     options?: {
@@ -124,6 +131,8 @@ export const getUpcomingOneOnOnesForPerson = cache(
     return prisma.oneOnOne.findMany({
       where: {
         OR: [{ managerId: personId }, { reportId: personId }],
+        // Ensure both manager and report belong to the same organization
+        AND: [{ manager: { organizationId } }, { report: { organizationId } }],
         scheduledAt: {
           gte: dateAfter,
           lte: dateBefore,

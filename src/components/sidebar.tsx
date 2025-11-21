@@ -1,13 +1,14 @@
 'use client'
 
 import { Link } from '@/components/ui/link'
-import { useClerk, useUser } from '@clerk/nextjs'
+import { OrganizationSwitcher, useClerk, useUser } from '@clerk/nextjs'
 import { signOutWithCleanup } from '@/lib/auth-client-utils'
 import { usePathname } from 'next/navigation'
 import { useMobileMenu } from '@/components/mobile-menu-provider'
 import { IndigoIcon } from '@/components/indigo-icon'
-import type { OrganizationBrief, UserBrief } from '@/lib/auth-types'
+import type { UserBrief } from '@/lib/auth-types'
 import { Geist_Mono as GeistMono } from 'next/font/google'
+import { dark } from '@clerk/themes'
 
 const geistMono = GeistMono({
   subsets: ['latin'],
@@ -37,8 +38,8 @@ import { useAIChat } from '@/components/ai-chat-provider'
 import { APP_VERSION } from '@/lib/version'
 import { PersonAvatar } from '@/components/people/person-avatar'
 import { Skeleton } from '@/components/ui/skeleton'
-import { OrganizationPlanInfo } from '@/components/common/organization-plan-info'
 import { PersonBrief } from '../types/person'
+import { Loading } from './ui/loading'
 interface NavItem {
   name: string
   href: string
@@ -51,7 +52,6 @@ interface SidebarProps {
   navigation?: NavItem[]
   serverSession?: UserBrief | null
   personData?: PersonBrief | null
-  organizationData?: OrganizationBrief | null
 }
 
 const iconMap = {
@@ -71,7 +71,6 @@ export default function Sidebar({
   navigation = [],
   serverSession,
   personData,
-  organizationData,
 }: SidebarProps) {
   const { user } = useUser()
   const pathname = usePathname()
@@ -84,9 +83,6 @@ export default function Sidebar({
 
   // Use the navigation passed from server-side filtering
   const filteredNavigation = navigation
-
-  const organizationName = organizationData?.name
-  const organizationId = organizationData?.id
 
   return (
     <>
@@ -154,15 +150,12 @@ export default function Sidebar({
                 )}
 
                 {/* Organization information - shown if organization exists */}
-                {organizationId && (
-                  <div className='mt-xs'>
-                    <OrganizationPlanInfo
-                      organizationName={organizationName}
-                      organizationId={organizationId}
-                      variant='vertical'
-                    />
-                  </div>
-                )}
+                {
+                  <OrganizationSwitcher
+                    appearance={dark}
+                    fallback={<Loading className='w-4 h-4' />}
+                  />
+                }
 
                 {/* Settings and Sign out links - always shown */}
                 <div className='flex items-center gap-md mt-sm'>
@@ -229,7 +222,7 @@ export default function Sidebar({
               })}
 
               {/* AI Chat Button - only show if user has an organization */}
-              {organizationId && (
+              {user?.publicMetadata?.managerOSOrganizationId && (
                 <button
                   onClick={() => {
                     setIsMobileMenuOpen(false)

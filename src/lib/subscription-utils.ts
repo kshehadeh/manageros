@@ -38,31 +38,83 @@ export async function getUserSubscriptionInfo(
   return data
 }
 
+/**
+ * Get all billing plans from Clerk
+ */
+export async function getAllClerkPlans(): Promise<ClerkCommercePlan[]> {
+  if (!process.env.CLERK_SECRET_KEY) {
+    return []
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.clerk.com/v1/billing/plans?limit=100`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
+        },
+      }
+    )
+
+    if (!response.ok) {
+      console.error('Failed to fetch Clerk plans:', response.status)
+      return []
+    }
+
+    const data = (await response.json()) as ClerkBillingPlansResponse
+    return data.data || []
+  } catch (error) {
+    console.error('Error fetching Clerk plans:', error)
+    return []
+  }
+}
+
+/**
+ * Get a specific plan by ID from Clerk
+ */
 export async function getSubscriptionInformation(
   planId: string
 ): Promise<ClerkCommercePlan | undefined> {
-  // fetch this information directly from clerk
-  const response = await fetch(
-    `https://api.clerk.com/v1/billing/plans?limit=100`,
-    {
-      headers: {
-        Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
-      },
-    }
+  const plans = await getAllClerkPlans()
+  return plans.find((plan: ClerkCommercePlan) => plan.id === planId)
+}
+
+/**
+ * Get the free plan from Clerk
+ * A free plan is defined as one with fee.amount === 0
+ * Falls back to the default plan if no free plan is found
+ */
+export async function getFreePlanFromClerk(): Promise<ClerkCommercePlan | null> {
+  const plans = await getAllClerkPlans()
+
+  if (plans.length === 0) {
+    return null
+  }
+
+  // First, try to find a plan with $0 fee
+  const freePlan = plans.find(
+    plan => plan.fee.amount === 0 || plan.fee.amount === 0.0
   )
-  const data = (await response.json()) as ClerkBillingPlansResponse
-  const plan = data.data.find((plan: ClerkCommercePlan) => plan.id === planId)
-  return plan
+
+  if (freePlan) {
+    return freePlan
+  }
+
+  // Fallback to the default plan if no free plan found
+  const defaultPlan = plans.find(plan => plan.is_default === true)
+
+  return defaultPlan || null
 }
 /**
  * Get plan limits based on plan name
  * Returns limit configuration for each plan type
+ * Fetches plan information from Clerk to determine if it's a free plan
  */
 export async function getPlanLimits(
   planName: string | null | undefined
 ): Promise<PlanLimits> {
   // Default to free tier limits if no plan specified
-  if (!planName || planName === 'free' || planName === 'Solo') {
+  if (!planName || planName === 'free') {
     return {
       maxPeople: null,
       maxInitiatives: null,
@@ -71,8 +123,12 @@ export async function getPlanLimits(
     }
   }
 
-  // Orchestrator plan has unlimited everything
-  if (planName === 'Team') {
+  // Fetch all plans from Clerk to check if this is a free plan
+  const plans = await getAllClerkPlans()
+  const plan = plans.find(p => p.name === planName)
+
+  // If plan is found and has $0 fee, treat as free plan with unlimited limits
+  if (plan && plan.fee.amount === 0) {
     return {
       maxPeople: null,
       maxInitiatives: null,
@@ -81,7 +137,8 @@ export async function getPlanLimits(
     }
   }
 
-  // Unknown plan - default to free tier limits
+  // For paid plans or unknown plans, default to unlimited
+  // In the future, plan limits could be stored in Clerk plan features or metadata
   return {
     maxPeople: null,
     maxInitiatives: null,

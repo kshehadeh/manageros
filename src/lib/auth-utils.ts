@@ -9,7 +9,14 @@ import {
 import { getUserFromClerk, syncUserDataToClerk } from './clerk-session-sync'
 import z from 'zod'
 import { checkIfManagerOrSelf } from '@/lib/utils/people-utils'
-import { getClerkOrganization } from './clerk-organization-utils'
+import {
+  getClerkOrganization,
+  getClerkOrganizationSubscription,
+} from './clerk-organization-utils'
+import {
+  getUserSubscriptionInfo,
+  getFreePlanFromClerk,
+} from './subscription-utils'
 import { combineName } from '@/lib/utils/name-utils'
 
 const SessionClaimsSchema = z.object({
@@ -285,10 +292,68 @@ export async function getCurrentUser(
       })
       if (!organization) {
         // If the organization doesn't exist in our database then we need to create it.
+        // Fetch subscription information from Clerk (similar to createOrganization action)
+        const orgSubscriptionInfo = await getClerkOrganizationSubscription(
+          clerkOrganization.id
+        )
+
+        // Determine plan name and subscription details from org subscription or user subscription
+        let subscriptionPlanId: string | null = null
+        let subscriptionPlanName: string | null = null
+        let subscriptionStatus: string = 'active'
+
+        if (
+          orgSubscriptionInfo &&
+          orgSubscriptionInfo.subscription_items &&
+          orgSubscriptionInfo.subscription_items.length > 0 &&
+          orgSubscriptionInfo.subscription_items[0]?.plan
+        ) {
+          // Organization has a subscription
+          subscriptionPlanId =
+            orgSubscriptionInfo.subscription_items[0].plan_id || null
+          subscriptionPlanName =
+            orgSubscriptionInfo.subscription_items[0].plan.name || null
+          subscriptionStatus = orgSubscriptionInfo.status || 'active'
+        } else {
+          // Fallback: check user subscription (for migration/backward compatibility)
+          const userSubscriptionInfo = await getUserSubscriptionInfo(
+            syncObject.clerkUserId || ''
+          )
+          if (
+            userSubscriptionInfo &&
+            userSubscriptionInfo.subscription_items &&
+            userSubscriptionInfo.subscription_items.length > 0 &&
+            userSubscriptionInfo.subscription_items[0]?.plan
+          ) {
+            subscriptionPlanId =
+              userSubscriptionInfo.subscription_items[0].plan_id || null
+            subscriptionPlanName =
+              userSubscriptionInfo.subscription_items[0].plan.name || null
+            subscriptionStatus = userSubscriptionInfo.status || 'active'
+          } else {
+            // No subscription - get free plan from Clerk
+            const freePlan = await getFreePlanFromClerk()
+            if (freePlan) {
+              subscriptionPlanId = freePlan.id
+              subscriptionPlanName = freePlan.name
+              subscriptionStatus = 'active'
+            } else {
+              // If we can't get the free plan from Clerk, set defaults
+              subscriptionPlanId = null
+              subscriptionPlanName = null
+              subscriptionStatus = 'active'
+            }
+          }
+        }
+
+        // Create the organization with subscription information
         organization = await prisma.organization.create({
           data: {
             clerkOrganizationId: clerkOrganization.id,
             billingUserId: syncObject.managerOSUserId,
+            subscriptionPlanId,
+            subscriptionPlanName,
+            subscriptionStatus,
           },
         })
       }

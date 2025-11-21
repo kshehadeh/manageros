@@ -103,6 +103,7 @@ export async function TodaysPrioritiesSectionServer() {
     // Fetch upcoming 1:1s
     const oneOnOnesResult = await getUpcomingOneOnOnesForPerson(
       user.managerOSPersonId,
+      user.managerOSOrganizationId,
       now,
       oneWeekFromNow,
       {
