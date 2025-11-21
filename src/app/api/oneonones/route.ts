@@ -111,6 +111,9 @@ export async function GET(request: NextRequest) {
     const whereConditions: Prisma.Sql[] = [
       // Only show one-on-ones where current user is manager or report
       Prisma.sql`(o."managerId" = ${currentPerson.id} OR o."reportId" = ${currentPerson.id})`,
+      // Ensure both manager and report belong to the current organization
+      Prisma.sql`manager."organizationId" = ${user.managerOSOrganizationId}`,
+      Prisma.sql`report."organizationId" = ${user.managerOSOrganizationId}`,
     ]
 
     // Apply search filter (immutable takes precedence)

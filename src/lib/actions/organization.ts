@@ -6,7 +6,10 @@ import { revalidatePath } from 'next/cache'
 import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 import { syncUserDataToClerk } from '@/lib/clerk-session-sync'
 import { auth } from '@clerk/nextjs/server'
-import { getUserSubscriptionInfo } from '../subscription-utils'
+import {
+  getUserSubscriptionInfo,
+  getFreePlanFromClerk,
+} from '../subscription-utils'
 import { PersonBrief } from '@/types/person'
 import type { UserBrief } from '@/lib/auth-types'
 import {
@@ -94,9 +97,18 @@ export async function createOrganization(formData: {
         userSubscriptionInfo.subscription_items[0].plan.name || null
       subscriptionStatus = userSubscriptionInfo.status || 'active'
     } else {
-      // No subscription - default to free plan
-      subscriptionPlanName = 'Solo'
-      subscriptionStatus = 'active'
+      // No subscription - get free plan from Clerk
+      const freePlan = await getFreePlanFromClerk()
+      if (freePlan) {
+        subscriptionPlanId = freePlan.id
+        subscriptionPlanName = freePlan.name
+        subscriptionStatus = 'active'
+      } else {
+        // If we can't get the free plan from Clerk, set defaults
+        subscriptionPlanId = null
+        subscriptionPlanName = null
+        subscriptionStatus = 'active'
+      }
     }
   }
 
@@ -1373,10 +1385,18 @@ export async function becomeOrganizationOwner() {
       subscriptionPlanName = plan.name || null
       subscriptionStatus = userSubscriptionInfo.status || 'active'
     } else {
-      // No paid subscription - allow free plan (Solo)
-      subscriptionPlanId = null
-      subscriptionPlanName = 'Solo'
-      subscriptionStatus = 'active'
+      // No paid subscription - get free plan from Clerk
+      const freePlan = await getFreePlanFromClerk()
+      if (freePlan) {
+        subscriptionPlanId = freePlan.id
+        subscriptionPlanName = freePlan.name
+        subscriptionStatus = 'active'
+      } else {
+        // If we can't get the free plan from Clerk, set defaults
+        subscriptionPlanId = null
+        subscriptionPlanName = null
+        subscriptionStatus = 'active'
+      }
     }
   }
 

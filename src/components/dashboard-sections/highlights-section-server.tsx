@@ -42,6 +42,7 @@ export async function HighlightsSectionServer() {
     // Count upcoming 1:1s (scheduled in the future)
     const upcomingOneOnOnes = await getUpcomingOneOnOnesForPerson(
       user.managerOSPersonId,
+      user.managerOSOrganizationId,
       now,
       oneWeekFromNow
     )

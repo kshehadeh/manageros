@@ -31,11 +31,15 @@ export async function OneOnOneMeetingsSection({
   }
 
   // Get 1:1 meetings where person is involved (as manager or report)
-  const oneOnOnesResult = await getOneOnOnesForPerson(personId, {
-    limit: 5,
-    includeManager: true,
-    includeReport: true,
-  })
+  const oneOnOnesResult = await getOneOnOnesForPerson(
+    personId,
+    organizationId,
+    {
+      limit: 5,
+      includeManager: true,
+      includeReport: true,
+    }
+  )
 
   // Type assertion: when includeManager and includeReport are true, they will be included
   const oneOnOnes = oneOnOnesResult as Array<

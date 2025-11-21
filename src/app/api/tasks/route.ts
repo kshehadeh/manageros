@@ -459,10 +459,8 @@ export async function GET(request: NextRequest) {
       LEFT JOIN "Person" a ON t."assigneeId" = a.id
       LEFT JOIN "Initiative" i ON t."initiativeId" = i.id
       WHERE (
-        -- Tasks created by the current user
-        t."createdById" = ${user.managerOSUserId || ''}
         -- Tasks associated with initiatives in the same organization
-        OR t."initiativeId" IN (
+        t."initiativeId" IN (
           SELECT id FROM "Initiative" WHERE "organizationId" = ${user.managerOSOrganizationId}
         )
         -- Tasks associated with objectives of initiatives in the same organization
@@ -470,6 +468,16 @@ export async function GET(request: NextRequest) {
           SELECT o.id FROM "Objective" o
           JOIN "Initiative" i ON o."initiativeId" = i.id
           WHERE i."organizationId" = ${user.managerOSOrganizationId}
+        )
+        -- Tasks created by the current user AND creator is in the current organization
+        -- (for tasks without initiatives/objectives)
+        OR (
+          t."createdById" = ${user.managerOSUserId || ''}
+          AND t."createdById" IN (
+            SELECT "userId" FROM "OrganizationMember" WHERE "organizationId" = ${user.managerOSOrganizationId}
+          )
+          AND t."initiativeId" IS NULL
+          AND t."objectiveId" IS NULL
         )
         ${
           user.managerOSPersonId

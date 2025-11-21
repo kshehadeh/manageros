@@ -87,6 +87,11 @@ export async function getOneOnOnes() {
         { managerId: currentPerson?.id || '' }, // participant1
         { reportId: currentPerson?.id || '' }, // participant2
       ],
+      // Ensure both manager and report belong to the current organization
+      AND: [
+        { manager: { organizationId: user.managerOSOrganizationId } },
+        { report: { organizationId: user.managerOSOrganizationId } },
+      ],
     },
     include: {
       manager: true,

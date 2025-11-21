@@ -77,11 +77,15 @@ export async function DashboardRecentOneOnOnesServerSection({
     }
 
     // Fetch recent one-on-ones where current user is involved (as manager or report)
-    const oneOnOnesResult = await getOneOnOnesForPerson(personId, {
-      limit: 10,
-      includeManager: true,
-      includeReport: true,
-    })
+    const oneOnOnesResult = await getOneOnOnesForPerson(
+      personId,
+      user.managerOSOrganizationId,
+      {
+        limit: 10,
+        includeManager: true,
+        includeReport: true,
+      }
+    )
 
     // Type assertion: when includeManager and includeReport are true, they will be included
     const oneOnOnes = oneOnOnesResult as Array<
