@@ -4,7 +4,6 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { ThemeProvider } from 'next-themes'
 import { ClerkProvider } from '@clerk/nextjs'
-import { dark } from '@clerk/themes'
 
 export default async function MarketingLayout({
   children,
@@ -18,7 +17,7 @@ export default async function MarketingLayout({
   }
 
   return (
-    <ClerkProvider appearance={dark}>
+    <ClerkProvider>
       <ThemeProvider
         attribute='class'
         defaultTheme='dark'

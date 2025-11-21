@@ -3,11 +3,10 @@ import { IndigoIcon } from '@/components/indigo-icon'
 import { ThemeProvider } from 'next-themes'
 import { Link } from '@/components/ui/link'
 import { ClerkProvider } from '@clerk/nextjs'
-import { dark } from '@clerk/themes'
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <ClerkProvider appearance={dark}>
+    <ClerkProvider>
       <ThemeProvider
         attribute='class'
         defaultTheme='dark'

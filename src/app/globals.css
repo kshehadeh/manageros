@@ -107,6 +107,29 @@
   --badge-neutral: var(--color-badge-neutral);
   --badge-neutral-foreground: var(--color-badge-neutral-foreground);
   --badge-neutral-text: var(--color-badge-neutral-text);
+
+  /** Clerk theme variables */
+  --clerk-color-primary: var(--color-primary);
+  --clerk-color-primary-foreground: var(--color-primary-foreground);
+  --clerk-color-foreground: var(--color-foreground);
+  --clerk-color-muted-foreground: var(--color-muted-foreground);
+  --clerk-color-muted: var(--color-muted);
+  --clerk-color-background: var(--color-background);
+  --clerk-color-input-foreground: var(--color-foreground);
+  --clerk-color-input: var(--color-input);
+  --clerk-color-border: var(--color-border);
+  --clerk-color-ring: var(--color-ring);
+  --clerk-color-danger: var(--color-destructive);
+  --clerk-color-success: var(--color-badge-success);
+  --clerk-color-warning: var(--color-badge-warning);
+  --clerk-color-neutral: var(--color-muted);
+  --clerk-color-shadow: hsl(0 0% 0% / 0.1);
+  --clerk-color-modal-backdrop: hsl(0 0% 0% / 0.5);
+  --clerk-font-family: var(--font-family-sans);
+  --clerk-font-family-buttons: var(--font-family-mono);
+  --clerk-font-size: var(--font-size-sm);
+  --clerk-border-radius: var(--radius-md);
+  --clerk-spacing: var(--spacing-xl);
 }
 
 .dark {
@@ -174,6 +197,29 @@
   --badge-neutral: var(--color-badge-neutral);
   --badge-neutral-foreground: var(--color-badge-neutral-foreground);
   --badge-neutral-text: var(--color-badge-neutral-text);
+
+  /** Clerk theme variables for dark theme */
+  --clerk-color-primary: var(--color-primary);
+  --clerk-color-primary-foreground: var(--color-primary-foreground);
+  --clerk-color-foreground: var(--color-foreground);
+  --clerk-color-muted-foreground: var(--color-muted-foreground);
+  --clerk-color-muted: var(--color-muted);
+  --clerk-color-background: var(--color-background);
+  --clerk-color-input-foreground: var(--color-foreground);
+  --clerk-color-input: var(--color-input);
+  --clerk-color-border: var(--color-border);
+  --clerk-color-ring: var(--color-ring);
+  --clerk-color-danger: var(--color-destructive);
+  --clerk-color-success: var(--color-badge-success);
+  --clerk-color-warning: var(--color-badge-warning);
+  --clerk-color-neutral: var(--color-foreground);
+  --clerk-color-shadow: hsl(0 0% 0% / 0.3);
+  --clerk-color-modal-backdrop: hsl(0 0% 0% / 0.7);
+  --clerk-font-family: var(--font-family-sans);
+  --clerk-font-family-buttons: var(--font-family-mono);
+  --clerk-font-size: var(--font-size-sm);
+  --clerk-border-radius: var(--radius-sm);
+  --clerk-spacing: var(--spacing-lg);
 }
 
 .rdp-root {
@@ -839,14 +885,19 @@ input[type='time']::-webkit-calendar-picker-indicator {
   }
 }
 
-.cl-logoBox {
-  display: none;
+.cl-navbar {
+  background: var(--color-card) !important;
+  max-width: 100% !important;
 }
 
-.cl-card {
-  background: var(--color-card) !important;
+.cl-organizationSwitcherTrigger {
+  padding: 0;
 }
 
-.cl-footer {
-  background: var(--color-card) !important;
+.cl-organizationPreviewMainIdentifier {
+  font-size: var(--font-size-sm) !important;
+}
+
+.cl-organizationPreviewSecondaryIdentifier {
+  font-size: var(--font-size-sm) !important;
 }

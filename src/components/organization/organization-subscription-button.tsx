@@ -1,23 +1,12 @@
 'use client'
 
-import { SignedIn } from '@clerk/nextjs'
-import { SubscriptionDetailsButton } from '@clerk/nextjs/experimental'
-import { Button } from '@/components/ui/button'
+import { OrganizationProfile, SignedIn } from '@clerk/nextjs'
 import { dark } from '@clerk/themes'
 
 export function OrganizationSubscriptionButton() {
   return (
     <SignedIn>
-      <SubscriptionDetailsButton
-        for={'organization'}
-        subscriptionDetailsProps={{
-          appearance: dark,
-        }}
-      >
-        <Button variant='outline' size='sm'>
-          Manage Subscription
-        </Button>
-      </SubscriptionDetailsButton>
+      <OrganizationProfile appearance={dark} />
     </SignedIn>
   )
 }

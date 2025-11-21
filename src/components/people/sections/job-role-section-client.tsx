@@ -62,7 +62,7 @@ export function JobRoleSectionClient({
           <div className='p-2'>
             <div className='text-sm font-medium'>{currentJobRole.title}</div>
             <div className='text-xs text-muted-foreground mt-1'>
-              {currentJobRole.level.name} • {currentJobRole.domain.name}
+              {currentJobRole.level?.name} • {currentJobRole.domain?.name}
             </div>
           </div>
         </div>
