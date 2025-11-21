@@ -1,5 +1,16 @@
 # Changelog
 
+# [1.8.0](https://github.com/kshehadeh/manageros/compare/v1.7.2...v1.8.0) (2025-11-21)
+
+### Bug Fixes
+
+- **build:** Fix build error ([480366a](https://github.com/kshehadeh/manageros/commit/480366ab372df450bb2a0568e4a2897d50ecb33d))
+- **permissions:** Made it impossible to see other org tasks and oneonones ([bcb01a2](https://github.com/kshehadeh/manageros/commit/bcb01a25489afc75d965b82c0b28ed12bfaa5672))
+
+### Features
+
+- **organizations:** Use the clerk ui for organization management ([71661d0](https://github.com/kshehadeh/manageros/commit/71661d09b626aa282e5c404283e20c55c9d65355))
+
 ## [1.7.2](https://github.com/kshehadeh/manageros/compare/v1.7.1...v1.7.2) (2025-11-20)
 
 ### Bug Fixes
