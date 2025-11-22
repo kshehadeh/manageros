@@ -149,11 +149,8 @@ export async function getPlanLimits(
 
 /**
  * Get subscription information for an organization
- * Fetches from Clerk organization billing API if available, including:
- * - Subscription plan details
- * - Billing status
- * - Payer (billing user) information
- * Falls back to stored data if Clerk API is unavailable
+ * Fetches from Clerk organization billing API - Clerk is the source of truth
+ * Returns subscription plan details, billing status, and payer (billing user) information
  */
 export async function getOrganizationSubscription(
   organizationId: string
@@ -161,84 +158,54 @@ export async function getOrganizationSubscription(
   const organization = await prisma.organization.findUnique({
     where: { id: organizationId },
     select: {
-      billingUserId: true,
       clerkOrganizationId: true,
-      subscriptionPlanId: true,
-      subscriptionPlanName: true,
-      subscriptionStatus: true,
     },
   })
 
-  if (!organization) {
+  if (!organization || !organization.clerkOrganizationId) {
     return null
   }
 
-  // If organization has a Clerk organization ID, fetch subscription from Clerk
-  if (organization.clerkOrganizationId) {
-    try {
-      const clerkSubscription = await getClerkOrganizationSubscription(
-        organization.clerkOrganizationId
-      )
+  try {
+    const clerkSubscription = await getClerkOrganizationSubscription(
+      organization.clerkOrganizationId
+    )
 
-      if (
-        clerkSubscription &&
-        clerkSubscription.subscription_items &&
-        clerkSubscription.subscription_items.length > 0 &&
-        clerkSubscription.subscription_items[0]?.plan
-      ) {
-        const firstItem = clerkSubscription.subscription_items[0]
-        const plan = firstItem.plan
+    if (
+      clerkSubscription &&
+      clerkSubscription.subscription_items &&
+      clerkSubscription.subscription_items.length > 0 &&
+      clerkSubscription.subscription_items[0]?.plan
+    ) {
+      const firstItem = clerkSubscription.subscription_items[0]
+      const plan = firstItem.plan
 
-        // Get billing user ID from Clerk's payer information
-        let billingUserId = organization.billingUserId
-        if (firstItem.payer?.user_id) {
-          // Try to find the user in our database by Clerk user ID
-          const billingUser = await prisma.user.findUnique({
-            where: { clerkUserId: firstItem.payer.user_id },
-            select: { id: true },
-          })
-          if (billingUser) {
-            billingUserId = billingUser.id
-          }
-        }
-
-        // Update stored subscription info from Clerk (async, don't wait)
-        prisma.organization
-          .update({
-            where: { id: organizationId },
-            data: {
-              billingUserId: billingUserId,
-              subscriptionPlanId: plan?.id || null,
-              subscriptionPlanName: plan?.name || null,
-              subscriptionStatus: clerkSubscription.status || 'active',
-            },
-          })
-          .catch(error => {
-            console.error(
-              'Failed to update organization subscription from Clerk:',
-              error
-            )
-          })
-
-        return {
-          billingUserId: billingUserId,
-          subscriptionPlanId: plan?.id || null,
-          subscriptionPlanName: plan?.name || null,
-          subscriptionStatus: clerkSubscription.status || 'active',
+      // Get billing user ID from Clerk's payer information
+      let billingUserId: string | null = null
+      if (firstItem.payer?.user_id) {
+        // Find the user in our database by Clerk user ID
+        const billingUser = await prisma.user.findUnique({
+          where: { clerkUserId: firstItem.payer.user_id },
+          select: { id: true },
+        })
+        if (billingUser) {
+          billingUserId = billingUser.id
         }
       }
-    } catch (error) {
-      console.error('Error fetching Clerk organization subscription:', error)
-      // Fall through to return stored data
-    }
-  }
 
-  // Fallback to stored subscription data
-  return {
-    billingUserId: organization.billingUserId,
-    subscriptionPlanId: organization.subscriptionPlanId,
-    subscriptionPlanName: organization.subscriptionPlanName,
-    subscriptionStatus: organization.subscriptionStatus,
+      return {
+        billingUserId: billingUserId,
+        subscriptionPlanId: plan?.id || null,
+        subscriptionPlanName: plan?.name || null,
+        subscriptionStatus: clerkSubscription.status || 'active',
+      }
+    }
+
+    // No subscription items found - return null
+    return null
+  } catch (error) {
+    console.error('Error fetching Clerk organization subscription:', error)
+    return null
   }
 }
 

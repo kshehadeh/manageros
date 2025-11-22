@@ -482,6 +482,36 @@ export async function getClerkOrganizationMembersCount(
  * Map Clerk role to ManagerOS role
  * OWNER is determined by checking if user is the billing user
  */
+/**
+ * Get the billing user's Clerk user ID from an organization's subscription
+ * Returns null if no subscription or payer found
+ */
+export async function getBillingUserClerkId(
+  clerkOrgId: string
+): Promise<string | null> {
+  try {
+    const subscription = await getClerkOrganizationSubscription(clerkOrgId)
+    if (subscription?.subscription_items?.[0]?.payer?.user_id) {
+      return subscription.subscription_items[0].payer.user_id
+    }
+    return null
+  } catch (error) {
+    console.error('Error getting billing user from Clerk:', error)
+    return null
+  }
+}
+
+/**
+ * Check if a Clerk user ID is the billing user for an organization
+ */
+export async function isBillingUser(
+  clerkOrgId: string,
+  clerkUserId: string
+): Promise<boolean> {
+  const billingUserClerkId = await getBillingUserClerkId(clerkOrgId)
+  return billingUserClerkId === clerkUserId
+}
+
 export async function mapClerkRoleToManagerOSRole(
   clerkRole: 'org:admin' | 'org:member',
   isBillingUser: boolean = false

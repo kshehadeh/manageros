@@ -22,32 +22,35 @@ model Organization {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Subscription fields
-  billingUserId       String?  // Reference to User who owns the subscription
-  subscriptionPlanId  String?  // Clerk plan ID (e.g., "plan_xxxxx" or "free")
-  subscriptionPlanName String? // Human-readable plan name (e.g., "Solo", "Orchestrator")
-  subscriptionStatus  String?  // Active subscription status from Clerk
-  clerkOrganizationId String   @unique // Clerk organization ID (required) - name and slug are stored in Clerk
+  // @deprecated - Billing user is now determined from Clerk subscription payer information. This field is kept for backward compatibility but should not be used. Use Clerk organization subscription to get payer information.
+  billingUserId        String?
+  // @deprecated - Subscription plan ID is now stored in Clerk as the source of truth. This field is kept for backward compatibility but should not be used. Use Clerk organization subscription API instead.
+  subscriptionPlanId   String?
+  // @deprecated - Subscription plan name is now stored in Clerk as the source of truth. This field is kept for backward compatibility but should not be used. Use Clerk organization subscription API instead.
+  subscriptionPlanName String?
+  // @deprecated - Subscription status is now stored in Clerk as the source of truth. This field is kept for backward compatibility but should not be used. Use Clerk organization subscription API instead.
+  subscriptionStatus   String?
+  clerkOrganizationId  String  @unique // Clerk organization ID (required) - name, slug, and subscription info are stored in Clerk
 
   // Relationships
-  billingUser         User?    @relation("BillingUser", fields: [billingUserId], references: [id])
-  members             OrganizationMember[]
-  teams               Team[]
-  people              Person[]
-  initiatives         Initiative[]
-  invitations         OrganizationInvitation[]
-  meetings            Meeting[]
-  meetingInstances    MeetingInstance[]
-  entityLinks         EntityLink[]
-  jobRoles            JobRole[]
-  levels              JobLevel[]
-  domains             JobDomain[]
-  notifications       Notification[]
-  reportInstances     ReportInstance[]
-  cronJobExecutions   CronJobExecution[]
-  notes               Note[]
-  fileAttachments     FileAttachment[]
-  githubOrgs          OrganizationGithubOrg[]
+  billingUser       User?                    @relation("BillingUser", fields: [billingUserId], references: [id])
+  members           OrganizationMember[]
+  teams             Team[]
+  people            Person[]
+  initiatives       Initiative[]
+  invitations       OrganizationInvitation[]
+  meetings          Meeting[]
+  meetingInstances  MeetingInstance[]
+  entityLinks       EntityLink[]
+  jobRoles          JobRole[]
+  levels            JobLevel[]
+  domains           JobDomain[]
+  notifications     Notification[]
+  reportInstances   ReportInstance[]
+  cronJobExecutions CronJobExecution[]
+  notes             Note[]
+  fileAttachments   FileAttachment[]
+  githubOrgs        OrganizationGithubOrg[]
 
   @@index([billingUserId])
   @@index([subscriptionPlanId])
@@ -91,7 +94,7 @@ model OrganizationMember {
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  role           String       @default("USER") // ADMIN, OWNER, or USER - OWNER has admin rights and is the billable user
+  role           String       @default("USER") // @deprecated - Role is now stored in Clerk as the source of truth. This field is kept for backward compatibility but should not be used. Use Clerk organization membership role instead.
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 

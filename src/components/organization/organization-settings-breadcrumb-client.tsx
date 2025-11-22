@@ -9,9 +9,7 @@ interface OrganizationSettingsBreadcrumbClientProps {
 export function OrganizationSettingsBreadcrumbClient({
   children,
 }: OrganizationSettingsBreadcrumbClientProps) {
-  usePageBreadcrumbs([
-    { name: 'Organization Settings', href: '/organization/settings' },
-  ])
+  usePageBreadcrumbs([{ name: 'Manage Users', href: '/organization/settings' }])
 
   return <>{children}</>
 }

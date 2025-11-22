@@ -10,7 +10,7 @@ export function JobRolesBreadcrumbClient({
   children,
 }: JobRolesBreadcrumbClientProps) {
   usePageBreadcrumbs([
-    { name: 'Organization Settings', href: '/organization/settings' },
+    { name: 'Manage Users', href: '/organization/settings' },
     { name: 'Job Roles', href: '/organization/job-roles' },
   ])
 

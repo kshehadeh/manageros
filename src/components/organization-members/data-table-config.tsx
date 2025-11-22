@@ -1,15 +1,8 @@
 'use client'
 
 import React from 'react'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { MoreHorizontal, Shield, User, Trash2, Calendar } from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { Shield, User, Calendar } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -17,11 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { updateUserRole } from '@/lib/actions/organization'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useOrganizationMembersTableSettings } from '@/hooks/use-organization-members-table-settings'
 import type { DataTableConfig } from '@/components/common/generic-data-table'
-import { toast } from 'sonner'
 
 interface OrganizationMember {
   id: string
@@ -73,11 +64,11 @@ export const organizationMembersDataTableConfig: DataTableConfig<
   createColumns: ({
     onButtonClick: _onButtonClick,
     visibleColumns,
-    refetch,
-    applyOptimisticUpdate,
-    removeOptimisticUpdate,
-    currentUserId,
-    onDeleteClick,
+    refetch: _refetch,
+    applyOptimisticUpdate: _applyOptimisticUpdate,
+    removeOptimisticUpdate: _removeOptimisticUpdate,
+    currentUserId: _currentUserId,
+    onDeleteClick: _onDeleteClick,
   }) => {
     const getRoleBadge = (role: string) => {
       if (role === 'OWNER') {
@@ -251,111 +242,6 @@ export const organizationMembersDataTableConfig: DataTableConfig<
         },
         meta: {
           hidden: visibleColumns?.includes('role') === false,
-        },
-      },
-      {
-        id: 'actions',
-        header: '',
-        size: 50,
-        minSize: 50,
-        maxSize: 50,
-        cell: ({ row }) => {
-          const member = row.original
-          // Get currentUserId from columnProps (passed via createColumns params)
-          // If it's the current user, they can't change their own role or remove themselves
-          const hasActions = currentUserId ? member.id !== currentUserId : true
-
-          if (!hasActions) {
-            return <div className='w-[50px]'></div>
-          }
-
-          const handleRoleChange = async (
-            userId: string,
-            newRole: 'ADMIN' | 'OWNER' | 'USER'
-          ) => {
-            try {
-              applyOptimisticUpdate(userId, { role: newRole })
-              await updateUserRole(userId, newRole)
-              toast.success(`User role updated to ${newRole}`)
-              refetch?.()
-            } catch (error) {
-              toast.error(
-                error instanceof Error ? error.message : 'Failed to update role'
-              )
-              removeOptimisticUpdate(userId)
-            }
-          }
-
-          const handleRemoveUserClick = () => {
-            if (onDeleteClick && typeof onDeleteClick === 'function') {
-              onDeleteClick(member.id, member.name)
-            }
-          }
-
-          return (
-            <div onClick={e => e.stopPropagation()}>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant='ghost'
-                    size='sm'
-                    onClick={e => e.stopPropagation()}
-                  >
-                    <MoreHorizontal className='h-4 w-4' />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align='end'
-                  onClick={e => e.stopPropagation()}
-                >
-                  {member.role === 'USER' ? (
-                    <>
-                      <DropdownMenuItem
-                        onClick={e => {
-                          e.stopPropagation()
-                          handleRoleChange(member.id, 'ADMIN')
-                        }}
-                      >
-                        <Shield className='h-4 w-4 mr-2' />
-                        Make Admin
-                      </DropdownMenuItem>
-                      {/* Note: OWNER role assignment requires paid subscription and ownership transfer is not yet implemented */}
-                    </>
-                  ) : member.role === 'OWNER' ? (
-                    <DropdownMenuItem disabled>
-                      <Shield className='h-4 w-4 mr-2' />
-                      Owner (Cannot change - billable user)
-                    </DropdownMenuItem>
-                  ) : (
-                    <DropdownMenuItem
-                      onClick={e => {
-                        e.stopPropagation()
-                        handleRoleChange(member.id, 'USER')
-                      }}
-                    >
-                      <User className='h-4 w-4 mr-2' />
-                      Make User
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem
-                    onClick={e => {
-                      e.stopPropagation()
-                      handleRemoveUserClick()
-                    }}
-                    className='text-red-600 focus:text-red-600'
-                  >
-                    <Trash2 className='h-4 w-4 mr-2' />
-                    Remove from Organization
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )
-        },
-        enableSorting: false,
-        enableGrouping: false,
-        meta: {
-          hidden: visibleColumns?.includes('actions') === false,
         },
       },
     ]

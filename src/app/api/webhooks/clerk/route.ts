@@ -299,14 +299,12 @@ export async function POST(req: Request) {
     eventType === 'subscription.created' ||
     eventType === 'subscription.updated'
   ) {
-    const { user_id, organization_id, plan_id, plan_name, status } =
-      evt.data as {
-        user_id?: string
-        organization_id?: string
-        plan_id?: string
-        plan_name?: string
-        status?: string
-      }
+    const { user_id, organization_id, plan_name, status } = evt.data as {
+      user_id?: string
+      organization_id?: string
+      plan_name?: string
+      status?: string
+    }
 
     try {
       let organization = null
@@ -325,28 +323,30 @@ export async function POST(req: Request) {
         }
       } else if (user_id) {
         // Priority 2: Fallback to user-based lookup (for backward compatibility)
+        // Note: This is deprecated - subscriptions should have organization_id
+        // We'll try to find organization by checking if user is in any Clerk org
         const user = await prisma.user.findUnique({
           where: { clerkUserId: user_id },
+          select: { id: true, clerkUserId: true },
         })
 
-        if (!user) {
+        if (!user || !user.clerkUserId) {
           console.warn(
             `User not found for Clerk user ID ${user_id} in subscription webhook`
           )
           return new Response('User not found', { status: 404 })
         }
 
-        // Find organization where this user is the billing user
-        organization = await prisma.organization.findFirst({
-          where: { billingUserId: user.id },
-        })
-
-        if (!organization) {
-          console.warn(
-            `No organization found with billingUserId ${user.id} for subscription webhook`
-          )
-          return new Response('Organization not found', { status: 404 })
-        }
+        // Try to find organization by checking Clerk memberships
+        // This is a fallback - ideally webhooks should include organization_id
+        console.warn(
+          `Subscription webhook missing organization_id, using deprecated user-based lookup for user ${user_id}`
+        )
+        // We can't easily find the org without organization_id, so return error
+        return new Response(
+          'Organization ID required in subscription webhook',
+          { status: 400 }
+        )
       } else {
         return new Response(
           'Missing user_id or organization_id in subscription webhook',
@@ -354,17 +354,13 @@ export async function POST(req: Request) {
         )
       }
 
-      // Update organization subscription information
-      await prisma.organization.update({
-        where: { id: organization.id },
-        data: {
-          subscriptionPlanId: plan_id || null,
-          subscriptionPlanName: plan_name || null,
-          subscriptionStatus: status || 'active',
-        },
-      })
+      // Subscription information is stored in Clerk, not in our database
+      // Just verify the organization exists - no database update needed
+      console.log(
+        `Subscription updated in Clerk for organization ${organization.id}: plan=${plan_name}, status=${status}`
+      )
 
-      return new Response('Subscription updated successfully', { status: 200 })
+      return new Response('Subscription webhook received', { status: 200 })
     } catch (error) {
       console.error('Error updating subscription:', error)
       return new Response('Error updating subscription', { status: 500 })
@@ -397,28 +393,15 @@ export async function POST(req: Request) {
         }
       } else if (user_id) {
         // Priority 2: Fallback to user-based lookup (for backward compatibility)
-        const user = await prisma.user.findUnique({
-          where: { clerkUserId: user_id },
-        })
-
-        if (!user) {
-          console.warn(
-            `User not found for Clerk user ID ${user_id} in subscription cancellation webhook`
-          )
-          return new Response('User not found', { status: 404 })
-        }
-
-        // Find organization where this user is the billing user
-        organization = await prisma.organization.findFirst({
-          where: { billingUserId: user.id },
-        })
-
-        if (!organization) {
-          console.warn(
-            `No organization found with billingUserId ${user.id} for subscription cancellation webhook`
-          )
-          return new Response('Organization not found', { status: 404 })
-        }
+        // Note: This is deprecated - subscriptions should have organization_id
+        console.warn(
+          `Subscription cancellation webhook missing organization_id, using deprecated user-based lookup for user ${user_id}`
+        )
+        // We can't easily find the org without organization_id, so return error
+        return new Response(
+          'Organization ID required in subscription cancellation webhook',
+          { status: 400 }
+        )
       } else {
         return new Response(
           'Missing user_id or organization_id in subscription cancellation webhook',
@@ -426,15 +409,15 @@ export async function POST(req: Request) {
         )
       }
 
-      // Update organization subscription status to canceled
-      await prisma.organization.update({
-        where: { id: organization.id },
-        data: {
-          subscriptionStatus: 'canceled',
-        },
-      })
+      // Subscription information is stored in Clerk, not in our database
+      // Just verify the organization exists - no database update needed
+      console.log(
+        `Subscription canceled in Clerk for organization ${organization.id}`
+      )
 
-      return new Response('Subscription canceled successfully', { status: 200 })
+      return new Response('Subscription cancellation webhook received', {
+        status: 200,
+      })
     } catch (error) {
       console.error('Error canceling subscription:', error)
       return new Response('Error canceling subscription', { status: 500 })

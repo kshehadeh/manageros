@@ -6,17 +6,12 @@ import { revalidatePath } from 'next/cache'
 import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 import { syncUserDataToClerk } from '@/lib/clerk-session-sync'
 import { auth } from '@clerk/nextjs/server'
-import {
-  getUserSubscriptionInfo,
-  getFreePlanFromClerk,
-} from '../subscription-utils'
 import { PersonBrief } from '@/types/person'
 import type { UserBrief } from '@/lib/auth-types'
 import {
   createClerkOrganization,
   addUserToClerkOrganization,
   mapManagerOSRoleToClerkRole,
-  getClerkOrganizationSubscription,
   getClerkOrganization,
   getClerkOrganizationMembers,
   mapClerkRoleToManagerOSRole,
@@ -24,6 +19,7 @@ import {
   updateUserRoleInClerkOrganization,
   removeUserFromClerkOrganization,
   getClerkOrganizationMembersCount,
+  isBillingUser as isBillingUserFromClerk,
 } from '../clerk-organization-utils'
 export async function createOrganization(formData: {
   name: string
@@ -60,69 +56,14 @@ export async function createOrganization(formData: {
     )
   }
 
-  // Get subscription from Clerk organization (may be null initially)
-  const orgSubscriptionInfo = await getClerkOrganizationSubscription(clerkOrgId)
-
-  // Determine plan name and subscription details from org subscription or user subscription
-  let subscriptionPlanId: string | null = null
-  let subscriptionPlanName: string | null = null
-  let subscriptionStatus: string = 'active'
-
-  if (
-    orgSubscriptionInfo &&
-    orgSubscriptionInfo.subscription_items &&
-    orgSubscriptionInfo.subscription_items.length > 0 &&
-    orgSubscriptionInfo.subscription_items[0]?.plan
-  ) {
-    // Organization has a subscription
-    subscriptionPlanId =
-      orgSubscriptionInfo.subscription_items[0].plan_id || null
-    subscriptionPlanName =
-      orgSubscriptionInfo.subscription_items[0].plan.name || null
-    subscriptionStatus = orgSubscriptionInfo.status || 'active'
-  } else {
-    // Fallback: check user subscription (for migration/backward compatibility)
-    const userSubscriptionInfo = await getUserSubscriptionInfo(
-      user.clerkUserId || ''
-    )
-    if (
-      userSubscriptionInfo &&
-      userSubscriptionInfo.subscription_items &&
-      userSubscriptionInfo.subscription_items.length > 0 &&
-      userSubscriptionInfo.subscription_items[0]?.plan
-    ) {
-      subscriptionPlanId =
-        userSubscriptionInfo.subscription_items[0].plan_id || null
-      subscriptionPlanName =
-        userSubscriptionInfo.subscription_items[0].plan.name || null
-      subscriptionStatus = userSubscriptionInfo.status || 'active'
-    } else {
-      // No subscription - get free plan from Clerk
-      const freePlan = await getFreePlanFromClerk()
-      if (freePlan) {
-        subscriptionPlanId = freePlan.id
-        subscriptionPlanName = freePlan.name
-        subscriptionStatus = 'active'
-      } else {
-        // If we can't get the free plan from Clerk, set defaults
-        subscriptionPlanId = null
-        subscriptionPlanName = null
-        subscriptionStatus = 'active'
-      }
-    }
-  }
-
   // Create organization in a transaction
+  // Subscription information is stored in Clerk, not in our database
   const result = await prisma.$transaction(async tx => {
-    // Create organization with subscription information
-    // Name and slug are stored in Clerk, not in our database
+    // Create organization - subscription info is stored in Clerk
+    // Name, slug, and subscription details are stored in Clerk, not in our database
     const organization = await tx.organization.create({
       data: {
-        billingUserId: user.managerOSUserId || '', // Set creating user as billing user (for reference)
         clerkOrganizationId: clerkOrgId,
-        subscriptionPlanId,
-        subscriptionPlanName,
-        subscriptionStatus,
       },
     })
 
@@ -1063,7 +1004,7 @@ export async function getOrganizationMembers() {
     return []
   }
 
-  // Get members from Clerk API
+  // Get members from Clerk API - this is the source of truth for roles
   const clerkMembers = await getClerkOrganizationMembers(
     organization.clerkOrganizationId
   )
@@ -1071,7 +1012,7 @@ export async function getOrganizationMembers() {
   // Get all Clerk user IDs
   const clerkUserIds = clerkMembers.map(m => m.public_user_data.user_id)
 
-  // Fetch corresponding ManagerOS users
+  // Fetch corresponding ManagerOS users to merge with Clerk data
   const users = await prisma.user.findMany({
     where: {
       clerkUserId: {
@@ -1101,41 +1042,58 @@ export async function getOrganizationMembers() {
     },
   })
 
-  // Create a map of clerkUserId -> user
+  // Create a map of clerkUserId -> user for quick lookup
   const userMap = new Map(users.map(u => [u.clerkUserId || '', u]))
 
   // Transform Clerk members to ManagerOS format
+  // Always use Clerk role as the source of truth
   const memberPromises = clerkMembers.map(async clerkMember => {
     const clerkUserId = clerkMember.public_user_data.user_id
     const managerOSUser = userMap.get(clerkUserId)
 
-    if (!managerOSUser) {
-      // User exists in Clerk but not in ManagerOS DB yet
-      return null
-    }
+    // Determine if user is billing user (OWNER) by checking Clerk subscription payer
+    const isBillingUser = await isBillingUserFromClerk(
+      organization.clerkOrganizationId,
+      clerkUserId
+    )
 
-    // Determine if user is billing user (OWNER)
-    const isBillingUser = organization.billingUserId === managerOSUser.id
-
-    // Map Clerk role to ManagerOS role
+    // Map Clerk role to ManagerOS role - Clerk is the source of truth
     const managerOSRole = await mapClerkRoleToManagerOSRole(
       clerkMember.role,
       isBillingUser
     )
 
+    // If user exists in ManagerOS, merge Clerk role with database data
+    if (managerOSUser) {
+      return {
+        id: managerOSUser.id,
+        name: managerOSUser.name,
+        email: managerOSUser.email,
+        role: managerOSRole, // Role from Clerk, not database
+        createdAt: managerOSUser.createdAt,
+        person: managerOSUser.person,
+      }
+    }
+
+    // User exists in Clerk but not in ManagerOS DB yet
+    // Return basic info from Clerk with role from Clerk
+    const clerkName =
+      clerkMember.public_user_data.first_name ||
+      clerkMember.public_user_data.last_name
+        ? `${clerkMember.public_user_data.first_name || ''} ${clerkMember.public_user_data.last_name || ''}`.trim()
+        : clerkMember.public_user_data.identifier
+
     return {
-      id: managerOSUser.id,
-      name: managerOSUser.name,
-      email: managerOSUser.email,
-      role: managerOSRole,
-      createdAt: managerOSUser.createdAt,
-      person: managerOSUser.person,
+      id: clerkUserId, // Use Clerk user ID as temporary ID
+      name: clerkName || 'Unknown',
+      email: clerkMember.public_user_data.identifier,
+      role: managerOSRole, // Role from Clerk
+      createdAt: new Date(clerkMember.created_at * 1000), // Convert Clerk timestamp
+      person: null, // No person record yet
     }
   })
   const memberResults = await Promise.all(memberPromises)
-  const members = memberResults
-    .filter((m): m is NonNullable<typeof m> => m !== null)
-    .sort((a, b) => a.name.localeCompare(b.name))
+  const members = memberResults.sort((a, b) => a.name.localeCompare(b.name))
 
   return members
 }
@@ -1199,16 +1157,26 @@ export async function updateUserRole(
     throw new Error('User not found or access denied')
   }
 
-  // Get organization with billing user info
-  const orgWithBilling = await prisma.organization.findUnique({
+  // Get organization
+  const org = await prisma.organization.findUnique({
     where: { id: currentUser.managerOSOrganizationId },
     select: {
-      billingUserId: true,
+      clerkOrganizationId: true,
     },
   })
 
+  if (!org?.clerkOrganizationId) {
+    throw new Error('Organization not found')
+  }
+
   // Determine current role from Clerk membership
-  const isCurrentBillingUser = orgWithBilling?.billingUserId === userId
+  // Check if target user is billing user by checking Clerk subscription
+  const isCurrentBillingUser = targetUser.clerkUserId
+    ? await isBillingUserFromClerk(
+        org.clerkOrganizationId,
+        targetUser.clerkUserId
+      )
+    : false
   const currentRole = await mapClerkRoleToManagerOSRole(
     targetClerkMembership.role,
     isCurrentBillingUser
@@ -1238,19 +1206,13 @@ export async function updateUserRole(
     const clerkMembers = await getClerkOrganizationMembers(
       organization.clerkOrganizationId
     )
-    const clerkUserIds = clerkMembers.map(m => m.public_user_data.user_id)
-    const users = await prisma.user.findMany({
-      where: {
-        clerkUserId: { in: clerkUserIds },
-      },
-      select: { id: true, clerkUserId: true },
-    })
-    const userMap = new Map(users.map(u => [u.clerkUserId || '', u.id]))
 
     const adminOrOwnerPromises = clerkMembers.map(async m => {
       const memberUserId = m.public_user_data.user_id
-      const memberUserDbId = userMap.get(memberUserId)
-      const isBillingUser = orgWithBilling?.billingUserId === memberUserDbId
+      const isBillingUser = await isBillingUserFromClerk(
+        organization.clerkOrganizationId,
+        memberUserId
+      )
       const role = await mapClerkRoleToManagerOSRole(m.role, isBillingUser)
       return role === 'ADMIN' || role === 'OWNER'
     })
@@ -1343,63 +1305,6 @@ export async function becomeOrganizationOwner() {
     )
   }
 
-  // Get subscription from Clerk organization (preferred) or user subscription (fallback)
-  const { getClerkOrganizationSubscription } = await import(
-    '../clerk-organization-utils'
-  )
-  const orgSubscriptionInfo = clerkOrgId
-    ? await getClerkOrganizationSubscription(clerkOrgId)
-    : null
-
-  // Determine plan name and subscription details
-  // Allow both paid subscriptions and free plans
-  let subscriptionPlanId: string | null = null
-  let subscriptionPlanName: string | null = null
-  let subscriptionStatus: string = 'active'
-
-  if (
-    orgSubscriptionInfo &&
-    orgSubscriptionInfo.subscription_items &&
-    orgSubscriptionInfo.subscription_items.length > 0 &&
-    orgSubscriptionInfo.subscription_items[0]?.plan
-  ) {
-    // Organization has a subscription
-    const plan = orgSubscriptionInfo.subscription_items[0].plan
-    subscriptionPlanId = plan.id || null
-    subscriptionPlanName = plan.name || null
-    subscriptionStatus = orgSubscriptionInfo.status || 'active'
-  } else {
-    // Fallback: check user subscription (for backward compatibility)
-    const userSubscriptionInfo = await getUserSubscriptionInfo(
-      currentUser.clerkUserId
-    )
-    if (
-      userSubscriptionInfo &&
-      userSubscriptionInfo.subscription_items &&
-      userSubscriptionInfo.subscription_items.length > 0 &&
-      userSubscriptionInfo.subscription_items[0]?.plan
-    ) {
-      // User has a paid subscription
-      const plan = userSubscriptionInfo.subscription_items[0].plan
-      subscriptionPlanId = plan.id || null
-      subscriptionPlanName = plan.name || null
-      subscriptionStatus = userSubscriptionInfo.status || 'active'
-    } else {
-      // No paid subscription - get free plan from Clerk
-      const freePlan = await getFreePlanFromClerk()
-      if (freePlan) {
-        subscriptionPlanId = freePlan.id
-        subscriptionPlanName = freePlan.name
-        subscriptionStatus = 'active'
-      } else {
-        // If we can't get the free plan from Clerk, set defaults
-        subscriptionPlanId = null
-        subscriptionPlanName = null
-        subscriptionStatus = 'active'
-      }
-    }
-  }
-
   // Verify current user is a member via Clerk
   if (!currentUser.clerkUserId) {
     throw new Error('Current user does not have Clerk account')
@@ -1414,24 +1319,27 @@ export async function becomeOrganizationOwner() {
     throw new Error('User is not a member of this organization')
   }
 
-  // Get organization with billing user info
-  const orgWithBilling = await prisma.organization.findUnique({
+  // Get organization
+  const org = await prisma.organization.findUnique({
     where: { id: organizationId },
     select: {
       id: true,
       clerkOrganizationId: true,
-      billingUserId: true,
     },
   })
 
-  if (!orgWithBilling) {
+  if (!org || !org.clerkOrganizationId) {
     throw new Error('Organization not found')
   }
 
-  // Find existing owner (billing user)
-  const existingOwnerUser = orgWithBilling.billingUserId
+  // Find existing owner (billing user) from Clerk subscription
+  const { getBillingUserClerkId } = await import('../clerk-organization-utils')
+  const existingOwnerClerkId = await getBillingUserClerkId(
+    org.clerkOrganizationId
+  )
+  const existingOwnerUser = existingOwnerClerkId
     ? await prisma.user.findUnique({
-        where: { id: orgWithBilling.billingUserId },
+        where: { clerkUserId: existingOwnerClerkId },
         select: {
           id: true,
           clerkUserId: true,
@@ -1442,17 +1350,15 @@ export async function becomeOrganizationOwner() {
       })
     : null
 
-  // Update organization billingUserId and subscription info
-  await prisma.organization.update({
-    where: { id: organizationId },
-    data: {
-      billingUserId: currentUser.managerOSUserId || '',
-      clerkOrganizationId: clerkOrgId || undefined,
-      subscriptionPlanId: subscriptionPlanId || undefined,
-      subscriptionPlanName: subscriptionPlanName || undefined,
-      subscriptionStatus: subscriptionStatus || undefined,
-    },
-  })
+  // Update organization clerkOrganizationId if needed (subscription info is in Clerk)
+  if (clerkOrgId && org.clerkOrganizationId !== clerkOrgId) {
+    await prisma.organization.update({
+      where: { id: organizationId },
+      data: {
+        clerkOrganizationId: clerkOrgId,
+      },
+    })
+  }
 
   // If there's an existing owner (different from current user), update their role in Clerk
   if (
@@ -1587,19 +1493,13 @@ export async function removeUserFromOrganization(userId: string) {
     const clerkMembers = await getClerkOrganizationMembers(
       organization.clerkOrganizationId
     )
-    const clerkUserIds = clerkMembers.map(m => m.public_user_data.user_id)
-    const users = await prisma.user.findMany({
-      where: {
-        clerkUserId: { in: clerkUserIds },
-      },
-      select: { id: true, clerkUserId: true },
-    })
-    const userMap = new Map(users.map(u => [u.clerkUserId || '', u.id]))
 
     const adminOrOwnerPromises = clerkMembers.map(async m => {
       const memberUserId = m.public_user_data.user_id
-      const memberUserDbId = userMap.get(memberUserId)
-      const isMemberBillingUser = organization.billingUserId === memberUserDbId
+      const isMemberBillingUser = await isBillingUserFromClerk(
+        organization.clerkOrganizationId,
+        memberUserId
+      )
       const role = await mapClerkRoleToManagerOSRole(
         m.role,
         isMemberBillingUser
