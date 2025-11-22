@@ -4,6 +4,12 @@ import { HighlightsSectionServer } from '@/components/dashboard-sections/highlig
 import { TodaysPrioritiesSectionServer } from '@/components/dashboard-sections/todays-priorities-section-server'
 import { ActiveInitiativesSectionServer } from '@/components/dashboard-sections/active-initiatives-section-server'
 import { TeamPulseSectionServer } from '@/components/dashboard-sections/team-pulse-section-server'
+import {
+  HighlightsSectionSkeleton,
+  TodaysPrioritiesSectionSkeleton,
+  ActiveInitiativesSectionSkeleton,
+  TeamPulseSectionSkeleton,
+} from '@/components/dashboard-sections/dashboard-section-skeletons'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
@@ -65,28 +71,16 @@ async function DashboardContent() {
             )}
 
             {!needsPersonLink && (
-              <Suspense
-                fallback={
-                  <div className='h-24 bg-muted/50 rounded-lg animate-pulse' />
-                }
-              >
+              <Suspense fallback={<HighlightsSectionSkeleton />}>
                 <HighlightsSectionServer />
               </Suspense>
             )}
 
-            <Suspense
-              fallback={
-                <div className='h-64 bg-muted/50 rounded-lg animate-pulse' />
-              }
-            >
+            <Suspense fallback={<TodaysPrioritiesSectionSkeleton />}>
               <TodaysPrioritiesSectionServer />
             </Suspense>
 
-            <Suspense
-              fallback={
-                <div className='h-64 bg-muted/50 rounded-lg animate-pulse' />
-              }
-            >
+            <Suspense fallback={<ActiveInitiativesSectionSkeleton />}>
               <ActiveInitiativesSectionServer
                 organizationId={user.managerOSOrganizationId}
                 personId={user.managerOSPersonId || null}
@@ -96,11 +90,7 @@ async function DashboardContent() {
         </PageMain>
 
         <PageSidebar>
-          <Suspense
-            fallback={
-              <div className='h-96 bg-muted/50 rounded-lg animate-pulse' />
-            }
-          >
+          <Suspense fallback={<TeamPulseSectionSkeleton />}>
             <TeamPulseSectionServer />
           </Suspense>
         </PageSidebar>

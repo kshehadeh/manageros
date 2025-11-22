@@ -109,7 +109,7 @@ export function PersonDetailModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent size='md' className='overflow-y-auto'>
+      <DialogContent size='md' className='overflow-y-auto max-h-[95vh]'>
         <DialogHeader>
           {loading ? (
             <>
