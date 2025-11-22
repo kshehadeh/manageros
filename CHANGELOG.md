@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.8.2](https://github.com/kshehadeh/manageros/compare/v1.8.1...v1.8.2) (2025-11-22)
+
+### Bug Fixes
+
+- **organizations:** More cleanup of organizations to put more of the control in the hands of the clerk api and UI ([156b3d4](https://github.com/kshehadeh/manageros/commit/156b3d47e6e9539b645ee3b4649287cc2f7c57ad))
+- **ui:** Added better dashboard skeletons ([d2a90c3](https://github.com/kshehadeh/manageros/commit/d2a90c3602b58a0c895192d3e6a877c35105c091))
+- **ui:** update person detail modal ([619b7bd](https://github.com/kshehadeh/manageros/commit/619b7bd8d67bb53c80ea3e062df42bab9b7547f7))
+
 ## [1.8.1](https://github.com/kshehadeh/manageros/compare/v1.8.0...v1.8.1) (2025-11-22)
 
 ### Bug Fixes
