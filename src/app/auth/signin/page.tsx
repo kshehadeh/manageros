@@ -58,7 +58,6 @@ export default function SignInPage() {
 
         {/* Right side - Sign in form */}
         <div className='flex w-full items-start sm:justify-center p-4 lg:w-1/2'>
-          Test
           <SignIn
             routing='hash'
             signUpUrl='/auth/signup'

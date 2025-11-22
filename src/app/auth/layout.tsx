@@ -6,7 +6,11 @@ import { ClerkProvider } from '@clerk/nextjs'
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      taskUrls={{
+        'choose-organization': '/dashboard',
+      }}
+    >
       <ThemeProvider
         attribute='class'
         defaultTheme='dark'
