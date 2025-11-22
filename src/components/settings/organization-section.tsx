@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { OrganizationSetupCards } from '@/components/organization-setup-cards'
-import { Settings } from 'lucide-react'
+import { Users } from 'lucide-react'
 import { Link } from '@/components/ui/link'
 import type { PendingInvitation } from '@/types/organization'
 
@@ -80,8 +80,8 @@ export function OrganizationSection({
               href='/organization/settings'
               className='flex items-center gap-2'
             >
-              <Settings className='w-4 h-4' />
-              Go to Organization Settings
+              <Users className='w-4 h-4' />
+              Manage Users
             </Link>
           </Button>
         </div>

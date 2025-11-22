@@ -6,7 +6,6 @@ import {
   Users2,
   Rocket,
   MessageCircle,
-  Settings,
   BarChart3,
   Handshake,
   CheckSquare,
@@ -356,10 +355,10 @@ function createStaticItems(
       },
       {
         id: 'nav.org-settings',
-        title: 'Organization Settings',
-        subtitle: 'Manage organization settings',
-        icon: <Settings className='h-4 w-4' />,
-        keywords: ['settings', 'organization', 'admin', 'config'],
+        title: 'Manage Users',
+        subtitle: 'Manage organization members and invitations',
+        icon: <Users2 className='h-4 w-4' />,
+        keywords: ['users', 'members', 'organization', 'admin', 'invitations'],
         group: 'Administration',
         perform: ({ closePalette, router }) => {
           router.push('/organization/settings')

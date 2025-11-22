@@ -1,11 +1,12 @@
-import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 import { redirect } from 'next/navigation'
+import { OrganizationMembersDataTable } from '@/components/organization-members/data-table'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
+import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 import { OrganizationSettingsBreadcrumbClient } from '@/components/organization/organization-settings-breadcrumb-client'
-import { OrganizationProfile } from '@clerk/nextjs'
-import { dark } from '@clerk/themes'
+import { OrganizationProfileButton } from '@/components/organization/organization-profile-button'
+import { Users } from 'lucide-react'
 
 export default async function OrganizationSettingsPage() {
   const user = await getCurrentUser()
@@ -24,12 +25,17 @@ export default async function OrganizationSettingsPage() {
     <OrganizationSettingsBreadcrumbClient>
       <PageContainer>
         <PageHeader
-          title='Organization Settings'
-          subtitle="Manage your organization's settings and configuration"
+          title='Manage Users'
+          titleIcon={Users}
+          subtitle='Manage organization members and invitations'
+          actions={<OrganizationProfileButton />}
         />
 
         <PageContent>
-          <OrganizationProfile appearance={dark} routing='hash' />
+          <OrganizationMembersDataTable
+            settingsId='organization-members'
+            currentUserId={user.managerOSUserId || ''}
+          />
         </PageContent>
       </PageContainer>
     </OrganizationSettingsBreadcrumbClient>

@@ -43,9 +43,9 @@ export async function getFilteredNavigation() {
       requiresPermission: 'report.access',
     },
     {
-      name: 'Org Settings',
+      name: 'Manage Users',
       href: '/organization/settings',
-      icon: 'Building',
+      icon: 'Users',
       adminOnly: true,
     },
   ]

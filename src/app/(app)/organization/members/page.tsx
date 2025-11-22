@@ -1,12 +1,8 @@
 import { redirect } from 'next/navigation'
-import { getOrganizationInvitations } from '@/lib/actions/organization'
 import { OrganizationMembersDataTable } from '@/components/organization-members/data-table'
-import OrganizationInvitationsSection from '@/components/organization-invitations-section'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
-import { PageMain } from '@/components/ui/page-main'
-import { PageSidebar } from '@/components/ui/page-sidebar'
 import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 
 export default async function OrganizationDetailsPage() {
@@ -22,8 +18,6 @@ export default async function OrganizationDetailsPage() {
     redirect('/dashboard')
   }
 
-  const invitations = await getOrganizationInvitations()
-
   return (
     <PageContainer>
       <PageHeader
@@ -32,16 +26,10 @@ export default async function OrganizationDetailsPage() {
       />
 
       <PageContent>
-        <PageMain>
-          <OrganizationMembersDataTable
-            settingsId='organization-members'
-            currentUserId={user.managerOSUserId || ''}
-          />
-        </PageMain>
-
-        <PageSidebar>
-          <OrganizationInvitationsSection invitations={invitations} />
-        </PageSidebar>
+        <OrganizationMembersDataTable
+          settingsId='organization-members'
+          currentUserId={user.managerOSUserId || ''}
+        />
       </PageContent>
     </PageContainer>
   )
