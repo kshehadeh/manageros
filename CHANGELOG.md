@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.8.1](https://github.com/kshehadeh/manageros/compare/v1.8.0...v1.8.1) (2025-11-22)
+
+### Bug Fixes
+
+- **ui:** Various UI fixes ([a46cb4f](https://github.com/kshehadeh/manageros/commit/a46cb4f54a156cdd18aca3ce25cee195fde0a655))
+
 # [1.8.0](https://github.com/kshehadeh/manageros/compare/v1.7.2...v1.8.0) (2025-11-21)
 
 ### Bug Fixes
