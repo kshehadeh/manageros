@@ -1,8 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Badge } from '@/components/ui/badge'
-import { Shield, User, Calendar } from 'lucide-react'
+import { User, Calendar } from 'lucide-react'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useOrganizationMembersTableSettings } from '@/hooks/use-organization-members-table-settings'
 import type { DataTableConfig } from '@/components/common/generic-data-table'
@@ -65,35 +64,11 @@ export const organizationMembersDataTableConfig: DataTableConfig<
     onDeleteClick: _onDeleteClick,
   }) => {
     const isGroupedByRole = grouping && grouping.includes('role')
-    const getRoleBadge = (role: string) => {
-      if (role === 'OWNER') {
-        return (
-          <Badge
-            variant='default'
-            className='bg-purple-100 text-purple-800 border-purple-200'
-          >
-            <Shield className='h-3 w-3 mr-1' />
-            Owner
-          </Badge>
-        )
-      }
-      if (role === 'ADMIN') {
-        return (
-          <Badge
-            variant='default'
-            className='bg-blue-100 text-blue-800 border-blue-200'
-          >
-            <Shield className='h-3 w-3 mr-1' />
-            Admin
-          </Badge>
-        )
-      }
-      return (
-        <Badge variant='secondary'>
-          <User className='h-3 w-3 mr-1' />
-          User
-        </Badge>
-      )
+    const getRoleLabel = (role: string) => {
+      if (role === 'OWNER') return 'Owner'
+      if (role === 'ADMIN') return 'Admin'
+      if (role === 'USER') return 'User'
+      return role
     }
 
     return [
@@ -191,7 +166,11 @@ export const organizationMembersDataTableConfig: DataTableConfig<
         maxSize: 150,
         cell: ({ row }) => {
           const member = row.original
-          return getRoleBadge(member.role)
+          return (
+            <span className='text-muted-foreground'>
+              {getRoleLabel(member.role)}
+            </span>
+          )
         },
         meta: {
           hidden:
@@ -221,15 +200,19 @@ export const organizationMembersDataTableConfig: DataTableConfig<
 
   // Filter configuration
   hasActiveFiltersFn: filters => {
-    return Boolean(filters.search)
+    return Boolean(filters.search || (filters.role && filters.role !== 'all'))
   },
   clearFiltersFn: () => ({
     search: '',
+    role: '',
   }),
   formatFiltersSummary: filters => {
     const parts: string[] = []
     if (filters.search) {
       parts.push(`search: "${filters.search}"`)
+    }
+    if (filters.role && filters.role !== 'all') {
+      parts.push(`role: ${filters.role}`)
     }
     return parts.join(', ')
   },

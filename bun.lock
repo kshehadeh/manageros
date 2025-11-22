@@ -55,6 +55,7 @@
         "crypto-js": "^4.2.0",
         "dagre": "^0.8.5",
         "date-fns": "^4.1.0",
+        "gpg": "^0.6.0",
         "lucide-react": "^0.553.0",
         "motion": "^12.23.24",
         "next": "16.0.1",
@@ -2013,6 +2014,8 @@
     "globalthis": ["globalthis@1.0.4", "", { "dependencies": { "define-properties": "^1.2.1", "gopd": "^1.0.1" } }, "sha512-DpLKbNU4WylpxJykQujfCcwYWiV/Jhm50Goo0wrVILAv5jOr9d+H+UR3PhSCD2rCCEIg0uc+G+muBTwD54JhDQ=="],
 
     "gopd": ["gopd@1.2.0", "", {}, "sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg=="],
+
+    "gpg": ["gpg@0.6.0", "", {}, "sha512-u0BpbalUehzMbaMxtzRAFn/gMmtnaVo2Y0yCp7X6csPnumyaDrXF4uvEWPhj3b1sqrblvKvNEXFSfOQrvGEiQw=="],
 
     "graceful-fs": ["graceful-fs@4.2.11", "", {}, "sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ=="],
 
