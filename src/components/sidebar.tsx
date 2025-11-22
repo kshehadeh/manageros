@@ -154,6 +154,7 @@ export default function Sidebar({
                   <OrganizationSwitcher
                     appearance={dark}
                     fallback={<Loading className='w-4 h-4' />}
+                    afterSelectOrganizationUrl='/dashboard'
                   />
                 }
 

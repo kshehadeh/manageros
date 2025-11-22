@@ -251,9 +251,14 @@ export async function getFeedbackById(id: string) {
     throw new Error('You do not have permission to view this feedback')
   }
 
+  // Filter by organizationId to ensure organization isolation
+  // The permission check already validates access, but we add this for defense in depth
   const feedback = await prisma.feedback.findFirst({
     where: {
       id,
+      about: {
+        organizationId: user.managerOSOrganizationId || '',
+      },
     },
     include: {
       about: {

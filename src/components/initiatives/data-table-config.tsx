@@ -262,4 +262,16 @@ export const initiativeDataTableConfig: DataTableConfig<
     { value: 'status', label: 'Status' },
     { value: 'rag', label: 'RAG Status' },
   ],
+
+  // Group label formatting
+  getGroupLabel: (groupValue: string, groupingColumn: string) => {
+    if (groupingColumn === 'status') {
+      return initiativeStatusUtils.getLabel(groupValue as InitiativeStatus)
+    }
+    if (groupingColumn === 'rag') {
+      // Capitalize first letter of RAG status (green -> Green, amber -> Amber, red -> Red)
+      return groupValue.charAt(0).toUpperCase() + groupValue.slice(1)
+    }
+    return groupValue || 'Unassigned'
+  },
 }

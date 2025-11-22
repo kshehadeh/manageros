@@ -29,7 +29,12 @@ export function PageSection({
     >
       {header}
       <div
-        className={cn('flex-1', hasHeader && 'px-md pb-xl md:px-2xl md:pb-2xl')}
+        className={cn(
+          'flex-1',
+          variant === 'bordered' &&
+            hasHeader &&
+            'px-md pb-xl md:px-2xl md:pb-2xl'
+        )}
       >
         {children}
       </div>
