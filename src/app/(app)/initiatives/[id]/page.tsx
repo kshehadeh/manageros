@@ -45,8 +45,12 @@ export default async function InitiativeDetail({
   }
 
   // Only fetch the initiative with minimal data needed for the page
-  const init = await prisma.initiative.findUnique({
-    where: { id },
+  // Filter by organizationId to ensure organization isolation
+  const init = await prisma.initiative.findFirst({
+    where: {
+      id,
+      organizationId: user.managerOSOrganizationId || '',
+    },
     select: {
       id: true,
       title: true,

@@ -613,7 +613,7 @@ export function GenericDataTable<
                   placeholder={config.searchPlaceholder}
                   value={searchInput}
                   onChange={e => setSearchInput(e.target.value)}
-                  className='pl-2xl'
+                  className='pl-3xl'
                 />
                 {isSearching && (
                   <div className='absolute right-2 top-2.5'>

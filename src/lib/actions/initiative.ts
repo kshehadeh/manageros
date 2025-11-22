@@ -538,9 +538,11 @@ export async function getInitiativeById(id: string) {
     throw new Error('You do not have permission to view this initiative')
   }
 
+  // Filter by organizationId to ensure organization isolation
   return await prisma.initiative.findFirst({
     where: {
       id,
+      organizationId: user.managerOSOrganizationId || '',
     },
     include: {
       objectives: true,

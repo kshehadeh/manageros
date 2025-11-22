@@ -18,6 +18,7 @@ import {
   getFreePlanFromClerk,
 } from './subscription-utils'
 import { combineName } from '@/lib/utils/name-utils'
+import { getTaskAccessWhereClause } from '@/lib/task-access-utils'
 
 const SessionClaimsSchema = z.object({
   email: z.string().optional().nullable(),
@@ -743,8 +744,29 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
 
     return !!task
   },
-  'task.view': user => {
-    return !!user.managerOSOrganizationId
+  'task.view': async (user, id) => {
+    if (!user.managerOSOrganizationId) {
+      return false
+    }
+
+    if (!id) {
+      return !!user.managerOSOrganizationId
+    }
+
+    // Verify task belongs to user's organization using the same access pattern
+    // as other task operations for consistency
+    const task = await prisma.task.findFirst({
+      where: {
+        id,
+        ...getTaskAccessWhereClause(
+          user.managerOSOrganizationId,
+          user.managerOSUserId || '',
+          user.managerOSPersonId || undefined
+        ),
+      },
+    })
+
+    return !!task
   },
 
   // Meeting permissions
@@ -1031,14 +1053,60 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
       !!user.managerOSOrganizationId
     )
   },
-  'initiative.edit': user => {
-    return isAdminOrOwner(user) && !!user.managerOSOrganizationId
+  'initiative.edit': async (user, id) => {
+    if (!user.managerOSOrganizationId) return false
+    if (!isAdminOrOwner(user)) return false
+
+    if (!id) {
+      return isAdminOrOwner(user) && !!user.managerOSOrganizationId
+    }
+
+    // Verify initiative belongs to user's organization
+    const initiative = await prisma.initiative.findFirst({
+      where: {
+        id,
+        organizationId: user.managerOSOrganizationId,
+      },
+    })
+
+    return !!initiative
   },
-  'initiative.delete': user => {
-    return isAdminOrOwner(user) && !!user.managerOSOrganizationId
+  'initiative.delete': async (user, id) => {
+    if (!user.managerOSOrganizationId) return false
+    if (!isAdminOrOwner(user)) return false
+
+    if (!id) {
+      return isAdminOrOwner(user) && !!user.managerOSOrganizationId
+    }
+
+    // Verify initiative belongs to user's organization
+    const initiative = await prisma.initiative.findFirst({
+      where: {
+        id,
+        organizationId: user.managerOSOrganizationId,
+      },
+    })
+
+    return !!initiative
   },
-  'initiative.view': user => {
-    return !!user.managerOSOrganizationId
+  'initiative.view': async (user, id) => {
+    if (!user.managerOSOrganizationId) {
+      return false
+    }
+
+    if (!id) {
+      return !!user.managerOSOrganizationId
+    }
+
+    // Verify initiative belongs to user's organization
+    const initiative = await prisma.initiative.findFirst({
+      where: {
+        id,
+        organizationId: user.managerOSOrganizationId,
+      },
+    })
+
+    return !!initiative
   },
 
   // Report permissions
@@ -1115,8 +1183,41 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
 
     return !!feedback
   },
-  'feedback.view': user => {
-    return !!user.managerOSOrganizationId
+  'feedback.view': async (user, id) => {
+    if (!user.managerOSOrganizationId) {
+      return false
+    }
+
+    if (!id) {
+      return !!user.managerOSOrganizationId
+    }
+
+    // Verify feedback belongs to user's organization
+    // Feedback is visible if:
+    // 1. It's public (isPrivate: false) AND the person it's about belongs to the user's organization, OR
+    // 2. It's private (isPrivate: true) AND the user is the author AND the person it's about belongs to the user's organization
+    const currentPerson = user.managerOSPersonId
+      ? await prisma.person.findFirst({
+          where: { id: user.managerOSPersonId },
+        })
+      : null
+
+    const feedback = await prisma.feedback.findFirst({
+      where: {
+        id,
+        about: {
+          organizationId: user.managerOSOrganizationId,
+        },
+        OR: [
+          { isPrivate: false }, // Public feedback
+          ...(currentPerson
+            ? [{ fromId: currentPerson.id }] // Private feedback by current user
+            : []),
+        ],
+      },
+    })
+
+    return !!feedback
   },
 
   // One-on-One permissions
@@ -1350,8 +1451,24 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
   'job-role.delete': async (user, _id) => {
     return isAdminOrOwner(user) && !!user.managerOSOrganizationId
   },
-  'job-role.view': user => {
-    return !!user.managerOSOrganizationId
+  'job-role.view': async (user, id) => {
+    if (!user.managerOSOrganizationId) {
+      return false
+    }
+
+    if (!id) {
+      return !!user.managerOSOrganizationId
+    }
+
+    // Verify job role belongs to user's organization
+    const jobRole = await prisma.jobRole.findFirst({
+      where: {
+        id,
+        organizationId: user.managerOSOrganizationId,
+      },
+    })
+
+    return !!jobRole
   },
   // Organization invitation permissions
   'organization.invitation.view': user => {

@@ -44,9 +44,34 @@ export function OrganizationSelector({
         organization: organizationId,
       })
 
-      // Redirect to dashboard after successful selection
-      router.push('/dashboard')
-      router.refresh()
+      // Check if we're on a list page that should refresh instead of redirecting
+      const currentPath = window.location.pathname
+      const listPages = [
+        '/initiatives',
+        '/tasks',
+        '/people',
+        '/meetings',
+        '/teams',
+        '/oneonones',
+        '/feedback',
+        '/feedback-campaigns',
+        '/my-tasks',
+        '/direct-reports',
+      ]
+
+      const isListPage = listPages.some(page => currentPath === page)
+
+      // Dispatch custom event to notify listeners
+      window.dispatchEvent(new CustomEvent('organization:changed'))
+
+      if (isListPage) {
+        // Refresh the current page to show data from the new organization
+        router.refresh()
+      } else {
+        // Redirect to dashboard for detail pages or other pages
+        router.push('/dashboard')
+        router.refresh()
+      }
     } catch (err) {
       console.error('Failed to switch organization:', err)
       setError(
