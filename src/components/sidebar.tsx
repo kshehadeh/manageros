@@ -150,13 +150,13 @@ export default function Sidebar({
                 )}
 
                 {/* Organization information - shown if organization exists */}
-                {
+                <div className='my-sm'>
                   <OrganizationSwitcher
                     appearance={dark}
                     fallback={<Loading className='w-4 h-4' />}
                     afterSelectOrganizationUrl='/dashboard'
                   />
-                }
+                </div>
 
                 {/* Settings and Sign out links - always shown */}
                 <div className='flex items-center gap-md mt-sm'>

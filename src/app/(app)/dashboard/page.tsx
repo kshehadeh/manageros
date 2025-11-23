@@ -45,7 +45,7 @@ async function DashboardContent() {
     <PageContainer>
       <PageContent>
         <PageMain>
-          <div className='space-y-6'>
+          <div className='space-y-10'>
             {hasNoPeople && (
               <HelpBlock
                 title='No People in Organization'

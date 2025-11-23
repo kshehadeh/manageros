@@ -1,6 +1,5 @@
 import { Link } from '@/components/ui/link'
 import { PersonAvatarWrapper } from './person-avatar-wrapper'
-import { PersonStatusBadge } from './person-status-badge'
 import { PersonActionsDropdown } from './person-actions-dropdown'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
@@ -12,7 +11,6 @@ import {
   User as UserIcon,
   Building2,
   Briefcase,
-  MessageCircle,
 } from 'lucide-react'
 import { Suspense } from 'react'
 import type { User, Person as PrismaPerson, Team } from '@prisma/client'
@@ -74,6 +72,7 @@ import { AccountLinkingSection } from './sections/account-linking-section'
 import { JobRoleSection } from './sections/job-role-section'
 import { GithubMetricsSection } from '@/components/github-metrics-section'
 import { JiraMetricsSection } from '@/components/jira-metrics-section'
+import { PersonStatusBadge } from './person-status-badge'
 
 interface PersonDetailContentProps {
   person: PersonWithDetailRelations
@@ -85,7 +84,6 @@ interface PersonDetailContentProps {
   currentPersonId?: string | null
   organizationId: string
   currentUserId: string
-  feedbackCount: number
 }
 
 export function PersonDetailContent({
@@ -95,17 +93,14 @@ export function PersonDetailContent({
   currentPersonId,
   organizationId,
   currentUserId,
-  feedbackCount,
 }: PersonDetailContentProps) {
   return (
     <PageContainer>
       <PageHeader
         title={
-          <div className='flex flex-col leading-none'>
-            <div>{person.name}</div>
-            <div className='mt-1'>
-              <PersonStatusBadge status={person.status} />
-            </div>
+          <div className='flex flex-row items-center gap-sm leading-none'>
+            {person.name}
+            <PersonStatusBadge status={person.status} size='sm' />
           </div>
         }
         iconComponent={
@@ -120,22 +115,39 @@ export function PersonDetailContent({
         }
         subtitle={
           <>
-            <div className='page-section-subtitle'>{person.role ?? ''}</div>
+            <div className='flex items-center gap-4'>
+              <div className='page-section-subtitle'>
+                {person.jobRole?.title ?? person.role ?? ''}
+              </div>
+              <div className='flex items-center gap-4 text-sm text-muted-foreground'>
+                {person.team && (
+                  <div className='flex items-center gap-1'>
+                    <Building2 className='w-4 h-4' />
+                    <Link
+                      href={`/teams/${person.team.id}`}
+                      className='hover:text-highlight transition-colors'
+                    >
+                      {person.team.name}
+                    </Link>
+                  </div>
+                )}
+                {person.employeeType && (
+                  <div className='flex items-center gap-1'>
+                    <Briefcase className='w-4 h-4' />
+                    <span>
+                      {person.employeeType === 'FULL_TIME' && 'Full Time'}
+                      {person.employeeType === 'PART_TIME' && 'Part Time'}
+                      {person.employeeType === 'INTERN' && 'Intern'}
+                      {person.employeeType === 'CONSULTANT' && 'Consultant'}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
             <div className='text-xs text-muted-foreground'>{person.email}</div>
 
             {/* Basic Information with Icons */}
             <div className='flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground'>
-              {person.team && (
-                <div className='flex items-center gap-1'>
-                  <Building2 className='w-4 h-4' />
-                  <Link
-                    href={`/teams/${person.team.id}`}
-                    className='hover:text-highlight transition-colors'
-                  >
-                    {person.team.name}
-                  </Link>
-                </div>
-              )}
               {person.manager && (
                 <div className='flex items-center gap-1'>
                   <UserIcon className='w-4 h-4' />
@@ -145,17 +157,6 @@ export function PersonDetailContent({
                   >
                     {person.manager.name}
                   </Link>
-                </div>
-              )}
-              {person.employeeType && (
-                <div className='flex items-center gap-1'>
-                  <Briefcase className='w-4 h-4' />
-                  <span>
-                    {person.employeeType === 'FULL_TIME' && 'Full Time'}
-                    {person.employeeType === 'PART_TIME' && 'Part Time'}
-                    {person.employeeType === 'INTERN' && 'Intern'}
-                    {person.employeeType === 'CONSULTANT' && 'Consultant'}
-                  </span>
                 </div>
               )}
               {person.startedAt && (
@@ -179,16 +180,6 @@ export function PersonDetailContent({
                   </span>
                 </div>
               )}
-              <div className='flex items-center gap-1'>
-                <MessageCircle className='w-4 h-4' />
-                <Link
-                  href={`/feedback/about/${person.id}`}
-                  className='hover:text-highlight transition-colors'
-                >
-                  {feedbackCount}{' '}
-                  {feedbackCount === 1 ? 'Feedback' : 'Feedbacks'}
-                </Link>
-              </div>
             </div>
           </>
         }

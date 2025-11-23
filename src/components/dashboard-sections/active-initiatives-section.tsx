@@ -33,21 +33,9 @@ export function ActiveInitiativesSection({
 
   return (
     <PageSection
-      header={
-        <SectionHeader
-          icon={Rocket}
-          title='Active Initiatives'
-          description={
-            <div className='hidden md:flex items-center gap-md text-xs text-muted-foreground'>
-              <Link href='/initiatives' className='hover:underline'>
-                View Initiatives
-              </Link>
-            </div>
-          }
-        />
-      }
+      header={<SectionHeader icon={Rocket} title='Active Initiatives' />}
     >
-      <div className='flex flex-col gap-md'>
+      <div className='flex flex-col gap-lg'>
         {activeInitiatives.slice(0, 5).map(initiative => (
           <Link
             key={initiative.id}

@@ -6,7 +6,6 @@ import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PersonAvatar } from '@/components/people/person-avatar'
 import { PersonDetailModal } from '@/components/people/person-detail-modal'
-import { Link } from '@/components/ui/link'
 import { format, isFuture, differenceInDays } from 'date-fns'
 import { Activity } from 'lucide-react'
 
@@ -74,25 +73,9 @@ export function TeamPulseSection({ members }: TeamPulseSectionProps) {
   return (
     <>
       <PageSection
-        header={
-          <SectionHeader
-            icon={Activity}
-            title='Team Pulse'
-            description={
-              <div className='hidden md:flex items-center gap-md text-xs text-muted-foreground'>
-                <Link href='/direct-reports' className='hover:underline'>
-                  View Direct Reports
-                </Link>
-                <span>•</span>
-                <Link href='/teams' className='hover:underline'>
-                  View Teams
-                </Link>
-              </div>
-            }
-          />
-        }
+        header={<SectionHeader icon={Activity} title='Team Pulse' />}
       >
-        <div className='flex flex-col gap-lg'>
+        <div className='flex flex-col gap-xl'>
           {members.map(member => (
             <Card
               key={member.id}

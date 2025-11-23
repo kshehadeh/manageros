@@ -29,7 +29,7 @@ export function PageContent({ children, className = '' }: PageContentProps) {
 
   if (hasLayout) {
     return (
-      <div className={cn('flex flex-col lg:flex-row gap-2xl', className)}>
+      <div className={cn('flex flex-col lg:flex-row gap-3xl', className)}>
         {children}
       </div>
     )

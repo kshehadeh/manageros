@@ -16,7 +16,7 @@ import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-
 import { useState } from 'react'
 import { updateInitiative, createInitiative } from '@/lib/actions/initiative'
 import { type InitiativeFormData, initiativeSchema } from '@/lib/validations'
-import { Rag } from '@/components/rag'
+import { RagCircle } from '@/components/rag'
 import { MarkdownEditor } from '@/components/markdown-editor'
 import {
   Trash2,
@@ -24,8 +24,8 @@ import {
   Calendar,
   Target,
   Users,
-  Settings,
   SettingsIcon,
+  ArrowRight,
 } from 'lucide-react'
 import { FormTemplate, type FormSection } from '@/components/ui/form-template'
 
@@ -245,6 +245,94 @@ export function InitiativeForm({
             )}
           </div>
 
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <div className='space-y-2'>
+              <Label htmlFor='status'>Status</Label>
+              <Select
+                value={formData.status}
+                onValueChange={value =>
+                  handleInputChange(
+                    'status',
+                    value as InitiativeFormData['status']
+                  )
+                }
+              >
+                <SelectTrigger
+                  className={errors.status ? 'border-destructive' : ''}
+                >
+                  <SelectValue placeholder='Select status' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='planned'>Planned</SelectItem>
+                  <SelectItem value='in_progress'>In Progress</SelectItem>
+                  <SelectItem value='paused'>Paused</SelectItem>
+                  <SelectItem value='done'>Done</SelectItem>
+                  <SelectItem value='canceled'>Canceled</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.status && (
+                <p className='text-sm text-destructive'>{errors.status}</p>
+              )}
+            </div>
+
+            <div className='space-y-2'>
+              <Label htmlFor='rag'>RAG Status</Label>
+              <Select
+                value={formData.rag}
+                onValueChange={value =>
+                  handleInputChange('rag', value as InitiativeFormData['rag'])
+                }
+              >
+                <SelectTrigger
+                  className={errors.rag ? 'border-destructive' : ''}
+                >
+                  <SelectValue placeholder='Select RAG status' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='green'>
+                    <div className='flex items-center gap-2'>
+                      <RagCircle rag='green' size='small' />
+                      <span>Green</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value='amber'>
+                    <div className='flex items-center gap-2'>
+                      <RagCircle rag='amber' size='small' />
+                      <span>Amber</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value='red'>
+                    <div className='flex items-center gap-2'>
+                      <RagCircle rag='red' size='small' />
+                      <span>Red</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.rag && (
+                <p className='text-sm text-destructive'>{errors.rag}</p>
+              )}
+            </div>
+
+            <div className='space-y-2'>
+              <Label htmlFor='confidence'>Confidence (%)</Label>
+              <Input
+                id='confidence'
+                type='number'
+                min='0'
+                max='100'
+                value={formData.confidence}
+                onChange={e =>
+                  handleInputChange('confidence', parseInt(e.target.value) || 0)
+                }
+                className={errors.confidence ? 'border-destructive' : ''}
+              />
+              {errors.confidence && (
+                <p className='text-sm text-destructive'>{errors.confidence}</p>
+              )}
+            </div>
+          </div>
+
           <div className='space-y-2'>
             <Label htmlFor='summary'>Summary</Label>
             <MarkdownEditor
@@ -301,85 +389,6 @@ export function InitiativeForm({
           {errors.targetDate && (
             <p className='text-sm text-destructive'>{errors.targetDate}</p>
           )}
-        </div>
-      ),
-    },
-    {
-      title: 'Status & Tracking',
-      icon: Settings,
-      content: (
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-          <div className='space-y-2'>
-            <Label htmlFor='status'>Status</Label>
-            <Select
-              value={formData.status}
-              onValueChange={value =>
-                handleInputChange(
-                  'status',
-                  value as InitiativeFormData['status']
-                )
-              }
-            >
-              <SelectTrigger
-                className={errors.status ? 'border-destructive' : ''}
-              >
-                <SelectValue placeholder='Select status' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='planned'>Planned</SelectItem>
-                <SelectItem value='in_progress'>In Progress</SelectItem>
-                <SelectItem value='paused'>Paused</SelectItem>
-                <SelectItem value='done'>Done</SelectItem>
-                <SelectItem value='canceled'>Canceled</SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.status && (
-              <p className='text-sm text-destructive'>{errors.status}</p>
-            )}
-          </div>
-
-          <div className='space-y-2'>
-            <Label htmlFor='rag'>RAG Status</Label>
-            <Select
-              value={formData.rag}
-              onValueChange={value =>
-                handleInputChange('rag', value as InitiativeFormData['rag'])
-              }
-            >
-              <SelectTrigger className={errors.rag ? 'border-destructive' : ''}>
-                <SelectValue placeholder='Select RAG status' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='green'>Green</SelectItem>
-                <SelectItem value='amber'>Amber</SelectItem>
-                <SelectItem value='red'>Red</SelectItem>
-              </SelectContent>
-            </Select>
-            <div className='mt-2'>
-              <Rag rag={formData.rag} />
-            </div>
-            {errors.rag && (
-              <p className='text-sm text-destructive'>{errors.rag}</p>
-            )}
-          </div>
-
-          <div className='space-y-2'>
-            <Label htmlFor='confidence'>Confidence (%)</Label>
-            <Input
-              id='confidence'
-              type='number'
-              min='0'
-              max='100'
-              value={formData.confidence}
-              onChange={e =>
-                handleInputChange('confidence', parseInt(e.target.value) || 0)
-              }
-              className={errors.confidence ? 'border-destructive' : ''}
-            />
-            {errors.confidence && (
-              <p className='text-sm text-destructive'>{errors.confidence}</p>
-            )}
-          </div>
         </div>
       ),
     },
@@ -445,15 +454,19 @@ export function InitiativeForm({
                     </Button>
                   )}
                 </div>
-                <Input
-                  id={`objective-keyresult-${index}`}
-                  type='text'
-                  value={objective.keyResult}
-                  onChange={e =>
-                    updateObjective(index, 'keyResult', e.target.value)
-                  }
-                  placeholder='Key result (optional)'
-                />
+                <div className='flex items-center gap-2 ml-6'>
+                  <ArrowRight className='h-4 w-4 text-muted-foreground shrink-0' />
+                  <Input
+                    id={`objective-keyresult-${index}`}
+                    type='text'
+                    value={objective.keyResult}
+                    onChange={e =>
+                      updateObjective(index, 'keyResult', e.target.value)
+                    }
+                    placeholder='Key result (optional)'
+                    className='flex-1'
+                  />
+                </div>
               </div>
               {index < objectives.length - 1 && (
                 <div className='border-b border-muted mt-4' />

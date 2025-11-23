@@ -40,16 +40,16 @@ export function SectionHeader({
 
   return (
     <div
-      className={`flex items-start justify-between md:mx-0 md:px-md ${className} mb-md bg-muted p-md`}
+      className={`flex items-start justify-between md:mx-0 md:px-lg ${className} mb-lg bg-muted p-lg`}
     >
-      <div className='flex-1 flex items-start gap-md'>
+      <div className='flex-1 flex items-start gap-lg'>
         <Icon className='w-6 h-6 shrink-0 mt-xs' />
         <div className='flex-1 min-w-0'>
-          <h3 className={`text-xl font-bold ${geistMono.className}`}>
+          <h3 className={`text-lg font-bold ${geistMono.className}`}>
             {title}
           </h3>
           {description && (
-            <div className='text-sm text-muted-foreground mt-sm'>
+            <div className='text-sm text-muted-foreground mt-md'>
               {description}
             </div>
           )}
