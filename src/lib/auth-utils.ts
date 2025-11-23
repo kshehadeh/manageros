@@ -414,23 +414,28 @@ export async function getFilteredNavigation(user: UserBrief | null) {
   }
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: 'Home' },
-    { name: 'My Tasks', href: '/my-tasks', icon: 'CheckSquare' },
-    { name: 'Initiatives', href: '/initiatives', icon: 'Rocket' },
-    { name: 'Meetings', href: '/meetings', icon: 'Calendar' },
-    { name: 'People', href: '/people', icon: 'User' },
-    { name: 'Teams', href: '/teams', icon: 'Users2' },
+    { name: 'Dashboard', href: '/dashboard', icon: 'Home', adminOnly: false },
+    {
+      name: 'My Tasks',
+      href: '/my-tasks',
+      icon: 'CheckSquare',
+      adminOnly: false,
+    },
+    {
+      name: 'Initiatives',
+      href: '/initiatives',
+      icon: 'Rocket',
+      adminOnly: false,
+    },
+    { name: 'Meetings', href: '/meetings', icon: 'Calendar', adminOnly: false },
+    { name: 'People', href: '/people', icon: 'User', adminOnly: false },
+    { name: 'Teams', href: '/teams', icon: 'Users2', adminOnly: false },
     {
       name: 'Reports',
       href: '/reports',
       icon: 'BarChart3',
       requiresPermission: 'report.access' as PermissionType,
-    },
-    {
-      name: 'Manage Users',
-      href: '/organization/settings',
-      icon: 'Users',
-      adminOnly: true,
+      adminOnly: false,
     },
   ]
 

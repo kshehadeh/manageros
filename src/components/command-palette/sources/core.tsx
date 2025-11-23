@@ -354,18 +354,6 @@ function createStaticItems(
         },
       },
       {
-        id: 'nav.org-settings',
-        title: 'Manage Users',
-        subtitle: 'Manage organization members and invitations',
-        icon: <Users2 className='h-4 w-4' />,
-        keywords: ['users', 'members', 'organization', 'admin', 'invitations'],
-        group: 'Administration',
-        perform: ({ closePalette, router }) => {
-          router.push('/organization/settings')
-          closePalette()
-        },
-      },
-      {
         id: 'nav.job-roles',
         title: 'View Job Roles',
         subtitle: 'Go to job role management',

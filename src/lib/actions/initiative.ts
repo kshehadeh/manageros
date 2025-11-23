@@ -63,12 +63,12 @@ export async function createInitiative(formData: InitiativeFormData) {
   const counts = await getOrganizationCounts(user.managerOSOrganizationId)
   const limitCheck = await checkOrganizationLimit(
     user.managerOSOrganizationId,
-    'maxInitiatives',
+    'initiatives',
     counts.initiatives
   )
 
-  if (!limitCheck.allowed) {
-    throw new Error(limitCheck.message || 'Initiatives limit exceeded')
+  if (!limitCheck) {
+    throw new Error('Initiatives limit exceeded')
   }
 
   // Create the initiative with objectives and owners

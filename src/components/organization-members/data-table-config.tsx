@@ -1,15 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Badge } from '@/components/ui/badge'
-import { Shield, User, Calendar } from 'lucide-react'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { User, Calendar } from 'lucide-react'
 import { useOrganizationMembers } from '@/hooks/use-organization-members'
 import { useOrganizationMembersTableSettings } from '@/hooks/use-organization-members-table-settings'
 import type { DataTableConfig } from '@/components/common/generic-data-table'
@@ -64,74 +56,19 @@ export const organizationMembersDataTableConfig: DataTableConfig<
   createColumns: ({
     onButtonClick: _onButtonClick,
     visibleColumns,
+    grouping,
     refetch: _refetch,
     applyOptimisticUpdate: _applyOptimisticUpdate,
     removeOptimisticUpdate: _removeOptimisticUpdate,
     currentUserId: _currentUserId,
     onDeleteClick: _onDeleteClick,
   }) => {
-    const getRoleBadge = (role: string) => {
-      if (role === 'OWNER') {
-        return (
-          <Badge
-            variant='default'
-            className='bg-purple-100 text-purple-800 border-purple-200'
-          >
-            <Shield className='h-3 w-3 mr-1' />
-            Owner
-          </Badge>
-        )
-      }
-      if (role === 'ADMIN') {
-        return (
-          <Badge
-            variant='default'
-            className='bg-blue-100 text-blue-800 border-blue-200'
-          >
-            <Shield className='h-3 w-3 mr-1' />
-            Admin
-          </Badge>
-        )
-      }
-      return (
-        <Badge variant='secondary'>
-          <User className='h-3 w-3 mr-1' />
-          User
-        </Badge>
-      )
-    }
-
-    const getPersonStatusBadge = (status: string) => {
-      const statusColors = {
-        active: 'bg-green-100 text-green-800 border-green-200',
-        inactive: 'bg-gray-100 text-gray-800 border-gray-200',
-        onLeave: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      }
-
-      // Convert status to title case
-      const formatStatus = (s: string) => {
-        return s
-          .replace(/_/g, ' ')
-          .replace(/([A-Z])/g, ' $1')
-          .trim()
-          .split(' ')
-          .map(
-            word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-          )
-          .join(' ')
-      }
-
-      return (
-        <Badge
-          variant='outline'
-          className={`whitespace-nowrap ${
-            statusColors[status as keyof typeof statusColors] ||
-            statusColors.inactive
-          }`}
-        >
-          {formatStatus(status)}
-        </Badge>
-      )
+    const isGroupedByRole = grouping && grouping.includes('role')
+    const getRoleLabel = (role: string) => {
+      if (role === 'OWNER') return 'Owner'
+      if (role === 'ADMIN') return 'Admin'
+      if (role === 'USER') return 'User'
+      return role
     }
 
     return [
@@ -143,27 +80,15 @@ export const organizationMembersDataTableConfig: DataTableConfig<
         maxSize: 500,
         cell: ({ row }) => {
           const member = row.original
+          const displayName = member.name?.trim() || '<Name not set>'
           return (
             <div className='flex flex-col gap-1'>
-              <div className='font-medium'>{member.name}</div>
-              <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-                {member.person ? (
-                  getPersonStatusBadge(member.person.status)
-                ) : (
-                  <Badge
-                    variant='outline'
-                    className='bg-gray-100 text-gray-600 border-gray-200 text-xs whitespace-nowrap'
-                  >
-                    Not Linked
-                  </Badge>
-                )}
-                {member.person?.team?.name && (
-                  <>
-                    <span>•</span>
-                    <span>{member.person.team.name}</span>
-                  </>
-                )}
-                <span>•</span>
+              <div
+                className={`font-medium ${!member.name?.trim() ? 'text-muted-foreground italic' : ''}`}
+              >
+                {displayName}
+              </div>
+              <div className='flex items-center gap-1 text-sm text-muted-foreground'>
                 <div className='flex items-center gap-1 text-xs'>
                   <Calendar className='h-3 w-3' />
                   <span>{new Date(member.createdAt).toLocaleDateString()}</span>
@@ -203,7 +128,10 @@ export const organizationMembersDataTableConfig: DataTableConfig<
             return <span className='text-muted-foreground'>—</span>
           }
           return (
-            <span className='text-muted-foreground'>{member.person.name}</span>
+            <div className='flex items-center gap-2 text-muted-foreground'>
+              <User className='h-4 w-4' />
+              <span>{member.person.name}</span>
+            </div>
           )
         },
         meta: {
@@ -238,10 +166,16 @@ export const organizationMembersDataTableConfig: DataTableConfig<
         maxSize: 150,
         cell: ({ row }) => {
           const member = row.original
-          return getRoleBadge(member.role)
+          return (
+            <span className='text-muted-foreground'>
+              {getRoleLabel(member.role)}
+            </span>
+          )
         },
         meta: {
-          hidden: visibleColumns?.includes('role') === false,
+          hidden:
+            visibleColumns?.includes('role') === false ||
+            Boolean(isGroupedByRole),
         },
       },
     ]
@@ -261,7 +195,6 @@ export const organizationMembersDataTableConfig: DataTableConfig<
   sortOptions: [
     { value: 'name', label: 'Name' },
     { value: 'email', label: 'Email' },
-    { value: 'role', label: 'Role' },
     { value: 'createdAt', label: 'Created Date' },
   ],
 
@@ -295,32 +228,5 @@ export const organizationMembersDataTableConfig: DataTableConfig<
       if (groupValue === 'USER') return 'User'
     }
     return groupValue || 'Unassigned'
-  },
-
-  // Filter content - role filter dropdown
-  filterContent: ({ settings, updateFilters }) => {
-    return (
-      <div className='space-y-md'>
-        <div className='space-y-sm'>
-          <label className='text-sm font-medium'>Role</label>
-          <Select
-            value={settings.filters.role || 'all'}
-            onValueChange={value =>
-              updateFilters({ role: value === 'all' ? '' : value })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder='All roles' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>All roles</SelectItem>
-              <SelectItem value='OWNER'>Owner</SelectItem>
-              <SelectItem value='ADMIN'>Admin</SelectItem>
-              <SelectItem value='USER'>User</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-    )
   },
 }

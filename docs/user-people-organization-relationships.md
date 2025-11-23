@@ -258,28 +258,50 @@ The following fields in the Organization model are **deprecated** and kept only 
 
 ### Subscription Plans
 
+**Important**: All features are managed in Clerk. Subscription plans and their features are configured entirely through the Clerk Dashboard.
+
+#### Feature Slug Format
+
+Limits are determined by feature slugs in Clerk subscription plans. The format is `{entity}_{limit}`:
+
+- `{entity}` must be one of: `people`, `initiatives`, `teams`, `feedbackcampaigns`
+- `{limit}` can be a number (e.g., `5`, `10`) or `unlimited`
+- Examples:
+  - `initiatives_5` → Maximum of 5 initiatives
+  - `people_10` → Maximum of 10 people
+  - `teams_unlimited` → Unlimited teams
+  - `feedbackcampaigns_2` → Maximum of 2 feedback campaigns
+
+The system automatically parses these feature slugs from the Clerk subscription plan to determine limits. This parsing happens in `getOrganizationSubscription()` in `src/lib/subscription-utils.ts`.
+
 #### Solo Plan (Free)
 
 - **Price**: Free
-- **Limits**:
-  - Max People: 5
-  - Max Initiatives: 10
-  - Max Teams: 2
-  - Max Feedback Campaigns: 2
+- **Features in Clerk** (feature slugs):
+  - `people_5` → Max People: 5
+  - `initiatives_10` → Max Initiatives: 10
+  - `teams_2` → Max Teams: 2
+  - `feedbackcampaigns_2` → Max Feedback Campaigns: 2
 - **Features**: All core features with limits
 
 #### Team Plan (Paid)
 
 - **Price**: Varies (set in Clerk Dashboard)
+- **Features in Clerk** (feature slugs):
+  - `people_unlimited` → Unlimited people
+  - `initiatives_unlimited` → Unlimited initiatives
+  - `teams_unlimited` → Unlimited teams
+  - `feedbackcampaigns_unlimited` → Unlimited feedback campaigns
 - **Limits**: Unlimited (all limits are `null`)
 - **Features**: All features with no limits
 
 ### How Subscription Limits Work
 
-1. **Limit Checking**: Before creating new entities (People, Initiatives, Teams, Feedback Campaigns), the system checks if the organization has reached its limit
-2. **Enforcement**: If limit is reached, creation is blocked with an error message
-3. **Viewing**: Users can still view existing entities even if over limit (per rule #10)
-4. **Calculation**: Limits are based on the subscription plan name fetched from Clerk organization subscription API
+1. **Feature Parsing**: The system fetches the subscription plan from Clerk and parses feature slugs to determine limits
+2. **Limit Checking**: Before creating new entities (People, Initiatives, Teams, Feedback Campaigns), the system checks if the organization has reached its limit
+3. **Enforcement**: If limit is reached, creation is blocked with an error message
+4. **Viewing**: Users can still view existing entities even if over limit (per rule #10)
+5. **Calculation**: Limits are parsed from feature slugs in the Clerk subscription plan (format: `{entity}_{limit}`)
 
 ### Subscription Updates
 

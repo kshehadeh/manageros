@@ -60,7 +60,24 @@ export function useOrganizationMembersTableSettings({
         userId,
         settingsId
       )
-      setSettings(loadedSettings)
+
+      // Clear role filter if it exists (UI no longer supports role filtering)
+      if (loadedSettings.filters.role && loadedSettings.filters.role !== '') {
+        const cleanedSettings = {
+          ...loadedSettings,
+          filters: {
+            ...loadedSettings.filters,
+            role: '',
+          },
+        }
+        setSettings(cleanedSettings)
+        // Persist the cleaned settings to prevent the filter from reappearing
+        updateOrganizationMembersTableSettings(userId, settingsId, {
+          filters: cleanedSettings.filters,
+        })
+      } else {
+        setSettings(loadedSettings)
+      }
       setIsLoaded(true)
     } else {
       setIsLoaded(false)

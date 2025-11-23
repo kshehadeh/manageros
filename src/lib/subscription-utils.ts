@@ -1,150 +1,28 @@
 'use server'
 
 import { prisma } from '@/lib/db'
-import {
-  ClerkBillingPlansResponse,
-  ClerkCommercePlan,
-  ClerkCommerceSubscription,
-} from './clerk-types'
-import { getClerkOrganizationSubscription } from './clerk-organization-utils'
-
-export interface PlanLimits {
-  maxPeople: number | null // null = unlimited
-  maxInitiatives: number | null
-  maxTeams: number | null
-  maxFeedbackCampaigns: number | null
-}
+import { getClerkClient } from './clerk'
+import { Feature } from '@clerk/backend'
+import { EntityName, EntityNameValues, PlanLimits } from './subscriptions'
 
 export interface OrganizationSubscription {
   billingUserId: string | null
   subscriptionPlanId: string | null
   subscriptionPlanName: string | null
   subscriptionStatus: string | null
+  limits: PlanLimits | null | undefined
 }
 
-export async function getUserSubscriptionInfo(
-  userId: string
-): Promise<ClerkCommerceSubscription | undefined> {
-  // fetch this information directly from clerk
-  const response = await fetch(
-    `https://api.clerk.com/v1/users/${userId}/billing/subscription`,
-    {
-      headers: {
-        Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
-      },
-    }
-  )
-  const data = (await response.json()) as ClerkCommerceSubscription
-  return data
-}
-
-/**
- * Get all billing plans from Clerk
- */
-export async function getAllClerkPlans(): Promise<ClerkCommercePlan[]> {
-  if (!process.env.CLERK_SECRET_KEY) {
-    return []
-  }
-
-  try {
-    const response = await fetch(
-      `https://api.clerk.com/v1/billing/plans?limit=100`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
-        },
-      }
-    )
-
-    if (!response.ok) {
-      console.error('Failed to fetch Clerk plans:', response.status)
-      return []
-    }
-
-    const data = (await response.json()) as ClerkBillingPlansResponse
-    return data.data || []
-  } catch (error) {
-    console.error('Error fetching Clerk plans:', error)
-    return []
-  }
-}
-
-/**
- * Get a specific plan by ID from Clerk
- */
-export async function getSubscriptionInformation(
-  planId: string
-): Promise<ClerkCommercePlan | undefined> {
-  const plans = await getAllClerkPlans()
-  return plans.find((plan: ClerkCommercePlan) => plan.id === planId)
-}
-
-/**
- * Get the free plan from Clerk
- * A free plan is defined as one with fee.amount === 0
- * Falls back to the default plan if no free plan is found
- */
-export async function getFreePlanFromClerk(): Promise<ClerkCommercePlan | null> {
-  const plans = await getAllClerkPlans()
-
-  if (plans.length === 0) {
+export async function getOrganizationLimits(
+  organizationId: string
+): Promise<PlanLimits | undefined | null> {
+  const subscription = await getOrganizationSubscription(organizationId)
+  if (!subscription) {
     return null
   }
 
-  // First, try to find a plan with $0 fee
-  const freePlan = plans.find(
-    plan => plan.fee.amount === 0 || plan.fee.amount === 0.0
-  )
-
-  if (freePlan) {
-    return freePlan
-  }
-
-  // Fallback to the default plan if no free plan found
-  const defaultPlan = plans.find(plan => plan.is_default === true)
-
-  return defaultPlan || null
-}
-/**
- * Get plan limits based on plan name
- * Returns limit configuration for each plan type
- * Fetches plan information from Clerk to determine if it's a free plan
- */
-export async function getPlanLimits(
-  planName: string | null | undefined
-): Promise<PlanLimits> {
-  // Default to free tier limits if no plan specified
-  if (!planName || planName === 'free') {
-    return {
-      maxPeople: null,
-      maxInitiatives: null,
-      maxTeams: null,
-      maxFeedbackCampaigns: null,
-    }
-  }
-
-  // Fetch all plans from Clerk to check if this is a free plan
-  const plans = await getAllClerkPlans()
-  const plan = plans.find(p => p.name === planName)
-
-  // If plan is found and has $0 fee, treat as free plan with unlimited limits
-  if (plan && plan.fee.amount === 0) {
-    return {
-      maxPeople: null,
-      maxInitiatives: null,
-      maxTeams: null,
-      maxFeedbackCampaigns: null,
-    }
-  }
-
-  // For paid plans or unknown plans, default to unlimited
-  // In the future, plan limits could be stored in Clerk plan features or metadata
-  return {
-    maxPeople: null,
-    maxInitiatives: null,
-    maxTeams: null,
-    maxFeedbackCampaigns: null,
-  }
+  console.log('getOrganizationLimits', JSON.stringify(subscription, null, 2))
+  return subscription.limits
 }
 
 /**
@@ -167,25 +45,28 @@ export async function getOrganizationSubscription(
   }
 
   try {
-    const clerkSubscription = await getClerkOrganizationSubscription(
-      organization.clerkOrganizationId
-    )
+    const clerkClient = getClerkClient()
+    const clerkSubscription =
+      await clerkClient.billing.getOrganizationBillingSubscription(
+        organization.clerkOrganizationId
+      )
 
     if (
       clerkSubscription &&
-      clerkSubscription.subscription_items &&
-      clerkSubscription.subscription_items.length > 0 &&
-      clerkSubscription.subscription_items[0]?.plan
+      clerkSubscription.subscriptionItems &&
+      clerkSubscription.subscriptionItems.length > 0 &&
+      clerkSubscription.subscriptionItems[0]?.plan
     ) {
-      const firstItem = clerkSubscription.subscription_items[0]
+      const firstItem = clerkSubscription.subscriptionItems[0]
       const plan = firstItem.plan
 
       // Get billing user ID from Clerk's payer information
+      // The payerId is on the subscription, and it's a Clerk user ID
       let billingUserId: string | null = null
-      if (firstItem.payer?.user_id) {
+      if (clerkSubscription.payerId) {
         // Find the user in our database by Clerk user ID
         const billingUser = await prisma.user.findUnique({
-          where: { clerkUserId: firstItem.payer.user_id },
+          where: { clerkUserId: clerkSubscription.payerId },
           select: { id: true },
         })
         if (billingUser) {
@@ -193,30 +74,48 @@ export async function getOrganizationSubscription(
         }
       }
 
+      const planLimits =
+        plan?.features?.reduce((acc: PlanLimits, f: Feature) => {
+          const [entity, limit] = f.slug.split('_') as [EntityName, string]
+          if (!EntityNameValues.includes(entity)) {
+            return acc
+          }
+
+          if (limit === 'unlimited') {
+            acc[entity] = null
+            return acc
+          }
+
+          try {
+            acc[entity] = parseInt(limit)
+          } catch {
+            acc[entity] = null
+          }
+
+          return acc
+        }, {} as PlanLimits) || null
+
+      console.log(planLimits)
+
       return {
         billingUserId: billingUserId,
         subscriptionPlanId: plan?.id || null,
         subscriptionPlanName: plan?.name || null,
         subscriptionStatus: clerkSubscription.status || 'active',
+        limits: planLimits,
       }
     }
 
     // No subscription items found - return null
     return null
   } catch (error) {
+    // Handle 404 as "no subscription" rather than an error
+    if (error instanceof Error && error.message.includes('404')) {
+      return null
+    }
     console.error('Error fetching Clerk organization subscription:', error)
     return null
   }
-}
-
-/**
- * Get organization limits based on subscription
- */
-export async function getOrganizationLimits(
-  organizationId: string
-): Promise<PlanLimits> {
-  const subscription = await getOrganizationSubscription(organizationId)
-  return await getPlanLimits(subscription?.subscriptionPlanName)
 }
 
 /**
@@ -226,34 +125,18 @@ export async function getOrganizationLimits(
  */
 export async function checkOrganizationLimit(
   organizationId: string,
-  limitType: keyof PlanLimits,
+  entity: EntityName,
   currentCount: number
-): Promise<{ allowed: boolean; limit: number | null; message?: string }> {
-  const limits = await getOrganizationLimits(organizationId)
-  const limit = limits[limitType]
-
-  // null means unlimited
-  if (limit === null) {
-    return { allowed: true, limit: null }
+): Promise<boolean> {
+  const subscription = await getOrganizationSubscription(organizationId)
+  if (!subscription) {
+    return true
   }
-
-  // Check if current count exceeds limit
-  if (currentCount >= limit) {
-    const limitTypeLabels: Record<keyof PlanLimits, string> = {
-      maxPeople: 'people',
-      maxInitiatives: 'initiatives',
-      maxTeams: 'teams',
-      maxFeedbackCampaigns: 'feedback campaigns',
-    }
-
-    return {
-      allowed: false,
-      limit,
-      message: `You have reached the limit of ${limit} ${limitTypeLabels[limitType]} for your subscription plan. Please upgrade your plan to add more.`,
-    }
+  const limits = subscription.limits
+  if (!limits || !limits[entity]) {
+    return true
   }
-
-  return { allowed: true, limit }
+  return currentCount < limits[entity]
 }
 
 /**
