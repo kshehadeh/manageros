@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.8.3](https://github.com/kshehadeh/manageros/compare/v1.8.2...v1.8.3) (2025-11-23)
+
+### Bug Fixes
+
+- **build:** Build error fixed ([30f68ff](https://github.com/kshehadeh/manageros/commit/30f68ffdb3843e8a7efcd6de6d2af37a84e8155f))
+- **ui:** Badge removal for role ([a499385](https://github.com/kshehadeh/manageros/commit/a49938555522dd1fb96c5fdbb55afa5b354d080c))
+- **users:** Manage users UI changes ([aa622dd](https://github.com/kshehadeh/manageros/commit/aa622dd3355ea86d84836b93a33216f057f4de4d))
+
 ## [1.8.2](https://github.com/kshehadeh/manageros/compare/v1.8.1...v1.8.2) (2025-11-22)
 
 ### Bug Fixes
