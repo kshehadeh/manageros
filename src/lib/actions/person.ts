@@ -236,7 +236,7 @@ export async function createPerson(formData: PersonFormData) {
   const limitCheck = await checkOrganizationLimit(
     user.managerOSOrganizationId,
     'people',
-    counts.people
+    counts?.people ?? 0
   )
 
   if (!limitCheck) {

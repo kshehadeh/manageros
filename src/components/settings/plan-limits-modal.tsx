@@ -112,7 +112,8 @@ export function PlanLimitsModal({
                 label: '',
                 icon: Users,
               }
-              const isUnlimited = limit === null || limit === undefined
+              const isUnlimited =
+                limit === null || limit === undefined || limit === 0
               const limitValue = limit ?? 0
               const percentage = isUnlimited
                 ? 0

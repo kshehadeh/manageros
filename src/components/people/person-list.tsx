@@ -209,8 +209,6 @@ export function SimplePeopleList({
       subheaderItems.push(<span key='email'>{person.email || 'No email'}</span>)
     }
 
-    console.log(subheaderItems)
-
     return (
       <SimpleListItem key={person.id}>
         <div

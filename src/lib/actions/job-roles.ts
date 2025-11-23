@@ -216,6 +216,7 @@ export async function createJobRole(data: JobRoleFormData) {
     })
 
     revalidatePath('/organization/settings')
+    revalidatePath('/organization/job-roles')
 
     return jobRole
   } catch (error) {
@@ -310,6 +311,7 @@ export async function updateJobRole(
     })
 
     revalidatePath('/organization/settings')
+    revalidatePath('/organization/job-roles')
 
     return updatedRole
   } catch (error) {
@@ -360,6 +362,7 @@ export async function deleteJobRole(id: string) {
     })
 
     revalidatePath('/organization/settings')
+    revalidatePath('/organization/job-roles')
 
     return { success: true }
   } catch (error) {
@@ -458,6 +461,7 @@ export async function createJobLevel(data: JobLevelFormData) {
     })
 
     revalidatePath('/organization/settings')
+    revalidatePath('/organization/job-roles')
 
     return jobLevel
   } catch (error) {
@@ -521,6 +525,7 @@ export async function updateJobLevel(
     })
 
     revalidatePath('/organization/settings')
+    revalidatePath('/organization/job-roles')
 
     return updatedLevel
   } catch (error) {
@@ -560,6 +565,7 @@ export async function updateJobLevelOrder(
     )
 
     revalidatePath('/organization/settings')
+    revalidatePath('/organization/job-roles')
 
     return { success: true }
   } catch (error) {
@@ -610,6 +616,7 @@ export async function deleteJobLevel(id: string) {
     })
 
     revalidatePath('/organization/settings')
+    revalidatePath('/organization/job-roles')
 
     return { success: true }
   } catch (error) {
@@ -696,6 +703,7 @@ export async function createJobDomain(data: JobDomainFormData) {
     })
 
     revalidatePath('/organization/settings')
+    revalidatePath('/organization/job-roles')
 
     return jobDomain
   } catch (error) {
@@ -759,6 +767,7 @@ export async function updateJobDomain(
     })
 
     revalidatePath('/organization/settings')
+    revalidatePath('/organization/job-roles')
 
     return updatedDomain
   } catch (error) {
@@ -809,6 +818,7 @@ export async function deleteJobDomain(id: string) {
     })
 
     revalidatePath('/organization/settings')
+    revalidatePath('/organization/job-roles')
 
     return { success: true }
   } catch (error) {

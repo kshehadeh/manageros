@@ -13,6 +13,7 @@ interface SectionHeaderProps {
   description?: ReactNode
   action?: ReactNode | ReactNode[]
   className?: string
+  variant?: 'default' | 'no-background'
 }
 
 export function SectionHeader({
@@ -21,6 +22,7 @@ export function SectionHeader({
   description,
   action,
   className = '',
+  variant = 'default',
 }: SectionHeaderProps) {
   const renderActions = () => {
     if (!action) return null
@@ -40,7 +42,9 @@ export function SectionHeader({
 
   return (
     <div
-      className={`flex items-start justify-between md:mx-0 md:px-lg ${className} mb-lg bg-muted p-lg`}
+      className={`flex items-start justify-between md:mx-0 md:px-lg ${className} mb-lg ${
+        variant === 'default' ? 'bg-muted p-lg' : ''
+      }`}
     >
       <div className='flex-1 flex items-start gap-lg'>
         <Icon className='w-6 h-6 shrink-0 mt-xs' />

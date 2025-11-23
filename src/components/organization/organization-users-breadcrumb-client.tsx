@@ -2,16 +2,16 @@
 
 import { usePageBreadcrumbs } from '@/lib/hooks/use-breadcrumb'
 
-interface JobRolesBreadcrumbClientProps {
+interface OrganizationUsersBreadcrumbClientProps {
   children: React.ReactNode
 }
 
-export function JobRolesBreadcrumbClient({
+export function OrganizationUsersBreadcrumbClient({
   children,
-}: JobRolesBreadcrumbClientProps) {
+}: OrganizationUsersBreadcrumbClientProps) {
   usePageBreadcrumbs([
     { name: 'Organization Settings', href: '/organization/settings' },
-    { name: 'Job Roles', href: '/organization/job-roles' },
+    { name: 'Manage Users', href: '/organization/users' },
   ])
 
   return <>{children}</>

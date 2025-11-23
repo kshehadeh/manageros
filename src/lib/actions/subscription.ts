@@ -7,7 +7,7 @@ import {
   type OrganizationSubscription,
   getOrganizationLimits,
 } from '@/lib/subscription-utils'
-import { EntityName, PlanLimits } from '../subscriptions'
+import { PlanLimits } from '../subscriptions'
 
 /**
  * Server action to get organization subscription information
@@ -40,7 +40,7 @@ export async function getOrganizationSubscriptionAction(
 
 export interface PlanLimitsAndCounts {
   limits: PlanLimits | null | undefined
-  counts: Record<EntityName, number>
+  counts: PlanLimits | null | undefined
   subscription: OrganizationSubscription | null
 }
 

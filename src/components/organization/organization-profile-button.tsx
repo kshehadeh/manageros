@@ -23,12 +23,12 @@ export function OrganizationProfileButton() {
         className='flex items-center gap-2'
       >
         <Settings className='w-4 h-4' />
-        <span className='hidden sm:inline'>Organization Settings</span>
+        <span className='hidden sm:inline'>Organization Manager</span>
       </Button>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className='max-w-4xl max-h-[90vh] overflow-y-auto'>
           <DialogHeader>
-            <DialogTitle>Organization Settings</DialogTitle>
+            <DialogTitle>Organization Manager</DialogTitle>
           </DialogHeader>
           <div className='mt-4'>
             <OrganizationProfile appearance={dark} routing='hash' />
