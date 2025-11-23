@@ -5,10 +5,9 @@ import {
   getOrganizationSubscription,
   getOrganizationCounts,
   type OrganizationSubscription,
-  type PlanLimits,
   getOrganizationLimits,
 } from '@/lib/subscription-utils'
-import { EntityName } from '../subscriptions'
+import { EntityName, PlanLimits } from '../subscriptions'
 
 /**
  * Server action to get organization subscription information
