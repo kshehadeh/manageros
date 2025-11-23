@@ -64,7 +64,7 @@ export async function createInitiative(formData: InitiativeFormData) {
   const limitCheck = await checkOrganizationLimit(
     user.managerOSOrganizationId,
     'initiatives',
-    counts.initiatives
+    counts?.initiatives ?? 0
   )
 
   if (!limitCheck) {

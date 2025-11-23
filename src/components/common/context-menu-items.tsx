@@ -202,20 +202,36 @@ export function SetDueDateMenuItem({
 
   // Calculate the quick date options
   const now = new Date()
-  const laterToday = new Date(now)
-  laterToday.setHours(23, 59, 59, 999)
 
+  // Later today: current time + 4 hours, rounded to nearest hour
+  const laterToday = new Date(now)
+  laterToday.setHours(laterToday.getHours() + 4)
+  // Round to nearest hour
+  const roundedHour = Math.round(
+    laterToday.getHours() + laterToday.getMinutes() / 60
+  )
+  laterToday.setHours(roundedHour, 0, 0, 0)
+
+  // Tomorrow: next day at 9am
   const tomorrow = new Date(now)
   tomorrow.setDate(tomorrow.getDate() + 1)
-  tomorrow.setHours(23, 59, 59, 999)
+  tomorrow.setHours(9, 0, 0, 0)
 
+  // Next Week: next Monday at 9am
   const nextWeek = new Date(now)
-  nextWeek.setDate(nextWeek.getDate() + 7)
-  nextWeek.setHours(23, 59, 59, 999)
+  const daysUntilMonday = (1 - nextWeek.getDay() + 7) % 7 || 7 // 1 = Monday, 0 = Sunday
+  nextWeek.setDate(nextWeek.getDate() + daysUntilMonday)
+  nextWeek.setHours(9, 0, 0, 0)
 
+  // Next Month: first workday (Monday-Friday) of next month at 9am
   const nextMonth = new Date(now)
-  nextMonth.setMonth(nextMonth.getMonth() + 1)
-  nextMonth.setHours(23, 59, 59, 999)
+  nextMonth.setMonth(nextMonth.getMonth() + 1, 1) // First day of next month
+  // Find first workday (Monday-Friday)
+  while (nextMonth.getDay() === 0 || nextMonth.getDay() === 6) {
+    // If Saturday (6) or Sunday (0), move to next day
+    nextMonth.setDate(nextMonth.getDate() + 1)
+  }
+  nextMonth.setHours(9, 0, 0, 0)
 
   return (
     <>

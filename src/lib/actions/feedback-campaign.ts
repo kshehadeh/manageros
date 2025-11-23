@@ -70,8 +70,8 @@ export async function createFeedbackCampaign(
   const counts = await getOrganizationCounts(user.managerOSOrganizationId)
   const limitCheck = await checkOrganizationLimit(
     user.managerOSOrganizationId,
-    'feedbackCampaigns',
-    counts.feedbackCampaigns
+    'feedbackcampaigns',
+    counts?.feedbackcampaigns ?? 0
   )
 
   if (!limitCheck) {

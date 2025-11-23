@@ -61,11 +61,11 @@ export function HighlightsSection({
 
   return (
     <PageSection header={<SectionHeader icon={Sparkles} title='Highlights' />}>
-      <div className='flex flex-wrap gap-3'>
+      <div className='flex flex-wrap gap-4'>
         {highlights.map((highlight, index) => (
           <Link key={index} href={highlight.href}>
             <Card
-              className={`flex items-center gap-2 px-4 py-2 ${highlight.bgColor} border-0 rounded-md shadow-none cursor-pointer hover:opacity-80 transition-opacity`}
+              className={`flex items-center gap-md px-lg py-md ${highlight.bgColor} border-0 rounded-md shadow-none cursor-pointer hover:opacity-80 transition-opacity`}
             >
               <div
                 className={`${highlight.color} flex items-center justify-center`}

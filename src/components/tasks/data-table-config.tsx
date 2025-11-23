@@ -39,7 +39,6 @@ import {
   SetDueDateMenuItem,
 } from '@/components/common/context-menu-items'
 import { toast } from 'sonner'
-import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { formatDistanceToNow } from 'date-fns'
 
 type TaskFilters = {
@@ -154,15 +153,6 @@ export const taskDataTableConfig: DataTableConfig<
                     {formatDistanceToNow(new Date(task.dueDate), {
                       addSuffix: true,
                     })}
-                  </div>
-                )}
-                {task.description && (
-                  <div className='line-clamp-2'>
-                    <ReadonlyNotesField
-                      content={task.description}
-                      variant='compact'
-                      showEmptyState={false}
-                    />
                   </div>
                 )}
               </div>

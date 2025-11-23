@@ -21,7 +21,6 @@ export async function getOrganizationLimits(
     return null
   }
 
-  console.log('getOrganizationLimits', JSON.stringify(subscription, null, 2))
   return subscription.limits
 }
 
@@ -95,8 +94,6 @@ export async function getOrganizationSubscription(
           return acc
         }, {} as PlanLimits) || null
 
-      console.log(planLimits)
-
       return {
         billingUserId: billingUserId,
         subscriptionPlanId: plan?.id || null,
@@ -142,7 +139,9 @@ export async function checkOrganizationLimit(
 /**
  * Get current counts for an organization
  */
-export async function getOrganizationCounts(organizationId: string) {
+export async function getOrganizationCounts(
+  organizationId: string
+): Promise<PlanLimits> {
   const [peopleCount, initiativesCount, teamsCount, feedbackCampaignsCount] =
     await Promise.all([
       prisma.person.count({
@@ -167,6 +166,6 @@ export async function getOrganizationCounts(organizationId: string) {
     people: peopleCount,
     initiatives: initiativesCount,
     teams: teamsCount,
-    feedbackCampaigns: feedbackCampaignsCount,
+    feedbackcampaigns: feedbackCampaignsCount,
   }
 }

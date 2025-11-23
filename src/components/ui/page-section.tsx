@@ -31,6 +31,7 @@ export function PageSection({
       <div
         className={cn(
           'flex-1',
+          hasHeader && 'pt-lg',
           variant === 'bordered' &&
             hasHeader &&
             'px-md pb-xl md:px-2xl md:pb-2xl'

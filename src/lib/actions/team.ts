@@ -220,7 +220,7 @@ export async function createTeam(formData: TeamFormData) {
   const limitCheck = await checkOrganizationLimit(
     user.managerOSOrganizationId,
     'teams',
-    counts.teams
+    counts?.teams ?? 0
   )
 
   if (!limitCheck) {

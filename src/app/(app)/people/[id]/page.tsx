@@ -7,7 +7,6 @@ import { isAdmin } from '@/lib/auth-utils'
 import { redirect } from 'next/navigation'
 import { getLinkedAccountAvatars } from '@/lib/actions/avatar'
 import { getPersonById } from '@/lib/data/people'
-import { getFeedbackCountForPerson } from '@/lib/data/feedback'
 import { getCurrentUser } from '@/lib/auth-utils'
 
 interface PersonDetailPageProps {
@@ -37,13 +36,6 @@ export default async function PersonDetailPage({
     notFound()
   }
 
-  // Get feedback count for this person (respecting privacy rules)
-  // Use user.managerOSPersonId directly - no need to fetch from database
-  const feedbackCount = await getFeedbackCountForPerson(
-    personResult.id,
-    user.managerOSPersonId || undefined
-  )
-
   // Add level field to match Person type requirements
   // Type assertion needed because Prisma types don't exactly match Person type
   const personWithLevel = {
@@ -71,7 +63,6 @@ export default async function PersonDetailPage({
         currentPersonId={user.managerOSPersonId || undefined}
         organizationId={user.managerOSOrganizationId}
         currentUserId={user.managerOSUserId || ''}
-        feedbackCount={feedbackCount}
       />
     </PersonDetailClient>
   )

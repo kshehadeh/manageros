@@ -242,33 +242,9 @@ export function TodaysPrioritiesSection({
   return (
     <>
       <PageSection
-        header={
-          <SectionHeader
-            icon={ListTodo}
-            title="Today's Priorities"
-            description={
-              <div className='hidden md:flex items-center gap-md text-xs text-muted-foreground'>
-                <Link href='/my-tasks' className='hover:underline'>
-                  View My Tasks
-                </Link>
-                <span>•</span>
-                <Link href='/oneonones' className='hover:underline'>
-                  View 1:1s
-                </Link>
-                <span>•</span>
-                <Link href='/feedback-campaigns' className='hover:underline'>
-                  View Feedback Campaigns
-                </Link>
-                <span>•</span>
-                <Link href='/meetings' className='hover:underline'>
-                  View Meetings
-                </Link>
-              </div>
-            }
-          />
-        }
+        header={<SectionHeader icon={ListTodo} title="Today's Priorities" />}
       >
-        <div className='flex flex-col gap-md'>
+        <div className='flex flex-col gap-lg'>
           {priorities.map(item => {
             if (item.type === 'task') {
               return (

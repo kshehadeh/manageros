@@ -1252,6 +1252,7 @@ export async function updateUserRole(
   await syncUserDataToClerk(targetUserBrief)
 
   revalidatePath('/organization/members')
+  revalidatePath('/organization/users')
   revalidatePath('/organization/settings')
 }
 
@@ -1410,6 +1411,7 @@ export async function becomeOrganizationOwner() {
 
   revalidatePath('/organization/settings')
   revalidatePath('/organization/members')
+  revalidatePath('/organization/users')
   revalidatePath('/dashboard')
 }
 
@@ -1563,6 +1565,7 @@ export async function removeUserFromOrganization(userId: string) {
   }
 
   revalidatePath('/organization/members')
+  revalidatePath('/organization/users')
   revalidatePath('/organization/settings')
 }
 
