@@ -2,10 +2,8 @@
 
 import { prisma } from '@/lib/db'
 import { getClerkClient } from './clerk'
-import { BillingSubscription, Feature } from '@clerk/backend'
-import { EntityName, EntityNameValues } from './subscriptions'
-
-export type PlanLimits = Record<EntityName, number | undefined | null>
+import { Feature } from '@clerk/backend'
+import { EntityName, EntityNameValues, PlanLimits } from './subscriptions'
 
 export interface OrganizationSubscription {
   billingUserId: string | null
@@ -13,14 +11,6 @@ export interface OrganizationSubscription {
   subscriptionPlanName: string | null
   subscriptionStatus: string | null
   limits: PlanLimits | null | undefined
-}
-
-export async function getUserSubscriptionInfo(
-  userId: string
-): Promise<BillingSubscription | null> {
-  // fetch this information directly from clerk
-  const clerkClient = getClerkClient()
-  return await clerkClient.billing.getUserBillingSubscription(userId)
 }
 
 export async function getOrganizationLimits(

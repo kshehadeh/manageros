@@ -89,6 +89,20 @@ Subscriptions in mpath are **organization-based**, not individual. This means th
 - **Billing user**: One person (usually the organization creator) owns the subscription
 - **Shared limits**: All members share the same subscription limits
 - **Automatic updates**: Subscription changes apply to the entire organization
+- **Managed in Clerk**: All subscription features and limits are configured and managed in the Clerk Dashboard
+
+### Feature Management
+
+**All features are managed in Clerk**: Subscription plans, features, and limits are configured entirely through the Clerk Dashboard. When you create or modify a subscription plan in Clerk, the features you define automatically determine the limits for your organization.
+
+**Feature Slug Format**: Limits are determined by feature slugs in the format `{entity}_{limit}`. For example:
+
+- `initiatives_5` means a maximum of 5 initiatives
+- `people_10` means a maximum of 10 people
+- `teams_unlimited` means unlimited teams
+- `feedbackcampaigns_2` means a maximum of 2 feedback campaigns
+
+The system automatically parses these feature slugs to determine the limits for each entity type. When creating a subscription plan in Clerk, you define features with these slugs to set the limits for your organization.
 
 ### Subscription Plans
 

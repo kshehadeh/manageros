@@ -22,18 +22,42 @@ The pricing page has been integrated with Clerk's billing system to handle subsc
 
 In the Clerk Dashboard, create your subscription plans:
 
+**Important**: All features are managed in Clerk. The feature slugs you define in Clerk determine the limits for your organization.
+
+#### Feature Slug Format
+
+Limits are determined by feature slugs in the format `{entity}_{limit}`:
+
+- `{entity}` must be one of: `people`, `initiatives`, `teams`, `feedbackcampaigns`
+- `{limit}` can be a number (e.g., `5`, `10`) or `unlimited`
+- Examples:
+  - `initiatives_5` → Maximum of 5 initiatives
+  - `people_10` → Maximum of 10 people
+  - `teams_unlimited` → Unlimited teams
+  - `feedbackcampaigns_2` → Maximum of 2 feedback campaigns
+
+The system automatically parses these feature slugs from the subscription plan to determine limits.
+
 #### Solo Plan (Free)
 
 - Plan Name: `Solo`
 - Price: `$0` (Free)
-- Features: Up to 5 employees, 10 open initiatives, 2 concurrent feedback campaigns, 2 teams
+- Features (add these feature slugs in Clerk):
+  - `people_5` (Up to 5 people)
+  - `initiatives_10` (Up to 10 initiatives)
+  - `teams_2` (Up to 2 teams)
+  - `feedbackcampaigns_2` (Up to 2 feedback campaigns)
 
 #### Orchestrator Plan (Paid)
 
 - Plan Name: `Orchestrator`
 - Price: `$4.99/month`
 - Trial Period: `14 days`
-- Features: Unlimited employees, initiatives, feedback campaigns, and teams
+- Features (add these feature slugs in Clerk):
+  - `people_unlimited` (Unlimited people)
+  - `initiatives_unlimited` (Unlimited initiatives)
+  - `teams_unlimited` (Unlimited teams)
+  - `feedbackcampaigns_unlimited` (Unlimited feedback campaigns)
 
 ### 3. Configure Environment Variables
 
@@ -162,18 +186,38 @@ If the URL format changes, update `src/app/api/billing/checkout/route.ts`.
 
 ## Subscription Limits
 
-Subscription limits are enforced at the organization level. Limits are defined in `src/lib/subscription-utils.ts`:
+Subscription limits are enforced at the organization level. **All features and limits are managed in Clerk** - they are not hardcoded in the application.
+
+### How Limits Are Determined
+
+Limits are automatically parsed from feature slugs defined in Clerk subscription plans. The feature slug format is `{entity}_{limit}`:
+
+- **Entity types**: `people`, `initiatives`, `teams`, `feedbackcampaigns`
+- **Limit values**: A number (e.g., `5`, `10`) or `unlimited`
+- **Examples**:
+  - `initiatives_5` → Maximum of 5 initiatives
+  - `people_unlimited` → Unlimited people
+  - `teams_2` → Maximum of 2 teams
+
+The system reads these feature slugs from the Clerk subscription plan and converts them into limit values. This happens in `src/lib/subscription-utils.ts` in the `getOrganizationSubscription()` function.
 
 ### Solo Plan (Free)
 
-- Max People: 5
-- Max Initiatives: 10
-- Max Teams: 2
-- Max Feedback Campaigns: 2
+When configured in Clerk with these feature slugs:
+
+- `people_5` → Max People: 5
+- `initiatives_10` → Max Initiatives: 10
+- `teams_2` → Max Teams: 2
+- `feedbackcampaigns_2` → Max Feedback Campaigns: 2
 
 ### Orchestrator Plan (Paid)
 
-- All limits: Unlimited (null)
+When configured in Clerk with these feature slugs:
+
+- `people_unlimited` → Unlimited people
+- `initiatives_unlimited` → Unlimited initiatives
+- `teams_unlimited` → Unlimited teams
+- `feedbackcampaigns_unlimited` → Unlimited feedback campaigns
 
 ### Limit Enforcement
 
