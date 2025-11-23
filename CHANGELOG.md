@@ -1,5 +1,7 @@
 # Changelog
 
+## [1.8.4](https://github.com/kshehadeh/manageros/compare/v1.8.3...v1.8.4) (2025-11-23)
+
 ## [1.8.3](https://github.com/kshehadeh/manageros/compare/v1.8.2...v1.8.3) (2025-11-23)
 
 ### Bug Fixes
