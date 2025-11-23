@@ -3,9 +3,11 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { OrganizationSetupCards } from '@/components/organization-setup-cards'
-import { Users } from 'lucide-react'
+import { Users, BarChart3 } from 'lucide-react'
 import { Link } from '@/components/ui/link'
 import type { PendingInvitation } from '@/types/organization'
+import { OrganizationProfileButton } from '@/components/organization/organization-profile-button'
+import { PlanLimitsModal } from '@/components/settings/plan-limits-modal'
 
 interface Organization {
   id: string
@@ -16,16 +18,23 @@ interface Organization {
 interface OrganizationSectionProps {
   organizationId: string | null
   organizationName: string | null
+  organizationSlug: string | null
+  billingPlanName: string | null
+  isAdmin: boolean
   pendingInvitations: PendingInvitation[]
 }
 
 export function OrganizationSection({
   organizationId,
   organizationName,
+  organizationSlug,
+  billingPlanName,
+  isAdmin,
 }: OrganizationSectionProps) {
   const [loading, setLoading] = useState(true)
   const [invitations, setInvitations] = useState<PendingInvitation[]>([])
   const [organizations, setOrganizations] = useState<Organization[]>([])
+  const [planLimitsModalOpen, setPlanLimitsModalOpen] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,6 +76,20 @@ export function OrganizationSection({
             <p className='text-sm font-medium'>Organization Name</p>
             <p className='text-sm text-muted-foreground'>{organizationName}</p>
           </div>
+          {organizationSlug && (
+            <div>
+              <p className='text-sm font-medium'>Organization Slug</p>
+              <p className='text-sm text-muted-foreground font-mono text-xs'>
+                {organizationSlug}
+              </p>
+            </div>
+          )}
+          {billingPlanName && (
+            <div>
+              <p className='text-sm font-medium'>Billing Plan</p>
+              <p className='text-sm text-muted-foreground'>{billingPlanName}</p>
+            </div>
+          )}
           <div>
             <p className='text-sm font-medium'>Organization ID</p>
             <p className='text-sm text-muted-foreground font-mono text-xs'>
@@ -74,7 +97,7 @@ export function OrganizationSection({
             </p>
           </div>
         </div>
-        <div className='border-t pt-4'>
+        <div className='border-t pt-4 flex gap-2'>
           <Button asChild variant='outline'>
             <Link
               href='/organization/settings'
@@ -84,7 +107,20 @@ export function OrganizationSection({
               Manage Users
             </Link>
           </Button>
+          <Button
+            variant='outline'
+            onClick={() => setPlanLimitsModalOpen(true)}
+          >
+            <BarChart3 className='w-4 h-4' />
+            View Limits
+          </Button>
+          {isAdmin && <OrganizationProfileButton />}
         </div>
+        <PlanLimitsModal
+          organizationId={organizationId}
+          open={planLimitsModalOpen}
+          onOpenChange={setPlanLimitsModalOpen}
+        />
       </div>
     )
   }

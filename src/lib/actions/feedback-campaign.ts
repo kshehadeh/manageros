@@ -70,12 +70,12 @@ export async function createFeedbackCampaign(
   const counts = await getOrganizationCounts(user.managerOSOrganizationId)
   const limitCheck = await checkOrganizationLimit(
     user.managerOSOrganizationId,
-    'maxFeedbackCampaigns',
+    'feedbackCampaigns',
     counts.feedbackCampaigns
   )
 
-  if (!limitCheck.allowed) {
-    throw new Error(limitCheck.message || 'Feedback campaigns limit exceeded')
+  if (!limitCheck) {
+    throw new Error('Feedback campaigns limit exceeded')
   }
 
   // Generate a unique invite link token

@@ -219,12 +219,12 @@ export async function createTeam(formData: TeamFormData) {
   const counts = await getOrganizationCounts(user.managerOSOrganizationId)
   const limitCheck = await checkOrganizationLimit(
     user.managerOSOrganizationId,
-    'maxTeams',
+    'teams',
     counts.teams
   )
 
-  if (!limitCheck.allowed) {
-    throw new Error(limitCheck.message || 'Teams limit exceeded')
+  if (!limitCheck) {
+    throw new Error('Teams limit exceeded')
   }
 
   // Create the team

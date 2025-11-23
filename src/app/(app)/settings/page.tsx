@@ -17,7 +17,11 @@ import { PageContent } from '@/components/ui/page-content'
 import { User, Settings, Shield, Building } from 'lucide-react'
 import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
-import { getCurrentUserWithPersonAndOrganization } from '../../../lib/auth-utils'
+import {
+  getCurrentUserWithPersonAndOrganization,
+  isAdminOrOwner,
+} from '../../../lib/auth-utils'
+import { getOrganizationSubscription } from '@/lib/subscription-utils'
 
 export default async function SettingsPage() {
   const { user, person, organization } =
@@ -33,6 +37,15 @@ export default async function SettingsPage() {
       getGithubCredentials(),
       getPendingInvitationsForUser(user.clerkUserId || null),
     ])
+
+  // Get billing plan information if organization exists
+  let billingPlanName: string | null = null
+  if (organization?.id) {
+    const subscription = await getOrganizationSubscription(organization.id)
+    billingPlanName = subscription?.subscriptionPlanName || null
+  }
+
+  const isAdmin = isAdminOrOwner(user)
 
   return (
     <PageContainer>
@@ -66,6 +79,9 @@ export default async function SettingsPage() {
               <OrganizationSection
                 organizationId={organization?.id || null}
                 organizationName={organization?.name || null}
+                organizationSlug={organization?.slug || null}
+                billingPlanName={billingPlanName}
+                isAdmin={isAdmin}
                 pendingInvitations={pendingInvitations}
               />
             </PageSection>

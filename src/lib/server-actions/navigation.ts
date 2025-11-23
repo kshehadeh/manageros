@@ -42,12 +42,6 @@ export async function getFilteredNavigation() {
       icon: 'BarChart3',
       requiresPermission: 'report.access',
     },
-    {
-      name: 'Manage Users',
-      href: '/organization/settings',
-      icon: 'Users',
-      adminOnly: true,
-    },
   ]
 
   // Filter navigation based on organization membership and admin role
