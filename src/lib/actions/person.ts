@@ -577,9 +577,6 @@ export async function deletePerson(id: string) {
 
   // Revalidate the people page
   revalidatePath('/people')
-
-  // Redirect to the people page
-  redirect('/people')
 }
 
 export async function getPerson(id: string) {
