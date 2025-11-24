@@ -3,11 +3,14 @@
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { MoreHorizontal } from 'lucide-react'
+import { MoreHorizontal, CheckCircle2, XCircle } from 'lucide-react'
 import { Link } from '@/components/ui/link'
 import { formatDistanceToNow } from 'date-fns'
-import { initiativeStatusUtils } from '@/lib/initiative-status'
-import type { InitiativeStatus } from '@/lib/initiative-status'
+import {
+  initiativeStatusUtils,
+  INITIATIVE_STATUS,
+  type InitiativeStatus,
+} from '@/lib/initiative-status'
 import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
 import {
   ViewDetailsMenuItem,
@@ -111,15 +114,40 @@ export function SimpleInitiativeList({
     const statusVariant = initiativeStatusUtils.getVariant(
       initiative.status as InitiativeStatus
     )
+    const isDone = initiative.status === INITIATIVE_STATUS.DONE
+    const isCancelled = initiative.status === INITIATIVE_STATUS.CANCELED
+    const isCompleted = isDone || isCancelled
+
+    // Render status icon or RAG circle
+    const renderStatusIndicator = () => {
+      if (isDone) {
+        return (
+          <CheckCircle2 className='h-3.5 w-3.5 text-green-600 dark:text-green-500' />
+        )
+      }
+      if (isCancelled) {
+        return (
+          <XCircle className='h-3.5 w-3.5 text-red-600 dark:text-red-500' />
+        )
+      }
+      return <RagCircle rag={initiative.rag} size='small' />
+    }
 
     return (
-      <SimpleListItem key={initiative.id}>
+      <SimpleListItem
+        key={initiative.id}
+        className={isCompleted ? 'bg-muted/30' : ''}
+      >
         <Link
           href={`/initiatives/${initiative.id}`}
           className='flex items-start gap-3 flex-1 min-w-0'
         >
           <div className='flex-1 min-w-0'>
-            <h3 className='font-medium text-sm truncate mb-1'>
+            <h3
+              className={`font-medium text-sm truncate mb-1 ${
+                isCompleted ? 'line-through' : ''
+              }`}
+            >
               {initiative.title}
             </h3>
 
@@ -129,7 +157,7 @@ export function SimpleInitiativeList({
                   initiative.status as InitiativeStatus
                 )}
               </Badge>
-              <RagCircle rag={initiative.rag} size='small' />
+              {renderStatusIndicator()}
               {initiative.team && variant === 'compact' && (
                 <>
                   <span className='truncate'>{initiative.team.name}</span>

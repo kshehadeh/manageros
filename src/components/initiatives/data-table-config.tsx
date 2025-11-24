@@ -3,12 +3,14 @@
 import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { MoreHorizontal } from 'lucide-react'
+import { MoreHorizontal, CheckCircle2, XCircle } from 'lucide-react'
 import { RagCircle } from '@/components/rag'
 import type { InitiativeWithRelations } from '@/types/initiative'
 import { calculateInitiativeCompletionPercentage } from '@/lib/completion-utils'
 import {
   initiativeStatusUtils,
+  INITIATIVE_STATUS,
+  COMPLETED_STATUSES,
   type InitiativeStatus,
 } from '@/lib/initiative-status'
 import { useInitiatives } from '@/hooks/use-initiatives'
@@ -62,6 +64,23 @@ export const initiativeDataTableConfig: DataTableConfig<
         accessorKey: 'rag',
         cell: ({ row }) => {
           const initiative = row.original
+          const isDone = initiative.status === INITIATIVE_STATUS.DONE
+          const isCancelled = initiative.status === INITIATIVE_STATUS.CANCELED
+
+          if (isDone) {
+            return (
+              <div className='flex items-start justify-center pt-1'>
+                <CheckCircle2 className='h-4 w-4 text-green-600 dark:text-green-500' />
+              </div>
+            )
+          }
+          if (isCancelled) {
+            return (
+              <div className='flex items-start justify-center pt-1'>
+                <XCircle className='h-4 w-4 text-red-600 dark:text-red-500' />
+              </div>
+            )
+          }
           return (
             <div className='flex items-start justify-center pt-1'>
               <RagCircle rag={initiative.rag} />
@@ -88,13 +107,34 @@ export const initiativeDataTableConfig: DataTableConfig<
           const statusLabel = initiativeStatusUtils.getLabel(
             initiative.status as InitiativeStatus
           )
+          const isDone = initiative.status === INITIATIVE_STATUS.DONE
+          const isCancelled = initiative.status === INITIATIVE_STATUS.CANCELED
+          const isCompleted = isDone || isCancelled
+
+          // Render status icon or RAG circle
+          const renderStatusIndicator = () => {
+            if (isDone) {
+              return (
+                <CheckCircle2 className='h-4 w-4 text-green-600 dark:text-green-500' />
+              )
+            }
+            if (isCancelled) {
+              return (
+                <XCircle className='h-4 w-4 text-red-600 dark:text-red-500' />
+              )
+            }
+            return <RagCircle rag={initiative.rag} />
+          }
+
           return (
             <div className='flex items-start gap-2'>
-              <div className='pt-1'>
-                <RagCircle rag={initiative.rag} />
-              </div>
+              <div className='pt-1'>{renderStatusIndicator()}</div>
               <div className='space-y-0.5 flex-1'>
-                <div className='font-medium'>{initiative.title}</div>
+                <div
+                  className={`font-medium ${isCompleted ? 'line-through' : ''}`}
+                >
+                  {initiative.title}
+                </div>
                 <div className='text-xs text-muted-foreground'>
                   {teamName} • {statusLabel}
                 </div>
@@ -273,5 +313,13 @@ export const initiativeDataTableConfig: DataTableConfig<
       return groupValue.charAt(0).toUpperCase() + groupValue.slice(1)
     }
     return groupValue || 'Unassigned'
+  },
+
+  // Custom row className for completed initiatives
+  getRowClassName: (initiative: InitiativeWithRelations) => {
+    if (COMPLETED_STATUSES.includes(initiative.status as InitiativeStatus)) {
+      return 'bg-muted/30'
+    }
+    return ''
   },
 }
