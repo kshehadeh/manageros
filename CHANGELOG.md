@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.5](https://github.com/kshehadeh/manageros/compare/v1.8.4...v1.8.5) (2025-11-24)
+
+### Bug Fixes
+
+- **build:** Fix build error ([0c1ac8b](https://github.com/kshehadeh/manageros/commit/0c1ac8b8ce422ff2740bcce82801fba556a17c99))
+- **various:** Fixed various UI issues and put organization settings in the sidebar ([da27262](https://github.com/kshehadeh/manageros/commit/da27262242a9f083d06c6aadebd7a07f41684a11))
+
 ## [1.8.4](https://github.com/kshehadeh/manageros/compare/v1.8.3...v1.8.4) (2025-11-23)
 
 ## [1.8.3](https://github.com/kshehadeh/manageros/compare/v1.8.2...v1.8.3) (2025-11-23)
