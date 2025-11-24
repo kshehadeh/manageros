@@ -44,7 +44,7 @@ export function InitiativeTasksClient({
     ? [
         <Button
           onClick={() => setIsAddModalOpen(true)}
-          variant='outline'
+          variant='default'
           size='sm'
           key='add-task'
         >

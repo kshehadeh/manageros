@@ -469,13 +469,6 @@ input[type='time']::-webkit-calendar-picker-indicator {
   gap: var(--spacing-lg);
 }
 
-.page-header {
-  margin-bottom: 0;
-  margin-left: calc(-1 * var(--spacing-lg));
-  margin-right: calc(-1 * var(--spacing-lg));
-  padding-left: var(--spacing-lg);
-  padding-right: var(--spacing-lg);
-}
 @media (min-width: 768px) {
   .page-header {
     margin-left: 0;

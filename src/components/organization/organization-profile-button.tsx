@@ -9,7 +9,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { OrganizationProfile, SignedIn } from '@clerk/nextjs'
-import { dark } from '@clerk/themes'
 import { Settings } from 'lucide-react'
 
 export function OrganizationProfileButton() {
@@ -31,7 +30,7 @@ export function OrganizationProfileButton() {
             <DialogTitle>Organization Manager</DialogTitle>
           </DialogHeader>
           <div className='mt-4'>
-            <OrganizationProfile appearance={dark} routing='hash' />
+            <OrganizationProfile routing='hash' />
           </div>
         </DialogContent>
       </Dialog>

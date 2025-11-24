@@ -67,7 +67,7 @@ export function CreateObjectiveModal({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant='outline' className='flex items-center gap-2'>
+        <Button variant='default' className='flex items-center gap-2'>
           <Plus className='h-4 w-4' />
           Add Objective
         </Button>

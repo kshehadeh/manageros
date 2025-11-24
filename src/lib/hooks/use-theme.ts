@@ -13,12 +13,10 @@ export function useTheme() {
     // Migrate from old storage key to new one if needed
     if (typeof window !== 'undefined') {
       const localStorageTheme = localStorage.getItem('manageros-theme')
-      const oldStorageTheme = localStorage.getItem('theme') // Check for old key too
 
       // If old key exists but new key doesn't, migrate it
-      if (oldStorageTheme && !localStorageTheme) {
-        localStorage.setItem('manageros-theme', oldStorageTheme)
-        localStorage.removeItem('theme')
+      if (!localStorageTheme) {
+        localStorage.setItem('manageros-theme', 'dark')
       }
     }
   }, [])
