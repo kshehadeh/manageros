@@ -1,5 +1,16 @@
 # Changelog
 
+# [1.9.0](https://github.com/kshehadeh/manageros/compare/v1.8.6...v1.9.0) (2025-11-24)
+
+### Bug Fixes
+
+- **organization:** Include organization details when fetching user and organization data ([2c7b704](https://github.com/kshehadeh/manageros/commit/2c7b704b3a7d56529cc09cbdf6631679d975b4ea))
+- **ui:** Update DialogContent size in CreateObjectiveModal for improved layout ([76ffe39](https://github.com/kshehadeh/manageros/commit/76ffe3910f4030723f863e51f43eea998719bb3f))
+
+### Features
+
+- **data:** Add jiraAccount and githubAccount fields to person data retrieval ([e1aeff7](https://github.com/kshehadeh/manageros/commit/e1aeff71e6008a58fc8a29115631e34f9a9536e7))
+
 ## [1.8.6](https://github.com/kshehadeh/manageros/compare/v1.8.5...v1.8.6) (2025-11-24)
 
 ### Bug Fixes
