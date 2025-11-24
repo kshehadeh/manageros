@@ -413,7 +413,15 @@ export async function getFilteredNavigation(user: UserBrief | null) {
     return []
   }
 
-  const navigation = [
+  interface NavigationItem {
+    name: string
+    href: string
+    icon: string
+    adminOnly: boolean
+    requiresPermission?: PermissionType
+  }
+
+  const navigation: NavigationItem[] = [
     { name: 'Dashboard', href: '/dashboard', icon: 'Home', adminOnly: false },
     {
       name: 'My Tasks',
