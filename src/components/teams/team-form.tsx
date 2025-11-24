@@ -6,6 +6,7 @@ import { Users } from 'lucide-react'
 import { TeamSelect } from '@/components/ui/team-select'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createTeam, updateTeam } from '@/lib/actions/team'
 import { type TeamFormData } from '@/lib/validations'
 import { FormTemplate, type FormSection } from '@/components/ui/form-template'
@@ -32,6 +33,7 @@ export function TeamForm({
   parentId,
   header: externalHeader,
 }: TeamFormProps) {
+  const router = useRouter()
   const [formData, setFormData] = useState<TeamFormData>({
     name: team?.name || '',
     description: team?.description || '',
@@ -46,25 +48,31 @@ export function TeamForm({
     setIsSubmitting(true)
     setError('')
 
+    let result
     try {
       if (team) {
-        await updateTeam(team.id, formData)
+        result = await updateTeam(team.id, formData)
       } else {
-        await createTeam(formData)
+        result = await createTeam(formData)
       }
     } catch (error) {
       console.error('Error submitting form:', error)
-
-      // Don't handle redirect errors - let them bubble up
-      if (error && typeof error === 'object' && 'digest' in error) {
-        const digest = (error as { digest?: string }).digest
-        if (digest?.startsWith('NEXT_REDIRECT')) {
-          throw error // Re-throw redirect errors
-        }
-      }
-
       setError(error instanceof Error ? error.message : 'An error occurred')
       setIsSubmitting(false)
+      return
+    }
+
+    // Redirect outside of try-catch block
+    setIsSubmitting(false)
+    if (team) {
+      // When updating, redirect to the team detail page
+      router.push(`/teams/${team.id}`)
+    } else if (result?.id) {
+      // When creating, redirect to the new team detail page
+      router.push(`/teams/${result.id}`)
+    } else {
+      // Fallback to teams list
+      router.push('/teams')
     }
   }
 

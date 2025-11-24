@@ -1,19 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Link } from '@/components/ui/link'
-import { Edit, Trash2 } from 'lucide-react'
+import { Edit, Trash2, Plus } from 'lucide-react'
 import { deleteInitiative } from '@/lib/actions/initiative'
 import { ActionDropdown } from '@/components/common/action-dropdown'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { toast } from 'sonner'
+import {
+  TaskQuickEditDialog,
+  type TaskQuickEditDialogRef,
+} from '@/components/tasks/task-quick-edit-dialog'
 
 export interface InitiativeActionsDropdownProps {
   initiativeId: string
   size?: 'sm' | 'default'
   canEdit?: boolean
   canDelete?: boolean
+  canCreateTask?: boolean
 }
 
 export function InitiativeActionsDropdown({
@@ -21,10 +26,13 @@ export function InitiativeActionsDropdown({
   size = 'default',
   canEdit = false,
   canDelete = false,
+  canCreateTask = false,
 }: InitiativeActionsDropdownProps) {
   const router = useRouter()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [showTaskDialog, setShowTaskDialog] = useState(false)
+  const taskDialogRef = useRef<TaskQuickEditDialogRef>(null)
 
   const handleDelete = async () => {
     setIsDeleting(true)
@@ -44,8 +52,16 @@ export function InitiativeActionsDropdown({
   }
 
   // Don't show dropdown if user has no permissions
-  if (!canEdit && !canDelete) {
+  if (!canEdit && !canDelete && !canCreateTask) {
     return null
+  }
+
+  const handleTaskDialogOpen = () => {
+    setShowTaskDialog(true)
+    // Small delay to ensure the dialog is fully rendered before focusing
+    setTimeout(() => {
+      taskDialogRef.current?.focus()
+    }, 100)
   }
 
   return (
@@ -53,6 +69,24 @@ export function InitiativeActionsDropdown({
       <ActionDropdown size={size}>
         {({ close }) => (
           <div className='py-1'>
+            {canCreateTask && (
+              <button
+                className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
+                onClick={event => {
+                  event.stopPropagation()
+                  close()
+                  handleTaskDialogOpen()
+                }}
+              >
+                <Plus className='w-4 h-4' />
+                New Task
+              </button>
+            )}
+
+            {canCreateTask && canEdit && (
+              <div className='border-t border-border my-1' />
+            )}
+
             {canEdit && (
               <Link
                 href={`/initiatives/${initiativeId}/edit`}
@@ -64,7 +98,7 @@ export function InitiativeActionsDropdown({
               </Link>
             )}
 
-            {canEdit && canDelete && (
+            {(canCreateTask || canEdit) && canDelete && (
               <div className='border-t border-border my-1' />
             )}
 
@@ -92,6 +126,16 @@ export function InitiativeActionsDropdown({
         title='Delete Initiative'
         entityName='initiative'
         isLoading={isDeleting}
+      />
+
+      <TaskQuickEditDialog
+        ref={taskDialogRef}
+        open={showTaskDialog}
+        onOpenChange={setShowTaskDialog}
+        initiativeId={initiativeId}
+        onSuccess={() => {
+          setShowTaskDialog(false)
+        }}
       />
     </>
   )

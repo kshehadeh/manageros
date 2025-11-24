@@ -14,6 +14,7 @@ import { PersonSelect } from '@/components/ui/person-select'
 import { TeamSelect } from '@/components/ui/team-select'
 import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { updateInitiative, createInitiative } from '@/lib/actions/initiative'
 import { type InitiativeFormData, initiativeSchema } from '@/lib/validations'
 import { RagCircle } from '@/components/rag'
@@ -113,6 +114,7 @@ export function InitiativeForm({
       : [{ personId: preselectedOwnerId || '', role: 'owner' as const }]
   )
 
+  const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -121,6 +123,7 @@ export function InitiativeForm({
     setIsSubmitting(true)
     setErrors({})
 
+    let result
     try {
       const submitData = {
         ...formData,
@@ -132,9 +135,9 @@ export function InitiativeForm({
       const validatedData = initiativeSchema.parse(submitData)
 
       if (initiative) {
-        await updateInitiative(initiative.id, validatedData)
+        result = await updateInitiative(initiative.id, validatedData)
       } else {
-        await createInitiative(validatedData)
+        result = await createInitiative(validatedData)
       }
     } catch (error: unknown) {
       console.error(
@@ -162,8 +165,18 @@ export function InitiativeForm({
             : `Error ${initiative ? 'updating' : 'creating'} initiative. Please try again.`
         setErrors({ general: errorMessage })
       }
-    } finally {
       setIsSubmitting(false)
+      return
+    }
+
+    // Redirect outside of try-catch block
+    setIsSubmitting(false)
+    if (initiative) {
+      // When updating, redirect to the initiative detail page
+      router.push(`/initiatives/${initiative.id}`)
+    } else if (result?.id) {
+      // When creating, redirect to the new initiative detail page
+      router.push(`/initiatives/${result.id}`)
     }
   }
 

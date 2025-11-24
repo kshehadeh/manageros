@@ -14,6 +14,7 @@ import { PersonSelect } from '@/components/ui/person-select'
 import { TeamSelect } from '@/components/ui/team-select'
 import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createPerson, updatePerson } from '@/lib/actions/person'
 import { type PersonFormData, personSchema } from '@/lib/validations'
 import { UserLinkForm } from '@/components/user-link-form'
@@ -99,6 +100,7 @@ export function PersonForm({
     startedAt: formatDateToISO(person?.startedAt || null),
   })
 
+  const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -107,25 +109,18 @@ export function PersonForm({
     setIsSubmitting(true)
     setErrors({})
 
+    let result
     try {
       // Validate the form data using Zod schema
       const validatedData = personSchema.parse(formData)
 
       if (person) {
-        await updatePerson(person.id, validatedData)
+        result = await updatePerson(person.id, validatedData)
       } else {
-        await createPerson(validatedData)
+        result = await createPerson(validatedData)
       }
     } catch (error: unknown) {
       console.error('Error submitting form:', error)
-
-      // Don't handle redirect errors - let them bubble up
-      if (error && typeof error === 'object' && 'digest' in error) {
-        const digest = (error as { digest?: string }).digest
-        if (digest?.startsWith('NEXT_REDIRECT')) {
-          throw error // Re-throw redirect errors
-        }
-      }
 
       if (error && typeof error === 'object' && 'issues' in error) {
         // Handle Zod validation errors
@@ -147,8 +142,18 @@ export function PersonForm({
             : 'Error submitting form. Please try again.'
         setErrors({ general: errorMessage })
       }
-    } finally {
       setIsSubmitting(false)
+      return
+    }
+
+    // Redirect outside of try-catch block
+    setIsSubmitting(false)
+    if (person) {
+      // When updating, redirect to the person detail page
+      router.push(`/people/${person.id}`)
+    } else if (result?.id) {
+      // When creating, redirect to the new person detail page
+      router.push(`/people/${result.id}`)
     }
   }
 

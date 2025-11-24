@@ -3,7 +3,6 @@
 import { prisma } from '@/lib/db'
 import { teamSchema, type TeamFormData } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
 import type {
   TeamWithHierarchy,
@@ -228,7 +227,7 @@ export async function createTeam(formData: TeamFormData) {
   }
 
   // Create the team
-  await prisma.team.create({
+  const createdTeam = await prisma.team.create({
     data: {
       name: validatedData.name,
       description: validatedData.description,
@@ -253,8 +252,8 @@ export async function createTeam(formData: TeamFormData) {
   // Revalidate the teams page
   revalidatePath('/teams')
 
-  // Redirect to the teams page
-  redirect('/teams')
+  // Return the created team
+  return createdTeam
 }
 
 export async function updateTeam(id: string, formData: TeamFormData) {
@@ -299,7 +298,7 @@ export async function updateTeam(id: string, formData: TeamFormData) {
   }
 
   // Update the team
-  await prisma.team.update({
+  const updatedTeam = await prisma.team.update({
     where: { id },
     data: {
       name: validatedData.name,
@@ -324,8 +323,8 @@ export async function updateTeam(id: string, formData: TeamFormData) {
   // Revalidate the teams page
   revalidatePath('/teams')
 
-  // Redirect to the teams page
-  redirect('/teams')
+  // Return the updated team
+  return updatedTeam
 }
 
 export async function deleteTeam(id: string) {

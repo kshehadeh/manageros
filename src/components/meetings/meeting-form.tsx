@@ -100,6 +100,7 @@ export function MeetingForm({
     setIsSubmitting(true)
     setErrors({})
 
+    let result
     try {
       // Convert 'none' and empty string values to undefined for validation
       const processedFormData = {
@@ -130,13 +131,9 @@ export function MeetingForm({
       const validatedData = meetingSchema.parse(processedFormData)
 
       if (isEditing && meetingId) {
-        await updateMeeting(meetingId, validatedData)
-        // Redirect to the meeting detail page
-        router.push(`/meetings/${meetingId}`)
+        result = await updateMeeting(meetingId, validatedData)
       } else {
-        const meeting = await createMeeting(validatedData)
-        // Redirect to the new meeting detail page
-        router.push(`/meetings/${meeting.id}`)
+        result = await createMeeting(validatedData)
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -150,8 +147,16 @@ export function MeetingForm({
         })
         setErrors(fieldErrors)
       }
-    } finally {
       setIsSubmitting(false)
+      return
+    }
+
+    // Redirect outside of try-catch block
+    setIsSubmitting(false)
+    if (isEditing && meetingId) {
+      router.push(`/meetings/${meetingId}`)
+    } else if (result?.id) {
+      router.push(`/meetings/${result.id}`)
     }
   }
 

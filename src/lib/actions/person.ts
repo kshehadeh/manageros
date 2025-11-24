@@ -8,7 +8,6 @@ import {
   type PersonUpdateData,
 } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 import { Prisma } from '@prisma/client'
 import { getTasksForAssignee } from '@/lib/data/tasks'
@@ -276,8 +275,8 @@ export async function createPerson(formData: PersonFormData) {
   // Revalidate the new person's detail page
   revalidatePath(`/people/${createdPerson.id}`)
 
-  // Redirect to the new person's detail page
-  redirect(`/people/${createdPerson.id}`)
+  // Return the created person
+  return createdPerson
 }
 
 export async function updatePerson(id: string, formData: PersonFormData) {
@@ -357,7 +356,7 @@ export async function updatePerson(id: string, formData: PersonFormData) {
   }
 
   // Update the person
-  await prisma.person.update({
+  const updatedPerson = await prisma.person.update({
     where: { id },
     data: {
       name: validatedData.name,
@@ -388,8 +387,8 @@ export async function updatePerson(id: string, formData: PersonFormData) {
   revalidatePath('/people')
   revalidatePath(`/people/${id}`)
 
-  // Redirect to the person detail page
-  redirect(`/people/${id}`)
+  // Return the updated person
+  return updatedPerson
 }
 
 export async function updatePersonPartial(
@@ -578,9 +577,6 @@ export async function deletePerson(id: string) {
 
   // Revalidate the people page
   revalidatePath('/people')
-
-  // Redirect to the people page
-  redirect('/people')
 }
 
 export async function getPerson(id: string) {
