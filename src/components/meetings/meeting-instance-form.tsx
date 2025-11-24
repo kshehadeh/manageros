@@ -104,18 +104,15 @@ export function MeetingInstanceForm({
     setIsSubmitting(true)
     setErrors({})
 
+    let result
     try {
       // Validate the form data
       const validatedData = meetingInstanceSchema.parse(formData)
 
       if (isEditing && instanceId) {
-        await updateMeetingInstance(instanceId, validatedData)
-        // Redirect to the meeting instance detail page
-        router.push(`/meetings/${meetingId}/instances/${instanceId}`)
+        result = await updateMeetingInstance(instanceId, validatedData)
       } else {
-        const createdInstance = await createMeetingInstance(validatedData)
-        // Redirect to the newly created instance detail page
-        router.push(`/meetings/${meetingId}/instances/${createdInstance.id}`)
+        result = await createMeetingInstance(validatedData)
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -129,8 +126,16 @@ export function MeetingInstanceForm({
         })
         setErrors(fieldErrors)
       }
-    } finally {
       setIsSubmitting(false)
+      return
+    }
+
+    // Redirect outside of try-catch block
+    setIsSubmitting(false)
+    if (isEditing && instanceId) {
+      router.push(`/meetings/${meetingId}/instances/${instanceId}`)
+    } else if (result?.id) {
+      router.push(`/meetings/${meetingId}/instances/${result.id}`)
     }
   }
 

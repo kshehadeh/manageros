@@ -69,19 +69,30 @@ export function OneOnOneForm({
     e.preventDefault()
     setIsSubmitting(true)
 
+    let result
     try {
       if (existingOneOnOne) {
-        await updateOneOnOne(existingOneOnOne.id, formData)
+        result = await updateOneOnOne(existingOneOnOne.id, formData)
       } else {
-        const created = await createOneOnOne(formData)
-        if (created && created.id) {
-          router.push(`/oneonones/${created.id}`)
-          return
-        }
+        result = await createOneOnOne(formData)
       }
     } catch (error) {
       console.error('Error submitting form:', error)
       setIsSubmitting(false)
+      return
+    }
+
+    // Redirect outside of try-catch block
+    setIsSubmitting(false)
+    if (existingOneOnOne) {
+      // When updating, redirect to the one-on-one detail page
+      router.push(`/oneonones/${existingOneOnOne.id}`)
+    } else if (result?.id) {
+      // When creating, redirect to the new one-on-one detail page
+      router.push(`/oneonones/${result.id}`)
+    } else {
+      // Fallback to one-on-ones list
+      router.push('/oneonones')
     }
   }
 

@@ -3,7 +3,6 @@
 import { prisma } from '@/lib/db'
 import { initiativeSchema, type InitiativeFormData } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 import {
   checkOrganizationLimit,
@@ -118,8 +117,8 @@ export async function createInitiative(formData: InitiativeFormData) {
     // Revalidate the initiatives page
     revalidatePath('/initiatives')
 
-    // Redirect to the new initiative
-    redirect(`/initiatives/${initiative.id}`)
+    // Return the created initiative
+    return initiative
   } catch (error) {
     // Handle specific database errors with user-friendly messages
     if (error && typeof error === 'object' && 'code' in error) {
@@ -243,8 +242,8 @@ export async function updateInitiative(
   revalidatePath('/initiatives')
   revalidatePath(`/initiatives/${id}`)
 
-  // Redirect to the updated initiative
-  redirect(`/initiatives/${initiative.id}`)
+  // Return the updated initiative
+  return initiative
 }
 
 export async function deleteInitiative(id: string) {

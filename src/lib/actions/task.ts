@@ -3,7 +3,6 @@
 import { prisma } from '@/lib/db'
 import { taskSchema, type TaskFormData } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 import { type TaskStatus } from '@/lib/task-status'
 import { taskPriorityUtils, DEFAULT_TASK_PRIORITY } from '@/lib/task-priority'
@@ -90,8 +89,8 @@ export async function createTask(formData: TaskFormData) {
   revalidatePath('/tasks')
   revalidatePath('/my-tasks')
 
-  // Redirect to the new task
-  redirect(`/tasks/${task.id}`)
+  // Return the created task
+  return task
 }
 
 export async function updateTask(taskId: string, formData: TaskFormData) {
@@ -193,8 +192,8 @@ export async function updateTask(taskId: string, formData: TaskFormData) {
   revalidatePath('/my-tasks')
   revalidatePath(`/tasks/${taskId}`)
 
-  // Redirect to the updated task
-  redirect(`/tasks/${task.id}`)
+  // Return the updated task
+  return task
 }
 
 export async function deleteTask(taskId: string) {

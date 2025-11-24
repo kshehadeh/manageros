@@ -3,7 +3,6 @@
 import { prisma } from '@/lib/db'
 import { oneOnOneSchema, type OneOnOneFormData } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 
 export async function createOneOnOne(formData: OneOnOneFormData) {
@@ -213,8 +212,11 @@ export async function updateOneOnOne(id: string, formData: OneOnOneFormData) {
   // Revalidate the one-on-ones page
   revalidatePath('/oneonones')
 
-  // Redirect to the one-on-ones page
-  redirect('/oneonones')
+  // Return the updated one-on-one
+  const updatedOneOnOne = await prisma.oneOnOne.findUnique({
+    where: { id },
+  })
+  return updatedOneOnOne
 }
 
 export async function deleteOneOnOne(id: string) {

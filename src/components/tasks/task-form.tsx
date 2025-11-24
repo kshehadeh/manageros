@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   TaskSummaryInput,
   type TaskSummaryInputRef,
@@ -61,6 +62,7 @@ function TaskFormContent({
   taskId,
   header: externalHeader,
 }: TaskFormProps) {
+  const router = useRouter()
   const { getCleanedText, detectedDate, detectedPriority } =
     useTaskSummaryInput()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -137,6 +139,7 @@ function TaskFormContent({
     setIsSubmitting(true)
     setErrors({})
 
+    let result
     try {
       // Get cleaned text from provider (with detected dates/priorities removed)
       const cleanedTitle = getCleanedText()
@@ -151,20 +154,12 @@ function TaskFormContent({
       const validatedData = taskSchema.parse(formDataWithCleanedTitle)
 
       if (isEditing && taskId) {
-        await updateTask(taskId, validatedData)
+        result = await updateTask(taskId, validatedData)
       } else {
-        await createTask(validatedData)
+        result = await createTask(validatedData)
       }
     } catch (error: unknown) {
       console.error('Error submitting task:', error)
-
-      // Don't handle redirect errors - let them bubble up
-      if (error && typeof error === 'object' && 'digest' in error) {
-        const digest = (error as { digest?: string }).digest
-        if (digest?.startsWith('NEXT_REDIRECT')) {
-          throw error // Re-throw redirect errors
-        }
-      }
 
       if (error && typeof error === 'object' && 'errors' in error) {
         // Handle Zod validation errors
@@ -186,8 +181,18 @@ function TaskFormContent({
             : 'Error submitting task. Please try again.'
         setErrors({ general: errorMessage })
       }
-    } finally {
       setIsSubmitting(false)
+      return
+    }
+
+    // Redirect outside of try-catch block
+    setIsSubmitting(false)
+    if (isEditing && taskId) {
+      // When updating, redirect to the task detail page
+      router.push(`/tasks/${taskId}`)
+    } else if (result?.id) {
+      // When creating, redirect to the new task detail page
+      router.push(`/tasks/${result.id}`)
     }
   }
 
