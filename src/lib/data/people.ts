@@ -40,6 +40,8 @@ export async function getPersonById(personId: string, organizationId: string) {
       reports: true,
       jobRole: true,
       user: true,
+      jiraAccount: true,
+      githubAccount: true,
     },
   })
 }
