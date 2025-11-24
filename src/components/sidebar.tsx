@@ -1,7 +1,7 @@
 'use client'
 
 import { Link } from '@/components/ui/link'
-import { OrganizationSwitcher, useClerk, useUser } from '@clerk/nextjs'
+import { useClerk, useUser } from '@clerk/nextjs'
 import { signOutWithCleanup } from '@/lib/auth-client-utils'
 import { usePathname } from 'next/navigation'
 import { useMobileMenu } from '@/components/mobile-menu-provider'
@@ -37,7 +37,7 @@ import { APP_VERSION } from '@/lib/version'
 import { PersonAvatar } from '@/components/people/person-avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PersonBrief } from '../types/person'
-import { Loading } from './ui/loading'
+import { SidebarOrganizationSwitcher } from '@/components/organization/sidebar-organization-switcher'
 interface NavItem {
   name: string
   href: string
@@ -127,7 +127,9 @@ export default function Sidebar({
                   size='sm'
                 />
               )}
-              <div className={`flex-1 min-w-0 ${geistMono.className}`}>
+              <div
+                className={`flex-1 flex flex-col gap-sm min-w-0 ${geistMono.className}`}
+              >
                 {/* Email - only shown if no person is associated */}
                 {!personData && (
                   <div className='text-sm text-foreground font-medium truncate'>
@@ -148,14 +150,11 @@ export default function Sidebar({
 
                 {/* Organization information - shown if organization exists */}
                 <div className='my-sm text-muted-foreground'>
-                  <OrganizationSwitcher
-                    fallback={<Loading className='w-4 h-4' />}
-                    afterSelectOrganizationUrl='/dashboard'
-                  />
+                  <SidebarOrganizationSwitcher />
                 </div>
 
                 {/* Settings and Sign out links - always shown */}
-                <div className='flex items-center gap-md mt-sm'>
+                <div className='flex items-center gap-lg mt-sm'>
                   <Link
                     href='/settings'
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -164,7 +163,6 @@ export default function Sidebar({
                     <Settings className='h-3 w-3' />
                     <span>Settings</span>
                   </Link>
-                  <span className='text-xs text-muted-foreground'>|</span>
                   <button
                     onClick={async () => {
                       setIsMobileMenuOpen(false)
