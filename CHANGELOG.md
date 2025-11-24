@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.8.6](https://github.com/kshehadeh/manageros/compare/v1.8.5...v1.8.6) (2025-11-24)
+
+### Bug Fixes
+
+- **build:** Fix build error ([fb9918e](https://github.com/kshehadeh/manageros/commit/fb9918e8b0cff1eba024f0fbe960505a1ec02c2d))
+- **clerk:** Reduce the number of times we call Clerk apis ([affb85e](https://github.com/kshehadeh/manageros/commit/affb85e290891a4e3245d6845b1a9b69a6792a91))
+- **forms:** Forms were not properly using NextjS redirects ([7d2449b](https://github.com/kshehadeh/manageros/commit/7d2449be0c912a5137bc179a1e91810d740167e7))
+- **ui:** Team detail view loading page didn't look right anymore ([e52287c](https://github.com/kshehadeh/manageros/commit/e52287cb3eff8ba5fc79326d903b531aa65effc6))
+
 ## [1.8.5](https://github.com/kshehadeh/manageros/compare/v1.8.4...v1.8.5) (2025-11-24)
 
 ### Bug Fixes
