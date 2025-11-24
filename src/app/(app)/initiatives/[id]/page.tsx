@@ -74,6 +74,7 @@ export default async function InitiativeDetail({
     'initiative.delete',
     init.id
   )
+  const canCreateTask = await getActionPermission(user, 'task.create')
 
   return (
     <InitiativeDetailClient initiativeTitle={init.title} initiativeId={init.id}>
@@ -104,6 +105,7 @@ export default async function InitiativeDetail({
               initiativeId={init.id}
               canEdit={canEdit}
               canDelete={canDelete}
+              canCreateTask={canCreateTask}
             />
           }
         />

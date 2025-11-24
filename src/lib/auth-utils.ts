@@ -297,7 +297,15 @@ export async function getCurrentUser(
 
     syncObject.managerOSOrganizationId = organization.id
     syncObject.clerkOrganizationId = organization.clerkOrganizationId
-    resync = true
+    // Only resync if organization data actually changed
+    const currentMetadata = sessionClaimsValidated.data.metadata
+    if (
+      !currentMetadata ||
+      currentMetadata.managerOSOrganizationId !== organization.id ||
+      currentMetadata.clerkOrganizationId !== organization.clerkOrganizationId
+    ) {
+      resync = true
+    }
   }
 
   if (options.revalidateLinks || !syncObject.managerOSPersonId) {
@@ -326,22 +334,47 @@ export async function getCurrentUser(
       //   syncObject.managerOSPersonId = user.personId
       // }
       syncObject.managerOSPersonId = user.personId
-      resync = true
+      // Only resync if person link actually changed
+      const currentMetadata = sessionClaimsValidated.data.metadata
+      if (
+        !currentMetadata ||
+        currentMetadata.managerOSPersonId !== user.personId
+      ) {
+        resync = true
+      }
     }
   }
 
   if (resync) {
-    // TODO: Handle sync failures gracefully
-    // If sync fails, we should log but not fail the entire request
-    await syncUserDataToClerk(syncObject)
+    // Only sync if data actually changed to avoid unnecessary Clerk API calls
+    // Compare current syncObject with what's in session claims metadata
+    const currentMetadata = sessionClaimsValidated.data.metadata
+    const hasDataChanged =
+      !currentMetadata ||
+      currentMetadata.managerOSUserId !== syncObject.managerOSUserId ||
+      currentMetadata.managerOSOrganizationId !==
+        syncObject.managerOSOrganizationId ||
+      currentMetadata.managerOSPersonId !== syncObject.managerOSPersonId ||
+      currentMetadata.clerkOrganizationId !== syncObject.clerkOrganizationId ||
+      currentMetadata.email !== syncObject.email ||
+      currentMetadata.name !== syncObject.name
+
+    if (hasDataChanged) {
+      // TODO: Handle sync failures gracefully
+      // If sync fails, we should log but not fail the entire request
+      await syncUserDataToClerk(syncObject)
+    }
   }
 
   return syncObject
 }
 
-export async function getCurrentUserWithPersonAndOrganization() {
-  // Get current user - session claims may be stale, so we'll query person directly
-  const user = await getCurrentUser({ revalidateLinks: true })
+export async function getCurrentUserWithPersonAndOrganization(options?: {
+  includeOrganizationDetails?: boolean
+}) {
+  // Get current user - use session claims by default to avoid unnecessary Clerk API calls
+  // Only revalidate when explicitly needed (e.g., after org switch)
+  const user = await getCurrentUser()
   const person = await prisma.person.findUnique({
     where: { id: user.managerOSPersonId || '' },
     select: {
@@ -355,7 +388,9 @@ export async function getCurrentUserWithPersonAndOrganization() {
 
   let organizationBrief: OrganizationBrief | null = null
 
-  if (user.managerOSOrganizationId) {
+  // Only fetch organization details from Clerk if explicitly requested
+  // This avoids unnecessary API calls when name/slug aren't needed
+  if (user.managerOSOrganizationId && options?.includeOrganizationDetails) {
     const organization = await prisma.organization.findUnique({
       where: { id: user.managerOSOrganizationId || '' },
       select: {
@@ -376,6 +411,24 @@ export async function getCurrentUserWithPersonAndOrganization() {
           slug: clerkOrganization.slug,
         } satisfies OrganizationBrief
       }
+    }
+  } else if (user.managerOSOrganizationId) {
+    // Return basic org info without Clerk API call
+    const organization = await prisma.organization.findUnique({
+      where: { id: user.managerOSOrganizationId || '' },
+      select: {
+        id: true,
+        clerkOrganizationId: true,
+      },
+    })
+
+    if (organization) {
+      organizationBrief = {
+        id: organization.id,
+        clerkOrganizationId: organization.clerkOrganizationId,
+        name: null,
+        slug: null,
+      } satisfies OrganizationBrief
     }
   }
 
