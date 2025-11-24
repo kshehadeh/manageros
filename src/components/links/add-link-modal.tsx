@@ -40,7 +40,7 @@ export function AddLinkModal({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant='outline' size='sm'>
+        <Button variant='default' size='sm'>
           <Plus className='w-4 h-4 mr-2' />
           Add Link
         </Button>

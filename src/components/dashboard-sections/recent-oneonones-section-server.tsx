@@ -29,7 +29,7 @@ export async function DashboardRecentOneOnOnesServerSection({
               icon={Handshake}
               title='Recent 1:1s'
               action={
-                <Button asChild variant='outline' size='sm'>
+                <Button asChild variant='default' size='sm'>
                   <Link href='/oneonones' className='flex items-center gap-2'>
                     <Eye className='w-4 h-4' />
                     View All
@@ -57,7 +57,7 @@ export async function DashboardRecentOneOnOnesServerSection({
               icon={Handshake}
               title='Recent 1:1s'
               action={
-                <Button asChild variant='outline' size='sm'>
+                <Button asChild variant='default' size='sm'>
                   <Link href='/oneonones' className='flex items-center gap-2'>
                     <Eye className='w-4 h-4' />
                     View All

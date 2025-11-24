@@ -431,11 +431,10 @@ export async function getFilteredNavigation(user: UserBrief | null) {
     { name: 'People', href: '/people', icon: 'User', adminOnly: false },
     { name: 'Teams', href: '/teams', icon: 'Users2', adminOnly: false },
     {
-      name: 'Reports',
-      href: '/reports',
-      icon: 'BarChart3',
-      requiresPermission: 'report.access' as PermissionType,
-      adminOnly: false,
+      name: 'Organization',
+      href: '/organization/settings',
+      icon: 'Building',
+      adminOnly: true,
     },
   ]
 

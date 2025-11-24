@@ -47,7 +47,7 @@ export function JobRoleSectionClient({
         title='Job Role'
         action={
           <Button
-            variant='outline'
+            variant='default'
             size='sm'
             onClick={() => setIsModalOpen(true)}
             title='Edit Job Role'

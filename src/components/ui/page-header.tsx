@@ -34,7 +34,7 @@ export function PageHeader({
   const hasIcon = iconComponent || TitleIcon
 
   return (
-    <div className={cn('page-header', className)}>
+    <div className={cn('mb-lg', className)}>
       <div className='flex items-start justify-between'>
         <div className='flex-1'>
           {hasIcon && subtitle ? (
@@ -62,7 +62,7 @@ export function PageHeader({
                   </div>
                 )}
                 {subtitle && (
-                  <div className='text-muted-foreground text-sm'>
+                  <div className='text-muted-foreground text-sm mt-md'>
                     {typeof subtitle === 'string' ? (
                       <p>{subtitle}</p>
                     ) : (
@@ -85,7 +85,7 @@ export function PageHeader({
                 </PageTitle>
               )}
               {subtitle && (
-                <div className='page-section-subtitle'>
+                <div className='text-muted-foreground text-sm mt-md'>
                   {typeof subtitle === 'string' ? <p>{subtitle}</p> : subtitle}
                 </div>
               )}

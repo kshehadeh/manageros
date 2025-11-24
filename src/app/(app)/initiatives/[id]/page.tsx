@@ -30,6 +30,11 @@ import {
   InitiativeCompletionRateSkeleton,
 } from '@/components/initiatives/initiative-detail-skeletons'
 import { Rag } from '../../../../components/rag'
+import { Badge } from '@/components/ui/badge'
+import {
+  initiativeStatusUtils,
+  type InitiativeStatus,
+} from '@/lib/initiative-status'
 
 export default async function InitiativeDetail({
   params,
@@ -56,6 +61,7 @@ export default async function InitiativeDetail({
       title: true,
       summary: true,
       rag: true,
+      status: true,
     },
   })
 
@@ -77,6 +83,16 @@ export default async function InitiativeDetail({
           titleIcon={Rocket}
           subtitle={
             <div className='flex items-center gap-2'>
+              <Badge
+                variant={initiativeStatusUtils.getVariant(
+                  init.status as InitiativeStatus
+                )}
+                className='text-xs'
+              >
+                {initiativeStatusUtils.getLabel(
+                  init.status as InitiativeStatus
+                )}
+              </Badge>
               <Rag rag={init.rag} size='small' />
               <Suspense fallback={<InitiativeCompletionRateSkeleton />}>
                 <InitiativeCompletionRate initiativeId={init.id} />
@@ -94,7 +110,7 @@ export default async function InitiativeDetail({
 
         <PageContent>
           <PageMain>
-            <div className='space-y-6'>
+            <div className='space-y-10'>
               {/* Summary Section */}
               {init.summary && (
                 <PageSection

@@ -90,7 +90,7 @@ export function TeamDetailContent({ team, isAdmin }: TeamDetailContentProps) {
                     icon={Users}
                     title={`Members`}
                     action={
-                      <Button asChild variant='outline' size='sm'>
+                      <Button asChild variant='default' size='sm'>
                         <Link
                           href={`/people/new?teamId=${team.id}`}
                           className='flex items-center gap-2'
@@ -128,7 +128,7 @@ export function TeamDetailContent({ team, isAdmin }: TeamDetailContentProps) {
                     title={`Initiatives`}
                     action={
                       <div className='flex items-center gap-2'>
-                        <Button asChild variant='outline' size='sm'>
+                        <Button asChild variant='default' size='sm'>
                           <Link
                             href={`/initiatives/new?teamId=${team.id}`}
                             className='flex items-center gap-2'
@@ -162,7 +162,7 @@ export function TeamDetailContent({ team, isAdmin }: TeamDetailContentProps) {
                     icon={Building2}
                     title={`Children`}
                     action={
-                      <Button asChild variant='outline' size='sm'>
+                      <Button asChild variant='default' size='sm'>
                         <Link
                           href={`/teams/new?parentId=${team.id}`}
                           className='flex items-center gap-2'

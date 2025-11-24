@@ -8,7 +8,6 @@ import { useMobileMenu } from '@/components/mobile-menu-provider'
 import { IndigoIcon } from '@/components/indigo-icon'
 import type { UserBrief } from '@/lib/auth-types'
 import { Geist_Mono as GeistMono } from 'next/font/google'
-import { dark } from '@clerk/themes'
 
 const geistMono = GeistMono({
   subsets: ['latin'],
@@ -23,7 +22,6 @@ import {
   Settings,
   Calendar,
   Building,
-  BarChart3,
   Command,
   Bot,
   CheckSquare,
@@ -63,7 +61,6 @@ const iconMap = {
   Settings,
   Calendar,
   Building,
-  BarChart3,
   CheckSquare,
 }
 
@@ -150,9 +147,8 @@ export default function Sidebar({
                 )}
 
                 {/* Organization information - shown if organization exists */}
-                <div className='my-sm'>
+                <div className='my-sm text-muted-foreground'>
                   <OrganizationSwitcher
-                    appearance={dark}
                     fallback={<Loading className='w-4 h-4' />}
                     afterSelectOrganizationUrl='/dashboard'
                   />

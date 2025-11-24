@@ -77,7 +77,7 @@ export async function OneOnOneMeetingsSection({
           icon={Handshake}
           title='1:1 Meetings'
           action={
-            <Button asChild variant='outline' size='sm'>
+            <Button asChild variant='default' size='sm'>
               <Link href='/oneonones' className='flex items-center gap-2'>
                 <Eye className='w-4 h-4' />
                 View All
