@@ -21,7 +21,9 @@ import { Button } from '@/components/ui/button'
 import { Link } from '@/components/ui/link'
 
 export default async function OrganizationSettingsPage() {
-  const { user, organization } = await getCurrentUserWithPersonAndOrganization()
+  const { user, organization } = await getCurrentUserWithPersonAndOrganization({
+    includeOrganizationDetails: true,
+  })
 
   if (!user) {
     redirect('/dashboard')
