@@ -1,5 +1,16 @@
 # Changelog
 
+# [1.10.0](/compare/v1.9.0...v1.10.0) (2025-11-25)
+
+### Features
+
+- **credentials:** Add delete functionality for GitHub and Jira credentials with Trash icon 91dd034
+- **dashboard:** Redirect users to organization setup if no organization is found and update sidebar to include link for creating a new organization e509279
+- **initiatives:** Enhance initiative list and data table with status indicators and styling for completed initiatives 93f8f3b
+- **loading:** Refactor loading components to use DataTableLoading for consistent loading UI across initiatives, tasks, people, and teams e404e1c
+- **onboarding:** Add onboarding section for new users and enhance organization management with improved admin checks and alerts for organization removal 53379fb
+- **organization-settings:** Refactor organization settings page to use server components and add loading skeletons for improved user experience 283af7f
+
 # [1.9.0](https://github.com/kshehadeh/manageros/compare/v1.8.6...v1.9.0) (2025-11-24)
 
 ### Bug Fixes
