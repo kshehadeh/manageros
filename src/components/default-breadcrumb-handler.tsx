@@ -40,11 +40,19 @@ export function DefaultBreadcrumbHandler() {
   } = useBreadcrumb()
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const prevPathnameRef = useRef<string>('')
+  // Use a ref to track hasManualBreadcrumbs so the timeout callback always gets the latest value
+  const hasManualBreadcrumbsRef = useRef(hasManualBreadcrumbs)
+
+  // Keep the ref in sync with the state
+  useEffect(() => {
+    hasManualBreadcrumbsRef.current = hasManualBreadcrumbs
+  }, [hasManualBreadcrumbs])
 
   useEffect(() => {
     // Reset manual breadcrumbs flag when pathname changes
     if (pathname !== prevPathnameRef.current) {
       setHasManualBreadcrumbs(false)
+      hasManualBreadcrumbsRef.current = false
       prevPathnameRef.current = pathname
     }
   }, [pathname, setHasManualBreadcrumbs])
@@ -120,7 +128,8 @@ export function DefaultBreadcrumbHandler() {
     // Increased timeout to give client components more time to mount and set breadcrumbs
     timeoutRef.current = setTimeout(() => {
       // Only set breadcrumbs if manual breadcrumbs haven't been set
-      if (!hasManualBreadcrumbs) {
+      // Use the ref to get the latest value, avoiding stale closure issues
+      if (!hasManualBreadcrumbsRef.current) {
         // Check if current breadcrumbs already match the pathname and aren't loading
         // This prevents overwriting breadcrumbs that were just set by a client component
         if (
@@ -140,7 +149,9 @@ export function DefaultBreadcrumbHandler() {
         clearTimeout(timeoutRef.current)
       }
     }
-  }, [pathname, setBreadcrumbs, hasManualBreadcrumbs, currentBreadcrumbs])
+    // Remove hasManualBreadcrumbs from deps since we use the ref now
+    // This prevents unnecessary effect reruns when hasManualBreadcrumbs changes
+  }, [pathname, setBreadcrumbs, currentBreadcrumbs])
 
   return null
 }
