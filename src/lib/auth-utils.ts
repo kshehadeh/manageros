@@ -261,50 +261,89 @@ export async function getCurrentUser(
         (!syncObject.managerOSOrganizationId ||
           !syncObject.clerkOrganizationId)))
   ) {
-    // First see if we can find one based on the organization in clerk.
-    let organization = await prisma.organization.findUnique({
-      where: {
-        clerkOrganizationId: sessionClaimsValidated.data.o?.id || undefined,
-      },
-    })
+    const clerkOrgId = sessionClaimsValidated.data.o?.id
 
-    if (!organization) {
-      // if there isn't one in our database then let's create it by getting the details
-      // from clerk.
-      const clerkOrganization = await getClerkOrganization(
-        sessionClaimsValidated.data.o?.id || ''
-      )
-      if (!clerkOrganization) {
-        throw new Error(
-          'Clerk organization could not be found - this is a fatal error'
-        )
-      }
-
-      // Check if the organization already exists in our database.
-      organization = await prisma.organization.findUnique({
-        where: { clerkOrganizationId: clerkOrganization.id },
-      })
-      if (!organization) {
-        // If the organization doesn't exist in our database then we need to create it.
-        // Subscription information is stored in Clerk, not in our database
-        organization = await prisma.organization.create({
-          data: {
-            clerkOrganizationId: clerkOrganization.id,
-          },
-        })
-      }
-    }
-
-    syncObject.managerOSOrganizationId = organization.id
-    syncObject.clerkOrganizationId = organization.clerkOrganizationId
-    // Only resync if organization data actually changed
-    const currentMetadata = sessionClaimsValidated.data.metadata
-    if (
-      !currentMetadata ||
-      currentMetadata.managerOSOrganizationId !== organization.id ||
-      currentMetadata.clerkOrganizationId !== organization.clerkOrganizationId
-    ) {
+    // Validate that clerkOrganizationId is not empty or invalid
+    if (!clerkOrgId || clerkOrgId.trim() === '') {
+      // Invalid clerkOrganizationId - clear organization data
+      syncObject.clerkOrganizationId = null
+      syncObject.managerOSOrganizationId = null
+      syncObject.managerOSPersonId = null
+      syncObject.role = null
       resync = true
+    } else {
+      // First see if we can find one based on the organization in clerk.
+      let organization = await prisma.organization.findUnique({
+        where: {
+          clerkOrganizationId: clerkOrgId,
+        },
+      })
+
+      if (!organization) {
+        // if there isn't one in our database then let's create it by getting the details
+        // from clerk.
+        const clerkOrganization = await getClerkOrganization(clerkOrgId)
+        if (!clerkOrganization) {
+          // Clerk organization doesn't exist or is invalid
+          // This can happen during organization creation when the ID is set but org isn't ready yet
+          // Clear organization data and let the sync handle it on next request
+          syncObject.clerkOrganizationId = null
+          syncObject.managerOSOrganizationId = null
+          syncObject.managerOSPersonId = null
+          syncObject.role = null
+          resync = true
+        } else {
+          // Check again if the organization already exists in our database (race condition protection)
+          organization = await prisma.organization.findUnique({
+            where: { clerkOrganizationId: clerkOrganization.id },
+          })
+
+          if (!organization) {
+            // If the organization doesn't exist in our database then we need to create it.
+            // Subscription information is stored in Clerk, not in our database
+            // Use upsert to handle race conditions where multiple requests try to create simultaneously
+            try {
+              organization = await prisma.organization.create({
+                data: {
+                  clerkOrganizationId: clerkOrganization.id,
+                },
+              })
+            } catch (error: unknown) {
+              // Handle unique constraint violation (race condition)
+              if (
+                error &&
+                typeof error === 'object' &&
+                'code' in error &&
+                error.code === 'P2002'
+              ) {
+                // Organization was created by another request - fetch it
+                organization = await prisma.organization.findUnique({
+                  where: { clerkOrganizationId: clerkOrganization.id },
+                })
+              } else {
+                // Re-throw other errors
+                throw error
+              }
+            }
+          }
+        }
+      }
+
+      // Only update sync object if we successfully found/created an organization
+      if (organization) {
+        syncObject.managerOSOrganizationId = organization.id
+        syncObject.clerkOrganizationId = organization.clerkOrganizationId
+        // Only resync if organization data actually changed
+        const currentMetadata = sessionClaimsValidated.data.metadata
+        if (
+          !currentMetadata ||
+          currentMetadata.managerOSOrganizationId !== organization.id ||
+          currentMetadata.clerkOrganizationId !==
+            organization.clerkOrganizationId
+        ) {
+          resync = true
+        }
+      }
     }
   }
 

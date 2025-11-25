@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { useOrganizationList } from '@clerk/nextjs'
 import { Building2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -11,7 +10,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 
 export function CreateOrganizationForm() {
-  const router = useRouter()
   const { createOrganization, setActive } = useOrganizationList({
     userMemberships: {
       infinite: true,
@@ -48,10 +46,14 @@ export function CreateOrganizationForm() {
         organization: organization.id,
       })
 
-      // Redirect to dashboard after successful creation
+      // Wait a brief moment for Clerk session to sync before redirecting
+      // This helps prevent race conditions in getCurrentUser()
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      // Use window.location for a hard redirect to ensure state is cleared
+      // This forces a full page reload with the new organization context
       // The auth sync will handle creating the organization in our database
-      router.push('/dashboard')
-      router.refresh()
+      window.location.href = '/dashboard'
     } catch (error) {
       setError(
         error instanceof Error
