@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { prisma } from './db'
 import {
   OrganizationBrief,
@@ -12,6 +13,30 @@ import { checkIfManagerOrSelf } from '@/lib/utils/people-utils'
 import { getClerkOrganization } from './clerk-organization-utils'
 import { combineName } from '@/lib/utils/name-utils'
 import { getTaskAccessWhereClause } from '@/lib/task-access-utils'
+
+// Cookie name for tracking organization removal
+const ORG_REMOVED_COOKIE = 'manageros_org_removed'
+
+/**
+ * Check if the user was recently removed from an organization
+ * This reads a short-lived cookie set by /api/auth/org-removed route handler
+ * The cookie expires after 60 seconds
+ *
+ * Note: Cookie deletion is not performed here because cookies are read-only
+ * in server components/pages. The cookie will expire automatically.
+ */
+export async function wasRemovedFromOrganization(): Promise<boolean> {
+  try {
+    const cookieStore = await cookies()
+    const removed = cookieStore.get(ORG_REMOVED_COOKIE)
+    if (removed?.value === 'true') {
+      return true
+    }
+  } catch {
+    // Ignore cookie errors
+  }
+  return false
+}
 
 const SessionClaimsSchema = z.object({
   email: z.string().optional().nullable(),
@@ -93,12 +118,12 @@ export type SessionClaims = z.infer<typeof SessionClaimsSchema>
  * **Issue**: Should handle gracefully - user may be in invalid state
  * **Impact**: High - User may be stuck with invalid organization reference
  *
- * ### 5. Person Link Invalid After Org Change
+ * ### 5. Person Link Invalid After Org Change (FIXED)
  * **Scenario**: User switches orgs, but personId points to person in old org
  * **Current Behavior**:
- *   - Lines 178-187: Only checks if personId exists, not if person belongs to current org
- * **Issue**: Person link validation missing - person may belong to different org
- * **Impact**: High - Security issue: user may access person data from wrong org
+ *   - Validates that person belongs to user's current organization
+ *   - Clears person link if person doesn't belong to current org
+ * **Status**: Fixed - Person link is now validated against current organization
  *
  * ### 6. Race Condition: Multiple Concurrent Calls
  * **Scenario**: Multiple requests call getCurrentUser simultaneously during org switch
@@ -128,12 +153,12 @@ export type SessionClaims = z.infer<typeof SessionClaimsSchema>
  * **Issue**: First user to join becomes billing user, may not be intended
  * **Impact**: Medium - Billing user assignment may be incorrect
  *
- * ### 10. Person Belongs to Different Organization
+ * ### 10. Person Belongs to Different Organization (FIXED)
  * **Scenario**: User's personId points to person in different organization
  * **Current Behavior**:
- *   - Lines 183-186: No validation that person belongs to user's organization
- * **Issue**: Critical security vulnerability - cross-org data access
- * **Impact**: Critical - Security breach risk
+ *   - Validates person belongs to user's current organization
+ *   - Clears person link and updates database if mismatch detected
+ * **Status**: Fixed - Cross-org person access is now prevented
  *
  * ### 11. Session Claims Stale After Database Update
  * **Scenario**: User data updated in database but session claims not refreshed
@@ -150,15 +175,15 @@ export type SessionClaims = z.infer<typeof SessionClaimsSchema>
  * **Issue**: System assumes single org per user
  * **Impact**: Low - Current design supports single org
  *
- * ## Unhandled Scenarios
+ * ## Remaining Edge Cases
  *
- * 1. **Person Link Validation**: No check that personId belongs to user's organization
+ * 1. ~~**Person Link Validation**: No check that personId belongs to user's organization~~ (FIXED)
  * 2. **Organization Membership Validation**: No verification that user is actually member of org in Clerk
  * 3. **Role Synchronization**: Role from Clerk may not match ManagerOS role (billing user check missing)
  * 4. **Concurrent Modification Protection**: No locking for org creation or user updates
  * 5. **Error Recovery**: No retry logic for Clerk API failures
  * 6. **Partial Failure Handling**: If syncUserDataToClerk fails, function still returns success
- * 7. **Organization Deletion**: No handling for org deleted in Clerk but exists in ManagerOS
+ * 7. ~~**Organization Deletion**: No handling for org deleted in Clerk but exists in ManagerOS~~ (FIXED via webhook)
  * 8. **User Deletion**: No handling for user deleted in Clerk but exists in ManagerOS
  * 9. **Email Change**: No handling for email change in Clerk
  * 10. **Name Change**: No handling for name change in Clerk
@@ -203,12 +228,16 @@ export async function getCurrentUser(
 
   if (!clerkOrgId && metadataClerkOrgId) {
     // User has no organization in Clerk but metadata still has one
+    // This means the user was removed from their organization
     // Clear all organization-related data
     syncObject.clerkOrganizationId = null
     syncObject.managerOSOrganizationId = null
     syncObject.managerOSPersonId = null
     syncObject.role = null
     resync = true
+
+    // Note: Cookie setting is handled by /api/auth/org-removed route handler
+    // because cookies are read-only in server components/pages
   } else if (
     clerkOrgId &&
     metadataClerkOrgId &&
@@ -261,85 +290,137 @@ export async function getCurrentUser(
         (!syncObject.managerOSOrganizationId ||
           !syncObject.clerkOrganizationId)))
   ) {
-    // First see if we can find one based on the organization in clerk.
-    let organization = await prisma.organization.findUnique({
-      where: {
-        clerkOrganizationId: sessionClaimsValidated.data.o?.id || undefined,
-      },
-    })
+    const clerkOrgId = sessionClaimsValidated.data.o?.id
 
-    if (!organization) {
-      // if there isn't one in our database then let's create it by getting the details
-      // from clerk.
-      const clerkOrganization = await getClerkOrganization(
-        sessionClaimsValidated.data.o?.id || ''
-      )
+    // Validate that clerkOrganizationId is not empty or invalid
+    if (!clerkOrgId || clerkOrgId.trim() === '') {
+      // Invalid clerkOrganizationId - clear organization data
+      syncObject.clerkOrganizationId = null
+      syncObject.managerOSOrganizationId = null
+      syncObject.managerOSPersonId = null
+      syncObject.role = null
+      resync = true
+    } else {
+      // First verify the organization still exists in Clerk
+      // This handles the case where an org is deleted in Clerk but session claims are stale
+      const clerkOrganization = await getClerkOrganization(clerkOrgId)
+      let organization = null
+
       if (!clerkOrganization) {
-        throw new Error(
-          'Clerk organization could not be found - this is a fatal error'
-        )
-      }
+        // Clerk organization doesn't exist - it was deleted
+        // Clear organization data
+        syncObject.clerkOrganizationId = null
+        syncObject.managerOSOrganizationId = null
+        syncObject.managerOSPersonId = null
+        syncObject.role = null
+        resync = true
 
-      // Check if the organization already exists in our database.
-      organization = await prisma.organization.findUnique({
-        where: { clerkOrganizationId: clerkOrganization.id },
-      })
-      if (!organization) {
-        // If the organization doesn't exist in our database then we need to create it.
-        // Subscription information is stored in Clerk, not in our database
-        organization = await prisma.organization.create({
-          data: {
-            clerkOrganizationId: clerkOrganization.id,
+        // Note: Cookie setting is handled by /api/auth/org-removed route handler
+        // because cookies are read-only in server components/pages
+      } else {
+        // Organization exists in Clerk - now check our database
+        organization = await prisma.organization.findUnique({
+          where: {
+            clerkOrganizationId: clerkOrgId,
           },
         })
-      }
-    }
 
-    syncObject.managerOSOrganizationId = organization.id
-    syncObject.clerkOrganizationId = organization.clerkOrganizationId
-    // Only resync if organization data actually changed
-    const currentMetadata = sessionClaimsValidated.data.metadata
-    if (
-      !currentMetadata ||
-      currentMetadata.managerOSOrganizationId !== organization.id ||
-      currentMetadata.clerkOrganizationId !== organization.clerkOrganizationId
-    ) {
-      resync = true
+        if (!organization) {
+          // Check again if the organization already exists in our database (race condition protection)
+          organization = await prisma.organization.findUnique({
+            where: { clerkOrganizationId: clerkOrganization.id },
+          })
+
+          if (!organization) {
+            // If the organization doesn't exist in our database then we need to create it.
+            // Subscription information is stored in Clerk, not in our database
+            // Use upsert to handle race conditions where multiple requests try to create simultaneously
+            try {
+              organization = await prisma.organization.create({
+                data: {
+                  clerkOrganizationId: clerkOrganization.id,
+                },
+              })
+            } catch (error: unknown) {
+              // Handle unique constraint violation (race condition)
+              if (
+                error &&
+                typeof error === 'object' &&
+                'code' in error &&
+                error.code === 'P2002'
+              ) {
+                // Organization was created by another request - fetch it
+                organization = await prisma.organization.findUnique({
+                  where: { clerkOrganizationId: clerkOrganization.id },
+                })
+              } else {
+                // Re-throw other errors
+                throw error
+              }
+            }
+          }
+        }
+      }
+
+      // Only update sync object if we successfully found/created an organization
+      if (organization) {
+        syncObject.managerOSOrganizationId = organization.id
+        syncObject.clerkOrganizationId = organization.clerkOrganizationId
+        // Only resync if organization data actually changed
+        const currentMetadata = sessionClaimsValidated.data.metadata
+        if (
+          !currentMetadata ||
+          currentMetadata.managerOSOrganizationId !== organization.id ||
+          currentMetadata.clerkOrganizationId !==
+            organization.clerkOrganizationId
+        ) {
+          resync = true
+        }
+      }
     }
   }
 
   if (options.revalidateLinks || !syncObject.managerOSPersonId) {
     // Check if the current user is linked to a person.
-    // ISSUE: No validation that person belongs to user's current organization
-    // This is a security vulnerability - person may belong to different org
     const user = await prisma.user.findUnique({
       where: { id: syncObject.managerOSUserId || '' },
     })
     if (user && user.personId) {
-      // TODO: Validate that person belongs to user's organization
-      // const person = await prisma.person.findFirst({
-      //   where: {
-      //     id: user.personId,
-      //     organizationId: syncObject.managerOSOrganizationId || '',
-      //   },
-      // })
-      // if (!person) {
-      //   // Person doesn't belong to current org - clear the link
-      //   syncObject.managerOSPersonId = null
-      //   await prisma.user.update({
-      //     where: { id: user.id },
-      //     data: { personId: null },
-      //   })
-      // } else {
-      //   syncObject.managerOSPersonId = user.personId
-      // }
-      syncObject.managerOSPersonId = user.personId
-      // Only resync if person link actually changed
-      const currentMetadata = sessionClaimsValidated.data.metadata
-      if (
-        !currentMetadata ||
-        currentMetadata.managerOSPersonId !== user.personId
-      ) {
+      // Validate that person belongs to user's current organization
+      // This prevents cross-organization data access when user switches orgs
+      if (syncObject.managerOSOrganizationId) {
+        const person = await prisma.person.findFirst({
+          where: {
+            id: user.personId,
+            organizationId: syncObject.managerOSOrganizationId,
+          },
+        })
+        if (!person) {
+          // Person doesn't belong to current org - clear the link
+          syncObject.managerOSPersonId = null
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { personId: null },
+          })
+          resync = true
+        } else {
+          syncObject.managerOSPersonId = user.personId
+          // Only resync if person link actually changed
+          const currentMetadata = sessionClaimsValidated.data.metadata
+          if (
+            !currentMetadata ||
+            currentMetadata.managerOSPersonId !== user.personId
+          ) {
+            resync = true
+          }
+        }
+      } else {
+        // User has no organization, clear person link
+        syncObject.managerOSPersonId = null
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { personId: null },
+        })
         resync = true
       }
     }
@@ -442,15 +523,64 @@ export async function getCurrentUserWithPersonAndOrganization(options?: {
 /**
  * Require authentication with optional organization requirement
  * This is the standard way to handle authorization in page components
+ *
+ * @param options.requireOrganization - If true, redirects to organization setup if no org
+ * @param options.requireAdmin - If true, redirects if user is not an admin/owner
+ * @param options.redirectTo - Custom redirect path (defaults to appropriate page)
  */
 export async function requireAuth(options?: {
   requireOrganization?: boolean
+  requireAdmin?: boolean
   redirectTo?: string
 }) {
   const user = await getCurrentUser()
 
+  // If organization is required but user doesn't have one, redirect to route handler
+  // that sets cookie (for removed users) and then redirects to org setup
   if (options?.requireOrganization && !user.managerOSOrganizationId) {
+    redirect(options.redirectTo || '/api/auth/org-removed')
+  }
+
+  // If admin is required but user is not admin/owner, redirect to dashboard
+  if (options?.requireAdmin && !isAdminOrOwner(user)) {
     redirect(options.redirectTo || '/dashboard')
+  }
+
+  return user
+}
+
+/**
+ * Require organization membership for a page
+ * This is a convenience helper that enforces organization membership
+ * and redirects to the organization setup page if not a member
+ *
+ * Use this for pages that absolutely require organization context
+ */
+export async function requireOrganization() {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    redirect('/api/auth/org-removed')
+  }
+
+  return user
+}
+
+/**
+ * Require admin/owner role for a page
+ * This enforces both organization membership and admin status
+ *
+ * Use this for admin-only pages like organization settings
+ */
+export async function requireAdmin() {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    redirect('/api/auth/org-removed')
+  }
+
+  if (!isAdminOrOwner(user)) {
+    redirect('/dashboard')
   }
 
   return user

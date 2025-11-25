@@ -17,6 +17,7 @@ import {
 } from './ui/dialog'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
+import { Trash2 } from 'lucide-react'
 
 interface GithubCredentialsFormProps {
   initialCredentials?: {
@@ -92,148 +93,147 @@ export function GithubCredentialsForm({
 
       {initialCredentials ? (
         <div className='rounded-md bg-secondary/30 border p-4'>
-          <div className='flex items-center justify-between'>
-            <div className='flex'>
-              <div className='flex-shrink-0'>
-                <svg
-                  className='h-5 w-5 text-emerald-400'
-                  viewBox='0 0 20 20'
-                  fill='currentColor'
-                >
-                  <path
-                    fillRule='evenodd'
-                    d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
-                    clipRule='evenodd'
-                  />
-                </svg>
-              </div>
-              <div className='ml-3'>
-                <h4 className='text-sm font-medium text-foreground'>
-                  GitHub credentials configured
-                </h4>
-                <div className='mt-1 text-sm text-foreground'>
-                  <p>Username: {initialCredentials.githubUsername}</p>
-                </div>
+          <div className='flex'>
+            <div className='flex-shrink-0'>
+              <svg
+                className='h-5 w-5 text-emerald-400'
+                viewBox='0 0 20 20'
+                fill='currentColor'
+              >
+                <path
+                  fillRule='evenodd'
+                  d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
+                  clipRule='evenodd'
+                />
+              </svg>
+            </div>
+            <div className='ml-3 flex-1'>
+              <h4 className='text-sm font-medium text-foreground'>
+                GitHub credentials configured
+              </h4>
+              <div className='mt-1 text-sm text-foreground'>
+                <p>Username: {initialCredentials.githubUsername}</p>
               </div>
             </div>
-            <div className='flex space-x-2'>
-              <Dialog
-                open={isFormDialogOpen}
-                onOpenChange={setIsFormDialogOpen}
-              >
-                <DialogTrigger asChild>
-                  <Button variant='outline' size='sm' onClick={resetForm}>
-                    Update Credentials
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Update GitHub Credentials</DialogTitle>
-                    <DialogDescription>
-                      Update your GitHub integration settings.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <form onSubmit={handleSubmit} className='space-y-4'>
-                    <div className='space-y-2'>
-                      <Label htmlFor='githubUsername'>GitHub Username</Label>
-                      <Input
-                        type='text'
-                        id='githubUsername'
-                        value={formData.githubUsername}
-                        onChange={e =>
-                          setFormData(prev => ({
-                            ...prev,
-                            githubUsername: e.target.value,
-                          }))
-                        }
-                        placeholder='your-github-username'
-                        required
-                      />
-                      <p className='text-xs text-muted-foreground'>
-                        Your GitHub username
-                      </p>
+          </div>
+          <div className='flex justify-end space-x-2 mt-4'>
+            <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant='outline' size='sm' onClick={resetForm}>
+                  Update Credentials
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Update GitHub Credentials</DialogTitle>
+                  <DialogDescription>
+                    Update your GitHub integration settings.
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className='space-y-4'>
+                  <div className='space-y-2'>
+                    <Label htmlFor='githubUsername'>GitHub Username</Label>
+                    <Input
+                      type='text'
+                      id='githubUsername'
+                      value={formData.githubUsername}
+                      onChange={e =>
+                        setFormData(prev => ({
+                          ...prev,
+                          githubUsername: e.target.value,
+                        }))
+                      }
+                      placeholder='your-github-username'
+                      required
+                    />
+                    <p className='text-xs text-muted-foreground'>
+                      Your GitHub username
+                    </p>
+                  </div>
+
+                  <div className='space-y-2'>
+                    <Label htmlFor='githubPat'>Personal Access Token</Label>
+                    <Input
+                      type='password'
+                      id='githubPat'
+                      value={formData.githubPat}
+                      onChange={e =>
+                        setFormData(prev => ({
+                          ...prev,
+                          githubPat: e.target.value,
+                        }))
+                      }
+                      placeholder='Enter your GitHub Personal Access Token'
+                      required
+                    />
+                    <p className='text-xs text-muted-foreground'>
+                      Generate a Personal Access Token from your GitHub account
+                      settings
+                    </p>
+                  </div>
+
+                  {error && (
+                    <div className='rounded-md bg-destructive/20 border border-destructive p-3'>
+                      <div className='text-sm text-destructive'>{error}</div>
                     </div>
+                  )}
 
-                    <div className='space-y-2'>
-                      <Label htmlFor='githubPat'>Personal Access Token</Label>
-                      <Input
-                        type='password'
-                        id='githubPat'
-                        value={formData.githubPat}
-                        onChange={e =>
-                          setFormData(prev => ({
-                            ...prev,
-                            githubPat: e.target.value,
-                          }))
-                        }
-                        placeholder='Enter your GitHub Personal Access Token'
-                        required
-                      />
-                      <p className='text-xs text-muted-foreground'>
-                        Generate a Personal Access Token from your GitHub
-                        account settings
-                      </p>
-                    </div>
-
-                    {error && (
-                      <div className='rounded-md bg-destructive/20 border border-destructive p-3'>
-                        <div className='text-sm text-destructive'>{error}</div>
-                      </div>
-                    )}
-
-                    <DialogFooter>
-                      <Button
-                        type='button'
-                        variant='outline'
-                        onClick={() => setIsFormDialogOpen(false)}
-                        disabled={isLoading}
-                      >
-                        Cancel
-                      </Button>
-                      <Button type='submit' disabled={isLoading}>
-                        {isLoading ? 'Saving...' : 'Save Credentials'}
-                      </Button>
-                    </DialogFooter>
-                  </form>
-                </DialogContent>
-              </Dialog>
-
-              <Dialog
-                open={isDeleteDialogOpen}
-                onOpenChange={setIsDeleteDialogOpen}
-              >
-                <DialogTrigger asChild>
-                  <Button variant='destructive' size='sm'>
-                    Delete
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Delete GitHub Credentials</DialogTitle>
-                    <DialogDescription>
-                      Are you sure you want to delete your GitHub credentials?
-                      This action cannot be undone.
-                    </DialogDescription>
-                  </DialogHeader>
                   <DialogFooter>
                     <Button
+                      type='button'
                       variant='outline'
-                      onClick={() => setIsDeleteDialogOpen(false)}
+                      onClick={() => setIsFormDialogOpen(false)}
                       disabled={isLoading}
                     >
                       Cancel
                     </Button>
-                    <Button
-                      variant='destructive'
-                      onClick={handleDelete}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? 'Deleting...' : 'Delete Credentials'}
+                    <Button type='submit' disabled={isLoading}>
+                      {isLoading ? 'Saving...' : 'Save Credentials'}
                     </Button>
                   </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog
+              open={isDeleteDialogOpen}
+              onOpenChange={setIsDeleteDialogOpen}
+            >
+              <DialogTrigger asChild>
+                <Button
+                  variant='destructive'
+                  size='sm'
+                  aria-label='Delete credentials'
+                >
+                  <Trash2 className='h-4 w-4' />
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Delete GitHub Credentials</DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to delete your GitHub credentials?
+                    This action cannot be undone.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button
+                    variant='outline'
+                    onClick={() => setIsDeleteDialogOpen(false)}
+                    disabled={isLoading}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant='destructive'
+                    onClick={handleDelete}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Deleting...' : 'Delete Credentials'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       ) : (

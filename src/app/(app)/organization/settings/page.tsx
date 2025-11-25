@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { Suspense } from 'react'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
@@ -8,49 +9,34 @@ import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
 import {
   getCurrentUserWithPersonAndOrganization,
-  isAdminOrOwner,
+  requireAdmin,
 } from '@/lib/auth-utils'
 import { OrganizationSettingsBreadcrumbClient } from '@/components/organization/organization-settings-breadcrumb-client'
 import { OrganizationProfileButton } from '@/components/organization/organization-profile-button'
-import { OrganizationSection } from '@/components/settings/organization-section'
-import { getOrganizationSubscription } from '@/lib/subscription-utils'
-import { getPendingInvitationsForUser } from '@/lib/actions/organization'
+import { OrganizationSectionServer } from '@/components/settings/organization-section-server'
+import { OrganizationSectionSkeleton } from '@/components/settings/organization-section-skeleton'
 import { Building, Users, Briefcase, BarChart3 } from 'lucide-react'
 import { PlanLimitsSection } from '@/components/settings/plan-limits-section'
+import { PlanLimitsSectionSkeleton } from '@/components/settings/plan-limits-section-skeleton'
 import { Button } from '@/components/ui/button'
 import { Link } from '@/components/ui/link'
 
 export default async function OrganizationSettingsPage() {
-  const { user, organization } = await getCurrentUserWithPersonAndOrganization({
+  // Require admin role and organization membership
+  await requireAdmin()
+
+  // Fetch organization details for the page
+  const { organization } = await getCurrentUserWithPersonAndOrganization({
     includeOrganizationDetails: true,
   })
 
-  if (!user) {
-    redirect('/dashboard')
+  // Ensure organization has required details
+  if (!organization || !organization.name) {
+    redirect('/api/auth/org-removed')
   }
 
-  // Check if user is admin
-  if (!isAdminOrOwner(user)) {
-    redirect('/dashboard')
-  }
-
-  // Check if user belongs to an organization
-  if (!user.managerOSOrganizationId || !organization) {
-    redirect('/dashboard')
-  }
-
-  const isAdmin = isAdminOrOwner(user)
-
-  // Get billing plan information
-  let billingPlanName: string | null = null
-  if (organization?.id) {
-    const subscription = await getOrganizationSubscription(organization.id)
-    billingPlanName = subscription?.subscriptionPlanName || null
-  }
-
-  const pendingInvitations = await getPendingInvitationsForUser(
-    user.clerkUserId || null
-  )
+  // Since requireAdmin passed, user is guaranteed to be admin
+  const isAdmin = true
 
   return (
     <OrganizationSettingsBreadcrumbClient>
@@ -71,18 +57,18 @@ export default async function OrganizationSettingsPage() {
                   <SectionHeader icon={Building} title='Basic Information' />
                 }
               >
-                <OrganizationSection
-                  organizationId={organization?.id || null}
-                  organizationName={organization?.name || null}
-                  organizationSlug={organization?.slug || null}
-                  billingPlanName={billingPlanName}
-                  isAdmin={isAdmin}
-                  pendingInvitations={pendingInvitations}
-                />
+                <Suspense fallback={<OrganizationSectionSkeleton />}>
+                  <OrganizationSectionServer
+                    organizationId={organization.id!}
+                    organizationName={organization.name!}
+                    organizationSlug={organization.slug ?? null}
+                    isAdmin={isAdmin}
+                  />
+                </Suspense>
               </PageSection>
 
               {/* Plan Limits Section */}
-              {organization?.id && (
+              {organization.id && (
                 <PageSection
                   variant='bordered'
                   header={
@@ -92,7 +78,9 @@ export default async function OrganizationSettingsPage() {
                     />
                   }
                 >
-                  <PlanLimitsSection organizationId={organization.id} />
+                  <Suspense fallback={<PlanLimitsSectionSkeleton />}>
+                    <PlanLimitsSection organizationId={organization.id} />
+                  </Suspense>
                 </PageSection>
               )}
             </div>

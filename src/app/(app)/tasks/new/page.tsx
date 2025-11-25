@@ -1,21 +1,18 @@
-import { redirect } from 'next/navigation'
 import { TaskForm } from '@/components/tasks/task-form'
 import { PageSection } from '@/components/ui/page-section'
 import { getPeopleForOrganization } from '@/lib/data/people'
 import { getObjectivesForOrganization } from '@/lib/data/objectives'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { requireOrganization } from '@/lib/auth-utils'
 
 export default async function NewTaskPage() {
-  const user = await getCurrentUser()
-
-  if (!user.managerOSOrganizationId) {
-    redirect('/dashboard')
-  }
+  // Require organization membership
+  const user = await requireOrganization()
 
   // Get all people and objectives for the form
+  // user.managerOSOrganizationId is guaranteed to be non-null after requireOrganization()
   const [people, objectives] = await Promise.all([
-    getPeopleForOrganization(user.managerOSOrganizationId),
-    getObjectivesForOrganization(user.managerOSOrganizationId),
+    getPeopleForOrganization(user.managerOSOrganizationId!),
+    getObjectivesForOrganization(user.managerOSOrganizationId!),
   ])
 
   return (

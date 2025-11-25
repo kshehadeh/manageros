@@ -1,9 +1,10 @@
-import { DashboardOrganizationSetup } from '@/components/dashboard-organization-setup'
+import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 import { HighlightsSectionServer } from '@/components/dashboard-sections/highlights-section-server'
 import { TodaysPrioritiesSectionServer } from '@/components/dashboard-sections/todays-priorities-section-server'
 import { ActiveInitiativesSectionServer } from '@/components/dashboard-sections/active-initiatives-section-server'
 import { TeamPulseSectionServer } from '@/components/dashboard-sections/team-pulse-section-server'
+import { OnboardingSection } from '@/components/dashboard-sections/onboarding-section'
 import {
   HighlightsSectionSkeleton,
   TodaysPrioritiesSectionSkeleton,
@@ -17,14 +18,15 @@ import { PageSidebar } from '@/components/ui/page-sidebar'
 import { HelpBlock } from '@/components/common/help-block'
 import { User, Users } from 'lucide-react'
 import { prisma } from '@/lib/db'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 
 async function DashboardContent() {
   const user = await getCurrentUser()
 
-  // If user doesn't have an organization, show organization setup cards
+  // If user doesn't have an organization, redirect to route handler that sets cookie
+  // This handles the case where user was removed from an organization
   if (!user.managerOSOrganizationId) {
-    return <DashboardOrganizationSetup />
+    redirect('/api/auth/org-removed')
   }
 
   // Check if there are any people in the organization
@@ -35,18 +37,27 @@ async function DashboardContent() {
   })
 
   const hasNoPeople = peopleCount === 0
+  const isAdmin = isAdminOrOwner(user)
+  const hasLinkedSelf = !!user.managerOSPersonId
 
   // Check if user needs to be linked to a person
   // Admins and owners don't need to be linked to a person
-  const needsPersonLink =
-    !user.managerOSPersonId && user.role !== 'ADMIN' && user.role !== 'OWNER'
+  const needsPersonLink = !user.managerOSPersonId && !isAdmin
 
   return (
     <PageContainer>
       <PageContent>
         <PageMain>
           <div className='space-y-10'>
-            {hasNoPeople && (
+            {/* Show onboarding section for admins with new organizations */}
+            <OnboardingSection
+              hasAddedPeople={!hasNoPeople}
+              hasLinkedSelf={hasLinkedSelf}
+              isAdmin={isAdmin}
+            />
+
+            {/* Show legacy help blocks for non-admins or as fallback */}
+            {hasNoPeople && !isAdmin && (
               <HelpBlock
                 title='No People in Organization'
                 description="You don't have any people in your organization yet. Add people to get started with managing your team, creating tasks, scheduling meetings, and tracking initiatives."
