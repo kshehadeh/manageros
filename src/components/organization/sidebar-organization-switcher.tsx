@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useOrganizationList, useOrganization } from '@clerk/nextjs'
 import { Building2 } from 'lucide-react'
 import {
@@ -23,6 +23,7 @@ export function SidebarOrganizationSwitcher() {
   const [isSelecting, setIsSelecting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const isSwitchingRef = useRef(false)
+  const lastActiveOrgRef = useRef<string | null>(null)
 
   // Get organizations from the list
   // userMemberships is a paginated list, access via .data
@@ -31,6 +32,39 @@ export function SidebarOrganizationSwitcher() {
 
   // Get the active organization ID
   const activeOrganizationId = activeOrganization?.id || null
+
+  // Function to revalidate memberships from Clerk
+  const revalidateMemberships = useCallback(async () => {
+    if (userMemberships?.revalidate) {
+      try {
+        await userMemberships.revalidate()
+      } catch (err) {
+        console.error('Failed to revalidate memberships:', err)
+      }
+    }
+  }, [userMemberships])
+
+  // Detect when active organization changes or is removed
+  useEffect(() => {
+    // If we had an active org and now we don't, the org was likely deleted
+    if (lastActiveOrgRef.current && !activeOrganizationId && isLoaded) {
+      // Revalidate the memberships list to remove stale data
+      revalidateMemberships()
+    }
+    lastActiveOrgRef.current = activeOrganizationId
+  }, [activeOrganizationId, isLoaded, revalidateMemberships])
+
+  // Also revalidate when the component mounts or window regains focus
+  useEffect(() => {
+    const handleFocus = () => {
+      revalidateMemberships()
+    }
+
+    window.addEventListener('focus', handleFocus)
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [revalidateMemberships])
 
   const handleValueChange = async (organizationId: string) => {
     // Prevent multiple simultaneous switches
@@ -84,8 +118,17 @@ export function SidebarOrganizationSwitcher() {
     )
   }
 
-  // Show empty state if no organizations
-  if (organizations.length === 0) {
+  // If there's no active organization but we have cached organizations,
+  // the user's organization was likely deleted - show the create link
+  // This handles the case where Clerk's cache is stale
+  const hasNoActiveOrg = !activeOrganizationId
+  const hasOnlyStaleOrgs =
+    hasNoActiveOrg &&
+    organizations.length > 0 &&
+    !organizations.some(org => org.id === activeOrganizationId)
+
+  // Show empty state if no organizations OR if only stale cached orgs remain
+  if (organizations.length === 0 || hasOnlyStaleOrgs) {
     return (
       <div className='text-xs text-muted-foreground flex items-center gap-sm'>
         <Building2 className='w-4 h-4' />

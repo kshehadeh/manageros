@@ -9,7 +9,7 @@ import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
 import {
   getCurrentUserWithPersonAndOrganization,
-  isAdminOrOwner,
+  requireAdmin,
 } from '@/lib/auth-utils'
 import { OrganizationSettingsBreadcrumbClient } from '@/components/organization/organization-settings-breadcrumb-client'
 import { OrganizationProfileButton } from '@/components/organization/organization-profile-button'
@@ -22,26 +22,21 @@ import { Button } from '@/components/ui/button'
 import { Link } from '@/components/ui/link'
 
 export default async function OrganizationSettingsPage() {
-  const { user, organization } = await getCurrentUserWithPersonAndOrganization({
+  // Require admin role and organization membership
+  await requireAdmin()
+
+  // Fetch organization details for the page
+  const { organization } = await getCurrentUserWithPersonAndOrganization({
     includeOrganizationDetails: true,
   })
 
-  if (!user) {
-    redirect('/dashboard')
-  }
-
-  // Check if user is admin
-  if (!isAdminOrOwner(user)) {
-    redirect('/dashboard')
-  }
-
-  // Check if user belongs to an organization
-  if (!user.managerOSOrganizationId || !organization || !organization.name) {
+  // Ensure organization has required details
+  if (!organization || !organization.name) {
     redirect('/organization/new')
   }
 
-  // At this point, organization is guaranteed to exist with name
-  const isAdmin = isAdminOrOwner(user)
+  // Since requireAdmin passed, user is guaranteed to be admin
+  const isAdmin = true
 
   return (
     <OrganizationSettingsBreadcrumbClient>

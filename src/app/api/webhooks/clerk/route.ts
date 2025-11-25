@@ -367,8 +367,174 @@ export async function POST(req: Request) {
     }
   }
 
-  // Organization membership webhooks are no longer needed since Clerk is the source of truth
-  // Membership is managed directly through Clerk API calls
+  // Handle organization membership deletion (user removed from org externally)
+  if (eventType === 'organizationMembership.deleted') {
+    const { organization, public_user_data } = evt.data as {
+      organization: { id: string; name: string; slug: string }
+      public_user_data: { user_id: string }
+    }
+
+    const clerkUserId = public_user_data?.user_id
+    const clerkOrgId = organization?.id
+
+    if (!clerkUserId) {
+      return new Response('Missing user ID in membership deletion webhook', {
+        status: 400,
+      })
+    }
+
+    try {
+      // Find the user in our database
+      const user = await prisma.user.findUnique({
+        where: { clerkUserId },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          clerkUserId: true,
+          personId: true,
+        },
+      })
+
+      if (!user) {
+        console.log(
+          `User with clerkUserId ${clerkUserId} not found in database - may have already been cleaned up`
+        )
+        return new Response('User not found - already cleaned up', {
+          status: 200,
+        })
+      }
+
+      // Check if user was linked to a person in this organization
+      if (user.personId) {
+        // Verify the person belonged to the organization being left
+        const person = await prisma.person.findFirst({
+          where: {
+            id: user.personId,
+            organization: {
+              clerkOrganizationId: clerkOrgId,
+            },
+          },
+        })
+
+        // If person was in the org being left, clear the link
+        if (person) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { personId: null },
+          })
+          console.log(
+            `Cleared person link for user ${user.id} after removal from organization`
+          )
+        }
+      }
+
+      // Sync user metadata to Clerk to clear organization info
+      await syncUserDataToClerk({
+        managerOSUserId: user.id,
+        email: user.email,
+        name: user.name,
+        clerkUserId: user.clerkUserId || '',
+        clerkOrganizationId: null, // No longer in organization
+        managerOSOrganizationId: null, // No longer in organization
+        managerOSPersonId: null, // Clear person link in metadata
+        role: null, // No role without organization
+      })
+
+      console.log(
+        `User ${clerkUserId} removed from organization ${clerkOrgId} - metadata synced`
+      )
+
+      return new Response('Organization membership deletion handled', {
+        status: 200,
+      })
+    } catch (error) {
+      console.error('Error handling organization membership deletion:', error)
+      return new Response('Error handling organization membership deletion', {
+        status: 500,
+      })
+    }
+  }
+
+  // Handle organization deletion
+  if (eventType === 'organization.deleted') {
+    const { id: clerkOrgId } = evt.data as { id: string }
+
+    if (!clerkOrgId) {
+      return new Response('Missing organization ID in deletion webhook', {
+        status: 400,
+      })
+    }
+
+    try {
+      // Find the organization in our database
+      const organization = await prisma.organization.findUnique({
+        where: { clerkOrganizationId: clerkOrgId },
+        select: { id: true },
+      })
+
+      if (!organization) {
+        console.log(
+          `Organization with clerkOrgId ${clerkOrgId} not found - may have already been deleted`
+        )
+        return new Response('Organization not found - already cleaned up', {
+          status: 200,
+        })
+      }
+
+      // Find all users linked to people in this organization and clear their links
+      const usersWithPersonLinks = await prisma.user.findMany({
+        where: {
+          person: {
+            organizationId: organization.id,
+          },
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          clerkUserId: true,
+        },
+      })
+
+      // Clear person links for all affected users
+      for (const user of usersWithPersonLinks) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { personId: null },
+        })
+
+        // Sync metadata to clear organization info
+        if (user.clerkUserId) {
+          await syncUserDataToClerk({
+            managerOSUserId: user.id,
+            email: user.email,
+            name: user.name,
+            clerkUserId: user.clerkUserId,
+            clerkOrganizationId: null,
+            managerOSOrganizationId: null,
+            managerOSPersonId: null,
+            role: null,
+          })
+        }
+      }
+
+      console.log(
+        `Organization ${clerkOrgId} deleted - cleared ${usersWithPersonLinks.length} user links`
+      )
+
+      // Note: We don't delete the ManagerOS organization record here
+      // That would require cascading deletes of all related data (people, meetings, etc.)
+      // This should be handled by a separate cleanup process or admin action
+
+      return new Response('Organization deletion handled', { status: 200 })
+    } catch (error) {
+      console.error('Error handling organization deletion:', error)
+      return new Response('Error handling organization deletion', {
+        status: 500,
+      })
+    }
+  }
 
   if (eventType === 'subscriptionItem.canceled') {
     const { user_id, organization_id } = evt.data as {

@@ -3,7 +3,7 @@ import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, wasRemovedFromOrganization } from '@/lib/auth-utils'
 import { getPendingInvitationsForUser } from '@/lib/actions/organization'
 import { OrganizationNewPageClient } from '@/components/organization/organization-new-page-client'
 
@@ -19,6 +19,9 @@ export default async function OrganizationNewPage() {
     redirect('/dashboard')
   }
 
+  // Check if user was removed from an organization (via cookie set by getCurrentUser)
+  const wasRemoved = await wasRemovedFromOrganization()
+
   // Get pending invitations
   const pendingInvitations = await getPendingInvitationsForUser(
     user.clerkUserId || null
@@ -33,7 +36,10 @@ export default async function OrganizationNewPage() {
 
       <PageContent>
         <PageMain>
-          <OrganizationNewPageClient pendingInvitations={pendingInvitations} />
+          <OrganizationNewPageClient
+            pendingInvitations={pendingInvitations}
+            wasRemovedFromOrganization={wasRemoved}
+          />
         </PageMain>
       </PageContent>
     </PageContainer>

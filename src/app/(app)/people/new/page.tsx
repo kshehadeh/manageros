@@ -1,8 +1,6 @@
 import { PersonForm } from '@/components/people/person-form'
 import { getJobRolesForSelection } from '@/lib/actions/job-roles'
-
-import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
-import { redirect } from 'next/navigation'
+import { requireAuth } from '@/lib/auth-utils'
 
 interface NewPersonPageProps {
   searchParams: Promise<{
@@ -14,17 +12,12 @@ interface NewPersonPageProps {
 export default async function NewPersonPage({
   searchParams,
 }: NewPersonPageProps) {
-  const user = await getCurrentUser()
-
-  // Check if user belongs to an organization
-  if (!user.managerOSOrganizationId) {
-    redirect('/dashboard')
-  }
-
-  // Check if user is admin or owner
-  if (!isAdminOrOwner(user)) {
-    redirect('/people')
-  }
+  // Require organization and admin role, redirect to /people if not admin
+  await requireAuth({
+    requireOrganization: true,
+    requireAdmin: true,
+    redirectTo: '/people',
+  })
 
   const params = await searchParams
   const managerId = params.managerId
