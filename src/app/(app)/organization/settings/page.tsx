@@ -32,7 +32,7 @@ export default async function OrganizationSettingsPage() {
 
   // Ensure organization has required details
   if (!organization || !organization.name) {
-    redirect('/organization/new')
+    redirect('/api/auth/org-removed')
   }
 
   // Since requireAdmin passed, user is guaranteed to be admin

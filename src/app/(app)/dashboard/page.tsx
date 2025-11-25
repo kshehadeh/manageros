@@ -23,9 +23,10 @@ import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 async function DashboardContent() {
   const user = await getCurrentUser()
 
-  // If user doesn't have an organization, redirect to organization setup page
+  // If user doesn't have an organization, redirect to route handler that sets cookie
+  // This handles the case where user was removed from an organization
   if (!user.managerOSOrganizationId) {
-    redirect('/organization/new')
+    redirect('/api/auth/org-removed')
   }
 
   // Check if there are any people in the organization

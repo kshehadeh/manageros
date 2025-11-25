@@ -19,16 +19,17 @@ const ORG_REMOVED_COOKIE = 'manageros_org_removed'
 
 /**
  * Check if the user was recently removed from an organization
- * This reads a short-lived cookie set by getCurrentUser when org removal is detected
- * The cookie is automatically cleared after reading
+ * This reads a short-lived cookie set by /api/auth/org-removed route handler
+ * The cookie expires after 60 seconds
+ *
+ * Note: Cookie deletion is not performed here because cookies are read-only
+ * in server components/pages. The cookie will expire automatically.
  */
 export async function wasRemovedFromOrganization(): Promise<boolean> {
   try {
     const cookieStore = await cookies()
     const removed = cookieStore.get(ORG_REMOVED_COOKIE)
     if (removed?.value === 'true') {
-      // Clear the cookie after reading
-      cookieStore.delete(ORG_REMOVED_COOKIE)
       return true
     }
   } catch {
@@ -235,19 +236,8 @@ export async function getCurrentUser(
     syncObject.role = null
     resync = true
 
-    // Set a cookie to notify the user they were removed from an organization
-    // This cookie is short-lived and will be read by the organization setup page
-    try {
-      const cookieStore = await cookies()
-      cookieStore.set(ORG_REMOVED_COOKIE, 'true', {
-        maxAge: 60, // 1 minute - just long enough for the redirect
-        path: '/',
-        httpOnly: false, // Allow client-side access
-        sameSite: 'lax',
-      })
-    } catch {
-      // Ignore cookie errors - this is a best-effort notification
-    }
+    // Note: Cookie setting is handled by /api/auth/org-removed route handler
+    // because cookies are read-only in server components/pages
   } else if (
     clerkOrgId &&
     metadataClerkOrgId &&
@@ -318,25 +308,15 @@ export async function getCurrentUser(
 
       if (!clerkOrganization) {
         // Clerk organization doesn't exist - it was deleted
-        // Clear organization data and set cookie to notify user
+        // Clear organization data
         syncObject.clerkOrganizationId = null
         syncObject.managerOSOrganizationId = null
         syncObject.managerOSPersonId = null
         syncObject.role = null
         resync = true
 
-        // Set a cookie to notify the user they were removed from an organization
-        try {
-          const cookieStore = await cookies()
-          cookieStore.set(ORG_REMOVED_COOKIE, 'true', {
-            maxAge: 60,
-            path: '/',
-            httpOnly: false,
-            sameSite: 'lax',
-          })
-        } catch {
-          // Ignore cookie errors
-        }
+        // Note: Cookie setting is handled by /api/auth/org-removed route handler
+        // because cookies are read-only in server components/pages
       } else {
         // Organization exists in Clerk - now check our database
         organization = await prisma.organization.findUnique({
@@ -555,9 +535,10 @@ export async function requireAuth(options?: {
 }) {
   const user = await getCurrentUser()
 
-  // If organization is required but user doesn't have one, redirect to org setup
+  // If organization is required but user doesn't have one, redirect to route handler
+  // that sets cookie (for removed users) and then redirects to org setup
   if (options?.requireOrganization && !user.managerOSOrganizationId) {
-    redirect(options.redirectTo || '/organization/new')
+    redirect(options.redirectTo || '/api/auth/org-removed')
   }
 
   // If admin is required but user is not admin/owner, redirect to dashboard
@@ -579,7 +560,7 @@ export async function requireOrganization() {
   const user = await getCurrentUser()
 
   if (!user.managerOSOrganizationId) {
-    redirect('/organization/new')
+    redirect('/api/auth/org-removed')
   }
 
   return user
@@ -595,7 +576,7 @@ export async function requireAdmin() {
   const user = await getCurrentUser()
 
   if (!user.managerOSOrganizationId) {
-    redirect('/organization/new')
+    redirect('/api/auth/org-removed')
   }
 
   if (!isAdminOrOwner(user)) {
