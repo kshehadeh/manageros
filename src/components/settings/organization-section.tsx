@@ -1,22 +1,9 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { OrganizationSetupCards } from '@/components/organization-setup-cards'
-import type { PendingInvitation } from '@/types/organization'
-
-interface Organization {
-  id: string
-  name: string
-  slug: string | null
-}
-
 interface OrganizationSectionProps {
   organizationId: string | null
   organizationName: string | null
   organizationSlug: string | null
   billingPlanName: string | null
   isAdmin: boolean
-  pendingInvitations: PendingInvitation[]
 }
 
 export function OrganizationSection({
@@ -24,89 +11,34 @@ export function OrganizationSection({
   organizationName,
   organizationSlug,
 }: OrganizationSectionProps) {
-  const [loading, setLoading] = useState(true)
-  const [invitations, setInvitations] = useState<PendingInvitation[]>([])
-  const [organizations, setOrganizations] = useState<Organization[]>([])
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [invitationsRes, orgsRes] = await Promise.all([
-          fetch('/api/organization/invitations'),
-          fetch('/api/organization/memberships'),
-        ])
-
-        if (invitationsRes.ok) {
-          const data = await invitationsRes.json()
-          setInvitations(data.invitations || [])
-        }
-
-        if (orgsRes.ok) {
-          const data = await orgsRes.json()
-          setOrganizations(data.organizations || [])
-        }
-      } catch (error) {
-        console.error('Error fetching organization data:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    if (!organizationId) {
-      fetchData()
-    } else {
-      setLoading(false)
-    }
-  }, [organizationId])
-
-  // If user has an organization, show organization info
-  if (organizationId && organizationName) {
-    return (
-      <div className='space-y-4'>
-        <div className='space-y-2'>
-          <div>
-            <p className='text-sm font-medium'>Organization Name</p>
-            <p className='text-sm text-muted-foreground'>{organizationName}</p>
-          </div>
-          {organizationSlug && (
-            <div>
-              <p className='text-sm font-medium'>Organization Slug</p>
-              <p className='text-sm text-muted-foreground font-mono text-xs'>
-                {organizationSlug}
-              </p>
-            </div>
-          )}
-          <div>
-            <p className='text-sm font-medium'>Organization ID</p>
-            <p className='text-sm text-muted-foreground font-mono text-xs'>
-              {organizationId}
-            </p>
-          </div>
-        </div>
-      </div>
-    )
+  // This component should only be used when user has an organization
+  // The settings page redirects users without organizations to /organization/new
+  if (!organizationId || !organizationName) {
+    return null
   }
-
-  // If no organization, show setup cards
-  if (loading) {
-    return (
-      <div className='flex items-center justify-center py-4'>
-        <div className='text-sm text-muted-foreground'>Loading...</div>
-      </div>
-    )
-  }
-
-  const hasMemberships = organizations.length > 0
-  const hasInvitations = invitations.length > 0
 
   return (
     <div className='space-y-4'>
-      <OrganizationSetupCards
-        hasMemberships={hasMemberships}
-        hasInvitations={hasInvitations}
-        invitations={invitations}
-        organizations={organizations}
-      />
+      <div className='space-y-2'>
+        <div>
+          <p className='text-sm font-medium'>Organization Name</p>
+          <p className='text-sm text-muted-foreground'>{organizationName}</p>
+        </div>
+        {organizationSlug && (
+          <div>
+            <p className='text-sm font-medium'>Organization Slug</p>
+            <p className='text-sm text-muted-foreground font-mono text-xs'>
+              {organizationSlug}
+            </p>
+          </div>
+        )}
+        <div>
+          <p className='text-sm font-medium'>Organization ID</p>
+          <p className='text-sm text-muted-foreground font-mono text-xs'>
+            {organizationId}
+          </p>
+        </div>
+      </div>
     </div>
   )
 }
