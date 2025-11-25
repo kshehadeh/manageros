@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Loading } from '@/components/ui/loading'
+import { Link } from '../ui/link'
 
 export function SidebarOrganizationSwitcher() {
   const { userMemberships, setActive, isLoaded } = useOrganizationList({
@@ -86,8 +87,9 @@ export function SidebarOrganizationSwitcher() {
   // Show empty state if no organizations
   if (organizations.length === 0) {
     return (
-      <div className='text-sm text-muted-foreground'>
-        No organizations available
+      <div className='text-xs text-muted-foreground flex items-center gap-sm'>
+        <Building2 className='w-4 h-4' />
+        <Link href='/organization/new'>Create Organization</Link>
       </div>
     )
   }

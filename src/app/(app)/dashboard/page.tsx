@@ -1,4 +1,4 @@
-import { DashboardOrganizationSetup } from '@/components/dashboard-organization-setup'
+import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 import { HighlightsSectionServer } from '@/components/dashboard-sections/highlights-section-server'
 import { TodaysPrioritiesSectionServer } from '@/components/dashboard-sections/todays-priorities-section-server'
@@ -22,9 +22,9 @@ import { getCurrentUser } from '@/lib/auth-utils'
 async function DashboardContent() {
   const user = await getCurrentUser()
 
-  // If user doesn't have an organization, show organization setup cards
+  // If user doesn't have an organization, redirect to organization setup page
   if (!user.managerOSOrganizationId) {
-    return <DashboardOrganizationSetup />
+    redirect('/organization/new')
   }
 
   // Check if there are any people in the organization
