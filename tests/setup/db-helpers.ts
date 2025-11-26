@@ -12,10 +12,7 @@
 
 import { prisma } from '@/lib/db'
 import type { PersonFormData } from '@/lib/validations'
-import {
-  createClerkOrganization,
-  deleteClerkOrganization,
-} from '@/lib/clerk-organization-utils'
+import { createClerkOrganization, deleteClerkOrganization } from '@/lib/clerk'
 
 /**
  * Test data cleanup tracker

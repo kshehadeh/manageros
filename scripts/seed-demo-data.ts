@@ -6,42 +6,11 @@ import {
   createClerkOrganization,
   deleteClerkOrganization,
   addUserToClerkOrganization,
-} from '../src/lib/clerk-organization-utils'
+  getClerkOrganizationBySlug,
+} from '../src/lib/clerk'
 import { getClerkHelper } from '../tests/setup/clerk-helpers'
 
 const prisma = new PrismaClient()
-const CLERK_API_BASE = 'https://api.clerk.com/v1'
-
-// Helper to get Clerk organization by slug
-async function getClerkOrganizationBySlug(
-  slug: string
-): Promise<{ id: string; name: string; slug: string } | null> {
-  if (!process.env.CLERK_SECRET_KEY) {
-    return null
-  }
-
-  try {
-    const response = await fetch(
-      `${CLERK_API_BASE}/organizations?slug=${encodeURIComponent(slug)}`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
-        },
-      }
-    )
-
-    if (!response.ok) {
-      return null
-    }
-
-    const data = (await response.json()) as {
-      data: Array<{ id: string; name: string; slug: string }>
-    }
-    return data.data && data.data.length > 0 ? data.data[0] : null
-  } catch {
-    return null
-  }
-}
 
 // Helper functions for generating relative dates
 const getRelativeDate = (daysOffset: number): Date => {

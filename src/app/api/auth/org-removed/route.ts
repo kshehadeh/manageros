@@ -12,8 +12,8 @@ const ORG_REMOVED_COOKIE = 'manageros_org_removed'
  * (because it's called from server components where cookies are read-only).
  */
 export async function GET() {
+  const cookieStore = await cookies()
   try {
-    const cookieStore = await cookies()
     cookieStore.set(ORG_REMOVED_COOKIE, 'true', {
       maxAge: 60, // 1 minute - just long enough for the redirect
       path: '/',

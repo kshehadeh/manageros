@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
 import { getCurrentUser, wasRemovedFromOrganization } from '@/lib/auth-utils'
-import { getPendingInvitationsForUser } from '@/lib/actions/organization'
+import { getPendingInvitationsForUser } from '@/lib/clerk'
 import { OrganizationNewPageClient } from '@/components/organization/organization-new-page-client'
 
 export default async function OrganizationNewPage() {

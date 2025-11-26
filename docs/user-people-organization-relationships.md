@@ -667,7 +667,7 @@ Happens when:
 }
 ```
 
-**Function**: `syncUserDataToClerk()` in `src/lib/clerk-session-sync.ts`
+**Function**: `syncUserDataToClerk()` in `src/lib/clerk.ts`
 
 #### Clerk → ManagerOS Sync
 

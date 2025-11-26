@@ -315,7 +315,7 @@ if (user && user.personId) {
 
 ## Related Files
 
-- `src/lib/clerk-session-sync.ts` - Clerk metadata sync functions
+- `src/lib/clerk.ts` - Clerk API and metadata sync functions
 - `src/lib/clerk-organization-utils.ts` - Clerk organization utilities
 - `src/lib/actions/organization.ts` - Organization management actions
 - `src/lib/auth-types.ts` - Type definitions
