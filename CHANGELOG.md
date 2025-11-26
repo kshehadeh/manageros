@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.12.0](/compare/v1.11.0...v1.12.0) (2025-11-26)
+
+### Features
+
+- **pricing:** Integrate Clerk billing plans into pricing page with dynamic card rendering 985319e
+
 # [1.11.0](/compare/v1.10.0...v1.11.0) (2025-11-26)
 
 ### Features
