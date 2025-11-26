@@ -7,10 +7,10 @@ import {
   UserBriefSchema,
   type UserBrief,
 } from './auth-types'
-import { getUserFromClerk, syncUserDataToClerk } from './clerk-session-sync'
+import { getUserFromClerk, syncUserDataToClerk } from './clerk'
 import z from 'zod'
 import { checkIfManagerOrSelf } from '@/lib/utils/people-utils'
-import { getClerkOrganization } from './clerk-organization-utils'
+import { getClerkOrganization } from './clerk'
 import { combineName } from '@/lib/utils/name-utils'
 import { getTaskAccessWhereClause } from '@/lib/task-access-utils'
 

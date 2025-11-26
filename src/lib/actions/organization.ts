@@ -4,22 +4,24 @@
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
-import { syncUserDataToClerk } from '@/lib/clerk-session-sync'
+import { syncUserDataToClerk } from '@/lib/clerk'
 import { auth } from '@clerk/nextjs/server'
 import { PersonBrief } from '@/types/person'
 import type { UserBrief } from '@/lib/auth-types'
 import {
   createClerkOrganization,
   addUserToClerkOrganization,
-  mapManagerOSRoleToClerkRole,
   getClerkOrganization,
   getClerkOrganizationMembers,
-  mapClerkRoleToManagerOSRole,
   getClerkOrganizationMembership,
   updateUserRoleInClerkOrganization,
   removeUserFromClerkOrganization,
   getClerkOrganizationMembersCount,
   isBillingUser as isBillingUserFromClerk,
+} from '../clerk'
+import {
+  mapManagerOSRoleToClerkRole,
+  mapClerkRoleToManagerOSRole,
 } from '../clerk-organization-utils'
 export async function createOrganization(formData: {
   name: string
@@ -778,116 +780,6 @@ export async function checkPendingInvitation(email: string) {
   return invitation
 }
 
-export async function getPendingInvitationsForUser(clerkUserId: string | null) {
-  // If user doesn't exist, return empty array
-  if (!clerkUserId || !process.env.CLERK_SECRET_KEY) {
-    return []
-  }
-
-  try {
-    // Fetch pending invitations from Clerk API
-    const response = await fetch(
-      `https://api.clerk.com/v1/users/${clerkUserId}/organization_invitations?status=pending`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
-        },
-      }
-    )
-
-    if (!response.ok) {
-      console.error(
-        `Failed to fetch Clerk invitations: ${response.status} ${await response.text()}`
-      )
-      return []
-    }
-
-    const data = (await response.json()) as {
-      data: Array<{
-        id: string
-        email_address: string
-        organization_id: string
-        status: string
-        created_at: number
-        updated_at: number
-        public_organization_data: {
-          id: string
-          name: string
-          slug: string
-        }
-        public_metadata?: {
-          invited_by_name?: string
-          invited_by_email?: string
-        }
-      }>
-    }
-
-    // Get organization details from our database to enrich the response
-    const clerkOrgIds = data.data.map(inv => inv.organization_id)
-    const organizations = await prisma.organization.findMany({
-      where: {
-        clerkOrganizationId: {
-          in: clerkOrgIds,
-        },
-      },
-      select: {
-        id: true,
-        clerkOrganizationId: true,
-        description: true,
-      },
-    })
-
-    const orgMap = new Map(
-      organizations.map(org => [org.clerkOrganizationId, org])
-    )
-
-    // Transform Clerk invitations to match expected format
-    return data.data
-      .filter(inv => {
-        // Filter out expired invitations (Clerk doesn't filter by expiration)
-        // We'll check expiration if Clerk provides it, otherwise include all pending
-        return inv.status === 'pending'
-      })
-      .map(inv => {
-        const org = orgMap.get(inv.organization_id)
-        return {
-          id: inv.id,
-          email: inv.email_address,
-          organizationId: org?.id || '',
-          status: 'pending' as const,
-          createdAt: new Date(inv.created_at * 1000).toISOString(),
-          updatedAt: new Date(inv.updated_at * 1000).toISOString(),
-          expiresAt: new Date(
-            (inv.created_at + 7 * 24 * 60 * 60) * 1000
-          ).toISOString(), // Assume 7-day expiration (standard Clerk default)
-          acceptedAt: null,
-          organization: org
-            ? {
-                id: org.id,
-                clerkOrganizationId: org.clerkOrganizationId,
-                description: org.description,
-                name: inv.public_organization_data.name,
-              }
-            : {
-                id: '',
-                clerkOrganizationId: inv.organization_id,
-                description: null,
-                name: inv.public_organization_data.name,
-              },
-          invitedBy: {
-            name:
-              inv.public_metadata?.invited_by_name ||
-              inv.public_organization_data.name,
-            email: inv.public_metadata?.invited_by_email || '',
-          },
-        }
-      })
-  } catch (error) {
-    console.error('Error fetching pending invitations from Clerk:', error)
-    return []
-  }
-}
-
 /**
  * Server action to trigger invitation acceptance
  * The actual acceptance is handled on the client-side via Clerk
@@ -1334,7 +1226,7 @@ export async function becomeOrganizationOwner() {
   }
 
   // Find existing owner (billing user) from Clerk subscription
-  const { getBillingUserClerkId } = await import('../clerk-organization-utils')
+  const { getBillingUserClerkId } = await import('../clerk')
   const existingOwnerClerkId = await getBillingUserClerkId(
     org.clerkOrganizationId
   )

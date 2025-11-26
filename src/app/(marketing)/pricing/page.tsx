@@ -3,7 +3,9 @@ import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 import { Metadata } from 'next'
 import { Geist_Mono as GeistMono } from 'next/font/google'
-import { PricingTable } from '@clerk/nextjs'
+import { ClerkPricingCard } from '@/components/marketing/clerk-pricing-card'
+import { getClerkBillingPlans } from '@/lib/clerk'
+import type { ClerkCommercePlan } from '@/lib/clerk-types'
 
 const geistMono = GeistMono({
   subsets: ['latin'],
@@ -16,7 +18,46 @@ export const metadata: Metadata = {
     'Choose the right plan for your engineering team. Start free with Solo or unlock unlimited features with Orchestrator.',
 }
 
-export default function PricingPage() {
+/**
+ * Transform a Clerk plan into props for ClerkPricingCard
+ */
+function transformPlanToCardProps(plan: ClerkCommercePlan, index: number) {
+  const isFree = plan.fee.amount === 0
+  const hasFreeTrial =
+    plan.free_trial_enabled && plan.free_trial_days && plan.free_trial_days > 0
+
+  // Extract feature names from plan features
+  const features = plan.features?.map(f => f.name) ?? []
+
+  return {
+    name: plan.name,
+    price: plan.fee.amount_formatted,
+    period: plan.is_recurring ? '/month' : undefined,
+    description: plan.description ?? '',
+    features,
+    cta: isFree
+      ? 'Get started'
+      : hasFreeTrial
+        ? `Start ${plan.free_trial_days}-day trial`
+        : 'Subscribe',
+    planId: isFree ? undefined : plan.id,
+    isFree,
+    popular: index === 1, // Mark second plan as popular (typically the paid plan)
+    trialBadge: hasFreeTrial
+      ? `${plan.free_trial_days}-day free trial`
+      : undefined,
+  }
+}
+
+export default async function PricingPage() {
+  // Fetch plans from Clerk
+  const clerkPlans = await getClerkBillingPlans()
+
+  // Transform Clerk plans to card props
+  const pricingTiers = clerkPlans.map((plan, index) =>
+    transformPlanToCardProps(plan, index)
+  )
+
   return (
     <>
       <section className='mx-auto flex w-full max-w-5xl flex-col gap-12 px-6 pb-20 pt-6 text-center sm:px-8 md:pt-24'>
@@ -41,7 +82,13 @@ export default function PricingPage() {
       </section>
 
       <section className='mx-auto max-w-6xl px-6 pb-24 sm:px-8'>
-        <PricingTable />
+        <FadeInOnScroll delay={300}>
+          <div className='grid gap-8 md:grid-cols-2'>
+            {pricingTiers.map(tier => (
+              <ClerkPricingCard key={tier.name} {...tier} />
+            ))}
+          </div>
+        </FadeInOnScroll>
       </section>
 
       <section className='mx-auto max-w-4xl px-6 pb-24 sm:px-8'>

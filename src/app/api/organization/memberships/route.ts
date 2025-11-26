@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth-utils'
-import { getClerkOrganization } from '@/lib/clerk-organization-utils'
+import { getClerkOrganization } from '@/lib/clerk'
 import { clerkClient } from '@clerk/nextjs/server'
 
 export async function GET() {

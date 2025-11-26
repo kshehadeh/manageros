@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
+import { getUserSubscription } from '@/lib/clerk'
 
 /**
  * API endpoint to check if the current user has an active subscription
@@ -12,30 +13,14 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Use Clerk's REST API to check subscription status
-    // Note: This requires CLERK_SECRET_KEY to be set
-    const clerkSecretKey = process.env.CLERK_SECRET_KEY
-
-    if (!clerkSecretKey) {
-      return NextResponse.json(
-        { error: 'Clerk not configured' },
-        { status: 500 }
-      )
-    }
-
     try {
       // Fetch user's subscriptions from Clerk
-      const response = await fetch(
-        `https://api.clerk.com/v1/users/${userId}/billing/subscription`,
-        { headers: { Authorization: `Bearer ${clerkSecretKey}` } }
-      )
+      const subscription = await getUserSubscription(userId)
 
-      if (!response.ok) {
+      if (!subscription) {
         // If no subscriptions endpoint or user has no subscriptions, return null
         return NextResponse.json({ subscription: null })
       }
-
-      const subscription = await response.json()
 
       // Check if subscription is active
       if (

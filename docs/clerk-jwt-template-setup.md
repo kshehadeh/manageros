@@ -95,7 +95,7 @@ const organizationId = sessionClaims.organizationId as string | null
 If you need to manually sync user data (e.g., after organization changes), use:
 
 ```typescript
-import { syncUserDataToClerk } from '@/lib/clerk-session-sync'
+import { syncUserDataToClerk } from '@/lib/clerk'
 
 // After user joins/leaves organization
 await syncUserDataToClerk(clerkUserId)

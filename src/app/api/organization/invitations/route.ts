@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getPendingInvitationsForUser } from '@/lib/actions/organization'
+import { getPendingInvitationsForUser } from '@/lib/clerk'
 import { getCurrentUser } from '../../../../lib/auth-utils'
 
 export async function GET() {
