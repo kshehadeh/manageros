@@ -12,7 +12,6 @@ import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
-import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
 import { PageSidebar } from '@/components/ui/page-sidebar'
 import { Calendar, User, Clock, FileText, ListTodo } from 'lucide-react'
@@ -61,49 +60,45 @@ export default async function TaskDetailPage({
       <PageContainer>
         <PageHeader
           titleIcon={ListTodo}
+          title={
+            <InlineEditableText
+              value={task.title}
+              onValueChange={async newTitle => {
+                'use server'
+                await updateTaskTitle(task.id, newTitle)
+              }}
+              placeholder='Enter task title'
+              className='page-title'
+            />
+          }
           subtitle={
-            <>
-              <div className='flex items-center gap-3 mb-2'>
-                <InlineEditableText
-                  value={task.title}
-                  onValueChange={async newTitle => {
-                    'use server'
-                    await updateTaskTitle(task.id, newTitle)
-                  }}
-                  placeholder='Enter task title'
-                  className='page-title'
-                />
+            <div className='flex flex-wrap items-center gap-3'>
+              <div className='flex items-center gap-1 text-sm text-muted-foreground'>
+                <Calendar className='w-4 h-4' />
+                <span>
+                  Created {new Date(task.createdAt).toLocaleDateString()}
+                </span>
               </div>
-              {/* Created Date, Assignee, and Completion Date in subheader */}
-              <div className='flex flex-wrap items-center gap-3 mt-2 mb-3'>
+              {task.assignee && (
                 <div className='flex items-center gap-1 text-sm text-muted-foreground'>
-                  <Calendar className='w-4 h-4' />
+                  <User className='w-4 h-4' />
+                  <Link
+                    href={`/people/${task.assignee.id}`}
+                    className='hover:text-highlight transition-colors'
+                  >
+                    {task.assignee.name}
+                  </Link>
+                </div>
+              )}
+              {task.completedAt && (
+                <div className='flex items-center gap-1 text-sm text-muted-foreground'>
+                  <Clock className='w-4 h-4' />
                   <span>
-                    Created {new Date(task.createdAt).toLocaleDateString()}
+                    Completed {new Date(task.completedAt).toLocaleDateString()}
                   </span>
                 </div>
-                {task.assignee && (
-                  <div className='flex items-center gap-1 text-sm text-muted-foreground'>
-                    <User className='w-4 h-4' />
-                    <Link
-                      href={`/people/${task.assignee.id}`}
-                      className='hover:text-highlight transition-colors'
-                    >
-                      {task.assignee.name}
-                    </Link>
-                  </div>
-                )}
-                {task.completedAt && (
-                  <div className='flex items-center gap-1 text-sm text-muted-foreground'>
-                    <Clock className='w-4 h-4' />
-                    <span>
-                      Completed{' '}
-                      {new Date(task.completedAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </>
+              )}
+            </div>
           }
           actions={
             <TaskActionsDropdown
@@ -119,51 +114,49 @@ export default async function TaskDetailPage({
           }
         />
 
-        <PageContent>
-          <PageMain>
-            <div className='space-y-6'>
-              {/* Task Description */}
-              <PageSection
-                header={<SectionHeader icon={FileText} title='Description' />}
-              >
-                <InlineEditableText
-                  value={task.description || ''}
-                  onValueChange={async newDescription => {
-                    'use server'
-                    await updateTaskDescription(task.id, newDescription)
-                  }}
-                  placeholder='Enter task description'
-                  multiline={true}
-                  emptyStateText='Click to add description'
-                />
-              </PageSection>
-            </div>
-          </PageMain>
+        <PageMain>
+          <div className='space-y-6'>
+            {/* Task Description */}
+            <PageSection
+              header={<SectionHeader icon={FileText} title='Description' />}
+            >
+              <InlineEditableText
+                value={task.description || ''}
+                onValueChange={async newDescription => {
+                  'use server'
+                  await updateTaskDescription(task.id, newDescription)
+                }}
+                placeholder='Enter task description'
+                multiline={true}
+                emptyStateText='Click to add description'
+              />
+            </PageSection>
+          </div>
+        </PageMain>
 
-          <PageSidebar>
-            <TaskSidebar
-              links={entityLinks.map(link => ({
-                id: link.id,
-                url: link.url,
-                title: link.title,
-                description: link.description,
-                createdAt: link.createdAt,
-                updatedAt: link.updatedAt,
-                createdBy: link.createdBy,
-              }))}
-              entityId={task.id}
-              status={task.status as TaskStatus}
-              priority={task.priority as TaskPriority}
-              assignee={task.assignee}
-              initiative={task.initiative}
-              objective={task.objective}
-              estimate={task.estimate}
-              dueDate={task.dueDate}
-              createdBy={task.createdBy}
-              updatedAt={task.updatedAt}
-            />
-          </PageSidebar>
-        </PageContent>
+        <PageSidebar>
+          <TaskSidebar
+            links={entityLinks.map(link => ({
+              id: link.id,
+              url: link.url,
+              title: link.title,
+              description: link.description,
+              createdAt: link.createdAt,
+              updatedAt: link.updatedAt,
+              createdBy: link.createdBy,
+            }))}
+            entityId={task.id}
+            status={task.status as TaskStatus}
+            priority={task.priority as TaskPriority}
+            assignee={task.assignee}
+            initiative={task.initiative}
+            objective={task.objective}
+            estimate={task.estimate}
+            dueDate={task.dueDate}
+            createdBy={task.createdBy}
+            updatedAt={task.updatedAt}
+          />
+        </PageSidebar>
       </PageContainer>
     </TaskDetailBreadcrumbClient>
   )
