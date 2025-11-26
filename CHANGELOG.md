@@ -1,5 +1,14 @@
 # Changelog
 
+# [1.11.0](/compare/v1.10.0...v1.11.0) (2025-11-26)
+
+### Features
+
+- Add react-contenteditable dependency and refactor InlineEditableText component for improved editing experience b4507e2
+- **auth:** Implement organization-based user authentication checks in chat route and feedback actions 302bf7c
+- **dashboard:** Add organization configuration check and integrate onboarding completion status in onboarding section eaeaf62
+- **settings:** Enhance settings page layout and user info display, update GitHub PAT description, and improve person linking form styling 00d16da
+
 # [1.10.0](/compare/v1.9.0...v1.10.0) (2025-11-25)
 
 ### Features
