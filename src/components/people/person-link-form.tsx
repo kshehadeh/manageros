@@ -21,8 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { Link, Unlink } from 'lucide-react'
+import { ArrowDown, Link, Unlink } from 'lucide-react'
 import { PersonListItem } from '@/components/people/person-list-item'
 import type { OrganizationBrief, UserBrief } from '@/lib/auth-types'
 import {
@@ -105,11 +104,18 @@ export function PersonLinkForm({
   }
 
   return (
-    <div className='space-y-4'>
-      <p className='text-sm text-muted-foreground'>
-        Link your account to a person in your organization to access features
-        like one-on-ones, reports, and personal data
-      </p>
+    <div className='space-y-sm'>
+      {currentPerson ? (
+        <p className='text-sm text-muted-foreground flex items-center gap-2'>
+          You are currently linked to <strong>{currentPerson.name}</strong>{' '}
+          <ArrowDown className='h-4 w-4' />
+        </p>
+      ) : (
+        <p className='text-sm text-muted-foreground'>
+          Link your account to a person in your organization to access features
+          like one-on-ones, reports, and personal data
+        </p>
+      )}
       {error && (
         <div className='p-3 text-sm text-destructive-foreground bg-destructive rounded-md'>
           {error}
@@ -118,51 +124,42 @@ export function PersonLinkForm({
 
       {currentPerson ? (
         <div className='space-y-4'>
-          <div className='flex items-center justify-between mb-2'>
-            <div className='flex items-center gap-2'>
-              <Link className='h-4 w-4 text-success' />
-              <span className='font-medium'>Currently Linked</span>
-              <Badge variant='success'>Active</Badge>
-            </div>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant='outline' size='sm' disabled={isLoading}>
-                  <Unlink className='h-4 w-4' />
-                  Unlink Account
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Unlink Account</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to unlink your account from{' '}
-                    <strong>{currentPerson.name}</strong>? This will remove
-                    access to personal features until you link to another
-                    person.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleUnlink}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? 'Unlinking...' : 'Unlink Account'}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+          <div className='flex flex-col items-start mb-2 gap-lg border rounded-sm p-2'>
+            <PersonListItem
+              person={{
+                id: currentPerson.id,
+                name: currentPerson.name,
+                email: currentPerson.email,
+                role: currentPerson.role,
+              }}
+              showRole={true}
+              showEmail={true}
+            />
           </div>
-          <PersonListItem
-            person={{
-              id: currentPerson.id,
-              name: currentPerson.name,
-              email: currentPerson.email,
-              role: currentPerson.role,
-            }}
-            showRole={true}
-            showEmail={true}
-          />
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant='outline' size='sm' disabled={isLoading}>
+                <Unlink className='h-4 w-4' />
+                Unlink Account
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Unlink Account</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to unlink your account from{' '}
+                  <strong>{currentPerson.name}</strong>? This will remove access
+                  to personal features until you link to another person.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleUnlink} disabled={isLoading}>
+                  {isLoading ? 'Unlinking...' : 'Unlink Account'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       ) : (
         <div className='space-y-4'>

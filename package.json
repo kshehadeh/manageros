@@ -120,6 +120,7 @@
     "node-ical": "^0.22.1",
     "nodemailer": "^7.0.10",
     "react": "19.2.0",
+    "react-contenteditable": "^3.3.7",
     "react-day-picker": "^9.11.2",
     "react-dom": "19.2.0",
     "react-icons": "^5.5.0",

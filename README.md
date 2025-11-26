@@ -7,22 +7,29 @@ A comprehensive management platform built for engineering managers to track init
 ManagerOS is a Next.js-based management platform designed specifically for engineering managers. It provides a structured approach to:
 
 - **Initiative Management**: Track strategic initiatives with RAG status, confidence levels, and progress metrics
-- **People Management**: Organize team members, roles, and reporting structures
+- **People Management**: Organize team members, roles, and reporting structures with hierarchical teams
 - **1:1 Management**: Schedule and track one-on-one meetings with team members
 - **Weekly Check-ins**: Regular progress updates with RAG status and confidence tracking
 - **Task Management**: Break down initiatives into objectives and actionable tasks
-- **Performance Tracking**: Monitor metrics and outcomes for each initiative
+- **Feedback System**: Multi-directional feedback collection and feedback campaigns
+- **Reporting**: Extensible reporting framework with AI-powered synopsis generation
+- **Integrations**: Jira and GitHub integration for work activity tracking
+
+For detailed feature documentation, see the [docs](docs/) folder.
 
 ## 🛠️ Tech Stack
 
-- **Framework**: Next.js 15 with App Router and Server Actions
-- **Database**: Prisma ORM with SQLite (easily upgradeable to PostgreSQL)
+- **Framework**: Next.js 16 with App Router and Server Actions
+- **Database**: Prisma ORM with PostgreSQL
+- **Authentication**: Clerk for user management and authentication
 - **Styling**: TailwindCSS with shadcn UI components and Radix UI primitives
 - **Runtime**: Bun for fast package management and execution
 - **Type Safety**: TypeScript throughout the application
 - **Validation**: Zod for runtime type validation
 - **State Management**: Zustand for client-side caching and global state
 - **Caching**: Client-side cache with stale-while-revalidate pattern
+- **File Storage**: Cloudflare R2 for file attachments and avatars
+- **Monitoring**: Sentry for error tracking and performance monitoring
 
 ## 📋 Prerequisites
 
@@ -41,18 +48,35 @@ bun install
 
 ### 2. Environment Configuration
 
-Create a `.env` file in the root directory:
+Create a `.env` file in the root directory with the following required variables:
 
 ```bash
 # Database Configuration
-DATABASE_URL="file:./prisma/dev.db"
-```
-
-For production, replace with a PostgreSQL connection string:
-
-```bash
 DATABASE_URL="postgresql://username:password@localhost:5432/manageros"
+DIRECT_URL="postgresql://username:password@localhost:5432/manageros"
+
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..."
+CLERK_SECRET_KEY="sk_test_..."
+
+# Cloudflare R2 (for file storage)
+R2_ACCOUNT_ID="..."
+R2_ACCESS_KEY_ID="..."
+R2_SECRET_ACCESS_KEY="..."
+R2_BUCKET_NAME="..."
+R2_PUBLIC_URL="https://..."
+
+# Optional: Email configuration (for notifications)
+SMTP_HOST="..."
+SMTP_PORT="..."
+SMTP_USER="..."
+SMTP_PASSWORD="..."
+
+# Optional: Sentry (for error tracking)
+SENTRY_DSN="..."
 ```
+
+For detailed setup instructions, see the documentation in the [docs](docs/) folder.
 
 ### 3. Database Setup
 
@@ -60,12 +84,14 @@ DATABASE_URL="postgresql://username:password@localhost:5432/manageros"
 # Generate Prisma client
 bun run prisma:generate
 
-# Push schema to database
-bun run prisma:push
+# Run database migrations
+bunx prisma migrate dev
 
-# Seed with sample data
-bun run prisma:seed
+# (Optional) Seed with demo data
+bun run db:seed-demo
 ```
+
+For database backup and restore procedures, see [Database Backup](docs/database-backup.md) and [Database Restore](docs/database-restore.md).
 
 ### 4. Start Development Server
 
@@ -77,118 +103,104 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 📊 Features Overview
 
-### Dashboard
+### Core Features
 
-- Recent check-ins with RAG status
-- Upcoming 1:1 meetings
-- Quick navigation to all sections
+- **Dashboard**: Executive overview with tasks, campaigns, teams, and direct reports
+- **Initiative Management**: Track strategic initiatives with objectives, key results, RAG status, and check-ins
+- **People Management**: Team member profiles, hierarchical teams, organizational charts, and job role management
+- **1:1 Management**: Schedule and track one-on-one meetings with markdown notes
+- **Task Management**: Break down initiatives into actionable tasks with assignment, priorities, and due dates
+- **Feedback System**: Multi-directional feedback with privacy controls and feedback campaigns
+- **Reporting**: Extensible reporting framework with AI-powered synopsis generation
+- **Integrations**: Jira and GitHub integration for work activity tracking
+- **Notifications**: Real-time notification system with bell icon and management page
+- **Command Palette**: Global Cmd/Ctrl+K palette for quick actions and search
+- **Help System**: Contextual help with markdown-rendered modals
 
-### Initiatives Management
-
-- Create and track strategic initiatives
-- Set objectives and key results
-- Monitor RAG status (Red/Amber/Green) and confidence levels
-- Weekly check-ins with progress updates
-- Task breakdown and assignment
-
-### People Management
-
-- Team member profiles with roles and contact information
-- Organizational hierarchy (manager-reports relationships)
-- Team assignments and status tracking
-
-### 1:1 Management
-
-- Schedule recurring one-on-one meetings
-- Set agendas and take notes
-- Track meeting cadence and history
-
-### Task Management
-
-- Break initiatives into actionable tasks
-- Assign tasks to team members
-- Track progress with status updates
-- Priority and due date management
-
-### Performance Optimization
+### Advanced Features
 
 - **Client-Side Caching**: Zustand-based cache with stale-while-revalidate pattern
-- **Network Awareness**: Respects offline state and handles connectivity issues
-- **Automatic Cache Invalidation**: Server actions trigger cache refresh
-- **Reduced API Calls**: Shared cache eliminates redundant data fetching
+- **Notes & Attachments**: Rich text notes with file attachments stored in Cloudflare R2
+- **Avatar Management**: Person and team avatars with upload, Jira/GitHub integration, and initials fallback
+- **Cron Jobs**: Extensible automated task system (birthday notifications, activity monitoring)
+- **Security**: Organization-level isolation and entity-specific access control
+- **Theming**: Token-based theming with light/dark mode support
 
-### UI Standards
+For detailed feature documentation, see:
 
-- Standardized UI components:
-  - Buttons use the shared shadcn `Button` at `src/components/ui/button.tsx`
-  - Default button style is `variant='outline'`
-  - Icon-only actions use `size='icon'` and Lucide icons
-  - Destructive confirms use `variant='destructive'` only for the confirm state
+- [API Documentation](docs/api/)
+- [Client-Side Caching](docs/client-side-caching.md)
+- [Help System](docs/help-system.md)
+- [Permissions System](docs/permissions.md)
+- [Security Audit Results](docs/security-audit-results.md)
 
 ## 🗄️ Database Schema
 
-The application uses a comprehensive Prisma schema with the following key models:
+The application uses a comprehensive Prisma schema with PostgreSQL. Key models include:
 
-- **Team**: Organizational units
-- **Person**: Team members with roles and relationships
-- **Initiative**: Strategic projects with objectives and metrics
+- **Organization**: Multi-tenant organization support
+- **User**: User accounts linked to Clerk
+- **Person**: Team members with roles, relationships, and avatars
+- **Team**: Hierarchical teams with parent-child relationships
+- **Initiative**: Strategic projects with objectives, key results, and metrics
 - **Task**: Actionable items linked to initiatives or objectives
-- **CheckIn**: Weekly progress updates
+- **CheckIn**: Weekly progress updates with RAG status
 - **OneOnOne**: Manager-report meeting records
-- **IDP**: Individual Development Plans
-- **Feedback**: Peer and manager feedback
-- **Metric**: Performance measurements
-- **Event**: Audit trail for all activities
+- **Feedback**: Multi-directional feedback with privacy controls
+- **FeedbackCampaign**: External stakeholder feedback collection
+- **Meeting**: Recurring meetings with instances
+- **Note**: Rich text notes with file attachments
+- **Notification**: Real-time notification system
+- **Report**: Extensible reporting framework
+- **JobRole/JobLevel/JobDomain**: Structured job role management
+
+For the complete schema, see `prisma/schema.prisma`. For database management, see [Database Backup](docs/database-backup.md) and [Database Restore](docs/database-restore.md).
 
 ## 🚀 Client-Side Caching System
 
-ManagerOS includes a sophisticated client-side caching system built with Zustand that optimizes data fetching and improves user experience:
+ManagerOS includes a sophisticated client-side caching system built with Zustand that optimizes data fetching and improves user experience. The system provides stale-while-revalidate pattern, network awareness, and automatic cache invalidation.
 
-### Key Features
-
-- **Stale-While-Revalidate**: Shows cached data immediately while refreshing in background
-- **Network Awareness**: Respects offline state and handles connectivity issues gracefully
-- **Automatic Cache Invalidation**: Server actions trigger cache refresh after mutations
-- **Extensible Architecture**: Easy to add caching for teams, initiatives, and other entities
-
-### Usage
-
-```tsx
-import { usePeopleCache } from '@/hooks/use-organization-cache'
-
-function MyComponent() {
-  const { people, isLoading, error } = usePeopleCache()
-
-  if (isLoading) return <div>Loading...</div>
-  if (error) return <div>Error: {error}</div>
-
-  return (
-    <div>
-      {people.map(person => (
-        <div key={person.id}>{person.name}</div>
-      ))}
-    </div>
-  )
-}
-```
-
-For detailed documentation, see [Client-Side Caching Guide](docs/client-side-caching.md).
+For detailed documentation and usage examples, see [Client-Side Caching Guide](docs/client-side-caching.md).
 
 ## 🔧 Available Scripts
 
 ```bash
 # Development
-bun run dev          # Start development server
-bun run build        # Build for production
-bun run start        # Start production server
+bun run dev              # Start development server
+bun run build            # Build for production
+bun run start            # Start production server
+bun run lint             # Run ESLint
+bun run lint:fix         # Fix ESLint errors
+bun run format           # Format code with Prettier
 
 # Database
 bun run prisma:generate  # Generate Prisma client
-bun run prisma:push      # Push schema changes to database
-bun run prisma:seed      # Seed database with sample data
+bun run db:init          # Initialize database
 bun run db:backup        # Create database backup
 bun run db:restore       # Restore database from backup
+bun run db:seed-demo     # Seed with demo data
+bun run db:migrate:deploy # Deploy migrations (production)
+
+# Help System
+bun run help:generate    # Generate help content
+bun run help:validate    # Validate help content
+
+# Cron Jobs
+bun run cron:run         # Run all cron jobs
+bun run cron:birthdays   # Run birthday notification job
+bun run cron:activity    # Run activity monitoring job
+
+# Version Management
+bun run version:patch    # Bump patch version
+bun run version:minor    # Bump minor version
+bun run version:major    # Bump major version
+
+# Testing
+bun run test             # Run Playwright tests
+bun run test:ui          # Run tests with UI
 ```
+
+For more details on specific scripts, see the [docs](docs/) folder.
 
 ## 🚀 Deployment
 
@@ -275,49 +287,41 @@ For more details on the release process, see [release-it documentation](release-
 
 ## 🔐 Authentication
 
-Currently, the application runs in demo mode with a simple manager-only authentication stub. For production deployment, integrate with:
+ManagerOS uses **Clerk** for authentication and user management. The system supports:
 
-- **NextAuth.js** for authentication
-- **Clerk** for user management
-- **WorkOS** for enterprise SSO
-- **Auth0** for identity management
+- Multi-tenant organization support
+- Role-based access control (ADMIN/USER)
+- User-person linking for access control
+- Organization member management
+- Password reset flow
+
+For detailed setup instructions, see:
+
+- [Clerk JWT Template Setup](docs/clerk-jwt-template-setup.md)
+- [Password Reset Setup](docs/password-reset-setup.md)
+- [User-People-Organization Relationships](docs/user-people-organization-relationships.md)
 
 ## 🚧 Roadmap
 
-### Phase 1: Core Features (Current)
+For the complete roadmap with implemented features and future plans, see [roadmap.md](roadmap.md).
 
-- ✅ Basic initiative management
-- ✅ People and team organization
-- ✅ 1:1 scheduling and tracking
-- ✅ Weekly check-ins
-- ✅ Task management
-- ✅ RAG status tracking
+### Key Implemented Features
 
-### Phase 2: Enhanced Management
-
-- [ ] Advanced reporting and analytics
-- [ ] Goal setting and OKR tracking
-- [ ] Performance review cycles
-- [ ] Feedback collection and management
-- [ ] Team health metrics
-- [ ] Integration with project management tools
-
-### Phase 3: Collaboration & Integration
-
-- [ ] Real-time notifications
-- [ ] Calendar integration
-- [ ] Slack/Teams integration
-- [ ] Email notifications
-- [ ] Mobile application
-- [ ] API for third-party integrations
-
-### Phase 4: Advanced Analytics
-
-- [ ] Predictive analytics for initiative success
-- [ ] Team performance insights
-- [ ] Resource allocation optimization
-- [ ] Custom dashboard creation
-- [ ] Advanced reporting suite
+- ✅ Multi-tenant organization support with Clerk
+- ✅ Comprehensive people and team management
+- ✅ Initiative tracking with OKRs and RAG status
+- ✅ Task management with assignment and priorities
+- ✅ 1:1 meeting scheduling and notes
+- ✅ Feedback system with campaigns
+- ✅ Reporting framework with AI synopsis
+- ✅ Jira and GitHub integrations
+- ✅ Notification system
+- ✅ Command palette
+- ✅ Help system
+- ✅ Client-side caching
+- ✅ Notes and file attachments
+- ✅ Avatar management
+- ✅ Cron job system
 
 ## 🤝 Contributing
 
@@ -331,14 +335,20 @@ Currently, the application runs in demo mode with a simple manager-only authenti
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
+## 📚 Documentation
+
+Comprehensive documentation is available in the [docs](docs/) folder:
+
+- **API Documentation**: [docs/api/](docs/api/) - REST API endpoints
+- **Features**: Individual feature documentation (caching, permissions, integrations, etc.)
+- **Setup Guides**: Clerk setup, R2 configuration, cron jobs, etc.
+- **Development**: Coding standards, UI components, testing guidelines
+
 ## 🆘 Support
 
 For support and questions:
 
 - Create an issue in the repository
-- Check the documentation
+- Check the [documentation](docs/) folder
 - Review the code examples in the `/src` directory
-
----
-
-**Note**: This is currently a demo scaffold. Replace the authentication stub with a real auth provider before deploying to production.
+- See [GitHub Bug Reporting](docs/github-bug-reporting.md) for reporting issues

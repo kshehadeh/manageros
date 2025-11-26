@@ -40,6 +40,21 @@ async function DashboardContent() {
   const isAdmin = isAdminOrOwner(user)
   const hasLinkedSelf = !!user.managerOSPersonId
 
+  // Check if organization is configured (has job roles, levels, or domains)
+  const [jobRolesCount, jobLevelsCount, jobDomainsCount] = await Promise.all([
+    prisma.jobRole.count({
+      where: { organizationId: user.managerOSOrganizationId },
+    }),
+    prisma.jobLevel.count({
+      where: { organizationId: user.managerOSOrganizationId },
+    }),
+    prisma.jobDomain.count({
+      where: { organizationId: user.managerOSOrganizationId },
+    }),
+  ])
+  const isOrganizationConfigured =
+    jobRolesCount > 0 || jobLevelsCount > 0 || jobDomainsCount > 0
+
   // Check if user needs to be linked to a person
   // Admins and owners don't need to be linked to a person
   const needsPersonLink = !user.managerOSPersonId && !isAdmin
@@ -54,6 +69,7 @@ async function DashboardContent() {
               hasAddedPeople={!hasNoPeople}
               hasLinkedSelf={hasLinkedSelf}
               isAdmin={isAdmin}
+              isOrganizationConfigured={isOrganizationConfigured}
             />
 
             {/* Show legacy help blocks for non-admins or as fallback */}

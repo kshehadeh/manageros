@@ -13,9 +13,21 @@ import { personLookupTool } from '@/lib/ai/tools/person-lookup-tool'
 import { jobRoleLookupTool } from '@/lib/ai/tools/job-role-lookup-tool'
 import { feedbackTool } from '@/lib/ai/tools/feedback-tool'
 import { toolIds } from '../../../lib/ai/tool-ids'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export async function POST(req: Request) {
   try {
+    // Verify authentication at the route level for defense in depth
+    const user = await getCurrentUser()
+    if (!user.managerOSOrganizationId) {
+      return new Response(
+        JSON.stringify({
+          error: 'Unauthorized - must belong to an organization',
+        }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
     const { messages } = await req.json()
 
     const convertedMessages = convertToModelMessages(messages)

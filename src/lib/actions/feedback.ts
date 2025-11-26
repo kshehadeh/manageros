@@ -88,11 +88,15 @@ export async function updateFeedback(id: string, formData: FeedbackFormData) {
     throw new Error('No person record found for current user')
   }
 
-  // Verify the feedback exists and the current user is the author
+  // Verify the feedback exists, the current user is the author,
+  // and the "about" person belongs to the user's organization
   const existingFeedback = await prisma.feedback.findFirst({
     where: {
       id,
       fromId: currentPerson.id,
+      about: {
+        organizationId: user.managerOSOrganizationId,
+      },
     },
   })
 
@@ -102,7 +106,7 @@ export async function updateFeedback(id: string, formData: FeedbackFormData) {
     )
   }
 
-  // Verify the person being given feedback belongs to the same organization
+  // Verify the NEW person being given feedback belongs to the same organization
   const aboutPerson = await prisma.person.findFirst({
     where: {
       id: validatedData.aboutId,
@@ -161,11 +165,15 @@ export async function deleteFeedback(id: string) {
     throw new Error('No person record found for current user')
   }
 
-  // Verify the feedback exists and the current user is the author
+  // Verify the feedback exists, the current user is the author,
+  // and the "about" person belongs to the user's organization
   const existingFeedback = await prisma.feedback.findFirst({
     where: {
       id,
       fromId: currentPerson.id,
+      about: {
+        organizationId: user.managerOSOrganizationId,
+      },
     },
   })
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useMemo } from 'react'
 import {
   useBreadcrumb,
   type BreadcrumbItem,
@@ -17,10 +17,10 @@ export function useSetBreadcrumbs(breadcrumbs: BreadcrumbItem[]) {
   const { setBreadcrumbs, setHasManualBreadcrumbs } = useBreadcrumb()
   const prevBreadcrumbsRef = useRef<string>('')
 
-  useEffect(() => {
-    // Create a stable string representation for comparison
-    const breadcrumbsString = JSON.stringify(breadcrumbs)
+  // Create a stable string representation for comparison
+  const breadcrumbsString = JSON.stringify(breadcrumbs)
 
+  useEffect(() => {
     // Always update breadcrumbs when they change
     // This ensures client components can override default breadcrumbs
     if (breadcrumbsString !== prevBreadcrumbsRef.current) {
@@ -28,7 +28,7 @@ export function useSetBreadcrumbs(breadcrumbs: BreadcrumbItem[]) {
       setHasManualBreadcrumbs(true)
       prevBreadcrumbsRef.current = breadcrumbsString
     }
-  }, [breadcrumbs, setBreadcrumbs, setHasManualBreadcrumbs])
+  }, [breadcrumbs, breadcrumbsString, setBreadcrumbs, setHasManualBreadcrumbs])
 }
 
 /**
@@ -36,10 +36,13 @@ export function useSetBreadcrumbs(breadcrumbs: BreadcrumbItem[]) {
  * @param additionalBreadcrumbs - Additional breadcrumb items (Dashboard will be prepended)
  */
 export function usePageBreadcrumbs(additionalBreadcrumbs: BreadcrumbItem[]) {
-  const breadcrumbs: BreadcrumbItem[] = [
-    { name: 'Dashboard', href: '/dashboard' },
-    ...additionalBreadcrumbs,
-  ]
+  // Memoize the breadcrumbs array to prevent unnecessary effect reruns
+  // Use JSON.stringify as the dependency since the array contents are what matter
+  const breadcrumbs = useMemo<BreadcrumbItem[]>(
+    () => [{ name: 'Dashboard', href: '/dashboard' }, ...additionalBreadcrumbs],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(additionalBreadcrumbs)]
+  )
 
   useSetBreadcrumbs(breadcrumbs)
 }
