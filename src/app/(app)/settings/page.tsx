@@ -4,13 +4,14 @@ import { getAvailablePersonsForSelfLinking } from '@/lib/actions/organization'
 import { JiraCredentialsSection } from '@/components/settings/jira-credentials-section'
 import { GithubCredentialsSection } from '@/components/settings/github-credentials-section'
 import { UserInfoSection } from '@/components/settings/user-info-section'
+import { OnboardingPreferenceSection } from '@/components/settings/onboarding-preference-section'
 import { PersonLinkForm } from '@/components/people/person-link-form'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
-import { User, Settings, Shield } from 'lucide-react'
+import { User, Settings, Shield, Sliders } from 'lucide-react'
 import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 import { getCurrentUserWithPersonAndOrganization } from '../../../lib/auth-utils'
@@ -84,6 +85,14 @@ export default async function SettingsPage() {
               </Button>
             </PageSection>
           </div>
+
+          {/* Preferences */}
+          <PageSection
+            variant='bordered'
+            header={<SectionHeader icon={Sliders} title='Preferences' />}
+          >
+            <OnboardingPreferenceSection />
+          </PageSection>
 
           {/* Integration Settings */}
           <PageSection

@@ -43,6 +43,9 @@ export interface UserSettings {
     isFullscreen: boolean
   }
 
+  // Onboarding settings
+  showOnboarding: boolean
+
   // Per-view task table settings
   taskTableSettings: Record<
     string,
@@ -258,6 +261,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   chatWindowSettings: {
     isFullscreen: false,
   },
+  showOnboarding: true,
   taskTableSettings: {},
   initiativeTableSettings: {},
   peopleTableSettings: {},
