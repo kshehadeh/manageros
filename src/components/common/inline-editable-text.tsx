@@ -39,19 +39,6 @@ export function InlineEditableText({
     }
   }, [value, isEditing])
 
-  // Focus and select content when entering edit mode
-  useEffect(() => {
-    if (isEditing && !multiline && contentEditableRef.current) {
-      contentEditableRef.current.focus()
-      // Select all text
-      const range = document.createRange()
-      range.selectNodeContents(contentEditableRef.current)
-      const selection = window.getSelection()
-      selection?.removeAllRanges()
-      selection?.addRange(range)
-    }
-  }, [isEditing, multiline])
-
   const handleStartEdit = useCallback(() => {
     if (disabled || isLoading) return
     setEditValue(value)
@@ -94,22 +81,6 @@ export function InlineEditableText({
     setEditValue(text)
   }, [])
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' && !multiline) {
-        e.preventDefault()
-        handleSave()
-      } else if (e.key === 'Enter' && multiline && e.metaKey) {
-        e.preventDefault()
-        handleSave()
-      } else if (e.key === 'Escape') {
-        e.preventDefault()
-        handleCancel()
-      }
-    },
-    [multiline, handleSave, handleCancel]
-  )
-
   const handleBlur = useCallback(
     (e: React.FocusEvent) => {
       // Don't blur if clicking on save/cancel buttons
@@ -121,6 +92,41 @@ export function InlineEditableText({
     },
     [handleSave]
   )
+
+  // Focus and select content when entering edit mode
+  useEffect(() => {
+    if (isEditing && !multiline && contentEditableRef.current) {
+      contentEditableRef.current.focus()
+      // Select all text
+      const range = document.createRange()
+      range.selectNodeContents(contentEditableRef.current)
+      const selection = window.getSelection()
+      selection?.removeAllRanges()
+      selection?.addRange(range)
+    }
+  }, [isEditing, multiline])
+
+  // Handle keyboard events directly on the contenteditable element
+  // This is more reliable than the onKeyDown prop for contenteditable
+  useEffect(() => {
+    if (!isEditing || multiline || !contentEditableRef.current) return
+
+    const element = contentEditableRef.current
+    const handleKeyDownEvent = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        handleSave()
+      } else if (e.key === 'Escape') {
+        e.preventDefault()
+        handleCancel()
+      }
+    }
+
+    element.addEventListener('keydown', handleKeyDownEvent)
+    return () => {
+      element.removeEventListener('keydown', handleKeyDownEvent)
+    }
+  }, [isEditing, multiline, handleSave, handleCancel])
 
   // Multiline editing uses the existing MarkdownEditor
   if (multiline) {
@@ -196,7 +202,6 @@ export function InlineEditableText({
           innerRef={contentEditableRef}
           html={editValue}
           onChange={handleChange}
-          onKeyDown={handleKeyDown}
           onBlur={handleBlur}
           disabled={isLoading}
           className={cn(
