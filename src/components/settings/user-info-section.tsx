@@ -12,6 +12,9 @@ import {
 } from 'react-icons/fa'
 import { SiApple } from 'react-icons/si'
 import type { ComponentType } from 'react'
+import { Shield } from 'lucide-react'
+import { Button } from '../ui/button'
+import { Link } from '../ui/link'
 
 interface ProviderInfo {
   icon: ComponentType<{ className?: string }>
@@ -54,8 +57,8 @@ function getRoleLabel(role: string): string {
 export function UserInfoSection({ userId, role }: UserInfoSectionProps) {
   const { user } = useUser()
   return (
-    <div className='space-y-2'>
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
+    <div className='space-y-sm flex flex-col gap-lg items-start'>
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-lg'>
         <div>
           <p className='text-sm font-medium'>Email</p>
           <div className='text-sm text-muted-foreground'>
@@ -79,13 +82,20 @@ export function UserInfoSection({ userId, role }: UserInfoSectionProps) {
             </p>
           </div>
         )}
+        {userId && (
+          <div>
+            <p className='text-sm font-medium'>User ID</p>
+            <p className='text-sm text-muted-foreground'>{userId}</p>
+          </div>
+        )}
       </div>
-      {userId && (
-        <div>
-          <p className='text-sm font-medium'>User ID</p>
-          <p className='text-sm text-muted-foreground'>{userId}</p>
-        </div>
-      )}
+
+      <Button variant='outline' asChild>
+        <Link href='/settings/permissions' className='flex items-center gap-2'>
+          <Shield className='w-4 h-4' />
+          View Access Permissions
+        </Link>
+      </Button>
     </div>
   )
 }

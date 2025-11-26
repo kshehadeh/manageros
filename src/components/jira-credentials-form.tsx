@@ -110,7 +110,6 @@ export function JiraCredentialsForm({
                 Jira credentials configured
               </h4>
               <div className='mt-1 text-sm text-foreground'>
-                <p>Connected to: {initialCredentials.jiraBaseUrl}</p>
                 <p>Username: {initialCredentials.jiraUsername}</p>
               </div>
             </div>

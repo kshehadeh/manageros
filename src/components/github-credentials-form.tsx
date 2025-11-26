@@ -87,8 +87,8 @@ export function GithubCredentialsForm({
   return (
     <div className='space-y-4'>
       <p className='text-sm text-muted-foreground'>
-        Configure your GitHub Personal Access Token to enable GitHub account
-        linking for your team members.
+        Configure your GitHub PAT to enable GitHub account linking for your team
+        members.
       </p>
 
       {initialCredentials ? (
