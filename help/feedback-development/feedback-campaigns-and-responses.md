@@ -59,10 +59,37 @@ Feedback campaigns provide a structured way to collect comprehensive feedback fr
 
 ### Invitation Process
 
-- **Email invitations** sent to all participants
+- **Email invitations** - Optional email notifications sent to all participants
 - **Unique invite links** for secure access
-- **Reminder notifications** for incomplete responses
+- **Manual reminder emails** - Send reminders to participants who haven't responded
+- **Email tracking** - View when invites and reminders were sent
 - **Deadline management** and extensions
+
+### Email Notifications
+
+Feedback campaigns support optional email notifications to help increase response rates:
+
+- **Initial Invites**: Send invitation emails to all participants when the campaign is created or activated
+  - Only available for draft or active campaigns
+  - Can only be sent once per campaign
+  - Includes campaign details, target person name, and feedback link
+- **Reminder Emails**: Send follow-up reminders to participants who haven't responded
+  - Only available for active campaigns
+  - Automatically filters out participants who have already responded
+  - Can be sent multiple times as needed
+  - Includes days remaining information when applicable
+
+- **Email Status Tracking**: View when emails were sent to each participant
+  - See invite sent dates in the invitee list
+  - Track reminder history for each participant
+  - Monitor email delivery status
+
+To send emails:
+
+1. Navigate to the campaign detail page
+2. Find the "Email Notifications" section
+3. Click "Send Invites" to send initial invitations (if not already sent)
+4. Click "Send Reminder" to send reminders to non-responders (for active campaigns)
 
 ### Response Interface
 

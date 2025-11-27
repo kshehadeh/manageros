@@ -16,6 +16,11 @@ enum EmployeeType {
   CONSULTANT
 }
 
+enum NotificationRecordType {
+  EMAIL
+  SMS
+}
+
 model Organization {
   id          String   @id @default(cuid())
   description String?
@@ -415,6 +420,7 @@ model FeedbackCampaign {
   inviteLink     String? // Unique link for invitees to access the feedback form
   status         String             @default("draft") // draft|active|completed|cancelled
   responses      FeedbackResponse[]
+  notificationRecords NotificationRecord[]
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
 
@@ -467,6 +473,24 @@ model FeedbackQuestion {
 
   @@index([templateId])
   @@index([sortOrder])
+}
+
+model NotificationRecord {
+  id             String                @id @default(cuid())
+  type           NotificationRecordType @default(EMAIL)
+  campaignId     String?
+  campaign       FeedbackCampaign?     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  recipientEmail String
+  subject        String
+  sentAt         DateTime              @default(now())
+  metadata       Json? // Additional tracking data (e.g., email type: 'invite' | 'reminder')
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  @@index([campaignId])
+  @@index([recipientEmail])
+  @@index([sentAt])
+  @@index([type])
 }
 
 model Meeting {

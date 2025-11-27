@@ -6,6 +6,7 @@ import { FeedbackCampaignDetailBreadcrumbClient } from '@/components/feedback/fe
 import { FeedbackCampaignActionsDropdown } from '@/components/feedback/feedback-campaign-actions-dropdown'
 import { FeedbackResponseLink } from '@/components/feedback/feedback-response-link'
 import { FeedbackInviteeList } from '@/components/feedback/feedback-invitee-list'
+import { FeedbackCampaignEmailSection } from '@/components/feedback/feedback-campaign-email-section'
 import { Badge } from '@/components/ui/badge'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
@@ -113,6 +114,18 @@ export default async function FeedbackCampaignDetailPage({
           submittedAt: true,
         },
       },
+      notificationRecords: {
+        select: {
+          id: true,
+          recipientEmail: true,
+          subject: true,
+          sentAt: true,
+          metadata: true,
+        },
+        orderBy: {
+          sentAt: 'desc',
+        },
+      } as const,
     },
   })
 
@@ -316,6 +329,21 @@ export default async function FeedbackCampaignDetailPage({
                   />
                 </PageSection>
               )}
+
+              {/* Email Notifications */}
+              <PageSection
+                header={
+                  <SectionHeader icon={Mail} title='Email Notifications' />
+                }
+              >
+                <FeedbackCampaignEmailSection
+                  campaignId={campaign.id}
+                  inviteEmails={campaign.inviteEmails}
+                  responses={campaign.responses}
+                  status={campaign.status}
+                  notificationRecords={campaign.notificationRecords}
+                />
+              </PageSection>
             </div>
           </PageMain>
 
@@ -331,6 +359,7 @@ export default async function FeedbackCampaignDetailPage({
               <FeedbackInviteeList
                 inviteEmails={campaign.inviteEmails}
                 responses={campaign.responses}
+                notificationRecords={campaign.notificationRecords}
               />
             </PageSection>
           </PageSidebar>

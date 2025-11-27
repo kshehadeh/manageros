@@ -9,13 +9,20 @@ import {
 } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
 import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
-import { generateInviteLinkToken } from '@/lib/utils/invite-link'
+import {
+  generateInviteLinkToken,
+  generateInviteLinkUrl,
+} from '@/lib/utils/invite-link'
 import { checkIfManagerOrSelf } from '../utils/people-utils'
 import { generateText } from '@/lib/ai'
 import {
   checkOrganizationLimit,
   getOrganizationCounts,
 } from '@/lib/subscription-utils'
+import { sendEmail } from '@/lib/email-resend'
+import { FeedbackCampaignInviteEmail } from '@/emails/FeedbackCampaignInviteEmail'
+import { FeedbackCampaignReminderEmail } from '@/emails/FeedbackCampaignReminderEmail'
+import { format, differenceInDays } from 'date-fns'
 
 export async function createFeedbackCampaign(
   formData: FeedbackCampaignFormData
@@ -804,5 +811,288 @@ Guidelines:
   return {
     success: true,
     summary,
+  }
+}
+
+export async function sendFeedbackCampaignInvites(campaignId: string) {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error(
+      'User must belong to an organization to send feedback campaign invites'
+    )
+  }
+
+  // Get the campaign with all necessary data
+  const campaign = await prisma.feedbackCampaign.findFirst({
+    where: {
+      id: campaignId,
+      userId: user.managerOSUserId || '',
+    },
+    include: {
+      targetPerson: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      template: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      responses: {
+        select: {
+          responderEmail: true,
+        },
+      },
+    },
+  })
+
+  if (!campaign) {
+    throw new Error('Campaign not found or access denied')
+  }
+
+  // Only allow sending if campaign is in draft or active status
+  if (campaign.status !== 'draft' && campaign.status !== 'active') {
+    throw new Error('Can only send invites for draft or active campaigns')
+  }
+
+  if (!campaign.inviteLink) {
+    throw new Error('Campaign invite link is missing')
+  }
+
+  // Check if invites have already been sent
+  const existingNotifications = await prisma.notificationRecord.findMany({
+    where: {
+      campaignId: campaign.id,
+      type: 'EMAIL',
+    },
+  })
+
+  // Filter for invite emails in JavaScript since Prisma JSON filtering is complex
+  const inviteNotifications = existingNotifications.filter(
+    n =>
+      n.metadata &&
+      typeof n.metadata === 'object' &&
+      'emailType' in n.metadata &&
+      n.metadata.emailType === 'invite'
+  )
+
+  if (inviteNotifications.length > 0) {
+    throw new Error('Invites have already been sent for this campaign')
+  }
+
+  const inviteUrl = generateInviteLinkUrl(campaign.inviteLink)
+  const startDateFormatted = format(campaign.startDate, 'MMM d, yyyy')
+  const endDateFormatted = format(campaign.endDate, 'MMM d, yyyy')
+
+  const results = []
+  const errors = []
+
+  // Send email to each invitee
+  for (const email of campaign.inviteEmails) {
+    try {
+      const result = await sendEmail({
+        to: email,
+        subject: `Feedback Request: ${campaign.targetPerson.name}`,
+        react: FeedbackCampaignInviteEmail({
+          campaignName: campaign.name || undefined,
+          targetPersonName: campaign.targetPerson.name,
+          inviteLink: inviteUrl,
+          startDate: startDateFormatted,
+          endDate: endDateFormatted,
+          creatorName: campaign.user.name || undefined,
+        }),
+      })
+
+      // Create notification record
+      await prisma.notificationRecord.create({
+        data: {
+          type: 'EMAIL',
+          campaignId: campaign.id,
+          recipientEmail: email,
+          subject: `Feedback Request: ${campaign.targetPerson.name}`,
+          metadata: {
+            emailType: 'invite',
+            messageId: result.messageId,
+          },
+        },
+      })
+
+      results.push({ email, success: true, messageId: result.messageId })
+    } catch (error) {
+      console.error(`Failed to send invite email to ${email}:`, error)
+      errors.push({
+        email,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
+  }
+
+  if (errors.length > 0 && results.length === 0) {
+    throw new Error(
+      `Failed to send all invites: ${errors.map(e => e.error).join(', ')}`
+    )
+  }
+
+  revalidatePath(
+    `/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`
+  )
+  revalidatePath(`/people/${campaign.targetPersonId}`)
+
+  return {
+    success: true,
+    sent: results.length,
+    failed: errors.length,
+    results,
+    errors: errors.length > 0 ? errors : undefined,
+  }
+}
+
+export async function sendFeedbackCampaignReminder(campaignId: string) {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error(
+      'User must belong to an organization to send feedback campaign reminders'
+    )
+  }
+
+  // Get the campaign with all necessary data
+  const campaign = await prisma.feedbackCampaign.findFirst({
+    where: {
+      id: campaignId,
+      userId: user.managerOSUserId || '',
+    },
+    include: {
+      targetPerson: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      template: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      responses: {
+        select: {
+          responderEmail: true,
+        },
+      },
+    },
+  })
+
+  if (!campaign) {
+    throw new Error('Campaign not found or access denied')
+  }
+
+  // Only allow sending reminders for active campaigns
+  if (campaign.status !== 'active') {
+    throw new Error('Can only send reminders for active campaigns')
+  }
+
+  if (!campaign.inviteLink) {
+    throw new Error('Campaign invite link is missing')
+  }
+
+  // Get emails that have already responded
+  const respondedEmails = new Set(campaign.responses.map(r => r.responderEmail))
+
+  // Get emails that need reminders (invited but haven't responded)
+  const emailsNeedingReminders = campaign.inviteEmails.filter(
+    email => !respondedEmails.has(email)
+  )
+
+  if (emailsNeedingReminders.length === 0) {
+    throw new Error('All invitees have already responded')
+  }
+
+  const inviteUrl = generateInviteLinkUrl(campaign.inviteLink)
+  const startDateFormatted = format(campaign.startDate, 'MMM d, yyyy')
+  const endDateFormatted = format(campaign.endDate, 'MMM d, yyyy')
+  const daysRemaining = differenceInDays(campaign.endDate, new Date())
+
+  const results = []
+  const errors = []
+
+  // Send reminder email to each non-responder
+  for (const email of emailsNeedingReminders) {
+    try {
+      const result = await sendEmail({
+        to: email,
+        subject: `Reminder: Feedback Request for ${campaign.targetPerson.name}`,
+        react: FeedbackCampaignReminderEmail({
+          campaignName: campaign.name || undefined,
+          targetPersonName: campaign.targetPerson.name,
+          inviteLink: inviteUrl,
+          startDate: startDateFormatted,
+          endDate: endDateFormatted,
+          creatorName: campaign.user.name || undefined,
+          daysRemaining: daysRemaining > 0 ? daysRemaining : undefined,
+        }),
+      })
+
+      // Create notification record
+      await prisma.notificationRecord.create({
+        data: {
+          type: 'EMAIL',
+          campaignId: campaign.id,
+          recipientEmail: email,
+          subject: `Reminder: Feedback Request for ${campaign.targetPerson.name}`,
+          metadata: {
+            emailType: 'reminder',
+            messageId: result.messageId,
+          },
+        },
+      })
+
+      results.push({ email, success: true, messageId: result.messageId })
+    } catch (error) {
+      console.error(`Failed to send reminder email to ${email}:`, error)
+      errors.push({
+        email,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
+  }
+
+  if (errors.length > 0 && results.length === 0) {
+    throw new Error(
+      `Failed to send all reminders: ${errors.map(e => e.error).join(', ')}`
+    )
+  }
+
+  revalidatePath(
+    `/people/${campaign.targetPersonId}/feedback-campaigns/${campaign.id}`
+  )
+  revalidatePath(`/people/${campaign.targetPersonId}`)
+
+  return {
+    success: true,
+    sent: results.length,
+    failed: errors.length,
+    results,
+    errors: errors.length > 0 ? errors : undefined,
   }
 }

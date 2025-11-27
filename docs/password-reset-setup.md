@@ -14,7 +14,39 @@ The password reset flow allows users to reset their passwords via email when the
 
 ## Email Configuration
 
-To enable email sending, configure the following environment variables:
+The system uses Resend API for email delivery (recommended) or SMTP for backward compatibility.
+
+### Resend API (Recommended)
+
+To enable email sending with Resend, configure the following environment variables:
+
+```env
+# Resend API Configuration
+RESEND_API_KEY=re_...
+RESEND_FROM_EMAIL=noreply@yourdomain.com
+
+# Application URL (used in reset links) - DO NOT include /api/auth
+NEXTAUTH_URL=http://localhost:3000
+```
+
+**Setup Steps:**
+
+1. Sign up for a Resend account at [resend.com](https://resend.com)
+2. Create an API key in your Resend dashboard
+3. Add and verify your sending domain in Resend
+4. Set `RESEND_API_KEY` to your API key
+5. Set `RESEND_FROM_EMAIL` to a verified email address or domain
+
+**Benefits of Resend:**
+
+- Better deliverability than SMTP
+- Built-in email tracking and analytics
+- React email templates support
+- Simplified configuration
+
+### SMTP Configuration (Legacy)
+
+For backward compatibility, SMTP is still supported:
 
 ```env
 # SMTP Configuration
@@ -23,6 +55,7 @@ SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=your-email@gmail.com
 SMTP_PASSWORD=your-app-password
+SMTP_FROM=your-email@gmail.com
 
 # Application URL (used in reset links) - DO NOT include /api/auth
 NEXTAUTH_URL=http://localhost:3000
@@ -30,7 +63,7 @@ NEXTAUTH_URL=http://localhost:3000
 
 **Important**: The system automatically uses `SMTP_USER` as the "from" address to avoid domain authorization issues. Do not set `SMTP_FROM` unless you have verified domain ownership with your email provider.
 
-### Gmail Setup
+### Gmail Setup (SMTP)
 
 For Gmail, you'll need to:
 
@@ -38,9 +71,9 @@ For Gmail, you'll need to:
 2. Generate an "App Password" for this application
 3. Use the app password as `SMTP_PASSWORD`
 
-### Other Email Providers
+### Other SMTP Providers
 
-The system uses Nodemailer and supports most SMTP providers:
+The system supports most SMTP providers:
 
 - **SendGrid**: Use their SMTP settings
 - **Mailgun**: Use their SMTP settings
