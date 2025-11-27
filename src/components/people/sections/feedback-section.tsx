@@ -50,18 +50,15 @@ export async function FeedbackSection({
 
   return (
     <PageSection
+      className='flex-1 min-w-[300px]'
       header={
         <SectionHeader
           icon={MessageCircle}
           title='Recent Feedback'
           action={
-            <Button asChild variant='outline' size='sm'>
-              <Link
-                href={`/feedback/about/${personId}`}
-                className='flex items-center gap-2'
-              >
+            <Button asChild variant='outline' size='sm' title='View All'>
+              <Link href={`/feedback/about/${personId}`}>
                 <Eye className='w-4 h-4' />
-                View All
               </Link>
             </Button>
           }

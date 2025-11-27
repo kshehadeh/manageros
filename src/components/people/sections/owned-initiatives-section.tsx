@@ -67,27 +67,28 @@ export async function OwnedInitiativesSection({
   }))
 
   return (
-    <PageSection
-      header={
-        <SectionHeader
-          icon={Rocket}
-          title='Owned Initiatives'
-          action={
-            <Button asChild variant='outline' size='sm'>
-              <Link href='/initiatives' className='flex items-center gap-2'>
-                <Eye className='w-4 h-4' />
-                View All
-              </Link>
-            </Button>
-          }
+    <div className='flex-1 min-w-[300px]'>
+      <PageSection
+        header={
+          <SectionHeader
+            icon={Rocket}
+            title='Owned Initiatives'
+            action={
+              <Button asChild variant='outline' size='sm' title='View All'>
+                <Link href='/initiatives'>
+                  <Eye className='w-4 h-4' />
+                </Link>
+              </Button>
+            }
+          />
+        }
+      >
+        <SimpleInitiativeList
+          initiatives={transformedInitiatives}
+          variant='compact'
+          emptyStateText='No initiatives found.'
         />
-      }
-    >
-      <SimpleInitiativeList
-        initiatives={transformedInitiatives}
-        variant='compact'
-        emptyStateText='No initiatives found.'
-      />
-    </PageSection>
+      </PageSection>
+    </div>
   )
 }
