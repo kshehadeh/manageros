@@ -11,7 +11,9 @@ import {
   User as UserIcon,
   Building2,
   Briefcase,
+  Activity,
 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { Suspense } from 'react'
 import type { User, Person as PrismaPerson, Team } from '@prisma/client'
 import type { Prisma } from '@prisma/client'
@@ -56,7 +58,6 @@ import {
   ActiveTasksSectionSkeleton,
   OneOnOneMeetingsSectionSkeleton,
   DirectReportsSectionSkeleton,
-  AccountLinkingSectionSkeleton,
   JobRoleSectionSkeleton,
 } from './person-detail-skeletons'
 
@@ -68,10 +69,7 @@ import { OwnedInitiativesSection } from './sections/owned-initiatives-section'
 import { ActiveTasksSection } from './sections/active-tasks-section'
 import { OneOnOneMeetingsSection } from './sections/one-on-one-meetings-section'
 import { DirectReportsSection } from './sections/direct-reports-section'
-import { AccountLinkingSection } from './sections/account-linking-section'
 import { JobRoleSection } from './sections/job-role-section'
-import { GithubMetricsSection } from '@/components/github-metrics-section'
-import { JiraMetricsSection } from '@/components/jira-metrics-section'
 import { PersonStatusBadge } from './person-status-badge'
 
 interface PersonDetailContentProps {
@@ -184,17 +182,31 @@ export function PersonDetailContent({
           </>
         }
         actions={
-          <PersonActionsDropdown
-            person={
-              person as unknown as PrismaPerson & {
-                team?: Team | null
-                reports?: PrismaPerson[]
-                manager?: PrismaPerson | null
+          <div className='flex items-center gap-2'>
+            <Button asChild variant='outline' size='sm'>
+              <Link
+                href={`/people/${person.id}/activity`}
+                className='flex items-center gap-2'
+              >
+                <Activity className='w-4 h-4' />
+                Activity
+              </Link>
+            </Button>
+            <PersonActionsDropdown
+              person={
+                person as unknown as PrismaPerson & {
+                  team?: Team | null
+                  reports?: PrismaPerson[]
+                  manager?: PrismaPerson | null
+                }
               }
-            }
-            currentPersonId={currentPersonId}
-            isAdmin={isAdmin}
-          />
+              currentPersonId={currentPersonId}
+              isAdmin={isAdmin}
+              linkedUser={person.user as User | null}
+              jiraAccount={person.jiraAccount}
+              githubAccount={person.githubAccount}
+            />
+          </div>
         }
       />
 
@@ -241,19 +253,6 @@ export function PersonDetailContent({
                 organizationId={organizationId}
               />
             </Suspense>
-
-            {/* Jira Metrics - Show if person has Jira account */}
-            {Boolean(person.jiraAccount) && (
-              <JiraMetricsSection personId={person.id} hasJiraAccount={true} />
-            )}
-
-            {/* GitHub Metrics - Show if person has GitHub account */}
-            {Boolean(person.githubAccount) && (
-              <GithubMetricsSection
-                personId={person.id}
-                hasGithubAccount={true}
-              />
-            )}
           </div>
         </PageMain>
 
@@ -283,20 +282,6 @@ export function PersonDetailContent({
                 organizationId={organizationId}
               />
             </Suspense>
-
-            {/* Account Linking - Only show for admins */}
-            {isAdmin && (
-              <Suspense fallback={<AccountLinkingSectionSkeleton />}>
-                <AccountLinkingSection
-                  personId={person.id}
-                  personName={person.name}
-                  personEmail={person.email}
-                  linkedUser={person.user as User | null}
-                  jiraAccount={person.jiraAccount}
-                  githubAccount={person.githubAccount}
-                />
-              </Suspense>
-            )}
           </div>
         </PageSidebar>
       </PageContent>

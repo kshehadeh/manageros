@@ -3,7 +3,12 @@
 import { Link } from '@/components/ui/link'
 import { useState } from 'react'
 import { FeedbackForm } from '@/components/feedback/feedback-form'
-import { type Person, type Team } from '@prisma/client'
+import {
+  type Person,
+  type Team,
+  type PersonJiraAccount,
+  type PersonGithubAccount,
+} from '@prisma/client'
 import {
   Plus,
   Rocket,
@@ -12,6 +17,7 @@ import {
   Handshake,
   Eye,
   Edit,
+  Link as LinkIcon,
 } from 'lucide-react'
 import { ActionDropdown } from '@/components/common/action-dropdown'
 import {
@@ -20,6 +26,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { AccountLinkingModal } from './account-linking-modal'
+
+interface LinkedUser {
+  id: string
+  name: string
+  email: string
+  role?: string | null
+}
 
 interface PersonActionsDropdownProps {
   person: Person & {
@@ -31,6 +45,9 @@ interface PersonActionsDropdownProps {
   isAdmin: boolean
   onFeedbackAdded?: () => void
   size?: 'sm' | 'default'
+  linkedUser?: LinkedUser | null
+  jiraAccount?: PersonJiraAccount | null
+  githubAccount?: PersonGithubAccount | null
 }
 
 export function PersonActionsDropdown({
@@ -39,8 +56,12 @@ export function PersonActionsDropdown({
   isAdmin,
   onFeedbackAdded,
   size = 'default',
+  linkedUser,
+  jiraAccount,
+  githubAccount,
 }: PersonActionsDropdownProps) {
   const [showFeedbackForm, setShowFeedbackForm] = useState(false)
+  const [showAccountLinking, setShowAccountLinking] = useState(false)
 
   const handleFeedbackSuccess = () => {
     setShowFeedbackForm(false)
@@ -151,6 +172,19 @@ export function PersonActionsDropdown({
               <Eye className='w-4 h-4' />
               View All Initiatives
             </Link>
+
+            {isAdmin && (
+              <button
+                className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
+                onClick={() => {
+                  setShowAccountLinking(true)
+                  close()
+                }}
+              >
+                <LinkIcon className='w-4 h-4' />
+                Link Accounts
+              </button>
+            )}
           </div>
         )}
       </ActionDropdown>
@@ -167,6 +201,17 @@ export function PersonActionsDropdown({
           />
         </DialogContent>
       </Dialog>
+
+      <AccountLinkingModal
+        open={showAccountLinking}
+        onOpenChange={setShowAccountLinking}
+        personId={person.id}
+        personName={person.name}
+        personEmail={person.email}
+        linkedUser={linkedUser}
+        jiraAccount={jiraAccount}
+        githubAccount={githubAccount}
+      />
     </>
   )
 }
