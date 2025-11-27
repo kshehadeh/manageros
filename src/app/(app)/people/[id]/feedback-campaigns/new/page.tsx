@@ -65,10 +65,10 @@ export default async function NewFeedbackCampaignPage({
     >
       <div className='space-y-6'>
         <div>
-          <h1 className='text-2xl font-bold'>Create Feedback Campaign</h1>
+          <h1 className='text-2xl font-bold'>Create Feedback 360</h1>
           <p className='text-neutral-400'>
-            Create a feedback campaign for {person.name}. External stakeholders
-            will be invited to provide feedback.
+            Create a Feedback 360 for {person.name}. External stakeholders will
+            be invited to provide feedback.
           </p>
         </div>
 

@@ -1,6 +1,9 @@
 import { Link } from '@/components/ui/link'
 import { prisma } from '@/lib/db'
-import { ExpandableSection } from '@/components/expandable-section'
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
+import { Button } from '@/components/ui/button'
+import { MessageSquare, Eye } from 'lucide-react'
 
 interface DashboardRecentFeedbackSectionProps {
   userId: string
@@ -30,7 +33,22 @@ export async function DashboardRecentFeedbackSection({
   if (!recentFeedback || recentFeedback.length === 0) return null
 
   return (
-    <ExpandableSection title='Recent Feedback' viewAllHref='/people'>
+    <PageSection
+      className='flex-1 min-w-[300px]'
+      header={
+        <SectionHeader
+          icon={MessageSquare}
+          title='Recent Feedback'
+          action={
+            <Button asChild variant='outline' size='sm' title='View All'>
+              <Link href='/people'>
+                <Eye className='w-4 h-4' />
+              </Link>
+            </Button>
+          }
+        />
+      }
+    >
       <div className='space-y-3'>
         {recentFeedback.map(feedback => (
           <Link
@@ -73,6 +91,6 @@ export async function DashboardRecentFeedbackSection({
           </Link>
         ))}
       </div>
-    </ExpandableSection>
+    </PageSection>
   )
 }

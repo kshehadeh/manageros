@@ -72,6 +72,7 @@ export async function OneOnOneMeetingsSection({
 
   return (
     <PageSection
+      className='flex-1 min-w-[300px]'
       header={
         <SectionHeader
           icon={Handshake}

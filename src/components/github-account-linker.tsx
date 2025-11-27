@@ -46,9 +46,12 @@ export function GithubAccountLinker({
         err instanceof Error ? err.message : 'Failed to link GitHub account'
 
       // Provide more user-friendly error messages
-      if (errorMessage.includes('credentials not configured')) {
+      if (
+        errorMessage.includes('credentials not configured') ||
+        errorMessage.includes('Organization GitHub integration not configured')
+      ) {
         toast.error(
-          'GitHub integration is not configured. Please set up GitHub credentials in Settings first.'
+          'Organization GitHub integration is not configured. Please contact your administrator to set up a GitHub integration.'
         )
       } else if (errorMessage.includes('No GitHub user found')) {
         toast.error(

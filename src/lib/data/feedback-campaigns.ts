@@ -215,6 +215,7 @@ export const getActiveAndDraftFeedbackCampaignsForPerson = cache(
           select: {
             id: true,
             name: true,
+            description: true,
           },
         },
         responses: {
@@ -222,6 +223,13 @@ export const getActiveAndDraftFeedbackCampaignsForPerson = cache(
             id: true,
             responderEmail: true,
             submittedAt: true,
+          },
+        },
+        targetPerson: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
           },
         },
       },

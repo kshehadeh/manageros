@@ -16,7 +16,7 @@ const entityLabels: Record<EntityName, { label: string; icon: typeof Users }> =
     people: { label: 'People', icon: Users },
     initiatives: { label: 'Initiatives', icon: Target },
     teams: { label: 'Teams', icon: Building2 },
-    feedbackcampaigns: { label: 'Feedback Campaigns', icon: MessageSquare },
+    feedbackcampaigns: { label: 'Feedback 360', icon: MessageSquare },
   }
 
 export async function PlanLimitsSection({

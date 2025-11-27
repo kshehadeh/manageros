@@ -38,9 +38,9 @@ export default async function FeedbackCampaignsPage() {
   return (
     <PageContainer>
       <PageHeader
-        title='Feedback Campaigns'
+        title='Feedback 360'
         titleIcon={MessageSquare}
-        subtitle='Manage feedback campaigns across your organization'
+        subtitle='Manage Feedback 360 across your organization'
         actions={
           <Button asChild>
             <Link href='/people' className='flex items-center gap-2'>
@@ -63,11 +63,11 @@ export default async function FeedbackCampaignsPage() {
                 <CardContent className='flex flex-col items-center justify-center py-12'>
                   <div className='text-center'>
                     <h3 className='text-lg font-semibold mb-2'>
-                      No feedback campaigns yet
+                      No Feedback 360 yet
                     </h3>
                     <p className='text-gray-600 mb-4'>
-                      Get started by creating your first feedback campaign for a
-                      team member.
+                      Get started by creating your first Feedback 360 for a team
+                      member.
                     </p>
                     <Button asChild>
                       <Link href='/people' className='flex items-center gap-2'>
@@ -85,22 +85,17 @@ export default async function FeedbackCampaignsPage() {
         <PageSidebar>
           <Card>
             <CardHeader>
-              <CardTitle>About Feedback Campaigns</CardTitle>
-              <CardDescription>
-                Learn how feedback campaigns work
-              </CardDescription>
+              <CardTitle>About Feedback 360</CardTitle>
+              <CardDescription>Learn how Feedback 360 works</CardDescription>
             </CardHeader>
             <CardContent className='space-y-4'>
               <div>
-                <h4 className='font-medium mb-2'>
-                  What are feedback campaigns?
-                </h4>
+                <h4 className='font-medium mb-2'>What is Feedback 360?</h4>
                 <p className='text-sm text-gray-600'>
-                  Feedback campaigns allow you to collect structured feedback
-                  from external stakeholders about a person in your
-                  organization. This is useful for performance reviews,
-                  360-degree feedback, or gathering input from customers and
-                  partners.
+                  Feedback 360 allows you to collect structured feedback from
+                  external stakeholders about a person in your organization.
+                  This is useful for performance reviews, 360-degree feedback,
+                  or gathering input from customers and partners.
                 </p>
               </div>
 

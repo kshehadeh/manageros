@@ -15,11 +15,13 @@ import { OrganizationSettingsBreadcrumbClient } from '@/components/organization/
 import { OrganizationProfileButton } from '@/components/organization/organization-profile-button'
 import { OrganizationSectionServer } from '@/components/settings/organization-section-server'
 import { OrganizationSectionSkeleton } from '@/components/settings/organization-section-skeleton'
-import { Building, Users, Briefcase, BarChart3 } from 'lucide-react'
+import { Building, Users, Briefcase, BarChart3, Plug } from 'lucide-react'
 import { PlanLimitsSection } from '@/components/settings/plan-limits-section'
 import { PlanLimitsSectionSkeleton } from '@/components/settings/plan-limits-section-skeleton'
 import { Button } from '@/components/ui/button'
 import { Link } from '@/components/ui/link'
+import { IntegrationsSectionServer } from '@/components/integrations/integrations-section-server'
+import { IntegrationsSectionSkeleton } from '@/components/integrations/integrations-section-skeleton'
 
 export default async function OrganizationSettingsPage() {
   // Require admin role and organization membership
@@ -80,6 +82,18 @@ export default async function OrganizationSettingsPage() {
                 >
                   <Suspense fallback={<PlanLimitsSectionSkeleton />}>
                     <PlanLimitsSection organizationId={organization.id} />
+                  </Suspense>
+                </PageSection>
+              )}
+
+              {/* Integrations Section */}
+              {organization.id && (
+                <PageSection
+                  variant='bordered'
+                  header={<SectionHeader icon={Plug} title='Integrations' />}
+                >
+                  <Suspense fallback={<IntegrationsSectionSkeleton />}>
+                    <IntegrationsSectionServer />
                   </Suspense>
                 </PageSection>
               )}

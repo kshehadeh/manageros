@@ -27,7 +27,7 @@ export default async function FeedbackCampaignResponsesPage({
   }
 
   // Create a meaningful campaign title from the available data
-  const campaignTitle = `${campaign.targetPerson.name} Feedback Campaign`
+  const campaignTitle = `${campaign.targetPerson.name} Feedback 360`
 
   return (
     <FeedbackCampaignResponsesBreadcrumbClient
@@ -41,7 +41,7 @@ export default async function FeedbackCampaignResponsesPage({
           title='Feedback Responses'
           subtitle={
             <>
-              Responses for feedback campaign about{' '}
+              Responses for Feedback 360 about{' '}
               <span className='font-semibold text-foreground'>
                 {campaign.targetPerson.name}
               </span>

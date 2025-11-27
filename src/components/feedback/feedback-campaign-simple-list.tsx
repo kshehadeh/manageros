@@ -31,7 +31,7 @@ export interface FeedbackCampaign {
   targetPerson: {
     id: string
     name: string
-    email: string
+    email: string | null
   }
 }
 
@@ -42,12 +42,14 @@ export interface FeedbackCampaignListProps {
   viewAllLabel?: string
   emptyStateText?: string
   className?: string
+  hidePersonName?: boolean
 }
 
 export function SimpleFeedbackCampaignList({
   campaigns,
-  emptyStateText = 'No active feedback campaigns.',
+  emptyStateText = 'No active Feedback 360.',
   className = '',
+  hidePersonName = false,
 }: FeedbackCampaignListProps) {
   const router = useRouter()
   const { handleButtonClick, ContextMenuComponent } = useDataTableContextMenu()
@@ -77,15 +79,24 @@ export function SimpleFeedbackCampaignList({
       }}
     >
       <div className='flex-1 space-y-1'>
-        {/* Campaign Title */}
-        <div className='font-medium text-sm text-foreground'>
-          {campaign.name || campaign.template?.name || 'Feedback Campaign'}
+        {/* Campaign Title with Status Badge */}
+        <div className='flex items-center gap-2'>
+          <span className='font-medium text-sm text-foreground'>
+            {campaign.name || campaign.template?.name || 'Feedback 360'}
+          </span>
+          <FeedbackCampaignStatusBadge
+            status={campaign.status}
+            isCurrentlyActive={isCampaignActive(campaign)}
+            isPending={isCampaignPending(campaign)}
+          />
         </div>
 
         {/* Person Name */}
-        <div className='text-sm text-muted-foreground'>
-          <span>{campaign.targetPerson.name}</span>
-        </div>
+        {!hidePersonName && (
+          <div className='text-sm text-muted-foreground'>
+            <span>{campaign.targetPerson.name}</span>
+          </div>
+        )}
 
         {/* Campaign Details */}
         <div className='flex items-center gap-4 text-xs text-muted-foreground'>
@@ -104,13 +115,8 @@ export function SimpleFeedbackCampaignList({
         </div>
       </div>
 
-      {/* Status Badge and Actions */}
-      <div className='ml-4 shrink-0 flex items-center gap-2'>
-        <FeedbackCampaignStatusBadge
-          status={campaign.status}
-          isCurrentlyActive={isCampaignActive(campaign)}
-          isPending={isCampaignPending(campaign)}
-        />
+      {/* Actions */}
+      <div className='ml-4 shrink-0 flex items-center'>
         <button
           onClick={e => {
             e.stopPropagation()

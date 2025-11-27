@@ -71,7 +71,7 @@ export function FeedbackCampaignsSectionSkeleton() {
         header={
           <SectionHeader
             icon={MessageCircle}
-            title='Feedback Campaigns (0)'
+            title='Feedback 360 (0)'
             action={
               <div className='flex items-center gap-2'>
                 <Skeleton className='h-8 w-8 rounded-md' />

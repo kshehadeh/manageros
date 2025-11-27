@@ -21,7 +21,7 @@ function formatActionName(action: string): string {
     .map(part => {
       // Handle special cases
       if (part === 'oneonone') return 'One-on-One'
-      if (part === 'feedback-campaign') return 'Feedback Campaign'
+      if (part === 'feedback-campaign') return 'Feedback 360'
       // Capitalize first letter
       return part.charAt(0).toUpperCase() + part.slice(1)
     })
@@ -35,7 +35,7 @@ function getCategory(action: string): string {
   if (action.startsWith('report.')) return 'Reports'
   if (action.startsWith('feedback.')) return 'Feedback'
   if (action.startsWith('oneonone.')) return 'One-on-Ones'
-  if (action.startsWith('feedback-campaign.')) return 'Feedback Campaigns'
+  if (action.startsWith('feedback-campaign.')) return 'Feedback 360'
   if (action.startsWith('user.')) return 'User Management'
   return 'Other'
 }
@@ -64,7 +64,7 @@ export default async function PermissionsPage() {
     'Reports',
     'Feedback',
     'One-on-Ones',
-    'Feedback Campaigns',
+    'Feedback 360',
     'User Management',
     'Other',
   ]

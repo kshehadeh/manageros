@@ -3,7 +3,6 @@
 import { uploadFileToR2 } from '@/lib/r2-upload'
 import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
-import { JiraApiService } from '@/lib/jira-api'
 
 /**
  * Upload an avatar image to R2 storage and return the URL
@@ -123,29 +122,54 @@ export async function getLinkedAccountAvatars(personId: string) {
     githubAvatar?: string
   } = {}
 
+  // Get the organization-level Jira integration
+  const jiraIntegration = await prisma.integration.findFirst({
+    where: {
+      organizationId: user.managerOSOrganizationId,
+      integrationType: 'jira',
+      scope: 'organization',
+      isEnabled: true,
+    },
+    orderBy: { createdAt: 'asc' },
+  })
+
   // For Jira, fetch the actual avatar URL from Jira API
-  if (person.jiraAccount) {
+  if (jiraIntegration) {
     try {
-      // Get user's Jira credentials
-      const credentials = await prisma.userJiraCredentials.findUnique({
-        where: { userId: user.managerOSUserId || '' },
+      // Get Jira account ID from EntityIntegrationLink or fall back to PersonJiraAccount
+      let jiraAccountId: string | null = null
+
+      const jiraLink = await prisma.entityIntegrationLink.findFirst({
+        where: {
+          entityType: 'Person',
+          entityId: personId,
+          integrationId: jiraIntegration.id,
+        },
       })
 
-      if (credentials) {
-        const jiraService = JiraApiService.fromEncryptedCredentials(
-          credentials.jiraUsername,
-          credentials.encryptedApiKey,
-          credentials.jiraBaseUrl
-        )
+      if (jiraLink) {
+        jiraAccountId = jiraLink.externalEntityId
+      } else if (person.jiraAccount) {
+        // Fall back to old PersonJiraAccount for backward compatibility
+        jiraAccountId = person.jiraAccount.jiraAccountId
+      }
 
-        // Get user details with avatar URLs
-        const jiraUser = await jiraService.getUserByAccountId(
-          person.jiraAccount.jiraAccountId
+      if (jiraAccountId) {
+        // Get integration instance
+        const { getIntegration } = await import(
+          '@/lib/integrations/integration-factory'
         )
+        const integrationInstance = await getIntegration(jiraIntegration.id)
 
-        if (jiraUser.avatarUrls) {
-          // Use the largest available avatar (48x48)
-          avatars.jiraAvatar = jiraUser.avatarUrls['48x48']
+        if (integrationInstance && integrationInstance.getType() === 'jira') {
+          const jiraInt =
+            integrationInstance as import('@/lib/integrations/jira').JiraIntegration
+          const jiraUser = await jiraInt.getUserByAccountId(jiraAccountId)
+
+          if (jiraUser && jiraUser.avatarUrls) {
+            // Use the largest available avatar (48x48)
+            avatars.jiraAvatar = jiraUser.avatarUrls['48x48']
+          }
         }
       }
     } catch (error) {
@@ -154,10 +178,41 @@ export async function getLinkedAccountAvatars(personId: string) {
     }
   }
 
+  // Get the organization-level GitHub integration
+  const githubIntegration = await prisma.integration.findFirst({
+    where: {
+      organizationId: user.managerOSOrganizationId,
+      integrationType: 'github',
+      scope: 'organization',
+      isEnabled: true,
+    },
+    orderBy: { createdAt: 'asc' },
+  })
+
   // For GitHub, we can use the GitHub avatar URL
-  if (person.githubAccount) {
-    // GitHub avatar URL pattern: https://avatars.githubusercontent.com/{username}
-    avatars.githubAvatar = `https://avatars.githubusercontent.com/${person.githubAccount.githubUsername}`
+  if (githubIntegration) {
+    // Get GitHub username from EntityIntegrationLink or fall back to PersonGithubAccount
+    let githubUsername: string | null = null
+
+    const githubLink = await prisma.entityIntegrationLink.findFirst({
+      where: {
+        entityType: 'Person',
+        entityId: personId,
+        integrationId: githubIntegration.id,
+      },
+    })
+
+    if (githubLink) {
+      githubUsername = githubLink.externalEntityId
+    } else if (person.githubAccount) {
+      // Fall back to old PersonGithubAccount for backward compatibility
+      githubUsername = person.githubAccount.githubUsername
+    }
+
+    if (githubUsername) {
+      // GitHub avatar URL pattern: https://avatars.githubusercontent.com/{username}
+      avatars.githubAvatar = `https://avatars.githubusercontent.com/${githubUsername}`
+    }
   }
 
   return avatars
