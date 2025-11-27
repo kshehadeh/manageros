@@ -809,6 +809,12 @@ export async function migrateJiraIntegration() {
     throw new Error('User ID is required')
   }
 
+  if (!user.managerOSOrganizationId) {
+    throw new Error(
+      'User must belong to an organization to migrate integrations'
+    )
+  }
+
   // Get old credentials
   const oldCreds = await prisma.userJiraCredentials.findUnique({
     where: { userId: user.managerOSUserId },
@@ -851,7 +857,7 @@ export async function migrateJiraIntegration() {
   const personLinks = await prisma.personJiraAccount.findMany({
     where: {
       person: {
-        organizationId: user.managerOSOrganizationId || undefined,
+        organizationId: user.managerOSOrganizationId,
       },
     },
   })
@@ -859,7 +865,7 @@ export async function migrateJiraIntegration() {
   for (const link of personLinks) {
     await prisma.entityIntegrationLink.create({
       data: {
-        organizationId: user.managerOSOrganizationId || '',
+        organizationId: user.managerOSOrganizationId,
         entityType: 'Person',
         entityId: link.personId,
         integrationId: integration.id,
@@ -881,6 +887,12 @@ export async function migrateGithubIntegration() {
 
   if (!user.managerOSUserId) {
     throw new Error('User ID is required')
+  }
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error(
+      'User must belong to an organization to migrate integrations'
+    )
   }
 
   // Get old credentials
@@ -924,7 +936,7 @@ export async function migrateGithubIntegration() {
   const personLinks = await prisma.personGithubAccount.findMany({
     where: {
       person: {
-        organizationId: user.managerOSOrganizationId || undefined,
+        organizationId: user.managerOSOrganizationId,
       },
     },
   })
@@ -932,7 +944,7 @@ export async function migrateGithubIntegration() {
   for (const link of personLinks) {
     await prisma.entityIntegrationLink.create({
       data: {
-        organizationId: user.managerOSOrganizationId || '',
+        organizationId: user.managerOSOrganizationId,
         entityType: 'Person',
         entityId: link.personId,
         integrationId: integration.id,
