@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { encrypt } from '@/lib/encryption'
 import { GithubApiService } from '@/lib/github-api'
+import type { Prisma } from '@prisma/client'
 
 export async function saveGithubCredentials(formData: {
   githubUsername: string
@@ -96,40 +97,105 @@ export async function linkPersonToGithubAccount(
     throw new Error('Person not found or access denied')
   }
 
-  // Get user's GitHub credentials
-  const credentials = await prisma.userGithubCredentials.findUnique({
-    where: { userId: user.managerOSUserId || '' },
+  // Get the first organization-level GitHub integration
+  const orgIntegration = await prisma.integration.findFirst({
+    where: {
+      organizationId: user.managerOSOrganizationId,
+      integrationType: 'github',
+      scope: 'organization',
+      isEnabled: true,
+    },
+    orderBy: { createdAt: 'asc' }, // Use the first one created
   })
 
-  if (!credentials) {
-    throw new Error('GitHub credentials not configured')
+  if (!orgIntegration) {
+    throw new Error(
+      'Organization GitHub integration not configured. Please contact your administrator.'
+    )
   }
 
-  // Search for GitHub user by username
-  const githubService = GithubApiService.fromEncryptedCredentials(
-    credentials.githubUsername,
-    credentials.encryptedPat
+  // Get integration instance
+  const { getIntegration } = await import(
+    '@/lib/integrations/integration-factory'
   )
+  const integrationInstance = await getIntegration(orgIntegration.id)
 
-  const githubUser = await githubService.getUserByUsername(githubUsername)
+  if (!integrationInstance) {
+    throw new Error('Failed to create integration instance')
+  }
 
-  if (!githubUser) {
+  // Search for GitHub user by username using the integration
+  if (integrationInstance.getType() !== 'github') {
+    throw new Error('Invalid integration type')
+  }
+
+  // Use the integration's searchEntities method to find users
+  const searchResults = await integrationInstance.searchEntities({
+    query: githubUsername,
+  })
+
+  if (searchResults.length === 0) {
     throw new Error(`No GitHub user found with username: ${githubUsername}`)
   }
 
-  // Create or update the link
+  const githubUserResult = searchResults[0]
+  const githubLogin = githubUserResult.id
+  const githubDisplayName = githubUserResult.title || githubUsername
+  const githubEmail = githubUserResult.description || null
+
+  // Check if link already exists
+  const existingLink = await prisma.entityIntegrationLink.findFirst({
+    where: {
+      entityType: 'Person',
+      entityId: personId,
+      integrationId: orgIntegration.id,
+      externalEntityId: githubLogin,
+    },
+  })
+
+  if (existingLink) {
+    // Update existing link
+    await prisma.entityIntegrationLink.update({
+      where: { id: existingLink.id },
+      data: {
+        metadata: {
+          githubDisplayName: githubDisplayName,
+          githubEmail: githubEmail,
+        } as unknown as Prisma.InputJsonValue,
+      },
+    })
+  } else {
+    // Create new link
+    await prisma.entityIntegrationLink.create({
+      data: {
+        organizationId: user.managerOSOrganizationId,
+        entityType: 'Person',
+        entityId: personId,
+        integrationId: orgIntegration.id,
+        externalEntityId: githubLogin,
+        externalEntityUrl:
+          githubUserResult.url || `https://github.com/${githubLogin}`,
+        metadata: {
+          githubDisplayName: githubDisplayName,
+          githubEmail: githubEmail,
+        } as unknown as Prisma.InputJsonValue,
+      },
+    })
+  }
+
+  // Also update the old PersonGithubAccount table for backward compatibility
   await prisma.personGithubAccount.upsert({
     where: { personId },
     create: {
       personId,
-      githubUsername: githubUser.login,
-      githubDisplayName: githubUser.name,
-      githubEmail: githubUser.email,
+      githubUsername: githubLogin,
+      githubDisplayName: githubDisplayName,
+      githubEmail: githubEmail,
     },
     update: {
-      githubUsername: githubUser.login,
-      githubDisplayName: githubUser.name,
-      githubEmail: githubUser.email,
+      githubUsername: githubLogin,
+      githubDisplayName: githubDisplayName,
+      githubEmail: githubEmail,
     },
   })
 
@@ -274,17 +340,45 @@ export async function fetchGithubPullRequests(
     throw new Error('Person not found or access denied')
   }
 
-  if (!person.githubAccount) {
-    return { success: false, error: 'No GitHub account linked' }
-  }
-
-  // Get user's GitHub credentials
-  const credentials = await prisma.userGithubCredentials.findUnique({
-    where: { userId: user.managerOSUserId || '' },
+  // Get the first organization-level GitHub integration
+  const orgIntegration = await prisma.integration.findFirst({
+    where: {
+      organizationId: user.managerOSOrganizationId,
+      integrationType: 'github',
+      scope: 'organization',
+      isEnabled: true,
+    },
+    orderBy: { createdAt: 'asc' },
   })
 
-  if (!credentials) {
-    throw new Error('GitHub credentials not configured')
+  if (!orgIntegration) {
+    return {
+      success: false,
+      error:
+        'Organization GitHub integration not configured. Please contact your administrator.',
+    }
+  }
+
+  // Get GitHub username from EntityIntegrationLink or fall back to PersonGithubAccount
+  let githubUsername: string | null = null
+
+  const integrationLink = await prisma.entityIntegrationLink.findFirst({
+    where: {
+      entityType: 'Person',
+      entityId: personId,
+      integrationId: orgIntegration.id,
+    },
+  })
+
+  if (integrationLink) {
+    githubUsername = integrationLink.externalEntityId
+  } else if (person.githubAccount) {
+    // Fall back to old PersonGithubAccount for backward compatibility
+    githubUsername = person.githubAccount.githubUsername
+  }
+
+  if (!githubUsername) {
+    return { success: false, error: 'No GitHub account linked' }
   }
 
   // Get allowed GitHub organizations for filtering
@@ -303,14 +397,22 @@ export async function fetchGithubPullRequests(
       : undefined
 
   try {
-    // Fetch recent pull requests
-    const githubService = GithubApiService.fromEncryptedCredentials(
-      credentials.githubUsername,
-      credentials.encryptedPat
+    // Get integration instance
+    const { getIntegration } = await import(
+      '@/lib/integrations/integration-factory'
     )
+    const integrationInstance = await getIntegration(orgIntegration.id)
 
-    const pullRequests = await githubService.getRecentPullRequests(
-      person.githubAccount.githubUsername,
+    if (!integrationInstance || integrationInstance.getType() !== 'github') {
+      throw new Error('Failed to create GitHub integration instance')
+    }
+
+    const githubIntegration =
+      integrationInstance as import('@/lib/integrations/github').GithubIntegration
+
+    // Fetch recent pull requests using the integration
+    const pullRequests = await githubIntegration.getUserPullRequests(
+      githubUsername,
       daysBack,
       allowedOrganizations
     )
@@ -353,17 +455,43 @@ export async function fetchGithubMetrics(
     throw new Error('Person not found or access denied')
   }
 
-  if (!person.githubAccount) {
-    throw new Error('Person is not linked to a GitHub account')
-  }
-
-  // Get user's GitHub credentials
-  const credentials = await prisma.userGithubCredentials.findUnique({
-    where: { userId: user.managerOSUserId || '' },
+  // Get the first organization-level GitHub integration
+  const orgIntegration = await prisma.integration.findFirst({
+    where: {
+      organizationId: user.managerOSOrganizationId,
+      integrationType: 'github',
+      scope: 'organization',
+      isEnabled: true,
+    },
+    orderBy: { createdAt: 'asc' },
   })
 
-  if (!credentials) {
-    throw new Error('GitHub credentials not configured')
+  if (!orgIntegration) {
+    throw new Error(
+      'Organization GitHub integration not configured. Please contact your administrator.'
+    )
+  }
+
+  // Get GitHub username from EntityIntegrationLink or fall back to PersonGithubAccount
+  let githubUsername: string | null = null
+
+  const integrationLink = await prisma.entityIntegrationLink.findFirst({
+    where: {
+      entityType: 'Person',
+      entityId: personId,
+      integrationId: orgIntegration.id,
+    },
+  })
+
+  if (integrationLink) {
+    githubUsername = integrationLink.externalEntityId
+  } else if (person.githubAccount) {
+    // Fall back to old PersonGithubAccount for backward compatibility
+    githubUsername = person.githubAccount.githubUsername
+  }
+
+  if (!githubUsername) {
+    throw new Error('Person is not linked to a GitHub account')
   }
 
   // Get allowed GitHub organizations for filtering
@@ -382,14 +510,22 @@ export async function fetchGithubMetrics(
       : undefined
 
   try {
-    // Fetch recent pull requests
-    const githubService = GithubApiService.fromEncryptedCredentials(
-      credentials.githubUsername,
-      credentials.encryptedPat
+    // Get integration instance
+    const { getIntegration } = await import(
+      '@/lib/integrations/integration-factory'
     )
+    const integrationInstance = await getIntegration(orgIntegration.id)
 
-    const pullRequests = await githubService.getRecentPullRequests(
-      person.githubAccount.githubUsername,
+    if (!integrationInstance || integrationInstance.getType() !== 'github') {
+      throw new Error('Failed to create GitHub integration instance')
+    }
+
+    const githubIntegration =
+      integrationInstance as import('@/lib/integrations/github').GithubIntegration
+
+    // Fetch recent pull requests using the integration
+    const pullRequests = await githubIntegration.getUserPullRequests(
+      githubUsername,
       daysBack,
       allowedOrganizations
     )

@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Copy } from 'lucide-react'
 
@@ -14,14 +15,22 @@ export function FeedbackResponseLink({
   startDate,
   endDate,
 }: FeedbackResponseLinkProps) {
-  const copyToClipboard = async () => {
-    const fullUrl = `${window.location.origin}/feedback-form/${inviteLink}`
-    try {
-      await navigator.clipboard.writeText(fullUrl)
-      // You could add a toast notification here
-    } catch (error) {
+  const [origin, setOrigin] = useState<string>('')
+
+  useEffect(() => {
+    setOrigin(window.location.origin)
+  }, [])
+
+  const copyToClipboard = () => {
+    const fullUrl = `${origin}/feedback-form/${inviteLink}`
+    // navigator.clipboard.writeText() returns a Promise, so we handle it without async/await
+    navigator.clipboard.writeText(fullUrl).catch(error => {
       console.error('Failed to copy link:', error)
-    }
+    })
+  }
+
+  if (!origin) {
+    return null
   }
 
   return (
@@ -33,7 +42,7 @@ export function FeedbackResponseLink({
         <div className='mt-2 flex items-center gap-2'>
           <div className='flex-1 p-3 bg-muted rounded-md border'>
             <code className='text-sm break-all'>
-              {`${window.location.origin}/feedback-form/${inviteLink}`}
+              {`${origin}/feedback-form/${inviteLink}`}
             </code>
           </div>
           <Button variant='outline' size='sm' onClick={copyToClipboard}>

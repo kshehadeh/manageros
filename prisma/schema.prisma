@@ -38,24 +38,26 @@ model Organization {
   clerkOrganizationId  String  @unique // Clerk organization ID (required) - name, slug, and subscription info are stored in Clerk
 
   // Relationships
-  billingUser       User?                    @relation("BillingUser", fields: [billingUserId], references: [id])
-  members           OrganizationMember[]
-  teams             Team[]
-  people            Person[]
-  initiatives       Initiative[]
-  invitations       OrganizationInvitation[]
-  meetings          Meeting[]
-  meetingInstances  MeetingInstance[]
-  entityLinks       EntityLink[]
-  jobRoles          JobRole[]
-  levels            JobLevel[]
-  domains           JobDomain[]
-  notifications     Notification[]
-  reportInstances   ReportInstance[]
-  cronJobExecutions CronJobExecution[]
-  notes             Note[]
-  fileAttachments   FileAttachment[]
-  githubOrgs        OrganizationGithubOrg[]
+  billingUser            User?                    @relation("BillingUser", fields: [billingUserId], references: [id])
+  members                OrganizationMember[]
+  teams                  Team[]
+  people                 Person[]
+  initiatives            Initiative[]
+  invitations            OrganizationInvitation[]
+  meetings               Meeting[]
+  meetingInstances       MeetingInstance[]
+  entityLinks            EntityLink[]
+  jobRoles               JobRole[]
+  levels                 JobLevel[]
+  domains                JobDomain[]
+  notifications          Notification[]
+  reportInstances        ReportInstance[]
+  cronJobExecutions      CronJobExecution[]
+  notes                  Note[]
+  fileAttachments        FileAttachment[]
+  githubOrgs             OrganizationGithubOrg[]
+  integrations           Integration[]            @relation("OrganizationIntegrations")
+  entityIntegrationLinks EntityIntegrationLink[]
 
   @@index([billingUserId])
   @@index([subscriptionPlanId])
@@ -86,6 +88,7 @@ model User {
   reportRuns              ReportInstance[]
   notes                   Note[]
   fileAttachments         FileAttachment[]
+  integrations            Integration[]            @relation("UserIntegrations")
   createdAt               DateTime                 @default(now())
   updatedAt               DateTime                 @updatedAt
 
@@ -406,23 +409,23 @@ model PersonGithubAccount {
 }
 
 model FeedbackCampaign {
-  id             String             @id @default(cuid())
-  name           String? // Custom name for the campaign (e.g., "Performance Review 2026")
-  userId         String
-  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  targetPersonId String
-  targetPerson   Person             @relation("CampaignTarget", fields: [targetPersonId], references: [id], onDelete: Cascade)
-  templateId     String?
-  template       FeedbackTemplate?  @relation(fields: [templateId], references: [id], onDelete: SetNull)
-  startDate      DateTime
-  endDate        DateTime
-  inviteEmails   String[] // Array of email addresses to invite
-  inviteLink     String? // Unique link for invitees to access the feedback form
-  status         String             @default("draft") // draft|active|completed|cancelled
-  responses      FeedbackResponse[]
+  id                  String               @id @default(cuid())
+  name                String? // Custom name for the campaign (e.g., "Performance Review 2026")
+  userId              String
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetPersonId      String
+  targetPerson        Person               @relation("CampaignTarget", fields: [targetPersonId], references: [id], onDelete: Cascade)
+  templateId          String?
+  template            FeedbackTemplate?    @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  startDate           DateTime
+  endDate             DateTime
+  inviteEmails        String[] // Array of email addresses to invite
+  inviteLink          String? // Unique link for invitees to access the feedback form
+  status              String               @default("draft") // draft|active|completed|cancelled
+  responses           FeedbackResponse[]
   notificationRecords NotificationRecord[]
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
 
   @@index([userId])
   @@index([targetPersonId])
@@ -476,16 +479,16 @@ model FeedbackQuestion {
 }
 
 model NotificationRecord {
-  id             String                @id @default(cuid())
+  id             String                 @id @default(cuid())
   type           NotificationRecordType @default(EMAIL)
   campaignId     String?
-  campaign       FeedbackCampaign?     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaign       FeedbackCampaign?      @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   recipientEmail String
   subject        String
-  sentAt         DateTime              @default(now())
+  sentAt         DateTime               @default(now())
   metadata       Json? // Additional tracking data (e.g., email type: 'invite' | 'reminder')
-  createdAt      DateTime              @default(now())
-  updatedAt      DateTime              @updatedAt
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
 
   @@index([campaignId])
   @@index([recipientEmail])
@@ -830,4 +833,47 @@ model OrganizationGithubOrg {
   @@unique([organizationId, githubOrgName])
   @@index([organizationId])
   @@index([githubOrgName])
+}
+
+model Integration {
+  id                   String                  @id @default(cuid())
+  organizationId       String?
+  organization         Organization?           @relation("OrganizationIntegrations", fields: [organizationId], references: [id], onDelete: Cascade)
+  userId               String?
+  user                 User?                   @relation("UserIntegrations", fields: [userId], references: [id], onDelete: Cascade)
+  integrationType      String // e.g., "google_calendar", "microsoft_outlook", "jira", "github"
+  name                 String
+  scope                String                  @default("organization") // "organization" | "user"
+  isEnabled            Boolean                 @default(true)
+  encryptedCredentials Json // Encrypted credentials stored as JSON
+  metadata             Json? // Additional configuration metadata
+  entityLinks          EntityIntegrationLink[]
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+
+  @@index([organizationId, integrationType])
+  @@index([userId, integrationType])
+  @@index([organizationId])
+  @@index([userId])
+  @@index([scope])
+}
+
+model EntityIntegrationLink {
+  id                String       @id @default(cuid())
+  organizationId    String
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  entityType        String // The type of entity (e.g., "Meeting", "MeetingInstance", "Person")
+  entityId          String // The ID of the entity
+  integrationId     String
+  integration       Integration  @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  externalEntityId  String // External system entity ID (e.g., calendar event ID, Jira account ID, GitHub username)
+  externalEntityUrl String? // URL to the external entity
+  metadata          Json? // Additional metadata about the link
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([entityType, entityId])
+  @@index([integrationId])
+  @@index([organizationId])
+  @@index([externalEntityId])
 }

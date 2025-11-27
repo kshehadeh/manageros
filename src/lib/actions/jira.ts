@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { encrypt } from '@/lib/encryption'
 import { JiraApiService } from '@/lib/jira-api'
+import type { Prisma } from '@prisma/client'
 
 export async function saveJiraCredentials(formData: {
   jiraUsername: string
@@ -126,47 +127,115 @@ export async function linkPersonToJiraAccount(
     throw new Error('Person not found or access denied')
   }
 
-  // Get user's Jira credentials
-  const credentials = await prisma.userJiraCredentials.findUnique({
-    where: { userId: user.managerOSUserId || '' },
+  // Get the first organization-level Jira integration
+  const orgIntegration = await prisma.integration.findFirst({
+    where: {
+      organizationId: user.managerOSOrganizationId,
+      integrationType: 'jira',
+      scope: 'organization',
+      isEnabled: true,
+    },
+    orderBy: { createdAt: 'asc' }, // Use the first one created
   })
 
-  if (!credentials) {
-    throw new Error('Jira credentials not configured')
+  if (!orgIntegration) {
+    throw new Error(
+      'Organization Jira integration not configured. Please contact your administrator.'
+    )
   }
 
-  // Search for Jira user by email
-  const jiraService = JiraApiService.fromEncryptedCredentials(
-    credentials.jiraUsername,
-    credentials.encryptedApiKey,
-    credentials.jiraBaseUrl
+  // Get integration instance
+  const { getIntegration } = await import(
+    '@/lib/integrations/integration-factory'
   )
+  const integrationInstance = await getIntegration(orgIntegration.id)
 
-  const jiraUsers = await jiraService.searchUsersByEmail(jiraEmail)
+  if (!integrationInstance) {
+    throw new Error('Failed to create integration instance')
+  }
 
-  if (jiraUsers.length === 0) {
+  // Search for Jira user by email using the integration
+  if (integrationInstance.getType() !== 'jira') {
+    throw new Error('Invalid integration type')
+  }
+
+  // Use the integration's searchEntities method to find users
+  const searchResults = await integrationInstance.searchEntities({
+    query: jiraEmail,
+  })
+
+  if (searchResults.length === 0) {
     throw new Error(`No active Jira user found with email: ${jiraEmail}`)
   }
 
-  if (jiraUsers.length > 1) {
+  if (searchResults.length > 1) {
     throw new Error(`Multiple Jira users found with email: ${jiraEmail}`)
   }
 
-  const jiraUser = jiraUsers[0]
+  const jiraUserResult = searchResults[0]
+  const jiraAccountId = jiraUserResult.id
+  const jiraEmailAddress = jiraUserResult.description || jiraEmail
+  const jiraDisplayName = jiraUserResult.title || jiraEmail
 
-  // Create or update the link
+  // Get Jira base URL from integration metadata or credentials
+  const credentials = orgIntegration.encryptedCredentials as {
+    jiraBaseUrl?: string
+  }
+  const jiraBaseUrl = credentials?.jiraBaseUrl || ''
+
+  // Check if link already exists
+  const existingLink = await prisma.entityIntegrationLink.findFirst({
+    where: {
+      entityType: 'Person',
+      entityId: personId,
+      integrationId: orgIntegration.id,
+      externalEntityId: jiraAccountId,
+    },
+  })
+
+  if (existingLink) {
+    // Update existing link
+    await prisma.entityIntegrationLink.update({
+      where: { id: existingLink.id },
+      data: {
+        metadata: {
+          jiraEmail: jiraEmailAddress,
+          jiraDisplayName: jiraDisplayName,
+        } as unknown as Prisma.InputJsonValue,
+      },
+    })
+  } else {
+    // Create new link
+    await prisma.entityIntegrationLink.create({
+      data: {
+        organizationId: user.managerOSOrganizationId,
+        entityType: 'Person',
+        entityId: personId,
+        integrationId: orgIntegration.id,
+        externalEntityId: jiraAccountId,
+        externalEntityUrl:
+          jiraUserResult.url || `${jiraBaseUrl}/people/${jiraAccountId}`,
+        metadata: {
+          jiraEmail: jiraEmailAddress,
+          jiraDisplayName: jiraDisplayName,
+        } as unknown as Prisma.InputJsonValue,
+      },
+    })
+  }
+
+  // Also update the old PersonJiraAccount table for backward compatibility
   await prisma.personJiraAccount.upsert({
     where: { personId },
     create: {
       personId,
-      jiraAccountId: jiraUser.accountId,
-      jiraEmail: jiraUser.emailAddress,
-      jiraDisplayName: jiraUser.displayName,
+      jiraAccountId: jiraAccountId,
+      jiraEmail: jiraEmailAddress,
+      jiraDisplayName: jiraDisplayName,
     },
     update: {
-      jiraAccountId: jiraUser.accountId,
-      jiraEmail: jiraUser.emailAddress,
-      jiraDisplayName: jiraUser.displayName,
+      jiraAccountId: jiraAccountId,
+      jiraEmail: jiraEmailAddress,
+      jiraDisplayName: jiraDisplayName,
     },
   })
 
@@ -226,18 +295,57 @@ export async function fetchJiraAssignedTickets(
     throw new Error('Person not found or access denied')
   }
 
-  if (!person.jiraAccount) {
+  // Get the first organization-level Jira integration
+  const orgIntegration = await prisma.integration.findFirst({
+    where: {
+      organizationId: user.managerOSOrganizationId,
+      integrationType: 'jira',
+      scope: 'organization',
+      isEnabled: true,
+    },
+    orderBy: { createdAt: 'asc' },
+  })
+
+  if (!orgIntegration) {
+    throw new Error(
+      'Organization Jira integration not configured. Please contact your administrator.'
+    )
+  }
+
+  // Get Jira account ID from EntityIntegrationLink or fall back to PersonJiraAccount
+  let jiraAccountId: string | null = null
+
+  const integrationLink = await prisma.entityIntegrationLink.findFirst({
+    where: {
+      entityType: 'Person',
+      entityId: personId,
+      integrationId: orgIntegration.id,
+    },
+  })
+
+  if (integrationLink) {
+    jiraAccountId = integrationLink.externalEntityId
+  } else if (person.jiraAccount) {
+    // Fall back to old PersonJiraAccount for backward compatibility
+    jiraAccountId = person.jiraAccount.jiraAccountId
+  }
+
+  if (!jiraAccountId) {
     throw new Error('Person is not linked to a Jira account')
   }
 
-  // Get user's Jira credentials
-  const credentials = await prisma.userJiraCredentials.findUnique({
-    where: { userId: user.managerOSUserId || '' },
-  })
+  // Get integration instance
+  const { getIntegration } = await import(
+    '@/lib/integrations/integration-factory'
+  )
+  const integrationInstance = await getIntegration(orgIntegration.id)
 
-  if (!credentials) {
-    throw new Error('Jira credentials not configured')
+  if (!integrationInstance || integrationInstance.getType() !== 'jira') {
+    throw new Error('Failed to create Jira integration instance')
   }
+
+  const jiraIntegration =
+    integrationInstance as import('@/lib/integrations/jira').JiraIntegration
 
   // Calculate date range
   const toDate = new Date()
@@ -247,15 +355,9 @@ export async function fetchJiraAssignedTickets(
   const fromDateStr = fromDate.toISOString().split('T')[0]
   const toDateStr = toDate.toISOString().split('T')[0]
 
-  // Fetch assigned tickets from Jira
-  const jiraService = JiraApiService.fromEncryptedCredentials(
-    credentials.jiraUsername,
-    credentials.encryptedApiKey,
-    credentials.jiraBaseUrl
-  )
-
-  const assignedTickets = await jiraService.getUserAssignedTickets(
-    person.jiraAccount.jiraAccountId,
+  // Fetch assigned tickets from Jira using the integration
+  const assignedTickets = await jiraIntegration.getUserTickets(
+    jiraAccountId,
     fromDateStr,
     toDateStr
   )
@@ -302,18 +404,57 @@ export async function fetchJiraMetrics(
     throw new Error('Person not found or access denied')
   }
 
-  if (!person.jiraAccount) {
+  // Get the first organization-level Jira integration
+  const orgIntegration = await prisma.integration.findFirst({
+    where: {
+      organizationId: user.managerOSOrganizationId,
+      integrationType: 'jira',
+      scope: 'organization',
+      isEnabled: true,
+    },
+    orderBy: { createdAt: 'asc' },
+  })
+
+  if (!orgIntegration) {
+    throw new Error(
+      'Organization Jira integration not configured. Please contact your administrator.'
+    )
+  }
+
+  // Get Jira account ID from EntityIntegrationLink or fall back to PersonJiraAccount
+  let jiraAccountId: string | null = null
+
+  const integrationLink = await prisma.entityIntegrationLink.findFirst({
+    where: {
+      entityType: 'Person',
+      entityId: personId,
+      integrationId: orgIntegration.id,
+    },
+  })
+
+  if (integrationLink) {
+    jiraAccountId = integrationLink.externalEntityId
+  } else if (person.jiraAccount) {
+    // Fall back to old PersonJiraAccount for backward compatibility
+    jiraAccountId = person.jiraAccount.jiraAccountId
+  }
+
+  if (!jiraAccountId) {
     throw new Error('Person is not linked to a Jira account')
   }
 
-  // Get user's Jira credentials
-  const credentials = await prisma.userJiraCredentials.findUnique({
-    where: { userId: user.managerOSUserId || '' },
-  })
+  // Get integration instance
+  const { getIntegration } = await import(
+    '@/lib/integrations/integration-factory'
+  )
+  const integrationInstance = await getIntegration(orgIntegration.id)
 
-  if (!credentials) {
-    throw new Error('Jira credentials not configured')
+  if (!integrationInstance || integrationInstance.getType() !== 'jira') {
+    throw new Error('Failed to create Jira integration instance')
   }
+
+  const jiraIntegration =
+    integrationInstance as import('@/lib/integrations/jira').JiraIntegration
 
   // Calculate date range for last 30 days
   const toDate = new Date()
@@ -323,15 +464,9 @@ export async function fetchJiraMetrics(
   const fromDateStr = fromDate.toISOString().split('T')[0]
   const toDateStr = toDate.toISOString().split('T')[0]
 
-  // Fetch assigned tickets from Jira
-  const jiraService = JiraApiService.fromEncryptedCredentials(
-    credentials.jiraUsername,
-    credentials.encryptedApiKey,
-    credentials.jiraBaseUrl
-  )
-
-  const assignedTickets = await jiraService.getUserAssignedTickets(
-    person.jiraAccount.jiraAccountId,
+  // Fetch assigned tickets from Jira using the integration
+  const assignedTickets = await jiraIntegration.getUserTickets(
+    jiraAccountId,
     fromDateStr,
     toDateStr
   )

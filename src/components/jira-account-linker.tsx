@@ -47,9 +47,12 @@ export function JiraAccountLinker({
         err instanceof Error ? err.message : 'Failed to link Jira account'
 
       // Provide more user-friendly error messages
-      if (errorMessage.includes('credentials not configured')) {
+      if (
+        errorMessage.includes('credentials not configured') ||
+        errorMessage.includes('Organization Jira integration not configured')
+      ) {
         toast.error(
-          'Jira integration is not configured. Please set up Jira credentials in Settings first.'
+          'Organization Jira integration is not configured. Please contact your administrator to set up a Jira integration.'
         )
       } else if (errorMessage.includes('No active Jira user found')) {
         toast.error(

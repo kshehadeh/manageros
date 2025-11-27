@@ -18,6 +18,8 @@ import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
 import { PageSidebar } from '@/components/ui/page-sidebar'
 import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
+import { EntityIntegrationLinksServer } from '@/components/integrations/entity-integration-links-server'
+import { Plug } from 'lucide-react'
 
 export default async function MeetingInstanceDetailPage({
   params,
@@ -185,6 +187,17 @@ export default async function MeetingInstanceDetailPage({
               className='mt-6'
               canEdit={canEdit}
             />
+            <PageSection
+              header={
+                <SectionHeader icon={Plug} title='External Integrations' />
+              }
+              className='mt-6'
+            >
+              <EntityIntegrationLinksServer
+                entityType='MeetingInstance'
+                entityId={meetingInstance.id}
+              />
+            </PageSection>
           </PageSidebar>
         </PageContent>
       </PageContainer>

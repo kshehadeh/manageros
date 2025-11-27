@@ -29,6 +29,8 @@ import {
 import { LinkListSection } from '@/components/links/link-list-section'
 import { MeetingStatusBadge } from '@/components/meetings/meeting-status-badge'
 import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
+import { EntityIntegrationLinksServer } from '@/components/integrations/entity-integration-links-server'
+import { Plug } from 'lucide-react'
 
 export default async function MeetingDetailPage({
   params,
@@ -257,6 +259,17 @@ export default async function MeetingDetailPage({
               className='mt-6'
               canEdit={canEdit}
             />
+            <PageSection
+              header={
+                <SectionHeader icon={Plug} title='External Integrations' />
+              }
+              className='mt-6'
+            >
+              <EntityIntegrationLinksServer
+                entityType='Meeting'
+                entityId={meeting.id}
+              />
+            </PageSection>
           </PageSidebar>
         </PageContent>
       </PageContainer>
