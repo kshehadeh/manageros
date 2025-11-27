@@ -66,11 +66,17 @@ R2_SECRET_ACCESS_KEY="..."
 R2_BUCKET_NAME="..."
 R2_PUBLIC_URL="https://..."
 
-# Optional: Email configuration (for notifications)
+# Email configuration (for notifications and password reset)
+# Using Resend API (recommended)
+RESEND_API_KEY="re_..."
+RESEND_FROM_EMAIL="noreply@yourdomain.com"
+
+# Legacy SMTP configuration (optional, for backward compatibility)
 SMTP_HOST="..."
 SMTP_PORT="..."
 SMTP_USER="..."
 SMTP_PASSWORD="..."
+SMTP_FROM="..."
 
 # Optional: Sentry (for error tracking)
 SENTRY_DSN="..."

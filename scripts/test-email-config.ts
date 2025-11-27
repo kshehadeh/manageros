@@ -1,6 +1,9 @@
 #!/usr/bin/env bun
 
-import { testEmailConfiguration, getEmailConfigStatus } from '../src/lib/email'
+import {
+  testResendConfiguration,
+  getResendConfigStatus,
+} from '../src/lib/email-resend'
 
 /**
  * Test email configuration script
@@ -9,29 +12,31 @@ import { testEmailConfiguration, getEmailConfigStatus } from '../src/lib/email'
 async function main() {
   console.log('=== Email Configuration Test ===')
 
-  const config = getEmailConfigStatus()
+  const config = getResendConfigStatus()
   console.log('Configuration Status:', config)
 
   if (config.isConfigured) {
-    console.log('\nTesting SMTP connection...')
-    const isValid = await testEmailConfiguration()
+    console.log('\nTesting Resend configuration...')
+    const isValid = await testResendConfiguration()
 
     if (isValid) {
       console.log('✅ Email configuration is valid and ready to use!')
     } else {
       console.log(
-        '❌ Email configuration test failed. Check your SMTP settings.'
+        '❌ Email configuration test failed. Check your Resend API key.'
       )
     }
   } else {
     console.log('\n⚠️  Email configuration incomplete.')
     console.log('Required environment variables:')
-    console.log('- SMTP_HOST')
-    console.log('- SMTP_USER')
-    console.log('- SMTP_PASSWORD')
-    console.log(
-      '\nIn development mode, password reset tokens will be logged to console.'
-    )
+    console.log('- RESEND_API_KEY')
+    if (config.resendFromEmail) {
+      console.log(`- From email: ${config.resendFromEmail}`)
+    } else {
+      console.log(
+        '- RESEND_FROM_EMAIL (optional, defaults to SMTP_FROM or noreply@manageros.com)'
+      )
+    }
   }
 
   console.log('\n=== End Test ===')

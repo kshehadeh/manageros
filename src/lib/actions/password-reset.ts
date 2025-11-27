@@ -3,7 +3,6 @@
 import { prisma } from '../db'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
-import { sendPasswordResetEmail, getEmailConfigStatus } from '../email'
 
 /**
  * Generate a secure random token for password reset
@@ -45,27 +44,8 @@ export async function createPasswordResetToken(email: string) {
       },
     })
 
-    // Send email with reset link
-    const emailConfig = getEmailConfigStatus()
-
-    if (emailConfig.isConfigured) {
-      try {
-        await sendPasswordResetEmail(email, token)
-      } catch (emailError) {
-        console.error('Failed to send password reset email:', emailError)
-        // Don't fail the entire operation if email fails
-        // The token is still created and can be used
-      }
-    } else {
-      // In development mode, log the reset link
-      console.log(`=== PASSWORD RESET TOKEN (Development Mode) ===`)
-      console.log(`Email: ${email}`)
-      console.log(`Token: ${token}`)
-      console.log(
-        `Reset URL: ${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}`
-      )
-      console.log(`===============================================`)
-    }
+    // Note: Password reset emails are now handled by Clerk
+    // This token creation is kept for backward compatibility if needed
 
     return { success: true }
   } catch (error) {
