@@ -1,10 +1,11 @@
 import { getCurrentUser } from '@/lib/auth-utils'
 import { TeamPulseSection } from './team-pulse-section'
-import { isFuture } from 'date-fns'
+import { isFuture, differenceInDays } from 'date-fns'
 import { getDirectReports } from '@/lib/data/people'
 import { getOneOnOnesForManagerAndReports } from '@/lib/data/one-on-ones'
 import { getTasksForAssignee } from '@/lib/data/tasks'
 import { getActiveFeedbackCampaignsForUser } from '@/lib/data/feedback-campaigns'
+import { prisma } from '@/lib/db'
 
 interface TeamPulseMember {
   id: string
@@ -14,6 +15,9 @@ interface TeamPulseMember {
   lastOneOnOne: Date | null
   taskCount: number
   feedbackPending: boolean
+  oneOnOneOverdue: boolean
+  hasRecentNegativeFeedback: boolean
+  hasRecentPositiveFeedback: boolean
 }
 
 export async function TeamPulseSectionServer() {
@@ -81,6 +85,45 @@ export async function TeamPulseSectionServer() {
       }
     )
 
+    // Get current person's person record for feedback access control
+    const currentPerson = await prisma.person.findFirst({
+      where: {
+        id: personId,
+        organizationId,
+      },
+    })
+
+    // Get recent feedback for all reports (last 30 days)
+    // Only show feedback that is either public or private feedback from current user
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+    const recentFeedback = await prisma.feedback.findMany({
+      where: {
+        aboutId: {
+          in: reportIds,
+        },
+        about: {
+          organizationId,
+        },
+        createdAt: {
+          gte: thirtyDaysAgo,
+        },
+        OR: [
+          { isPrivate: false },
+          ...(currentPerson ? [{ fromId: currentPerson.id }] : []),
+        ],
+      },
+      select: {
+        aboutId: true,
+        kind: true,
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    })
+
     // Build the team pulse data
     const teamMembers: TeamPulseMember[] = directReports.map(report => {
       // Find upcoming 1:1
@@ -111,12 +154,26 @@ export async function TeamPulseSectionServer() {
 
       const lastOneOnOne = pastOneOnOnes[0]?.scheduledAt || null
 
+      // Check if 1:1 is overdue (more than 2 weeks since last 1:1)
+      const oneOnOneOverdue =
+        lastOneOnOne === null ||
+        differenceInDays(new Date(), new Date(lastOneOnOne)) > 14
+
       // Count tasks
       const taskCount = tasks.filter(t => t.assigneeId === report.id).length
 
       // Check for pending feedback
       const feedbackPending = feedbackCampaigns.some(
         fc => fc.targetPersonId === report.id
+      )
+
+      // Check for recent feedback (last 30 days)
+      const reportFeedback = recentFeedback.filter(f => f.aboutId === report.id)
+      const hasRecentNegativeFeedback = reportFeedback.some(
+        f => f.kind === 'concern'
+      )
+      const hasRecentPositiveFeedback = reportFeedback.some(
+        f => f.kind === 'praise'
       )
 
       return {
@@ -127,6 +184,9 @@ export async function TeamPulseSectionServer() {
         lastOneOnOne,
         taskCount,
         feedbackPending,
+        oneOnOneOverdue,
+        hasRecentNegativeFeedback,
+        hasRecentPositiveFeedback,
       }
     })
 
