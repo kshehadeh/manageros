@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.13.0](/compare/v1.12.0...v1.13.0) (2025-11-27)
+
+### Features
+
+- **email:** Implement Resend API for email notifications in feedback campaigns, including invite and reminder emails, and update related configurations and documentation c365c9c
+
 # [1.12.0](/compare/v1.11.0...v1.12.0) (2025-11-26)
 
 ### Features
