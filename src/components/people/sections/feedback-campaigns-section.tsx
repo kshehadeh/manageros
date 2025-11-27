@@ -1,4 +1,4 @@
-import { PersonFeedbackCampaigns } from '@/components/people/person-feedback-campaigns'
+import { SimpleFeedbackCampaignList } from '@/components/feedback/feedback-campaign-simple-list'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { Button } from '@/components/ui/button'
@@ -34,19 +34,19 @@ export async function FeedbackCampaignsSection({
   }
 
   return (
-    <div className='flex-1 min-w-[300px] max-w-[500px]'>
+    <div className='flex-1 min-w-[300px]'>
       <PageSection
         header={
           <SectionHeader
             icon={MessageCircle}
-            title={`Feedback Campaigns (${feedbackCampaigns.length})`}
+            title={`Feedback 360`}
             action={
               <div className='flex items-center gap-2'>
                 <Button
                   asChild
                   variant='outline'
                   size='sm'
-                  title='View All Feedback Campaigns'
+                  title='View All Feedback 360'
                 >
                   <Link href={`/people/${personId}/feedback-campaigns`}>
                     <Eye className='w-4 h-4' />
@@ -56,7 +56,7 @@ export async function FeedbackCampaignsSection({
                   asChild
                   variant='outline'
                   size='sm'
-                  title='Create New Feedback Campaign'
+                  title='Create New Feedback 360'
                 >
                   <Link href={`/people/${personId}/feedback-campaigns/new`}>
                     <Plus className='w-4 h-4' />
@@ -67,7 +67,11 @@ export async function FeedbackCampaignsSection({
           />
         }
       >
-        <PersonFeedbackCampaigns campaigns={feedbackCampaigns} />
+        <SimpleFeedbackCampaignList
+          campaigns={feedbackCampaigns}
+          hidePersonName
+          emptyStateText='No active or draft Feedback 360.'
+        />
       </PageSection>
     </div>
   )

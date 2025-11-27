@@ -267,8 +267,8 @@ function createStaticItems(
     },
     {
       id: 'nav.feedback-campaigns',
-      title: 'View Feedback Campaigns',
-      subtitle: 'Go to feedback campaigns',
+      title: 'View Feedback 360',
+      subtitle: 'Go to Feedback 360',
       icon: <ClipboardList className='h-4 w-4' />,
       keywords: [
         'feedback campaigns',

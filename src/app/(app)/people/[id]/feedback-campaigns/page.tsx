@@ -104,10 +104,10 @@ export default async function FeedbackCampaignsPage({
     >
       <PageContainer>
         <PageHeader
-          title='Feedback Campaigns'
+          title='Feedback 360'
           titleIcon={MessageSquare}
           helpId='feedback-campaigns'
-          subtitle={`Manage feedback campaigns for ${person.name}`}
+          subtitle={`Manage Feedback 360 for ${person.name}`}
           actions={
             <Button asChild>
               <Link

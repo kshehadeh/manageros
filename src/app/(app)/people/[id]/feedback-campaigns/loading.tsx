@@ -9,9 +9,9 @@ export default function LoadingPage() {
   return (
     <PageContainer>
       <PageHeader
-        title='Feedback Campaigns'
+        title='Feedback 360'
         titleIcon={Mail}
-        subtitle='Loading feedback campaigns...'
+        subtitle='Loading Feedback 360...'
       />
 
       <PageContent>

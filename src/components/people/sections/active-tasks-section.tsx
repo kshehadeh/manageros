@@ -71,6 +71,7 @@ export async function ActiveTasksSection({
 
     return (
       <PageSection
+        className='flex-1 min-w-[300px] '
         header={
           <SectionHeader
             icon={ListTodo}

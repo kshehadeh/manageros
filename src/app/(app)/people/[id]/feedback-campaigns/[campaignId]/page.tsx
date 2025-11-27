@@ -134,7 +134,7 @@ export default async function FeedbackCampaignDetailPage({
   }
 
   // Create a meaningful campaign title
-  const campaignTitle = campaign.name || `${person.name} Feedback Campaign`
+  const campaignTitle = campaign.name || `${person.name} Feedback 360`
 
   // Calculate response statistics
   const totalInvites = campaign.inviteEmails.length
@@ -191,7 +191,7 @@ export default async function FeedbackCampaignDetailPage({
                 </Badge>
               </div>
               <div className='page-section-subtitle'>
-                Feedback campaign for {person.name}
+                Feedback 360 for {person.name}
               </div>
 
               {/* Basic Information with Icons */}

@@ -15,7 +15,7 @@ const routeMap: Record<string, string> = {
   '/meetings': 'Meetings',
   '/oneonones': '1:1s',
   '/feedback': 'Feedback',
-  '/feedback-campaigns': 'Feedback Campaigns',
+  '/feedback-campaigns': 'Feedback 360',
   '/reports': 'Reports',
   '/direct-reports': 'Direct Reports',
   '/organization/invitations': 'Invitations',

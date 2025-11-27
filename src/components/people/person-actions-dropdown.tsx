@@ -160,7 +160,7 @@ export function PersonActionsDropdown({
                 onClick={close}
               >
                 <MessageCircle className='w-4 h-4' />
-                Feedback Campaigns
+                Feedback 360
               </Link>
             )}
 

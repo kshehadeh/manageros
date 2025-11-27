@@ -22,8 +22,8 @@ export default async function FeedbackFormPage({
               Campaign Not Found
             </h1>
             <p className='text-muted-foreground'>
-              The feedback campaign you&apos;re looking for doesn&apos;t exist
-              or has been removed.
+              The Feedback 360 you&apos;re looking for doesn&apos;t exist or has
+              been removed.
             </p>
           </div>
         </div>
@@ -42,8 +42,8 @@ export default async function FeedbackFormPage({
               Campaign Not Active
             </h1>
             <p className='text-muted-foreground'>
-              This feedback campaign is not currently active. Please check back
-              during the campaign period.
+              This Feedback 360 is not currently active. Please check back
+              during the collection period.
             </p>
           </div>
         </div>

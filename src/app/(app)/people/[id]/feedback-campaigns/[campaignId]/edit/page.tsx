@@ -97,7 +97,7 @@ export default async function EditFeedbackCampaignPage({
     >
       <div className='space-y-6'>
         <div>
-          <h1 className='text-2xl font-bold'>Edit Feedback Campaign</h1>
+          <h1 className='text-2xl font-bold'>Edit Feedback 360</h1>
           <p className='text-neutral-400'>
             Update campaign details for {person.name}
           </p>

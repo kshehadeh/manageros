@@ -212,7 +212,7 @@ export function PersonDetailContent({
 
       <PageContent>
         <PageMain>
-          <div className='space-y-6'>
+          <div className='flex gap-lg flex-wrap space-y-6'>
             {/* Feedback Campaigns Section */}
             <Suspense fallback={<FeedbackCampaignsSectionSkeleton />}>
               <FeedbackCampaignsSection
