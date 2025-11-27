@@ -1,5 +1,16 @@
 # Changelog
 
+# [1.15.0](/compare/v1.14.0...v1.15.0) (2025-11-27)
+
+### Bug Fixes
+
+- **integrations:** Add organization validation for Jira and GitHub integration migrations. Ensure users belong to an organization before migrating integrations and remove fallback to undefined for organization IDs in database queries. 1ddcf68
+
+### Features
+
+- **integrations:** Add support for organization-level integrations with Jira and GitHub, including linking accounts and fetching user data. Update integration handling in avatar and metrics functions. Enhance UI with integration sections in meetings and organization settings. 11ca8f0
+- **metrics:** Enhance GitHub and Jira metrics sections to fetch and display recent pull requests and assigned tickets, respectively. Update loading messages and descriptions to reflect the last 2 weeks for GitHub and last 7 days for Jira. Introduce account linking functionality in the person actions dropdown. b534478
+
 # [1.14.0](/compare/v1.13.0...v1.14.0) (2025-11-27)
 
 ### Features
