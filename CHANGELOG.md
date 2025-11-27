@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.14.0](/compare/v1.13.0...v1.14.0) (2025-11-27)
+
+### Features
+
+- **team-pulse:** Enhance team pulse section with overdue 1:1 tracking and recent feedback indicators 58c9008
+
 # [1.13.0](/compare/v1.12.0...v1.13.0) (2025-11-27)
 
 ### Features
