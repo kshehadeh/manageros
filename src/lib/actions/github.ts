@@ -433,83 +433,94 @@ export async function fetchGithubPullRequests(
 export async function fetchGithubMetrics(
   personId: string,
   daysBack: number = 30
-) {
-  const user = await getCurrentUser()
-
-  if (!user.managerOSOrganizationId) {
-    throw new Error('User must belong to an organization')
-  }
-
-  // Verify person belongs to user's organization
-  const person = await prisma.person.findFirst({
-    where: {
-      id: personId,
-      organizationId: user.managerOSOrganizationId,
-    },
-    include: {
-      githubAccount: true,
-    },
-  })
-
-  if (!person) {
-    throw new Error('Person not found or access denied')
-  }
-
-  // Get the first organization-level GitHub integration
-  const orgIntegration = await prisma.integration.findFirst({
-    where: {
-      organizationId: user.managerOSOrganizationId,
-      integrationType: 'github',
-      scope: 'organization',
-      isEnabled: true,
-    },
-    orderBy: { createdAt: 'asc' },
-  })
-
-  if (!orgIntegration) {
-    throw new Error(
-      'Organization GitHub integration not configured. Please contact your administrator.'
-    )
-  }
-
-  // Get GitHub username from EntityIntegrationLink or fall back to PersonGithubAccount
-  let githubUsername: string | null = null
-
-  const integrationLink = await prisma.entityIntegrationLink.findFirst({
-    where: {
-      entityType: 'Person',
-      entityId: personId,
-      integrationId: orgIntegration.id,
-    },
-  })
-
-  if (integrationLink) {
-    githubUsername = integrationLink.externalEntityId
-  } else if (person.githubAccount) {
-    // Fall back to old PersonGithubAccount for backward compatibility
-    githubUsername = person.githubAccount.githubUsername
-  }
-
-  if (!githubUsername) {
-    throw new Error('Person is not linked to a GitHub account')
-  }
-
-  // Get allowed GitHub organizations for filtering
-  const githubOrgs = await prisma.organizationGithubOrg.findMany({
-    where: {
-      organizationId: user.managerOSOrganizationId,
-    },
-    select: {
-      githubOrgName: true,
-    },
-  })
-
-  const allowedOrganizations =
-    githubOrgs.length > 0
-      ? githubOrgs.map((org: { githubOrgName: string }) => org.githubOrgName)
-      : undefined
-
+): Promise<
+  | {
+      success: true
+      metrics: { openPrs: number; mergedPrs: number; total: number }
+    }
+  | { success: false; error: string }
+> {
   try {
+    const user = await getCurrentUser()
+
+    if (!user.managerOSOrganizationId) {
+      return { success: false, error: 'User must belong to an organization' }
+    }
+
+    // Verify person belongs to user's organization
+    const person = await prisma.person.findFirst({
+      where: {
+        id: personId,
+        organizationId: user.managerOSOrganizationId,
+      },
+      include: {
+        githubAccount: true,
+      },
+    })
+
+    if (!person) {
+      return { success: false, error: 'Person not found or access denied' }
+    }
+
+    // Get the first organization-level GitHub integration
+    const orgIntegration = await prisma.integration.findFirst({
+      where: {
+        organizationId: user.managerOSOrganizationId,
+        integrationType: 'github',
+        scope: 'organization',
+        isEnabled: true,
+      },
+      orderBy: { createdAt: 'asc' },
+    })
+
+    if (!orgIntegration) {
+      return {
+        success: false,
+        error:
+          'Organization GitHub integration not configured. Please contact your administrator.',
+      }
+    }
+
+    // Get GitHub username from EntityIntegrationLink or fall back to PersonGithubAccount
+    let githubUsername: string | null = null
+
+    const integrationLink = await prisma.entityIntegrationLink.findFirst({
+      where: {
+        entityType: 'Person',
+        entityId: personId,
+        integrationId: orgIntegration.id,
+      },
+    })
+
+    if (integrationLink) {
+      githubUsername = integrationLink.externalEntityId
+    } else if (person.githubAccount) {
+      // Fall back to old PersonGithubAccount for backward compatibility
+      githubUsername = person.githubAccount.githubUsername
+    }
+
+    if (!githubUsername) {
+      return {
+        success: false,
+        error: 'Person is not linked to a GitHub account',
+      }
+    }
+
+    // Get allowed GitHub organizations for filtering
+    const githubOrgs = await prisma.organizationGithubOrg.findMany({
+      where: {
+        organizationId: user.managerOSOrganizationId,
+      },
+      select: {
+        githubOrgName: true,
+      },
+    })
+
+    const allowedOrganizations =
+      githubOrgs.length > 0
+        ? githubOrgs.map((org: { githubOrgName: string }) => org.githubOrgName)
+        : undefined
+
     // Get integration instance
     const { getIntegration } = await import(
       '@/lib/integrations/integration-factory'
@@ -517,7 +528,10 @@ export async function fetchGithubMetrics(
     const integrationInstance = await getIntegration(orgIntegration.id)
 
     if (!integrationInstance || integrationInstance.getType() !== 'github') {
-      throw new Error('Failed to create GitHub integration instance')
+      return {
+        success: false,
+        error: 'Failed to create GitHub integration instance',
+      }
     }
 
     const githubIntegration =
@@ -563,8 +577,12 @@ export async function fetchGithubMetrics(
     }
   } catch (error) {
     console.error('Failed to fetch GitHub metrics:', error)
-    throw error instanceof Error
-      ? error
-      : new Error('Failed to fetch GitHub metrics')
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch GitHub metrics',
+    }
   }
 }

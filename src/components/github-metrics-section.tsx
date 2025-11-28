@@ -74,11 +74,14 @@ export function GithubMetricsSection({
         if (metricsResult.success) {
           setMetrics(metricsResult.metrics)
         } else {
-          setError('Failed to load GitHub metrics')
+          setError(metricsResult.error || 'Failed to load GitHub metrics')
         }
 
         if (prsResult.success && prsResult.pullRequests) {
           setPullRequests(prsResult.pullRequests)
+        } else if (!metricsResult.success) {
+          // Only set PR error if we don't already have a metrics error
+          // (they likely have the same root cause)
         }
       } catch (err) {
         setError(

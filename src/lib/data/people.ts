@@ -36,10 +36,25 @@ export async function getPersonById(personId: string, organizationId: string) {
     },
     include: {
       team: true,
-      manager: true,
+      manager: {
+        include: {
+          reports: true,
+        },
+      },
       reports: true,
-      jobRole: true,
-      user: true,
+      jobRole: {
+        include: {
+          level: true,
+          domain: true,
+        },
+      },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
       jiraAccount: true,
       githubAccount: true,
     },

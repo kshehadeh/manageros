@@ -59,6 +59,7 @@ export async function DirectReportsSection({
           title={`Direct Reports (${reports.length})`}
         />
       }
+      className='flex-1 min-w-[300px]'
     >
       <SimplePeopleList
         people={reports.map(report => ({
