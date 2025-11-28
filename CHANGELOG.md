@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.16.0](/compare/v1.15.0...v1.16.0) (2025-11-28)
+
+### Features
+
+- **people:** Add AI Overview page and related components for person profiles. Implement access control, breadcrumb navigation, and content display for AI-generated overviews. Enhance person detail view with job role and team information, and introduce a dropdown for viewing options. 14ea237
+
 # [1.15.0](/compare/v1.14.0...v1.15.0) (2025-11-27)
 
 ### Bug Fixes
