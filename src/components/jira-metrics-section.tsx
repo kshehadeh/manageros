@@ -69,11 +69,14 @@ export function JiraMetricsSection({
         if (metricsResult.success) {
           setMetrics(metricsResult.metrics)
         } else {
-          setError('Failed to load Jira metrics')
+          setError(metricsResult.error || 'Failed to load Jira metrics')
         }
 
         if (ticketsResult.success) {
           setTickets(ticketsResult.tickets)
+        } else if (!metricsResult.success) {
+          // Only set ticket error if we don't already have a metrics error
+          // (they likely have the same root cause)
         }
 
         setJiraBaseUrl(baseUrl)

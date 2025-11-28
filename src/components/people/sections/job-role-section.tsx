@@ -76,7 +76,7 @@ export async function JobRoleSection({
   })
 
   return (
-    <PageSection>
+    <PageSection className='flex-1 min-w-[300px]'>
       <JobRoleSectionClient
         personId={personId}
         personName={personNameToUse}

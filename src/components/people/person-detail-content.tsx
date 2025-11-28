@@ -5,15 +5,8 @@ import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
-import { PageSidebar } from '@/components/ui/page-sidebar'
-import {
-  CalendarDays,
-  User as UserIcon,
-  Building2,
-  Briefcase,
-  Activity,
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { CalendarDays, Users, Briefcase, ArrowUpRight } from 'lucide-react'
+import { PersonViewDropdown } from './person-view-dropdown'
 import { Suspense } from 'react'
 import type { User, Person as PrismaPerson, Team } from '@prisma/client'
 import type { Prisma } from '@prisma/client'
@@ -39,7 +32,6 @@ export type PersonWithDetailRelations = Prisma.PersonGetPayload<{
         id: true
         name: true
         email: true
-        role: true
       }
     }
     jiraAccount: true
@@ -51,7 +43,6 @@ export type PersonWithDetailRelations = Prisma.PersonGetPayload<{
 
 // Import skeleton components
 import {
-  OverviewSectionSkeleton,
   FeedbackCampaignsSectionSkeleton,
   FeedbackSectionSkeleton,
   OwnedInitiativesSectionSkeleton,
@@ -62,7 +53,6 @@ import {
 } from './person-detail-skeletons'
 
 // Import section components
-import { OverviewSection } from './sections/overview-section'
 import { FeedbackCampaignsSection } from './sections/feedback-campaigns-section'
 import { FeedbackSection } from './sections/feedback-section'
 import { OwnedInitiativesSection } from './sections/owned-initiatives-section'
@@ -92,6 +82,91 @@ export function PersonDetailContent({
   organizationId,
   currentUserId,
 }: PersonDetailContentProps) {
+  // Build subtitle items array for dot-separated display
+  const subtitleItems = [
+    // Job role/title
+    (person.jobRole?.title ?? person.role) ? (
+      <span key='role' className='font-medium text-foreground'>
+        {person.jobRole ? (
+          <Link
+            href={`/job-roles/${person.jobRole.id}`}
+            className='hover:text-highlight transition-colors'
+          >
+            {person.jobRole.title}
+          </Link>
+        ) : (
+          person.role
+        )}
+      </span>
+    ) : null,
+
+    // Team
+    person.team ? (
+      <span key='team' className='flex items-center gap-1 whitespace-nowrap'>
+        <Users className='w-3.5 h-3.5' />
+        <Link
+          href={`/teams/${person.team.id}`}
+          className='hover:text-highlight transition-colors'
+        >
+          {person.team.name}
+        </Link>
+      </span>
+    ) : null,
+
+    // Employee type
+    person.employeeType ? (
+      <span key='type' className='flex items-center gap-1 whitespace-nowrap'>
+        <Briefcase className='w-3.5 h-3.5' />
+        <span>
+          {person.employeeType === 'FULL_TIME' && 'Full Time'}
+          {person.employeeType === 'PART_TIME' && 'Part Time'}
+          {person.employeeType === 'INTERN' && 'Intern'}
+          {person.employeeType === 'CONSULTANT' && 'Consultant'}
+        </span>
+      </span>
+    ) : null,
+
+    // Email
+    <span key='email'>{person.email}</span>,
+
+    // Manager
+    person.manager ? (
+      <span key='manager' className='flex items-center gap-1 whitespace-nowrap'>
+        <ArrowUpRight className='w-3.5 h-3.5' />
+        <Link
+          href={`/people/${person.manager.id}`}
+          className='hover:text-highlight transition-colors'
+        >
+          {person.manager.name}
+        </Link>
+      </span>
+    ) : null,
+
+    // Start date
+    person.startedAt ? (
+      <span key='started' className='flex items-center gap-1 whitespace-nowrap'>
+        <CalendarDays className='w-3.5 h-3.5' />
+        Started {new Date(person.startedAt).toLocaleDateString()}
+      </span>
+    ) : null,
+
+    // Birthday
+    person.birthday ? (
+      <span
+        key='birthday'
+        className='flex items-center gap-1 whitespace-nowrap'
+      >
+        <CalendarDays className='w-3.5 h-3.5' />
+        Birthday{' '}
+        {person.birthday.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'numeric',
+          day: 'numeric',
+        })}
+      </span>
+    ) : null,
+  ].filter(Boolean)
+
   return (
     <PageContainer>
       <PageHeader
@@ -112,86 +187,20 @@ export function PersonDetailContent({
           />
         }
         subtitle={
-          <>
-            <div className='flex items-center gap-4'>
-              <div className='page-section-subtitle'>
-                {person.jobRole?.title ?? person.role ?? ''}
-              </div>
-              <div className='flex items-center gap-4 text-sm text-muted-foreground'>
-                {person.team && (
-                  <div className='flex items-center gap-1'>
-                    <Building2 className='w-4 h-4' />
-                    <Link
-                      href={`/teams/${person.team.id}`}
-                      className='hover:text-highlight transition-colors'
-                    >
-                      {person.team.name}
-                    </Link>
-                  </div>
+          <div className='flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground'>
+            {subtitleItems.map((item, index) => (
+              <span key={index} className='flex items-center gap-2'>
+                {index > 0 && (
+                  <span className='text-muted-foreground/50'>·</span>
                 )}
-                {person.employeeType && (
-                  <div className='flex items-center gap-1'>
-                    <Briefcase className='w-4 h-4' />
-                    <span>
-                      {person.employeeType === 'FULL_TIME' && 'Full Time'}
-                      {person.employeeType === 'PART_TIME' && 'Part Time'}
-                      {person.employeeType === 'INTERN' && 'Intern'}
-                      {person.employeeType === 'CONSULTANT' && 'Consultant'}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className='text-xs text-muted-foreground'>{person.email}</div>
-
-            {/* Basic Information with Icons */}
-            <div className='flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground'>
-              {person.manager && (
-                <div className='flex items-center gap-1'>
-                  <UserIcon className='w-4 h-4' />
-                  <Link
-                    href={`/people/${person.manager.id}`}
-                    className='hover:text-highlight transition-colors'
-                  >
-                    {person.manager.name}
-                  </Link>
-                </div>
-              )}
-              {person.startedAt && (
-                <div className='flex items-center gap-1'>
-                  <CalendarDays className='w-4 h-4' />
-                  <span>
-                    Started {new Date(person.startedAt).toLocaleDateString()}
-                  </span>
-                </div>
-              )}
-              {person.birthday && (
-                <div className='flex items-center gap-1'>
-                  <CalendarDays className='w-4 h-4' />
-                  <span>
-                    Birthday{' '}
-                    {person.birthday.toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'numeric',
-                      day: 'numeric',
-                    })}
-                  </span>
-                </div>
-              )}
-            </div>
-          </>
+                {item}
+              </span>
+            ))}
+          </div>
         }
         actions={
           <div className='flex items-center gap-2'>
-            <Button asChild variant='outline' size='sm'>
-              <Link
-                href={`/people/${person.id}/activity`}
-                className='flex items-center gap-2'
-              >
-                <Activity className='w-4 h-4' />
-                Activity
-              </Link>
-            </Button>
+            <PersonViewDropdown personId={person.id} />
             <PersonActionsDropdown
               person={
                 person as unknown as PrismaPerson & {
@@ -254,36 +263,24 @@ export function PersonDetailContent({
               />
             </Suspense>
           </div>
+
+          {/* Job Role Section */}
+          <Suspense fallback={<JobRoleSectionSkeleton />}>
+            <JobRoleSection
+              personId={person.id}
+              personName={person.name}
+              currentJobRole={person.jobRole}
+            />
+          </Suspense>
+
+          {/* Direct Reports */}
+          <Suspense fallback={<DirectReportsSectionSkeleton />}>
+            <DirectReportsSection
+              personId={person.id}
+              organizationId={organizationId}
+            />
+          </Suspense>
         </PageMain>
-
-        <PageSidebar>
-          <div className='space-y-6'>
-            {/* Overview Section */}
-            <Suspense fallback={<OverviewSectionSkeleton />}>
-              <OverviewSection
-                personId={person.id}
-                organizationId={organizationId}
-              />
-            </Suspense>
-
-            {/* Job Role Section */}
-            <Suspense fallback={<JobRoleSectionSkeleton />}>
-              <JobRoleSection
-                personId={person.id}
-                personName={person.name}
-                currentJobRole={person.jobRole}
-              />
-            </Suspense>
-
-            {/* Direct Reports */}
-            <Suspense fallback={<DirectReportsSectionSkeleton />}>
-              <DirectReportsSection
-                personId={person.id}
-                organizationId={organizationId}
-              />
-            </Suspense>
-          </div>
-        </PageSidebar>
       </PageContent>
     </PageContainer>
   )
