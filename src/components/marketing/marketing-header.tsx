@@ -186,7 +186,7 @@ export function MarketingHeader() {
             </Button>
             <Button
               asChild
-              className='bg-white text-black shadow-[0_18px_40px_rgba(88,86,255,0.45)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90 w-full'
+              className='bg-primary text-primary-foreground shadow-[0_18px_40px_color-mix(in_srgb,var(--color-primary)_45%,transparent)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/90 w-full'
             >
               <Link
                 href='/auth/signup'
@@ -210,7 +210,7 @@ export function MarketingHeader() {
         </Button>
         <Button
           asChild
-          className='bg-white text-black shadow-[0_18px_40px_rgba(88,86,255,0.45)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90'
+          className='bg-primary text-primary-foreground shadow-[0_18px_40px_color-mix(in_srgb,var(--color-primary)_45%,transparent)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/90'
         >
           <Link href='/auth/signup'>Register now</Link>
         </Button>
