@@ -1,5 +1,15 @@
 # Changelog
 
+# [1.18.0](/compare/v1.17.0...v1.18.0) (2025-11-29)
+
+### Bug Fixes
+
+- **integrations:** Improve error handling in connection tests for GitHub and Jira integrations. Throw specific errors with messages based on the type of caught error to enhance debugging and user feedback. 2e1e881
+
+### Features
+
+- **activity:** Enhance activity page with date range selection and loading states. Introduce new sections for tasks and initiatives, integrate GitHub and Jira metrics, and implement skeleton components for improved user experience during data loading. cf46776
+
 # [1.17.0](/compare/v1.16.0...v1.17.0) (2025-11-29)
 
 ### Features
