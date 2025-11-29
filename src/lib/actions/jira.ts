@@ -83,15 +83,31 @@ export async function getJiraCredentials() {
 export async function getJiraBaseUrl() {
   const user = await getCurrentUser()
 
-  const credentials = await prisma.userJiraCredentials.findUnique({
-    where: { userId: user.managerOSUserId || '' },
-  })
-
-  if (!credentials) {
+  if (!user.managerOSOrganizationId) {
     return null
   }
 
-  return credentials.jiraBaseUrl
+  // Get the organization-level Jira integration
+  const orgIntegration = await prisma.integration.findFirst({
+    where: {
+      organizationId: user.managerOSOrganizationId,
+      integrationType: 'jira',
+      scope: 'organization',
+      isEnabled: true,
+    },
+    orderBy: { createdAt: 'asc' },
+  })
+
+  if (!orgIntegration) {
+    return null
+  }
+
+  // Get Jira base URL from integration credentials
+  const credentials = orgIntegration.encryptedCredentials as {
+    jiraBaseUrl?: string
+  }
+
+  return credentials?.jiraBaseUrl || null
 }
 
 export async function deleteJiraCredentials() {

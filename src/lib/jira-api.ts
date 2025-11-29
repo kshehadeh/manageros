@@ -143,7 +143,14 @@ export class JiraApiService {
       return true
     } catch (error) {
       console.error('Jira connection test failed:', error)
-      return false
+      if (error instanceof JiraApiError) {
+        throw error
+      }
+      throw new JiraApiError(
+        error instanceof Error
+          ? error.message
+          : 'Connection test failed. Please check your credentials.'
+      )
     }
   }
 

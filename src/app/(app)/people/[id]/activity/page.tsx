@@ -1,4 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
+import { Suspense } from 'react'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { getPersonById } from '@/lib/data/people'
 import { ActivityBreadcrumbClient } from '@/components/people/activity/activity-breadcrumb-client'
@@ -8,9 +9,13 @@ interface ActivityPageProps {
   params: Promise<{
     id: string
   }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default async function ActivityPage({ params }: ActivityPageProps) {
+export default async function ActivityPage({
+  params,
+  searchParams,
+}: ActivityPageProps) {
   const user = await getCurrentUser()
 
   const { id } = await params
@@ -28,12 +33,16 @@ export default async function ActivityPage({ params }: ActivityPageProps) {
 
   return (
     <ActivityBreadcrumbClient personName={person.name} personId={person.id}>
-      <ActivityPageContent
-        personId={person.id}
-        personName={person.name}
-        hasJiraAccount={Boolean(person.jiraAccount)}
-        hasGithubAccount={Boolean(person.githubAccount)}
-      />
+      <Suspense fallback={<div>Loading...</div>}>
+        <ActivityPageContent
+          personId={person.id}
+          personName={person.name}
+          hasJiraAccount={Boolean(person.jiraAccount)}
+          hasGithubAccount={Boolean(person.githubAccount)}
+          organizationId={user.managerOSOrganizationId}
+          searchParams={searchParams}
+        />
+      </Suspense>
     </ActivityBreadcrumbClient>
   )
 }

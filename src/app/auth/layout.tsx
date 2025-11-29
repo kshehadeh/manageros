@@ -13,9 +13,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
     >
       <ThemeProvider
         attribute='class'
-        defaultTheme='dark'
-        enableSystem={true}
-        storageKey='manageros-theme'
+        forcedTheme='dark'
         disableTransitionOnChange
       >
         <div className='bg-background text-foreground flex flex-col items-center justify-center p-4 min-h-screen'>
