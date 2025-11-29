@@ -84,7 +84,10 @@ export class GithubApiService {
       return true
     } catch (error) {
       console.error('GitHub connection test failed:', error)
-      return false
+      if (error instanceof Error) {
+        throw error
+      }
+      throw new Error('Connection test failed. Please check your credentials.')
     }
   }
 

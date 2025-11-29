@@ -66,7 +66,11 @@ export class GithubIntegration extends BaseIntegrationImpl {
       return await service.testConnection()
     } catch (error) {
       console.error('GitHub connection test failed:', error)
-      return false
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Connection test failed. Please check your credentials.'
+      throw new Error(errorMessage)
     }
   }
 
