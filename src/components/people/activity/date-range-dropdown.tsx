@@ -86,7 +86,7 @@ export function DateRangeDropdown({
   const handlePresetChange = (preset: string) => {
     if (preset === 'custom') {
       // If switching to custom and we have a custom date, use it
-      // Otherwise, open the calendar to select a date
+      // Otherwise, set a temporary custom range and open the calendar
       if (customDate) {
         const range: DateRange = {
           from: startOfDay(customDate),
@@ -95,6 +95,16 @@ export function DateRangeDropdown({
         }
         onChange(range)
       } else {
+        // Set a temporary custom range so the Popover can render
+        // Use the current value's from date or default to 30 days ago
+        const tempFrom =
+          value?.from || startOfDay(subDays(endOfDay(new Date()), 30))
+        const range: DateRange = {
+          from: tempFrom,
+          to: endOfDay(new Date()),
+          preset: 'custom',
+        }
+        onChange(range)
         setIsCustomOpen(true)
       }
       return

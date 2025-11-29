@@ -77,14 +77,8 @@ export async function createOrganizationIntegration(formData: {
   try {
     const integrationInstance = await getIntegration(integration.id)
     if (integrationInstance) {
-      const isValid = await integrationInstance.testConnection()
-      if (!isValid) {
-        // Delete the integration if connection test fails
-        await prisma.integration.delete({ where: { id: integration.id } })
-        throw new Error(
-          'Connection test failed. Please check your credentials.'
-        )
-      }
+      // testConnection() throws on failure
+      await integrationInstance.testConnection()
     }
   } catch (error) {
     // Delete the integration if connection test fails
@@ -176,12 +170,8 @@ export async function updateOrganizationIntegration(
     try {
       const integrationInstance = await getIntegration(updated.id)
       if (integrationInstance) {
-        const isValid = await integrationInstance.testConnection()
-        if (!isValid) {
-          throw new Error(
-            'Connection test failed. Please check your credentials.'
-          )
-        }
+        // testConnection() throws on failure
+        await integrationInstance.testConnection()
       }
     } catch (error) {
       throw error instanceof Error
@@ -276,8 +266,9 @@ export async function testOrganizationIntegration(integrationId: string) {
       throw new Error('Failed to create integration instance')
     }
 
-    const isValid = await integrationInstance.testConnection()
-    return { success: isValid }
+    // testConnection() throws on failure, so if we get here it succeeded
+    await integrationInstance.testConnection()
+    return { success: true }
   } catch (error) {
     return {
       success: false,
@@ -344,14 +335,8 @@ export async function createUserIntegration(formData: {
   try {
     const integrationInstance = await getIntegration(integration.id)
     if (integrationInstance) {
-      const isValid = await integrationInstance.testConnection()
-      if (!isValid) {
-        // Delete the integration if connection test fails
-        await prisma.integration.delete({ where: { id: integration.id } })
-        throw new Error(
-          'Connection test failed. Please check your credentials.'
-        )
-      }
+      // testConnection() throws on failure
+      await integrationInstance.testConnection()
     }
   } catch (error) {
     // Delete the integration if connection test fails
@@ -441,12 +426,8 @@ export async function updateUserIntegration(
     try {
       const integrationInstance = await getIntegration(updated.id)
       if (integrationInstance) {
-        const isValid = await integrationInstance.testConnection()
-        if (!isValid) {
-          throw new Error(
-            'Connection test failed. Please check your credentials.'
-          )
-        }
+        // testConnection() throws on failure
+        await integrationInstance.testConnection()
       }
     } catch (error) {
       throw error instanceof Error
@@ -539,8 +520,9 @@ export async function testUserIntegration(integrationId: string) {
       throw new Error('Failed to create integration instance')
     }
 
-    const isValid = await integrationInstance.testConnection()
-    return { success: isValid }
+    // testConnection() throws on failure, so if we get here it succeeded
+    await integrationInstance.testConnection()
+    return { success: true }
   } catch (error) {
     return {
       success: false,

@@ -59,10 +59,21 @@ export async function POST(
       )
     }
 
-    const isValid = await integrationInstance.testConnection()
+    // testConnection() may throw errors, but we want to return { success: boolean }
+    // instead of an error response for failed connection tests
+    let isValid = false
+    try {
+      isValid = await integrationInstance.testConnection()
+    } catch (error) {
+      // Connection test failures are expected outcomes, not exceptional errors
+      // Log the error but return success: false to maintain API contract
+      console.error('Integration connection test failed:', error)
+      isValid = false
+    }
 
     return NextResponse.json({ success: isValid })
   } catch (error) {
+    // Only catch unexpected errors (e.g., authentication, database, etc.)
     console.error('Integration test error:', error)
     return NextResponse.json(
       {

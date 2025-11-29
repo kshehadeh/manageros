@@ -109,13 +109,8 @@ export const githubTool = {
         credentials.encryptedPat
       )
 
-      // Test connection
-      const isConnected = await githubService.testConnection()
-      if (!isConnected) {
-        throw new Error(
-          'Failed to connect to GitHub. Please check your credentials.'
-        )
-      }
+      // Test connection (throws on failure)
+      await githubService.testConnection()
 
       // Determine which person to search for
       let targetPersonId = personId
