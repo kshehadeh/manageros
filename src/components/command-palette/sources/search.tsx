@@ -12,6 +12,8 @@ import {
   User,
   MessageCircle,
   Handshake,
+  Activity,
+  ClipboardList,
 } from 'lucide-react'
 
 interface SearchResultBase {
@@ -45,7 +47,7 @@ export const searchCommandSource: CommandSource = {
       return []
     }
     const results = await searchAll(query)
-    const items: CommandItemDescriptor[] = results.map(r => {
+    const items: CommandItemDescriptor[] = results.flatMap(r => {
       const base = {
         id: `${r.type}.${r.id}`,
         title: r.title,
@@ -53,63 +55,114 @@ export const searchCommandSource: CommandSource = {
         group: 'Search Results',
       }
       if (r.type === 'task') {
-        return {
-          ...base,
-          icon: <ListTodo className='h-4 w-4' />,
-          perform: ({ closePalette, router }) => {
-            router.push(`/tasks/${r.id}`)
-            closePalette()
+        return [
+          {
+            ...base,
+            icon: <ListTodo className='h-4 w-4' />,
+            perform: ({ closePalette, router }) => {
+              router.push(`/tasks/${r.id}`)
+              closePalette()
+            },
           },
-        }
+        ]
       }
       if (r.type === 'initiative') {
-        return {
-          ...base,
-          icon: <Rocket className='h-4 w-4' />,
-          perform: ({ closePalette, router }) => {
-            router.push(`/initiatives/${r.id}`)
-            closePalette()
+        return [
+          {
+            ...base,
+            icon: <Rocket className='h-4 w-4' />,
+            perform: ({ closePalette, router }) => {
+              router.push(`/initiatives/${r.id}`)
+              closePalette()
+            },
           },
-        }
+        ]
       }
       if (r.type === 'feedback') {
-        return {
-          ...base,
-          icon: <MessageCircle className='h-4 w-4' />,
-          perform: ({ closePalette, router }) => {
-            router.push(`/feedback/${r.id}`)
-            closePalette()
+        return [
+          {
+            ...base,
+            icon: <MessageCircle className='h-4 w-4' />,
+            perform: ({ closePalette, router }) => {
+              router.push(`/feedback/${r.id}`)
+              closePalette()
+            },
           },
-        }
+        ]
       }
       if (r.type === 'oneOnOne') {
-        return {
-          ...base,
-          icon: <Handshake className='h-4 w-4' />,
-          perform: ({ closePalette, router }) => {
-            router.push(`/oneonones/${r.id}`)
-            closePalette()
+        return [
+          {
+            ...base,
+            icon: <Handshake className='h-4 w-4' />,
+            perform: ({ closePalette, router }) => {
+              router.push(`/oneonones/${r.id}`)
+              closePalette()
+            },
           },
-        }
+        ]
       }
       if (r.type === 'meeting') {
-        return {
+        return [
+          {
+            ...base,
+            icon: <Calendar className='h-4 w-4' />,
+            perform: ({ closePalette, router }) => {
+              router.push(`/meetings/${r.id}`)
+              closePalette()
+            },
+          },
+        ]
+      }
+      // For persons, return multiple items: Profile, Activity, and Feedback 360
+      if (r.type === 'person') {
+        return [
+          {
+            ...base,
+            id: `${r.type}.${r.id}.profile`,
+            title: `View ${r.title}`,
+            subtitle: 'View profile',
+            icon: <User className='h-4 w-4' />,
+            perform: ({ closePalette, router }) => {
+              router.push(`/people/${r.id}`)
+              closePalette()
+            },
+          },
+          {
+            ...base,
+            id: `${r.type}.${r.id}.activity`,
+            title: `${r.title} - Activity`,
+            subtitle: 'View activity page',
+            icon: <Activity className='h-4 w-4' />,
+            perform: ({ closePalette, router }) => {
+              router.push(`/people/${r.id}/activity`)
+              closePalette()
+            },
+          },
+          {
+            ...base,
+            id: `${r.type}.${r.id}.feedback-360`,
+            title: `${r.title} - Feedback 360`,
+            subtitle: 'View Feedback 360',
+            icon: <ClipboardList className='h-4 w-4' />,
+            perform: ({ closePalette, router }) => {
+              router.push(`/people/${r.id}/feedback-campaigns`)
+              closePalette()
+            },
+          },
+        ]
+      }
+      // Fallback for unknown types
+      return [
+        {
           ...base,
-          icon: <Calendar className='h-4 w-4' />,
+          icon: <User className='h-4 w-4' />,
           perform: ({ closePalette, router }) => {
-            router.push(`/meetings/${r.id}`)
+            router.push(`/people/${r.id}`)
             closePalette()
           },
-        }
-      }
-      return {
-        ...base,
-        icon: <User className='h-4 w-4' />,
-        perform: ({ closePalette, router }) => {
-          router.push(`/people/${r.id}`)
-          closePalette()
         },
-      }
+      ]
     })
     return items
   },
