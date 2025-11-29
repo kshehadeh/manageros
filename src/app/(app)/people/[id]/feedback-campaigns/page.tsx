@@ -3,7 +3,7 @@ import { getCurrentUser } from '@/lib/auth-utils'
 import { FeedbackCampaignList } from '@/components/feedback/feedback-campaign-list'
 import { FeedbackCampaignsBreadcrumbClient } from '@/components/feedback/feedback-campaigns-breadcrumb-client'
 import { Button } from '@/components/ui/button'
-import { Plus, MessageSquare } from 'lucide-react'
+import { Plus, MessageSquare, ArrowLeft } from 'lucide-react'
 import { Link } from '@/components/ui/link'
 import { checkIfManagerOrSelf } from '@/lib/utils/people-utils'
 import { getPersonById, getPersonByUserId } from '@/lib/data/people'
@@ -109,15 +109,26 @@ export default async function FeedbackCampaignsPage({
           helpId='feedback-campaigns'
           subtitle={`Manage Feedback 360 for ${person.name}`}
           actions={
-            <Button asChild>
-              <Link
-                href={`/people/${person.id}/feedback-campaigns/new`}
-                className='flex items-center gap-2'
-              >
-                <Plus className='h-4 w-4' />
-                Create Campaign
-              </Link>
-            </Button>
+            <div className='flex items-center gap-2'>
+              <Button asChild variant='outline'>
+                <Link
+                  href={`/people/${person.id}`}
+                  className='flex items-center gap-2'
+                >
+                  <ArrowLeft className='h-4 w-4' />
+                  Back to Profile
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link
+                  href={`/people/${person.id}/feedback-campaigns/new`}
+                  className='flex items-center gap-2'
+                >
+                  <Plus className='h-4 w-4' />
+                  Create Campaign
+                </Link>
+              </Button>
+            </div>
           }
         />
 
