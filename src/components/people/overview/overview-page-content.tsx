@@ -6,10 +6,21 @@ import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
 import { Button } from '@/components/ui/button'
 import { Link } from '@/components/ui/link'
-import { ArrowLeft, Sparkles, RefreshCw, Copy, Check } from 'lucide-react'
+import {
+  ArrowLeft,
+  Sparkles,
+  RefreshCw,
+  Copy,
+  Check,
+  FileText,
+} from 'lucide-react'
 import { PersonOverviewModal } from '@/components/person-overview-modal'
+import { JiraActivityAISection } from '@/components/people/sections/jira-activity-ai-section'
+import { GithubActivityAISection } from '@/components/people/sections/github-activity-ai-section'
 import Markdown from 'react-markdown'
 import { toast } from 'sonner'
 
@@ -23,6 +34,8 @@ interface OverviewPageContentProps {
   overviewFromDate?: string
   overviewToDate?: string
   overviewLookbackDays?: number
+  hasJiraAccount?: boolean
+  hasGithubAccount?: boolean
 }
 
 export function OverviewPageContent({
@@ -32,9 +45,9 @@ export function OverviewPageContent({
   hasOverview,
   overviewContent,
   overviewUpdatedAt,
-  overviewFromDate,
-  overviewToDate,
   overviewLookbackDays = 30,
+  hasJiraAccount = false,
+  hasGithubAccount = false,
 }: OverviewPageContentProps) {
   const router = useRouter()
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false)
@@ -65,117 +78,104 @@ export function OverviewPageContent({
   return (
     <PageContainer>
       <PageHeader
-        title='AI Overview'
+        title='AI Insights'
         titleIcon={Sparkles}
-        subtitle={`AI-generated professional overview for ${personName}`}
+        subtitle={`AI-generated insights for ${personName}`}
         actions={
-          <div className='flex items-center gap-2'>
-            {canGenerate && (
-              <Button
-                variant='outline'
-                onClick={() => setIsGenerateModalOpen(true)}
-              >
-                {hasOverview ? (
-                  <>
-                    <RefreshCw className='w-4 h-4 mr-2' />
-                    Regenerate
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className='w-4 h-4 mr-2' />
-                    Generate
-                  </>
-                )}
-              </Button>
-            )}
-            <Button asChild variant='outline'>
-              <Link
-                href={`/people/${personId}`}
-                className='flex items-center gap-2'
-              >
-                <ArrowLeft className='w-4 h-4' />
-                Back to Profile
-              </Link>
-            </Button>
-          </div>
+          <Button asChild variant='outline'>
+            <Link
+              href={`/people/${personId}`}
+              className='flex items-center gap-2'
+            >
+              <ArrowLeft className='w-4 h-4' />
+              Back to Profile
+            </Link>
+          </Button>
         }
       />
 
       <PageContent>
         <PageMain>
-          {!hasOverview ? (
-            <div className='text-center py-12 text-muted-foreground'>
-              <Sparkles className='w-12 h-12 mx-auto mb-4 opacity-50' />
-              <p className='text-lg font-medium mb-2'>
-                No AI overview generated yet
-              </p>
-              <p className='text-sm mb-6'>
-                Generate a comprehensive professional overview that includes
-                role, initiatives, tasks, and feedback highlights.
-              </p>
-              {canGenerate && (
-                <Button onClick={() => setIsGenerateModalOpen(true)}>
-                  <Sparkles className='w-4 h-4 mr-2' />
-                  Generate Overview
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className='space-y-6'>
-              {/* Overview content */}
-              <div className='bg-card border rounded-lg p-6'>
+          <div className='flex gap-lg flex-wrap space-y-6'>
+            {/* Person Overview Section */}
+            <PageSection
+              className='flex-1 min-w-[300px] gap-lg'
+              header={
+                <SectionHeader
+                  icon={FileText}
+                  title='Person Overview'
+                  description={
+                    overviewUpdatedAt
+                      ? `Generated: ${new Date(overviewUpdatedAt).toLocaleString()}`
+                      : undefined
+                  }
+                  action={
+                    <div className='flex items-center gap-1'>
+                      {hasOverview && (
+                        <Button
+                          variant='outline'
+                          size='sm'
+                          onClick={handleCopy}
+                          title='Copy to clipboard'
+                        >
+                          {isCopied ? (
+                            <Check className='w-4 h-4' />
+                          ) : (
+                            <Copy className='w-4 h-4' />
+                          )}
+                        </Button>
+                      )}
+                      {canGenerate && (
+                        <Button
+                          variant='outline'
+                          size='sm'
+                          onClick={() => setIsGenerateModalOpen(true)}
+                          title={
+                            hasOverview
+                              ? 'Regenerate Overview'
+                              : 'Generate Overview'
+                          }
+                        >
+                          {hasOverview ? (
+                            <RefreshCw className='w-4 h-4' />
+                          ) : (
+                            <Sparkles className='w-4 h-4' />
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  }
+                />
+              }
+            >
+              {!hasOverview ? (
+                <div className='text-sm text-muted-foreground'>
+                  Click the button to generate a factual overview of this
+                  person&apos;s role, initiatives, tasks, and feedback.
+                </div>
+              ) : (
                 <div className='prose prose-sm dark:prose-invert max-w-none'>
                   <div className='text-sm whitespace-pre-wrap leading-relaxed'>
                     <Markdown>{overviewContent}</Markdown>
                   </div>
                 </div>
-              </div>
+              )}
+            </PageSection>
 
-              {/* Metadata and actions */}
-              <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 text-xs text-muted-foreground'>
-                <div className='space-y-1'>
-                  {overviewUpdatedAt && (
-                    <div>
-                      Last updated:{' '}
-                      {new Date(overviewUpdatedAt).toLocaleDateString()} at{' '}
-                      {new Date(overviewUpdatedAt).toLocaleTimeString()}
-                    </div>
-                  )}
-                  {overviewFromDate && overviewToDate ? (
-                    <div>
-                      Period: {new Date(overviewFromDate).toLocaleDateString()}{' '}
-                      - {new Date(overviewToDate).toLocaleDateString()} (
-                      {overviewLookbackDays} day
-                      {overviewLookbackDays !== 1 ? 's' : ''})
-                    </div>
-                  ) : (
-                    <div>
-                      Lookback period: Last {overviewLookbackDays} day
-                      {overviewLookbackDays !== 1 ? 's' : ''}
-                    </div>
-                  )}
-                </div>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  onClick={handleCopy}
-                  className='flex items-center gap-2'
-                >
-                  {isCopied ? (
-                    <>
-                      <Check className='w-4 h-4' />
-                      Copied
-                    </>
-                  ) : (
-                    <>
-                      <Copy className='w-4 h-4' />
-                      Copy to Clipboard
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          )}
+            {/* Integration Activity AI Sections */}
+            {hasJiraAccount && (
+              <JiraActivityAISection
+                personId={personId}
+                lookbackDays={overviewLookbackDays}
+              />
+            )}
+            {hasGithubAccount && (
+              <GithubActivityAISection
+                personId={personId}
+                lookbackDays={overviewLookbackDays}
+              />
+            )}
+          </div>
         </PageMain>
       </PageContent>
 

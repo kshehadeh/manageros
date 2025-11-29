@@ -6,6 +6,7 @@ import { Geist_Mono as GeistMono } from 'next/font/google'
 import { ClerkPricingCard } from '@/components/marketing/clerk-pricing-card'
 import { getClerkBillingPlans } from '@/lib/clerk'
 import type { ClerkCommercePlan } from '@/lib/clerk-types'
+import { ArrowRight } from 'lucide-react'
 
 const geistMono = GeistMono({
   subsets: ['latin'],
@@ -22,7 +23,6 @@ export const metadata: Metadata = {
  * Transform a Clerk plan into props for ClerkPricingCard
  */
 function transformPlanToCardProps(plan: ClerkCommercePlan, index: number) {
-  const isFree = plan.fee.amount === 0
   const hasFreeTrial =
     plan.free_trial_enabled && plan.free_trial_days && plan.free_trial_days > 0
 
@@ -35,13 +35,7 @@ function transformPlanToCardProps(plan: ClerkCommercePlan, index: number) {
     period: plan.is_recurring ? '/month' : undefined,
     description: plan.description ?? '',
     features,
-    cta: isFree
-      ? 'Get started'
-      : hasFreeTrial
-        ? `Start ${plan.free_trial_days}-day trial`
-        : 'Subscribe',
-    planId: isFree ? undefined : plan.id,
-    isFree,
+    planId: plan.id,
     popular: index === 1, // Mark second plan as popular (typically the paid plan)
     trialBadge: hasFreeTrial
       ? `${plan.free_trial_days}-day free trial`
@@ -75,14 +69,27 @@ export default async function PricingPage() {
         </FadeInOnScroll>
         <FadeInOnScroll delay={200}>
           <p className='mx-auto text-base text-white/70 sm:text-lg'>
-            Start free with Solo, or unlock unlimited scale with Orchestrator.
-            All plans include our full suite of engineering management tools.
+            Plans are tied to organizations, not individual users. You can sign
+            up and create an organization first, then choose a plan later. All
+            team members in your organization will share the same plan.{' '}
           </p>
+        </FadeInOnScroll>
+        <FadeInOnScroll delay={300}>
+          <Button
+            asChild
+            size='lg'
+            className='mx-auto w-fit bg-primary text-primary-foreground shadow-[0_18px_40px_rgba(79,70,229,0.45)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/90'
+          >
+            <Link href='/auth/signup'>
+              Get started free
+              <ArrowRight className='ml-2 h-4 w-4' />
+            </Link>
+          </Button>
         </FadeInOnScroll>
       </section>
 
       <section className='mx-auto max-w-6xl px-6 pb-24 sm:px-8'>
-        <FadeInOnScroll delay={300}>
+        <FadeInOnScroll delay={350}>
           <div className='grid gap-8 md:grid-cols-2'>
             {pricingTiers.map(tier => (
               <ClerkPricingCard key={tier.name} {...tier} />
@@ -109,7 +116,7 @@ export default async function PricingPage() {
               variant='outline'
               className='border-white/20 bg-white/10 text-white/80 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/40 hover:text-white'
             >
-              <Link href='mailto:hello@manageros.com'>Contact us</Link>
+              <Link href='mailto:hello@mpath.dev'>Contact us</Link>
             </Button>
           </div>
         </FadeInOnScroll>

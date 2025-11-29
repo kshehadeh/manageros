@@ -15,7 +15,6 @@ import {
   ListTodo,
   MessageCircle,
   Handshake,
-  Eye,
   Edit,
   Link as LinkIcon,
 } from 'lucide-react'
@@ -73,10 +72,6 @@ export function PersonActionsDropdown({
   }
 
   const canCreateOneOnOne = currentPersonId && currentPersonId !== person.id
-
-  const canCreateFeedbackCampaign =
-    person.managerId === currentPersonId ||
-    (currentPersonId === person.id && (person.reports?.length ?? 0) > 0)
 
   return (
     <>
@@ -152,26 +147,6 @@ export function PersonActionsDropdown({
                 Add a 1:1
               </Link>
             )}
-
-            {canCreateFeedbackCampaign && (
-              <Link
-                href={`/people/${person.id}/feedback-campaigns`}
-                className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-                onClick={close}
-              >
-                <MessageCircle className='w-4 h-4' />
-                Feedback 360
-              </Link>
-            )}
-
-            <Link
-              href='/initiatives'
-              className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-              onClick={close}
-            >
-              <Eye className='w-4 h-4' />
-              View All Initiatives
-            </Link>
 
             {isAdmin && (
               <button

@@ -47,6 +47,10 @@ export default async function OverviewPage({ params }: OverviewPageProps) {
     console.error('Error fetching overview:', error)
   }
 
+  // Check if person has integration accounts
+  const hasJiraAccount = !!('jiraAccount' in person && person.jiraAccount)
+  const hasGithubAccount = !!('githubAccount' in person && person.githubAccount)
+
   return (
     <OverviewBreadcrumbClient personName={person.name} personId={person.id}>
       <OverviewPageContent
@@ -59,6 +63,8 @@ export default async function OverviewPage({ params }: OverviewPageProps) {
         overviewFromDate={overview?.fromDate}
         overviewToDate={overview?.toDate}
         overviewLookbackDays={overview?.lookbackDays}
+        hasJiraAccount={hasJiraAccount}
+        hasGithubAccount={hasGithubAccount}
       />
     </OverviewBreadcrumbClient>
   )
