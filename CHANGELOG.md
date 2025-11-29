@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.17.0](/compare/v1.16.0...v1.17.0) (2025-11-29)
+
+### Features
+
+- **people:** Enhance person overview functionality with AI-generated insights and integration activity. Add support for Jira and GitHub activity summaries, update schema for synopsis types, and improve UI components for feedback campaigns and person actions. Introduce new sections for displaying integration data in person profiles. 43d71ad
+
 # [1.16.0](/compare/v1.15.0...v1.16.0) (2025-11-28)
 
 ### Features
