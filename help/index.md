@@ -1,7 +1,7 @@
 ---
-id: getting-started
-title: Getting Started with mpath
-category: Getting Started
+id: "getting-started"
+title: "Getting Started with mpath"
+category: "Getting Started"
 ---
 
 # Welcome to mpath
