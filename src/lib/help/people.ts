@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-12-01T10:26:59.568Z
+ * Generated on: 2025-12-01T10:53:13.366Z
  */
 
 export interface HelpContent {
@@ -26,8 +26,8 @@ The People page is your **source of truth for who is in your organization, how t
 
 It’s where you go to answer questions like:
 
-- “Who owns this initiative?”  
-- “Who does this person report to?”  
+- “Who owns this initiative?”
+- “Who does this person report to?”
 - “What is this engineer currently involved in?”
 
 ---
@@ -166,9 +166,9 @@ This ensures that everything else in mpath (initiatives, tasks, meetings, report
 
 ## Related Topics
 
-- \`people-hierarchy\` – understanding and navigating the org chart  
-- \`direct-reports\` – focused view for managers and their teams  
-- \`one-on-ones\` – running high‑quality 1:1s grounded in people data  
+- \`people-hierarchy\` – understanding and navigating the org chart
+- \`direct-reports\` – focused view for managers and their teams
+- \`one-on-ones\` – running high‑quality 1:1s grounded in people data
 - \`job-roles\` – how roles, levels, and domains are modeled in mpath
 `,
 }

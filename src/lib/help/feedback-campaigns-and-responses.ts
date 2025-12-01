@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-12-01T10:31:05.043Z
+ * Generated on: 2025-12-01T10:53:13.366Z
  */
 
 export interface HelpContent {
@@ -192,7 +192,7 @@ Feedback results can inform:
 - **Succession and promotion** decisions.
 - **Team‑level interventions** (training, coaching, process changes).
 
-Use feedback as *one input* alongside:
+Use feedback as _one input_ alongside:
 
 - Outcomes and impact (initiatives, tasks).
 - Your own observations.

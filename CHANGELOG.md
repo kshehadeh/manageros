@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.19.0](/compare/v1.18.0...v1.19.0) (2025-12-01)
+
+### Features
+
+- **help:** Introduce a comprehensive help system with structured content and navigation. Implement help layout, markdown rendering, and dynamic routing for help topics. Enhance user experience with a dedicated help header and improved integration with existing components. 77fc101
+
 # [1.18.0](/compare/v1.17.0...v1.18.0) (2025-11-29)
 
 ### Bug Fixes

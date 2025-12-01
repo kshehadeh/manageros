@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-12-01T10:25:24.279Z
+ * Generated on: 2025-12-01T10:53:13.365Z
  */
 
 export interface HelpContent {
@@ -41,7 +41,7 @@ mpath separates **meetings** (the series or one‑time event) from **meeting ins
 
 Think of it as:
 
-- **Meeting** → “Our weekly platform sync, every Monday at 10:00.”  
+- **Meeting** → “Our weekly platform sync, every Monday at 10:00.”
 - **Instance** → “This Monday’s platform sync, where we discussed Q3 incidents.”
 
 ---
@@ -166,9 +166,9 @@ For each occurrence:
 
 ## Related Topics
 
-- \`meetings\` – creating and managing meetings/series  
-- \`meeting-instances\` – managing individual occurrences  
-- \`initiatives\` – tying meetings to strategic work  
+- \`meetings\` – creating and managing meetings/series
+- \`meeting-instances\` – managing individual occurrences
+- \`initiatives\` – tying meetings to strategic work
 - \`task-status\` / \`task-priorities\` – managing the tasks that come out of meetings
 
 ## Meeting Types

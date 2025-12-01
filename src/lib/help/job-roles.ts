@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-12-01T10:26:59.568Z
+ * Generated on: 2025-12-01T10:53:13.367Z
  */
 
 export interface HelpContent {
@@ -162,9 +162,10 @@ Use descriptions to capture:
 
 ## Related Topics
 
-- \`people\` – how people, roles, and teams are surfaced in the UI  
-- \`people-hierarchy\` – how reporting lines and structure are visualized  
+- \`people\` – how people, roles, and teams are surfaced in the UI
+- \`people-hierarchy\` – how reporting lines and structure are visualized
 - \`direct-reports\` – using roles and hierarchy when managing your team
+
 # Job Roles and Organizational Structure
 
 ## Overview

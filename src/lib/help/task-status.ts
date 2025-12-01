@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-12-01T10:22:41.742Z
+ * Generated on: 2025-12-01T10:53:13.368Z
  */
 
 export interface HelpContent {
@@ -123,10 +123,10 @@ This helps keep history accurate without pretending everything “finished”.
 ### During standups and check‑ins
 
 - Start by scanning **Blocked** tasks:
-  - “What needs unblocking today?”  
+  - “What needs unblocking today?”
   - “Who can help remove these blockers?”
 - Then look at **Doing**:
-  - “What has been in Doing for too long?”  
+  - “What has been in Doing for too long?”
   - “Should we split any of these into smaller tasks?”
 - Use **To Do** to decide **what to pull next**, aligning with priorities.
 
@@ -143,10 +143,10 @@ This helps keep history accurate without pretending everything “finished”.
 
 ### Example: Healthy flow
 
-- New request comes in → task is created in **To Do**  
-- Engineer starts work → moves task to **Doing**  
-- Waiting on design sign‑off → moves to **Blocked** with a note  
-- Design approved → moves back to **Doing**  
+- New request comes in → task is created in **To Do**
+- Engineer starts work → moves task to **Doing**
+- Waiting on design sign‑off → moves to **Blocked** with a note
+- Design approved → moves back to **Doing**
 - Shipped and verified in production → moves to **Done**
 
 ### Example: Avoiding “everything is Doing”
@@ -166,6 +166,6 @@ Do this:
 - **Update status as part of your working habit**, not just before reviews.
 - **Prefer Blocked over silent stagnation** – it invites help.
 - **Use Dropped intentionally** to reflect real decisions.
-- **Pair status with priority** (see \`task-priorities\`) for a full picture of *what* to do and *when*.
+- **Pair status with priority** (see \`task-priorities\`) for a full picture of _what_ to do and _when_.
 `,
 }

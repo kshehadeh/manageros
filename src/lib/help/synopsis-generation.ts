@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-12-01T10:31:05.046Z
+ * Generated on: 2025-12-01T10:53:13.365Z
  */
 
 export interface HelpContent {
@@ -168,14 +168,14 @@ Synopses are only as good as the signals they see:
 
 ## Troubleshooting and Tips
 
-- **Synopsis feels incomplete?**  
+- **Synopsis feels incomplete?**
   - Check that tasks, GitHub, and Jira are linked and up‑to‑date.
   - Try a longer date range.
 
-- **Tone doesn’t match your style?**  
+- **Tone doesn’t match your style?**
   - Edit the text; treat it like a draft.
 
-- **Performance slow for large ranges?**  
+- **Performance slow for large ranges?**
   - Narrow the date range or temporarily deselect some data sources.
 
 Used thoughtfully, synopses can significantly reduce **manager prep time** while improving the **quality of feedback and discussions** for everyone involved.

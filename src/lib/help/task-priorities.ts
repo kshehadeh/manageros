@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-12-01T10:22:41.742Z
+ * Generated on: 2025-12-01T10:53:13.368Z
  */
 
 export interface HelpContent {
@@ -102,12 +102,12 @@ Low priority tasks are great for:
 
 ### During planning
 
-1. Start from initiatives and outcomes.  
+1. Start from initiatives and outcomes.
 2. For each task, ask:
-   - “Does this directly impact our current commitments?”  
+   - “Does this directly impact our current commitments?”
    - “What happens if we don’t do this this cycle?”
 3. Assign:
-   - **High** to the few tasks that *must* move to hit those commitments.
+   - **High** to the few tasks that _must_ move to hit those commitments.
    - **Medium** to the rest of the planned work.
    - **Low** to nice‑to‑haves and future ideas.
 
@@ -115,8 +115,8 @@ Low priority tasks are great for:
 
 When someone has capacity:
 
-1. Look for **High** tasks in **To Do** first.  
-2. If there are none, pull a **Medium** that aligns with current initiatives.  
+1. Look for **High** tasks in **To Do** first.
+2. If there are none, pull a **Medium** that aligns with current initiatives.
 3. Only pull **Low** when High/Medium are under control.
 
 When something new comes in:
@@ -136,7 +136,7 @@ When something new comes in:
 
 ### Example: Quarterly initiative planning
 
-- Initiative: “Improve sign‑up conversion”  
+- Initiative: “Improve sign‑up conversion”
 - High priority tasks:
   - A/B test new pricing page
   - Fix a major bug in the signup flow

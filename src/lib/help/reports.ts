@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-12-01T10:35:02.536Z
+ * Generated on: 2025-12-01T10:53:13.364Z
  */
 
 export interface HelpContent {
@@ -28,8 +28,8 @@ Reports in mpath help you **step back from the day‑to‑day and see patterns**
 
 Use them when you want to answer questions like:
 
-- “What has this person actually been working on this quarter?”  
-- “Where is our team spending most of its energy?”  
+- “What has this person actually been working on this quarter?”
+- “Where is our team spending most of its energy?”
 - “What stories can I bring into reviews and planning?”
 
 ---
@@ -152,9 +152,9 @@ For more detail on specific access rules, see the individual report topics.
 
 ## Related Topics
 
-- \`person-overview-report\` – detailed, data‑heavy person analysis  
-- \`ai-synopsis-report\` – AI‑generated person summaries  
-- \`synopsis-generation\` – how synopses work outside the reports system  
+- \`person-overview-report\` – detailed, data‑heavy person analysis
+- \`ai-synopsis-report\` – AI‑generated person summaries
+- \`synopsis-generation\` – how synopses work outside the reports system
 - \`feedback-campaigns\` – how to collect structured input that can flow into reports
 `,
 }

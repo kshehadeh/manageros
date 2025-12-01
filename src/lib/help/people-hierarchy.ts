@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-12-01T10:26:59.567Z
+ * Generated on: 2025-12-01T10:53:13.366Z
  */
 
 export interface HelpContent {
@@ -26,8 +26,8 @@ The People Hierarchy view is your **org chart** inside mpath. It shows how peopl
 
 Use it when you want to answer questions like:
 
-- “Who does this person report to?”  
-- “Who is on this team?”  
+- “Who does this person report to?”
+- “Who is on this team?”
 - “What does this manager’s span of control look like?”
 
 ---

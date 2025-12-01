@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-12-01T10:38:40.890Z
+ * Generated on: 2025-12-01T10:53:13.367Z
  */
 
 export interface HelpContent {
@@ -24,7 +24,7 @@ export const helpContent: HelpContent = {
 
 GitHub integration brings **development work into the same place as people, initiatives, and tasks**.
 
-It helps you see not just *that* work is happening, but **where and how** engineers are contributing in code.
+It helps you see not just _that_ work is happening, but **where and how** engineers are contributing in code.
 
 ---
 

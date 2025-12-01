@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-12-01T10:25:24.279Z
+ * Generated on: 2025-12-01T10:53:13.365Z
  */
 
 export interface HelpContent {
@@ -120,7 +120,7 @@ This helps you see who is expected and who has opted out.
 ### 3. Connect meetings to real work
 
 1. From the meeting page, **associate**:
-   - Relevant **teams**  
+   - Relevant **teams**
    - **Initiatives** and **objectives** being discussed
 2. Use these associations to:
    - Jump from a meeting to the initiative it supports

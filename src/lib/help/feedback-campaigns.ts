@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-12-01T10:31:05.046Z
+ * Generated on: 2025-12-01T10:53:13.366Z
  */
 
 export interface HelpContent {
@@ -109,8 +109,8 @@ They are:
 
 Before you create anything in the UI, answer:
 
-- “What decision will this feedback inform?”  
-- “Who needs to receive feedback?”  
+- “What decision will this feedback inform?”
+- “Who needs to receive feedback?”
 - “Who should be invited to give it?”
 
 This keeps your campaign focused and respectful of people’s time.

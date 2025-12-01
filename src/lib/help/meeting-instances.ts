@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-12-01T10:25:24.279Z
+ * Generated on: 2025-12-01T10:53:13.365Z
  */
 
 export interface HelpContent {
@@ -152,6 +152,5 @@ During or after the meeting:
 - **Record attendance promptly** after each session.
 - **Cancel instances that are no longer needed** to keep schedules clean.
 - Use instances as the **source of truth** when you need to remember “What did we decide last time?”
-
 `,
 }
