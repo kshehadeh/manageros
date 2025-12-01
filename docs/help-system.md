@@ -52,7 +52,6 @@ A wrapper component that adds a help icon to any existing content.
 
 ```tsx
 import { HelpWrapper } from '@/components/help-icon'
-
 ;<HelpWrapper helpId='people-hierarchy' position='top-right'>
   <div className='p-4 border rounded'>
     <h3>Team Structure</h3>
@@ -87,6 +86,82 @@ import { HelpWrapper } from '@/components/help-icon'
 ## Help Content
 
 Help content is now stored as individual markdown files in the `/help` directory, making it much easier to maintain and edit.
+
+At the **content level**, each topic should be:
+
+- **Benefit-focused** – explain why a manager should care, not just what the UI does
+- **How-to oriented** – show step‑by‑step flows for common tasks
+- **Grounded in examples** – at least one concrete scenario per topic
+
+### Standard Topic Structure
+
+Every help topic should follow this structure (adapt to the feature as needed):
+
+1. **Overview**
+   - What this feature is and who it is for.
+2. **Why it matters / Benefits**
+   - 3–5 concrete outcomes or problems it solves.
+3. **Key Concepts**
+   - Short explanations of core terms used in the UI.
+4. **How to Use (Step‑by‑Step)**
+   - Sequential steps for the main workflows.
+5. **Examples & Best Practices**
+   - 2–4 short scenarios or tips.
+6. **Related Topics**
+   - Pointers to other help IDs that are commonly used together.
+
+### Area‑Level Templates
+
+To keep content focused, each area has a slightly different lens:
+
+- **Tasks & Projects**
+  - Emphasize: prioritization, status, daily workflow for engineers and managers.
+  - Answer questions like:
+    - “How do I use tasks to run my week?”
+    - “How should I combine initiatives, objectives, and tasks?”
+    - “How do status and priority interact in planning?”
+
+- **People & Teams**
+  - Emphasize: coaching, reporting lines, people ops flows.
+  - Answer questions like:
+    - “How do I understand someone’s reporting chain?”
+    - “How do I see all the work and feedback around a person or team?”
+    - “How does this help with performance and growth conversations?”
+
+- **Meetings & Communication**
+  - Emphasize: preparation, follow‑ups, and cadence.
+  - Answer questions like:
+    - “How do I prepare quickly for a 1:1 or review?”
+    - “How do meetings connect back to initiatives and tasks?”
+    - “What should a good recurring meeting workflow look like in mpath?”
+
+- **Feedback & Development**
+  - Emphasize: growth loops, campaigns, and closing the loop.
+  - Answer questions like:
+    - “When should I use a feedback campaign vs ad‑hoc feedback?”
+    - “How do I interpret and act on feedback over time?”
+    - “How does feedback show up in people and meeting flows?”
+
+- **Reports & Analytics**
+  - Emphasize: when to run which report and how to interpret it.
+  - Answer questions like:
+    - “Which report should I use for which question?”
+    - “How do I read this report and what actions does it suggest?”
+    - “How often should I revisit this report?”
+
+- **Getting Started / Keyboard Shortcuts / Accounts**
+  - Emphasize: quick wins, navigation, and setup.
+  - Answer questions like:
+    - “What are the fastest ways to get value in the first week?”
+    - “How do I move around without hunting through menus?”
+    - “How do accounts, organizations, and subscriptions relate?”
+
+- **Integrations (GitHub, Jira, etc.)**
+  - Emphasize: setup, expected outcomes, and troubleshooting basics.
+  - Answer questions like:
+    - “What data does this integration bring into mpath?”
+    - “How does this change what I see in initiatives, tasks, or people?”
+    - “What should I check if data doesn’t look right?”
 
 ### File Structure
 

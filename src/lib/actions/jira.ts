@@ -32,10 +32,13 @@ export async function saveJiraCredentials(formData: {
     baseUrl: formData.jiraBaseUrl,
   })
 
-  const isConnected = await jiraService.testConnection()
-  if (!isConnected) {
+  try {
+    await jiraService.testConnection()
+  } catch (error) {
     throw new Error(
-      'Failed to connect to Jira. Please check your credentials and URL.'
+      error instanceof Error
+        ? error.message
+        : 'Failed to connect to Jira. Please check your credentials and URL.'
     )
   }
 

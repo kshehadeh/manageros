@@ -6,31 +6,143 @@ category: Tasks & Projects
 
 # Task Priorities
 
-Task priorities help you and your team focus on what matters most. mpath uses a simple but effective priority system:
+Task priorities tell your team **what should move first** when time and attention are limited.
+
+Used consistently, they prevent everything from feeling “urgent” and make trade‑offs explicit.
+
+---
+
+## Overview
+
+Each task in mpath has a priority that answers:
+
+- **High** – “We need this to move now.”
+- **Medium** – “Important, should happen soon.”
+- **Low** – “Valuable, but okay to slip if needed.”
+
+Status (`To Do`, `Doing`, etc.) tells you **where** work is.  
+Priority tells you **how strongly you should pull it next**.
+
+---
+
+## Why Priorities Matter (Benefits)
+
+- **Aligns the team on what’s truly important**  
+  Engineers don’t have to guess which of 10 tasks to do next.
+
+- **Helps with realistic planning**  
+  When time is tight, you can drop or move **Low** items without derailing outcomes.
+
+- **Supports clear stakeholder conversations**  
+  You can point to a set of **High** items and say “these are the commitments.”
+
+- **Reduces decision fatigue**  
+  A small, meaningful set of priorities avoids endless sorting and re‑sorting.
+
+---
 
 ## Priority Levels
 
 ### 🔴 High Priority
 
-- **Critical tasks** that need immediate attention
-- **Deadline-driven** work with tight timelines
-- **Blocking issues** that prevent other work
+Reserve **High** for a **small set of work that truly needs to move now**:
+
+- Critical work to hit a near‑term deadline
+- Tasks blocking other teams or initiatives
+- Incident follow‑ups that meaningfully reduce risk
+
+Best practices:
+
+- Keep **High** items **visible and few** (typically 3–5 per person or team).
+- Review them in every standup or planning session.
 
 ### 🟡 Medium Priority
 
-- **Important tasks** that should be completed soon
-- **Regular work** that contributes to goals
-- **Supporting activities** for high-priority items
+Use **Medium** for work that is **important but not immediately urgent**:
+
+- Regular feature work tied to initiatives
+- Enhancements that improve user experience or productivity
+- Follow‑ups that should happen this cycle but not necessarily today
+
+These are often your **default** tasks for the current sprint or week.
 
 ### 🟢 Low Priority
 
-- **Nice-to-have** tasks when time permits
-- **Future planning** and preparation work
-- **Optional improvements** and enhancements
+Use **Low** for **valuable but easily deferred** work:
 
-## Best Practices
+- Nice‑to‑have improvements
+- Experiments or ideas you might explore later
+- Maintenance tasks that matter but won’t hurt if delayed
 
-- **Limit high-priority tasks** to 3-5 items maximum
-- **Review priorities weekly** and adjust as needed
-- **Communicate changes** to stakeholders when priorities shift
-- **Use deadlines** to help determine priority levels
+Low priority tasks are great for:
+
+- Filling small gaps in time
+- Onboarding new team members
+- “If we get to it” time at the end of a cycle
+
+---
+
+## How to Use Priorities in Practice
+
+### During planning
+
+1. Start from initiatives and outcomes.
+2. For each task, ask:
+   - “Does this directly impact our current commitments?”
+   - “What happens if we don’t do this this cycle?”
+3. Assign:
+   - **High** to the few tasks that _must_ move to hit those commitments.
+   - **Medium** to the rest of the planned work.
+   - **Low** to nice‑to‑haves and future ideas.
+
+### During execution
+
+When someone has capacity:
+
+1. Look for **High** tasks in **To Do** first.
+2. If there are none, pull a **Medium** that aligns with current initiatives.
+3. Only pull **Low** when High/Medium are under control.
+
+When something new comes in:
+
+- If it is more important than existing **High** items, mark it **High** and consider lowering or dropping something else.
+- If not, start it as **Medium** or **Low** and communicate clearly about timing.
+
+### When priorities change
+
+- Revisit priorities **weekly** or whenever plans shift.
+- Explicitly **downgrade or drop** items instead of leaving them marked **High** forever.
+- Use these changes as input into conversations about **capacity vs. demand**.
+
+---
+
+## Examples & Best Practices
+
+### Example: Quarterly initiative planning
+
+- Initiative: “Improve sign‑up conversion”
+- High priority tasks:
+  - A/B test new pricing page
+  - Fix a major bug in the signup flow
+- Medium priority tasks:
+  - Improve form validation messages
+  - Add a confirmation email tweak
+- Low priority tasks:
+  - Explore a new experiment idea for later
+
+### Example: Production incident follow‑up
+
+- High:
+  - Add missing alert for the failure path
+  - Patch the root cause in the hot path
+- Medium:
+  - Refactor related module for clarity
+- Low:
+  - Write a blogpost about the incident
+
+### Quick best practices
+
+- **Limit High** – if everything is High, nothing is.
+- **Pair priority with status** – focus on High + Doing / To Do first.
+- **Be explicit when you downgrade** – communicate to stakeholders when a task moves from High → Medium or Low.
+- **Use Low as a parking lot**, not a graveyard – review Low items regularly and either promote or drop them.

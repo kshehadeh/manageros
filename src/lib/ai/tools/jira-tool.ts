@@ -131,13 +131,8 @@ export const jiraTool = {
         credentials.jiraBaseUrl
       )
 
-      // Test connection
-      const isConnected = await jiraService.testConnection()
-      if (!isConnected) {
-        throw new Error(
-          'Failed to connect to Jira. Please check your credentials.'
-        )
-      }
+      // Test connection (throws on failure)
+      await jiraService.testConnection()
 
       // Use the JiraApiService to search for tickets
       const searchResult = await jiraService.searchTickets(

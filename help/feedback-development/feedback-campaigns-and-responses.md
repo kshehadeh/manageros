@@ -6,7 +6,205 @@ category: Feedback & Development
 
 # Feedback Campaigns and Responses
 
-Feedback campaigns provide a structured way to collect comprehensive feedback from multiple sources about team members, enabling 360-degree reviews, performance evaluations, and pulse surveys.
+Feedback campaigns provide a structured way to collect comprehensive feedback from multiple sources about team members, enabling 360‑degree reviews, performance evaluations, and pulse surveys.
+
+This topic focuses on **how campaigns are configured, how responses are collected, and how to interpret and use the results**.
+
+---
+
+## Setting Up Effective Campaigns
+
+### Basic configuration
+
+When creating or editing a campaign you can set:
+
+- **Campaign name** – descriptive title for the feedback cycle.
+- **Target person** – the individual receiving feedback.
+- **Template** – pre‑defined or custom question sets.
+- **Date range** – start and end dates for responses.
+- **Status** – `draft`, `active`, `completed`, or `cancelled`.
+
+Good defaults:
+
+- Start in **Draft** while you confirm participants and questions.
+- Move to **Active** once you’re ready to send invites.
+
+### Managing participants
+
+You control who is invited to respond:
+
+- Add an **invite list** of feedback providers.
+- Use **roles** to ensure a balanced mix:
+  - Manager(s)
+  - Peers and cross‑functional partners
+  - Direct reports
+  - External stakeholders (when relevant)
+- Decide if responses should be **anonymous** or identified.
+
+### Using templates
+
+Templates help you:
+
+- Reuse consistent **question sets** across cycles.
+- Mix **rating scales** with open‑ended questions.
+- Tailor questions to:
+  - Performance reviews
+  - 360s
+  - Pulse checks
+
+---
+
+## Collecting Responses
+
+### Invitations and reminders
+
+For each campaign you can:
+
+- Send **initial invite emails** with secure links to the form.
+- Send **reminder emails** to non‑responders while the campaign is active.
+- See, for each invitee:
+  - When invites and reminders were sent.
+  - Whether they have submitted a response.
+
+Tips:
+
+- Time invites so people have space to respond thoughtfully.
+- Use 1–2 reminders, not continual nudges.
+
+### The response experience
+
+Responders see:
+
+- A **user‑friendly**, mobile‑friendly form.
+- Progress indicators for longer surveys.
+- Clear messaging about whether responses are **anonymous**.
+
+Encourage:
+
+- **Specific examples** instead of vague statements.
+- A **balanced view** (strengths and growth areas).
+
+### Managing responses
+
+As responses come in you can:
+
+- Track completion in real time.
+- Prevent duplicates (one response per invite).
+- Handle anonymous responses appropriately.
+
+---
+
+## Analyzing Feedback
+
+### What data is captured
+
+Behind the scenes, responses include:
+
+- Ratings and text answers to each question.
+- **Timestamps** and metadata.
+- Participant identity (when not anonymous).
+- Campaign and target person context.
+
+### How to read the results
+
+Use the campaign detail views to:
+
+- Look at **rating distributions** and averages.
+- Review **open‑ended comments** for patterns.
+- Compare themes across respondent groups (e.g. peers vs. reports).
+
+When synthesizing:
+
+- Focus on **recurring themes**, not single comments.
+- Separate:
+  - Observations about **impact and behavior**.
+  - Suggestions about **style or preferences**.
+- Capture 3–5 key strengths and 2–3 focus areas.
+
+---
+
+## Privacy, Security, and Trust
+
+### Data protection
+
+Feedback data is:
+
+- Stored securely with **encryption**.
+- Governed by **role‑based access** controls.
+- Tracked via **audit trails** where required.
+
+Campaigns should be designed in line with your org’s privacy and HR policies.
+
+### Anonymity
+
+When you enable anonymity:
+
+- Individual responses are **de‑identified** in views shared with the recipient.
+- Reports may use **aggregated** data and minimum response thresholds.
+- You should avoid sharing highly identifying quotes without care.
+
+### Compliance
+
+mpath supports:
+
+- Data minimization and retention practices.
+- Rights to deletion and access where required (e.g. GDPR contexts).
+
+Always check with your HR/legal partners for org‑specific requirements.
+
+---
+
+## From Responses to Action
+
+### Designing follow‑up
+
+After a campaign closes:
+
+1. Summarize themes for each recipient.
+2. Share the summary in a **1:1 or performance conversation**.
+3. Co‑create:
+   - 1–3 focus areas.
+   - Concrete actions and support.
+   - Timeframes for revisiting progress.
+
+### Integrating with other systems
+
+Feedback results can inform:
+
+- **Performance reviews** and calibration.
+- **Goal setting** and development plans.
+- **Succession and promotion** decisions.
+- **Team‑level interventions** (training, coaching, process changes).
+
+Use feedback as _one input_ alongside:
+
+- Outcomes and impact (initiatives, tasks).
+- Your own observations.
+- Synopses and reports.
+
+---
+
+## Troubleshooting and Good Practices
+
+### If response rates are low
+
+- Re‑check:
+  - Timing (avoid peak load periods).
+  - Length and complexity of the survey.
+  - How clearly you communicated **why** the feedback matters.
+
+### If responses are low quality
+
+- Adjust templates to:
+  - Ask for **examples**.
+  - Focus on **specific situations**.
+  - Reduce overly generic questions.
+
+### Quick best practices
+
+- **Be transparent** – tell people how feedback will be used and who will see it.
+- **Close the loop** – share themes and actions with both recipients and, when appropriate, respondents.
+- **Use campaigns sparingly but meaningfully** – a few well‑run campaigns beat constant noise.
 
 ## Campaign Types
 

@@ -23,10 +23,13 @@ export async function saveGithubCredentials(formData: {
     pat: formData.githubPat,
   })
 
-  const isConnected = await githubService.testConnection()
-  if (!isConnected) {
+  try {
+    await githubService.testConnection()
+  } catch (error) {
     throw new Error(
-      'Failed to connect to GitHub. Please check your credentials.'
+      error instanceof Error
+        ? error.message
+        : 'Failed to connect to GitHub. Please check your credentials.'
     )
   }
 

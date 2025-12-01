@@ -6,20 +6,100 @@ category: People & Teams
 
 # People Hierarchy
 
-The people hierarchy shows the organizational structure of your team. This view helps you understand:
+The People Hierarchy view is your **org chart** inside mpath. It shows how people, teams, and reporting lines fit together.
 
-- **Reporting relationships** between team members
-- **Management structure** and who reports to whom
-- **Team composition** and organizational depth
+Use it when you want to answer questions like:
 
-## Key Features
+- “Who does this person report to?”
+- “Who is on this team?”
+- “What does this manager’s span of control look like?”
 
-- **Visual representation** of the org chart
-- **Interactive navigation** to individual profiles
-- **Role-based access** to different levels of the hierarchy
+---
 
-## Best Practices
+## Overview
 
-- Keep the hierarchy updated as team changes occur
-- Use clear role titles and descriptions
-- Ensure proper reporting relationships are maintained
+The hierarchy view gives you a **visual representation** of:
+
+- Reporting relationships (manager → direct reports)
+- Team and org structure
+- How people move up and down the chain
+
+From the chart, you can jump into:
+
+- Individual **person profiles**
+- **Teams** and their members
+
+---
+
+## Why the Hierarchy Matters (Benefits)
+
+- **Faster onboarding and context sharing**  
+  New managers and ICs can quickly see “who’s who” without digging through docs.
+
+- **Better planning and staffing decisions**  
+  Understand spans of control and team sizes when adding or moving people.
+
+- **Clearer communication paths**  
+  Know who to involve when initiatives or incidents cross teams.
+
+- **A single source of truth for structure**  
+  When properly maintained, this replaces scattered org diagrams.
+
+---
+
+## How to Use the Hierarchy View
+
+### 1. Navigate the org
+
+- Start from a known person (e.g. yourself or your manager).
+- Move **up** to see your leadership chain.
+- Move **down** to see teams and sub‑teams.
+
+This is especially helpful in:
+
+- Large organizations
+- Matrixed environments with many teams
+
+### 2. Prepare for cross‑team work
+
+When working on cross‑team initiatives:
+
+- Use the hierarchy to:
+  - Identify managers and leads for involved teams.
+  - Understand who may need to be consulted or informed.
+- Combine with **People** and **Initiatives** views to see:
+  - Who owns which work
+  - Where dependencies live
+
+### 3. Keep structure accurate
+
+For admins and people ops:
+
+- Update reporting lines when:
+  - People move between teams
+  - New teams are created or merged
+  - Managers change
+- Ensure job roles (`job-roles`) and reporting lines tell a **consistent story**.
+
+---
+
+## Examples & Best Practices
+
+### Example: New manager onboarding
+
+- A new EM joins and needs to understand the area quickly.
+- Use the hierarchy to:
+  - See all direct and indirect reports.
+  - Understand how their area fits into the broader org.
+
+### Example: Planning a reorg
+
+- Use the chart to:
+  - Visualize current structure and spans of control.
+  - Simulate new shapes before implementing changes.
+
+### Quick best practices
+
+- **Keep the hierarchy up to date** – outdated org charts create confusion quickly.
+- **Use clear and consistent role titles** so the chart is meaningful at a glance.
+- **Review structure periodically** (e.g. quarterly) to make sure it still matches how work actually flows.

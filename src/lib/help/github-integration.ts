@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-10-25T08:06:22.008Z
+ * Generated on: 2025-12-01T10:38:40.890Z
  */
 
 export interface HelpContent {
@@ -22,114 +22,89 @@ export const helpContent: HelpContent = {
   category: 'Integrations',
   content: `# GitHub Integration
 
-mpath integrates with GitHub to provide visibility into your team's development work, track pull requests, and link team members to their GitHub accounts.
+GitHub integration brings **development work into the same place as people, initiatives, and tasks**.
 
-## Setup Process
+It helps you see not just *that* work is happening, but **where and how** engineers are contributing in code.
 
-### 1. Configure GitHub Credentials
+---
 
-- **Go to Settings** → GitHub Integration
-- **Enter your GitHub username** and Personal Access Token (PAT)
-- **Test the connection** to verify access
-- **Save credentials** securely (PAT is encrypted)
+## What You Get from the GitHub Integration
 
-### 2. Link Team Members
+With GitHub connected you can:
 
-- **Navigate to a person's profile**
-- **Click "Link GitHub Account"**
-- **Search for their GitHub username**
-- **Verify and confirm** the account link
+- See **recent pull requests** for linked people directly in mpath.
+- Understand how work on **initiatives and tasks** shows up in code.
+- Use PR activity as input into:
+  - Performance reviews and promotion discussions.
+  - Weekly team reviews and incident post‑mortems.
 
-### 3. View GitHub Activity
+The goal is not to create a separate “metrics dashboard”, but to **add GitHub context to the workflows you already use**.
 
-- **Pull request tracking** for linked accounts
-- **Recent activity** and contribution history
-- **Repository visibility** based on permissions
+---
 
-## Features
+## How to Set It Up (Step‑by‑Step)
 
-### Pull Request Tracking
+### 1. Configure org‑level GitHub settings
 
-- **View recent pull requests** for each team member
-- **Track PR status** (open, merged, closed)
-- **Monitor contribution patterns** and activity levels
-- **Filter by date range** (default: last 30 days)
+1. Go to **Settings → GitHub Integration**.
+2. Enter the required GitHub credentials (for your org or service account):
+   - GitHub username (or app identity).
+   - Personal Access Token (PAT) or app token with appropriate scopes.
+3. Test the connection and save.
 
-### Account Linking
+> Use the minimum required scopes and prefer fine‑grained tokens where possible.
 
-- **Secure GitHub account association** with mpath profiles
-- **Automatic profile matching** by username
-- **Display name and email** synchronization
-- **Easy unlinking** when needed
+### 2. Link people to their GitHub accounts
 
-### Work Activity Integration
+1. Open a person’s profile in mpath.
+2. Use the **“Link GitHub Account”** action.
+3. Search or enter their GitHub username.
+4. Confirm the match.
 
-- **GitHub PRs** appear in work activity summaries
-- **Contribution tracking** for performance reviews
-- **Development metrics** and productivity insights
+Once linked:
 
-## GitHub Personal Access Token Setup
+- Their PR activity can appear in:
+  - Person profiles.
+  - Initiative and report views (e.g. Person Overview, AI Synopsis).
 
-### Creating a PAT
+---
 
-1. **Go to GitHub Settings** → Developer settings → Personal access tokens
-2. **Click "Generate new token (classic)"**
-3. **Select scopes:**
-   - \`repo\` - Full control of private repositories
-   - \`read:user\` - Read user profile data
-4. **Generate and copy** the token immediately
-5. **Enter in mpath** settings
+## How Engineers and Managers Use It Day‑to‑Day
 
-### Required Permissions
+### For engineers
 
-- **Repository access** - To fetch pull request data
-- **User profile access** - To verify account information
-- **Organization access** - If working with organization repos
+- See your own **recent PRs** alongside tasks and initiatives.
+- Use this context in 1:1s and reviews to:
+  - Recall which pieces of work shipped.
+  - Talk about collaboration (reviews, cross‑repo work).
 
-## Best Practices
+### For managers and leads
 
-### Security
+- When looking at a person or initiative:
+  - See **where code is landing** (repos, services).
+  - Understand the balance between **feature work, maintenance, and incident‑driven work**.
+- Use GitHub data as:
+  - One input to performance discussions (not the only one).
+  - A way to recognize invisible work like reviews and refactors.
 
-- **Use fine-grained tokens** when possible
-- **Rotate tokens regularly** for security
-- **Limit token scope** to minimum required permissions
-- **Never share tokens** in plain text
+---
 
-### Team Management
+## Security & Best Practices
 
-- **Link accounts proactively** for new team members
-- **Verify permissions** before linking accounts
-- **Update links** when team members change GitHub usernames
-- **Unlink accounts** for departed team members
+- **Keep tokens scoped and rotated**:
+  - Use fine‑grained PATs or app‑based integrations where possible.
+  - Rotate regularly and remove tokens when no longer needed.
+- **Respect repo access**:
+  - Only fetch data for repositories your org is comfortable surfacing.
+  - Follow your internal security and privacy policies.
+- **Keep links current**:
+  - Link GitHub accounts promptly for new hires.
+  - Unlink accounts when people leave the organization.
 
-### Data Privacy
+If you see missing or unexpected data, check:
 
-- **Respect GitHub's API rate limits**
-- **Only track public repositories** unless explicitly authorized
-- **Maintain confidentiality** of private repository data
-- **Follow your organization's** GitHub usage policies
-
-## Troubleshooting
-
-### Connection Issues
-
-- **Verify PAT permissions** and expiration
-- **Check GitHub username** spelling
-- **Test connection** in settings
-- **Review API rate limits** if experiencing failures
-
-### Missing Data
-
-- **Confirm account linking** for team members
-- **Check repository permissions** for private repos
-- **Verify date ranges** for activity queries
-- **Review GitHub API status** for service issues
-
-### Performance
-
-- **Limit date ranges** for large datasets
-- **Use appropriate filters** to reduce API calls
-- **Monitor API usage** to avoid rate limiting
-- **Cache data** when possible for better performance
+- Account linking.
+- Token scopes and expiration.
+- Repository permissions and GitHub API status.
 `,
 }

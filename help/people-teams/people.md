@@ -6,106 +6,151 @@ category: People & Teams
 
 # People
 
-The People page is your central hub for managing all team members in your organization. This comprehensive view provides tools for viewing, filtering, and managing people across your organization.
+The People page is your **source of truth for who is in your organization, how they’re connected, and what they’re working on**.
+
+It’s where you go to answer questions like:
+
+- “Who owns this initiative?”
+- “Who does this person report to?”
+- “What is this engineer currently involved in?”
+
+---
 
 ## Overview
 
-The People page displays all members of your organization in a searchable, filterable table format. You can:
+The People page shows all members of your organization in a **searchable, filterable table** and is deeply connected to the rest of mpath:
 
-- **View all team members** in your organization
-- **Filter and search** people by name, role, team, or status
-- **Access individual profiles** for detailed information
-- **Manage people** (if you're an admin)
+- Each person has a **profile** that ties together:
+  - Reporting relationships
+  - Tasks and initiatives
+  - Meetings, feedback, and synopses
+  - Integrations (GitHub, Jira, etc.)
+- Managers and admins can see both **team‑level** and **org‑wide** views.
 
-## Key Features
+---
 
-### People Table
+## Why the People Page Matters (Benefits)
 
-- **Name and contact information** for each person
-- **Role and team assignments**
-- **Status indicators** (active, inactive, etc.)
-- **Quick access** to individual profiles
+- **Faster answers during reviews and planning**  
+  Quickly pull up a person’s context when talking about performance, staffing, or load.
 
-### Filtering and Search
+- **Clearer ownership and accountability**  
+  See who leads what, who reports to whom, and where there might be gaps.
 
-- **Search by name** or other attributes
-- **Filter by team** or department
-- **Filter by role** or status
-- **Sort by different criteria**
+- **Better cross‑team collaboration**  
+  Find the right people across teams when initiatives or incidents span org boundaries.
 
-### Actions Available
+- **Stronger people decisions**  
+  Use a combination of hierarchy, workload, and feedback to decide where to invest.
 
-- **View Chart**: Switch to the organizational chart view
-- **Import CSV**: Bulk import people from a CSV file (admin only)
-- **New Person**: Add a new team member (admin only)
+---
 
-## Navigation
+## Key Concepts
 
-### Individual Profiles
+### People table
 
-Click on any person's name to access their detailed profile, which includes:
+The table shows for each person:
 
-- **Personal information** and contact details
-- **Team assignments** and reporting relationships
-- **Tasks and initiatives** they're involved in
-- **Feedback and performance** information
-- **Meeting history** and one-on-ones
-- **Integration data** from GitHub and Jira
+- Name and basic contact info
+- Role and team
+- Status (e.g. active)
+- Quick access to their **profile** and **chart position**
 
-### Chart View
+You can:
 
-Use the "Chart" button to switch to the organizational hierarchy view, which shows:
+- Sort and filter by team, role, or other attributes
+- Search by name to jump directly to someone
 
-- **Reporting relationships** visually
-- **Team structure** and hierarchy
-- **Interactive navigation** between levels
+### Person profile
 
-## Admin Functions
+Clicking a person opens their profile, which can include:
 
-If you're an organization administrator, you have additional capabilities:
+- **Personal info** and contact details
+- **Job role** and team assignments
+- **Reporting chain** (manager and direct reports)
+- **Initiatives** and **tasks** they’re involved in
+- **Meetings** (including one‑on‑ones)
+- **Feedback**, **synopses**, and other context
 
-### Import People
+### Chart view
 
-- **CSV import** for bulk adding team members
-- **Template download** with required fields
-- **Validation** to ensure data quality
+From People you can jump to the **org chart**:
 
-### Add New Person
+- Visualizes reporting lines and team structure
+- Lets you navigate up/down the hierarchy quickly
 
-- **Manual entry** for individual team members
-- **Role assignment** and team membership
-- **Contact information** and preferences
+---
 
-## Best Practices
+## How to Use the People Page in Practice
 
-### Data Management
+### 1. During performance and growth conversations
 
-- **Keep information current** by regularly updating profiles
-- **Use consistent naming** conventions for roles and teams
-- **Maintain accurate reporting** relationships
+Before a review, promotion, or growth conversation:
 
-### Organization
+1. Open the person’s profile from the **People** page.
+2. Review:
+   - Their **initiatives**, **tasks**, and key responsibilities
+   - Relevant **feedback** and **synopses**
+   - Their position in the **hierarchy** (span of control, peers)
+3. Use this as factual grounding for your discussion.
 
-- **Use filters effectively** to find specific people quickly
-- **Leverage search** for large organizations
-- **Regularly review** team composition and structure
+### 2. When planning staffing and ownership
 
-### Access Control
+Use People + org chart to:
 
-- **Respect privacy settings** for sensitive information
-- **Use appropriate permissions** for different user roles
-- **Maintain data security** across the organization
+- See who’s currently on which **team**.
+- Check who owns which **initiatives** and how stretched they are.
+- Identify potential **successors** or co‑owners for critical work.
+
+### 3. For day‑to‑day navigation
+
+- Start from **People** when:
+  - You remember the person but not the initiative name.
+  - You want to see all the work and meetings around someone.
+  - You need to find a manager or teammate quickly.
+
+Use filters and search to zero in on the right slice of the org.
+
+### 4. As an admin (managing the org)
+
+Admins can:
+
+- Add new people or bulk‑import via CSV.
+- Maintain accurate **job roles** and team assignments.
+- Keep reporting relationships in sync with reality.
+
+This ensures that everything else in mpath (initiatives, tasks, meetings, reports) is grounded in a **correct org model**.
+
+---
+
+## Examples & Best Practices
+
+### Example: Preparing for a 1:1
+
+- From the People page, open your direct report’s profile.
+- Review:
+  - Current initiatives and tasks
+  - Recent feedback or incidents
+- Use that as input into your 1:1 agenda (see `one-on-ones`).
+
+### Example: Spinning up a new initiative
+
+- Filter by team and role to find potential owners.
+- Use profiles to:
+  - See what people are already working on
+  - Avoid overloading the same person repeatedly
+
+### Quick best practices
+
+- **Keep profiles up to date** – title, team, and job role should reflect reality.
+- **Use consistent naming** for roles and teams (see `job-roles`).
+- **Rely on filters/search instead of side docs** for lists of people on a team.
+
+---
 
 ## Related Topics
 
-- **[People Hierarchy](/help/people-hierarchy)**: Understanding organizational structure
-- **[Direct Reports](/help/direct-reports)**: Managing your team members
-- **[One-on-Ones](/help/one-on-ones)**: Regular check-ins with team members
-- **[Feedback Campaigns](/help/feedback-campaigns)**: Collecting performance feedback
-
-## Tips
-
-- Use the search function to quickly find people in large organizations
-- The chart view is helpful for understanding reporting relationships
-- Regular updates to people profiles ensure accurate information across the platform
-- Leverage filters to focus on specific teams or roles when needed
+- `people-hierarchy` – understanding and navigating the org chart
+- `direct-reports` – focused view for managers and their teams
+- `one-on-ones` – running high‑quality 1:1s grounded in people data
+- `job-roles` – how roles, levels, and domains are modeled in mpath
