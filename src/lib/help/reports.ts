@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-10-25T08:06:22.005Z
+ * Generated on: 2025-12-01T10:35:02.536Z
  */
 
 export interface HelpContent {
@@ -22,221 +22,139 @@ export const helpContent: HelpContent = {
   category: 'Reports & Analytics',
   content: `# Reports
 
-Reports in mpath provide powerful data analysis and insights by aggregating information from multiple sources across your organization. They help managers and team members understand work patterns, track progress, and make data-driven decisions.
+# Reports
+
+Reports in mpath help you **step back from the day‑to‑day and see patterns** – across people, initiatives, and time.
+
+Use them when you want to answer questions like:
+
+- “What has this person actually been working on this quarter?”  
+- “Where is our team spending most of its energy?”  
+- “What stories can I bring into reviews and planning?”
+
+---
 
 ## Overview
 
-### What are Reports?
+Reports are **on‑demand analyses** that pull together data from:
 
-Reports are structured data analysis tools that combine information from various mpath features and external integrations to provide comprehensive insights. They can be generated on-demand with customizable parameters and are designed to support performance management, team oversight, and organizational analytics.
+- Tasks and initiatives
+- Meetings and 1:1s
+- Feedback campaigns
+- Integrations like GitHub and Jira
 
-### Key Features
+They produce **readable summaries** you can use in:
 
-- **Multi-source data integration** - Combines tasks, initiatives, GitHub, Jira, feedback, and more
-- **Flexible time periods** - Configurable date ranges for specific analysis periods
-- **Multiple output formats** - Support for markdown, PDF, and other formats
-- **Access control** - Secure access based on user permissions and organization membership
-- **Historical tracking** - Persistent report instances for historical analysis
-- **Real-time data** - Always uses current data from integrated systems
+- Performance reviews and calibrations
+- Weekly or monthly team health reviews
+- Project and initiative updates
 
-## Available Reports
+---
+
+## Which Report Should I Use?
 
 ### Person Overview Report
 
-A comprehensive analysis of an individual's work activity, including:
+Best when you want a **data‑rich view of someone’s work** over a period:
 
-- Task completion and progress
-- Initiative involvement
-- GitHub pull request activity
-- Jira ticket work
-- Optional feedback integration
+- What tasks they completed and how work flowed.
+- Which initiatives and objectives they contributed to.
+- GitHub/Jira activity (when linked).
+- Optional inclusion of structured feedback.
 
-**Use Cases**: Performance reviews, progress tracking, individual development planning
+Use it for:
 
-### Person AI Synopsis Report
+- Preparing for reviews or promotion discussions.
+- Understanding workload and contribution patterns.
+- Looking at trends across a quarter or half.
 
-AI-powered professional summaries of work activity, featuring:
+### AI Synopsis Report
 
-- Intelligent content generation
-- Multi-source data analysis
-- Professional manager-ready output
-- Configurable data source inclusion
+Best when you want a **manager‑ready summary in bullet form**:
 
-**Use Cases**: Performance summaries, manager briefings, achievement documentation
+- 5–8 concise bullets describing key achievements and themes.
+- Same underlying data sources as the person overview.
 
-## Data Sources
+Use it for:
 
-Reports can integrate data from multiple sources:
+- Quick briefings before 1:1s or leadership meetings.
+- Drafting summaries in performance reviews.
+- Sharing highlights with stakeholders.
 
-### Internal mpath Data
+---
 
-- **Tasks**: Completion status, priorities, assignments, and progress
-- **Initiatives**: Project involvement, contributions, and outcomes
-- **Meetings**: One-on-ones, team meetings, and communication patterns
-- **Feedback**: Campaign responses, peer feedback, and performance data
-- **People**: Role information, team structure, and organizational hierarchy
+## How Reports Fit with the Rest of mpath
 
-### External Integrations
+Reports rely on:
 
-- **GitHub**: Pull requests, code contributions, repository activity
-- **Jira**: Ticket assignments, work items, project contributions
-- **Other integrations**: Additional tools as they become available
+- **Good task hygiene** (status, priority, initiative links).
+- **Accurate initiative ownership** and status.
+- **Connected integrations** (GitHub/Jira) where applicable.
+- **Feedback campaigns** for richer context.
 
-## Access Control
+They don’t replace:
 
-### Security Rules
+- Day‑to‑day boards or lists.
+- 1:1 notes or initiative detail pages.
 
-- **Organization Isolation**: Users can only access reports for their organization
-- **Role-based Access**: Different access levels based on user roles
-- **Personal Data**: Users can generate reports for their own data
-- **Manager Access**: Managers can generate reports for their direct reports
-- **Admin Access**: Organization administrators have broader access
+Instead, they give you a **zoomed‑out view** you can use to:
 
-### Permission Requirements
+- Spot patterns.
+- Tell coherent stories about impact.
+- Plan what to do next.
 
-- User must belong to an organization
-- User must have appropriate role permissions
-- Target data must belong to the same organization
-- External integrations must be properly configured
+---
 
-## Usage
+## Access and Permissions (High Level)
 
-### Running Reports
+In general:
 
-1. Navigate to the **Reports** section in the application
-2. Select the desired report from the available options
-3. Configure report parameters:
-   - Select target person or data scope
-   - Set date ranges for analysis
-   - Choose data sources to include
-   - Configure output options
-4. Click **Run Report** to generate
-5. View results in the report viewer
-6. Download or share as needed
+- You can generate **reports about yourself**, provided your account is linked to your person record.
+- **Managers** can generate reports about their direct reports (where defined).
+- **Admins** can generate reports for anyone in the organization.
 
-### Report Parameters
+All reports respect:
 
-#### Common Parameters
+- Organization isolation – no cross‑org visibility.
+- Feedback privacy rules – private feedback remains visible only to authors.
 
-- **Date Range**: Start and end dates for data analysis
-- **Person Selection**: Target individual for person-focused reports
-- **Data Sources**: Choose which integrations to include
-- **Output Format**: Select preferred output format
+For more detail on specific access rules, see the individual report topics.
 
-#### Report-Specific Parameters
+---
 
-Each report type has specific parameters tailored to its purpose:
+## Using Reports Effectively
 
-- **Person Overview**: Task filtering, initiative scope, feedback inclusion
-- **AI Synopsis**: Content focus, summary length, data source weighting
+### Before performance reviews
 
-## Output Formats
+- Generate **Person Overview** and/or **AI Synopsis** for each report.
+- Combine with:
+  - Feedback campaign results.
+  - Your own observations and 1:1 notes.
+  - Initiative pages showing broader impact.
 
-### Markdown
+### During regular rhythms
 
-- **Format**: Structured markdown documents
-- **Use Cases**: Documentation, sharing, integration with other tools
-- **Features**: Headers, lists, tables, formatting
+- Monthly or quarterly:
+  - Run reports for team members or key roles.
+  - Look for:
+    - Over/under‑utilization.
+    - Concentration of risk or critical work.
+    - Emerging leaders and high‑impact contributors.
 
-### Future Formats
+### When communicating upwards
 
-- **PDF**: Professional document generation
-- **CSV**: Data export for analysis
-- **JSON**: Programmatic access to structured data
+- Use key excerpts and metrics from reports in:
+  - Org updates.
+  - Project status summaries.
+  - Headcount and capacity discussions.
 
-## Best Practices
+---
 
-### Report Generation
+## Related Topics
 
-- **Regular Intervals**: Generate reports consistently (weekly, monthly, quarterly)
-- **Appropriate Scope**: Use relevant date ranges and data sources
-- **Data Quality**: Ensure underlying data is accurate and up-to-date
-- **Access Control**: Respect privacy and security requirements
-
-### Content Review
-
-- **Accuracy Verification**: Review generated content for factual accuracy
-- **Context Addition**: Supplement reports with personal observations
-- **Action Planning**: Use insights to drive future actions and improvements
-- **Documentation**: Save important reports for historical reference
-
-### Team Usage
-
-- **Performance Management**: Use reports for reviews and evaluations
-- **Progress Tracking**: Monitor team and individual progress
-- **Resource Planning**: Use data for capacity and workload planning
-- **Recognition**: Identify achievements and contributions
-
-## Troubleshooting
-
-### Common Issues
-
-#### Data Availability
-
-- **Missing Data**: Verify integrations are properly configured
-- **Date Range Issues**: Check that data exists for specified periods
-- **Account Linking**: Ensure person records are linked to external accounts
-- **Permission Problems**: Verify API credentials and access rights
-
-#### Report Quality
-
-- **Incomplete Data**: Adjust date ranges or data source selection
-- **Integration Errors**: Check external service status and connectivity
-- **Access Denied**: Verify user permissions and organization membership
-- **Performance Issues**: Optimize date ranges and data source selection
-
-#### Technical Problems
-
-- **Generation Failures**: Check system resources and API limits
-- **Format Issues**: Verify output format compatibility
-- **Caching Problems**: Clear caches if data appears stale
-- **Integration Timeouts**: Reduce data scope or retry generation
-
-### Performance Optimization
-
-- **Reasonable Date Ranges**: Avoid extremely long periods that may timeout
-- **Selective Data Sources**: Disable unnecessary integrations for faster generation
-- **API Limits**: Monitor external service usage and respect rate limits
-- **System Resources**: Check server capacity during peak usage periods
-
-## Integration with Other Features
-
-### Performance Management
-
-- **Review Preparation**: Generate reports before performance discussions
-- **Progress Documentation**: Create regular progress reports
-- **Goal Setting**: Use insights for future objective planning
-- **Development Planning**: Identify areas for growth and improvement
-
-### Team Management
-
-- **Team Overview**: Generate reports for all team members
-- **Cross-team Analysis**: Compare performance across different teams
-- **Resource Allocation**: Use data for workload and capacity planning
-- **Recognition Programs**: Identify high performers and contributors
-
-### Organizational Analytics
-
-- **Trend Analysis**: Track patterns over time across the organization
-- **Capacity Planning**: Use aggregated data for resource planning
-- **Process Improvement**: Identify areas for workflow optimization
-- **Strategic Planning**: Support decision-making with data insights
-
-## Future Enhancements
-
-### Planned Features
-
-- **Custom Reports**: User-defined report templates and configurations
-- **Scheduled Reports**: Automated report generation and delivery
-- **Advanced Analytics**: Statistical analysis and trend identification
-- **Interactive Dashboards**: Real-time data visualization
-- **Export Options**: Additional output formats and sharing capabilities
-
-### Integration Expansion
-
-- **Additional Tools**: Support for more external integrations
-- **API Access**: Programmatic report generation and data access
-- **Webhook Support**: Real-time data updates and notifications
-- **Third-party Analytics**: Integration with business intelligence tools
+- \`person-overview-report\` – detailed, data‑heavy person analysis  
+- \`ai-synopsis-report\` – AI‑generated person summaries  
+- \`synopsis-generation\` – how synopses work outside the reports system  
+- \`feedback-campaigns\` – how to collect structured input that can flow into reports
 `,
 }

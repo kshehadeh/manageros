@@ -6,37 +6,192 @@ category: Tasks & Projects
 
 # Initiatives
 
-Initiatives are strategic projects or programs that drive organizational goals forward. They help you:
+Initiatives are the **big rocks** in your organization – strategic efforts that pull together people, tasks, and goals around a shared outcome.
 
-## What are Initiatives?
+Use initiatives when you want to:
 
-- **Strategic projects** with clear objectives
-- **Cross-functional work** involving multiple team members
-- **Goal-oriented activities** with measurable outcomes
+- Keep a **quarterly or multi-sprint effort** visible and on track
+- Tie day‑to‑day tasks back to **clear objectives and outcomes**
+- Give teams and stakeholders a **single source of truth** for status, risk, and ownership
 
-## Key Components
+---
+
+## Overview
+
+An initiative in mpath represents a **strategic project, OKR, or program**. It brings together:
+
+- **Objectives** – what success looks like
+- **Owners & team** – who is accountable and involved
+- **Tasks** – the execution work that moves the initiative forward
+- **Status, RAG, confidence** – how healthy and likely to succeed it is
+
+Typical examples:
+
+- “Ship v2 of the onboarding experience”
+- “Reduce infra costs by 20%”
+- “Improve time‑to‑resolution for P1 incidents”
+
+---
+
+## Why Initiatives Matter (Benefits)
+
+- **Connect strategy to execution**  
+  See how individual tasks and objectives roll up into a bigger outcome.
+
+- **Create a shared narrative for leadership**  
+  Use a single page to talk about status, risk, and confidence instead of scattered docs and spreadsheets.
+
+- **Clarify ownership**  
+  Make it obvious who is accountable, who’s involved, and which team is driving the work.
+
+- **Focus attention where it matters**  
+  RAG status and confidence make it easy to spot initiatives that need support before they go off the rails.
+
+- **Support recurring reviews**  
+  Use initiatives as the backbone for weekly, bi‑weekly, or monthly check‑ins with leads and stakeholders.
+
+---
+
+## Key Concepts
+
+### Initiative
+
+A container for a strategic effort. An initiative has:
+
+- **Title & summary** – what you’re doing and why
+- **Outcome** – the primary result you’re aiming for (e.g. “NPS > 50”)
+- **Dates** – when the initiative starts and when you’re aiming to finish
+- **Status** – `planning`, `in_progress`, `on_hold`, `completed`, or `cancelled`
+- **RAG** – health indicator (`red`, `amber`, `green`)
+- **Confidence** – 1–10 sense of how likely you are to hit the outcome
 
 ### Objectives
 
-- **Clear, measurable goals** for the initiative
-- **Success criteria** and key results
-- **Timeline and milestones** for tracking progress
+Objectives break the initiative into **measurable chunks of progress**:
+
+- Each objective has a **title** and optional **key result**
+- They act like **mini‑goals** within the initiative (e.g. “Improve DB performance – p95 < 100ms”)
+- They help frame discussions in check‑ins (“Which objectives are at risk?”)
+
+### Owners & Team
+
+- **Owners** are specific people accountable for the initiative’s success (engineering lead, PM, EM, etc.)
+- You can add multiple owners with roles like `owner`, `tech lead`, or `product`
+- Initiatives can also be linked to a **team**, which anchors the work to an org unit
 
 ### Tasks
 
-- **Actionable items** that contribute to the initiative
-- **Assigned responsibilities** and ownership
-- **Progress tracking** and status updates
+Tasks are the **execution layer**:
 
-### Check-ins
+- Concrete work items that connect to an initiative and/or its objectives
+- They carry status, priority, and assignees  
+  (see the `task-status` and `task-priorities` help topics for more detail)
 
-- **Regular progress reviews** and updates
-- **Stakeholder communication** and alignment
-- **Course corrections** and adjustments
+---
 
-## Best Practices
+## How to Use Initiatives (Step‑by‑Step)
 
-- **Define clear success metrics** before starting
-- **Assign clear ownership** for each component
-- **Schedule regular check-ins** to maintain momentum
-- **Document lessons learned** for future initiatives
+### 1. Create a new initiative
+
+1. Go to the **Initiatives** section.
+2. Click **New initiative**.
+3. Fill in:
+   - **Title** – clear and specific (e.g. “Q4 Platform Resilience Upgrade”)
+   - **Summary** – 1–3 sentences describing the scope
+   - **Outcome** – the result you care about (latency, NPS, revenue, etc.)
+   - **Dates** – realistic start and target dates
+   - **Status** – usually `planning` or `in_progress` when you create it
+   - **RAG & confidence** – your honest starting point
+4. Save the initiative – this becomes the home for related objectives and tasks.
+
+### 2. Add objectives with clear key results
+
+1. From the initiative detail page, add **Objectives**.
+2. For each objective, define:
+   - A **title** (e.g. “Reduce p95 API latency”)
+   - An optional **key result** (e.g. “p95 < 150ms for top 10 endpoints”)
+3. Aim for **3–5 objectives** per initiative – enough to cover the work but still focused.
+
+### 3. Assign owners and (optionally) a team
+
+1. Add one or more **owners**:
+   - Use roles like `owner`, `tech lead`, `PM`, or `EM` to clarify responsibilities.
+2. If the initiative belongs to a specific org unit, link a **team**:
+   - This makes it easier to filter initiatives across the org.
+
+### 4. Link tasks to the initiative
+
+1. When creating or editing tasks, link them to the relevant **initiative** (and objective where applicable).
+2. Use task status and priority to keep execution clear:
+   - `status` shows where the work sits in the lifecycle (see `task-status`).
+   - `priority` shows what should move first when schedules get tight (see `task-priorities`).
+3. In reviews, start from the initiative and drill into tasks that are blocked or at risk.
+
+### 5. Run regular check‑ins
+
+1. On your **initiative detail** page, review:
+   - Overall **status**, **RAG**, and **confidence**
+   - Progress on each **objective**
+   - Recently updated or blocked **tasks**
+2. Adjust as needed:
+   - Update status/RAG/confidence to reflect reality.
+   - Add or re‑prioritize objectives if the scope shifts.
+   - Reassign or clarify ownership when responsibilities change.
+3. Use this page as the shared artifact in your **weekly / bi‑weekly reviews** with leads and stakeholders.
+
+---
+
+## Examples & Best Practices
+
+### Example: Shipping a new feature set
+
+- **Initiative**: “Launch self‑serve onboarding for SMEs”
+- **Outcome**: “Increase self‑serve signups by 30%”
+- **Objectives**:
+  - “Reduce time‑to‑value for new workspaces”
+  - “Improve onboarding completion to 90%”
+  - “Reduce support tickets for new users by 25%”
+- **Tasks**:
+  - Design flows, implement backend, instrument analytics, update docs
+- **Usage**:
+  - Weekly review with PM + EM: check RAG, confidence, and tasks that didn’t move.
+
+### Example: Operational improvement initiative
+
+- **Initiative**: “Improve incident response”
+- **Outcome**: “Cut P1 MTTR in half”
+- **Objectives**:
+  - “Standardize runbooks for top 10 incident types”
+  - “Reduce alert noise by 40%”
+  - “Train all on‑call engineers on new process”
+- **Best practices**:
+  - Make the **outcome measurable**.
+  - Tie initiatives into **meetings** (e.g. weekly ops review) so it’s regularly inspected.
+
+### General best practices
+
+- **Start with the outcome**  
+  Write the outcome first, then add objectives and tasks that support it.
+
+- **Update RAG and confidence before reviews**  
+  This keeps conversations focused on what changed and why.
+
+- **Limit the number of active initiatives per team**  
+  Too many “important” things means nothing is truly important.
+
+- **Close out completed or cancelled initiatives**  
+  Use `completed` or `cancelled` so dashboards stay accurate and historical work stays readable.
+
+---
+
+## Related Topics
+
+- **Tasks & Projects**
+  - `task-status` – how task states work and when to move them
+  - `task-priorities` – using priority to focus execution
+- **People & Teams**
+  - `people` – understanding people records and roles
+  - `people-hierarchy` – how reporting lines are modeled
+- **Meetings & Communication**
+  - `meetings` and `meeting-instances` – using meetings to review initiatives
+  - `one-on-ones` – bringing initiative context into 1:1s

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { Link } from '@/components/ui/link'
-import { usePathname } from 'next/navigation'
+import { useAuth } from '@clerk/nextjs'
 import { ChevronDown, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,9 +19,8 @@ const geistMono = GeistMono({
   variable: '--font-geist-mono',
 })
 
-export function MarketingHeader() {
-  const pathname = usePathname()
-  const isHomePage = pathname === '/'
+export function HelpHeader() {
+  const { isSignedIn } = useAuth()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   return (
@@ -65,11 +64,9 @@ export function MarketingHeader() {
       <nav
         className={`hidden items-center gap-8 text-sm font-medium text-white/70 md:flex ${geistMono.className}`}
       >
-        {!isHomePage && (
-          <Link href='/' className='transition-colors hover:text-white'>
-            Home
-          </Link>
-        )}
+        <Link href='/' className='transition-colors hover:text-white'>
+          Home
+        </Link>
         <Link href='/pricing' className='transition-colors hover:text-white'>
           Pricing
         </Link>
@@ -125,15 +122,13 @@ export function MarketingHeader() {
           className={`md:hidden w-full flex flex-col gap-4 pb-4 border-t border-white/20 pt-4 animate-in slide-in-from-top-2 ${geistMono.className}`}
         >
           <nav className='flex flex-col gap-4'>
-            {!isHomePage && (
-              <Link
-                href='/'
-                onClick={() => setIsMobileMenuOpen(false)}
-                className='text-sm font-medium text-white/70 transition-colors hover:text-white'
-              >
-                Home
-              </Link>
-            )}
+            <Link
+              href='/'
+              onClick={() => setIsMobileMenuOpen(false)}
+              className='text-sm font-medium text-white/70 transition-colors hover:text-white'
+            >
+              Home
+            </Link>
             <Link
               href='/pricing'
               onClick={() => setIsMobileMenuOpen(false)}
@@ -182,48 +177,75 @@ export function MarketingHeader() {
           </nav>
           {/* Mobile auth buttons */}
           <div className='flex flex-col gap-2 pt-2 border-t border-white/20'>
-            <Button
-              asChild
-              variant='ghost'
-              className='text-white/80 hover:text-white w-full'
-            >
-              <Link
-                href='/auth/signin'
-                onClick={() => setIsMobileMenuOpen(false)}
+            {isSignedIn ? (
+              <Button
+                asChild
+                className='bg-primary text-primary-foreground shadow-[0_18px_40px_color-mix(in_srgb,var(--color-primary)_45%,transparent)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/90 w-full'
               >
-                Sign in
-              </Link>
-            </Button>
-            <Button
-              asChild
-              className='bg-primary text-primary-foreground shadow-[0_18px_40px_color-mix(in_srgb,var(--color-primary)_45%,transparent)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/90 w-full'
-            >
-              <Link
-                href='/auth/signup'
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Register now
-              </Link>
-            </Button>
+                <Link
+                  href='/dashboard'
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+              </Button>
+            ) : (
+              <>
+                <Button
+                  asChild
+                  variant='ghost'
+                  className='text-white/80 hover:text-white w-full'
+                >
+                  <Link
+                    href='/auth/signin'
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Sign in
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  className='bg-primary text-primary-foreground shadow-[0_18px_40px_color-mix(in_srgb,var(--color-primary)_45%,transparent)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/90 w-full'
+                >
+                  <Link
+                    href='/auth/signup'
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Register now
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}
       <div
         className={`hidden md:flex items-center gap-3 ${geistMono.className}`}
       >
-        <Button
-          asChild
-          variant='ghost'
-          className='text-white/80 hover:text-white'
-        >
-          <Link href='/auth/signin'>Sign in</Link>
-        </Button>
-        <Button
-          asChild
-          className='bg-primary text-primary-foreground shadow-[0_18px_40px_color-mix(in_srgb,var(--color-primary)_45%,transparent)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/90'
-        >
-          <Link href='/auth/signup'>Register now</Link>
-        </Button>
+        {isSignedIn ? (
+          <Button
+            asChild
+            className='bg-primary text-primary-foreground shadow-[0_18px_40px_color-mix(in_srgb,var(--color-primary)_45%,transparent)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/90'
+          >
+            <Link href='/dashboard'>Dashboard</Link>
+          </Button>
+        ) : (
+          <>
+            <Button
+              asChild
+              variant='ghost'
+              className='text-white/80 hover:text-white'
+            >
+              <Link href='/auth/signin'>Sign in</Link>
+            </Button>
+            <Button
+              asChild
+              className='bg-primary text-primary-foreground shadow-[0_18px_40px_color-mix(in_srgb,var(--color-primary)_45%,transparent)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/90'
+            >
+              <Link href='/auth/signup'>Register now</Link>
+            </Button>
+          </>
+        )}
       </div>
     </header>
   )

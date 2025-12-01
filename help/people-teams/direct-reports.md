@@ -6,25 +6,124 @@ category: People & Teams
 
 # Direct Reports
 
-Direct reports are team members who report directly to you. This section provides:
+Direct reports are the people who **report directly to you**. The Direct Reports view in mpath gives you a focused lens on **how your team is doing and what they need from you**.
+
+---
 
 ## Overview
 
-- **Team size** and composition
-- **Individual performance** indicators
-- **Quick access** to team member profiles
+The Direct Reports view pulls together:
 
-## Management Tools
+- Who your direct reports are
+- Their **recent work** (initiatives, tasks)
+- Their **meetings** (especially one‑on‑ones)
+- Signals like feedback, synopses, and activity
 
-- **One-on-one scheduling** and tracking
-- **Performance feedback** collection
-- **Goal setting** and progress monitoring
-- **Task assignment** and follow-up
+Use it as your **home base for people management**.
 
-## Key Metrics
+---
 
-- **Team productivity** indicators
-- **Engagement levels** and satisfaction
-- **Development progress** and growth areas
+## Why the Direct Reports View Matters (Benefits)
 
-Use this section to stay connected with your team and ensure their success.
+- **Clear picture of your team’s load and focus**  
+  See where people are heavily loaded or under‑utilized.
+
+- **Better coaching and support**  
+  Quickly jump from a person to their initiatives, tasks, and 1:1s.
+
+- **Faster detection of risk**  
+  Spot patterns like repeated blockers, dropped work, or missing 1:1s.
+
+- **Stronger career conversations**  
+  Have discussions anchored in real work and history, not just memory.
+
+---
+
+## Key Concepts
+
+### Team composition
+
+See:
+
+- How many people report to you
+- Their roles, levels, and teams
+- Changes over time (e.g. reorgs, new hires)
+
+### Work and outcomes
+
+For each report you can navigate to:
+
+- **Initiatives** they own or contribute to
+- **Tasks** they’re working on (with status and priority)
+- **Meetings** they’re regularly part of
+
+### Growth and feedback signals
+
+Tie in:
+
+- **Feedback** they have received (and sometimes given)
+- **Synopses** or reports that summarize their impact
+- Notes from **one‑on‑ones** over time
+
+---
+
+## How to Use Direct Reports in Your Weekly Rhythm
+
+### 1. Before 1:1s
+
+Use the Direct Reports view to:
+
+- Scan each person’s current work and initiatives.
+- Note any:
+  - Overloaded or under‑loaded engineers
+  - Repeated blockers or dropped tasks
+  - Big wins to recognize
+
+This becomes input into your `one-on-ones` agendas.
+
+### 2. During team health reviews
+
+On a weekly or bi‑weekly basis:
+
+- Look across your direct reports:
+  - Who is carrying the most critical initiatives?
+  - Who might be ready for more ownership?
+  - Who appears consistently blocked or stuck?
+- Use this to:
+  - Adjust staffing on initiatives
+  - Plan growth opportunities
+  - Decide where you need to lean in as a manager
+
+### 3. For performance and promotion discussions
+
+When evaluating performance:
+
+- Start from Direct Reports → individual profiles.
+- Review:
+  - Ownership and results on initiatives
+  - Consistency of delivery on tasks
+  - Feedback patterns and synopses
+- Build a balanced picture anchored in evidence.
+
+---
+
+## Examples & Best Practices
+
+### Example: Adjusting load across the team
+
+- You notice one engineer is on **several High priority initiatives**, while another has mostly Low/Medium tasks.
+- Use Direct Reports + People to:
+  - Rebalance work across initiatives.
+  - Move ownership where appropriate.
+
+### Example: Preparing for calibration
+
+- Use the view to:
+  - List your direct reports and their key outcomes this cycle.
+  - Identify which examples to bring into calibration or performance forums.
+
+### Quick best practices
+
+- **Review this view at least weekly** – don’t wait for performance review season.
+- **Use it alongside 1:1s** – what you see here should inform your conversations.
+- **Track patterns over time**, not just snapshots – trends matter more than single weeks.

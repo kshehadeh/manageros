@@ -6,222 +6,160 @@ category: Feedback & Development
 
 # Synopsis Generation
 
-mpath uses AI-powered synopsis generation to create concise, professional summaries of team members' work activities, combining data from tasks, GitHub pull requests, Jira tickets, and feedback to provide comprehensive performance insights.
+mpath uses AI‑powered synopsis generation to create concise, professional summaries of a person’s work over a period of time.
+
+Think of a synopsis as a **manager‑ready snapshot** that pulls together tasks, initiatives, GitHub/Jira activity, meetings, and feedback into one narrative.
+
+---
 
 ## Overview
 
-### What is Synopsis Generation?
+### What is a synopsis?
 
-Synopsis generation automatically creates professional work summaries by analyzing:
+A synopsis is an AI‑generated summary that looks at:
 
-- **Task completion** and progress
-- **GitHub pull requests** and contributions
-- **Jira ticket activity** and work items
-- **Feedback responses** and performance data
-- **Meeting participation** and outcomes
+- **Task completion and status changes**
+- **Initiative and objective involvement**
+- **GitHub pull requests and reviews** (for linked accounts)
+- **Jira tickets and project activity**
+- **Relevant feedback** and signals
 
-### Benefits
+and turns it into **5–8 bullet points** in clear, professional language.
 
-- **Time-saving** - Automated summary creation
-- **Consistency** - Standardized format and structure
-- **Comprehensive** - Multiple data sources combined
-- **Professional** - AI-generated, manager-ready content
-- **Historical** - Track performance over time
+### Why synopses matter (Benefits)
 
-## Data Sources
+- **Saves time** – no more manual compiling of notes before reviews or check‑ins.
+- **Improves consistency** – everyone gets summaries in a similar format.
+- **Surfaces patterns** – makes it easier to see themes across weeks or quarters.
+- **Anchors discussions in data** – you can talk about impact instead of trying to remember everything.
 
-### Task Management
+---
 
-- **Completed tasks** within the specified date range
-- **Task status changes** and progress updates
-- **Priority levels** and initiative associations
-- **Completion dates** and effort tracking
+## Where the Data Comes From
 
-### GitHub Integration
+Synopses work best when your data in mpath is healthy:
 
-- **Pull request activity** for linked accounts
-- **Repository contributions** and code reviews
-- **Merge activity** and collaboration patterns
-- **Development metrics** and productivity
+- **Tasks** – status, completion, priority, and initiative links.
+- **Initiatives and objectives** – ownership and participation.
+- **GitHub** – pull requests, reviews, and merges (for linked accounts).
+- **Jira** – tickets, status changes, and project contributions.
+- **Feedback** – structured feedback from campaigns, where included.
 
-### Jira Integration
+If a source isn’t connected, that part simply won’t influence the summary.
 
-- **Assigned tickets** and work items
-- **Status updates** and progress tracking
-- **Project contributions** and deliverables
-- **Work activity** and capacity utilization
+---
 
-### Feedback Data
+## How to Generate a Synopsis (Step‑by‑Step)
 
-- **Feedback responses** from campaigns
-- **Performance evaluations** and ratings
-- **Peer feedback** and manager assessments
-- **Development insights** and recommendations
+1. Navigate to the **person’s profile** (your own or, for admins, someone else’s).
+2. Open the **Synopsis** section.
+3. Choose:
+   - **Date range** (e.g. last 14, 30, or 90 days).
+   - Whether to **include feedback** (when appropriate).
+   - Any relevant **focus options** (if available).
+4. Trigger **Generate synopsis**.
+5. Review the generated summary:
+   - Edit lightly if you need to adjust wording.
+   - Save it so you can reference it later.
 
-## Generation Process
+You can keep multiple synopses over time to build a history of contributions.
 
-### Configuration Options
+---
 
-- **Date range** - Specify the period for analysis (default: 14 days)
-- **Include feedback** - Option to incorporate feedback data
-- **Data sources** - Select which integrations to include
-- **Customization** - Adjust tone and focus areas
+## How to Use Synopses in Practice
 
-### AI Processing
+### Performance and growth conversations
 
-- **Data aggregation** from multiple sources
-- **Pattern recognition** and trend analysis
-- **Content synthesis** into coherent narrative
-- **Professional formatting** with bullet points
-- **Quality assurance** and fact-checking
+- Before a review:
+  - Generate a synopsis for the last quarter.
+  - Combine it with feedback from campaigns and your own notes.
+  - Use it as the **starting point** for your written evaluation.
 
-### Output Format
+- With the person:
+  - Share key points and examples from the synopsis.
+  - Discuss where it matches or differs from their self‑assessment.
 
-- **Concise bullet points** (5-8 items typically)
-- **Past tense** professional language
-- **Specific outcomes** and metrics when available
-- **Action-oriented** descriptions
-- **Manager-ready** format
+### Weekly or bi‑weekly manager check‑ins
 
-## Usage Scenarios
+- Generate shorter‑window synopses (e.g. 14 days) periodically.
+- Use them to:
+  - Ground `one-on-ones` in concrete recent work.
+  - Spot load issues and recurring patterns (e.g. always firefighting).
 
-### Performance Reviews
+### Initiative and project reporting
 
-- **Quarterly summaries** for formal evaluations
-- **Goal achievement** tracking and documentation
-- **Development progress** and skill growth
-- **Contribution analysis** and impact assessment
+- For key initiatives:
+  - Use synopses of owners and major contributors to see how work has moved.
+  - Pull phrasing or examples into initiative updates.
 
-### Weekly Check-ins
+---
 
-- **Regular updates** for manager meetings
-- **Progress tracking** and milestone monitoring
-- **Workload assessment** and capacity planning
-- **Quick status** updates and highlights
+## Privacy, Security, and Access Control
 
-### Project Reporting
+### Who can generate and see synopses
 
-- **Initiative progress** and deliverable tracking
-- **Team contributions** to specific projects
-- **Cross-functional** collaboration insights
-- **Project milestone** achievements
+- Individuals can generate and view synopses **only for themselves** (their linked person record).
+- Organization **admins** can generate, view, and delete synopses for anyone in their org.
 
-### Development Planning
+This mirrors the access rules in the application:
 
-- **Skill development** tracking and progress
-- **Learning opportunities** identification
-- **Career growth** documentation
-- **Training needs** assessment
+- You cannot generate or view synopses for people outside your organization.
+- Access is enforced server‑side; it’s not just UI‑based.
 
-## Privacy and Security
+### Feedback and sensitive data
 
-### Data Access
+- **Private feedback** remains visible only to the author; it is not surfaced to others via synopses.
+- Public or shared feedback can be incorporated when you choose to include feedback.
 
-- **Organization-level** data isolation
-- **Role-based permissions** for synopsis access
-- **Private feedback** protection and filtering
-- **Secure data handling** throughout the process
+### AI processing
 
-### Access Control
+- Only the **minimum necessary data** is sent to the AI service.
+- Data is transmitted securely.
+- External AI services do not retain your org’s data beyond processing.
 
-- **Personal synopses**: Users can only generate synopses for their own linked person record
-- **Admin privileges**: Organization administrators can generate synopses for any person in their organization
-- **Viewing restrictions**: Same access control applies to viewing and deleting synopses
-- **Linked person requirement**: Users must have a linked person record to generate synopses for themselves
+---
 
-### Feedback Privacy
+## Getting the Most from Synopses
 
-- **Private feedback** only visible to authors
-- **Public feedback** included in summaries
-- **Anonymous responses** handled appropriately
-- **Consent-based** data inclusion
+### Make your underlying data good
 
-### AI Processing
+Synopses are only as good as the signals they see:
 
-- **Secure API calls** to AI services
-- **Data minimization** - only necessary information processed
-- **No data retention** by external AI services
-- **Encrypted transmission** of sensitive data
+- Keep **tasks** up‑to‑date (status, completion, initiative links).
+- Make sure **GitHub/Jira** accounts are correctly linked.
+- Run **feedback campaigns** periodically for richer context.
 
-## Best Practices
+### Treat synopses as a starting point, not the final word
 
-### Regular Generation
+- Always **review and sanity‑check** what the AI generates.
+- Add your own perspective and nuance.
+- Use synopses to:
+  - Jog your memory.
+  - Suggest themes.
+  - Provide structure to your write‑ups.
 
-- **Consistent timing** for synopsis creation
-- **Appropriate frequency** based on team needs
-- **Date range selection** for relevant periods
-- **Feedback inclusion** when appropriate
+### Communicate clearly with your team
 
-### Data Quality
+- Explain:
+  - What synopses are.
+  - What data they use.
+  - How they will (and won’t) be used in performance discussions.
+- Encourage people to:
+  - Read their own synopses.
+  - Correct underlying data (tasks, links) if something looks off.
 
-- **Accurate task tracking** and status updates
-- **Complete GitHub** and Jira integrations
-- **Regular feedback** collection and campaigns
-- **Up-to-date** team member information
+---
 
-### Usage Guidelines
+## Troubleshooting and Tips
 
-- **Review generated content** for accuracy
-- **Supplement with personal** observations
-- **Use as starting point** for discussions
-- **Combine with qualitative** feedback
+- **Synopsis feels incomplete?**
+  - Check that tasks, GitHub, and Jira are linked and up‑to‑date.
+  - Try a longer date range.
 
-### Team Communication
+- **Tone doesn’t match your style?**
+  - Edit the text; treat it like a draft.
 
-- **Share synopses** with team members
-- **Discuss insights** and development areas
-- **Set goals** based on generated summaries
-- **Track progress** over time
+- **Performance slow for large ranges?**
+  - Narrow the date range or temporarily deselect some data sources.
 
-## Customization Options
-
-### Content Focus
-
-- **Technical contributions** emphasis
-- **Leadership activities** highlighting
-- **Collaboration patterns** and teamwork
-- **Innovation and creativity** focus
-
-### Tone and Style
-
-- **Formal business** language
-- **Conversational** and approachable
-- **Technical detail** level adjustment
-- **Length and depth** customization
-
-### Data Integration
-
-- **Selective source** inclusion
-- **Custom date ranges** and periods
-- **Specific project** or initiative focus
-- **Team-level** vs individual summaries
-
-## Troubleshooting
-
-### Missing Data
-
-- **Verify integrations** are properly configured
-- **Check date ranges** for data availability
-- **Confirm account linking** for GitHub/Jira
-- **Review task completion** and status updates
-
-### Quality Issues
-
-- **Adjust date ranges** for more comprehensive data
-- **Include feedback** for richer context
-- **Verify data accuracy** in source systems
-- **Review AI prompts** and customization
-
-### Performance
-
-- **Optimize date ranges** for faster processing
-- **Limit data sources** if experiencing delays
-- **Check system resources** and API limits
-- **Monitor generation** frequency and usage
-
-### Integration Problems
-
-- **Test GitHub** and Jira connections
-- **Verify API permissions** and tokens
-- **Check account linking** for team members
-- **Review data sync** status and frequency
+Used thoughtfully, synopses can significantly reduce **manager prep time** while improving the **quality of feedback and discussions** for everyone involved.

@@ -6,254 +6,108 @@ category: Reports & Analytics
 
 # Person Overview Report
 
-The Person Overview Report provides a comprehensive analysis of an individual's work activity by aggregating data from multiple sources within mpath and external integrations. It offers detailed insights into task completion, initiative involvement, and overall work patterns.
+The Person Overview Report is your **“show me the data” view of someone’s work** over a period of time.
 
-## Overview
+It pulls together tasks, initiatives, integrations, and (optionally) feedback into a structured report you can read or share.
 
-### What is the Person Overview Report?
+---
 
-The Person Overview Report is a detailed analytical report that examines a person's work activity over a specified time period. It combines data from tasks, initiatives, GitHub pull requests, Jira tickets, and optional feedback to provide a complete picture of work contributions and patterns.
+## When to Use the Person Overview Report
 
-### Key Features
+Use this report when you need:
 
-- **Comprehensive data aggregation** - Combines multiple data sources for complete analysis
-- **Flexible time periods** - Configurable date ranges for specific analysis periods
-- **Optional feedback integration** - Include or exclude feedback data based on needs
-- **External integration support** - Incorporates GitHub and Jira activity
-- **Structured output** - Organized markdown format for easy reading and sharing
-- **Access control** - Secure access based on user permissions and organization membership
+- A **detailed picture** of what someone has been doing (not just a few highlights).
+- Evidence for **performance reviews, promotions, or calibration**.
+- To understand how someone’s work is **distributed across initiatives and projects**.
+- To check for **capacity, load, or focus issues** over time.
 
-## Data Sources
+If you want a shorter, narrative‑style summary instead, see the `ai-synopsis-report`.
 
-### Task Management
+---
 
-The report includes detailed task information:
+## What the Report Includes
 
-- **Task completion** - Completed tasks within the specified date range
-- **Task status** - Current status of all tasks (pending, in progress, completed)
-- **Priority levels** - Task priorities and their distribution
-- **Initiative associations** - Tasks linked to specific initiatives
-- **Completion dates** - When tasks were completed
-- **Update timestamps** - Last modification dates
+Depending on what’s connected, a Person Overview can include:
 
-### Initiative Management
+- **Task activity**
+  - Completed tasks in the chosen date range.
+  - Status distribution (To Do, Doing, Blocked, Done, Dropped).
+  - Priority mix and links to initiatives.
 
-Initiative-related data provides context for project work:
+- **Initiative involvement**
+  - Which initiatives and objectives they contributed to.
+  - How tasks are spread across initiatives.
 
-- **Initiative participation** - Initiatives the person is involved in
-- **Task contributions** - Tasks associated with each initiative
-- **Initiative status** - Current status of initiatives
-- **Cross-functional work** - Collaboration across different initiatives
-- **Project progress** - Contribution to overall initiative goals
+- **GitHub and Jira activity** (if linked)
+  - Pull requests created/reviewed/merged.
+  - Tickets assigned and completed.
+  - Distribution across repositories/projects and issue types.
 
-### GitHub Integration
+- **Feedback (optional)**
+  - High‑level summary of feedback campaigns included in the range.
 
-For users with linked GitHub accounts:
+This gives you both **quantitative metrics** (counts, distributions) and **context** (where the work is happening).
 
-- **Pull request activity** - PRs created, reviewed, or merged
-- **Repository contributions** - Work across different repositories
-- **Code review participation** - Review activity and collaboration
-- **Merge activity** - Successful code integrations
-- **Development metrics** - Lines of code, commits, and other metrics
+---
 
-### Jira Integration
+## How to Run the Report (Step‑by‑Step)
 
-For users with linked Jira accounts:
+1. Go to the **Reports** section.
+2. Select **Person Overview**.
+3. Configure:
+   - **Person** – who you want to analyze.
+   - **From / To dates** – the analysis window (e.g. quarter, sprint cycle).
+   - **Include feedback** – whether to bring in feedback data.
+4. Run the report and open the generated instance.
 
-- **Ticket assignments** - Work items assigned to the person
-- **Status updates** - Progress on various tickets
-- **Project contributions** - Work across different Jira projects
-- **Issue types** - Types of work (bugs, features, tasks)
-- **Work activity patterns** - Timing and frequency of work
+Tips:
 
-### Feedback Data (Optional)
+- For performance reviews, use the **full review period** (e.g. last quarter/half).
+- For check‑ins, use **smaller windows** (2–6 weeks) to keep things focused.
 
-When feedback inclusion is enabled:
+---
 
-- **Feedback responses** - Responses to feedback campaigns
-- **Performance evaluations** - Ratings and assessments
-- **Peer feedback** - Input from colleagues and team members
-- **Manager assessments** - Direct manager feedback
-- **Development insights** - Areas for improvement and growth
+## How to Read and Use the Report
 
-## Usage
+### For reviews and promotion discussions
 
-### Accessing the Report
+- Look at:
+  - **Volume and type of work** – what they did and where.
+  - **Initiative spread** – are they spread thin or focused?
+  - **Patterns over time** – bursts of work, long‑running efforts, etc.
+- Combine with:
+  - `synopsis-generation` / `ai-synopsis-report` for narrative summaries.
+  - Feedback campaign results for perception and behavior signals.
+  - Your own 1:1 notes and observations.
 
-1. Navigate to the **Reports** section in the application
-2. Select **"Person Overview"** from the available reports
-3. Configure the report parameters:
-   - **Person**: Select the person to analyze
-   - **From Date**: Start of the analysis period
-   - **To Date**: End of the analysis period
-   - **Include Feedback**: Option to include feedback data
-4. Click **Run Report** to generate the analysis
+### For coaching and development
 
-### Report Parameters
+- Use the report in 1:1s to:
+  - Show how work lines up with **career goals** and expectations.
+  - Highlight **impactful initiatives** and **visible contributions**.
+  - Spot areas where they might take more ownership or breadth.
 
-#### Required Parameters
+### For workload and capacity checks
 
-- **Person ID**: The person to generate the overview for
-- **From Date**: Start date for the analysis period (ISO format: YYYY-MM-DD)
-- **To Date**: End date for the analysis period (ISO format: YYYY-MM-DD)
+- Scan:
+  - Number and mix of tasks.
+  - Initiative load and cross‑team work.
+  - Ticket/PR volume (when integrated).
+- Use this to:
+  - Adjust staffing across initiatives.
+  - Balance work across team members.
 
-#### Optional Parameters
+---
 
-- **Include Feedback**: Whether to include feedback data in the analysis (default: false)
+## Access and Permissions (Summary)
 
-### Output Format
+- **Self‑access** – people can generate overviews for themselves (their linked person record).
+- **Managers** – can generate overviews for their direct reports.
+- **Admins** – can generate overviews for anyone in the organization.
 
-The report generates a structured markdown document containing:
+All data is:
 
-1. **Header Section**:
-   - Person name and basic information
-   - Analysis period (from date to date)
-   - Report generation timestamp
+- Scoped to your **organization**.
+- Respectful of **feedback privacy** (private feedback remains limited to authors).
 
-2. **Task Summary**:
-   - Total tasks completed
-   - Tasks by status (pending, in progress, completed)
-   - Task completion timeline
-   - Priority distribution
-
-3. **Initiative Summary**:
-   - Initiatives involved in
-   - Tasks per initiative
-   - Initiative status overview
-   - Contribution patterns
-
-4. **GitHub Activity** (if linked):
-   - Pull requests created, reviewed, merged
-   - Repository contributions
-   - Code review activity
-   - Development metrics
-
-5. **Jira Activity** (if linked):
-   - Tickets assigned and completed
-   - Project contributions
-   - Issue type distribution
-   - Work activity patterns
-
-6. **Feedback Summary** (if included):
-   - Feedback responses received
-   - Performance ratings
-   - Peer input
-   - Development areas
-
-## Access Control
-
-### Security Rules
-
-- **Personal Access**: Users can generate overviews for their own linked person record
-- **Manager Access**: Managers can generate overviews for their direct reports
-- **Admin Access**: Organization administrators can generate overviews for any person in their organization
-- **Organization Isolation**: All data is strictly filtered by organization membership
-- **Feedback Privacy**: Private feedback is only included if the current user is the author
-
-### Permission Requirements
-
-- User must belong to an organization
-- User must have appropriate access to the target person's data
-- External integrations must be properly configured for the target person
-- Feedback data requires additional permissions based on privacy settings
-
-## Technical Details
-
-### Report Definition
-
-- **Code ID**: `person-overview`
-- **Supported Renderers**: `markdown`
-- **Input Schema**: Zod schema with person ID, date range, and feedback inclusion options
-- **Output Type**: Structured JSON with comprehensive work activity data
-
-### Data Processing
-
-- **Real-time Data**: Fetches current data from all integrated systems
-- **Error Handling**: Graceful degradation if external services are unavailable
-- **Data Validation**: Ensures data integrity and consistency
-- **Performance Optimization**: Efficient queries to minimize processing time
-
-### Integration Handling
-
-- **GitHub API**: Respects rate limits and handles authentication
-- **Jira API**: Manages permissions and data access
-- **Database Queries**: Optimized for performance and security
-- **Caching Strategy**: No caching - always uses fresh data for accuracy
-
-## Best Practices
-
-### Report Generation
-
-- **Regular Intervals**: Generate overviews weekly or monthly for consistent tracking
-- **Appropriate Date Ranges**: Use 2-4 week periods for meaningful analysis
-- **Feedback Inclusion**: Include feedback for comprehensive performance reviews
-- **Data Quality**: Ensure task statuses and external accounts are up to date
-
-### Content Analysis
-
-- **Pattern Recognition**: Look for trends in task completion and work patterns
-- **Initiative Focus**: Analyze contribution to different initiatives
-- **External Activity**: Review GitHub and Jira activity for development insights
-- **Feedback Integration**: Use feedback data to understand performance perceptions
-
-### Team Usage
-
-- **Performance Reviews**: Use overviews for quarterly or annual evaluations
-- **Progress Tracking**: Monitor team member progress and development
-- **Workload Analysis**: Understand capacity and work distribution
-- **Development Planning**: Identify areas for growth and improvement
-
-## Troubleshooting
-
-### Common Issues
-
-#### Missing Data
-
-- **Verify Integrations**: Ensure GitHub and Jira accounts are properly linked
-- **Check Date Ranges**: Confirm data exists for the specified time period
-- **Account Linking**: Verify person records are linked to external accounts
-- **Permission Issues**: Check API credentials and permissions
-
-#### Data Quality Concerns
-
-- **Task Status**: Verify task completion dates and status updates
-- **Initiative Data**: Check initiative associations and status updates
-- **External Activity**: Confirm GitHub and Jira integration health
-- **Feedback Access**: Verify feedback permissions and privacy settings
-
-#### Access Problems
-
-- **Organization Membership**: Confirm user belongs to the correct organization
-- **Person Access**: Verify user has access to the target person's data
-- **Manager Relationships**: Check direct report relationships
-- **Admin Permissions**: Verify admin access if needed
-
-### Performance Optimization
-
-- **Date Range Limits**: Use reasonable date ranges to avoid timeouts
-- **Data Source Selection**: Disable unnecessary integrations if experiencing delays
-- **API Limits**: Monitor GitHub and Jira API usage and limits
-- **System Resources**: Check server resources during peak usage
-
-## Integration with Other Features
-
-### Performance Management
-
-- **Review Preparation**: Generate overviews before performance discussions
-- **Progress Documentation**: Create regular progress reports
-- **Achievement Tracking**: Document accomplishments and contributions
-- **Development Planning**: Use insights for future goal setting
-
-### Team Management
-
-- **Team Overview**: Generate overviews for all team members
-- **Cross-team Analysis**: Compare work patterns across different team members
-- **Resource Planning**: Use data for capacity and workload planning
-- **Recognition Programs**: Identify high performers and contributors
-
-### Task and Initiative Management
-
-- **Workload Analysis**: Understand task distribution and completion patterns
-- **Initiative Tracking**: Monitor contribution to organizational initiatives
-- **Capacity Planning**: Use data for future project planning
-- **Process Improvement**: Identify workflow optimization opportunities
+For underlying technical and security details, see the reports and security documentation.

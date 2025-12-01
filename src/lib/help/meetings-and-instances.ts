@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-10-25T08:06:22.007Z
+ * Generated on: 2025-12-01T10:25:24.279Z
  */
 
 export interface HelpContent {
@@ -22,7 +22,154 @@ export const helpContent: HelpContent = {
   category: 'Meetings & Communication',
   content: `# Meetings and Meeting Instances
 
-mpath provides comprehensive meeting management with support for both one-time meetings and recurring meeting series with individual instances.
+mpath separates **meetings** (the series or one‑time event) from **meeting instances** (each actual occurrence). Understanding the difference helps you design effective rhythms instead of “just more meetings”.
+
+---
+
+## Overview: Meetings vs Meeting Instances
+
+- A **meeting** defines:
+  - The purpose and structure (title, description, agenda)
+  - The base schedule (date/time and recurrence pattern)
+  - Default participants and a meeting owner
+  - Associations to teams, initiatives, and objectives
+
+- A **meeting instance** is:
+  - One specific occurrence on a particular date
+  - Where you capture **notes, attendance, and action items**
+  - Independently reschedulable or cancelable
+
+Think of it as:
+
+- **Meeting** → “Our weekly platform sync, every Monday at 10:00.”  
+- **Instance** → “This Monday’s platform sync, where we discussed Q3 incidents.”
+
+---
+
+## Why This Model Matters (Benefits)
+
+- **Cleaner calendars and history**  
+  Change details for a single occurrence without breaking the whole series.
+
+- **Better decision tracking**  
+  Each instance holds the specific decisions and actions from that session.
+
+- **Clear ownership and expectations**  
+  The series defines who should generally be there; instances record who actually was.
+
+- **Stronger connection to work**  
+  Meetings tie directly into initiatives and tasks, so discussions drive execution.
+
+---
+
+## Types of Meetings
+
+### One‑time meetings
+
+Use one‑time meetings for:
+
+- Ad‑hoc discussions and incident reviews
+- Interviews, performance conversations, or special workshops
+- One‑off deep dives with stakeholders
+
+These are simple: one schedule, one occurrence, individual notes and tasks.
+
+### Recurring meetings
+
+Use recurring meetings for:
+
+- Weekly team syncs
+- Bi‑weekly planning or grooming
+- Monthly initiative reviews or leadership check‑ins
+
+You define:
+
+- **Pattern** – daily, weekly, monthly, bi‑monthly, semi‑annually
+- **Participants** – who is expected each time
+- **Associations** – which teams/initiatives this ritual supports
+
+mpath generates instances automatically based on this pattern.
+
+---
+
+## Designing a Meeting + Instance Workflow
+
+### 1. Create the meeting (series or one‑time)
+
+1. Choose a clear **title** and write a short **purpose**:
+   - “What decisions or outcomes is this meeting responsible for?”
+2. Set:
+   - **Date & time**
+   - **Duration**
+   - **Location** (physical room or video link)
+3. Add **participants** and assign a **meeting owner** (often the EM, PM, or team lead).
+4. If this is recurring, configure the **recurrence pattern** and date range.
+5. Associate the meeting with relevant **teams** and **initiatives**.
+
+### 2. Use instances to track reality
+
+For each occurrence:
+
+- Adjust the specific **time or location** if needed.
+- Confirm who’s actually attending and record **attendance** afterward.
+- Capture **instance‑specific notes**:
+  - What changed since last time?
+  - What decisions did we make?
+  - What actions did we take on previous follow‑ups?
+
+### 3. Turn outcomes into tasks
+
+- From the instance notes, create **tasks**:
+  - Link them back to the **meeting instance** and relevant **initiative**.
+  - Assign owners and due dates.
+- In the next instance, review these tasks to close the loop.
+
+---
+
+## Examples & Best Practices
+
+### Example: Weekly team sync
+
+- **Meeting (series)**:
+  - Weekly, 45 minutes, same participants and agenda.
+  - Linked to the team and its key initiatives.
+- **Instances**:
+  - Each one tracks:
+    - What changed on initiatives (RAG, confidence, key risks)
+    - Which tasks were created or closed
+    - Who attended and who missed
+
+### Example: Monthly stakeholder review
+
+- **Meeting (series)**:
+  - Monthly review with engineering, product, and leadership.
+  - Linked to cross‑team initiatives and objectives.
+- **Instances**:
+  - Capture decisions on scope, priority shifts, and risks.
+  - Spawn tasks for follow‑ups and communication work.
+
+### Quick best practices
+
+- **Define meetings around decisions, not just updates.**  
+  Every recurring meeting should clearly state what it is accountable for.
+
+- **Review recurring meetings quarterly.**  
+  Kill or reshape meetings that no longer provide clear value.
+
+- **Keep instance notes focused and action‑oriented.**  
+  You should be able to skim an instance and quickly see “decisions + actions”.
+
+- **Use initiatives and tasks as anchors.**  
+  Let meetings be the place where you review and adjust, not the only place work lives.
+
+---
+
+## Related Topics
+
+- \`meetings\` – creating and managing meetings/series  
+- \`meeting-instances\` – managing individual occurrences  
+- \`initiatives\` – tying meetings to strategic work  
+- \`task-status\` / \`task-priorities\` – managing the tasks that come out of meetings
 
 ## Meeting Types
 

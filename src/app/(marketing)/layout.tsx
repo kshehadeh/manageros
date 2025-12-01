@@ -4,6 +4,7 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { ThemeProvider } from 'next-themes'
 import { ClerkProvider } from '@clerk/nextjs'
+import { headers } from 'next/headers'
 
 export default async function MarketingLayout({
   children,
@@ -11,8 +12,13 @@ export default async function MarketingLayout({
   children: React.ReactNode
 }) {
   const { userId } = await auth()
+  const headersList = await headers()
+  const pathname = headersList.get('x-pathname') || ''
 
-  if (userId) {
+  // Allow authenticated users to access landing pages
+  const isLandingPage = pathname.startsWith('/landing/')
+
+  if (userId && !isLandingPage) {
     return redirect('/dashboard')
   }
 

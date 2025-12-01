@@ -6,7 +6,7 @@
  *
  *   bun run help:generate
  *
- * Generated on: 2025-10-25T08:06:22.008Z
+ * Generated on: 2025-12-01T10:38:40.890Z
  */
 
 export interface HelpContent {
@@ -22,47 +22,85 @@ export const helpContent: HelpContent = {
   category: 'Integrations',
   content: `# Jira Integration
 
-mpath integrates with Jira to provide a unified view of your team's work across both platforms.
+Jira integration lets mpath pull in **ticket work and project activity** so your view of execution covers both tasks and Jira issues.
 
-## Setup Process
+It’s especially useful when engineering teams live in Jira but managers want a **unified picture** across initiatives, tasks, and tickets.
 
-### 1. Connect Your Jira Account
+---
 
-- **Enter your Jira URL** (e.g., yourcompany.atlassian.net)
-- **Provide authentication credentials** (API token recommended)
-- **Test the connection** to ensure proper access
+## What You Get from the Jira Integration
 
-### 2. Link Team Members
+With Jira connected you can:
 
-- **Associate Jira accounts** with mpath people
-- **Map Jira usernames** to team member profiles
-- **Verify access permissions** for each user
+- See a person’s **assigned issues and progress** alongside their mpath tasks.
+- Understand how work on **initiatives** spans Jira projects and issue types.
+- Use Jira activity in:
+  - Person Overview and AI Synopsis reports.
+  - Initiative reviews and capacity discussions.
 
-### 3. Configure Work Tracking
+The goal is to **reduce tab‑switching** and bring Jira context into the same surface you’re already using for people and initiatives.
 
-- **Select projects** to track in mpath
-- **Choose issue types** to include in work activity
-- **Set up automatic sync** for real-time updates
+---
 
-## Features
+## How to Set It Up (Step‑by‑Step)
 
-### Work Activity Tracking
+### 1. Connect Jira to your organization
 
-- **View assigned tickets** for each team member
-- **Track progress** on Jira issues
-- **Monitor workload** and capacity
+1. Go to **Settings → Jira Integration**.
+2. Enter:
+   - Your Jira base URL (e.g. \`https://yourcompany.atlassian.net\`).
+   - Credentials (API token + email / app auth, depending on your setup).
+3. Test the connection and save.
 
-### Status Synchronization
+### 2. Link people to their Jira accounts
 
-- **Real-time updates** from Jira to mpath
-- **Automatic task creation** from Jira issues
-- **Progress tracking** across both platforms
+1. Open a person’s profile.
+2. Use the **link Jira account** action (where available).
+3. Map their Jira identity (username/email) to their mpath person record.
 
-## Best Practices
+Once linked, mpath can attribute Jira issues to the right person.
 
-- **Use consistent naming** between Jira and mpath
-- **Regular sync** to keep data current
-- **Train team members** on the integration
-- **Monitor performance** and adjust as needed
+### 3. Choose what to sync
+
+- Select **projects** you care about.
+- Optionally limit by:
+  - **Issue types** (bugs, stories, tasks, etc.).
+  - Other filters as supported.
+
+This helps keep the integration focused on the work that matters most.
+
+---
+
+## How Managers and Teams Use It
+
+### For managers
+
+- In person and initiative views:
+  - See **Jira issues** alongside tasks and initiatives.
+  - Understand **where time is going** (feature work vs. bugs vs. interrupts).
+- In reports:
+  - Use Jira activity as part of the picture for reviews and planning.
+
+### For engineers
+
+- See all your work context in one place:
+  - What you own in Jira.
+  - How it ties back to initiatives and tasks in mpath.
+
+---
+
+## Best Practices & Guardrails
+
+- **Use consistent naming** between Jira projects and mpath initiatives when possible.
+- Regularly **review which projects are synced** so you’re not pulling noise.
+- Train the team on:
+  - What Jira data appears in mpath.
+  - How it will be used (e.g. for planning, not micromanagement).
+
+If data looks off:
+
+- Check account linking and permissions.
+- Verify project and issue type filters.
+- Confirm Jira API status and credentials.
 `,
 }
