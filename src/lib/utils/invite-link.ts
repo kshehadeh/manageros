@@ -1,4 +1,5 @@
 import { randomBytes } from 'crypto'
+import { getBaseUrl } from './url-utils'
 
 /**
  * Generates a unique invite link token for feedback campaigns
@@ -14,6 +15,6 @@ export function generateInviteLinkToken(): string {
  * @returns The full URL for the invite link
  */
 export function generateInviteLinkUrl(token: string): string {
-  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+  const baseUrl = getBaseUrl()
   return `${baseUrl}/feedback-form/${token}`
 }
