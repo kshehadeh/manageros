@@ -1,0 +1,399 @@
+---
+id: job-roles
+title: Job Roles
+category: People & Teams
+---
+
+<Info>
+  Job roles in mpath describe **what a position is, how senior it is, and which domain it belongs to**. They give you a consistent language for hiring, career growth, and organizational analysis.
+</Info>
+
+Ever need to answer questions like:
+- "What level is this person?"
+- "How many Senior Engineers do we have?"
+- "What's the difference between a Staff and Principal role?"
+
+Job roles help you answer these questions and create clarity across your organization.
+
+## What You'll Find Here
+
+Job roles are built from three core pieces that work together:
+
+<CardGroup cols={3}>
+<Card title="Job Levels" icon="arrow-up-down">
+  How senior the role is (e.g., Junior, Senior, Staff). Levels are ordered to show career progression.
+</Card>
+
+<Card title="Job Domains" icon="sitemap">
+  Which functional area it belongs to (e.g., Engineering, Product, Design). Domains help you organize by function.
+</Card>
+
+<Card title="Role Definitions" icon="briefcase">
+  How level and domain combine into specific positions (e.g., Senior Software Engineer). Each role includes detailed descriptions.
+</Card>
+</CardGroup>
+
+Once defined, job roles can be **assigned to people** and used across:
+
+- The **People** view for filtering and organization
+- Org planning and career frameworks
+- Performance and calibration workflows
+- Hiring and recruitment processes
+
+## Why Job Roles Matter
+
+You might be wondering: "Why do I need structured job roles?" Here's why they're so valuable:
+
+<Tip>
+  **Clarity for people and managers**  
+  Everyone understands what a role means, how it's expected to operate, and what "next level" looks like. This eliminates confusion about expectations and career paths.
+</Tip>
+
+- **Consistency in hiring and promotion**  
+  Candidates and internal moves are evaluated against the same expectations. No more "what does Senior mean here?" questions.
+
+- **Better reporting and planning**  
+  You can see how many people you have at each level and in each domain. This helps with org planning, identifying gaps, and making data-driven decisions.
+
+- **Foundation for career growth**  
+  Clear levels and descriptions help people understand what they need to do to advance. Managers can use them to guide development conversations.
+
+## Key Concepts
+
+Let's break down how job roles work:
+
+<AccordionGroup>
+<Accordion title="Job Levels">
+
+Levels represent **seniority and scope** within your organization. For example:
+
+- **Junior** → entry-level roles
+- **Professional** → core individual contributors
+- **Senior Professional** → experienced ICs with broader scope
+- **Staff / Principal** → strategic technical leaders
+
+**Level Ordering**: Job levels are displayed in order from lowest to highest seniority. This order:
+- Determines how levels appear in selection dropdowns
+- Helps establish clear career progression paths
+- Makes it easy to understand the hierarchy at a glance
+
+You can drag and drop levels to reorder them, with visual feedback and automatic persistence.
+
+</Accordion>
+
+<Accordion title="Job Domains">
+
+Domains represent **functional areas** in your organization, such as:
+
+- **Engineering** - Software development and technical roles
+- **Product** - Product management and strategy
+- **Design** - User experience and visual design
+- **Marketing** - Marketing and communications
+
+Domains help you:
+- Slice the org by function
+- Understand where skills sit
+- Plan hiring and growth by area
+- Analyze distribution across functions
+
+</Accordion>
+
+<Accordion title="Job Roles">
+
+A job role combines **level + domain + description** into a concrete position:
+
+- "Senior Software Engineer" (Senior Professional, Engineering)
+- "Staff Product Manager" (Staff, Product)
+- "UX Designer" (multiple levels, Design)
+
+Each role can include:
+
+- **Responsibilities** - What the role is expected to do
+- **Requirements** - Skills, experience, and qualifications needed
+- **Growth expectations** - Signals for readiness to move to the next level
+
+Job descriptions support markdown formatting, so you can create rich, detailed role definitions.
+
+</Accordion>
+</AccordionGroup>
+
+## How to Manage Job Roles
+
+Here's how to set up and manage job roles in mpath:
+
+<Steps>
+<Step title="Set up levels and domains (Administrators)">
+
+As an administrator, start by creating the foundation:
+
+1. Go to **Organization Settings → Job Role Management**
+2. Create **job levels**:
+   - Click "Add Level" in the Job Levels section
+   - Enter level name (e.g., "Junior", "Senior", "Staff")
+   - Click "Create" to save
+   - New levels automatically receive the next order number
+3. **Order job levels**:
+   - Drag and drop levels to reorder them (use the grip handle ⋮⋮)
+   - Order numbers automatically update based on position
+   - Lower order numbers appear first in dropdown menus
+4. Create **job domains**:
+   - Click "Add Domain" in the Job Domains section
+   - Enter domain name (e.g., "Engineering", "Product")
+   - Click "Create" to save
+
+<Check>
+  Start with your core levels and domains. You can always add more later as your organization evolves.
+</Check>
+
+</Step>
+
+<Step title="Create job roles">
+
+Once you have levels and domains, create specific job roles:
+
+1. In the Job Roles section, click **Add Job Role**
+2. Fill in the details:
+   - **Title** - The role name (e.g., "Senior Software Engineer")
+   - **Level** - Selected from the levels you defined
+   - **Domain** - Selected from your domains
+   - **Description** - Responsibilities, expectations, and requirements (supports markdown)
+3. Click "Create" to save
+
+Roles become available everywhere a **job role** can be selected.
+
+</Step>
+
+<Step title="Assign roles to people">
+
+You can assign job roles when:
+
+- **Creating a new person** from the People page
+- **Editing an existing person's** profile
+
+1. Navigate to People → Add Person (or edit an existing person)
+2. Fill in basic information
+3. In the "Job Role" section, select a role from the dropdown
+4. Save the person
+
+This keeps people data, hierarchy, and career paths aligned.
+
+</Step>
+
+<Step title="Edit and maintain roles">
+
+Keep your job roles current:
+
+- **Edit**: Click the "Edit" button next to any level, domain, or role
+- **Delete**: Click the "Delete" button (only allowed if no roles/people are assigned)
+
+<Warning>
+  You cannot delete levels or domains that have job roles assigned, or job roles that have people assigned. You must first reassign or remove the people from that role.
+</Warning>
+
+</Step>
+</Steps>
+
+## Job Descriptions
+
+Job descriptions support markdown formatting, so you can create rich, detailed role definitions:
+
+```markdown
+### Responsibilities
+
+- Design and implement software solutions
+- Mentor junior team members
+- Collaborate with product and design teams
+
+### Requirements
+
+- **Experience**: 5+ years in software development
+- **Skills**: React, TypeScript, Node.js
+- **Education**: Computer Science degree or equivalent
+
+### Preferred Qualifications
+
+- Previous startup experience
+- Knowledge of cloud platforms
+- Experience with mobile development
+```
+
+Use descriptions to capture:
+- Responsibilities and expected scope
+- Technical and leadership expectations
+- Signals for readiness to move to the next level
+
+## Real-World Examples
+
+Let's see how job roles work in practice:
+
+<AccordionGroup>
+<Accordion title="Building an engineering ladder">
+
+You're setting up a clear engineering progression:
+
+**Levels**: Junior → Professional → Senior Professional → Staff → Principal
+
+**Domains**: Engineering, Product, Design
+
+**Roles**:
+- "Software Engineer" (Professional, Engineering)
+- "Senior Software Engineer" (Senior Professional, Engineering)
+- "Staff Software Engineer" (Staff, Engineering)
+
+Each role has detailed descriptions covering responsibilities, technical expectations, and growth signals. This creates a clear career path that everyone understands.
+
+</Accordion>
+
+<Accordion title="Planning hiring for next year">
+
+Use job roles to make data-driven hiring decisions:
+
+1. See how many people you have at each level in each domain
+2. Spot gaps (e.g., missing Staff-level engineers in key domains)
+3. Plan which roles to open for hiring
+4. Ensure balanced representation across functional areas
+
+This helps you identify where you need to invest in hiring and growth.
+
+</Accordion>
+
+<Accordion title="Handling promotions">
+
+When someone gets promoted:
+
+1. Go to their profile from the People page
+2. Edit their job role assignment
+3. Select their new role (e.g., from "Senior Software Engineer" to "Staff Software Engineer")
+4. Optionally update the job role description if expectations have changed
+
+The change is immediately reflected across mpath, keeping everything in sync.
+
+</Accordion>
+</AccordionGroup>
+
+## Viewing Job Role Information
+
+Job roles appear throughout mpath:
+
+<CardGroup cols={2}>
+<Card title="In the People Table" icon="table">
+  Job roles appear in a dedicated "Job Role" column. Shows role title with level and domain information. Displays as "—" for people without assigned roles.
+</Card>
+
+<Card title="In Person Details" icon="user">
+  Full job role information visible when viewing individual person profiles. Includes full job description with markdown formatting. Shows who else has the same job role.
+</Card>
+</CardGroup>
+
+## Best Practices
+
+Here are some tips to get the most out of job roles:
+
+<Tip>
+  **Keep role descriptions current**  
+  Update job descriptions when expectations change. Outdated descriptions create confusion and misalignment. Set a reminder to review them quarterly.
+</Tip>
+
+- **Review levels and roles periodically** with HR/people ops. Organizations evolve, and your job roles should too.
+
+- **Use roles consistently in performance and calibration** so evaluation criteria are clear. Everyone should be evaluated against the same expectations for their role.
+
+- **Start with levels** - Define the organizational hierarchy first, then map domains, then create specific roles.
+
+- **Keep it simple at first** - You don't need every possible role from day one. Start with your core roles and expand as needed.
+
+- **Align with compensation** - Ensure levels align with your compensation philosophy. This helps with fairness and transparency.
+
+## Common Use Cases
+
+<AccordionGroup>
+<Accordion title="Career Development">
+
+Use job roles to support career growth:
+
+- **Growth Planning**: Use levels to plan career progression paths
+- **Skill Mapping**: Link job descriptions to development areas
+- **Cross-Domain**: Track movement between different functional areas
+- **Clear Expectations**: Help people understand what's needed to advance
+
+</Accordion>
+
+<Accordion title="Organizational Analysis">
+
+Use job roles for data-driven insights:
+
+- **Role Distribution**: See how roles are distributed across the organization
+- **Level Breakdown**: Understand the seniority distribution
+- **Domain Balance**: Ensure balanced representation across functional areas
+- **Gap Analysis**: Identify where you need more people at specific levels
+
+</Accordion>
+
+<Accordion title="Recruitment">
+
+Use job roles for hiring:
+
+- **Clear Roles**: Provide specific job descriptions for new hires
+- **Role Mapping**: Help candidates understand organizational structure
+- **Expectations**: Set clear expectations about responsibilities and growth
+- **Consistency**: Ensure all candidates are evaluated against the same criteria
+
+</Accordion>
+</AccordionGroup>
+
+## FAQs
+
+<AccordionGroup>
+<Accordion title="Can one person have multiple job roles?">
+
+No, each person can only have one job role assigned. This ensures clarity about their primary role and responsibilities. If someone has multiple responsibilities, you can reflect that in the job description.
+
+</Accordion>
+
+<Accordion title="Can I change a person's job role?">
+
+Yes, administrators can edit a person's job role assignment at any time through the person edit form. This is useful for promotions, role changes, or corrections.
+
+</Accordion>
+
+<Accordion title="What happens if I delete a job role that has people assigned?">
+
+You cannot delete job roles that have people assigned. You must first reassign or remove the people from that role. This safety check prevents accidental data loss.
+
+</Accordion>
+
+<Accordion title="How do I handle promotions?">
+
+Update the person's job role to reflect their new level and responsibilities. You can also update the job role description if needed. The change is immediately reflected across mpath.
+
+</Accordion>
+
+<Accordion title="Can I see who else has the same job role?">
+
+Yes, the job role management interface shows all people assigned to each role. This helps you understand role distribution and find peers.
+
+</Accordion>
+</AccordionGroup>
+
+## What's Next?
+
+Now that you understand job roles, explore these related topics:
+
+<CardGroup cols={2}>
+<Card title="People" icon="users" href="/people-teams/people">
+  Learn how people, roles, and teams are surfaced in the UI and how to assign roles to people.
+</Card>
+
+<Card title="People Hierarchy" icon="sitemap" href="/people-teams/people-hierarchy">
+  See how reporting lines and structure are visualized, including how roles fit into the org chart.
+</Card>
+
+<Card title="Direct Reports" icon="users-round" href="/people-teams/direct-reports">
+  Discover how to use roles and hierarchy when managing your team.
+</Card>
+
+<Card title="Teams" icon="sitemap" href="/people-teams/teams">
+  Learn how teams work alongside job roles to organize your organization.
+</Card>
+</CardGroup>
+

@@ -1,0 +1,108 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "almond",
+  "name": "mpath Help",
+  "colors": {
+    "primary": "#cf6e19",
+    "light": "#cf6e19",
+    "dark": "#cf6e19"
+  },
+  "favicon": "/favicon.ico",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Getting started",
+            "pages": ["quickstart", "concepts", "keyboard-shortcuts"]
+          },
+          {
+            "group": "People & Teams",
+            "pages": [
+              "people-teams/people",
+              "people-teams/teams",
+              "people-teams/job-roles"
+            ]
+          },
+          {
+            "group": "Meetings & Communication",
+            "pages": [
+              "meetings-communication/meetings",
+              "meetings-communication/one-on-ones"
+            ]
+          },
+          {
+            "group": "Tasks & Projects",
+            "pages": ["tasks-projects/tasks", "tasks-projects/initiatives"]
+          },
+          {
+            "group": "Feedback & Development",
+            "pages": [
+              "feedback-development/feedback",
+              "feedback-development/feedback-360-campaigns"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "pages": [
+              "integrations/integrations",
+              "integrations/jira-integration",
+              "integrations/github-integration"
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Documentation",
+          "href": "https://mintlify.com/docs",
+          "icon": "book-open-cover"
+        },
+        {
+          "anchor": "Blog",
+          "href": "https://mintlify.com/blog",
+          "icon": "newspaper"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/logo/mpath-docs-header-light.png",
+    "dark": "/logo/mpath-docs-header-dark.png"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Home",
+        "href": "https://www.mpath.dev"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Dashboard",
+      "href": "https://www.mpath.dev/dashboard"
+    }
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/kshehadeh",
+      "github": "https://github.com/kshehadeh/manageros",
+      "linkedin": "https://linkedin.com/kshehadeh"
+    }
+  }
+}

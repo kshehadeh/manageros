@@ -1,0 +1,213 @@
+---
+id: jira-integration
+title: Jira Integration
+category: Integrations
+---
+
+Jira integration lets mpath pull in **ticket work and project activity** so your view of execution covers both tasks and Jira issues.
+
+It's especially useful when engineering teams live in Jira but managers want a **unified picture** across initiatives, tasks, and tickets.
+
+---
+
+## What You Get from the Jira Integration
+
+With Jira connected you can:
+
+- See a person's **assigned issues and progress** alongside their mpath tasks.
+- Understand how work on **initiatives** spans Jira projects and issue types.
+- Use Jira activity in:
+  - Person Activity views.
+  - Person Overview and AI Synopsis reports.
+  - Initiative reviews and capacity discussions.
+
+The goal is to **reduce tab‑switching** and bring Jira context into the same surface you're already using for people and initiatives.
+
+---
+
+## How to Set It Up (Step‑by‑Step)
+
+### 1. Generate Jira API Token
+
+Before configuring the integration in mpath, you'll need a Jira API token:
+
+1. Log into your Jira instance.
+2. Go to **Account Settings** → **Security** → **API tokens**.
+3. Click **Create API token**.
+4. Give it a label (e.g., "ManagerOS Integration").
+5. **Copy the token immediately** (it won't be shown again).
+
+### 2. Configure Organization-Level Integration
+
+<Warning>
+  You must be an organization administrator to configure organization-level integrations.
+</Warning>
+
+1. Navigate to **Organization Settings** → **Integrations**.
+2. Click **Add Integration**.
+3. Select **Jira**.
+4. Enter:
+   - **Name**: A descriptive name (e.g., "Company Jira").
+   - **Jira Username or Email**: Your Jira account email.
+   - **Jira Base URL**: Your Jira instance URL (e.g., `https://yourcompany.atlassian.net`).
+   - **API Token**: The token you generated in step 1.
+5. Click **Create**.
+6. The system will test the connection automatically.
+
+<Info>
+  Organization-level integrations allow all organization members to link their Jira accounts. User-level integrations are also available in **Settings** → **Integrations** for personal use.
+</Info>
+
+### 3. Link People to Their Jira Accounts
+
+Once the organization-level integration is configured:
+
+1. Open a person's profile in mpath.
+2. Navigate to the **"Account Linking"** section.
+3. In the Jira Account section, enter the person's **Jira email address**.
+4. Click **"Link Account"**.
+
+<Check>
+  The Jira email must match an active Jira user in your Jira instance. If multiple users are found with the same email, contact your administrator.
+</Check>
+
+Once linked, mpath can attribute Jira issues to the right person and display their activity in Activity views.
+
+---
+
+## How Managers and Teams Use It
+
+### For managers
+
+- In person Activity views:
+  - See **Jira issues** alongside tasks and initiatives.
+  - Understand **where time is going** (feature work vs. bugs vs. interrupts).
+- In reports:
+  - Use Jira activity as part of the picture for reviews and planning.
+- In AI Overview and synopses:
+  - Get comprehensive insights that include Jira work activity.
+
+### For engineers
+
+- See all your work context in one place:
+  - What you own in Jira.
+  - How it ties back to initiatives and tasks in mpath.
+- Use Activity views to:
+  - Review your recent Jira work.
+  - See how Jira tickets relate to mpath initiatives.
+
+---
+
+## Accessing Jira Data
+
+### Activity Views
+
+Jira activity appears in person Activity views:
+
+1. Navigate to a person's profile.
+2. Click the **"View"** dropdown menu.
+3. Select **"Activity"**.
+4. Scroll to the **Jira Metrics** section.
+
+The Activity view shows:
+- Assigned issues.
+- Issue progress and status.
+- Project activity within the selected date range.
+
+### AI Overview and Synopses
+
+Jira data is also included in:
+- **AI Overview** reports for people.
+- **AI-generated synopses** that synthesize work across all tools.
+
+---
+
+## Best Practices & Guardrails
+
+### Security
+
+- **Use fine-grained tokens** where possible.
+- **Rotate API tokens regularly** and remove unused tokens.
+- **Limit token scopes** to only what's needed.
+- **Review linked accounts** periodically and unlink when people leave.
+
+### Data Management
+
+- **Use consistent naming** between Jira projects and mpath initiatives when possible.
+- **Link accounts promptly** for new team members.
+- **Keep links current** as people change roles or accounts.
+- **Verify account links** are correct (wrong links show wrong data).
+
+### Usage
+
+- **Don't rely solely on metrics**—use Jira data as one input among many.
+- **Respect privacy**—integration data should support, not replace, conversations.
+- **Train the team** on:
+  - What Jira data appears in mpath.
+  - How it will be used (e.g., for planning, not micromanagement).
+
+---
+
+## Troubleshooting
+
+### No Data Appearing
+
+If Jira data isn't showing up:
+
+1. **Check organization-level configuration**:
+   - Verify integration is enabled in Organization Settings → Integrations.
+   - Test the connection.
+   - Confirm credentials are valid and not expired.
+
+2. **Verify account linking**:
+   - Ensure the person's account is linked.
+   - Check that the email is correct.
+   - Confirm the account exists in your Jira instance.
+
+3. **Check date ranges**:
+   - Activity views use date ranges—ensure your range includes recent activity.
+   - Try expanding the date range.
+
+4. **Review permissions**:
+   - Verify the integration credentials have access to the data.
+   - Check project permissions in Jira.
+
+### Wrong Data Showing
+
+If you see incorrect data:
+
+1. **Verify account linking**:
+   - Check that the linked account belongs to the correct person.
+   - Unlink and re-link if necessary.
+
+2. **Check for duplicate accounts**:
+   - Some Jira instances may have multiple accounts for the same person.
+   - Ensure you're linking to the correct account.
+
+### Connection Issues
+
+If the integration connection fails:
+
+- Check that the Jira base URL is correct.
+- Verify the API token is valid and not expired.
+- Confirm the Jira username/email matches the token owner.
+- Check Jira API status and your network connection.
+
+---
+
+## Learn More
+
+<CardGroup cols={2}>
+<Card title="Integrations Overview" icon="plug" href="/integrations">
+  Learn about the integration system and how integrations work in mpath.
+</Card>
+
+<Card title="GitHub Integration" icon="code" href="/github-integration">
+  Discover how to connect GitHub and view pull request activity.
+</Card>
+</CardGroup>
+
+<Tip>
+  Need help? Click the help icon (?) on any page in mpath for contextual guidance about Jira integration and account linking.
+</Tip>
+
