@@ -297,7 +297,7 @@ function TaskFormContent({
                   </option>
                 ))}
               </select>
-              <HelpIcon helpId='task-status' size='sm' />
+              <HelpIcon helpId='tasks' size='sm' />
             </div>
             {errors.status && (
               <p className='text-sm text-red-500 mt-1'>{errors.status}</p>
@@ -332,7 +332,7 @@ function TaskFormContent({
                   </option>
                 ))}
               </select>
-              <HelpIcon helpId='task-priorities' size='sm' />
+              <HelpIcon helpId='tasks' size='sm' />
             </div>
             {errors.priority && (
               <p className='text-sm text-red-500 mt-1'>{errors.priority}</p>

@@ -1,13 +1,10 @@
 'use client'
 
-import { useState } from 'react'
 import { HelpCircle } from 'lucide-react'
-import { HelpDialog } from '@/components/shared'
-import { getHelpContent } from '@/lib/help-content-loader'
 import { cn } from '@/lib/utils'
 
 interface HelpIconProps {
-  /** The ID of the help content to display */
+  /** The ID of the help content to display - links to help.mpath.dev */
   helpId: string
   /** Optional custom className for styling */
   className?: string
@@ -20,7 +17,7 @@ interface HelpIconProps {
     | 'top-left'
     | 'bottom-right'
     | 'bottom-left'
-  /** Custom tooltip text (overrides help content title) */
+  /** Custom tooltip text */
   tooltip?: string
 }
 
@@ -38,6 +35,13 @@ const positionClasses = {
   'bottom-left': 'absolute -bottom-1 -left-1',
 }
 
+/**
+ * Constructs the help URL for Mintlify documentation
+ */
+function getHelpUrl(helpId: string): string {
+  return `https://help.mpath.dev/${helpId}`
+}
+
 export function HelpIcon({
   helpId,
   className,
@@ -45,44 +49,31 @@ export function HelpIcon({
   position = 'inline',
   tooltip,
 }: HelpIconProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const helpContent = getHelpContent(helpId)
-
-  if (!helpContent) {
-    console.warn(`Help content not found for ID: ${helpId}`)
-    return null
-  }
+  const helpUrl = getHelpUrl(helpId)
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    setIsOpen(true)
+    window.open(helpUrl, '_blank', 'noopener,noreferrer')
   }
 
   return (
-    <>
-      <button
-        type='button'
-        onClick={handleClick}
-        className={cn(
-          'inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
-          sizeClasses[size],
-          positionClasses[position],
-          className
-        )}
-        aria-label={`Help: ${tooltip || helpContent.title}`}
-        title={tooltip || helpContent.title}
-      >
-        <HelpCircle className='h-full w-full' />
-      </button>
-
-      <HelpDialog
-        helpId={helpId}
-        icon={HelpCircle}
-        isOpen={isOpen}
-        onOpenChange={setIsOpen}
-      />
-    </>
+    <a
+      href={helpUrl}
+      onClick={handleClick}
+      target='_blank'
+      rel='noopener noreferrer'
+      className={cn(
+        'inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+        sizeClasses[size],
+        positionClasses[position],
+        className
+      )}
+      aria-label={tooltip || `Help: ${helpId}`}
+      title={tooltip || `View help for ${helpId}`}
+    >
+      <HelpCircle className='h-full w-full' />
+    </a>
   )
 }
 
