@@ -1,0 +1,237 @@
+---
+id: github-integration
+title: GitHub Integration
+category: Integrations
+---
+
+GitHub integration brings **development work into the same place as people, initiatives, and tasks**.
+
+It helps you see not just _that_ work is happening, but **where and how** engineers are contributing in code.
+
+---
+
+## What You Get from the GitHub Integration
+
+With GitHub connected you can:
+
+- See **recent pull requests** for linked people directly in mpath.
+- Understand how work on **initiatives and tasks** shows up in code.
+- Use PR activity as input into:
+  - Performance reviews and promotion discussions.
+  - Weekly team reviews and incident post‑mortems.
+  - AI Overview and synopsis reports.
+
+The goal is not to create a separate "metrics dashboard", but to **add GitHub context to the workflows you already use**.
+
+---
+
+## How to Set It Up (Step‑by‑Step)
+
+### 1. Generate GitHub Personal Access Token
+
+Before configuring the integration in mpath, you'll need a GitHub Personal Access Token (PAT):
+
+1. Go to [GitHub Settings](https://github.com/settings/tokens).
+2. Navigate to **Developer settings** → **Personal access tokens** → **Tokens (classic)**.
+3. Click **Generate new token (classic)**.
+4. Give it a name (e.g., "ManagerOS Integration").
+5. Select scopes:
+   - `repo` - Full control of private repositories (if you need private repo access).
+   - `read:user` - Read user profile data.
+   - `read:org` - Read org and team membership (if you need organization data).
+6. Click **Generate token**.
+7. **Important**: Copy the token immediately (it won't be shown again).
+
+<Tip>
+  Use fine-grained tokens where possible for better security. Fine-grained tokens allow more granular permission control.
+</Tip>
+
+### 2. Configure Organization-Level Integration
+
+<Warning>
+  You must be an organization administrator to configure organization-level integrations.
+</Warning>
+
+1. Navigate to **Organization Settings** → **Integrations**.
+2. Click **Add Integration**.
+3. Select **GitHub**.
+4. Enter:
+   - **Name**: A descriptive name (e.g., "Company GitHub").
+   - **GitHub Username**: Your GitHub username.
+   - **Personal Access Token**: The PAT you generated in step 1.
+5. Click **Create**.
+6. The system will test the connection automatically.
+
+<Info>
+  Organization-level integrations allow all organization members to link their GitHub accounts. User-level integrations are also available in **Settings** → **Integrations** for personal use.
+</Info>
+
+### 3. Link People to Their GitHub Accounts
+
+Once the organization-level integration is configured:
+
+1. Open a person's profile in mpath.
+2. Navigate to the **"Account Linking"** section.
+3. In the GitHub Account section, enter the person's **GitHub username**.
+4. Click **"Link Account"**.
+
+<Check>
+  The GitHub username must be valid and the account must be accessible with the configured integration credentials.
+</Check>
+
+Once linked:
+
+- Their PR activity can appear in:
+  - Person Activity views.
+  - Person Overview and AI Synopsis reports.
+  - Initiative views.
+
+---
+
+## How Engineers and Managers Use It Day‑to‑Day
+
+### For engineers
+
+- See your own **recent PRs** alongside tasks and initiatives in Activity views.
+- Use this context in 1:1s and reviews to:
+  - Recall which pieces of work shipped.
+  - Talk about collaboration (reviews, cross‑repo work).
+  - Show progress on initiatives through code contributions.
+
+### For managers and leads
+
+- When looking at a person or initiative:
+  - See **where code is landing** (repos, services).
+  - Understand the balance between **feature work, maintenance, and incident‑driven work**.
+- Use GitHub data as:
+  - One input to performance discussions (not the only one).
+  - A way to recognize invisible work like reviews and refactors.
+- In AI Overview and synopses:
+  - Get comprehensive insights that include GitHub activity.
+
+---
+
+## Accessing GitHub Data
+
+### Activity Views
+
+GitHub activity appears in person Activity views:
+
+1. Navigate to a person's profile.
+2. Click the **"View"** dropdown menu.
+3. Select **"Activity"**.
+4. Scroll to the **GitHub Metrics** section.
+
+The Activity view shows:
+- Recent pull requests.
+- Code contributions.
+- Repository activity within the selected date range.
+
+### AI Overview and Synopses
+
+GitHub data is also included in:
+- **AI Overview** reports for people.
+- **AI-generated synopses** that synthesize work across all tools.
+
+---
+
+## Security & Best Practices
+
+### Security
+
+- **Keep tokens scoped and rotated**:
+  - Use fine‑grained PATs or app‑based integrations where possible.
+  - Rotate regularly and remove tokens when no longer needed.
+- **Respect repo access**:
+  - Only fetch data for repositories your org is comfortable surfacing.
+  - Follow your internal security and privacy policies.
+- **Review linked accounts**:
+  - Link GitHub accounts promptly for new hires.
+  - Unlink accounts when people leave the organization.
+
+### Data Management
+
+- **Link accounts promptly** for new team members.
+- **Verify account links** are correct (wrong links show wrong data).
+- **Keep links current** as people change roles or accounts.
+- **Review integration data** regularly to ensure accuracy.
+
+### Usage
+
+- **Don't rely solely on metrics**—use GitHub data as one input among many.
+- **Respect privacy**—integration data should support, not replace, conversations.
+- **Recognize invisible work** like code reviews and refactoring that may not show up in PR counts.
+
+---
+
+## Troubleshooting
+
+### No Data Appearing
+
+If GitHub data isn't showing up:
+
+1. **Check organization-level configuration**:
+   - Verify integration is enabled in Organization Settings → Integrations.
+   - Test the connection.
+   - Confirm credentials are valid and not expired.
+
+2. **Verify account linking**:
+   - Ensure the person's account is linked.
+   - Check that the username is correct.
+   - Confirm the account exists and is accessible.
+
+3. **Check date ranges**:
+   - Activity views use date ranges—ensure your range includes recent activity.
+   - Try expanding the date range.
+
+4. **Review permissions**:
+   - Verify the integration credentials have access to the repositories.
+   - Check repository permissions and GitHub API status.
+
+### Wrong Data Showing
+
+If you see incorrect data:
+
+1. **Verify account linking**:
+   - Check that the linked account belongs to the correct person.
+   - Unlink and re-link if necessary.
+
+2. **Check for duplicate accounts**:
+   - Some people may have multiple GitHub accounts.
+   - Ensure you're linking to the correct account.
+
+### Connection Issues
+
+If the integration connection fails:
+
+- Check that the GitHub username is correct.
+- Verify the Personal Access Token is valid and not expired.
+- Confirm the token has the required scopes.
+- Check GitHub API status and your network connection.
+
+### Token Scopes
+
+If you're missing data:
+
+- Verify the token has `repo` scope for private repositories.
+- Check that `read:user` and `read:org` scopes are included if needed.
+- Review GitHub's token scope documentation for your use case.
+
+---
+
+## Learn More
+
+<CardGroup cols={2}>
+<Card title="Integrations Overview" icon="plug" href="/integrations">
+  Learn about the integration system and how integrations work in mpath.
+</Card>
+
+<Card title="Jira Integration" icon="ticket" href="/jira-integration">
+  Discover how to connect Jira and view ticket activity.
+</Card>
+</CardGroup>
+
+<Tip>
+  Need help? Click the help icon (?) on any page in mpath for contextual guidance about GitHub integration and account linking.
+</Tip>
+

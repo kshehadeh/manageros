@@ -1,0 +1,269 @@
+---
+id: integrations
+title: Integrations Overview
+category: Integrations
+---
+
+Integrations connect **third-party tools and services** to mpath, bringing external work activity and context directly into your management workflows.
+
+Instead of switching between multiple tools, integrations help you see **where work is happening** across your organization—from code contributions to ticket assignments—all in one place.
+
+---
+
+## What Integrations Do
+
+Integrations help you:
+
+- **See complete work context** for team members by combining mpath tasks with external activity
+- **Reduce context switching** by bringing Jira tickets, GitHub pull requests, and other work into mpath
+- **Get better insights** for performance reviews, planning, and team discussions
+- **Understand work distribution** across different tools and platforms
+
+The goal is not to replace your existing tools, but to **enrich the workflows you already use** with additional context and visibility.
+
+---
+
+## Types of Integrations
+
+### Currently Available
+
+<CardGroup cols={2}>
+<Card title="Jira Integration" icon="ticket" href="/jira-integration">
+  Connect Jira to see assigned issues, ticket progress, and project activity for each person. Perfect for teams that track work in Jira.
+</Card>
+
+<Card title="GitHub Integration" icon="code" href="/github-integration">
+  Link GitHub accounts to surface pull requests, code contributions, and development activity. Great for engineering teams.
+</Card>
+</CardGroup>
+
+### Coming Soon
+
+<Warning>
+  **Microsoft and Google integrations** are planned for future releases. These will enable integration with Microsoft 365, Azure DevOps, Google Workspace, and other Microsoft and Google services.
+</Warning>
+
+---
+
+## How to Access Integration Data
+
+### Activity Views
+
+Integration data appears in **Activity views** for each person:
+
+1. Navigate to a person's profile
+2. Click the **"View"** dropdown menu
+3. Select **"Activity"**
+
+The Activity view shows:
+
+- **Tasks** from mpath
+- **Initiatives** the person is working on
+- **Jira metrics** (if Jira account is linked)
+  - Assigned issues
+  - Issue progress and status
+  - Project activity
+- **GitHub metrics** (if GitHub account is linked)
+  - Recent pull requests
+  - Code contributions
+  - Repository activity
+
+<Info>
+  Activity views use date ranges to filter data. Adjust the date range to see activity for specific time periods.
+</Info>
+
+### AI Overview and Synopses
+
+Integration data also appears in:
+
+- **AI Overview** reports for people
+- **AI-generated synopses** that synthesize work across all tools
+- **Initiative views** that show how work spans multiple platforms
+
+This helps you get a **complete picture** of someone's contributions across mpath, Jira, GitHub, and other connected tools.
+
+---
+
+## Account Linking
+
+To see integration data for a person, you need to **link their account** in the third-party system to their mpath person record.
+
+### How Account Linking Works
+
+Account linking creates a connection between:
+
+- A **person** in mpath (someone in your organization)
+- An **account** in a third-party system (their Jira user, GitHub profile, etc.)
+
+Once linked, mpath can:
+
+- Fetch activity data from the third-party system
+- Attribute work to the correct person
+- Display metrics and activity in Activity views
+
+### Linking Accounts
+
+#### For Jira
+
+1. Open the person's profile in mpath
+2. Go to the **"Account Linking"** section
+3. Enter the person's **Jira email address**
+4. Click **"Link Account"**
+
+<Check>
+  Your organization must have Jira integration configured at the organization level before you can link individual accounts.
+</Check>
+
+#### For GitHub
+
+1. Open the person's profile in mpath
+2. Go to the **"Account Linking"** section
+3. Enter the person's **GitHub username**
+4. Click **"Link Account"**
+
+<Check>
+  Your organization must have GitHub integration configured at the organization level before you can link individual accounts.
+</Check>
+
+### Requirements
+
+Before linking accounts:
+
+1. **Organization-level integration** must be configured
+   - Go to **Organization Settings → Integrations**
+   - Click **Add Integration** and select Jira or GitHub
+   - Configure with appropriate credentials
+   - Test the connection
+
+2. **Person must exist** in mpath
+   - Create the person record if it doesn't exist
+   - Ensure they belong to your organization
+
+3. **Account must exist** in the third-party system
+   - For Jira: The email must match an active Jira user
+   - For GitHub: The username must be valid
+
+### Unlinking Accounts
+
+To remove an account link:
+
+1. Go to the person's profile
+2. Navigate to **"Account Linking"**
+3. Click **"Unlink"** next to the account you want to remove
+
+<Warning>
+  Unlinking an account will stop fetching new activity data, but historical data may still be visible in reports and synopses.
+</Warning>
+
+---
+
+## Setting Up Integrations
+
+### Organization-Level Setup
+
+Before linking individual accounts, administrators must configure integrations at the organization level:
+
+1. Go to **Organization Settings → Integrations**
+2. Click **Add Integration**
+3. Select the integration you want to set up (Jira or GitHub)
+4. Enter required credentials:
+   - **Jira**: Name, Jira base URL, username/email, and API token
+   - **GitHub**: Name, GitHub username, and Personal Access Token (PAT)
+5. Click **Create** (the system will test the connection automatically)
+
+<Info>
+  Use the minimum required scopes for tokens and rotate them regularly for security.
+</Info>
+
+### Individual Account Linking
+
+Once organization-level integration is configured:
+
+1. Navigate to a person's profile
+2. Use the **"Account Linking"** section to link their accounts
+3. Verify the link appears correctly
+4. Check the Activity view to confirm data is being fetched
+
+---
+
+## Best Practices
+
+### Security
+
+- **Use fine-grained tokens** where possible (especially for GitHub)
+- **Rotate credentials regularly** and remove unused tokens
+- **Limit token scopes** to only what's needed
+- **Review linked accounts** periodically and unlink when people leave
+
+### Data Management
+
+- **Link accounts promptly** for new team members
+- **Verify account links** are correct (wrong links show wrong data)
+- **Keep links current** as people change roles or accounts
+- **Review integration data** regularly to ensure accuracy
+
+### Usage
+
+- **Use Activity views** for quick checks on recent work
+- **Combine with AI Overview** for comprehensive insights
+- **Don't rely solely on metrics**—use integration data as one input among many
+- **Respect privacy**—integration data should support, not replace, conversations
+
+---
+
+## Troubleshooting
+
+### No Data Appearing
+
+If integration data isn't showing up:
+
+1. **Check organization-level configuration**
+   - Verify integration is enabled in Settings
+   - Test the connection
+   - Confirm credentials are valid
+
+2. **Verify account linking**
+   - Ensure the person's account is linked
+   - Check that the email/username is correct
+   - Confirm the account exists in the third-party system
+
+3. **Check date ranges**
+   - Activity views use date ranges—ensure your range includes recent activity
+   - Try expanding the date range
+
+4. **Review permissions**
+   - Verify the integration credentials have access to the data
+   - Check repository/project permissions for GitHub/Jira
+
+### Wrong Data Showing
+
+If you see incorrect data:
+
+1. **Verify account linking**
+   - Check that the linked account belongs to the correct person
+   - Unlink and re-link if necessary
+
+2. **Check for duplicate accounts**
+   - Some systems may have multiple accounts for the same person
+   - Ensure you're linking to the correct account
+
+---
+
+## Learn More
+
+Explore detailed guides for each integration:
+
+<CardGroup cols={2}>
+<Card title="Jira Integration Guide" icon="ticket" href="/jira-integration">
+  Learn how to set up Jira integration, link accounts, and use Jira data in mpath.
+</Card>
+
+<Card title="GitHub Integration Guide" icon="code" href="/github-integration">
+  Discover how to connect GitHub, link developer accounts, and view PR activity.
+</Card>
+</CardGroup>
+
+<Tip>
+  Need help? Click the help icon (?) on any page in mpath for contextual guidance about integrations and account linking.
+</Tip>
+

@@ -73,7 +73,11 @@ export function MarketingHeader() {
         <Link href='/pricing' className='transition-colors hover:text-white'>
           Pricing
         </Link>
-        <Link href='/help' className='transition-colors hover:text-white'>
+        <Link
+          href='https://help.mpath.dev'
+          target='_blank'
+          className='transition-colors hover:text-white'
+        >
           Help
         </Link>
         <DropdownMenu>

@@ -11,11 +11,7 @@ export default async function PeopleChartPage() {
 
   return (
     <PageContainer>
-      <PageHeader
-        title='Organization Chart'
-        titleIcon={Workflow}
-        helpId='people-hierarchy'
-      />
+      <PageHeader title='Organization Chart' titleIcon={Workflow} />
       <PageContent>
         <PageSection>
           <OrgChartReactFlow people={people} />

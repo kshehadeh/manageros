@@ -16,7 +16,7 @@ export default async function MeetingsPage() {
       <PageHeader
         title='Meetings'
         titleIcon={Calendar}
-        helpId='meetings'
+        helpId='meetings-communication/meetings'
         subtitle="Manage and track your organization's meetings"
         actions={
           canCreateMeetings ? (

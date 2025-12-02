@@ -22,7 +22,6 @@ import {
   Settings,
   Calendar,
   Building,
-  Command,
   Bot,
   CheckSquare,
   Keyboard,
@@ -30,14 +29,15 @@ import {
   BookOpen,
 } from 'lucide-react'
 import { useState } from 'react'
-import { HelpDialog } from '@/components/shared'
 import { BugSubmissionModal } from '@/components/bug-submission-modal'
+import { HELP_IDS } from '@/lib/help'
 import { useAIChat } from '@/components/ai-chat-provider'
 import { APP_VERSION } from '@/lib/version'
 import { PersonAvatar } from '@/components/people/person-avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PersonBrief } from '../types/person'
 import { SidebarOrganizationSwitcher } from '@/components/organization/sidebar-organization-switcher'
+import { HelpLink } from './shared'
 interface NavItem {
   name: string
   href: string
@@ -72,8 +72,6 @@ export default function Sidebar({
   const { user } = useUser()
   const pathname = usePathname()
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useMobileMenu()
-  const [isKeyboardShortcutsOpen, setIsKeyboardShortcutsOpen] = useState(false)
-  const [isGettingStartedOpen, setIsGettingStartedOpen] = useState(false)
   const [isBugOpen, setIsBugOpen] = useState(false)
   const { toggleAIChat } = useAIChat()
   const { signOut } = useClerk()
@@ -249,34 +247,28 @@ export default function Sidebar({
         <div className='px-lg py-xl border-t space-y-sm'>
           {serverSession ? (
             <>
-              <button
-                onClick={() => {
-                  setIsMobileMenuOpen(false)
-                  setIsKeyboardShortcutsOpen(true)
-                }}
-                className={`flex items-center gap-lg px-lg py-md text-sm text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
+              <HelpLink
+                helpId={HELP_IDS.keyboardShortcuts}
+                className={`flex items-center gap-lg px-lg py-md text-xs text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
               >
-                <Keyboard className='h-5 w-5' />
+                <Keyboard className='h-4 w-4' />
                 <span>Keyboard Shortcuts</span>
-              </button>
-              <button
-                onClick={() => {
-                  setIsMobileMenuOpen(false)
-                  setIsGettingStartedOpen(true)
-                }}
-                className={`flex items-center gap-lg px-lg py-md text-sm text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
+              </HelpLink>
+              <HelpLink
+                helpId={HELP_IDS.concepts}
+                className={`flex items-center gap-lg px-lg py-md text-xs text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
               >
-                <BookOpen className='h-5 w-5' />
-                <span>Help</span>
-              </button>
+                <BookOpen className='h-4 w-4' />
+                <span>Core Concepts</span>
+              </HelpLink>
               <button
                 onClick={() => {
                   setIsMobileMenuOpen(false)
                   setIsBugOpen(true)
                 }}
-                className={`flex items-center gap-lg px-lg py-md text-sm text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
+                className={`flex items-center gap-lg px-lg py-md text-xs text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
               >
-                <Bug className='h-5 w-5' />
+                <Bug className='h-4 w-4' />
                 <span>Report a bug</span>
               </button>
             </>
@@ -303,19 +295,6 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* Keyboard Shortcuts Modal */}
-      <HelpDialog
-        helpId='keyboard-shortcuts'
-        icon={Command}
-        isOpen={isKeyboardShortcutsOpen}
-        onOpenChange={setIsKeyboardShortcutsOpen}
-      />
-      <HelpDialog
-        helpId='getting-started'
-        icon={BookOpen}
-        isOpen={isGettingStartedOpen}
-        onOpenChange={setIsGettingStartedOpen}
-      />
       <BugSubmissionModal open={isBugOpen} onOpenChange={setIsBugOpen} />
     </>
   )

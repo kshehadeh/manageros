@@ -20,7 +20,7 @@ export default async function InitiativesPage() {
       <PageHeader
         title='Initiatives'
         titleIcon={Rocket}
-        helpId='initiatives'
+        helpId='tasks-projects/initiatives'
         subtitle='Manage long-term goals and objectives'
         actions={
           canCreateInitiatives ? (

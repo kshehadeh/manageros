@@ -1,0 +1,298 @@
+---
+id: teams
+title: Teams
+category: People & Teams
+---
+
+<Info>
+  Teams are groups of people in your organization that work together. They can be flat (all at the same level) or hierarchical (with parent and child teams), and they're the foundation for organizing work, initiatives, and meetings.
+</Info>
+
+Ever need to answer questions like:
+- "Which team owns this initiative?"
+- "Who's on the Platform team?"
+- "How is Engineering organized?"
+
+The Teams page shows you all of this at a glance, and helps you understand how your organization is structured.
+
+## What You'll Find Here
+
+Teams in mpath are more than just labels—they're active containers that connect people, work, and communication. Each team can:
+
+<CardGroup cols={2}>
+<Card title="Organize People" icon="users">
+  Teams group people together, making it easy to see who works with whom and understand team composition.
+</Card>
+
+<Card title="Own Initiatives" icon="target">
+  Teams can own initiatives, giving you clear ownership and accountability for strategic work.
+</Card>
+
+<Card title="Host Meetings" icon="calendar">
+  Teams can have meetings associated with them, making it easy to organize team rituals and ceremonies.
+</Card>
+
+<Card title="Nest Hierarchically" icon="sitemap">
+  Teams can have parent and child relationships, allowing you to model complex organizational structures.
+</Card>
+</CardGroup>
+
+## Why Teams Matter
+
+You might be wondering: "Why do I need to organize people into teams?" Here's why it's so valuable:
+
+<Tip>
+  **Clear ownership and accountability**  
+  When a team owns an initiative, you know exactly who's responsible. This eliminates confusion about who should be working on what and who to talk to when questions arise.
+</Tip>
+
+- **Better organization structure**  
+  Teams help you model how your organization actually works—whether that's flat, hierarchical, or matrixed. This structure then powers features like filtering, reporting, and navigation.
+
+- **Easier collaboration**  
+  When you know which team someone is on, you can quickly find their teammates, understand their context, and see what initiatives they're working on.
+
+- **Smarter filtering and search**  
+  Teams make it easy to filter people, initiatives, and meetings. Want to see everything related to the Platform team? Just filter by team.
+
+- **Foundation for other features**  
+  Teams are the building blocks that enable better organization charts, team-level reporting, and cross-team collaboration.
+
+## Understanding Teams
+
+Let's break down what teams are and how they work:
+
+<AccordionGroup>
+<Accordion title="Team Structure">
+
+Teams can be organized in two ways:
+
+**Flat Structure:**
+- All teams at the same level
+- Simple and straightforward
+- Perfect for smaller organizations or when you don't need hierarchy
+
+**Hierarchical Structure:**
+- Teams can have parent and child relationships
+- Parent teams contain child teams
+- Great for modeling complex organizations (e.g., Engineering → Platform, Product Engineering)
+
+You can mix both approaches—some teams can be top-level while others are nested.
+
+</Accordion>
+
+<Accordion title="Team Details">
+
+Each team has:
+
+- **Name** - What the team is called (e.g., "Platform Engineering")
+- **Description** - What the team does and their purpose
+- **Avatar** - Optional visual identifier for the team
+- **Parent Team** - Optional parent if it's part of a hierarchy
+- **Members** - People assigned to the team
+- **Initiatives** - Strategic work the team owns
+- **Meetings** - Team rituals and ceremonies
+
+All of this comes together to give you a complete picture of each team.
+
+</Accordion>
+
+<Accordion title="Team Relationships">
+
+Teams connect to everything else in mpath:
+
+- **People** - Teams contain people, and people can belong to one team
+- **Initiatives** - Teams can own initiatives, showing clear ownership
+- **Meetings** - Teams can have meetings associated with them
+- **Hierarchy** - Teams can have parent/child relationships
+
+These relationships make teams powerful—they're not just labels, they're active organizational units.
+
+</Accordion>
+</AccordionGroup>
+
+## How to Use Teams
+
+Here are the most common ways you'll work with teams:
+
+<Steps>
+<Step title="Create and organize teams">
+
+Start by creating teams that match your organization structure:
+
+1. Go to the **Teams** page
+2. Click **New Team**
+3. Fill in the basics:
+   - **Name** - Clear, descriptive name (e.g., "Platform Engineering")
+   - **Description** - What the team does and their scope
+   - **Parent Team** - If it's part of a hierarchy, select the parent
+4. Save the team
+
+<Check>
+  Start with your current structure, but don't overthink it. You can always reorganize later as your understanding evolves.
+</Check>
+
+</Step>
+
+<Step title="Assign people to teams">
+
+Once you have teams, assign people to them:
+
+1. Go to a person's profile from the **People** page
+2. Edit their team assignment
+3. Select the appropriate team
+
+Or assign teams when you're adding new people to your organization.
+
+<Info>
+  People can belong to one team (or no team). This keeps things simple while still giving you the organizational structure you need.
+</Info>
+
+</Step>
+
+<Step title="Link initiatives to teams">
+
+Give teams ownership of initiatives:
+
+1. When creating or editing an initiative
+2. Associate it with the team that owns it
+3. This makes it clear who's responsible and helps with filtering
+
+This is especially powerful when you want to see all initiatives for a specific team or understand a team's workload.
+
+</Step>
+
+<Step title="Organize team meetings">
+
+Associate meetings with teams:
+
+1. When creating a meeting
+2. Link it to the relevant team(s)
+3. This helps you see all meetings for a team and understand team rhythms
+
+Team meetings might include standups, retros, planning sessions, or any other team rituals.
+
+</Step>
+
+<Step title="Build hierarchies (if needed)">
+
+If your organization has nested teams:
+
+1. Create parent teams first (e.g., "Engineering")
+2. Then create child teams (e.g., "Platform", "Product Engineering")
+3. Set the parent when creating or editing child teams
+
+<Warning>
+  Before deleting a team, make sure to:
+  - Remove or reassign all team members
+  - Remove or reassign all initiatives
+  - Delete or reassign all child teams
+  
+  Teams with members, initiatives, or children cannot be deleted.
+</Warning>
+
+</Step>
+</Steps>
+
+## Real-World Examples
+
+Let's see how teams work in practice:
+
+<AccordionGroup>
+<Accordion title="Flat team structure">
+
+You're a smaller organization with distinct functional teams:
+
+- Engineering
+- Product
+- Design
+- Operations
+
+Each team is at the top level, with no hierarchy. This keeps things simple and works great for smaller organizations or when you want a flat structure.
+
+</Accordion>
+
+<Accordion title="Hierarchical team structure">
+
+You're a larger organization with nested teams:
+
+**Engineering** (parent)
+- Platform Engineering (child)
+- Product Engineering (child)
+  - Mobile (grandchild)
+  - Web (grandchild)
+
+This structure models how your organization actually works, with clear parent-child relationships that reflect reporting and ownership.
+
+</Accordion>
+
+<Accordion title="Team-owned initiatives">
+
+The Platform team owns several initiatives:
+- "Infrastructure Modernization"
+- "Developer Experience Improvements"
+- "Reliability & Observability"
+
+When you filter by the Platform team, you see all their initiatives, people, and meetings in one place. This gives you a complete picture of what the team is working on.
+
+</Accordion>
+
+<Accordion title="Reorganizing teams">
+
+Your organization is restructuring:
+
+1. You need to move the "Mobile" team from "Product Engineering" to be a direct child of "Engineering"
+2. Update the Mobile team's parent relationship
+3. The hierarchy updates automatically
+
+Teams make reorganizations straightforward—just update the parent relationship, and everything else follows.
+
+</Accordion>
+</AccordionGroup>
+
+## Best Practices
+
+Here are some tips to get the most out of teams:
+
+<Tip>
+  **Keep team names clear and consistent**  
+  Use naming conventions that make sense at a glance. Avoid abbreviations unless they're universally understood. Consistency makes filtering and searching much more effective.
+</Tip>
+
+- **Match your actual structure**  
+  Teams should reflect how your organization actually works, not how you wish it worked. This makes them more useful for day-to-day navigation and decision-making.
+
+- **Use descriptions**  
+  Add descriptions to teams to clarify their scope and purpose. This helps new people understand what each team does and prevents scope confusion.
+
+- **Start simple, evolve as needed**  
+  You don't need to model every possible team relationship from day one. Start with your core teams and add hierarchy or detail as you need it.
+
+- **Keep teams current**  
+  When teams change (people move, teams merge, etc.), update the structure. Outdated team assignments create confusion quickly.
+
+- **Use teams for filtering**  
+  Take advantage of team-based filtering throughout mpath. It's one of the fastest ways to narrow down to relevant information.
+
+## What's Next?
+
+Now that you understand teams, explore these related topics:
+
+<CardGroup cols={2}>
+<Card title="People" icon="users" href="/people">
+  Learn how people are organized and assigned to teams.
+</Card>
+
+<Card title="People Hierarchy" icon="sitemap" href="/people-hierarchy">
+  See how teams fit into the organizational hierarchy view.
+</Card>
+
+<Card title="Initiatives" icon="target" href="/initiatives">
+  Understand how teams own and work on initiatives.
+</Card>
+
+<Card title="Job Roles" icon="briefcase" href="/job-roles">
+  Learn how job roles work alongside teams to organize your organization.
+</Card>
+</CardGroup>
+

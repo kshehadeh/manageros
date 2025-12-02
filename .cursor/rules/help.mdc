@@ -1,0 +1,8 @@
+---
+description: Whenever help and documentation is being updated
+alwaysApply: false
+---
+
+- I am using mintlify for documentation publishing (https://www.mintlify.com/)
+- Use mdx files to create richer UIs
+- Organize documentation into folders that are tied to key features within the app

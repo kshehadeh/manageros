@@ -1,2 +1,2 @@
-export { HelpDialog } from './help-dialog'
-export type { HelpDialogProps } from './help-dialog'
+export { HelpLink } from './help-link'
+export type { HelpLinkProps } from './help-link'

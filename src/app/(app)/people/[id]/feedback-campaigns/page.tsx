@@ -106,7 +106,7 @@ export default async function FeedbackCampaignsPage({
         <PageHeader
           title='Feedback 360'
           titleIcon={MessageSquare}
-          helpId='feedback-campaigns'
+          helpId='feedback-development/feedback-360-campaigns'
           subtitle={`Manage Feedback 360 for ${person.name}`}
           actions={
             <div className='flex items-center gap-2'>

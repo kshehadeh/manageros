@@ -7,6 +7,7 @@ import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
+import { HELP_IDS } from '@/lib/help'
 
 export default async function TeamsPage() {
   const user = await requireAuth({ requireOrganization: true })
@@ -17,6 +18,7 @@ export default async function TeamsPage() {
         title='Teams'
         titleIcon={Users2}
         subtitle="Manage your organization's team structure"
+        helpId={HELP_IDS.peopleTeamsTeams}
         actions={
           <div className='flex gap-2'>
             <Button asChild variant='outline'>

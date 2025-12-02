@@ -2,6 +2,7 @@ import { ReactNode } from 'react'
 import { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { HelpIcon } from '@/components/help-icon'
+import { HelpId } from '@/lib/help'
 import { Geist_Mono as GeistMono } from 'next/font/google'
 
 const geistMono = GeistMono({
@@ -13,7 +14,7 @@ interface PageTitleProps {
   children: ReactNode
   icon?: LucideIcon | React.ElementType
   iconComponent?: ReactNode
-  helpId?: string
+  helpId?: HelpId
   className?: string
 }
 

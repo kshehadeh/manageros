@@ -82,7 +82,7 @@ export default async function MeetingInstanceDetailPage({
       <PageContainer>
         <PageHeader
           title={meetingInstance.meeting.title}
-          helpId='meeting-instances'
+          helpId='meetings-communication/meetings'
           subtitle={
             <>
               <p className='page-section-subtitle'>Meeting Instance</p>
