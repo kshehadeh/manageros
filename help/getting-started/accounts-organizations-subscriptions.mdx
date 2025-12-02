@@ -1,0 +1,472 @@
+---
+id: accounts-organizations-subscriptions
+title: Accounts, Organizations & Subscriptions
+description: Understand how accounts, organizations, people, and billing work together in mpath
+category: Getting Started
+---
+
+<Info>
+  **Understanding the foundation of mpath.** This guide explains how accounts, organizations, people, and subscriptions connect to create your team's workspace. Getting these relationships right unlocks all of mpath's features.
+</Info>
+
+## The Big Picture
+
+mpath is built on three foundational concepts that work together:
+
+<CardGroup cols={3}>
+<Card title="Your Account" icon="key">
+  Your login credentials and personal access to mpath. This is **you** as a user of the platform.
+</Card>
+
+<Card title="Your Organization" icon="building">
+  Your company or team's workspace. All data—people, tasks, initiatives—lives here, isolated and secure.
+</Card>
+
+<Card title="Your Subscription" icon="credit-card">
+  The plan that determines features and limits. Subscriptions are **organization-wide**, not per-user.
+</Card>
+</CardGroup>
+
+---
+
+## Understanding the Account → Person Relationship
+
+One of the most important concepts in mpath is the distinction between your **Account** and your **Person** record. They serve different purposes:
+
+<AccordionGroup>
+<Accordion title="Your Account (Login Identity)">
+
+Your **account** is your login identity—the credentials you use to access mpath:
+
+- **One account per email**: Each email address can only have one account
+- **Authentication**: Handles your password, SSO, and security settings
+- **Organization membership**: Connects you to one organization (or none yet)
+- **User role**: Determines your permissions (User, Admin, or Owner)
+
+Your account is managed through your user settings and handles all authentication concerns.
+
+</Accordion>
+
+<Accordion title="Your Person Record (Organizational Identity)">
+
+Your **Person** record represents you as a member of your organization:
+
+- **Organizational identity**: Appears in org charts, gets assigned tasks, participates in meetings
+- **Relationships**: Has a manager, direct reports, and team assignments
+- **Work context**: Owns initiatives, tasks, feedback, and one-on-ones
+- **Independent existence**: Person records can exist even without a linked account (useful for tracking people who haven't joined yet)
+
+<Tip>
+  Person records are the foundation of organizational structure. Everything in mpath—from tasks to feedback—connects to people, not accounts.
+</Tip>
+
+</Accordion>
+
+<Accordion title="Linking Account to Person">
+
+When your account is **linked** to your Person record, you unlock personal features:
+
+- ✅ Create and manage one-on-ones with your manager or reports
+- ✅ See your own tasks, initiatives, and feedback
+- ✅ Access personal reports and synopses
+- ✅ Receive notifications relevant to your work
+- ✅ Use "My Tasks" and personal dashboard views
+
+**Without linking**, you can still access organization data (based on your role), but personal features won't know which Person is "you."
+
+<Warning>
+  If you can't access features like "My Tasks" or your one-on-ones, your account might not be linked to your Person record. Check with an organization admin.
+</Warning>
+
+</Accordion>
+</AccordionGroup>
+
+For detailed information about managing people in your organization, see the **[People guide](/people-teams/people)**.
+
+---
+
+## Organizations: Your Team's Workspace
+
+An **organization** is your company or team's isolated workspace in mpath. Think of it as your team's private instance where all your data lives.
+
+### Key Characteristics
+
+<CardGroup cols={2}>
+<Card title="Data Isolation" icon="shield">
+  You can only see data from your own organization. Complete privacy between different companies using mpath.
+</Card>
+
+<Card title="Shared Workspace" icon="users">
+  All members share the same data and subscription limits. Collaboration happens within org boundaries.
+</Card>
+
+<Card title="Unique Identity" icon="fingerprint">
+  Each organization has a unique name and URL slug (e.g., `acme-corp`) that identifies it across the platform.
+</Card>
+
+<Card title="Central Configuration" icon="gear">
+  Organization-level settings control integrations, job roles, teams, and other shared configurations.
+</Card>
+</CardGroup>
+
+### Organization Roles
+
+When you join an organization, you're assigned one of three roles:
+
+| Role | Capabilities |
+|------|-------------|
+| **User** | Standard member. Can view and interact with organization data based on entity-specific permissions. |
+| **Admin** | Can manage organization settings, members, job roles, teams, and most data. Cannot manage billing. |
+| **Owner** | Everything Admin can do, plus manages subscription and billing. Typically the organization creator. |
+
+### Creating vs. Joining
+
+<Steps>
+<Step title="Creating a New Organization">
+
+If you're starting fresh:
+
+1. Sign up for mpath with your email
+2. Choose a subscription plan during onboarding
+3. Enter your organization name and unique slug
+4. You become the **Owner** and **billing user**
+5. Start inviting team members
+
+</Step>
+
+<Step title="Joining an Existing Organization">
+
+If you're joining a team:
+
+1. Receive an invitation email from an organization admin
+2. Click the invitation link
+3. Create your account (or sign in if you already have one)
+4. You're automatically added to the organization
+5. Ask an admin to link your account to your Person record
+
+<Check>
+  When you join via invitation, you'll automatically have the role assigned by the admin who invited you.
+</Check>
+
+</Step>
+</Steps>
+
+---
+
+## Organization-Level Settings
+
+Organizations have several configurable settings that affect everyone:
+
+<CardGroup cols={2}>
+<Card title="Job Roles & Levels" icon="briefcase" href="/people-teams/job-roles">
+  Define job levels (Junior, Senior, Staff), domains (Engineering, Product), and specific roles. Creates a consistent language for career growth.
+</Card>
+
+<Card title="Integrations" icon="plug" href="/integrations/integrations">
+  Connect third-party tools like GitHub and Jira. Organization-level setup enables individual account linking.
+</Card>
+
+<Card title="Teams" icon="users-round" href="/people-teams/teams">
+  Create team structures with hierarchies. Teams can own initiatives and organize people into working groups.
+</Card>
+
+<Card title="Billing & Subscription" icon="credit-card">
+  Manage your subscription plan, view usage, and update payment methods. Only accessible to the billing user.
+</Card>
+</CardGroup>
+
+### Managing Organization Settings
+
+To access organization settings:
+
+1. Click your organization name in the sidebar or header
+2. Select **Organization Settings**
+3. Navigate to the relevant section:
+   - **General**: Name, slug, and basic info
+   - **Members**: Invite, remove, and manage member roles
+   - **Job Roles**: Create and manage job levels, domains, and roles
+   - **Integrations**: Connect GitHub, Jira, and other tools
+   - **Billing**: View usage and manage subscription
+
+<Tip>
+  Regularly review your organization settings to ensure job roles are current, integrations are working, and team structures reflect reality.
+</Tip>
+
+---
+
+## Billing & Subscriptions
+
+Subscriptions in mpath are **organization-based**, not per-user. This means your entire organization shares one plan and its limits.
+
+### How Billing Works
+
+<AccordionGroup>
+<Accordion title="Organization-Wide Subscription">
+
+Your subscription applies to **everyone** in the organization:
+
+- All members share the same feature limits
+- One subscription per organization (no individual upgrades)
+- Subscription changes apply immediately to everyone
+- Limits are based on entity counts (people, initiatives, teams, etc.)
+
+This keeps billing simple—you don't need to track individual seats or worry about per-user costs.
+
+</Accordion>
+
+<Accordion title="The Billing User">
+
+One person in each organization is the **billing user**:
+
+- Usually the organization creator/owner
+- Has access to billing settings and payment methods
+- Receives invoices and billing notifications
+- Can upgrade, downgrade, or cancel the subscription
+- Can transfer billing responsibility to another owner
+
+<Info>
+  Only the billing user can make changes to the subscription. If you need billing changes and you're not the billing user, contact your organization's owner.
+</Info>
+
+</Accordion>
+
+<Accordion title="Feature Limits">
+
+Subscriptions control how many entities you can create:
+
+- **People**: How many person records you can have
+- **Initiatives**: How many strategic projects you can track
+- **Teams**: How many team groups you can create
+- **Feedback Campaigns**: How many 360 campaigns you can run
+
+**What happens at the limit?**
+- ✅ You can still **view** all existing data
+- ❌ You **cannot create** new items of that type
+- 💡 You'll see a message explaining the limit
+- ⬆️ Upgrade your plan to increase limits
+
+</Accordion>
+</AccordionGroup>
+
+### Subscription Plans
+
+<CardGroup cols={2}>
+<Card title="Solo Plan (Free)" icon="user">
+  Perfect for small teams getting started:
+  - Up to 5 people
+  - Up to 10 initiatives
+  - Up to 2 teams
+  - Up to 2 feedback campaigns
+  - All core features included
+</Card>
+
+<Card title="Team Plan (Paid)" icon="users">
+  For growing teams and larger organizations:
+  - **Unlimited** people
+  - **Unlimited** initiatives
+  - **Unlimited** teams
+  - **Unlimited** feedback campaigns
+  - Priority support
+</Card>
+</CardGroup>
+
+### Viewing Your Usage
+
+To see your current usage and limits:
+
+1. Go to **Organization Settings → Billing**
+2. View the usage dashboard showing:
+   - Current count vs. limit for each entity type
+   - Subscription status and renewal date
+   - Available upgrades (if applicable)
+
+---
+
+## Common Scenarios
+
+<Steps>
+<Step title="I Just Signed Up—Now What?">
+
+Welcome! Here's your path to getting started:
+
+1. ✅ Your account is created
+2. ✅ You chose a subscription plan
+3. ✅ You created your organization
+4. **Next**: Create your Person record and link it to your account
+5. **Then**: Invite team members and build your org structure
+
+<Check>
+  Don't forget to link your account to your Person record! This unlocks personal features like "My Tasks" and one-on-ones.
+</Check>
+
+</Step>
+
+<Step title="I Was Invited to Join">
+
+You received an invitation email:
+
+1. Click the invitation link
+2. Create your account (or sign in if you have one)
+3. You're now part of the organization
+4. **Important**: Ask an admin to link your account to your Person record
+5. Explore the People page to see your team
+
+</Step>
+
+<Step title="I Can't Access Personal Features">
+
+If "My Tasks" or one-on-ones aren't working:
+
+1. Go to **Settings → Account Linking**
+2. Check if your account is linked to a Person record
+3. If not linked, find your Person record and select it
+4. Click "Link Account"
+5. If you don't see your Person record, ask an admin to create it first
+
+<Warning>
+  Personal features require your account to be linked to your Person record. Without this link, mpath doesn't know which Person is "you."
+</Warning>
+
+</Step>
+
+<Step title="I Want to Upgrade Our Plan">
+
+To upgrade your subscription:
+
+1. Go to **Organization Settings → Billing**
+2. Review your current usage
+3. Click "Manage Subscription"
+4. Select the new plan
+5. Complete payment
+6. New limits apply immediately
+
+<Info>
+  Only the billing user (usually the organization owner) can manage subscriptions.
+</Info>
+
+</Step>
+
+<Step title="I'm Reaching Our Limits">
+
+If you're hitting subscription limits:
+
+1. Check current usage in **Organization Settings → Billing**
+2. Identify what's using the most capacity
+3. Consider if you can archive or remove unused items
+4. Upgrade to Team plan for unlimited capacity
+5. Remember: You can still view everything, just can't create more
+
+</Step>
+</Steps>
+
+---
+
+## Understanding the Full Hierarchy
+
+Here's how everything connects in mpath:
+
+```
+Organization
+├── Subscription (shared by everyone)
+│   └── Limits apply to entity counts
+├── Members (user accounts with roles)
+│   └── User | Admin | Owner
+├── People (organizational identities)
+│   ├── Linked to accounts (for personal features)
+│   ├── Assigned to teams
+│   ├── Have managers and reports
+│   └── Own work: tasks, initiatives, meetings
+├── Organization Settings
+│   ├── Job Roles & Levels
+│   ├── Integrations (GitHub, Jira)
+│   └── Teams structure
+└── Data (isolated per organization)
+    ├── Initiatives & Objectives
+    ├── Tasks
+    ├── Meetings & One-on-Ones
+    └── Feedback & Campaigns
+```
+
+<Info>
+  Everything flows from your organization. When you query data, access controls ensure you only see what belongs to your organization and what you're permitted to access.
+</Info>
+
+---
+
+## Key Takeaways
+
+<AccordionGroup>
+<Accordion title="Account vs. Person: The Critical Distinction">
+
+| Account | Person |
+|---------|--------|
+| Your login credentials | Your organizational identity |
+| Handles authentication | Appears in org charts |
+| Has a user role (User/Admin/Owner) | Has a manager and reports |
+| Can belong to one organization | Owns tasks, initiatives, meetings |
+| **Link them together** to unlock personal features |
+
+</Accordion>
+
+<Accordion title="Organization Boundaries">
+
+- 🔒 All data is isolated per organization
+- 👥 All members share the same workspace and limits
+- ⚙️ Organization-level settings affect everyone
+- 💳 One subscription covers the entire organization
+
+</Accordion>
+
+<Accordion title="Billing Essentials">
+
+- 💰 Subscriptions are organization-wide, not per-user
+- 📊 Limits are based on entity counts
+- 👤 Only the billing user can manage subscriptions
+- 📈 You can view data even when at limits—you just can't create more
+
+</Accordion>
+</AccordionGroup>
+
+---
+
+## Related Topics
+
+<CardGroup cols={2}>
+<Card title="People" icon="users" href="/people-teams/people">
+  Deep dive into managing people, the org chart, and person profiles.
+</Card>
+
+<Card title="Job Roles" icon="briefcase" href="/people-teams/job-roles">
+  Set up job levels, domains, and role definitions for your organization.
+</Card>
+
+<Card title="Teams" icon="users-round" href="/people-teams/teams">
+  Organize people into teams with hierarchical structures.
+</Card>
+
+<Card title="Integrations" icon="plug" href="/integrations/integrations">
+  Connect GitHub, Jira, and other tools to surface work activity.
+</Card>
+
+<Card title="Quickstart Guide" icon="rocket" href="/getting-started/quickstart">
+  Get up and running with mpath in 5 minutes.
+</Card>
+
+<Card title="Core Concepts" icon="lightbulb" href="/getting-started/concepts">
+  Understand all of mpath's core concepts and how they work together.
+</Card>
+</CardGroup>
+
+---
+
+## Need Help?
+
+<Tip>
+  **Look for the help icon (?)** on any page in mpath for contextual guidance specific to what you're working on.
+</Tip>
+
+- **Account issues**: Check **Settings → User Info**
+- **Organization questions**: Check **Organization Settings**
+- **Subscription help**: Contact your organization's billing user
+- **Linking problems**: Ask an organization admin for help
+

@@ -20,11 +20,13 @@ import {
   TableCell,
 } from '@/components/ui/table'
 import { HelpIcon } from '@/components/help-icon'
+import { HelpId } from '@/lib/help'
 
 // Map report codeId to help documentation ID
-const reportHelpMap: Record<string, string> = {
-  'person-overview': 'person-overview-report',
-  'person-ai-synopsis': 'ai-synopsis-report',
+// Note: Help documentation for reports is not yet available
+const reportHelpMap: Record<string, HelpId> = {
+  // 'person-overview': 'person-overview-report',
+  // 'person-ai-synopsis': 'ai-synopsis-report',
 }
 
 export default async function ReportsPage() {
@@ -44,7 +46,6 @@ export default async function ReportsPage() {
         <div className='flex items-center gap-3 mb-2'>
           <BarChart3 className='h-8 w-8 text-muted-foreground' />
           <h1 className='text-2xl font-semibold'>Reports</h1>
-          <HelpIcon helpId='reports' size='lg' />
         </div>
         <p className='text-muted-foreground'>
           Run data reports and view recent runs

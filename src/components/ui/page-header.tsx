@@ -3,6 +3,7 @@ import { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PageTitle } from './page-title'
 import { HelpIcon } from '@/components/help-icon'
+import { HelpId } from '@/lib/help'
 import { Geist_Mono as GeistMono } from 'next/font/google'
 
 const geistMono = GeistMono({
@@ -14,7 +15,7 @@ interface PageHeaderProps {
   title?: string | ReactNode
   titleIcon?: LucideIcon | React.ElementType
   iconComponent?: ReactNode
-  helpId?: string
+  helpId?: HelpId
   subtitle?: string | ReactNode
   actions?: ReactNode
   className?: string

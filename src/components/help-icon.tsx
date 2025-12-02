@@ -2,10 +2,11 @@
 
 import { HelpCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { HelpId, getHelpUrl } from '@/lib/help'
 
 interface HelpIconProps {
   /** The ID of the help content to display - links to help.mpath.dev */
-  helpId: string
+  helpId?: HelpId
   /** Optional custom className for styling */
   className?: string
   /** Size of the help icon */
@@ -35,13 +36,6 @@ const positionClasses = {
   'bottom-left': 'absolute -bottom-1 -left-1',
 }
 
-/**
- * Constructs the help URL for Mintlify documentation
- */
-function getHelpUrl(helpId: string): string {
-  return `https://help.mpath.dev/${helpId}`
-}
-
 export function HelpIcon({
   helpId,
   className,
@@ -49,6 +43,10 @@ export function HelpIcon({
   position = 'inline',
   tooltip,
 }: HelpIconProps) {
+  if (!helpId) {
+    return null
+  }
+
   const helpUrl = getHelpUrl(helpId)
 
   const handleClick = (e: React.MouseEvent) => {
@@ -87,7 +85,7 @@ export function HelpWrapper({
   size = 'md',
 }: {
   children: React.ReactNode
-  helpId: string
+  helpId?: HelpId
   position?: Exclude<HelpIconProps['position'], 'inline'>
   size?: HelpIconProps['size']
 }) {

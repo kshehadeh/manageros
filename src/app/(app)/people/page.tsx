@@ -18,7 +18,7 @@ export default async function PeoplePage() {
       <PageHeader
         title='People'
         titleIcon={User}
-        helpId='people'
+        helpId='people-teams/people'
         actions={
           <div className='flex flex-wrap items-center gap-3'>
             <Button asChild variant='outline'>

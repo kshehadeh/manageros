@@ -6,6 +6,7 @@ import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
+import { HELP_IDS } from '@/lib/help'
 
 export default async function MyTasksPage() {
   const user = await getCurrentUser()
@@ -17,6 +18,7 @@ export default async function MyTasksPage() {
         title='My Tasks'
         titleIcon={CheckSquare}
         subtitle='Track and manage tasks assigned to you'
+        helpId={HELP_IDS.tasksProjectsTasks}
         actions={canCreateTasks ? <CreateTaskButton variant='default' /> : null}
       />
 

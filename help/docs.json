@@ -15,7 +15,12 @@
         "groups": [
           {
             "group": "Getting started",
-            "pages": ["quickstart", "concepts", "keyboard-shortcuts"]
+            "pages": [
+              "getting-started/quickstart",
+              "getting-started/accounts-organizations-subscriptions",
+              "getting-started/concepts",
+              "getting-started/keyboard-shortcuts"
+            ]
           },
           {
             "group": "People & Teams",

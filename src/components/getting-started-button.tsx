@@ -2,17 +2,15 @@
 
 import { Button } from '@/components/ui/button'
 import { BookOpen } from 'lucide-react'
-
-/**
- * Constructs the help URL for Mintlify documentation
- */
-function getHelpUrl(helpId: string): string {
-  return `https://help.mpath.dev/${helpId}`
-}
+import { HELP_IDS, getHelpUrl } from '@/lib/help'
 
 export function GettingStartedButton() {
   const handleClick = () => {
-    window.open(getHelpUrl('getting-started'), '_blank', 'noopener,noreferrer')
+    window.open(
+      getHelpUrl(HELP_IDS.quickstart),
+      '_blank',
+      'noopener,noreferrer'
+    )
   }
 
   return (

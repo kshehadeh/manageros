@@ -33,7 +33,7 @@ export default async function SettingsPage() {
       <PageHeader
         title='Settings'
         subtitle='Manage your account settings and integrations.'
-        helpId='accounts-organizations-subscriptions'
+        helpId='getting-started/accounts-organizations-subscriptions'
       />
 
       <PageContent>
