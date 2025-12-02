@@ -11,12 +11,7 @@
 export function getBaseUrl(): string {
   // Check VERCEL_PROJECT_PRODUCTION_URL first (production domain)
   if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
-    return process.env.VERCEL_PROJECT_PRODUCTION_URL
-  }
-
-  // Check NEXTAUTH_URL (explicitly set)
-  if (process.env.NEXTAUTH_URL) {
-    return process.env.NEXTAUTH_URL
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
   }
 
   // Check VERCEL_URL (automatically set by Vercel, needs https:// prefix)
