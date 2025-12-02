@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.20.2](/compare/v1.20.1...v1.20.2) (2025-12-02)
+
+### Bug Fixes
+
+- **urls:** Fix base url calculator 38f2d6d
+
 ## [1.20.1](/compare/v1.20.0...v1.20.1) (2025-12-02)
 
 # [1.20.0](/compare/v1.19.0...v1.20.0) (2025-12-02)
