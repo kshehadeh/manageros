@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.20.0](/compare/v1.19.0...v1.20.0) (2025-12-02)
+
+### Features
+
+- **help:** Add comprehensive help documentation including core concepts, development setup, keyboard shortcuts, and integration guides. Introduce new markdown files for structured content and enhance user navigation with a dedicated help system. ce48240
+
 # [1.19.0](/compare/v1.18.0...v1.19.0) (2025-12-01)
 
 ### Features
