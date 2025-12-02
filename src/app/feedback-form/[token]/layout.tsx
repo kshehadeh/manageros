@@ -2,8 +2,6 @@ import type { ReactNode } from 'react'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from 'sonner'
 import { AnimatedGeometricPattern } from '@/components/marketing/animated-geometric-pattern'
-import Image from 'next/image'
-import { Link } from '@/components/ui/link'
 
 export default function FeedbackFormLayout({
   children,
@@ -35,26 +33,6 @@ export default function FeedbackFormLayout({
 
         {/* Content */}
         <div className='relative z-10 flex min-h-screen flex-col'>
-          {/* Logo header - centered at top */}
-          <header className='flex w-full items-center justify-center px-6 py-8'>
-            <Link href='/' className='flex items-center gap-3'>
-              <Image
-                src='/images/indigo-logo-white.png'
-                alt='mpath Logo'
-                width={40}
-                height={40}
-                className='h-10 w-10'
-                priority
-              />
-              <div>
-                <p className='text-lg font-semibold tracking-tight'>mpath</p>
-                <p className='text-xs text-white/60 hidden sm:block'>
-                  Built for engineering leaders
-                </p>
-              </div>
-            </Link>
-          </header>
-
           {/* Main content */}
           <div className='flex-1'>{children}</div>
         </div>
