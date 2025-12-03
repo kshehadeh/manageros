@@ -115,7 +115,22 @@ async function evaluateOneOnOneFrequency(
       const lastOneOnOne = await getLastOneOnOneDate(manager.id, report.id)
 
       if (!lastOneOnOne) {
-        // No 1:1 ever recorded - create urgent exception
+        // No 1:1 ever recorded - check if exception already exists
+        const existingException = await prisma.exception.findFirst({
+          where: {
+            ruleId: rule.id,
+            organizationId: rule.organizationId,
+            entityType: 'OneOnOne',
+            entityId: `${manager.id}-${report.id}`,
+            status: 'active',
+          },
+        })
+
+        if (existingException) {
+          continue // Already has an active exception
+        }
+
+        // Create urgent exception if threshold is exceeded
         const daysSince = Infinity
         if (daysSince > config.urgentThresholdDays) {
           await createExceptionForOneOnOne(
@@ -296,7 +311,22 @@ async function evaluateInitiativeCheckIn(
     const lastCheckIn = await getLastCheckInDate(initiative.id)
 
     if (!lastCheckIn) {
-      // No check-in ever recorded
+      // No check-in ever recorded - check if exception already exists
+      const existingException = await prisma.exception.findFirst({
+        where: {
+          ruleId: rule.id,
+          organizationId: rule.organizationId,
+          entityType: 'Initiative',
+          entityId: initiative.id,
+          status: 'active',
+        },
+      })
+
+      if (existingException) {
+        continue // Already has an active exception
+      }
+
+      // Create exception if threshold is exceeded
       const daysSince = Infinity
       if (daysSince > config.warningThresholdDays) {
         await createExceptionForInitiative(
@@ -454,7 +484,22 @@ async function evaluateFeedback360(
     const lastFeedbackCampaign = await getLastFeedbackCampaignDate(person.id)
 
     if (!lastFeedbackCampaign) {
-      // No feedback campaign ever recorded
+      // No feedback campaign ever recorded - check if exception already exists
+      const existingException = await prisma.exception.findFirst({
+        where: {
+          ruleId: rule.id,
+          organizationId: rule.organizationId,
+          entityType: 'Person',
+          entityId: person.id,
+          status: 'active',
+        },
+      })
+
+      if (existingException) {
+        continue // Already has an active exception
+      }
+
+      // Create exception if threshold is exceeded
       const monthsSince = Infinity
       if (monthsSince > config.warningThresholdMonths) {
         await createExceptionForFeedback360(
