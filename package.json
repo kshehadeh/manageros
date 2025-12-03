@@ -36,6 +36,7 @@
     "cron:birthdays": "bun scripts/run-cron-jobs.ts --job birthday-notification",
     "cron:activity": "bun scripts/run-cron-jobs.ts --job activity-monitoring",
     "cron:overdue-tasks": "bun scripts/run-cron-jobs.ts --job overdue-tasks-notification",
+    "cron:tolerance-rules": "bun scripts/run-cron-jobs.ts --job tolerance-rules-evaluation",
     "version:patch": "bun scripts/bump-version.ts patch",
     "version:minor": "bun scripts/bump-version.ts minor",
     "version:major": "bun scripts/bump-version.ts major",

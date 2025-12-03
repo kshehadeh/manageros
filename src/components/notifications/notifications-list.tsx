@@ -14,6 +14,9 @@ import {
 import {
   getAllUserNotifications,
   markNotificationAsRead,
+  acknowledgeNotification,
+  ignoreNotification,
+  resolveNotification,
 } from '@/lib/actions/notification'
 import { NotificationWithResponse } from '@/lib/actions/notification'
 import { NotificationActionsDropdown } from '@/components/notifications/notification-actions-dropdown'
@@ -24,7 +27,10 @@ import {
   AlertTriangle,
   XCircle,
   Info,
+  Eye,
+  ExternalLink,
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 interface NotificationsListProps {
   showAllOrganizationNotifications?: boolean
@@ -35,6 +41,7 @@ export function NotificationsList({
   showAllOrganizationNotifications = false,
   isAdmin = false,
 }: NotificationsListProps) {
+  const router = useRouter()
   const [notifications, setNotifications] = useState<
     NotificationWithResponse[]
   >([])
@@ -42,6 +49,7 @@ export function NotificationsList({
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
 
   const loadNotifications = useCallback(
     async (page: number = 1, append: boolean = false) => {
@@ -143,6 +151,41 @@ export function NotificationsList({
     }
   }
 
+  const handleExceptionAction = async (
+    notificationId: string,
+    action: 'acknowledge' | 'ignore' | 'resolve'
+  ) => {
+    setUpdatingId(notificationId)
+    try {
+      switch (action) {
+        case 'acknowledge':
+          await acknowledgeNotification(notificationId)
+          break
+        case 'ignore':
+          await ignoreNotification(notificationId)
+          break
+        case 'resolve':
+          await resolveNotification(notificationId)
+          break
+      }
+      router.refresh()
+      // Reload notifications to get updated state
+      const result = await getAllUserNotifications(
+        currentPage,
+        20,
+        showAllOrganizationNotifications
+      )
+      setNotifications(result.notifications)
+    } catch (error) {
+      console.error('Error updating notification:', error)
+      alert(
+        error instanceof Error ? error.message : 'Failed to update notification'
+      )
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
   const getStatusBadge = (response: NotificationWithResponse['response']) => {
     if (!response) {
       return <Badge variant='secondary'>Unread</Badge>
@@ -151,6 +194,12 @@ export function NotificationsList({
     switch (response.status) {
       case 'read':
         return <Badge variant='outline'>Read</Badge>
+      case 'acknowledged':
+        return <Badge variant='default'>Acknowledged</Badge>
+      case 'ignored':
+        return <Badge variant='secondary'>Ignored</Badge>
+      case 'resolved':
+        return <Badge variant='outline'>Resolved</Badge>
       default:
         return <Badge variant='secondary'>Unread</Badge>
     }
@@ -253,14 +302,64 @@ export function NotificationsList({
                 </TableCell>
                 <TableCell>
                   <div className='flex items-center gap-2'>
+                    {notification.metadata?.exceptionId &&
+                      (!notification.response ||
+                        notification.response.status === 'unread') && (
+                        <>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            onClick={() =>
+                              handleExceptionAction(
+                                notification.id,
+                                'acknowledge'
+                              )
+                            }
+                            disabled={updatingId === notification.id}
+                            title='Acknowledge'
+                          >
+                            <Eye className='w-4 h-4' />
+                          </Button>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            onClick={() =>
+                              handleExceptionAction(notification.id, 'ignore')
+                            }
+                            disabled={updatingId === notification.id}
+                            title='Ignore'
+                          >
+                            <XCircle className='w-4 h-4' />
+                          </Button>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            onClick={() =>
+                              handleExceptionAction(notification.id, 'resolve')
+                            }
+                            disabled={updatingId === notification.id}
+                            title='Resolve'
+                          >
+                            <CheckCircle className='w-4 h-4' />
+                          </Button>
+                        </>
+                      )}
                     {(!notification.response ||
-                      notification.response.status === 'unread') && (
-                      <Button
-                        variant='outline'
-                        size='sm'
-                        onClick={() => handleMarkAsRead(notification.id)}
-                      >
-                        Mark as read
+                      notification.response.status === 'unread') &&
+                      !notification.metadata?.exceptionId && (
+                        <Button
+                          variant='outline'
+                          size='sm'
+                          onClick={() => handleMarkAsRead(notification.id)}
+                        >
+                          Mark as read
+                        </Button>
+                      )}
+                    {notification.metadata?.navigationPath && (
+                      <Button variant='ghost' size='sm' asChild>
+                        <a href={notification.metadata.navigationPath}>
+                          <ExternalLink className='w-4 h-4' />
+                        </a>
                       </Button>
                     )}
                     {isAdmin && (

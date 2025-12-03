@@ -58,6 +58,8 @@ model Organization {
   githubOrgs             OrganizationGithubOrg[]
   integrations           Integration[]            @relation("OrganizationIntegrations")
   entityIntegrationLinks EntityIntegrationLink[]
+  toleranceRules         OrganizationToleranceRule[]
+  exceptions             Exception[]
 
   @@index([billingUserId])
   @@index([subscriptionPlanId])
@@ -692,6 +694,7 @@ model Notification {
 
   // Relationships
   responses NotificationResponse[]
+  exception Exception?
 
   @@index([organizationId])
   @@index([userId])
@@ -704,9 +707,12 @@ model NotificationResponse {
   notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
   userId         String
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status         String       @default("unread") // unread|read|dismissed
+  status         String       @default("unread") // unread|read|dismissed|acknowledged|ignored|resolved
   readAt         DateTime?
   dismissedAt    DateTime?
+  acknowledgedAt DateTime?
+  ignoredAt      DateTime?
+  resolvedAt     DateTime?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -878,4 +884,54 @@ model EntityIntegrationLink {
   @@index([integrationId])
   @@index([organizationId])
   @@index([externalEntityId])
+}
+
+model OrganizationToleranceRule {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  ruleType       String       // one_on_one_frequency|initiative_checkin|feedback_360|manager_span
+  name           String       // Human-readable name
+  description    String?      // Optional description
+  isEnabled      Boolean      @default(true)
+  config         Json         // Rule-specific configuration (thresholds, time periods, etc.)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  
+  exceptions     Exception[]
+  
+  @@index([organizationId])
+  @@index([ruleType])
+  @@index([isEnabled])
+}
+
+model Exception {
+  id             String                  @id @default(cuid())
+  ruleId         String
+  rule           OrganizationToleranceRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  severity       String                  @default("warning") // warning|urgent
+  entityType     String                  // Person|Initiative|OneOnOne|FeedbackCampaign
+  entityId       String                  // ID of the entity that triggered the exception
+  message        String                  // Human-readable message
+  metadata       Json?                   // Additional context data
+  notificationId String?                 @unique
+  notification   Notification?           @relation(fields: [notificationId], references: [id], onDelete: SetNull)
+  status         String                  @default("active") // active|acknowledged|ignored|resolved
+  acknowledgedAt DateTime?
+  ignoredAt      DateTime?
+  resolvedAt     DateTime?
+  acknowledgedBy String?
+  ignoredBy      String?
+  resolvedBy     String?
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+  
+  @@index([ruleId])
+  @@index([organizationId])
+  @@index([entityType, entityId])
+  @@index([status])
+  @@index([severity])
+  @@index([notificationId])
 }

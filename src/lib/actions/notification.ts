@@ -4,6 +4,11 @@ import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { InputJsonValue } from '@prisma/client/runtime/library'
+import {
+  acknowledgeException,
+  ignoreException,
+  resolveException,
+} from './exceptions'
 
 export interface CreateNotificationData {
   title: string
@@ -31,7 +36,16 @@ export interface NotificationWithResponse {
     status: string
     readAt: Date | null
     dismissedAt: Date | null
-  }
+    acknowledgedAt?: Date | null | undefined
+    ignoredAt?: Date | null | undefined
+    resolvedAt?: Date | null | undefined
+  } | null
+  metadata?: {
+    exceptionId?: string
+    entityType?: string
+    entityId?: string
+    navigationPath?: string
+  } | null
 }
 
 /**
@@ -176,7 +190,24 @@ export async function getUserNotifications(limit: number = 10) {
           email: notification.user.email,
         }
       : null,
-    response: notification.responses[0] || null,
+    response: notification.responses[0]
+      ? {
+          id: notification.responses[0].id,
+          status: notification.responses[0].status,
+          readAt: notification.responses[0].readAt,
+          dismissedAt: notification.responses[0].dismissedAt,
+          acknowledgedAt: notification.responses[0].acknowledgedAt,
+          ignoredAt: notification.responses[0].ignoredAt,
+          resolvedAt: notification.responses[0].resolvedAt,
+        }
+      : null,
+    metadata:
+      (notification.metadata as {
+        exceptionId?: string
+        entityType?: string
+        entityId?: string
+        navigationPath?: string
+      }) || null,
   }))
 }
 
@@ -208,7 +239,9 @@ export async function getUnreadNotifications(limit: number = 5) {
       responses: {
         none: {
           userId: user.managerOSUserId || '',
-          status: { in: ['read', 'dismissed'] },
+          status: {
+            in: ['read', 'dismissed', 'acknowledged', 'ignored', 'resolved'],
+          },
         },
       },
     },
@@ -310,6 +343,9 @@ export async function markNotificationAsDismissed(notificationId: string) {
         },
       ],
     },
+    include: {
+      exception: true,
+    },
   })
 
   if (!notification) {
@@ -336,6 +372,207 @@ export async function markNotificationAsDismissed(notificationId: string) {
       dismissedAt: new Date(),
     },
   })
+
+  // If notification is linked to an exception, update the exception status
+  if (notification.exception && user.managerOSUserId) {
+    // Dismissing a notification doesn't change exception status
+    // But we could optionally ignore the exception
+  }
+
+  revalidatePath('/')
+  return response
+}
+
+/**
+ * Acknowledge a notification
+ * Updates linked exception if it exists
+ */
+export async function acknowledgeNotification(notificationId: string) {
+  const user = await getCurrentUser()
+  if (!user) {
+    throw new Error('Authentication required')
+  }
+
+  if (!user.managerOSUserId) {
+    throw new Error('User ID is required')
+  }
+
+  // Verify the notification exists and user has access to it
+  const notification = await prisma.notification.findFirst({
+    where: {
+      id: notificationId,
+      OR: [
+        { userId: user.managerOSUserId || '' },
+        {
+          organizationId: user.managerOSOrganizationId,
+          userId: null,
+        },
+      ],
+    },
+    include: {
+      exception: true,
+    },
+  })
+
+  if (!notification) {
+    throw new Error('Notification not found or access denied')
+  }
+
+  // Upsert the response record
+  const response = await prisma.notificationResponse.upsert({
+    where: {
+      // eslint-disable-next-line camelcase
+      notificationId_userId: {
+        notificationId,
+        userId: user.managerOSUserId,
+      },
+    },
+    update: {
+      status: 'acknowledged',
+      acknowledgedAt: new Date(),
+    },
+    create: {
+      notificationId,
+      userId: user.managerOSUserId,
+      status: 'acknowledged',
+      acknowledgedAt: new Date(),
+    },
+  })
+
+  // If notification is linked to an exception, acknowledge it
+  if (notification.exception) {
+    await acknowledgeException(notification.exception.id)
+  }
+
+  revalidatePath('/')
+  return response
+}
+
+/**
+ * Ignore a notification
+ * Updates linked exception if it exists
+ */
+export async function ignoreNotification(notificationId: string) {
+  const user = await getCurrentUser()
+  if (!user) {
+    throw new Error('Authentication required')
+  }
+
+  if (!user.managerOSUserId) {
+    throw new Error('User ID is required')
+  }
+
+  // Verify the notification exists and user has access to it
+  const notification = await prisma.notification.findFirst({
+    where: {
+      id: notificationId,
+      OR: [
+        { userId: user.managerOSUserId || '' },
+        {
+          organizationId: user.managerOSOrganizationId,
+          userId: null,
+        },
+      ],
+    },
+    include: {
+      exception: true,
+    },
+  })
+
+  if (!notification) {
+    throw new Error('Notification not found or access denied')
+  }
+
+  // Upsert the response record
+  const response = await prisma.notificationResponse.upsert({
+    where: {
+      // eslint-disable-next-line camelcase
+      notificationId_userId: {
+        notificationId,
+        userId: user.managerOSUserId,
+      },
+    },
+    update: {
+      status: 'ignored',
+      ignoredAt: new Date(),
+    },
+    create: {
+      notificationId,
+      userId: user.managerOSUserId,
+      status: 'ignored',
+      ignoredAt: new Date(),
+    },
+  })
+
+  // If notification is linked to an exception, ignore it
+  if (notification.exception) {
+    await ignoreException(notification.exception.id)
+  }
+
+  revalidatePath('/')
+  return response
+}
+
+/**
+ * Resolve a notification
+ * Updates linked exception if it exists
+ */
+export async function resolveNotification(notificationId: string) {
+  const user = await getCurrentUser()
+  if (!user) {
+    throw new Error('Authentication required')
+  }
+
+  if (!user.managerOSUserId) {
+    throw new Error('User ID is required')
+  }
+
+  // Verify the notification exists and user has access to it
+  const notification = await prisma.notification.findFirst({
+    where: {
+      id: notificationId,
+      OR: [
+        { userId: user.managerOSUserId || '' },
+        {
+          organizationId: user.managerOSOrganizationId,
+          userId: null,
+        },
+      ],
+    },
+    include: {
+      exception: true,
+    },
+  })
+
+  if (!notification) {
+    throw new Error('Notification not found or access denied')
+  }
+
+  // Upsert the response record
+  const response = await prisma.notificationResponse.upsert({
+    where: {
+      // eslint-disable-next-line camelcase
+      notificationId_userId: {
+        notificationId,
+        userId: user.managerOSUserId,
+      },
+    },
+    update: {
+      status: 'resolved',
+      resolvedAt: new Date(),
+    },
+    create: {
+      notificationId,
+      userId: user.managerOSUserId,
+      status: 'resolved',
+      resolvedAt: new Date(),
+    },
+  })
+
+  // If notification is linked to an exception, resolve it
+  if (notification.exception) {
+    await resolveException(notification.exception.id)
+  }
 
   revalidatePath('/')
   return response
@@ -369,7 +606,9 @@ export async function getUnreadNotificationCount() {
       responses: {
         none: {
           userId: user.managerOSUserId || '',
-          status: { in: ['read', 'dismissed'] },
+          status: {
+            in: ['read', 'dismissed', 'acknowledged', 'ignored', 'resolved'],
+          },
         },
       },
     },
@@ -502,7 +741,24 @@ export async function getAllUserNotifications(
         : notification.userId === null
           ? { id: 'organization', name: 'Organization', email: '' }
           : null,
-      response: notification.responses[0] || null,
+      response: notification.responses[0]
+        ? {
+            id: notification.responses[0].id,
+            status: notification.responses[0].status,
+            readAt: notification.responses[0].readAt,
+            dismissedAt: notification.responses[0].dismissedAt,
+            acknowledgedAt: notification.responses[0].acknowledgedAt,
+            ignoredAt: notification.responses[0].ignoredAt,
+            resolvedAt: notification.responses[0].resolvedAt,
+          }
+        : null,
+      metadata:
+        (notification.metadata as {
+          exceptionId?: string
+          entityType?: string
+          entityId?: string
+          navigationPath?: string
+        }) || null,
     })),
     totalCount,
     totalPages: Math.ceil(totalCount / limit),
