@@ -19,7 +19,7 @@ interface MeetingInstanceActionsDropdownProps {
 export function MeetingInstanceActionsDropdown({
   meetingId,
   instanceId,
-  size = 'default',
+  size = 'sm',
   canEdit = false,
   canDelete = false,
 }: MeetingInstanceActionsDropdownProps) {

@@ -17,7 +17,7 @@ interface JobRoleActionsDropdownProps {
 export function JobRoleActionsDropdown({
   jobRoleId,
   jobRoleTitle,
-  size = 'default',
+  size = 'sm',
 }: JobRoleActionsDropdownProps) {
   const router = useRouter()
   const handleDelete = async () => {

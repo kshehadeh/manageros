@@ -16,7 +16,7 @@ interface OneOnOneActionsDropdownProps {
 
 export function OneOnOneActionsDropdown({
   oneOnOneId,
-  size = 'default',
+  size = 'sm',
 }: OneOnOneActionsDropdownProps) {
   const router = useRouter()
   const [showDeleteModal, setShowDeleteModal] = useState(false)

@@ -36,7 +36,7 @@ interface ActionDropdownProps {
 
 export function ActionDropdown({
   children,
-  size = 'default',
+  size = 'sm',
   align = 'right',
   className,
   menuClassName,

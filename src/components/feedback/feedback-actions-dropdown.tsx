@@ -41,7 +41,7 @@ export function FeedbackActionsDropdown({
 
   return (
     <>
-      <ActionDropdown>
+      <ActionDropdown size='sm'>
         {({ close }) => (
           <div className='py-1'>
             <Link

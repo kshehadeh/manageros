@@ -33,7 +33,7 @@ interface TaskActionsDropdownProps {
 export function TaskActionsDropdown({
   taskId,
   task,
-  size = 'default',
+  size = 'sm',
 }: TaskActionsDropdownProps) {
   const router = useRouter()
   const [showDeleteModal, setShowDeleteModal] = useState(false)

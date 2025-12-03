@@ -137,6 +137,7 @@ export function FeedbackCampaignActionsDropdown({
   return (
     <>
       <ActionDropdown
+        size='sm'
         onOpenChange={open => {
           if (!open) {
             setCopiedLink(false)

@@ -23,6 +23,7 @@ export function TeamsActionsDropdown({
       trigger={({ toggle }) => (
         <Button
           variant='outline'
+          size='sm'
           className='flex items-center gap-2'
           onClick={toggle}
         >
