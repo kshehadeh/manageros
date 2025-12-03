@@ -23,7 +23,7 @@ export interface InitiativeActionsDropdownProps {
 
 export function InitiativeActionsDropdown({
   initiativeId,
-  size = 'default',
+  size = 'sm',
   canEdit = false,
   canDelete = false,
   canCreateTask = false,

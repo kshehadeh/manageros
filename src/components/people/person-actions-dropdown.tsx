@@ -54,7 +54,7 @@ export function PersonActionsDropdown({
   currentPersonId,
   isAdmin,
   onFeedbackAdded,
-  size = 'default',
+  size = 'sm',
   linkedUser,
   jiraAccount,
   githubAccount,

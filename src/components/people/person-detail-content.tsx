@@ -214,6 +214,7 @@ export function PersonDetailContent({
               linkedUser={person.user as User | null}
               jiraAccount={person.jiraAccount}
               githubAccount={person.githubAccount}
+              size='sm'
             />
           </div>
         }

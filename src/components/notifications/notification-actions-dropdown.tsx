@@ -15,7 +15,7 @@ interface NotificationActionsDropdownProps {
 export function NotificationActionsDropdown({
   notificationId,
   notificationTitle,
-  size = 'default',
+  size = 'sm',
 }: NotificationActionsDropdownProps) {
   const handleDelete = async () => {
     try {

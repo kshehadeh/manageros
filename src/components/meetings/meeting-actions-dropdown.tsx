@@ -30,7 +30,7 @@ interface MeetingActionsDropdownProps {
 export function MeetingActionsDropdown({
   meetingId,
   meeting,
-  size = 'default',
+  size = 'sm',
   canEdit = false,
   canDelete = false,
 }: MeetingActionsDropdownProps) {

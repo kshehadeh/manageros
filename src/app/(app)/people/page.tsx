@@ -4,9 +4,8 @@ import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 import { User } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Link } from '@/components/ui/link'
-import { Workflow, Upload, UserPlus } from 'lucide-react'
+import { PeopleActionsDropdown } from '@/components/people/people-actions-dropdown'
+import { PeopleViewDropdown } from '@/components/people/people-view-dropdown'
 
 export default async function PeoplePage() {
   const user = await getCurrentUser()
@@ -21,29 +20,11 @@ export default async function PeoplePage() {
         helpId='people-teams/people'
         actions={
           <div className='flex flex-wrap items-center gap-3'>
-            <Button asChild variant='outline'>
-              <Link href='/people/chart' className='flex items-center gap-2'>
-                <Workflow className='w-4 h-4' />
-                <span className='hidden sm:inline'>Chart</span>
-              </Link>
-            </Button>
-
-            {canImportPeople && (
-              <Button asChild variant='outline'>
-                <Link href='/people/import' className='flex items-center gap-2'>
-                  <Upload className='w-4 h-4' />
-                  <span className='hidden sm:inline'>Import CSV</span>
-                </Link>
-              </Button>
-            )}
-            {canCreatePeople && (
-              <Button asChild className='flex items-center gap-2'>
-                <Link href='/people/new'>
-                  <UserPlus className='w-4 h-4' />
-                  <span className='hidden sm:inline'>Create Person</span>
-                </Link>
-              </Button>
-            )}
+            <PeopleViewDropdown />
+            <PeopleActionsDropdown
+              canCreatePeople={canCreatePeople}
+              canImportPeople={canImportPeople}
+            />
           </div>
         }
       />

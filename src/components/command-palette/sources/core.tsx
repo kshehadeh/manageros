@@ -14,6 +14,7 @@ import {
   Briefcase,
   ClipboardList,
   Building,
+  Workflow,
 } from 'lucide-react'
 import {
   type CommandItemDescriptor,
@@ -309,6 +310,42 @@ function createStaticItems(
       group: 'Navigation',
       perform: ({ closePalette, router }) => {
         router.push('/oneonones')
+        closePalette()
+      },
+    },
+    {
+      id: 'nav.people-org-chart',
+      title: 'People Org Chart',
+      subtitle: 'View organizational chart for people',
+      icon: <Workflow className='h-4 w-4' />,
+      keywords: [
+        'org chart',
+        'organizational chart',
+        'people chart',
+        'hierarchy',
+        'organization',
+      ],
+      group: 'Navigation',
+      perform: ({ closePalette, router }) => {
+        router.push('/people/chart')
+        closePalette()
+      },
+    },
+    {
+      id: 'nav.teams-org-chart',
+      title: 'Teams Org Chart',
+      subtitle: 'View organizational chart for teams',
+      icon: <Workflow className='h-4 w-4' />,
+      keywords: [
+        'org chart',
+        'organizational chart',
+        'teams chart',
+        'team hierarchy',
+        'organization',
+      ],
+      group: 'Navigation',
+      perform: ({ closePalette, router }) => {
+        router.push('/teams/chart')
         closePalette()
       },
     },

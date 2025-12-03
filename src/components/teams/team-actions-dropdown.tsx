@@ -15,7 +15,7 @@ interface TeamActionsDropdownProps {
 
 export function TeamActionsDropdown({
   teamId,
-  size = 'default',
+  size = 'sm',
 }: TeamActionsDropdownProps) {
   const router = useRouter()
   const handleDelete = async () => {
