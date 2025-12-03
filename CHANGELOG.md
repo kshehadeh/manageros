@@ -1,5 +1,15 @@
 # Changelog
 
+# [1.23.0](/compare/v1.22.0...v1.23.0) (2025-12-03)
+
+### Bug Fixes
+
+- **tolerance-rules:** Implement transaction-based exception creation to prevent duplicates in one-on-one frequency evaluations 51d8267
+
+### Features
+
+- **tolerance-rules:** Add Tolerance Rules section to documentation and UI, including manual check functionality dc2c600
+
 # [1.22.0](/compare/v1.21.1...v1.22.0) (2025-12-03)
 
 ### Bug Fixes
