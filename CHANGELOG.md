@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.21.0](/compare/v1.20.2...v1.21.0) (2025-12-03)
+
+### Features
+
+- **feedback:** Implement feedback form layout and enhance submission form with email validation and rating selector a7a20ec
+
 ## [1.20.2](/compare/v1.20.1...v1.20.2) (2025-12-02)
 
 ### Bug Fixes
