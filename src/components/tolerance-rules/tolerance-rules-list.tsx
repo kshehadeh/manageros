@@ -88,14 +88,22 @@ export function ToleranceRulesList({ rules }: ToleranceRulesListProps) {
   const getConfigSummary = (rule: ToleranceRule) => {
     const config = rule.config as ToleranceRuleConfig
     switch (rule.ruleType) {
-      case 'one_on_one_frequency':
-        return `Warning: ${config as OneOnOneFrequencyConfig}.warningThresholdDays days, Urgent: ${config as OneOnOneFrequencyConfig}.urgentThresholdDays days`
-      case 'initiative_checkin':
-        return `Warning: ${config as InitiativeCheckInConfig}.warningThresholdDays days`
-      case 'feedback_360':
-        return `Warning: ${config as Feedback360Config}.warningThresholdMonths months`
-      case 'manager_span':
-        return `Max: ${config as ManagerSpanConfig}.maxDirectReports reports`
+      case 'one_on_one_frequency': {
+        const oneOnOneConfig = config as OneOnOneFrequencyConfig
+        return `Warning: ${oneOnOneConfig.warningThresholdDays} days, Urgent: ${oneOnOneConfig.urgentThresholdDays} days`
+      }
+      case 'initiative_checkin': {
+        const initiativeConfig = config as InitiativeCheckInConfig
+        return `Warning: ${initiativeConfig.warningThresholdDays} days`
+      }
+      case 'feedback_360': {
+        const feedbackConfig = config as Feedback360Config
+        return `Warning: ${feedbackConfig.warningThresholdMonths} months`
+      }
+      case 'manager_span': {
+        const managerConfig = config as ManagerSpanConfig
+        return `Max: ${managerConfig.maxDirectReports} reports`
+      }
       default:
         return 'N/A'
     }

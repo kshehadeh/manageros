@@ -34,15 +34,16 @@ See [Security Requirements](../../.cursor/rules/security-requirements.mdc) for d
 
 ### Core Entities
 
-| API             | Description                                | Documentation                 |
-| --------------- | ------------------------------------------ | ----------------------------- |
-| **Tasks**       | Create, manage, and track tasks            | [View Docs](./tasks.md)       |
-| **People**      | Manage people in the organization          | [View Docs](./people.md)      |
-| **Teams**       | Organize people into hierarchical teams    | [View Docs](./teams.md)       |
-| **Initiatives** | Track strategic initiatives and objectives | [View Docs](./initiatives.md) |
-| **Meetings**    | Schedule and manage meetings               | [View Docs](./meetings.md)    |
-| **One-on-Ones** | Manage one-on-one meetings                 | [View Docs](./oneonones.md)   |
-| **Feedback**    | Give and receive feedback                  | [View Docs](./feedback.md)    |
+| API                 | Description                                   | Documentation                                |
+| ------------------- | --------------------------------------------- | -------------------------------------------- |
+| **Tasks**           | Create, manage, and track tasks               | [View Docs](./tasks.md)                      |
+| **People**          | Manage people in the organization             | [View Docs](./people.md)                     |
+| **Teams**           | Organize people into hierarchical teams       | [View Docs](./teams.md)                      |
+| **Initiatives**     | Track strategic initiatives and objectives    | [View Docs](./initiatives.md)                |
+| **Meetings**        | Schedule and manage meetings                  | [View Docs](./meetings.md)                   |
+| **One-on-Ones**     | Manage one-on-one meetings                    | [View Docs](./oneonones.md)                  |
+| **Feedback**        | Give and receive feedback                     | [View Docs](./feedback.md)                   |
+| **Tolerance Rules** | Monitor organizational metrics and exceptions | [View Docs](./tolerance-rules-exceptions.md) |
 
 ### Platform Services
 
