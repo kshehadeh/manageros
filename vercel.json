@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/notifications?job=activity-monitoring",
       "schedule": "0 10 * * 1"
+    },
+    {
+      "path": "/api/cron/notifications?job=tolerance-rules-evaluation",
+      "schedule": "0 8 * * *"
     }
   ],
   "buildCommand": "bunx prisma generate && next build --turbo",

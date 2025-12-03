@@ -11,6 +11,7 @@ import {
 import { BirthdayNotificationJob } from './jobs/birthday-notification-job'
 import { ActivityMonitoringJob } from './jobs/activity-monitoring-job'
 import { OverdueTasksNotificationJob } from './jobs/overdue-tasks-notification-job'
+import { ToleranceRulesEvaluationJob } from './jobs/tolerance-rules-evaluation-job'
 
 export class CronJobRegistry {
   private jobs: Map<string, CronJob> = new Map()
@@ -118,6 +119,7 @@ export class CronJobRegistry {
     this.register(new BirthdayNotificationJob())
     this.register(new ActivityMonitoringJob())
     this.register(new OverdueTasksNotificationJob())
+    this.register(new ToleranceRulesEvaluationJob())
   }
 }
 

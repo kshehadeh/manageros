@@ -235,12 +235,14 @@ Examples:
 
   # Run specific job for all organizations
   bun scripts/run-cron-jobs.ts --job birthday-notification
+  bun scripts/run-cron-jobs.ts --job tolerance-rules-evaluation
 
   # Run all jobs for specific organization
   bun scripts/run-cron-jobs.ts --org org123
 
   # Run specific job for specific organization
   bun scripts/run-cron-jobs.ts --job activity-monitoring --org org123
+  bun scripts/run-cron-jobs.ts --job tolerance-rules-evaluation --org org123
 
 Available jobs:
 ${cronJobRegistry

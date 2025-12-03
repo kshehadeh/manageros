@@ -84,6 +84,36 @@
       "request": "attach",
       "port": 9229,
       "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug Cron Jobs Script",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run-cron-jobs.ts",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["--inspect"],
+      "args": ["--verbose"],
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "name": "Debug Cron Jobs: Tolerance Rules",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run-cron-jobs.ts",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["--inspect"],
+      "args": ["--job", "tolerance-rules-evaluation", "--verbose"],
+      "env": {
+        "NODE_ENV": "development"
+      }
     }
   ],
   "compounds": [

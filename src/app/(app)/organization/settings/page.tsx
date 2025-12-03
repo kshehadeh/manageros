@@ -15,7 +15,14 @@ import { OrganizationSettingsBreadcrumbClient } from '@/components/organization/
 import { OrganizationProfileButton } from '@/components/organization/organization-profile-button'
 import { OrganizationSectionServer } from '@/components/settings/organization-section-server'
 import { OrganizationSectionSkeleton } from '@/components/settings/organization-section-skeleton'
-import { Building, Users, Briefcase, BarChart3, Plug } from 'lucide-react'
+import {
+  Building,
+  Users,
+  Briefcase,
+  BarChart3,
+  Plug,
+  AlertTriangle,
+} from 'lucide-react'
 import { PlanLimitsSection } from '@/components/settings/plan-limits-section'
 import { PlanLimitsSectionSkeleton } from '@/components/settings/plan-limits-section-skeleton'
 import { Button } from '@/components/ui/button'
@@ -145,6 +152,30 @@ export default async function OrganizationSettingsPage() {
                     >
                       <Briefcase className='w-4 h-4' />
                       Manage Job Roles
+                    </Link>
+                  </Button>
+                </div>
+              </PageSection>
+
+              {/* Tolerance Rules Section */}
+              <PageSection
+                header={
+                  <SectionHeader
+                    icon={AlertTriangle}
+                    title='Tolerance Rules'
+                    variant='no-background'
+                    description='Configure organizational tolerance rules that monitor metrics and generate exceptions'
+                  />
+                }
+              >
+                <div className='space-y-4'>
+                  <Button asChild variant='outline'>
+                    <Link
+                      href='/organization/settings/tolerance-rules'
+                      className='flex items-center gap-2'
+                    >
+                      <AlertTriangle className='w-4 h-4' />
+                      Manage Tolerance Rules
                     </Link>
                   </Button>
                 </div>
