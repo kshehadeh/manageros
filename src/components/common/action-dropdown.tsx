@@ -89,7 +89,7 @@ export function ActionDropdown({
         trigger({ open, toggle, close })
       ) : (
         <Button
-          variant='ghost'
+          variant='outline'
           size={size}
           className={cn('flex items-center gap-md', triggerClassName)}
           onClick={toggle}

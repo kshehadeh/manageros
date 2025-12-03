@@ -21,7 +21,7 @@ export function PersonViewDropdown({ personId }: PersonViewDropdownProps) {
       size='sm'
       trigger={({ toggle }) => (
         <Button
-          variant='ghost'
+          variant='outline'
           size='sm'
           className='flex items-center gap-md'
           onClick={toggle}
