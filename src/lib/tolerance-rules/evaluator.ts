@@ -8,6 +8,7 @@ import {
   linkExceptionToNotification,
 } from '@/lib/actions/exceptions'
 import { createSystemNotification } from '@/lib/actions/notification'
+import { InputJsonValue } from '@prisma/client/runtime/library'
 import type {
   ToleranceRule,
   ToleranceRuleType,
@@ -151,23 +152,9 @@ async function evaluateOneOnOneFrequency(
       )
 
       // Check if we need to create an exception
-      // Only create if there isn't already an active exception for this rule + entity
-      const existingException = await prisma.exception.findFirst({
-        where: {
-          ruleId: rule.id,
-          organizationId: rule.organizationId,
-          entityType: 'OneOnOne',
-          entityId: `${manager.id}-${report.id}`,
-          status: 'active',
-        },
-      })
-
-      if (existingException) {
-        continue // Already has an active exception
-      }
-
+      // Use a transaction to atomically check and create to prevent race conditions
       if (daysSince > config.urgentThresholdDays) {
-        await createExceptionForOneOnOne(
+        const created = await createExceptionForOneOnOneSafely(
           rule,
           manager.id,
           report.id,
@@ -175,9 +162,11 @@ async function evaluateOneOnOneFrequency(
           config.urgentThresholdDays,
           daysSince
         )
-        exceptionsCreated++
+        if (created) {
+          exceptionsCreated++
+        }
       } else if (daysSince > config.warningThresholdDays) {
-        await createExceptionForOneOnOne(
+        const created = await createExceptionForOneOnOneSafely(
           rule,
           manager.id,
           report.id,
@@ -185,7 +174,9 @@ async function evaluateOneOnOneFrequency(
           config.warningThresholdDays,
           daysSince
         )
-        exceptionsCreated++
+        if (created) {
+          exceptionsCreated++
+        }
       }
     }
   }
@@ -216,7 +207,113 @@ async function getLastOneOnOneDate(
 }
 
 /**
- * Create exception for one-on-one frequency issue
+ * Safely create exception for one-on-one frequency issue with transaction-based duplicate prevention
+ * Returns true if exception was created, false if it already existed
+ */
+async function createExceptionForOneOnOneSafely(
+  rule: ToleranceRule,
+  managerId: string,
+  reportId: string,
+  severity: 'warning' | 'urgent',
+  thresholdDays: number,
+  daysSince: number
+): Promise<boolean> {
+  const entityId = `${managerId}-${reportId}`
+
+  try {
+    // Use a transaction to atomically check and create
+    const result = await prisma.$transaction(
+      async tx => {
+        // Check for existing active exception within the transaction
+        const existingException = await tx.exception.findFirst({
+          where: {
+            ruleId: rule.id,
+            organizationId: rule.organizationId,
+            entityType: 'OneOnOne',
+            entityId,
+            status: 'active',
+          },
+        })
+
+        // If exception already exists, skip creation
+        if (existingException) {
+          return false
+        }
+
+        // Get manager and report names for message
+        const [manager, report] = await Promise.all([
+          tx.person.findUnique({ where: { id: managerId } }),
+          tx.person.findUnique({ where: { id: reportId } }),
+        ])
+
+        const managerName = manager?.name || 'Unknown'
+        const reportName = report?.name || 'Unknown'
+
+        const message =
+          daysSince === Infinity
+            ? `${managerName} has not had a 1:1 with ${reportName} (threshold: ${thresholdDays} days)`
+            : `${managerName} has not had a 1:1 with ${reportName} in ${daysSince} days (threshold: ${thresholdDays} days)`
+
+        // Create the exception within the transaction
+        await tx.exception.create({
+          data: {
+            ruleId: rule.id,
+            organizationId: rule.organizationId,
+            severity,
+            entityType: 'OneOnOne',
+            entityId,
+            message,
+            metadata: {
+              managerId,
+              reportId,
+              managerName,
+              reportName,
+              thresholdDays,
+              daysSince: daysSince === Infinity ? null : daysSince,
+            } as InputJsonValue,
+            status: 'active',
+          },
+        })
+
+        return true
+      },
+      {
+        isolationLevel: 'Serializable', // Highest isolation level to prevent race conditions
+      }
+    )
+
+    // If exception was created, create notification outside transaction
+    if (result) {
+      await createNotificationForOneOnOneException(
+        rule,
+        managerId,
+        reportId,
+        severity,
+        entityId
+      )
+    }
+
+    return result
+  } catch (error) {
+    // Handle unique constraint violations (P2002 is Prisma's unique constraint error code)
+    // This can happen if a unique constraint is added to the database
+    if (
+      error &&
+      typeof error === 'object' &&
+      'code' in error &&
+      error.code === 'P2002'
+    ) {
+      // Duplicate exception detected - another process created it concurrently
+      return false
+    }
+    // Re-throw other errors
+    throw error
+  }
+}
+
+/**
+ * Create exception for one-on-one frequency issue (legacy - kept for reference)
+ * @deprecated Use createExceptionForOneOnOneSafely instead
  */
 async function createExceptionForOneOnOne(
   rule: ToleranceRule,
@@ -279,6 +376,59 @@ async function createExceptionForOneOnOne(
         exceptionId: exception.id,
         entityType: 'OneOnOne',
         entityId: `${managerId}-${reportId}`,
+        navigationPath: `/people/${managerId}`,
+      },
+    })
+
+    await linkExceptionToNotification(exception.id, notification.id)
+  }
+}
+
+/**
+ * Create notification for one-on-one exception (extracted for reuse)
+ */
+async function createNotificationForOneOnOneException(
+  rule: ToleranceRule,
+  managerId: string,
+  reportId: string,
+  severity: 'warning' | 'urgent',
+  entityId: string
+): Promise<void> {
+  // Get the exception that was just created
+  const exception = await prisma.exception.findFirst({
+    where: {
+      ruleId: rule.id,
+      organizationId: rule.organizationId,
+      entityType: 'OneOnOne',
+      entityId,
+      status: 'active',
+    },
+  })
+
+  if (!exception) {
+    return
+  }
+
+  // Create notification for the manager
+  const managerWithUser = await prisma.person.findUnique({
+    where: { id: managerId },
+    include: { user: true },
+  })
+
+  if (managerWithUser?.user?.id) {
+    const notification = await createSystemNotification({
+      title:
+        severity === 'urgent'
+          ? 'Urgent: Missing 1:1 Meeting'
+          : 'Warning: Missing 1:1 Meeting',
+      message: exception.message,
+      type: severity === 'urgent' ? 'error' : 'warning',
+      organizationId: rule.organizationId,
+      userId: managerWithUser.user.id,
+      metadata: {
+        exceptionId: exception.id,
+        entityType: 'OneOnOne',
+        entityId,
         navigationPath: `/people/${managerId}`,
       },
     })
