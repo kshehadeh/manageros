@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 import { z } from 'zod'
+import { evaluateAllRules } from '@/lib/tolerance-rules/evaluator'
 import type {
   ToleranceRule,
   ToleranceRuleType,
@@ -323,6 +324,35 @@ export async function toggleToleranceRule(
     ruleType: rule.ruleType as ToleranceRuleType,
     config: rule.config as unknown as ToleranceRuleConfig,
   } as ToleranceRule
+}
+
+/**
+ * Manually trigger tolerance check evaluation for all enabled rules
+ * Only admins can trigger manual checks
+ */
+export async function runToleranceCheck(): Promise<{
+  exceptionsCreated: number
+  errors: string[]
+}> {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error(
+      'User must belong to an organization to run tolerance checks'
+    )
+  }
+
+  if (!isAdminOrOwner(user)) {
+    throw new Error('Only administrators can run tolerance checks')
+  }
+
+  const result = await evaluateAllRules(user.managerOSOrganizationId)
+
+  // Revalidate relevant paths to show new exceptions
+  revalidatePath('/exceptions')
+  revalidatePath('/organization/settings/tolerance-rules')
+
+  return result
 }
 
 /**

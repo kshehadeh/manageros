@@ -1,6 +1,6 @@
 import { getCurrentUser } from '@/lib/auth-utils'
 import { TeamPulseSection } from './team-pulse-section'
-import { isFuture, differenceInDays } from 'date-fns'
+import { isFuture } from 'date-fns'
 import { getDirectReports } from '@/lib/data/people'
 import { getOneOnOnesForManagerAndReports } from '@/lib/data/one-on-ones'
 import { getTasksForAssignee } from '@/lib/data/tasks'
@@ -15,7 +15,6 @@ interface TeamPulseMember {
   lastOneOnOne: Date | null
   taskCount: number
   feedbackPending: boolean
-  oneOnOneOverdue: boolean
   hasRecentNegativeFeedback: boolean
   hasRecentPositiveFeedback: boolean
 }
@@ -154,11 +153,6 @@ export async function TeamPulseSectionServer() {
 
       const lastOneOnOne = pastOneOnOnes[0]?.scheduledAt || null
 
-      // Check if 1:1 is overdue (more than 2 weeks since last 1:1)
-      const oneOnOneOverdue =
-        lastOneOnOne === null ||
-        differenceInDays(new Date(), new Date(lastOneOnOne)) > 14
-
       // Count tasks
       const taskCount = tasks.filter(t => t.assigneeId === report.id).length
 
@@ -184,7 +178,6 @@ export async function TeamPulseSectionServer() {
         lastOneOnOne,
         taskCount,
         feedbackPending,
-        oneOnOneOverdue,
         hasRecentNegativeFeedback,
         hasRecentPositiveFeedback,
       }

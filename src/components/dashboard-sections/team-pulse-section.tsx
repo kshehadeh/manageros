@@ -8,7 +8,6 @@ import { PersonAvatar } from '@/components/people/person-avatar'
 import { PersonDetailModal } from '@/components/people/person-detail-modal'
 import { format, isFuture, differenceInDays } from 'date-fns'
 import { Activity, AlertCircle, ThumbsUp } from 'lucide-react'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 interface TeamPulseMember {
   id: string
@@ -18,7 +17,6 @@ interface TeamPulseMember {
   lastOneOnOne: Date | null
   taskCount: number
   feedbackPending: boolean
-  oneOnOneOverdue: boolean
   hasRecentNegativeFeedback: boolean
   hasRecentPositiveFeedback: boolean
 }
@@ -74,42 +72,14 @@ export function TeamPulseSection({ members }: TeamPulseSectionProps) {
     setSelectedPersonId(null)
   }
 
-  // Count members with overdue 1:1s
-  const overdueCount = members.filter(m => m.oneOnOneOverdue).length
-  const overdueMembers = members.filter(m => m.oneOnOneOverdue)
-
   return (
     <>
       <PageSection
         header={<SectionHeader icon={Activity} title='Team Pulse' />}
       >
-        {overdueCount > 0 && (
-          <Alert variant='destructive' className='mb-xl'>
-            <AlertCircle className='h-4 w-4' />
-            <AlertTitle>
-              {overdueCount} team member{overdueCount === 1 ? '' : 's'} haven't
-              had a 1:1 in over 2 weeks
-            </AlertTitle>
-            <AlertDescription>
-              {overdueMembers.length === 1 ? (
-                <>
-                  <strong>{overdueMembers[0].name}</strong> hasn't had a 1:1 in
-                  more than 2 weeks.
-                </>
-              ) : (
-                <>
-                  The following team members haven't had a 1:1 in more than 2
-                  weeks:{' '}
-                  <strong>{overdueMembers.map(m => m.name).join(', ')}</strong>
-                </>
-              )}
-            </AlertDescription>
-          </Alert>
-        )}
         <div className='flex flex-col gap-xl'>
           {members.map(member => {
-            const hasIssues =
-              member.oneOnOneOverdue || member.hasRecentNegativeFeedback
+            const hasIssues = member.hasRecentNegativeFeedback
             const hasPositives = member.hasRecentPositiveFeedback
 
             return (
@@ -150,11 +120,6 @@ export function TeamPulseSection({ members }: TeamPulseSectionProps) {
                       )}
                     </div>
                     <div className='flex flex-col gap-xs mt-sm'>
-                      {member.oneOnOneOverdue && (
-                        <div className='text-xs text-destructive font-medium'>
-                          • Overdue 1:1 (more than 2 weeks)
-                        </div>
-                      )}
                       {member.hasRecentNegativeFeedback && (
                         <div className='text-xs text-destructive font-medium'>
                           • Recent negative feedback
