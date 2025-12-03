@@ -1,5 +1,16 @@
 # Changelog
 
+# [1.22.0](/compare/v1.21.1...v1.22.0) (2025-12-03)
+
+### Bug Fixes
+
+- **tolerance-rules:** Enhance exception handling by checking for existing active exceptions before creating new ones in evaluation functions 650a106
+
+### Features
+
+- **branch-cleanup:** Add branch cleanup script and related package scripts for managing local and remote branches e4bb0ef
+- **tolerance-rules:** Add tolerance rules evaluation job and related UI components for managing exceptions and notifications e724f87
+
 ## [1.21.1](/compare/v1.21.0...v1.21.1) (2025-12-03)
 
 # [1.21.0](/compare/v1.20.2...v1.21.0) (2025-12-03)
