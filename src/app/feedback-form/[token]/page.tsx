@@ -1,5 +1,7 @@
 import { getFeedbackCampaignByInviteLink } from '@/lib/actions/feedback-campaign'
 import { FeedbackSubmissionForm } from '@/components/feedback/feedback-submission-form'
+import { FeedbackFormLayout } from '@/components/feedback/feedback-form-layout'
+
 interface FeedbackFormPageProps {
   params: Promise<{
     token: string
@@ -15,10 +17,10 @@ export default async function FeedbackFormPage({
 
   if (!campaign) {
     return (
-      <div className='flex items-center justify-center py-8 px-4'>
+      <div className='flex items-center justify-center py-2xl px-xl'>
         <div className='w-full'>
-          <div className='bg-card/95 backdrop-blur-sm rounded-lg shadow-lg border border-white/10 p-6 md:p-8 text-center'>
-            <h1 className='text-2xl font-bold text-foreground mb-2'>
+          <div className='bg-card/95 backdrop-blur-sm rounded-lg shadow-lg border border-white/10 p-2xl md:p-3xl text-center'>
+            <h1 className='text-2xl font-bold text-foreground mb-md'>
               Campaign Not Found
             </h1>
             <p className='text-muted-foreground'>
@@ -35,10 +37,10 @@ export default async function FeedbackFormPage({
   const now = new Date()
   if (now < campaign.startDate || now > campaign.endDate) {
     return (
-      <div className='flex items-center justify-center py-8 px-4'>
+      <div className='flex items-center justify-center py-2xl px-xl'>
         <div className='w-full'>
-          <div className='bg-card/95 backdrop-blur-sm rounded-lg shadow-lg border border-white/10 p-6 md:p-8 text-center'>
-            <h1 className='text-2xl font-bold text-foreground mb-2'>
+          <div className='bg-card/95 backdrop-blur-sm rounded-lg shadow-lg border border-white/10 p-2xl md:p-3xl text-center'>
+            <h1 className='text-2xl font-bold text-foreground mb-md'>
               Campaign Not Active
             </h1>
             <p className='text-muted-foreground'>
@@ -52,24 +54,8 @@ export default async function FeedbackFormPage({
   }
 
   return (
-    <div className='flex items-center justify-center py-8 px-4'>
-      <div className='w-full md:max-w-[50vw]'>
-        <div className='bg-card/95 backdrop-blur-sm rounded-lg shadow-lg border border-white/10 p-6 md:p-8'>
-          <div className='text-center mb-8'>
-            <h1 className='text-3xl font-bold text-foreground mb-2'>
-              Feedback Request
-            </h1>
-            <p className='text-muted-foreground'>
-              You&apos;ve been invited to provide feedback about{' '}
-              <span className='font-semibold text-foreground'>
-                {campaign.targetPerson.name}
-              </span>
-            </p>
-          </div>
-
-          <FeedbackSubmissionForm campaign={campaign} />
-        </div>
-      </div>
-    </div>
+    <FeedbackFormLayout targetPerson={campaign.targetPerson}>
+      <FeedbackSubmissionForm campaign={campaign} />
+    </FeedbackFormLayout>
   )
 }

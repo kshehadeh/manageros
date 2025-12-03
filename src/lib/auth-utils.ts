@@ -26,8 +26,8 @@ const ORG_REMOVED_COOKIE = 'manageros_org_removed'
  * in server components/pages. The cookie will expire automatically.
  */
 export async function wasRemovedFromOrganization(): Promise<boolean> {
+  const cookieStore = await cookies()
   try {
-    const cookieStore = await cookies()
     const removed = cookieStore.get(ORG_REMOVED_COOKIE)
     if (removed?.value === 'true') {
       return true

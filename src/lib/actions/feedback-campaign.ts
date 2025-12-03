@@ -23,6 +23,8 @@ import { sendEmail } from '@/lib/email-resend'
 import { FeedbackCampaignInviteEmail } from '@/emails/FeedbackCampaignInviteEmail'
 import { FeedbackCampaignReminderEmail } from '@/emails/FeedbackCampaignReminderEmail'
 import { format, differenceInDays } from 'date-fns'
+import { fetchJiraAssignedTickets } from './jira'
+import { fetchGithubPullRequests } from './github'
 
 export async function createFeedbackCampaign(
   formData: FeedbackCampaignFormData
@@ -561,6 +563,13 @@ export async function getFeedbackCampaignByInviteLink(inviteLink: string) {
           id: true,
           name: true,
           email: true,
+          role: true,
+          jobRole: {
+            select: {
+              title: true,
+            },
+          },
+          organizationId: true,
         },
       },
       template: {
@@ -572,6 +581,67 @@ export async function getFeedbackCampaignByInviteLink(inviteLink: string) {
       },
     },
   })
+
+  // If campaign found, fetch stats for the target person
+  if (campaign?.targetPerson) {
+    // Get initiatives count
+    const initiativesCount = await prisma.initiative.count({
+      where: {
+        organizationId: campaign.targetPerson.organizationId,
+        owners: {
+          some: { personId: campaign.targetPerson.id },
+        },
+      },
+    })
+
+    // Get Jira tickets count (try to fetch, but don't fail if no integration)
+    let jiraTicketsCount = 0
+    try {
+      const jiraResult = await fetchJiraAssignedTickets(
+        campaign.targetPerson.id,
+        30
+      )
+      if (jiraResult.success) {
+        jiraTicketsCount = jiraResult.tickets.length
+      }
+    } catch (error) {
+      // Continue without Jira data
+      console.warn('Failed to fetch Jira tickets:', error)
+    }
+
+    // Get open PRs count (try to fetch, but don't fail if no integration)
+    let openPrsCount = 0
+    try {
+      const githubResult = await fetchGithubPullRequests(
+        campaign.targetPerson.id,
+        30
+      )
+      if (
+        githubResult.success &&
+        'pullRequests' in githubResult &&
+        githubResult.pullRequests
+      ) {
+        openPrsCount = githubResult.pullRequests.filter(
+          pr => pr.state === 'open'
+        ).length
+      }
+    } catch (error) {
+      // Continue without GitHub data
+      console.warn('Failed to fetch GitHub PRs:', error)
+    }
+
+    return {
+      ...campaign,
+      targetPerson: {
+        ...campaign.targetPerson,
+        stats: {
+          initiativesCount,
+          jiraTicketsCount,
+          openPrsCount,
+        },
+      },
+    }
+  }
 
   return campaign
 }

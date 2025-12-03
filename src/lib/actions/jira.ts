@@ -310,9 +310,8 @@ export async function fetchJiraAssignedTickets(
     }
   | { success: false; error: string }
 > {
+  const user = await getCurrentUser()
   try {
-    const user = await getCurrentUser()
-
     if (!user.managerOSOrganizationId) {
       return { success: false, error: 'User must belong to an organization' }
     }

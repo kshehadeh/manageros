@@ -6,9 +6,20 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Separator } from '@/components/ui/separator'
+import { RatingSelector } from '@/components/ui/rating-selector'
 import { submitFeedbackResponseByInviteLink } from '@/lib/actions/feedback-campaign'
-import { CheckCircle, AlertCircle } from 'lucide-react'
+import { CheckCircle, AlertCircle, XCircle } from 'lucide-react'
 import { JsonValue } from '@prisma/client/runtime/library'
+import { Geist_Mono as GeistMono } from 'next/font/google'
+import { useEffect } from 'react'
+import { cn } from '@/lib/utils'
+
+const geistMono = GeistMono({
+  subsets: ['latin'],
+  variable: '--font-geist-mono',
+})
 
 interface FeedbackQuestion {
   id: string
@@ -23,11 +34,6 @@ interface FeedbackCampaign {
   id: string
   name?: string | null
   inviteLink: string | null
-  targetPerson: {
-    id: string
-    name: string
-    email: string | null
-  }
   template: {
     id: string
     name: string
@@ -53,16 +59,51 @@ export function FeedbackSubmissionForm({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [emailValidationError, setEmailValidationError] = useState<
+    string | null
+  >(null)
+
+  // Validate email against invite list
+  const isEmailValid =
+    responderEmail.trim() !== '' &&
+    campaign.inviteEmails.some(
+      email => email.toLowerCase() === responderEmail.toLowerCase().trim()
+    )
+
+  useEffect(() => {
+    if (responderEmail.trim() === '') {
+      setEmailValidationError(null)
+      return
+    }
+
+    if (isEmailValid) {
+      setEmailValidationError(null)
+    } else {
+      setEmailValidationError(
+        'This email address is not authorized to provide feedback for this campaign.'
+      )
+    }
+  }, [responderEmail, isEmailValid])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
+
+    // Validate email before submitting
+    if (!isEmailValid) {
+      setEmailValidationError(
+        'Please enter an email address that was invited to provide feedback.'
+      )
+      return
+    }
+
     setIsSubmitting(true)
     setError(null)
 
     try {
       await submitFeedbackResponseByInviteLink(
         campaign.inviteLink!,
-        responderEmail,
+        responderEmail.trim(),
         responses
       )
       setIsSubmitted(true)
@@ -98,32 +139,17 @@ export function FeedbackSubmissionForm({
 
       case 'rating':
         return (
-          <RadioGroup
-            value={currentValue ? String(currentValue) : ''}
-            onValueChange={value => updateResponse(questionId, value)}
+          <RatingSelector
+            value={currentValue ? Number(currentValue) : null}
+            onChange={value => updateResponse(questionId, value)}
+            min={1}
+            max={5}
+            labels={{
+              min: 'Poor',
+              max: 'Excellent',
+            }}
             required={question.required}
-          >
-            <div className='flex justify-between'>
-              {[1, 2, 3, 4, 5].map(rating => (
-                <div key={rating} className='flex items-center space-x-2'>
-                  <RadioGroupItem
-                    value={rating.toString()}
-                    id={`${questionId}-${rating}`}
-                  />
-                  <Label
-                    htmlFor={`${questionId}-${rating}`}
-                    className='text-sm'
-                  >
-                    {rating}
-                  </Label>
-                </div>
-              ))}
-            </div>
-            <div className='flex justify-between text-xs text-muted-foreground mt-1'>
-              <span>Poor</span>
-              <span>Excellent</span>
-            </div>
-          </RadioGroup>
+          />
         )
 
       case 'multiple_choice':
@@ -139,7 +165,7 @@ export function FeedbackSubmissionForm({
                 const optionValue =
                   typeof option === 'string' ? option : String(option)
                 return (
-                  <div key={index} className='flex items-center space-x-2'>
+                  <div key={index} className='flex items-center gap-md'>
                     <RadioGroupItem
                       value={optionValue}
                       id={`${questionId}-${index}`}
@@ -171,9 +197,9 @@ export function FeedbackSubmissionForm({
 
   if (isSubmitted) {
     return (
-      <div className='text-center py-8'>
-        <CheckCircle className='h-16 w-16 text-badge-success mx-auto mb-4' />
-        <h2 className='text-2xl font-bold text-foreground mb-2'>Thank You!</h2>
+      <div className='text-center py-2xl'>
+        <CheckCircle className='h-16 w-16 text-badge-success mx-auto mb-xl' />
+        <h2 className='text-2xl font-bold text-foreground mb-md'>Thank You!</h2>
         <p className='text-muted-foreground'>
           Your feedback has been successfully submitted.
         </p>
@@ -182,44 +208,62 @@ export function FeedbackSubmissionForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className='space-y-6'>
+    <form onSubmit={handleSubmit} className='space-y-xl'>
       {error && (
-        <div className='p-4 bg-destructive/10 border border-destructive/20 rounded-md'>
-          <div className='flex'>
-            <AlertCircle className='h-5 w-5 text-destructive' />
-            <div className='ml-3'>
-              <p className='text-sm text-destructive'>{error}</p>
-            </div>
-          </div>
-        </div>
+        <Alert variant='destructive'>
+          <AlertCircle className='h-4 w-4' />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
-      <div className='space-y-2'>
+      <div className='space-y-md'>
         <Label htmlFor='responderEmail'>Your Email Address</Label>
-        <Input
-          id='responderEmail'
-          type='email'
-          value={responderEmail}
-          onChange={e => setResponderEmail(e.target.value)}
-          placeholder='Enter your email address'
-          required
-        />
-        <p className='text-sm text-muted-foreground'>
-          This must match one of the email addresses invited to provide
-          feedback.
-        </p>
+        <div className='relative'>
+          <Input
+            id='responderEmail'
+            type='email'
+            value={responderEmail}
+            onChange={e => setResponderEmail(e.target.value)}
+            placeholder='Enter your email address'
+            required
+            className={cn(
+              emailValidationError
+                ? 'border-destructive pr-10'
+                : isEmailValid
+                  ? 'border-badge-success pr-10'
+                  : 'pr-10'
+            )}
+          />
+          {responderEmail.trim() !== '' && (
+            <div className='absolute right-xl top-1/2 -translate-y-1/2'>
+              {isEmailValid ? (
+                <CheckCircle className='h-5 w-5 text-badge-success' />
+              ) : (
+                <XCircle className='h-5 w-5 text-destructive' />
+              )}
+            </div>
+          )}
+        </div>
+        {emailValidationError ? (
+          <p className='text-sm text-destructive'>{emailValidationError}</p>
+        ) : (
+          <p className='text-sm text-muted-foreground'>
+            This must match one of the email addresses invited to provide
+            feedback.
+          </p>
+        )}
       </div>
 
       {campaign.template &&
       campaign.template.questions &&
       campaign.template.questions.length > 0 ? (
-        <div className='space-y-6'>
-          {campaign.template.questions.map((question, index) => (
-            <div key={question.id} className='space-y-3'>
-              <Label className='text-base font-medium'>
-                {index + 1}. {question.question}
+        <div className='space-y-xl'>
+          {campaign.template.questions.map(question => (
+            <div key={question.id} className='space-y-2xl'>
+              <Label className={`text-lg font-medium ${geistMono.className}`}>
+                {question.question}
                 {question.required && (
-                  <span className='text-destructive ml-1'>*</span>
+                  <span className='text-destructive ml-xs'>*</span>
                 )}
               </Label>
               {renderQuestion(question)}
@@ -227,10 +271,10 @@ export function FeedbackSubmissionForm({
           ))}
         </div>
       ) : (
-        <div className='space-y-3'>
-          <Label className='text-base font-medium'>
+        <div className='space-y-2xl'>
+          <Label className={`text-lg font-medium ${geistMono.className}`}>
             General Feedback
-            <span className='text-destructive ml-1'>*</span>
+            <span className='text-destructive ml-xs'>*</span>
           </Label>
           <Textarea
             value={responses['general'] || ''}
@@ -242,8 +286,14 @@ export function FeedbackSubmissionForm({
         </div>
       )}
 
-      <div className='pt-4'>
-        <Button type='submit' disabled={isSubmitting} className='w-full'>
+      <Separator />
+
+      <div className='pt-xl'>
+        <Button
+          type='submit'
+          disabled={isSubmitting || !isEmailValid}
+          className='w-full'
+        >
           {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
         </Button>
       </div>
