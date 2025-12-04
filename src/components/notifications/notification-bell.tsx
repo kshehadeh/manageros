@@ -15,10 +15,10 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
-import { markNotificationAsRead } from '@/lib/actions/notification'
 import { formatDistanceToNow } from 'date-fns'
 import { Link } from '@/components/ui/link'
 import { useNotifications } from '@/hooks/use-notifications'
+import { NotificationStatusDropdown } from '@/components/notifications/notification-status-dropdown'
 
 interface NotificationBellProps {
   className?: string
@@ -34,15 +34,6 @@ export function NotificationBell({ className }: NotificationBellProps) {
     isOffline,
     refresh,
   } = useNotifications({ limit: 5, pollInterval: 30000 })
-
-  const handleMarkAsRead = async (notificationId: string) => {
-    try {
-      await markNotificationAsRead(notificationId)
-      refresh() // Refresh notifications after marking as read
-    } catch (error) {
-      console.error('Failed to mark notification as read:', error)
-    }
-  }
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -106,10 +97,10 @@ export function NotificationBell({ className }: NotificationBellProps) {
           />
 
           {/* Dropdown */}
-          <Card className='absolute right-0 top-12 w-80 z-50 shadow-lg'>
-            <CardHeader className='pb-3'>
+          <Card className='absolute right-0 top-12 w-80 z-50 shadow-lg rounded-sm'>
+            <CardHeader className='py-sm px-smborder-b border-border bg-muted'>
               <div className='flex items-center justify-between'>
-                <CardTitle className='text-sm font-medium'>
+                <CardTitle className='text-base font-medium font-mono'>
                   Notifications
                 </CardTitle>
                 <Button
@@ -123,10 +114,10 @@ export function NotificationBell({ className }: NotificationBellProps) {
               </div>
             </CardHeader>
 
-            <CardContent className='p-0'>
-              <ScrollArea className='h-80'>
+            <CardContent className='p-lg! flex flex-col max-h-[500px]'>
+              <ScrollArea className='flex-1 min-h-0'>
                 {isOffline ? (
-                  <div className='p-4 text-center text-muted-foreground text-sm'>
+                  <div className='p-3 text-center text-muted-foreground text-sm'>
                     <WifiOff className='h-8 w-8 mx-auto mb-2 opacity-50' />
                     <p>Notifications unavailable offline</p>
                     <p className='text-xs mt-1'>
@@ -134,45 +125,38 @@ export function NotificationBell({ className }: NotificationBellProps) {
                     </p>
                   </div>
                 ) : notifications.length === 0 ? (
-                  <div className='p-4 text-center text-muted-foreground text-sm'>
+                  <div className='p-3 text-center text-muted-foreground text-sm'>
                     No unread notifications
                   </div>
                 ) : (
                   <div className='space-y-1'>
                     {notifications.map((notification, index) => (
                       <div key={notification.id}>
-                        <div className='p-3 hover:bg-muted/50 transition-colors'>
-                          <div className='flex items-start gap-3'>
-                            <div>{getNotificationIcon(notification.type)}</div>
-                            <div className='flex-1 min-w-0'>
-                              <div className='flex items-start justify-between gap-2'>
-                                <div className='flex-1 min-w-0'>
-                                  <p className='text-sm font-medium text-foreground truncate'>
-                                    {notification.title}
-                                  </p>
-                                  <p className='text-xs text-muted-foreground mt-1 line-clamp-2'>
-                                    {notification.message}
-                                  </p>
-                                  <p className='text-xs text-muted-foreground mt-1'>
-                                    {formatDistanceToNow(
-                                      notification.createdAt,
-                                      { addSuffix: true }
-                                    )}
-                                  </p>
-                                </div>
-                                <div className='flex gap-1'>
-                                  <Button
-                                    variant='ghost'
-                                    size='sm'
-                                    onClick={() =>
-                                      handleMarkAsRead(notification.id)
-                                    }
-                                    className='h-6 px-2 text-xs'
-                                  >
-                                    Mark as read
-                                  </Button>
-                                </div>
-                              </div>
+                        <div className='py-sm hover:bg-muted/50 transition-colors'>
+                          <div className='flex items-start gap-2'>
+                            <div className='flex-shrink-0'>
+                              {getNotificationIcon(notification.type)}
+                            </div>
+                            <div className='flex-1 min-w-0 overflow-hidden'>
+                              <p className='text-xs font-medium text-foreground truncate'>
+                                {notification.title}
+                              </p>
+                              <p className='text-xs text-muted-foreground mt-1 line-clamp-2'>
+                                {notification.message}
+                              </p>
+                              <p className='text-xs text-muted-foreground mt-1'>
+                                {formatDistanceToNow(notification.createdAt, {
+                                  addSuffix: true,
+                                })}
+                              </p>
+                            </div>
+                            <div className='flex-shrink-0'>
+                              <NotificationStatusDropdown
+                                notification={notification}
+                                onActionComplete={refresh}
+                                size='sm'
+                                align='right'
+                              />
                             </div>
                           </div>
                         </div>
@@ -186,7 +170,7 @@ export function NotificationBell({ className }: NotificationBellProps) {
               {!isOffline && notifications.length > 0 && (
                 <>
                   <Separator />
-                  <div className='p-3'>
+                  <div className='p-2 flex-shrink-0'>
                     <Link href='/notifications'>
                       <Button variant='outline' size='sm' className='w-full'>
                         See all notifications
