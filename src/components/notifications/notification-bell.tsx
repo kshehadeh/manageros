@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Bell,
   X,
@@ -19,6 +19,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { Link } from '@/components/ui/link'
 import { useNotifications } from '@/hooks/use-notifications'
 import { NotificationStatusDropdown } from '@/components/notifications/notification-status-dropdown'
+import { NOTIFICATION_UPDATED_EVENT } from '@/lib/notification-events'
 
 interface NotificationBellProps {
   className?: string
@@ -34,6 +35,25 @@ export function NotificationBell({ className }: NotificationBellProps) {
     isOffline,
     refresh,
   } = useNotifications({ limit: 5, pollInterval: 30000 })
+
+  // Listen for notification update events from other components
+  useEffect(() => {
+    const handleNotificationUpdate = () => {
+      refresh()
+    }
+
+    window.addEventListener(
+      NOTIFICATION_UPDATED_EVENT,
+      handleNotificationUpdate
+    )
+
+    return () => {
+      window.removeEventListener(
+        NOTIFICATION_UPDATED_EVENT,
+        handleNotificationUpdate
+      )
+    }
+  }, [refresh])
 
   const getNotificationIcon = (type: string) => {
     switch (type) {

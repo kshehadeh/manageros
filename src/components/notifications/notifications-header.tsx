@@ -20,6 +20,7 @@ import {
   markAllNotificationsAsResolved,
 } from '@/lib/actions/notification'
 import { toast } from 'sonner'
+import { dispatchNotificationUpdate } from '@/lib/notification-events'
 
 interface NotificationsHeaderProps {
   onRefresh?: () => void
@@ -56,6 +57,7 @@ export function NotificationsHeader({
         setIsProcessing(true)
         await action()
         toast.success(successMessage)
+        dispatchNotificationUpdate()
         onBulkActionComplete?.()
         onRefresh?.()
       } catch (error) {
