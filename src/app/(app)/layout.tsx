@@ -21,6 +21,8 @@ import {
   getCurrentUserWithPersonAndOrganization,
   getFilteredNavigation,
 } from '../../lib/auth-utils'
+import { getIncompleteTasksCountForAssignee } from '@/lib/data/tasks'
+import { prisma } from '@/lib/db'
 
 interface AppLayoutProps {
   children: ReactNode
@@ -30,6 +32,52 @@ export default async function AppLayout({ children }: AppLayoutProps) {
   const { user, person, organization } =
     await getCurrentUserWithPersonAndOrganization()
   const filteredNavigation = await getFilteredNavigation(user)
+
+  // Fetch badge counts for navigation items
+  const navigationWithBadges = await Promise.all(
+    filteredNavigation.map(async item => {
+      // Add incomplete tasks count to "My Tasks"
+      if (
+        item.href === '/my-tasks' &&
+        person?.id &&
+        user.managerOSOrganizationId &&
+        user.managerOSUserId
+      ) {
+        const tasksInfo = await getIncompleteTasksCountForAssignee(
+          person.id,
+          user.managerOSOrganizationId,
+          user.managerOSUserId
+        )
+        return {
+          ...item,
+          badgeCount: tasksInfo.count,
+          badgeVariant: (tasksInfo.hasOverdue ? 'error' : 'secondary') as
+            | 'error'
+            | 'secondary',
+        }
+      }
+
+      // Add in progress initiatives count to "Initiatives"
+      if (
+        item.href === '/initiatives' &&
+        person?.id &&
+        user.managerOSOrganizationId
+      ) {
+        const inProgressInitiativesCount = await prisma.initiative.count({
+          where: {
+            organizationId: user.managerOSOrganizationId,
+            owners: {
+              some: { personId: person.id },
+            },
+            status: 'in_progress',
+          },
+        })
+        return { ...item, badgeCount: inProgressInitiativesCount }
+      }
+
+      return item
+    })
+  )
 
   // Render full layout for authenticated routes
   return (
@@ -58,7 +106,7 @@ export default async function AppLayout({ children }: AppLayoutProps) {
                           user={user}
                           person={person}
                           organization={organization}
-                          navigation={filteredNavigation}
+                          navigation={navigationWithBadges}
                         />
                         <div className='flex-1 flex flex-col overflow-hidden lg:ml-0'>
                           <TopBar />

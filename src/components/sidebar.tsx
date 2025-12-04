@@ -38,12 +38,24 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { PersonBrief } from '../types/person'
 import { SidebarOrganizationSwitcher } from '@/components/organization/sidebar-organization-switcher'
 import { HelpLink } from './shared'
+import { Badge } from '@/components/ui/badge'
 interface NavItem {
   name: string
   href: string
   icon: string
   adminOnly?: boolean
   requiresPermission?: string
+  badgeCount?: number
+  badgeVariant?:
+    | 'default'
+    | 'secondary'
+    | 'destructive'
+    | 'outline'
+    | 'success'
+    | 'warning'
+    | 'error'
+    | 'info'
+    | 'neutral'
 }
 
 interface SidebarProps {
@@ -209,7 +221,15 @@ export default function Sidebar({
                     }`}
                   >
                     {IconComponent && <IconComponent className='h-5 w-5' />}
-                    {item.name}
+                    <span className='flex-1'>{item.name}</span>
+                    {item.badgeCount !== undefined && item.badgeCount > 0 && (
+                      <Badge
+                        variant={item.badgeVariant || 'secondary'}
+                        className='ml-auto'
+                      >
+                        {item.badgeCount}
+                      </Badge>
+                    )}
                   </Link>
                 )
               })}

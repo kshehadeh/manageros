@@ -371,6 +371,10 @@ export function getTaskTableSettings(
   const tableSettings = settings.taskTableSettings[settingsId]
 
   if (!tableSettings) {
+    // For "my-tasks" view, default to filtering out completed tasks
+    const defaultStatusFilter =
+      settingsId === 'my-tasks' ? ['todo', 'doing', 'blocked'] : []
+
     return {
       sorting: [],
       grouping: 'none',
@@ -380,7 +384,7 @@ export function getTaskTableSettings(
       },
       filters: {
         search: '',
-        status: [],
+        status: defaultStatusFilter,
         assigneeId: [],
         initiativeId: [],
         priority: [],

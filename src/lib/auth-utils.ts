@@ -602,6 +602,17 @@ export async function getFilteredNavigation(user: UserBrief | null) {
     icon: string
     adminOnly: boolean
     requiresPermission?: PermissionType
+    badgeCount?: number
+    badgeVariant?:
+      | 'default'
+      | 'secondary'
+      | 'destructive'
+      | 'outline'
+      | 'success'
+      | 'warning'
+      | 'error'
+      | 'info'
+      | 'neutral'
   }
 
   const navigation: NavigationItem[] = [
