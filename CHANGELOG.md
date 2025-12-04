@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.25.1](/compare/v1.25.0...v1.25.1) (2025-12-04)
+
+### Bug Fixes
+
+- **notification-detail-modal:** Refactor date formatting logic for notification response timestamps d4ae4c5
+
 # [1.25.0](/compare/v1.24.0...v1.25.0) (2025-12-04)
 
 ### Features
