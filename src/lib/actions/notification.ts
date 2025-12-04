@@ -765,3 +765,301 @@ export async function getAllUserNotifications(
     currentPage: page,
   }
 }
+
+/**
+ * Mark all user notifications as read
+ */
+export async function markAllNotificationsAsRead() {
+  const user = await getCurrentUser()
+  if (!user) {
+    throw new Error('Authentication required')
+  }
+
+  if (!user.managerOSUserId) {
+    throw new Error('User ID is required')
+  }
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error(
+      'User must belong to an organization to mark notifications as read'
+    )
+  }
+
+  // Get all notifications for the user that aren't already read
+  const notifications = await prisma.notification.findMany({
+    where: {
+      OR: [
+        { userId: user.managerOSUserId },
+        {
+          organizationId: user.managerOSOrganizationId,
+          userId: null,
+        },
+      ],
+      responses: {
+        none: {
+          userId: user.managerOSUserId,
+          status: 'read',
+        },
+      },
+    },
+  })
+
+  // Create or update responses for all notifications
+  await Promise.all(
+    notifications.map(notification =>
+      prisma.notificationResponse.upsert({
+        where: {
+          // eslint-disable-next-line camelcase
+          notificationId_userId: {
+            notificationId: notification.id,
+            userId: user.managerOSUserId,
+          },
+        },
+        update: {
+          status: 'read',
+          readAt: new Date(),
+        },
+        create: {
+          notificationId: notification.id,
+          userId: user.managerOSUserId,
+          status: 'read',
+          readAt: new Date(),
+        },
+      })
+    )
+  )
+
+  revalidatePath('/notifications')
+  revalidatePath('/')
+}
+
+/**
+ * Mark all user notifications as acknowledged
+ */
+export async function markAllNotificationsAsAcknowledged() {
+  const user = await getCurrentUser()
+  if (!user) {
+    throw new Error('Authentication required')
+  }
+
+  if (!user.managerOSUserId) {
+    throw new Error('User ID is required')
+  }
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error(
+      'User must belong to an organization to acknowledge notifications'
+    )
+  }
+
+  // Get all notifications for the user that aren't already acknowledged
+  const notifications = await prisma.notification.findMany({
+    where: {
+      OR: [
+        { userId: user.managerOSUserId },
+        {
+          organizationId: user.managerOSOrganizationId,
+          userId: null,
+        },
+      ],
+      responses: {
+        none: {
+          userId: user.managerOSUserId,
+          status: 'acknowledged',
+        },
+      },
+    },
+    include: {
+      exception: true,
+    },
+  })
+
+  // Create or update responses for all notifications
+  await Promise.all(
+    notifications.map(async notification => {
+      const response = await prisma.notificationResponse.upsert({
+        where: {
+          // eslint-disable-next-line camelcase
+          notificationId_userId: {
+            notificationId: notification.id,
+            userId: user.managerOSUserId,
+          },
+        },
+        update: {
+          status: 'acknowledged',
+          acknowledgedAt: new Date(),
+        },
+        create: {
+          notificationId: notification.id,
+          userId: user.managerOSUserId,
+          status: 'acknowledged',
+          acknowledgedAt: new Date(),
+        },
+      })
+
+      // If notification is linked to an exception, acknowledge it
+      if (notification.exception) {
+        await acknowledgeException(notification.exception.id)
+      }
+
+      return response
+    })
+  )
+
+  revalidatePath('/notifications')
+  revalidatePath('/')
+}
+
+/**
+ * Mark all user notifications as ignored
+ */
+export async function markAllNotificationsAsIgnored() {
+  const user = await getCurrentUser()
+  if (!user) {
+    throw new Error('Authentication required')
+  }
+
+  if (!user.managerOSUserId) {
+    throw new Error('User ID is required')
+  }
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error(
+      'User must belong to an organization to ignore notifications'
+    )
+  }
+
+  // Get all notifications for the user that aren't already ignored
+  const notifications = await prisma.notification.findMany({
+    where: {
+      OR: [
+        { userId: user.managerOSUserId },
+        {
+          organizationId: user.managerOSOrganizationId,
+          userId: null,
+        },
+      ],
+      responses: {
+        none: {
+          userId: user.managerOSUserId,
+          status: 'ignored',
+        },
+      },
+    },
+    include: {
+      exception: true,
+    },
+  })
+
+  // Create or update responses for all notifications
+  await Promise.all(
+    notifications.map(async notification => {
+      const response = await prisma.notificationResponse.upsert({
+        where: {
+          // eslint-disable-next-line camelcase
+          notificationId_userId: {
+            notificationId: notification.id,
+            userId: user.managerOSUserId,
+          },
+        },
+        update: {
+          status: 'ignored',
+          ignoredAt: new Date(),
+        },
+        create: {
+          notificationId: notification.id,
+          userId: user.managerOSUserId,
+          status: 'ignored',
+          ignoredAt: new Date(),
+        },
+      })
+
+      // If notification is linked to an exception, ignore it
+      if (notification.exception) {
+        await ignoreException(notification.exception.id)
+      }
+
+      return response
+    })
+  )
+
+  revalidatePath('/notifications')
+  revalidatePath('/')
+}
+
+/**
+ * Mark all user notifications as resolved
+ */
+export async function markAllNotificationsAsResolved() {
+  const user = await getCurrentUser()
+  if (!user) {
+    throw new Error('Authentication required')
+  }
+
+  if (!user.managerOSUserId) {
+    throw new Error('User ID is required')
+  }
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error(
+      'User must belong to an organization to resolve notifications'
+    )
+  }
+
+  // Get all notifications for the user that aren't already resolved
+  const notifications = await prisma.notification.findMany({
+    where: {
+      OR: [
+        { userId: user.managerOSUserId },
+        {
+          organizationId: user.managerOSOrganizationId,
+          userId: null,
+        },
+      ],
+      responses: {
+        none: {
+          userId: user.managerOSUserId,
+          status: 'resolved',
+        },
+      },
+    },
+    include: {
+      exception: true,
+    },
+  })
+
+  // Create or update responses for all notifications
+  await Promise.all(
+    notifications.map(async notification => {
+      const response = await prisma.notificationResponse.upsert({
+        where: {
+          // eslint-disable-next-line camelcase
+          notificationId_userId: {
+            notificationId: notification.id,
+            userId: user.managerOSUserId,
+          },
+        },
+        update: {
+          status: 'resolved',
+          resolvedAt: new Date(),
+        },
+        create: {
+          notificationId: notification.id,
+          userId: user.managerOSUserId,
+          status: 'resolved',
+          resolvedAt: new Date(),
+        },
+      })
+
+      // If notification is linked to an exception, resolve it
+      if (notification.exception) {
+        await resolveException(notification.exception.id)
+      }
+
+      return response
+    })
+  )
+
+  revalidatePath('/notifications')
+  revalidatePath('/')
+}

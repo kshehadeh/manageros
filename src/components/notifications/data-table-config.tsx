@@ -221,7 +221,7 @@ export const notificationsDataTableConfig: DataTableConfig<
   deleteAction: deleteNotification,
 
   // Custom context menu items
-  contextMenuItems: ({ entity, close, refetch, onDelete }) => {
+  contextMenuItems: ({ entity, close, applyOptimisticUpdate, onDelete }) => {
     const notification = entity as NotificationWithResponse
     const status = notification.response?.status
     const isRead = status === 'read'
@@ -231,20 +231,58 @@ export const notificationsDataTableConfig: DataTableConfig<
 
     const handleMarkAsRead = async () => {
       try {
+        // Optimistically update the UI
+        const now = new Date()
+        applyOptimisticUpdate(notification.id, {
+          response: notification.response
+            ? {
+                ...notification.response,
+                status: 'read',
+                readAt: now,
+              }
+            : {
+                id: '',
+                status: 'read',
+                readAt: now,
+                dismissedAt: null,
+                acknowledgedAt: null,
+                ignoredAt: null,
+                resolvedAt: null,
+              },
+        } as Partial<NotificationWithResponse>)
         await markNotificationAsRead(notification.id)
-        refetch?.()
         toast.success('Notification marked as read')
         close()
       } catch (error) {
         console.error('Failed to mark notification as read:', error)
         toast.error('Failed to mark notification as read')
+        // Revert optimistic update on error by refetching
+        // The optimistic update will be cleared on next refetch
       }
     }
 
     const handleAcknowledge = async () => {
       try {
+        // Optimistically update the UI
+        const now = new Date()
+        applyOptimisticUpdate(notification.id, {
+          response: notification.response
+            ? {
+                ...notification.response,
+                status: 'acknowledged',
+                acknowledgedAt: now,
+              }
+            : {
+                id: '',
+                status: 'acknowledged',
+                readAt: null,
+                dismissedAt: null,
+                acknowledgedAt: now,
+                ignoredAt: null,
+                resolvedAt: null,
+              },
+        } as Partial<NotificationWithResponse>)
         await acknowledgeNotification(notification.id)
-        refetch?.()
         toast.success('Notification acknowledged')
         close()
       } catch (error) {
@@ -255,8 +293,26 @@ export const notificationsDataTableConfig: DataTableConfig<
 
     const handleIgnore = async () => {
       try {
+        // Optimistically update the UI
+        const now = new Date()
+        applyOptimisticUpdate(notification.id, {
+          response: notification.response
+            ? {
+                ...notification.response,
+                status: 'ignored',
+                ignoredAt: now,
+              }
+            : {
+                id: '',
+                status: 'ignored',
+                readAt: null,
+                dismissedAt: null,
+                acknowledgedAt: null,
+                ignoredAt: now,
+                resolvedAt: null,
+              },
+        } as Partial<NotificationWithResponse>)
         await ignoreNotification(notification.id)
-        refetch?.()
         toast.success('Notification ignored')
         close()
       } catch (error) {
@@ -267,8 +323,26 @@ export const notificationsDataTableConfig: DataTableConfig<
 
     const handleResolve = async () => {
       try {
+        // Optimistically update the UI
+        const now = new Date()
+        applyOptimisticUpdate(notification.id, {
+          response: notification.response
+            ? {
+                ...notification.response,
+                status: 'resolved',
+                resolvedAt: now,
+              }
+            : {
+                id: '',
+                status: 'resolved',
+                readAt: null,
+                dismissedAt: null,
+                acknowledgedAt: null,
+                ignoredAt: null,
+                resolvedAt: now,
+              },
+        } as Partial<NotificationWithResponse>)
         await resolveNotification(notification.id)
-        refetch?.()
         toast.success('Notification resolved')
         close()
       } catch (error) {

@@ -12,6 +12,7 @@ import { UserBrief } from '../../../lib/auth-types'
 
 export default function NotificationsPage() {
   const [showAllNotifications, setShowAllNotifications] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
   const { user } = useUser()
 
   // Get role from Clerk user metadata (no API call needed)
@@ -19,11 +20,15 @@ export default function NotificationsPage() {
   const isAdmin = userRole === 'ADMIN' || userRole === 'OWNER'
 
   const handleRefresh = () => {
-    window.location.reload()
+    setRefreshKey(prev => prev + 1)
   }
 
   const handleToggleView = (showAll: boolean) => {
     setShowAllNotifications(showAll)
+  }
+
+  const handleBulkActionComplete = () => {
+    setRefreshKey(prev => prev + 1)
   }
 
   return (
@@ -37,6 +42,7 @@ export default function NotificationsPage() {
             isAdmin={isAdmin}
             showAllNotifications={showAllNotifications}
             onToggleView={handleToggleView}
+            onBulkActionComplete={handleBulkActionComplete}
           />
         }
       />
@@ -44,6 +50,7 @@ export default function NotificationsPage() {
       <PageContent>
         <PageSection>
           <NotificationsDataTable
+            key={refreshKey}
             settingsId='notifications'
             enablePagination={true}
             showAllOrganizationNotifications={showAllNotifications}

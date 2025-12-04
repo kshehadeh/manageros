@@ -30,7 +30,7 @@ import {
 } from '@/lib/actions/notification'
 import { toast } from 'sonner'
 import { formatDistanceToNow } from 'date-fns'
-import { ConfirmAction } from '@/components/common/confirm-action'
+import { DeleteModal } from '@/components/common/delete-modal'
 
 interface NotificationDetailModalProps {
   notification: NotificationWithResponse | null
@@ -78,6 +78,7 @@ export function NotificationDetailModal({
   onActionComplete,
 }: NotificationDetailModalProps) {
   const [isProcessing, setIsProcessing] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   if (!notification) return null
 
@@ -140,6 +141,7 @@ export function NotificationDetailModal({
       await deleteNotification(notification.id)
       toast.success('Notification deleted')
       onActionComplete?.()
+      setShowDeleteModal(false)
       onClose()
     } catch (error) {
       console.error('Failed to delete notification:', error)
@@ -279,32 +281,35 @@ export function NotificationDetailModal({
                 Resolve
               </Button>
             )}
-            <ConfirmAction
-              onConfirm={handleDelete}
-              renderTrigger={({ open }) => (
-                <Button
-                  variant='destructive'
-                  onClick={open}
-                  disabled={isProcessing}
-                  className='flex items-center gap-2'
-                >
-                  <Trash2 className='h-4 w-4' />
-                  Delete
-                </Button>
-              )}
-              confirmMessage='Are you sure you want to delete this notification?'
-              confirmDescription={
-                notification.title
-                  ? `"${notification.title}"`
-                  : 'This action cannot be undone.'
-              }
-            />
+            <Button
+              variant='destructive'
+              onClick={() => setShowDeleteModal(true)}
+              disabled={isProcessing}
+              className='flex items-center gap-2'
+            >
+              <Trash2 className='h-4 w-4' />
+              Delete
+            </Button>
           </div>
           <Button variant='outline' onClick={onClose} disabled={isProcessing}>
             Close
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title='Delete Notification'
+        description={
+          notification.title
+            ? `Are you sure you want to delete "${notification.title}"? This action cannot be undone.`
+            : 'Are you sure you want to delete this notification? This action cannot be undone.'
+        }
+        entityName='notification'
+        isLoading={isProcessing}
+      />
     </Dialog>
   )
 }
