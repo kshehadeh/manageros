@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db'
 import { checkInSchema, type CheckInFormData } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth-utils'
+import { resolveInitiativeExceptions } from '@/lib/tolerance-rules/resolve-exceptions'
 
 export async function createCheckIn(formData: CheckInFormData) {
   const user = await getCurrentUser()
@@ -60,8 +61,15 @@ export async function createCheckIn(formData: CheckInFormData) {
     },
   })
 
+  // Auto-resolve any active exceptions for this initiative
+  await resolveInitiativeExceptions(
+    user.managerOSOrganizationId,
+    validatedData.initiativeId
+  )
+
   // Revalidate the initiative detail page
   revalidatePath(`/initiatives/${validatedData.initiativeId}`)
+  revalidatePath('/exceptions')
 
   return checkIn
 }

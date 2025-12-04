@@ -316,6 +316,9 @@ export async function updatePerson(id: string, formData: PersonFormData) {
     throw new Error('Person not found or access denied')
   }
 
+  // Store old manager ID to check for changes
+  const oldManagerId = existingPerson.managerId
+
   // Verify team belongs to user's organization if specified
   if (validatedData.teamId) {
     const team = await prisma.team.findFirst({
@@ -383,9 +386,28 @@ export async function updatePerson(id: string, formData: PersonFormData) {
     },
   })
 
+  // Auto-resolve manager span exceptions if manager changed
+  // Compare against updatedPerson.managerId (normalized database value) instead of validatedData.managerId
+  // to avoid issues with undefined vs null comparison
+  if (oldManagerId !== updatedPerson.managerId) {
+    const { resolveManagerSpanExceptions } = await import(
+      '@/lib/tolerance-rules/resolve-exceptions'
+    )
+    // Check old manager (if they had too many reports, they might now be below threshold)
+    if (oldManagerId) {
+      await resolveManagerSpanExceptions(
+        user.managerOSOrganizationId,
+        oldManagerId
+      )
+    }
+    // Check new manager (if they were at threshold, adding a report might create an exception, but we don't resolve here)
+    // The evaluation job will create exceptions if needed
+  }
+
   // Revalidate the people page and person detail page
   revalidatePath('/people')
   revalidatePath(`/people/${id}`)
+  revalidatePath('/exceptions')
 
   // Return the updated person
   return updatedPerson
@@ -472,6 +494,8 @@ export async function updatePersonPartial(
 
   // Store old job role ID if it exists before update (for revalidation)
   const oldJobRoleId = existingPerson.jobRoleId
+  // Store old manager ID to check for changes
+  const oldManagerId = existingPerson.managerId
 
   // Build update data object with only provided fields
   const updateFields: Partial<Prisma.PersonUpdateInput> = {}
@@ -517,11 +541,31 @@ export async function updatePersonPartial(
     },
   })
 
+  // Auto-resolve manager span exceptions if manager changed
+  if (
+    validatedData.managerId !== undefined &&
+    oldManagerId !== updatedPerson.managerId
+  ) {
+    const { resolveManagerSpanExceptions } = await import(
+      '@/lib/tolerance-rules/resolve-exceptions'
+    )
+    // Check old manager (if they had too many reports, they might now be below threshold)
+    if (oldManagerId) {
+      await resolveManagerSpanExceptions(
+        user.managerOSOrganizationId,
+        oldManagerId
+      )
+    }
+    // Check new manager (if they were at threshold, adding a report might create an exception, but we don't resolve here)
+    // The evaluation job will create exceptions if needed
+  }
+
   // Revalidate the people page
   revalidatePath('/people')
 
   // Revalidate the person detail page
   revalidatePath(`/people/${id}`)
+  revalidatePath('/exceptions')
 
   // Revalidate job roles if job role was updated
   if (validatedData.jobRoleId !== undefined) {
