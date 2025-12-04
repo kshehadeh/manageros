@@ -1,5 +1,14 @@
 # Changelog
 
+# [1.24.0](/compare/v1.23.1...v1.24.0) (2025-12-04)
+
+### Features
+
+- **data-table:** Add removeOptimisticUpdate method and improve formatting in GenericDataTable and notificationsDataTableConfig 034bb93
+- **data-table:** Enhance initiative, meeting, and task filters with multi-select options and array support for filter values 8f02c0d
+- **notifications:** Implement bulk actions for notifications and enhance notification detail modal with delete functionality 2378980
+- **sidebar:** Add badge counts for incomplete tasks and in-progress initiatives in navigation 7f6bb2a
+
 ## [1.23.1](/compare/v1.23.0...v1.23.1) (2025-12-04)
 
 # [1.23.0](/compare/v1.22.0...v1.23.0) (2025-12-03)
