@@ -21,6 +21,7 @@ import { NotificationWithResponse } from '@/lib/actions/notification'
 import { ActionDropdown } from '@/components/common/action-dropdown'
 import { ConfirmAction } from '@/components/common/confirm-action'
 import { toast } from 'sonner'
+import { dispatchNotificationUpdate } from '@/lib/notification-events'
 
 interface NotificationStatusDropdownProps {
   notification: NotificationWithResponse
@@ -39,6 +40,7 @@ export function NotificationStatusDropdown({
     try {
       await markNotificationAsRead(notification.id)
       onActionComplete?.()
+      dispatchNotificationUpdate()
       toast.success('Notification marked as read')
     } catch (error) {
       console.error('Failed to mark notification as read:', error)
@@ -50,6 +52,7 @@ export function NotificationStatusDropdown({
     try {
       await acknowledgeNotification(notification.id)
       onActionComplete?.()
+      dispatchNotificationUpdate()
       toast.success('Notification acknowledged')
     } catch (error) {
       console.error('Failed to acknowledge notification:', error)
@@ -61,6 +64,7 @@ export function NotificationStatusDropdown({
     try {
       await ignoreNotification(notification.id)
       onActionComplete?.()
+      dispatchNotificationUpdate()
       toast.success('Notification ignored')
     } catch (error) {
       console.error('Failed to ignore notification:', error)
@@ -72,6 +76,7 @@ export function NotificationStatusDropdown({
     try {
       await resolveNotification(notification.id)
       onActionComplete?.()
+      dispatchNotificationUpdate()
       toast.success('Notification resolved')
     } catch (error) {
       console.error('Failed to resolve notification:', error)
@@ -83,6 +88,7 @@ export function NotificationStatusDropdown({
     try {
       await deleteNotification(notification.id)
       onActionComplete?.()
+      dispatchNotificationUpdate()
       toast.success('Notification deleted')
     } catch (error) {
       console.error('Failed to delete notification:', error)

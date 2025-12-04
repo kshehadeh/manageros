@@ -31,6 +31,7 @@ import {
 import { toast } from 'sonner'
 import { formatDistanceToNow } from 'date-fns'
 import { DeleteModal } from '@/components/common/delete-modal'
+import { dispatchNotificationUpdate } from '@/lib/notification-events'
 
 interface NotificationDetailModalProps {
   notification: NotificationWithResponse | null
@@ -97,6 +98,7 @@ export function NotificationDetailModal({
       setIsProcessing(true)
       await action()
       toast.success(successMessage)
+      dispatchNotificationUpdate()
       onActionComplete?.()
       if (shouldClose) {
         onClose()
@@ -140,6 +142,7 @@ export function NotificationDetailModal({
       setIsProcessing(true)
       await deleteNotification(notification.id)
       toast.success('Notification deleted')
+      dispatchNotificationUpdate()
       onActionComplete?.()
       setShowDeleteModal(false)
       onClose()

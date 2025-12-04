@@ -88,6 +88,8 @@ export async function createTask(formData: TaskFormData) {
   // Revalidate the tasks page
   revalidatePath('/tasks')
   revalidatePath('/my-tasks')
+  // Revalidate layout to update sidebar badge counts
+  revalidatePath('/', 'layout')
 
   // Return the created task
   return task
@@ -190,6 +192,8 @@ export async function updateTask(taskId: string, formData: TaskFormData) {
   // Revalidate the tasks page and task detail page
   revalidatePath('/tasks')
   revalidatePath('/my-tasks')
+  // Revalidate layout to update sidebar badge counts
+  revalidatePath('/', 'layout')
   revalidatePath(`/tasks/${taskId}`)
 
   // Return the updated task
@@ -228,6 +232,8 @@ export async function deleteTask(taskId: string) {
   // Revalidate the tasks page
   revalidatePath('/tasks')
   revalidatePath('/my-tasks')
+  // Revalidate layout to update sidebar badge counts
+  revalidatePath('/', 'layout')
 }
 
 export async function getTasksForInitiative(initiativeId: string) {
@@ -441,6 +447,8 @@ export async function createQuickTask(
   // Revalidate the tasks page
   revalidatePath('/tasks')
   revalidatePath('/my-tasks')
+  // Revalidate layout to update sidebar badge counts
+  revalidatePath('/', 'layout')
 
   return task
 }
@@ -533,6 +541,8 @@ export async function createQuickTaskForInitiative(
   revalidatePath('/tasks')
   revalidatePath('/my-tasks')
   revalidatePath(`/initiatives/${initiativeId}`)
+  // Revalidate layout to update sidebar badge counts
+  revalidatePath('/', 'layout')
 
   return task
 }
@@ -579,6 +589,8 @@ export async function updateTaskStatus(taskId: string, status: TaskStatus) {
   // Revalidate the tasks page and task detail page
   revalidatePath('/tasks')
   revalidatePath('/my-tasks')
+  // Revalidate layout to update sidebar badge counts
+  revalidatePath('/', 'layout')
   revalidatePath(`/tasks/${taskId}`)
 
   return task
@@ -634,6 +646,8 @@ export async function updateTaskTitle(taskId: string, title: string) {
   // Revalidate the tasks page and task detail page
   revalidatePath('/tasks')
   revalidatePath('/my-tasks')
+  // Revalidate layout to update sidebar badge counts
+  revalidatePath('/', 'layout')
   revalidatePath(`/tasks/${taskId}`)
 
   return task
@@ -696,6 +710,8 @@ export async function updateTaskAssignee(
   // Revalidate the tasks page and task detail page
   revalidatePath('/tasks')
   revalidatePath('/my-tasks')
+  // Revalidate layout to update sidebar badge counts
+  revalidatePath('/', 'layout')
   revalidatePath(`/tasks/${taskId}`)
 
   return task
@@ -747,6 +763,8 @@ export async function updateTaskPriority(taskId: string, priority: number) {
   // Revalidate the tasks page and task detail page
   revalidatePath('/tasks')
   revalidatePath('/my-tasks')
+  // Revalidate layout to update sidebar badge counts
+  revalidatePath('/', 'layout')
   revalidatePath(`/tasks/${taskId}`)
 
   return task
@@ -835,6 +853,8 @@ export async function updateTaskQuickEdit(
   // Revalidate the tasks page and task detail page
   revalidatePath('/tasks')
   revalidatePath('/my-tasks')
+  // Revalidate layout to update sidebar badge counts
+  revalidatePath('/', 'layout')
   revalidatePath(`/tasks/${taskId}`)
 
   return task
@@ -881,6 +901,8 @@ export async function updateTaskDescription(
   revalidatePath('/tasks')
   revalidatePath('/my-tasks')
   revalidatePath(`/tasks/${taskId}`)
+  // Revalidate layout to update sidebar badge counts
+  revalidatePath('/', 'layout')
 
   return task
 }
@@ -923,6 +945,8 @@ export async function updateTaskDueDate(taskId: string, dueDate: Date | null) {
   revalidatePath('/tasks')
   revalidatePath('/my-tasks')
   revalidatePath(`/tasks/${taskId}`)
+  // Revalidate layout to update sidebar badge counts
+  revalidatePath('/', 'layout')
 
   return task
 }

@@ -116,6 +116,8 @@ export async function createInitiative(formData: InitiativeFormData) {
 
     // Revalidate the initiatives page
     revalidatePath('/initiatives')
+    // Revalidate layout to update sidebar badge counts
+    revalidatePath('/', 'layout')
 
     // Return the created initiative
     return initiative
@@ -241,6 +243,8 @@ export async function updateInitiative(
   // Revalidate the initiatives page
   revalidatePath('/initiatives')
   revalidatePath(`/initiatives/${id}`)
+  // Revalidate layout to update sidebar badge counts
+  revalidatePath('/', 'layout')
 
   // Return the updated initiative
   return initiative
@@ -278,6 +282,8 @@ export async function deleteInitiative(id: string) {
 
   // Revalidate the initiatives page
   revalidatePath('/initiatives')
+  // Revalidate layout to update sidebar badge counts
+  revalidatePath('/', 'layout')
 }
 
 export async function createObjective(
@@ -454,6 +460,8 @@ export async function addInitiativeOwner(
 
   // Revalidate the initiative page
   revalidatePath(`/initiatives/${initiativeId}`)
+  // Revalidate layout to update sidebar badge counts
+  revalidatePath('/', 'layout')
 
   return owner
 }
@@ -492,6 +500,8 @@ export async function removeInitiativeOwner(
 
   // Revalidate the initiative page
   revalidatePath(`/initiatives/${initiativeId}`)
+  // Revalidate layout to update sidebar badge counts
+  revalidatePath('/', 'layout')
 }
 
 /**
