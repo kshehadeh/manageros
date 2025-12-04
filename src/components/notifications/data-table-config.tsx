@@ -221,7 +221,13 @@ export const notificationsDataTableConfig: DataTableConfig<
   deleteAction: deleteNotification,
 
   // Custom context menu items
-  contextMenuItems: ({ entity, close, applyOptimisticUpdate, onDelete }) => {
+  contextMenuItems: ({
+    entity,
+    close,
+    applyOptimisticUpdate,
+    removeOptimisticUpdate,
+    onDelete,
+  }) => {
     const notification = entity as NotificationWithResponse
     const status = notification.response?.status
     const isRead = status === 'read'
@@ -251,13 +257,17 @@ export const notificationsDataTableConfig: DataTableConfig<
               },
         } as Partial<NotificationWithResponse>)
         await markNotificationAsRead(notification.id)
+        // Clear optimistic update after server confirms - the update is now permanent
+        // We keep the optimistic update applied since the server action succeeded
+        // The optimistic update will persist until the next data fetch, which is fine
+        // since it matches the server state
         toast.success('Notification marked as read')
         close()
       } catch (error) {
         console.error('Failed to mark notification as read:', error)
         toast.error('Failed to mark notification as read')
-        // Revert optimistic update on error by refetching
-        // The optimistic update will be cleared on next refetch
+        // Revert optimistic update on error
+        removeOptimisticUpdate(notification.id)
       }
     }
 
@@ -288,6 +298,7 @@ export const notificationsDataTableConfig: DataTableConfig<
       } catch (error) {
         console.error('Failed to acknowledge notification:', error)
         toast.error('Failed to acknowledge notification')
+        removeOptimisticUpdate(notification.id)
       }
     }
 
@@ -318,6 +329,7 @@ export const notificationsDataTableConfig: DataTableConfig<
       } catch (error) {
         console.error('Failed to ignore notification:', error)
         toast.error('Failed to ignore notification')
+        removeOptimisticUpdate(notification.id)
       }
     }
 
@@ -348,6 +360,7 @@ export const notificationsDataTableConfig: DataTableConfig<
       } catch (error) {
         console.error('Failed to resolve notification:', error)
         toast.error('Failed to resolve notification')
+        removeOptimisticUpdate(notification.id)
       }
     }
 
