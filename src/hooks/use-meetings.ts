@@ -19,10 +19,10 @@ interface MeetingFilters {
   scheduledFrom?: string
   scheduledTo?: string
   search?: string
-  teamId?: string
-  initiativeId?: string
+  teamId?: string | string[]
+  initiativeId?: string | string[]
   meetingType?: string
-  [key: string]: string | undefined
+  [key: string]: string | string[] | undefined
 }
 
 interface UseMeetingsOptions {
@@ -56,14 +56,21 @@ export function useMeetings({
       setLoading(true)
       setError(null)
 
+      // Convert filters to search params, handling arrays
+      const filterEntries = Object.entries(filters || {})
+        .map(([key, value]) => {
+          if (Array.isArray(value)) {
+            // Convert array to comma-separated string
+            return [key, value.join(',')]
+          }
+          return [key, value]
+        })
+        .filter(([_, value]) => value !== undefined && value !== '')
+
       const searchParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
-        ...Object.fromEntries(
-          Object.entries(filters || {}).filter(
-            ([_, value]) => value !== undefined && value !== ''
-          )
-        ),
+        ...Object.fromEntries(filterEntries),
       })
 
       // Add sort parameter

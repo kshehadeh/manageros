@@ -140,7 +140,7 @@ async function evaluateOneOnOneFrequency(
             report.id,
             'urgent',
             config.urgentThresholdDays,
-            0
+            Infinity
           )
           exceptionsCreated++
         }
@@ -251,7 +251,7 @@ async function createExceptionForOneOnOneSafely(
 
         const message =
           daysSince === Infinity
-            ? `${managerName} has not had a 1:1 with ${reportName} (threshold: ${thresholdDays} days)`
+            ? `${managerName} has never had a one on one with ${reportName} (threshold: ${thresholdDays} days)`
             : `${managerName} has not had a 1:1 with ${reportName} in ${daysSince} days (threshold: ${thresholdDays} days)`
 
         // Create the exception within the transaction
@@ -334,7 +334,7 @@ async function createExceptionForOneOnOne(
 
   const message =
     daysSince === Infinity
-      ? `${managerName} has not had a 1:1 with ${reportName} (threshold: ${thresholdDays} days)`
+      ? `${managerName} has never had a one on one with ${reportName} (threshold: ${thresholdDays} days)`
       : `${managerName} has not had a 1:1 with ${reportName} in ${daysSince} days (threshold: ${thresholdDays} days)`
 
   const exceptionInput: CreateExceptionInput = {

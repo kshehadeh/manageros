@@ -161,6 +161,8 @@ export interface DataTableConfig<
     entity: TData
     close: () => void
     refetch: () => void
+    applyOptimisticUpdate: (_entityId: string, _updates: Partial<TData>) => void
+    removeOptimisticUpdate: (_entityId: string) => void
     onDelete: () => void
   }) => React.ReactNode
 
@@ -919,6 +921,8 @@ export function GenericDataTable<
               entity,
               close,
               refetch,
+              applyOptimisticUpdate,
+              removeOptimisticUpdate,
               onDelete: () => {
                 setDeleteTargetId(entityId)
                 setShowDeleteModal(true)

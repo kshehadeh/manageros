@@ -10,6 +10,17 @@ interface NavItem {
   icon: string
   adminOnly?: boolean
   requiresPermission?: string
+  badgeCount?: number
+  badgeVariant?:
+    | 'default'
+    | 'secondary'
+    | 'destructive'
+    | 'outline'
+    | 'success'
+    | 'warning'
+    | 'error'
+    | 'info'
+    | 'neutral'
 }
 interface SidebarData {
   user: UserBrief | null

@@ -13,11 +13,12 @@ interface MeetingDataTableProps {
   enablePagination?: boolean
   immutableFilters?: {
     search?: string
-    teamId?: string
+    teamId?: string | string[]
     organizerId?: string
     type?: string
     dateFrom?: string
     dateTo?: string
+    initiativeId?: string | string[]
   }
 }
 

@@ -6,12 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Badge, BadgeVariant } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+  MultiSelect,
+  type MultiSelectOption,
+} from '@/components/ui/multi-select'
+import { usePeopleCache } from '@/hooks/use-organization-cache'
+import { useInitiatives } from '@/hooks/use-initiatives'
 import {
   MoreHorizontal,
   User as UserIcon,
@@ -25,7 +24,11 @@ import {
   TASK_STATUS,
   ALL_TASK_STATUSES,
 } from '@/lib/task-status'
-import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
+import {
+  taskPriorityUtils,
+  type TaskPriority,
+  ALL_TASK_PRIORITIES,
+} from '@/lib/task-priority'
 import type { ExtendedTaskListItem } from '@/lib/task-list-select'
 import { useTasks } from '@/hooks/use-tasks'
 import { useTaskTableSettings } from '@/hooks/use-task-table-settings'
@@ -49,6 +52,110 @@ type TaskFilters = {
   priority?: string[]
   dueDateFrom?: string
   dueDateTo?: string
+}
+
+function TaskFilterContent({
+  settings,
+  updateFilters,
+}: {
+  settings: { filters: TaskFilters } & Record<string, unknown>
+  updateFilters: (filters: Partial<TaskFilters>) => void
+}) {
+  const { people } = usePeopleCache()
+  const { data: initiativesData } = useInitiatives({ limit: 1000 })
+  const initiatives = initiativesData?.initiatives || []
+
+  const statusOptions: MultiSelectOption[] = ALL_TASK_STATUSES.map(status => ({
+    value: status,
+    label: taskStatusUtils.getLabel(status),
+  }))
+
+  const assigneeOptions: MultiSelectOption[] = people.map(person => ({
+    value: person.id,
+    label: person.name,
+  }))
+
+  const initiativeOptions: MultiSelectOption[] = initiatives.map(
+    initiative => ({
+      value: initiative.id,
+      label: initiative.title,
+    })
+  )
+
+  const priorityOptions: MultiSelectOption[] = ALL_TASK_PRIORITIES.map(
+    priority => ({
+      value: priority.toString(),
+      label: taskPriorityUtils.getLabel(priority),
+    })
+  )
+
+  return (
+    <div className='space-y-3'>
+      <div className='space-y-2'>
+        <label className='text-sm font-medium'>Status</label>
+        <MultiSelect
+          options={statusOptions}
+          selected={
+            Array.isArray(settings.filters.status)
+              ? settings.filters.status
+              : settings.filters.status
+                ? [settings.filters.status]
+                : []
+          }
+          onChange={selected => updateFilters({ status: selected })}
+          placeholder='All statuses'
+        />
+      </div>
+
+      <div className='space-y-2'>
+        <label className='text-sm font-medium'>Assignee</label>
+        <MultiSelect
+          options={assigneeOptions}
+          selected={
+            Array.isArray(settings.filters.assigneeId)
+              ? settings.filters.assigneeId
+              : settings.filters.assigneeId
+                ? [settings.filters.assigneeId]
+                : []
+          }
+          onChange={selected => updateFilters({ assigneeId: selected })}
+          placeholder='All assignees'
+        />
+      </div>
+
+      <div className='space-y-2'>
+        <label className='text-sm font-medium'>Initiative</label>
+        <MultiSelect
+          options={initiativeOptions}
+          selected={
+            Array.isArray(settings.filters.initiativeId)
+              ? settings.filters.initiativeId
+              : settings.filters.initiativeId
+                ? [settings.filters.initiativeId]
+                : []
+          }
+          onChange={selected => updateFilters({ initiativeId: selected })}
+          placeholder='All initiatives'
+        />
+      </div>
+
+      <div className='space-y-2'>
+        <label className='text-sm font-medium'>Priority</label>
+        <MultiSelect
+          options={priorityOptions}
+          selected={
+            Array.isArray(settings.filters.priority)
+              ? settings.filters.priority
+              : settings.filters.priority
+                ? [settings.filters.priority]
+                : []
+          }
+          onChange={selected => updateFilters({ priority: selected })}
+          placeholder='All priorities'
+        />
+      </div>
+    </div>
+  )
 }
 
 export const taskDataTableConfig: DataTableConfig<
@@ -388,37 +495,7 @@ export const taskDataTableConfig: DataTableConfig<
 
   // Filter configuration
   filterContent: ({ settings, updateFilters }) => (
-    <div className='space-y-3'>
-      <div className='space-y-2'>
-        <label className='text-sm font-medium'>Status</label>
-        <Select
-          value={
-            settings.filters.status && settings.filters.status.length > 0
-              ? settings.filters.status[0]
-              : 'all'
-          }
-          onValueChange={value => {
-            if (value === 'all') {
-              updateFilters({ status: [] })
-            } else {
-              updateFilters({ status: [value] })
-            }
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder='All statuses' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='all'>All statuses</SelectItem>
-            {ALL_TASK_STATUSES.map(status => (
-              <SelectItem key={status} value={status}>
-                {taskStatusUtils.getLabel(status)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
+    <TaskFilterContent settings={settings} updateFilters={updateFilters} />
   ),
 
   hasActiveFiltersFn: filters => {

@@ -112,3 +112,47 @@ export const getOverdueTasksForAssignee = cache(
     })
   }
 )
+
+/**
+ * Get count of incomplete tasks assigned to a person and whether any are overdue
+ * Incomplete tasks are those with status not in ['done', 'dropped']
+ * Overdue tasks are incomplete tasks with a dueDate before today
+ */
+export const getIncompleteTasksCountForAssignee = cache(
+  async (
+    assigneeId: string,
+    organizationId: string,
+    userId: string
+  ): Promise<{ count: number; hasOverdue: boolean }> => {
+    const startOfToday = new Date()
+    startOfToday.setHours(0, 0, 0, 0)
+
+    const baseWhere = {
+      assigneeId,
+      status: {
+        notIn: ['done', 'dropped'],
+      },
+      ...getTaskAccessWhereClause(organizationId, userId, assigneeId),
+    }
+
+    const [count, overdueCount] = await Promise.all([
+      prisma.task.count({
+        where: baseWhere,
+      }),
+      prisma.task.count({
+        where: {
+          ...baseWhere,
+          dueDate: {
+            lt: startOfToday,
+            not: null,
+          },
+        },
+      }),
+    ])
+
+    return {
+      count,
+      hasOverdue: overdueCount > 0,
+    }
+  }
+)
