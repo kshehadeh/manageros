@@ -142,6 +142,10 @@ export interface DataTableConfig<
   // Group label formatting
   getGroupLabel?: (_groupValue: string, _groupingColumn: string) => string
 
+  // Group ordering function - returns a number to determine group order (lower = first)
+  // If not provided, groups are sorted alphabetically
+  getGroupOrder?: (_groupValue: string, _groupingColumn: string) => number
+
   // Global filter function
   globalFilterFn?: (
     _row: { original: TData },
@@ -430,6 +434,18 @@ export function GenericDataTable<
     return groupValue || 'Unassigned'
   }
 
+  // Helper function to get group order
+  const getGroupOrder = useCallback(
+    (groupValue: string, groupingColumn: string) => {
+      if (config.getGroupOrder) {
+        return config.getGroupOrder(groupValue, groupingColumn)
+      }
+      // Default: sort alphabetically (no specific order)
+      return Infinity
+    },
+    [config]
+  )
+
   // Handle context menu actions
   const handleDeleteConfirm = async (entityId: string) => {
     if (!config.deleteAction) return
@@ -564,6 +580,41 @@ export function GenericDataTable<
             ?.totalPages
         : undefined,
   })
+
+  // Sort rows when grouped to respect group order
+  const tableRows = table.getRowModel().rows
+  const sortedRows = useMemo(() => {
+    if (effectiveGrouping.length === 0 || !config.getGroupOrder) {
+      return tableRows
+    }
+
+    const groupingColumn = effectiveGrouping[0]
+    const rowsArray = [...tableRows]
+
+    // Sort groups by their order value
+    return rowsArray.sort((a, b) => {
+      // If both are groups, compare their order
+      if (a.getIsGrouped() && b.getIsGrouped()) {
+        const aValue = String(a.getValue(groupingColumn) || '')
+        const bValue = String(b.getValue(groupingColumn) || '')
+        const aOrder = getGroupOrder(aValue, groupingColumn)
+        const bOrder = getGroupOrder(bValue, groupingColumn)
+
+        // If orders are equal, sort alphabetically
+        if (aOrder === bOrder) {
+          return aValue.localeCompare(bValue)
+        }
+        return aOrder - bOrder
+      }
+
+      // If one is a group and one isn't, groups come first
+      if (a.getIsGrouped() && !b.getIsGrouped()) return -1
+      if (!a.getIsGrouped() && b.getIsGrouped()) return 1
+
+      // Both are regular rows, maintain their original order
+      return 0
+    })
+  }, [tableRows, effectiveGrouping, config.getGroupOrder, getGroupOrder])
 
   // Expand all groups by default when table is ready
   useEffect(() => {
@@ -753,8 +804,8 @@ export function GenericDataTable<
                   </div>
                 </TableCell>
               </TableRow>
-            ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map(row => {
+            ) : sortedRows?.length ? (
+              sortedRows.map(row => {
                 if (row.getIsGrouped()) {
                   // Group header row
                   return (

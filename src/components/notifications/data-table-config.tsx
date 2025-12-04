@@ -441,4 +441,21 @@ export const notificationsDataTableConfig: DataTableConfig<
     }
     return groupValue || 'Unassigned'
   },
+
+  // Group ordering - ensure Unread comes first when grouping by status
+  getGroupOrder: (groupValue: string, groupingColumn: string) => {
+    if (groupingColumn === 'status') {
+      // Define order: unread first, then others alphabetically
+      const statusOrder: Record<string, number> = {
+        unread: 0,
+        read: 1,
+        acknowledged: 2,
+        ignored: 3,
+        resolved: 4,
+      }
+      return statusOrder[groupValue] ?? 999
+    }
+    // For other grouping columns, use default alphabetical order
+    return Infinity
+  },
 }
