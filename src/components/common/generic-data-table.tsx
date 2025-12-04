@@ -115,7 +115,7 @@ export interface DataTableConfig<
   onRowClick?: (
     _router: AppRouterInstance,
     _id: string,
-    _extra?: unknown
+    _entity?: TData
   ) => void
 
   // UI configuration
@@ -458,7 +458,7 @@ export function GenericDataTable<
     if (propOnRowClick) {
       propOnRowClick(entityId, extra)
     } else if (config.onRowClick) {
-      config.onRowClick(router, entityId, extra)
+      config.onRowClick(router, entityId, entity)
     } else {
       router.push(`/${config.entityType}/${entityId}`)
     }

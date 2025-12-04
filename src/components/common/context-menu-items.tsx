@@ -14,6 +14,7 @@ interface ContextMenuItemProps {
   children: ReactNode
   variant?: 'default' | 'destructive'
   className?: string
+  disabled?: boolean
 }
 
 export function ContextMenuItem({
@@ -22,6 +23,7 @@ export function ContextMenuItem({
   children,
   variant = 'default',
   className = '',
+  disabled = false,
 }: ContextMenuItemProps) {
   const baseClass =
     'w-full px-lg py-md text-sm hover:bg-accent flex items-center gap-md text-left transition-colors'
@@ -29,11 +31,15 @@ export function ContextMenuItem({
     variant === 'destructive'
       ? 'text-destructive hover:bg-destructive/10 hover:text-destructive'
       : ''
+  const disabledClass = disabled
+    ? 'opacity-50 cursor-not-allowed pointer-events-none'
+    : ''
 
   return (
     <button
       onClick={onClick}
-      className={`${baseClass} ${variantClass} ${className}`}
+      disabled={disabled}
+      className={`${baseClass} ${variantClass} ${disabledClass} ${className}`}
     >
       {icon}
       {children}
