@@ -10,6 +10,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  MultiSelect,
+  type MultiSelectOption,
+} from '@/components/ui/multi-select'
+import { useTeamsCache } from '@/hooks/use-organization-cache'
+import { useInitiatives } from '@/hooks/use-initiatives'
 import { MoreHorizontal, Target, Building2, Clock } from 'lucide-react'
 import type {
   UpcomingMeeting,
@@ -124,9 +130,92 @@ type MeetingFilters = {
   scheduledFrom?: string
   scheduledTo?: string
   search?: string
-  teamId?: string
-  initiativeId?: string
+  teamId?: string | string[]
+  initiativeId?: string | string[]
   meetingType?: string
+}
+
+function MeetingFilterContent({
+  settings,
+  updateFilters,
+}: {
+  settings: { filters: MeetingFilters } & Record<string, unknown>
+  updateFilters: (filters: Partial<MeetingFilters>) => void
+}) {
+  const { teams } = useTeamsCache()
+  const { data: initiativesData } = useInitiatives({ limit: 1000 })
+  const initiatives = initiativesData?.initiatives || []
+
+  const teamOptions: MultiSelectOption[] = teams.map(team => ({
+    value: team.id,
+    label: team.name,
+  }))
+
+  const initiativeOptions: MultiSelectOption[] = initiatives.map(
+    initiative => ({
+      value: initiative.id,
+      label: initiative.title,
+    })
+  )
+
+  return (
+    <div className='space-y-3'>
+      <div className='space-y-2'>
+        <label className='text-sm font-medium'>Meeting Type</label>
+        <Select
+          value={settings.filters.meetingType || 'all'}
+          onValueChange={value => {
+            if (value === 'all') {
+              updateFilters({ meetingType: undefined })
+            } else {
+              updateFilters({ meetingType: value })
+            }
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder='All meetings' />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value='all'>All meetings</SelectItem>
+            <SelectItem value='non-recurring'>Non-recurring only</SelectItem>
+            <SelectItem value='recurring'>Recurring only</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className='space-y-2'>
+        <label className='text-sm font-medium'>Team</label>
+        <MultiSelect
+          options={teamOptions}
+          selected={
+            Array.isArray(settings.filters.teamId)
+              ? settings.filters.teamId
+              : settings.filters.teamId
+                ? [settings.filters.teamId]
+                : []
+          }
+          onChange={selected => updateFilters({ teamId: selected })}
+          placeholder='All teams'
+        />
+      </div>
+
+      <div className='space-y-2'>
+        <label className='text-sm font-medium'>Initiative</label>
+        <MultiSelect
+          options={initiativeOptions}
+          selected={
+            Array.isArray(settings.filters.initiativeId)
+              ? settings.filters.initiativeId
+              : settings.filters.initiativeId
+                ? [settings.filters.initiativeId]
+                : []
+          }
+          onChange={selected => updateFilters({ initiativeId: selected })}
+          placeholder='All initiatives'
+        />
+      </div>
+    </div>
+  )
 }
 
 export const meetingDataTableConfig: DataTableConfig<
@@ -469,37 +558,14 @@ export const meetingDataTableConfig: DataTableConfig<
 
   // Filter configuration
   filterContent: ({ settings, updateFilters }) => (
-    <div className='space-y-3'>
-      <div className='space-y-2'>
-        <label className='text-sm font-medium'>Meeting Type</label>
-        <Select
-          value={settings.filters.meetingType || 'all'}
-          onValueChange={value => {
-            if (value === 'all') {
-              updateFilters({ meetingType: undefined })
-            } else {
-              updateFilters({ meetingType: value })
-            }
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder='All meetings' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='all'>All meetings</SelectItem>
-            <SelectItem value='non-recurring'>Non-recurring only</SelectItem>
-            <SelectItem value='recurring'>Recurring only</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
+    <MeetingFilterContent settings={settings} updateFilters={updateFilters} />
   ),
 
   hasActiveFiltersFn: filters => {
     return (
       filters.search !== '' ||
-      filters.teamId !== '' ||
-      filters.initiativeId !== '' ||
+      (filters.teamId && filters.teamId.length > 0) ||
+      (filters.initiativeId && filters.initiativeId.length > 0) ||
       filters.meetingType !== '' ||
       filters.meetingType !== undefined ||
       filters.scheduledFrom !== '' ||
@@ -509,8 +575,8 @@ export const meetingDataTableConfig: DataTableConfig<
 
   clearFiltersFn: () => ({
     search: '',
-    teamId: '',
-    initiativeId: '',
+    teamId: [],
+    initiativeId: [],
     meetingType: undefined,
     scheduledFrom: '',
     scheduledTo: '',

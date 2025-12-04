@@ -80,10 +80,10 @@ export interface UserSettings {
       }
       filters: {
         search: string
-        teamId: string
-        ownerId: string
-        rag: string
-        status: string
+        teamId: string | string[]
+        ownerId: string | string[]
+        rag: string | string[]
+        status: string | string[]
         dateFrom: string
         dateTo: string
       }
@@ -157,8 +157,8 @@ export interface UserSettings {
       }
       filters: {
         search: string
-        teamId: string
-        initiativeId: string
+        teamId: string[]
+        initiativeId: string[]
         scheduledFrom: string
         scheduledTo: string
         meetingType: string
@@ -448,10 +448,25 @@ export function updateTaskTableSettings(
 export function getInitiativeTableSettings(
   userId: string,
   settingsId: string
-): UserSettings['initiativeTableSettings'][string] {
+): {
+  sorting: Array<{ id: string; desc: boolean }>
+  grouping: string
+  sort: { field: string; direction: 'asc' | 'desc' }
+  filters: {
+    search: string
+    teamId: string[]
+    ownerId: string[]
+    rag: string[]
+    status: string[]
+    dateFrom: string
+    dateTo: string
+  }
+} {
   const settings = loadUserSettings(userId)
-  return (
-    settings.initiativeTableSettings[settingsId] || {
+  const rawSettings = settings.initiativeTableSettings[settingsId]
+
+  if (!rawSettings) {
+    return {
       sorting: [],
       grouping: 'none',
       sort: {
@@ -460,15 +475,46 @@ export function getInitiativeTableSettings(
       },
       filters: {
         search: '',
-        teamId: '',
-        ownerId: '',
-        rag: '',
-        status: '',
+        teamId: [],
+        ownerId: [],
+        rag: [],
+        status: [],
         dateFrom: '',
         dateTo: '',
       },
     }
-  )
+  }
+
+  // Normalize filter arrays (handle backward compatibility with string values from localStorage)
+  return {
+    ...rawSettings,
+    filters: {
+      ...rawSettings.filters,
+      teamId: Array.isArray(rawSettings.filters.teamId)
+        ? rawSettings.filters.teamId
+        : typeof rawSettings.filters.teamId === 'string' &&
+            rawSettings.filters.teamId
+          ? [rawSettings.filters.teamId]
+          : [],
+      ownerId: Array.isArray(rawSettings.filters.ownerId)
+        ? rawSettings.filters.ownerId
+        : typeof rawSettings.filters.ownerId === 'string' &&
+            rawSettings.filters.ownerId
+          ? [rawSettings.filters.ownerId]
+          : [],
+      rag: Array.isArray(rawSettings.filters.rag)
+        ? rawSettings.filters.rag
+        : typeof rawSettings.filters.rag === 'string' && rawSettings.filters.rag
+          ? [rawSettings.filters.rag]
+          : [],
+      status: Array.isArray(rawSettings.filters.status)
+        ? rawSettings.filters.status
+        : typeof rawSettings.filters.status === 'string' &&
+            rawSettings.filters.status
+          ? [rawSettings.filters.status]
+          : [],
+    },
+  }
 }
 
 /**
@@ -734,8 +780,8 @@ export function getMeetingTableSettings(
       },
       filters: {
         search: '',
-        teamId: '',
-        initiativeId: '',
+        teamId: [],
+        initiativeId: [],
         scheduledFrom: '',
         scheduledTo: '',
         meetingType: '',

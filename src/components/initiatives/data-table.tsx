@@ -14,10 +14,10 @@ interface InitiativeDataTableProps {
   visibleColumns?: string[]
   immutableFilters?: {
     search?: string
-    teamId?: string
-    ownerId?: string
-    rag?: string
-    status?: string
+    teamId?: string | string[]
+    ownerId?: string | string[]
+    rag?: string | string[]
+    status?: string | string[]
     dateFrom?: string
     dateTo?: string
   }

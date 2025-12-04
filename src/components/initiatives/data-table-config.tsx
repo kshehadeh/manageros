@@ -11,8 +11,14 @@ import {
   initiativeStatusUtils,
   INITIATIVE_STATUS,
   COMPLETED_STATUSES,
+  ALL_INITIATIVE_STATUSES,
   type InitiativeStatus,
 } from '@/lib/initiative-status'
+import {
+  MultiSelect,
+  type MultiSelectOption,
+} from '@/components/ui/multi-select'
+import { usePeopleCache, useTeamsCache } from '@/hooks/use-organization-cache'
 import { useInitiatives } from '@/hooks/use-initiatives'
 import { useInitiativeTableSettings } from '@/hooks/use-initiative-table-settings'
 import { deleteInitiative } from '@/lib/actions/initiative'
@@ -20,12 +26,114 @@ import type { DataTableConfig } from '@/components/common/generic-data-table'
 
 type InitiativeFilters = {
   search?: string
-  teamId?: string
-  ownerId?: string
-  rag?: string
-  status?: string
+  teamId?: string | string[]
+  ownerId?: string | string[]
+  rag?: string | string[]
+  status?: string | string[]
   dateFrom?: string
   dateTo?: string
+}
+
+function InitiativeFilterContent({
+  settings,
+  updateFilters,
+}: {
+  settings: { filters: InitiativeFilters } & Record<string, unknown>
+  updateFilters: (filters: Partial<InitiativeFilters>) => void
+}) {
+  const { people } = usePeopleCache()
+  const { teams } = useTeamsCache()
+
+  const statusOptions: MultiSelectOption[] = ALL_INITIATIVE_STATUSES.map(
+    status => ({
+      value: status,
+      label: initiativeStatusUtils.getLabel(status),
+    })
+  )
+
+  const ragOptions: MultiSelectOption[] = [
+    { value: 'green', label: 'Green' },
+    { value: 'amber', label: 'Amber' },
+    { value: 'red', label: 'Red' },
+  ]
+
+  const teamOptions: MultiSelectOption[] = teams.map(team => ({
+    value: team.id,
+    label: team.name,
+  }))
+
+  const ownerOptions: MultiSelectOption[] = people.map(person => ({
+    value: person.id,
+    label: person.name,
+  }))
+
+  return (
+    <div className='space-y-3'>
+      <div className='space-y-2'>
+        <label className='text-sm font-medium'>Status</label>
+        <MultiSelect
+          options={statusOptions}
+          selected={
+            Array.isArray(settings.filters.status)
+              ? settings.filters.status
+              : settings.filters.status
+                ? [settings.filters.status]
+                : []
+          }
+          onChange={selected => updateFilters({ status: selected })}
+          placeholder='All statuses'
+        />
+      </div>
+
+      <div className='space-y-2'>
+        <label className='text-sm font-medium'>RAG Status</label>
+        <MultiSelect
+          options={ragOptions}
+          selected={
+            Array.isArray(settings.filters.rag)
+              ? settings.filters.rag
+              : settings.filters.rag
+                ? [settings.filters.rag]
+                : []
+          }
+          onChange={selected => updateFilters({ rag: selected })}
+          placeholder='All RAG statuses'
+        />
+      </div>
+
+      <div className='space-y-2'>
+        <label className='text-sm font-medium'>Team</label>
+        <MultiSelect
+          options={teamOptions}
+          selected={
+            Array.isArray(settings.filters.teamId)
+              ? settings.filters.teamId
+              : settings.filters.teamId
+                ? [settings.filters.teamId]
+                : []
+          }
+          onChange={selected => updateFilters({ teamId: selected })}
+          placeholder='All teams'
+        />
+      </div>
+
+      <div className='space-y-2'>
+        <label className='text-sm font-medium'>Owner</label>
+        <MultiSelect
+          options={ownerOptions}
+          selected={
+            Array.isArray(settings.filters.ownerId)
+              ? settings.filters.ownerId
+              : settings.filters.ownerId
+                ? [settings.filters.ownerId]
+                : []
+          }
+          onChange={selected => updateFilters({ ownerId: selected })}
+          placeholder='All owners'
+        />
+      </div>
+    </div>
+  )
 }
 
 export const initiativeDataTableConfig: DataTableConfig<
@@ -322,4 +430,34 @@ export const initiativeDataTableConfig: DataTableConfig<
     }
     return ''
   },
+
+  // Filter configuration
+  filterContent: ({ settings, updateFilters }) => (
+    <InitiativeFilterContent
+      settings={settings}
+      updateFilters={updateFilters}
+    />
+  ),
+
+  hasActiveFiltersFn: filters => {
+    return (
+      filters.search !== '' ||
+      (filters.status && filters.status.length > 0) ||
+      (filters.rag && filters.rag.length > 0) ||
+      (filters.teamId && filters.teamId.length > 0) ||
+      (filters.ownerId && filters.ownerId.length > 0) ||
+      filters.dateFrom !== '' ||
+      filters.dateTo !== ''
+    )
+  },
+
+  clearFiltersFn: () => ({
+    search: '',
+    status: [],
+    rag: [],
+    teamId: [],
+    ownerId: [],
+    dateFrom: '',
+    dateTo: '',
+  }),
 }

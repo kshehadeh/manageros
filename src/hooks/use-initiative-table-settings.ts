@@ -17,10 +17,10 @@ interface InitiativeTableSettings {
   }
   filters: {
     search: string
-    teamId: string
-    ownerId: string
-    rag: string
-    status: string
+    teamId: string[]
+    ownerId: string[]
+    rag: string[]
+    status: string[]
     dateFrom: string
     dateTo: string
   }
@@ -52,10 +52,10 @@ export function useInitiativeTableSettings({
     },
     filters: {
       search: '',
-      teamId: '',
-      ownerId: '',
-      rag: '',
-      status: '',
+      teamId: [],
+      ownerId: [],
+      rag: [],
+      status: [],
       dateFrom: '',
       dateTo: '',
     },
@@ -66,7 +66,34 @@ export function useInitiativeTableSettings({
   useEffect(() => {
     if (userId && enabled) {
       const loadedSettings = getInitiativeTableSettings(userId, settingsId)
-      setSettings(loadedSettings)
+      // Normalize filter arrays (handle backward compatibility with string values)
+      const normalizedSettings = {
+        ...loadedSettings,
+        filters: {
+          ...loadedSettings.filters,
+          teamId: Array.isArray(loadedSettings.filters.teamId)
+            ? loadedSettings.filters.teamId
+            : loadedSettings.filters.teamId
+              ? [loadedSettings.filters.teamId]
+              : [],
+          ownerId: Array.isArray(loadedSettings.filters.ownerId)
+            ? loadedSettings.filters.ownerId
+            : loadedSettings.filters.ownerId
+              ? [loadedSettings.filters.ownerId]
+              : [],
+          rag: Array.isArray(loadedSettings.filters.rag)
+            ? loadedSettings.filters.rag
+            : loadedSettings.filters.rag
+              ? [loadedSettings.filters.rag]
+              : [],
+          status: Array.isArray(loadedSettings.filters.status)
+            ? loadedSettings.filters.status
+            : loadedSettings.filters.status
+              ? [loadedSettings.filters.status]
+              : [],
+        },
+      }
+      setSettings(normalizedSettings)
       setIsLoaded(true)
     } else {
       setIsLoaded(false)
@@ -108,13 +135,57 @@ export function useInitiativeTableSettings({
 
   // Update filters
   const updateFilters = useCallback(
-    (filters: Partial<InitiativeTableSettings['filters']>) => {
+    (
+      filters: Partial<{
+        search?: string
+        teamId?: string | string[]
+        ownerId?: string | string[]
+        rag?: string | string[]
+        status?: string | string[]
+        dateFrom?: string
+        dateTo?: string
+      }>
+    ) => {
       if (!userId || !enabled) return
 
       setSettings(prev => {
+        // Normalize filter arrays (convert strings to arrays)
+        const normalizedFilters: Partial<InitiativeTableSettings['filters']> =
+          {}
+
+        if (filters.search !== undefined) {
+          normalizedFilters.search = filters.search
+        }
+        if (filters.teamId !== undefined) {
+          normalizedFilters.teamId = Array.isArray(filters.teamId)
+            ? filters.teamId
+            : [filters.teamId]
+        }
+        if (filters.ownerId !== undefined) {
+          normalizedFilters.ownerId = Array.isArray(filters.ownerId)
+            ? filters.ownerId
+            : [filters.ownerId]
+        }
+        if (filters.rag !== undefined) {
+          normalizedFilters.rag = Array.isArray(filters.rag)
+            ? filters.rag
+            : [filters.rag]
+        }
+        if (filters.status !== undefined) {
+          normalizedFilters.status = Array.isArray(filters.status)
+            ? filters.status
+            : [filters.status]
+        }
+        if (filters.dateFrom !== undefined) {
+          normalizedFilters.dateFrom = filters.dateFrom
+        }
+        if (filters.dateTo !== undefined) {
+          normalizedFilters.dateTo = filters.dateTo
+        }
+
         const newSettings = {
           ...prev,
-          filters: { ...prev.filters, ...filters },
+          filters: { ...prev.filters, ...normalizedFilters },
         }
 
         // Save to localStorage using the new settings
@@ -141,10 +212,10 @@ export function useInitiativeTableSettings({
       },
       filters: {
         search: '',
-        teamId: '',
-        ownerId: '',
-        rag: '',
-        status: '',
+        teamId: [],
+        ownerId: [],
+        rag: [],
+        status: [],
         dateFrom: '',
         dateTo: '',
       },

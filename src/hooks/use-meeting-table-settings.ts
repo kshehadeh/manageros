@@ -17,8 +17,8 @@ interface MeetingTableSettings {
   }
   filters: {
     search: string
-    teamId: string
-    initiativeId: string
+    teamId: string[]
+    initiativeId: string[]
     scheduledFrom: string
     scheduledTo: string
     meetingType: string
@@ -51,8 +51,8 @@ export function useMeetingTableSettings({
     },
     filters: {
       search: '',
-      teamId: '',
-      initiativeId: '',
+      teamId: [],
+      initiativeId: [],
       scheduledFrom: '',
       scheduledTo: '',
       meetingType: '',
@@ -106,13 +106,48 @@ export function useMeetingTableSettings({
 
   // Update filters
   const updateFilters = useCallback(
-    (filters: Partial<MeetingTableSettings['filters']>) => {
+    (
+      filters: Partial<{
+        search?: string
+        teamId?: string | string[]
+        initiativeId?: string | string[]
+        scheduledFrom?: string
+        scheduledTo?: string
+        meetingType?: string
+      }>
+    ) => {
       if (!userId || !enabled) return
 
       setSettings(prev => {
+        // Normalize filter arrays (convert strings to arrays)
+        const normalizedFilters: Partial<MeetingTableSettings['filters']> = {}
+
+        if (filters.search !== undefined) {
+          normalizedFilters.search = filters.search
+        }
+        if (filters.teamId !== undefined) {
+          normalizedFilters.teamId = Array.isArray(filters.teamId)
+            ? filters.teamId
+            : [filters.teamId]
+        }
+        if (filters.initiativeId !== undefined) {
+          normalizedFilters.initiativeId = Array.isArray(filters.initiativeId)
+            ? filters.initiativeId
+            : [filters.initiativeId]
+        }
+        if (filters.scheduledFrom !== undefined) {
+          normalizedFilters.scheduledFrom = filters.scheduledFrom
+        }
+        if (filters.scheduledTo !== undefined) {
+          normalizedFilters.scheduledTo = filters.scheduledTo
+        }
+        if (filters.meetingType !== undefined) {
+          normalizedFilters.meetingType = filters.meetingType
+        }
+
         const newSettings = {
           ...prev,
-          filters: { ...prev.filters, ...filters },
+          filters: { ...prev.filters, ...normalizedFilters },
         }
 
         // Save to localStorage using the new settings
@@ -139,8 +174,8 @@ export function useMeetingTableSettings({
       },
       filters: {
         search: '',
-        teamId: '',
-        initiativeId: '',
+        teamId: [],
+        initiativeId: [],
         scheduledFrom: '',
         scheduledTo: '',
         meetingType: '',

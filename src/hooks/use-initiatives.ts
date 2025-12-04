@@ -15,11 +15,21 @@ interface InitiativesResponse {
   }
 }
 
+interface InitiativeFilters {
+  search?: string
+  teamId?: string | string[]
+  ownerId?: string | string[]
+  rag?: string | string[]
+  status?: string | string[]
+  dateFrom?: string
+  dateTo?: string
+}
+
 interface UseInitiativesOptions {
   page?: number
   limit?: number
-  filters?: Record<string, string>
-  immutableFilters?: Record<string, string>
+  filters?: InitiativeFilters
+  immutableFilters?: InitiativeFilters
   sort?: string
   enabled?: boolean
 }
@@ -47,14 +57,21 @@ export function useInitiatives({
       setLoading(true)
       setError(null)
 
+      // Convert filters to search params, handling arrays
+      const filterEntries = Object.entries(filters || {})
+        .map(([key, value]) => {
+          if (Array.isArray(value)) {
+            // Convert array to comma-separated string
+            return [key, value.join(',')]
+          }
+          return [key, value]
+        })
+        .filter(([_, value]) => value !== undefined && value !== '')
+
       const searchParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
-        ...Object.fromEntries(
-          Object.entries(filters || {}).filter(
-            ([_, value]) => value !== undefined && value !== ''
-          )
-        ),
+        ...Object.fromEntries(filterEntries),
       })
 
       // Add sort parameter if provided
