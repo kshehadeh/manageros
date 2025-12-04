@@ -187,7 +187,7 @@ export function NotificationBell({ className }: NotificationBellProps) {
                 )}
               </ScrollArea>
 
-              {!isOffline && notifications.length > 0 && (
+              {!isOffline && (
                 <>
                   <Separator />
                   <div className='p-2 flex-shrink-0'>
