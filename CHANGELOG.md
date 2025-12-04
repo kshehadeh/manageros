@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.25.0](/compare/v1.24.0...v1.25.0) (2025-12-04)
+
+### Features
+
+- **notifications:** Implement notification update handling in NotificationBell and dispatch updates in related components 8458f92
+- **revalidation:** Add layout revalidation to update sidebar badge counts after initiative and task operations fb647c7
+
 # [1.24.0](/compare/v1.23.1...v1.24.0) (2025-12-04)
 
 ### Features
