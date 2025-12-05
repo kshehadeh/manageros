@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db'
 import { oneOnOneSchema, type OneOnOneFormData } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
 import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
+import { resolveOneOnOneExceptions } from '@/lib/tolerance-rules/resolve-exceptions'
 
 export async function createOneOnOne(formData: OneOnOneFormData) {
   const user = await getCurrentUser()
@@ -54,9 +55,17 @@ export async function createOneOnOne(formData: OneOnOneFormData) {
     },
   })
 
+  // Auto-resolve any active exceptions for this 1:1 pair
+  await resolveOneOnOneExceptions(
+    user.managerOSOrganizationId,
+    validatedData.participant1Id,
+    validatedData.participant2Id
+  )
+
   revalidatePath('/oneonones')
   revalidatePath(`/people/${participant1.id}`)
   revalidatePath(`/people/${participant2.id}`)
+  revalidatePath('/exceptions')
 
   // Return created record id to allow client-side navigation to detail page
   return { id: created.id }

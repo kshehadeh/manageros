@@ -25,6 +25,7 @@ import { FeedbackCampaignReminderEmail } from '@/emails/FeedbackCampaignReminder
 import { format, differenceInDays } from 'date-fns'
 import { fetchJiraAssignedTickets } from './jira'
 import { fetchGithubPullRequests } from './github'
+import { resolveFeedback360Exceptions } from '@/lib/tolerance-rules/resolve-exceptions'
 
 export async function createFeedbackCampaign(
   formData: FeedbackCampaignFormData
@@ -128,7 +129,14 @@ export async function createFeedbackCampaign(
     },
   })
 
+  // Auto-resolve any active feedback360 exceptions for this person
+  await resolveFeedback360Exceptions(
+    user.managerOSOrganizationId,
+    validatedData.targetPersonId
+  )
+
   revalidatePath(`/people/${validatedData.targetPersonId}`)
+  revalidatePath('/exceptions')
   return campaign
 }
 
