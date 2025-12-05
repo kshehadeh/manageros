@@ -195,6 +195,7 @@ async function evaluateOneOnOneFrequency(
   })
 
   // Create a map of managerId-reportId -> lastScheduledAt
+  // Only store the actual direction (managerId-reportId), not both directions
   const lastOneOnOneMap = new Map<string, Date>()
   for (const oneOnOne of allOneOnOnes) {
     // Skip if scheduledAt is null
@@ -202,18 +203,12 @@ async function evaluateOneOnOneFrequency(
       continue
     }
 
-    // Check both directions
-    const key1 = `${oneOnOne.managerId}-${oneOnOne.reportId}`
-    const key2 = `${oneOnOne.reportId}-${oneOnOne.managerId}`
+    // Only update the key that matches the actual direction of the record
+    const key = `${oneOnOne.managerId}-${oneOnOne.reportId}`
+    const existing = lastOneOnOneMap.get(key)
 
-    const existing1 = lastOneOnOneMap.get(key1)
-    const existing2 = lastOneOnOneMap.get(key2)
-
-    if (!existing1 || oneOnOne.scheduledAt > existing1) {
-      lastOneOnOneMap.set(key1, oneOnOne.scheduledAt)
-    }
-    if (!existing2 || oneOnOne.scheduledAt > existing2) {
-      lastOneOnOneMap.set(key2, oneOnOne.scheduledAt)
+    if (!existing || oneOnOne.scheduledAt > existing) {
+      lastOneOnOneMap.set(key, oneOnOne.scheduledAt)
     }
   }
 
@@ -241,7 +236,15 @@ async function evaluateOneOnOneFrequency(
         continue
       }
 
-      const lastOneOnOne = lastOneOnOneMap.get(entityId)
+      // Check both directions since a one-on-one might be stored with reversed roles
+      const key1 = `${pair.managerId}-${pair.reportId}`
+      const key2 = `${pair.reportId}-${pair.managerId}`
+      const date1 = lastOneOnOneMap.get(key1)
+      const date2 = lastOneOnOneMap.get(key2)
+
+      // Use the most recent date from either direction
+      const lastOneOnOne =
+        date1 && date2 ? (date1 > date2 ? date1 : date2) : date1 || date2
 
       if (!lastOneOnOne) {
         // No 1:1 ever recorded - create urgent exception if threshold is exceeded
