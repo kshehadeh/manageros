@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.26.0](/compare/v1.25.1...v1.26.0) (2025-12-05)
+
+### Features
+
+- **exceptions:** Auto-resolve exceptions for check-ins, feedback campaigns, and one-on-ones; update person management logic f1d736e
+
 ## [1.25.1](/compare/v1.25.0...v1.25.1) (2025-12-04)
 
 ### Bug Fixes
