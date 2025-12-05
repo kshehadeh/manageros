@@ -274,10 +274,9 @@ export function GenericDataTable<
   const { isLoaded } = useUser()
   const sessionStatus = isLoaded ? 'authenticated' : 'loading'
 
-  // Don't fetch data if we're waiting for session to load
-  // Allow fetching even if settings aren't loaded yet - they'll use defaults
-  // Settings loading shouldn't block data fetching
-  const shouldFetch = sessionStatus !== 'loading'
+  // Don't fetch data until both session and settings are loaded
+  // This ensures filters from localStorage are applied before the first API call
+  const shouldFetch = sessionStatus !== 'loading' && settingsLoaded
 
   // Initialize search input from loaded settings only once
   useEffect(() => {
