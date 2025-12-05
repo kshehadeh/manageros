@@ -223,6 +223,24 @@ export interface UserSettings {
     }
   >
 
+  // Per-view tolerance rules table settings
+  toleranceRulesTableSettings: Record<
+    string,
+    {
+      sorting: Array<{ id: string; desc: boolean }>
+      grouping: string
+      sort: {
+        field: string
+        direction: 'asc' | 'desc'
+      }
+      filters: {
+        search: string
+        ruleType: string
+        isEnabled: string
+      }
+    }
+  >
+
   // Future expandable settings can be added here:
   // sidebarCollapsed: boolean
   // defaultPageSize: number
@@ -271,6 +289,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   feedbackTableSettings: {},
   jobRolesTableSettings: {},
   organizationMembersTableSettings: {},
+  toleranceRulesTableSettings: {},
   // When adding new settings, add their defaults here:
   // sidebarCollapsed: false
   // defaultPageSize: 25
@@ -1037,6 +1056,72 @@ export function updateOrganizationMembersTableSettings(
     ...currentSettings,
     organizationMembersTableSettings: {
       ...currentSettings.organizationMembersTableSettings,
+      [settingsId]: updatedTableSettings,
+    },
+  }
+
+  saveUserSettings(userId, updatedSettings)
+}
+
+/**
+ * Get tolerance rules table settings for a specific view
+ */
+export function getToleranceRulesTableSettings(
+  userId: string,
+  settingsId: string
+): UserSettings['toleranceRulesTableSettings'][string] {
+  const settings = loadUserSettings(userId)
+  return (
+    settings.toleranceRulesTableSettings[settingsId] || {
+      sorting: [],
+      grouping: 'none',
+      sort: {
+        field: '',
+        direction: 'asc',
+      },
+      filters: {
+        search: '',
+        ruleType: '',
+        isEnabled: '',
+      },
+    }
+  )
+}
+
+/**
+ * Update tolerance rules table settings for a specific view
+ */
+export function updateToleranceRulesTableSettings(
+  userId: string,
+  settingsId: string,
+  tableSettings: Partial<UserSettings['toleranceRulesTableSettings'][string]>
+): void {
+  const currentSettings = loadUserSettings(userId)
+  const currentTableSettings = currentSettings.toleranceRulesTableSettings[
+    settingsId
+  ] || {
+    sorting: [],
+    grouping: 'none',
+    sort: {
+      field: '',
+      direction: 'asc' as const,
+    },
+    filters: {
+      search: '',
+      ruleType: '',
+      isEnabled: '',
+    },
+  }
+
+  const updatedTableSettings = {
+    ...currentTableSettings,
+    ...tableSettings,
+  }
+
+  const updatedSettings = {
+    ...currentSettings,
+    toleranceRulesTableSettings: {
+      ...currentSettings.toleranceRulesTableSettings,
       [settingsId]: updatedTableSettings,
     },
   }

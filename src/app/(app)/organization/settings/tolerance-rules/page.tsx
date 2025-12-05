@@ -1,20 +1,15 @@
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
-import { PageSection } from '@/components/ui/page-section'
-import { SectionHeader } from '@/components/ui/section-header'
 import { requireAdmin } from '@/lib/auth-utils'
-import { getToleranceRules } from '@/lib/actions/tolerance-rules'
-import { ToleranceRulesList } from '@/components/tolerance-rules/tolerance-rules-list'
+import { ToleranceRulesDataTable } from '@/components/tolerance-rules/tolerance-rules-data-table'
 import { RunToleranceCheckButton } from '@/components/tolerance-rules/run-tolerance-check-button'
 import { Button } from '@/components/ui/button'
 import { Link } from '@/components/ui/link'
-import { AlertTriangle, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 
 export default async function ToleranceRulesPage() {
   await requireAdmin()
-
-  const rules = await getToleranceRules()
 
   return (
     <PageContainer>
@@ -35,18 +30,7 @@ export default async function ToleranceRulesPage() {
       />
 
       <PageContent>
-        <PageSection
-          variant='bordered'
-          header={
-            <SectionHeader
-              icon={AlertTriangle}
-              title='Tolerance Rules'
-              description='Rules are evaluated daily and create exceptions when thresholds are exceeded. Exceptions appear in notifications and can be acknowledged, ignored, or resolved.'
-            />
-          }
-        >
-          <ToleranceRulesList rules={rules} />
-        </PageSection>
+        <ToleranceRulesDataTable settingsId='tolerance-rules-page' />
       </PageContent>
     </PageContainer>
   )
