@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.27.0](/compare/v1.26.0...v1.27.0) (2025-12-05)
+
+### Features
+
+- **tolerance-rules:** Add support for filtering by full-time employees in tolerance rule configurations aeaa599
+- **tolerance-rules:** Replace tolerance rules list with data table and add user-specific table settings management cebf9dd
+
 # [1.26.0](/compare/v1.25.1...v1.26.0) (2025-12-05)
 
 ### Features
