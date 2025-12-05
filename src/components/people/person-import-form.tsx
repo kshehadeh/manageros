@@ -10,7 +10,8 @@ import { FileText } from 'lucide-react'
 interface ImportResult {
   success: boolean
   message: string
-  imported: number
+  created: number
+  updated: number
   errors: string[]
   errorRows?: Array<{
     rowNumber: number
@@ -20,6 +21,7 @@ interface ImportResult {
       role: string
       team: string
       manager: string
+      birthday: string
     }
     errors: string[]
   }>
@@ -60,7 +62,8 @@ export function PersonImportForm() {
       setResult({
         success: false,
         message: 'An error occurred during import',
-        imported: 0,
+        created: 0,
+        updated: 0,
         errors: [error instanceof Error ? error.message : 'Unknown error'],
         errorRows: [],
       })
@@ -71,7 +74,7 @@ export function PersonImportForm() {
 
   const downloadTemplate = () => {
     const csvContent =
-      'name,email,role,team,manager\nJohn Doe,john.doe@company.com,Software Engineer,Engineering,\nJane Smith,jane.smith@company.com,Senior Engineer,Engineering,John Doe'
+      'name,email,role,team,manager,birthday\nJohn Doe,john.doe@company.com,Software Engineer,Engineering,,1988-04-20\nJane Smith,jane.smith@company.com,Senior Engineer,Engineering,John Doe,1992-11-05'
     const blob = new Blob([csvContent], { type: 'text/csv' })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -87,10 +90,10 @@ export function PersonImportForm() {
     if (!result?.errorRows || !result.errorRows.length) return
 
     const csvContent = [
-      'row_number,name,email,role,team,manager,errors',
+      'row_number,name,email,role,team,manager,birthday,errors',
       ...result.errorRows.map(
         row =>
-          `${row.rowNumber},"${row.data.name}","${row.data.email}","${row.data.role}","${row.data.team}","${row.data.manager}","${row.errors.join('; ')}"`
+          `${row.rowNumber},"${row.data.name}","${row.data.email}","${row.data.role}","${row.data.team}","${row.data.manager}","${row.data.birthday}","${row.errors.join('; ')}"`
       ),
     ].join('\n')
 
@@ -198,7 +201,10 @@ export function PersonImportForm() {
       >
         <div className='space-y-4'>
           <p className='text-muted-foreground'>
-            Your CSV file should have the following columns:
+            Your CSV file should have the following columns. The{' '}
+            <span className='font-semibold'>name</span> field is used as the
+            key to match existing people. Include other fields only when you
+            want to add or update that data.
           </p>
           <div className='overflow-x-auto'>
             <table className='min-w-full border rounded-lg'>
@@ -289,6 +295,20 @@ export function PersonImportForm() {
                     Jane Smith
                   </td>
                 </tr>
+                <tr>
+                  <td className='px-xl py-lg text-sm font-medium text-foreground border-r'>
+                    birthday
+                  </td>
+                  <td className='px-xl py-lg text-sm text-muted-foreground border-r'>
+                    Person&apos;s birthday (YYYY-MM-DD)
+                  </td>
+                  <td className='px-xl py-lg text-sm text-muted-foreground border-r'>
+                    No
+                  </td>
+                  <td className='px-xl py-lg text-sm text-muted-foreground'>
+                    1992-11-05
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -307,7 +327,15 @@ export function PersonImportForm() {
                 • Manager information will be updated when their own row is
                 processed
               </li>
-              <li>• All fields except name are optional</li>
+              <li>• All fields except name are optional for updates</li>
+              <li>
+                • Include only the columns you want to change—blank cells leave
+                existing data untouched
+              </li>
+              <li>
+                • To rename someone, include their existing email plus the new
+                name
+              </li>
             </ul>
           </div>
         </div>
@@ -348,9 +376,14 @@ export function PersonImportForm() {
               </div>
               <div className='ml-3'>
                 <h3 className='text-sm font-medium'>{result.message}</h3>
-                {result.imported > 0 && (
-                  <div className='mt-2 text-sm'>
-                    <p>Successfully imported {result.imported} people</p>
+                {(result.created > 0 || result.updated > 0) && (
+                  <div className='mt-2 text-sm space-y-1'>
+                    {result.created > 0 && (
+                      <p>Created {result.created} new people</p>
+                    )}
+                    {result.updated > 0 && (
+                      <p>Updated {result.updated} existing people</p>
+                    )}
                   </div>
                 )}
               </div>
@@ -404,6 +437,9 @@ export function PersonImportForm() {
                         Manager
                       </th>
                       <th className='px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
+                        Birthday
+                      </th>
+                      <th className='px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                         Errors
                       </th>
                     </tr>
@@ -428,6 +464,9 @@ export function PersonImportForm() {
                         </td>
                         <td className='px-6 py-4 whitespace-nowrap text-sm text-foreground'>
                           {row.data.manager || '—'}
+                        </td>
+                        <td className='px-6 py-4 whitespace-nowrap text-sm text-foreground'>
+                          {row.data.birthday || '—'}
                         </td>
                         <td className='px-6 py-4 text-sm text-destructive'>
                           {row.errors.join(', ')}

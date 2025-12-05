@@ -581,38 +581,84 @@ export function GenericDataTable<
   })
 
   // Sort rows when grouped to respect group order
-  const tableRows = table.getRowModel().rows
+  // Use getExpandedRowModel() to only show rows from expanded groups
+  const tableRows = table.getExpandedRowModel().rows
   const sortedRows = useMemo(() => {
     if (effectiveGrouping.length === 0 || !config.getGroupOrder) {
       return tableRows
     }
 
     const groupingColumn = effectiveGrouping[0]
-    const rowsArray = [...tableRows]
+
+    // Build a structure that preserves parent-child relationships
+    // Group rows with their children, sort groups, then flatten
+    const groups: Array<{
+      groupRow: (typeof tableRows)[0]
+      children: typeof tableRows
+    }> = []
+    const orphanRows: typeof tableRows = []
+    const currentGroup: {
+      groupRow: (typeof tableRows)[0] | null
+      children: typeof tableRows
+    } = {
+      groupRow: null,
+      children: [],
+    }
+
+    for (const row of tableRows) {
+      if (row.getIsGrouped()) {
+        // Save previous group if it exists
+        if (currentGroup.groupRow) {
+          groups.push({
+            groupRow: currentGroup.groupRow,
+            children: [...currentGroup.children],
+          })
+        }
+        // Start new group
+        currentGroup.groupRow = row
+        currentGroup.children = []
+      } else {
+        // Add to current group's children if we have a group, otherwise it's an orphan
+        if (currentGroup.groupRow) {
+          currentGroup.children.push(row)
+        } else {
+          orphanRows.push(row)
+        }
+      }
+    }
+
+    // Don't forget the last group
+    if (currentGroup.groupRow) {
+      groups.push({
+        groupRow: currentGroup.groupRow,
+        children: [...currentGroup.children],
+      })
+    }
 
     // Sort groups by their order value
-    return rowsArray.sort((a, b) => {
-      // If both are groups, compare their order
-      if (a.getIsGrouped() && b.getIsGrouped()) {
-        const aValue = String(a.getValue(groupingColumn) || '')
-        const bValue = String(b.getValue(groupingColumn) || '')
-        const aOrder = getGroupOrder(aValue, groupingColumn)
-        const bOrder = getGroupOrder(bValue, groupingColumn)
+    groups.sort((a, b) => {
+      const aValue = String(a.groupRow.getValue(groupingColumn) || '')
+      const bValue = String(b.groupRow.getValue(groupingColumn) || '')
+      const aOrder = getGroupOrder(aValue, groupingColumn)
+      const bOrder = getGroupOrder(bValue, groupingColumn)
 
-        // If orders are equal, sort alphabetically
-        if (aOrder === bOrder) {
-          return aValue.localeCompare(bValue)
-        }
-        return aOrder - bOrder
+      // If orders are equal, sort alphabetically
+      if (aOrder === bOrder) {
+        return aValue.localeCompare(bValue)
       }
-
-      // If one is a group and one isn't, groups come first
-      if (a.getIsGrouped() && !b.getIsGrouped()) return -1
-      if (!a.getIsGrouped() && b.getIsGrouped()) return 1
-
-      // Both are regular rows, maintain their original order
-      return 0
+      return aOrder - bOrder
     })
+
+    // Flatten back to array: orphan rows first (if any), then group row followed by its children
+    const sorted: typeof tableRows = []
+    // Add orphan rows first (shouldn't happen with proper grouping, but handle it gracefully)
+    sorted.push(...orphanRows)
+    for (const group of groups) {
+      sorted.push(group.groupRow)
+      sorted.push(...group.children)
+    }
+
+    return sorted
   }, [tableRows, effectiveGrouping, config.getGroupOrder, getGroupOrder])
 
   // Expand all groups by default when table is ready
