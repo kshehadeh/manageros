@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.28.0](/compare/v1.27.0...v1.28.0) (2025-12-05)
+
+### Features
+
+- **people-import:** Support birthday column and partial updates when importing people
+
 # [1.27.0](/compare/v1.26.0...v1.27.0) (2025-12-05)
 
 ### Features

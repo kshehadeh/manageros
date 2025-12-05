@@ -140,6 +140,7 @@ export const csvPersonSchema = z.object({
   role: z.string().optional(),
   team: z.string().optional(),
   manager: z.string().optional(), // Manager name instead of email
+  birthday: z.string().optional(),
 })
 
 export type CSVPersonData = z.infer<typeof csvPersonSchema>
