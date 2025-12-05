@@ -46,6 +46,8 @@ export function ToleranceRuleForm({ rule }: ToleranceRuleFormProps) {
       (rule?.config as OneOnOneFrequencyConfig)?.warningThresholdDays || 14,
     urgentThresholdDays:
       (rule?.config as OneOnOneFrequencyConfig)?.urgentThresholdDays || 30,
+    onlyFullTimeEmployees:
+      (rule?.config as OneOnOneFrequencyConfig)?.onlyFullTimeEmployees ?? false,
     warningThresholdMonths:
       (rule?.config as Feedback360Config)?.warningThresholdMonths || 6,
     maxDirectReports:
@@ -67,6 +69,7 @@ export function ToleranceRuleForm({ rule }: ToleranceRuleFormProps) {
           config = {
             warningThresholdDays: Number(formData.warningThresholdDays),
             urgentThresholdDays: Number(formData.urgentThresholdDays),
+            onlyFullTimeEmployees: formData.onlyFullTimeEmployees,
           }
           break
         case 'initiative_checkin':
@@ -154,6 +157,23 @@ export function ToleranceRuleForm({ rule }: ToleranceRuleFormProps) {
                 }
                 required
               />
+            </div>
+            <div className='flex items-center space-x-2'>
+              <input
+                type='checkbox'
+                id='onlyFullTimeEmployees'
+                checked={formData.onlyFullTimeEmployees}
+                onChange={e =>
+                  setFormData({
+                    ...formData,
+                    onlyFullTimeEmployees: e.target.checked,
+                  })
+                }
+                className='h-4 w-4 rounded border-gray-300'
+              />
+              <Label htmlFor='onlyFullTimeEmployees' className='cursor-pointer'>
+                Only check against full-time employees
+              </Label>
             </div>
           </>
         )

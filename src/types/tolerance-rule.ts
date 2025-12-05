@@ -11,6 +11,7 @@ export type ToleranceRuleType =
 export interface OneOnOneFrequencyConfig {
   warningThresholdDays: number
   urgentThresholdDays: number
+  onlyFullTimeEmployees?: boolean
 }
 
 export interface InitiativeCheckInConfig {

@@ -24,6 +24,7 @@ const toleranceRuleTypeSchema = z.enum([
 const oneOnOneFrequencyConfigSchema = z.object({
   warningThresholdDays: z.number().int().positive(),
   urgentThresholdDays: z.number().int().positive(),
+  onlyFullTimeEmployees: z.boolean().optional(),
 })
 
 const initiativeCheckInConfigSchema = z.object({

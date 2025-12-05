@@ -124,6 +124,7 @@ async function evaluateOneOnOneFrequency(
   let exceptionsCreated = 0
 
   // Get all managers with direct reports in the organization
+  // If onlyFullTimeEmployees is enabled, filter reports to only full-time employees
   const managers = await prisma.person.findMany({
     where: {
       organizationId: rule.organizationId,
@@ -131,6 +132,9 @@ async function evaluateOneOnOneFrequency(
       reports: {
         some: {
           status: 'active',
+          ...(config.onlyFullTimeEmployees
+            ? { employeeType: 'FULL_TIME' }
+            : {}),
         },
       },
     },
@@ -139,6 +143,9 @@ async function evaluateOneOnOneFrequency(
       reports: {
         where: {
           status: 'active',
+          ...(config.onlyFullTimeEmployees
+            ? { employeeType: 'FULL_TIME' }
+            : {}),
         },
         select: {
           id: true,
