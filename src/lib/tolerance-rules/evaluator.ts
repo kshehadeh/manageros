@@ -58,6 +58,38 @@ export async function evaluateAllRules(organizationId: string): Promise<{
 }
 
 /**
+ * Batch check existing exceptions for multiple entities
+ * Returns a Set of entityIds that already have active exceptions
+ */
+async function getExistingExceptions(
+  ruleId: string,
+  organizationId: string,
+  entityType: string,
+  entityIds: string[]
+): Promise<Set<string>> {
+  if (entityIds.length === 0) {
+    return new Set()
+  }
+
+  const existingExceptions = await prisma.exception.findMany({
+    where: {
+      ruleId,
+      organizationId,
+      entityType,
+      entityId: {
+        in: entityIds,
+      },
+      status: 'active',
+    },
+    select: {
+      entityId: true,
+    },
+  })
+
+  return new Set(existingExceptions.map(e => e.entityId))
+}
+
+/**
  * Evaluate a single rule and create exceptions if thresholds are exceeded
  */
 async function evaluateRule(rule: ToleranceRule): Promise<number> {
@@ -102,53 +134,129 @@ async function evaluateOneOnOneFrequency(
         },
       },
     },
-    include: {
+    select: {
+      id: true,
       reports: {
         where: {
           status: 'active',
+        },
+        select: {
+          id: true,
         },
       },
     },
   })
 
+  // Build list of all manager-report pairs
+  const managerReportPairs: Array<{ managerId: string; reportId: string }> = []
   for (const manager of managers) {
     for (const report of manager.reports) {
-      const lastOneOnOne = await getLastOneOnOneDate(manager.id, report.id)
+      managerReportPairs.push({
+        managerId: manager.id,
+        reportId: report.id,
+      })
+    }
+  }
+
+  if (managerReportPairs.length === 0) {
+    return 0
+  }
+
+  // Batch fetch last 1:1 dates for all manager-report pairs
+  // We need to check both directions (manager->report and report->manager)
+  const managerIds = managerReportPairs.map(p => p.managerId)
+  const reportIds = managerReportPairs.map(p => p.reportId)
+  const allPersonIds = Array.from(new Set([...managerIds, ...reportIds]))
+
+  const allOneOnOnes = await prisma.oneOnOne.findMany({
+    where: {
+      OR: [
+        {
+          managerId: { in: allPersonIds },
+          reportId: { in: allPersonIds },
+        },
+      ],
+    },
+    select: {
+      managerId: true,
+      reportId: true,
+      scheduledAt: true,
+    },
+    orderBy: {
+      scheduledAt: 'desc',
+    },
+  })
+
+  // Create a map of managerId-reportId -> lastScheduledAt
+  const lastOneOnOneMap = new Map<string, Date>()
+  for (const oneOnOne of allOneOnOnes) {
+    // Skip if scheduledAt is null
+    if (!oneOnOne.scheduledAt) {
+      continue
+    }
+
+    // Check both directions
+    const key1 = `${oneOnOne.managerId}-${oneOnOne.reportId}`
+    const key2 = `${oneOnOne.reportId}-${oneOnOne.managerId}`
+
+    const existing1 = lastOneOnOneMap.get(key1)
+    const existing2 = lastOneOnOneMap.get(key2)
+
+    if (!existing1 || oneOnOne.scheduledAt > existing1) {
+      lastOneOnOneMap.set(key1, oneOnOne.scheduledAt)
+    }
+    if (!existing2 || oneOnOne.scheduledAt > existing2) {
+      lastOneOnOneMap.set(key2, oneOnOne.scheduledAt)
+    }
+  }
+
+  // Batch check existing exceptions
+  const entityIds = managerReportPairs.map(p => `${p.managerId}-${p.reportId}`)
+  const existingExceptions = await getExistingExceptions(
+    rule.id,
+    rule.organizationId,
+    'OneOnOne',
+    entityIds
+  )
+
+  const now = Date.now()
+
+  // Process pairs in batches
+  const BATCH_SIZE = 100
+  for (let i = 0; i < managerReportPairs.length; i += BATCH_SIZE) {
+    const batch = managerReportPairs.slice(i, i + BATCH_SIZE)
+
+    for (const pair of batch) {
+      const entityId = `${pair.managerId}-${pair.reportId}`
+
+      // Skip if exception already exists
+      if (existingExceptions.has(entityId)) {
+        continue
+      }
+
+      const lastOneOnOne = lastOneOnOneMap.get(entityId)
 
       if (!lastOneOnOne) {
-        // No 1:1 ever recorded - check if exception already exists
-        const existingException = await prisma.exception.findFirst({
-          where: {
-            ruleId: rule.id,
-            organizationId: rule.organizationId,
-            entityType: 'OneOnOne',
-            entityId: `${manager.id}-${report.id}`,
-            status: 'active',
-          },
-        })
-
-        if (existingException) {
-          continue // Already has an active exception
-        }
-
-        // Create urgent exception if threshold is exceeded
+        // No 1:1 ever recorded - create urgent exception if threshold is exceeded
         const daysSince = Infinity
         if (daysSince > config.urgentThresholdDays) {
-          await createExceptionForOneOnOne(
+          const created = await createExceptionForOneOnOneSafely(
             rule,
-            manager.id,
-            report.id,
+            pair.managerId,
+            pair.reportId,
             'urgent',
             config.urgentThresholdDays,
             Infinity
           )
-          exceptionsCreated++
+          if (created) {
+            exceptionsCreated++
+          }
         }
         continue
       }
 
       const daysSince = Math.floor(
-        (Date.now() - lastOneOnOne.getTime()) / (1000 * 60 * 60 * 24)
+        (now - lastOneOnOne.getTime()) / (1000 * 60 * 60 * 24)
       )
 
       // Check if we need to create an exception
@@ -156,8 +264,8 @@ async function evaluateOneOnOneFrequency(
       if (daysSince > config.urgentThresholdDays) {
         const created = await createExceptionForOneOnOneSafely(
           rule,
-          manager.id,
-          report.id,
+          pair.managerId,
+          pair.reportId,
           'urgent',
           config.urgentThresholdDays,
           daysSince
@@ -168,8 +276,8 @@ async function evaluateOneOnOneFrequency(
       } else if (daysSince > config.warningThresholdDays) {
         const created = await createExceptionForOneOnOneSafely(
           rule,
-          manager.id,
-          report.id,
+          pair.managerId,
+          pair.reportId,
           'warning',
           config.warningThresholdDays,
           daysSince
@@ -182,28 +290,6 @@ async function evaluateOneOnOneFrequency(
   }
 
   return exceptionsCreated
-}
-
-/**
- * Get the most recent one-on-one date for a manager-report pair
- */
-async function getLastOneOnOneDate(
-  managerId: string,
-  reportId: string
-): Promise<Date | null> {
-  const oneOnOne = await prisma.oneOnOne.findFirst({
-    where: {
-      OR: [
-        { managerId, reportId },
-        { managerId: reportId, reportId: managerId },
-      ],
-    },
-    orderBy: {
-      scheduledAt: 'desc',
-    },
-  })
-
-  return oneOnOne?.scheduledAt || null
 }
 
 /**
@@ -312,79 +398,6 @@ async function createExceptionForOneOnOneSafely(
 }
 
 /**
- * Create exception for one-on-one frequency issue (legacy - kept for reference)
- * @deprecated Use createExceptionForOneOnOneSafely instead
- */
-async function createExceptionForOneOnOne(
-  rule: ToleranceRule,
-  managerId: string,
-  reportId: string,
-  severity: 'warning' | 'urgent',
-  thresholdDays: number,
-  daysSince: number
-): Promise<void> {
-  // Get manager and report names for message
-  const [manager, report] = await Promise.all([
-    prisma.person.findUnique({ where: { id: managerId } }),
-    prisma.person.findUnique({ where: { id: reportId } }),
-  ])
-
-  const managerName = manager?.name || 'Unknown'
-  const reportName = report?.name || 'Unknown'
-
-  const message =
-    daysSince === Infinity
-      ? `${managerName} has never had a one on one with ${reportName} (threshold: ${thresholdDays} days)`
-      : `${managerName} has not had a 1:1 with ${reportName} in ${daysSince} days (threshold: ${thresholdDays} days)`
-
-  const exceptionInput: CreateExceptionInput = {
-    ruleId: rule.id,
-    organizationId: rule.organizationId,
-    severity,
-    entityType: 'OneOnOne',
-    entityId: `${managerId}-${reportId}`,
-    message,
-    metadata: {
-      managerId,
-      reportId,
-      managerName,
-      reportName,
-      thresholdDays,
-      daysSince: daysSince === Infinity ? null : daysSince,
-    },
-  }
-
-  const exception = await createException(exceptionInput)
-
-  // Create notification for the manager
-  const managerWithUser = await prisma.person.findUnique({
-    where: { id: managerId },
-    include: { user: true },
-  })
-
-  if (managerWithUser?.user?.id) {
-    const notification = await createSystemNotification({
-      title:
-        severity === 'urgent'
-          ? 'Urgent: Missing 1:1 Meeting'
-          : 'Warning: Missing 1:1 Meeting',
-      message,
-      type: severity === 'urgent' ? 'error' : 'warning',
-      organizationId: rule.organizationId,
-      userId: managerWithUser.user.id,
-      metadata: {
-        exceptionId: exception.id,
-        entityType: 'OneOnOne',
-        entityId: `${managerId}-${reportId}`,
-        navigationPath: `/people/${managerId}`,
-      },
-    })
-
-    await linkExceptionToNotification(exception.id, notification.id)
-  }
-}
-
-/**
  * Create notification for one-on-one exception (extracted for reuse)
  */
 async function createNotificationForOneOnOneException(
@@ -455,90 +468,98 @@ async function evaluateInitiativeCheckIn(
         in: ['planned', 'in_progress'],
       },
     },
+    select: {
+      id: true,
+    },
   })
 
-  for (const initiative of initiatives) {
-    const lastCheckIn = await getLastCheckInDate(initiative.id)
-
-    if (!lastCheckIn) {
-      // No check-in ever recorded - check if exception already exists
-      const existingException = await prisma.exception.findFirst({
-        where: {
-          ruleId: rule.id,
-          organizationId: rule.organizationId,
-          entityType: 'Initiative',
-          entityId: initiative.id,
-          status: 'active',
-        },
-      })
-
-      if (existingException) {
-        continue // Already has an active exception
-      }
-
-      // Create exception if threshold is exceeded
-      const daysSince = Infinity
-      if (daysSince > config.warningThresholdDays) {
-        await createExceptionForInitiative(
-          rule,
-          initiative.id,
-          'warning',
-          config.warningThresholdDays,
-          0
-        )
-        exceptionsCreated++
-      }
-      continue
-    }
-
-    const daysSince = Math.floor(
-      (Date.now() - lastCheckIn.getTime()) / (1000 * 60 * 60 * 24)
-    )
-
-    // Check if we need to create an exception
-    const existingException = await prisma.exception.findFirst({
-      where: {
-        ruleId: rule.id,
-        organizationId: rule.organizationId,
-        entityType: 'Initiative',
-        entityId: initiative.id,
-        status: 'active',
-      },
-    })
-
-    if (existingException) {
-      continue
-    }
-
-    if (daysSince > config.warningThresholdDays) {
-      await createExceptionForInitiative(
-        rule,
-        initiative.id,
-        'warning',
-        config.warningThresholdDays,
-        daysSince
-      )
-      exceptionsCreated++
-    }
+  if (initiatives.length === 0) {
+    return 0
   }
 
-  return exceptionsCreated
-}
+  const initiativeIds = initiatives.map(i => i.id)
 
-/**
- * Get the most recent check-in date for an initiative
- */
-async function getLastCheckInDate(initiativeId: string): Promise<Date | null> {
-  const checkIn = await prisma.checkIn.findFirst({
+  // Batch fetch last check-in date for all initiatives
+  const allCheckIns = await prisma.checkIn.findMany({
     where: {
-      initiativeId,
+      initiativeId: {
+        in: initiativeIds,
+      },
+    },
+    select: {
+      initiativeId: true,
+      createdAt: true,
     },
     orderBy: {
       createdAt: 'desc',
     },
   })
 
-  return checkIn?.createdAt || null
+  // Create a map of initiativeId -> lastCheckInDate (most recent per initiative)
+  const lastCheckInMap = new Map<string, Date>()
+  for (const checkIn of allCheckIns) {
+    if (!lastCheckInMap.has(checkIn.initiativeId)) {
+      lastCheckInMap.set(checkIn.initiativeId, checkIn.createdAt)
+    }
+  }
+
+  // Batch check existing exceptions
+  const existingExceptions = await getExistingExceptions(
+    rule.id,
+    rule.organizationId,
+    'Initiative',
+    initiativeIds
+  )
+
+  const now = Date.now()
+
+  // Process initiatives in batches
+  const BATCH_SIZE = 100
+  for (let i = 0; i < initiatives.length; i += BATCH_SIZE) {
+    const batch = initiatives.slice(i, i + BATCH_SIZE)
+
+    for (const initiative of batch) {
+      // Skip if exception already exists
+      if (existingExceptions.has(initiative.id)) {
+        continue
+      }
+
+      const lastCheckIn = lastCheckInMap.get(initiative.id)
+
+      if (!lastCheckIn) {
+        // No check-in ever recorded - create exception if threshold is exceeded
+        const daysSince = Infinity
+        if (daysSince > config.warningThresholdDays) {
+          await createExceptionForInitiative(
+            rule,
+            initiative.id,
+            'warning',
+            config.warningThresholdDays,
+            0
+          )
+          exceptionsCreated++
+        }
+        continue
+      }
+
+      const daysSince = Math.floor(
+        (now - lastCheckIn.getTime()) / (1000 * 60 * 60 * 24)
+      )
+
+      if (daysSince > config.warningThresholdDays) {
+        await createExceptionForInitiative(
+          rule,
+          initiative.id,
+          'warning',
+          config.warningThresholdDays,
+          daysSince
+        )
+        exceptionsCreated++
+      }
+    }
+  }
+
+  return exceptionsCreated
 }
 
 /**
@@ -628,92 +649,89 @@ async function evaluateFeedback360(
       organizationId: rule.organizationId,
       status: 'active',
     },
+    select: {
+      id: true,
+    },
   })
 
-  for (const person of people) {
-    const lastFeedbackCampaign = await getLastFeedbackCampaignDate(person.id)
-
-    if (!lastFeedbackCampaign) {
-      // No feedback campaign ever recorded - check if exception already exists
-      const existingException = await prisma.exception.findFirst({
-        where: {
-          ruleId: rule.id,
-          organizationId: rule.organizationId,
-          entityType: 'Person',
-          entityId: person.id,
-          status: 'active',
-        },
-      })
-
-      if (existingException) {
-        continue // Already has an active exception
-      }
-
-      // Create exception if threshold is exceeded
-      const monthsSince = Infinity
-      if (monthsSince > config.warningThresholdMonths) {
-        await createExceptionForFeedback360(
-          rule,
-          person.id,
-          'warning',
-          config.warningThresholdMonths,
-          0
-        )
-        exceptionsCreated++
-      }
-      continue
-    }
-
-    const monthsSince = Math.floor(
-      (Date.now() - lastFeedbackCampaign.getTime()) / (1000 * 60 * 60 * 24 * 30)
-    )
-
-    // Check if we need to create an exception
-    const existingException = await prisma.exception.findFirst({
-      where: {
-        ruleId: rule.id,
-        organizationId: rule.organizationId,
-        entityType: 'Person',
-        entityId: person.id,
-        status: 'active',
-      },
-    })
-
-    if (existingException) {
-      continue
-    }
-
-    if (monthsSince > config.warningThresholdMonths) {
-      await createExceptionForFeedback360(
-        rule,
-        person.id,
-        'warning',
-        config.warningThresholdMonths,
-        monthsSince
-      )
-      exceptionsCreated++
-    }
+  if (people.length === 0) {
+    return 0
   }
 
-  return exceptionsCreated
-}
+  const personIds = people.map(p => p.id)
 
-/**
- * Get the most recent feedback campaign date for a person
- */
-async function getLastFeedbackCampaignDate(
-  personId: string
-): Promise<Date | null> {
-  const campaign = await prisma.feedbackCampaign.findFirst({
+  // Batch fetch all feedback campaigns for these people
+  // We'll group by personId in memory to get the most recent one per person
+  const allCampaigns = await prisma.feedbackCampaign.findMany({
     where: {
-      targetPersonId: personId,
+      targetPersonId: {
+        in: personIds,
+      },
+    },
+    select: {
+      targetPersonId: true,
+      createdAt: true,
     },
     orderBy: {
       createdAt: 'desc',
     },
   })
 
-  return campaign?.createdAt || null
+  // Create a map of personId -> lastCampaignDate (most recent per person)
+  const lastCampaignMap = new Map<string, Date>()
+  for (const campaign of allCampaigns) {
+    if (!lastCampaignMap.has(campaign.targetPersonId)) {
+      lastCampaignMap.set(campaign.targetPersonId, campaign.createdAt)
+    }
+  }
+
+  // Batch check existing exceptions
+  const existingExceptions = await getExistingExceptions(
+    rule.id,
+    rule.organizationId,
+    'Person',
+    personIds
+  )
+
+  const now = Date.now()
+
+  // Process people in batches to avoid memory issues
+  const BATCH_SIZE = 100
+  for (let i = 0; i < people.length; i += BATCH_SIZE) {
+    const batch = people.slice(i, i + BATCH_SIZE)
+
+    for (const person of batch) {
+      // Skip if exception already exists
+      if (existingExceptions.has(person.id)) {
+        continue
+      }
+
+      const lastCampaign = lastCampaignMap.get(person.id)
+      let monthsSince: number
+
+      if (!lastCampaign) {
+        // No feedback campaign ever recorded
+        monthsSince = Infinity
+      } else {
+        monthsSince = Math.floor(
+          (now - lastCampaign.getTime()) / (1000 * 60 * 60 * 24 * 30)
+        )
+      }
+
+      if (monthsSince > config.warningThresholdMonths) {
+        await createExceptionForFeedback360(
+          rule,
+          person.id,
+          'warning',
+          config.warningThresholdMonths,
+          monthsSince === Infinity ? 0 : monthsSince
+        )
+        exceptionsCreated++
+      }
+    }
+  }
+
+  return exceptionsCreated
 }
 
 /**
@@ -820,34 +838,43 @@ async function evaluateManagerSpan(
     },
   })
 
-  for (const manager of managers) {
-    const directReportCount = manager._count.reports
+  if (managers.length === 0) {
+    return 0
+  }
 
-    if (directReportCount > config.maxDirectReports) {
-      // Check if we need to create an exception
-      const existingException = await prisma.exception.findFirst({
-        where: {
-          ruleId: rule.id,
-          organizationId: rule.organizationId,
-          entityType: 'Person',
-          entityId: manager.id,
-          status: 'active',
-        },
-      })
+  // Filter managers that exceed threshold
+  const managersExceedingThreshold = managers.filter(
+    m => m._count.reports > config.maxDirectReports
+  )
 
-      if (existingException) {
-        continue
-      }
+  if (managersExceedingThreshold.length === 0) {
+    return 0
+  }
 
-      await createExceptionForManagerSpan(
-        rule,
-        manager.id,
-        'warning',
-        config.maxDirectReports,
-        directReportCount
-      )
-      exceptionsCreated++
+  // Batch check existing exceptions
+  const managerIds = managersExceedingThreshold.map(m => m.id)
+  const existingExceptions = await getExistingExceptions(
+    rule.id,
+    rule.organizationId,
+    'Person',
+    managerIds
+  )
+
+  // Process managers that need exceptions
+  for (const manager of managersExceedingThreshold) {
+    // Skip if exception already exists
+    if (existingExceptions.has(manager.id)) {
+      continue
     }
+
+    await createExceptionForManagerSpan(
+      rule,
+      manager.id,
+      'warning',
+      config.maxDirectReports,
+      manager._count.reports
+    )
+    exceptionsCreated++
   }
 
   return exceptionsCreated
