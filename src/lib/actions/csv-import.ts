@@ -116,7 +116,13 @@ function parseCSV(csvText: string): {
   const errors: PersonCSVRowError[] = []
 
   for (let i = 1; i < lines.length; i++) {
-    const values = parseCSVLine(lines[i])
+    const line = lines[i].trim()
+    // Skip completely empty lines
+    if (line.length === 0) {
+      continue
+    }
+
+    const values = parseCSVLine(line)
     const rowNum = i + 1
 
     if (values.length !== headers.length) {
@@ -202,17 +208,7 @@ export async function importPersonsFromCSV(formData: FormData) {
   const csvText = await file.text()
   let parseResult: {
     data: CSVPersonData[]
-    errors: Array<{
-      rowNumber: number
-      data: {
-        name: string
-        email: string
-        role: string
-        team: string
-        manager: string
-      }
-      errors: string[]
-    }>
+    errors: PersonCSVRowError[]
   }
 
   try {
@@ -245,17 +241,12 @@ export async function importPersonsFromCSV(formData: FormData) {
   // Create lookup maps
   const teamMap = new Map(existingTeams.map(t => [t.name.toLowerCase(), t.id]))
   const personEmailMap = new Map(
-    existingPeople
-      .filter(p => p.email)
-      .map(p => [p.email!.toLowerCase(), p.id])
+    existingPeople.filter(p => p.email).map(p => [p.email!.toLowerCase(), p.id])
   )
   const personNameMap = new Map(
     existingPeople.map(p => [p.name.toLowerCase(), p.id])
   )
-  const personById = new Map<
-    string,
-    { name: string; email: string | null }
-  >(
+  const personById = new Map<string, { name: string; email: string | null }>(
     existingPeople.map(p => [
       p.id,
       { name: p.name, email: p.email ? p.email.toLowerCase() : null },
@@ -414,18 +405,14 @@ export async function importPersonsFromCSV(formData: FormData) {
 
     if (!personId) {
       if (pendingCreateNames.has(normalizedNameLower)) {
-        rowErrors.push(
-          `Name "${row.name}" is duplicated within this import`
-        )
+        rowErrors.push(`Name "${row.name}" is duplicated within this import`)
       }
       if (normalizedEmail) {
         if (personEmailMap.has(normalizedEmail)) {
           rowErrors.push(`Email ${row.email} already exists`)
         }
         if (pendingCreateEmails.has(normalizedEmail)) {
-          rowErrors.push(
-            `Email ${row.email} is duplicated within this import`
-          )
+          rowErrors.push(`Email ${row.email} is duplicated within this import`)
         }
       }
     } else {
@@ -448,7 +435,8 @@ export async function importPersonsFromCSV(formData: FormData) {
         normalizedName &&
         normalizedName !== existingPerson.name
 
-      const wantsEmailUpdate = matchStrategy !== 'email' && Boolean(normalizedEmail)
+      const wantsEmailUpdate =
+        matchStrategy !== 'email' && Boolean(normalizedEmail)
 
       const hasRoleValue = Boolean(row.role?.trim())
       const hasManagerValue = Boolean(normalizedManagerRaw)
@@ -536,11 +524,15 @@ export async function importPersonsFromCSV(formData: FormData) {
         }
 
         if (entry.hasTeamValue) {
-          updateData.teamId = entry.teamId ?? null
+          updateData.team = entry.teamId
+            ? { connect: { id: entry.teamId } }
+            : { disconnect: true }
         }
 
         if (entry.hasManagerValue) {
-          updateData.managerId = normalizedManagerId
+          updateData.manager = normalizedManagerId
+            ? { connect: { id: normalizedManagerId } }
+            : { disconnect: true }
         }
 
         if (entry.hasBirthdayValue) {
@@ -570,10 +562,7 @@ export async function importPersonsFromCSV(formData: FormData) {
         const newEmailLower = updatedPerson.email
           ? updatedPerson.email.toLowerCase()
           : null
-        if (
-          entry.previousEmail &&
-          entry.previousEmail !== newEmailLower
-        ) {
+        if (entry.previousEmail && entry.previousEmail !== newEmailLower) {
           personEmailMap.delete(entry.previousEmail)
         }
         if (newEmailLower) {
@@ -611,9 +600,7 @@ export async function importPersonsFromCSV(formData: FormData) {
         }
         personById.set(createdPerson.id, {
           name: createdPerson.name,
-          email: createdPerson.email
-            ? createdPerson.email.toLowerCase()
-            : null,
+          email: createdPerson.email ? createdPerson.email.toLowerCase() : null,
         })
         createdCount++
       }
