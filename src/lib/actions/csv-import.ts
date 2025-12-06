@@ -377,6 +377,17 @@ export async function importPersonsFromCSV(formData: FormData) {
       }
     }
 
+    // Validate manager exists (either in system or will be created in this import)
+    const hasManagerValue = Boolean(normalizedManagerName)
+    if (hasManagerValue && normalizedManagerName) {
+      const managerExists =
+        personNameMap.has(normalizedManagerName) ||
+        pendingCreateNames.has(normalizedManagerName)
+      if (!managerExists) {
+        rowErrors.push(`Manager "${row.manager}" not found`)
+      }
+    }
+
     const existingByEmail = normalizedEmail
       ? personEmailMap.get(normalizedEmail)
       : undefined
@@ -439,7 +450,6 @@ export async function importPersonsFromCSV(formData: FormData) {
         matchStrategy !== 'email' && Boolean(normalizedEmail)
 
       const hasRoleValue = Boolean(row.role?.trim())
-      const hasManagerValue = Boolean(normalizedManagerRaw)
 
       const hasUpdatePayload =
         wantsNameUpdate ||
