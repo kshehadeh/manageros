@@ -19,6 +19,7 @@
 - **Team Management** - Hierarchical teams with parent-child relationships and deletion capabilities
 - **Organization Chart** - Interactive ReactFlow-based org chart visualization
 - **Person Import** - Bulk import functionality for adding multiple people
+- **Person Import Enhancements** (December 5, 2025) - CSV import now supports birthday data and partial updates that only touch populated columns, enabling lightweight data refreshes for existing people
 - **Team Import** - CSV import functionality for teams with automatic parent team creation, fuzzy matching, and update capabilities for existing teams
 - **User Linking** - Connect user accounts to person records for access control
 - **Job Role Management** - Structured job roles with levels and domains, markdown-enabled job descriptions, organization-wide role management, role assignment to people, drag-and-drop level ordering, dedicated management page (January 2025)
