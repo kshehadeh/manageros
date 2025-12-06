@@ -788,8 +788,9 @@ model ReportInstance {
 
 model Note {
   id             String           @id @default(cuid())
-  entityType     String // The type of entity (e.g., "Initiative", "Task", "Meeting", "Person")
-  entityId       String // The ID of the entity
+  title          String? // Title for standalone notes (optional)
+  entityType     String? // The type of entity (e.g., "Initiative", "Task", "Meeting", "Person") - optional for standalone notes
+  entityId       String? // The ID of the entity - optional for standalone notes
   organizationId String
   organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   content        String
@@ -803,6 +804,7 @@ model Note {
   @@index([organizationId])
   @@index([createdById])
   @@index([createdAt])
+  @@index([title])
 }
 
 model FileAttachment {

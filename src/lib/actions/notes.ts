@@ -100,14 +100,18 @@ export async function createNote(formData: {
     },
   })
 
-  revalidatePath(
-    `/${validatedData.entityType.toLowerCase()}s/${validatedData.entityId}`
-  )
+  // Only revalidate if this is an entity-attached note
+  if (validatedData.entityType && validatedData.entityId) {
+    revalidatePath(
+      `/${validatedData.entityType.toLowerCase()}s/${validatedData.entityId}`
+    )
+  }
 
   return {
     success: true,
     note: {
       id: note.id,
+      title: note.title,
       entityType: note.entityType,
       entityId: note.entityId,
       content: note.content,
@@ -184,14 +188,18 @@ export async function updateNote(formData: { id: string; content: string }) {
     },
   })
 
-  revalidatePath(
-    `/${existingNote.entityType.toLowerCase()}s/${existingNote.entityId}`
-  )
+  // Only revalidate if this is an entity-attached note
+  if (existingNote.entityType && existingNote.entityId) {
+    revalidatePath(
+      `/${existingNote.entityType.toLowerCase()}s/${existingNote.entityId}`
+    )
+  }
 
   return {
     success: true,
     note: {
       id: note.id,
+      title: note.title,
       entityType: note.entityType,
       entityId: note.entityId,
       content: note.content,
@@ -242,9 +250,12 @@ export async function deleteNote(formData: { id: string }) {
     },
   })
 
-  revalidatePath(
-    `/${existingNote.entityType.toLowerCase()}s/${existingNote.entityId}`
-  )
+  // Only revalidate if this is an entity-attached note
+  if (existingNote.entityType && existingNote.entityId) {
+    revalidatePath(
+      `/${existingNote.entityType.toLowerCase()}s/${existingNote.entityId}`
+    )
+  }
 
   return {
     success: true,
@@ -298,6 +309,7 @@ export async function getNotesForEntity(
 
   return notes.map(note => ({
     id: note.id,
+    title: note.title,
     entityType: note.entityType,
     entityId: note.entityId,
     content: note.content,
@@ -365,9 +377,12 @@ export async function addAttachmentsToNote(formData: {
     })),
   })
 
-  revalidatePath(
-    `/${existingNote.entityType.toLowerCase()}s/${existingNote.entityId}`
-  )
+  // Only revalidate if this is an entity-attached note
+  if (existingNote.entityType && existingNote.entityId) {
+    revalidatePath(
+      `/${existingNote.entityType.toLowerCase()}s/${existingNote.entityId}`
+    )
+  }
 
   return {
     success: true,
@@ -405,9 +420,410 @@ export async function deleteFileAttachment(formData: { id: string }) {
     },
   })
 
-  revalidatePath(
-    `/${existingAttachment.entityType.toLowerCase()}s/${existingAttachment.entityId}`
-  )
+  // Only revalidate if this is an entity-attached note
+  if (existingAttachment.entityType && existingAttachment.entityId) {
+    revalidatePath(
+      `/${existingAttachment.entityType.toLowerCase()}s/${existingAttachment.entityId}`
+    )
+  }
+
+  return {
+    success: true,
+  }
+}
+
+// Validation schemas for standalone notes
+const CreateStandaloneNoteSchema = z.object({
+  title: z.string().min(1).max(500),
+  content: z.string().min(1),
+})
+
+const UpdateStandaloneNoteSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1).max(500).optional(),
+  content: z.string().min(1),
+})
+
+/**
+ * Create a new standalone note
+ */
+export async function createStandaloneNote(formData: {
+  title: string
+  content: string
+  files?: File[]
+}) {
+  const user = await getCurrentUser()
+  if (!user.managerOSOrganizationId) {
+    throw new Error('User must belong to an organization to create notes')
+  }
+
+  const validatedData = CreateStandaloneNoteSchema.parse(formData)
+
+  // Create standalone note first (entityType and entityId are null)
+  const note = await prisma.note.create({
+    data: {
+      title: validatedData.title,
+      entityType: null,
+      entityId: null,
+      organizationId: user.managerOSOrganizationId,
+      content: validatedData.content,
+      createdById: user.managerOSUserId || '',
+    },
+    include: {
+      createdBy: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+  })
+
+  // Upload files if provided (now we have the note ID)
+  let fileUploadResults: FileUploadResult[] = []
+  if (formData.files && formData.files.length > 0) {
+    // For standalone notes, use the note ID as entityId
+    fileUploadResults = await uploadFilesToR2(formData.files, {
+      entityType: 'StandaloneNote',
+      entityId: note.id,
+      folder: 'notes',
+    })
+
+    // Create attachment records
+    await prisma.fileAttachment.createMany({
+      data: fileUploadResults.map(file => ({
+        noteId: note.id,
+        entityType: 'StandaloneNote',
+        entityId: note.id,
+        organizationId: user.managerOSOrganizationId!,
+        fileName: file.fileName,
+        originalName: file.originalName,
+        fileSize: file.fileSize,
+        mimeType: file.mimeType,
+        r2Key: file.r2Key,
+        r2Url: file.r2Url,
+        uploadedById: user.managerOSUserId || '',
+      })),
+    })
+  }
+
+  // Fetch note with attachments
+  const noteWithAttachments = await prisma.note.findUnique({
+    where: { id: note.id },
+    include: {
+      createdBy: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      attachments: {
+        include: {
+          uploadedBy: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      },
+    },
+  })
+
+  if (!noteWithAttachments) {
+    throw new Error('Failed to retrieve created note')
+  }
+
+  const finalNote = noteWithAttachments
+
+  revalidatePath('/notes')
+
+  return {
+    success: true,
+    note: {
+      id: finalNote.id,
+      title: finalNote.title,
+      entityType: finalNote.entityType,
+      entityId: finalNote.entityId,
+      content: finalNote.content,
+      createdAt: finalNote.createdAt.toISOString(),
+      updatedAt: finalNote.updatedAt.toISOString(),
+      createdBy: finalNote.createdBy,
+      attachments: finalNote.attachments.map(att => ({
+        id: att.id,
+        fileName: att.fileName,
+        originalName: att.originalName,
+        fileSize: att.fileSize,
+        mimeType: att.mimeType,
+        r2Url: att.r2Url,
+        createdAt: att.createdAt.toISOString(),
+        uploadedBy: att.uploadedBy,
+      })),
+    },
+  }
+}
+
+/**
+ * Get all standalone notes for the organization
+ */
+export async function getStandaloneNotes(): Promise<NoteWithAttachments[]> {
+  const user = await getCurrentUser()
+  if (!user.managerOSOrganizationId) {
+    throw new Error('User must belong to an organization to view notes')
+  }
+
+  const notes = await prisma.note.findMany({
+    where: {
+      organizationId: user.managerOSOrganizationId,
+      entityType: null, // Standalone notes have null entityType
+      entityId: null, // Standalone notes have null entityId
+    },
+    include: {
+      createdBy: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      attachments: {
+        include: {
+          uploadedBy: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      },
+    },
+    orderBy: {
+      updatedAt: 'desc', // Most recently updated first
+    },
+  })
+
+  return notes.map(note => ({
+    id: note.id,
+    title: note.title,
+    entityType: note.entityType,
+    entityId: note.entityId,
+    content: note.content,
+    createdAt: note.createdAt.toISOString(),
+    updatedAt: note.updatedAt.toISOString(),
+    createdBy: note.createdBy,
+    attachments: note.attachments.map(att => ({
+      id: att.id,
+      fileName: att.fileName,
+      originalName: att.originalName,
+      fileSize: att.fileSize,
+      mimeType: att.mimeType,
+      r2Url: att.r2Url,
+      createdAt: att.createdAt.toISOString(),
+      uploadedBy: att.uploadedBy,
+    })),
+  }))
+}
+
+/**
+ * Get a single standalone note by ID
+ */
+export async function getStandaloneNoteById(
+  id: string
+): Promise<NoteWithAttachments | null> {
+  const user = await getCurrentUser()
+  if (!user.managerOSOrganizationId) {
+    throw new Error('User must belong to an organization to view notes')
+  }
+
+  const note = await prisma.note.findFirst({
+    where: {
+      id,
+      organizationId: user.managerOSOrganizationId,
+      entityType: null, // Standalone notes have null entityType
+      entityId: null, // Standalone notes have null entityId
+    },
+    include: {
+      createdBy: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      attachments: {
+        include: {
+          uploadedBy: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      },
+    },
+  })
+
+  if (!note) {
+    return null
+  }
+
+  return {
+    id: note.id,
+    title: note.title,
+    entityType: note.entityType,
+    entityId: note.entityId,
+    content: note.content,
+    createdAt: note.createdAt.toISOString(),
+    updatedAt: note.updatedAt.toISOString(),
+    createdBy: note.createdBy,
+    attachments: note.attachments.map(att => ({
+      id: att.id,
+      fileName: att.fileName,
+      originalName: att.originalName,
+      fileSize: att.fileSize,
+      mimeType: att.mimeType,
+      r2Url: att.r2Url,
+      createdAt: att.createdAt.toISOString(),
+      uploadedBy: att.uploadedBy,
+    })),
+  }
+}
+
+/**
+ * Update a standalone note
+ */
+export async function updateStandaloneNote(formData: {
+  id: string
+  title?: string
+  content: string
+}) {
+  const user = await getCurrentUser()
+  if (!user.managerOSOrganizationId) {
+    throw new Error('User must belong to an organization to update notes')
+  }
+
+  const validatedData = UpdateStandaloneNoteSchema.parse(formData)
+
+  // Check if note exists and user has permission
+  const existingNote = await prisma.note.findFirst({
+    where: {
+      id: validatedData.id,
+      organizationId: user.managerOSOrganizationId,
+      entityType: null, // Standalone notes have null entityType
+      entityId: null, // Standalone notes have null entityId
+    },
+  })
+
+  if (!existingNote) {
+    throw new Error('Note not found or access denied')
+  }
+
+  // Update note
+  const note = await prisma.note.update({
+    where: {
+      id: validatedData.id,
+    },
+    data: {
+      title: validatedData.title ?? existingNote.title,
+      content: validatedData.content,
+      updatedAt: new Date(),
+    },
+    include: {
+      createdBy: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      attachments: {
+        include: {
+          uploadedBy: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      },
+    },
+  })
+
+  revalidatePath('/notes')
+  revalidatePath(`/notes/${note.id}`)
+
+  return {
+    success: true,
+    note: {
+      id: note.id,
+      title: note.title,
+      entityType: note.entityType,
+      entityId: note.entityId,
+      content: note.content,
+      createdAt: note.createdAt.toISOString(),
+      updatedAt: note.updatedAt.toISOString(),
+      createdBy: note.createdBy,
+      attachments: note.attachments.map(att => ({
+        id: att.id,
+        fileName: att.fileName,
+        originalName: att.originalName,
+        fileSize: att.fileSize,
+        mimeType: att.mimeType,
+        r2Url: att.r2Url,
+        createdAt: att.createdAt.toISOString(),
+        uploadedBy: att.uploadedBy,
+      })),
+    },
+  }
+}
+
+/**
+ * Delete a standalone note
+ */
+export async function deleteStandaloneNote(formData: { id: string }) {
+  const user = await getCurrentUser()
+  if (!user.managerOSOrganizationId) {
+    throw new Error('User must belong to an organization to delete notes')
+  }
+
+  const validatedData = DeleteNoteSchema.parse(formData)
+
+  // Check if note exists and user has permission
+  const existingNote = await prisma.note.findFirst({
+    where: {
+      id: validatedData.id,
+      organizationId: user.managerOSOrganizationId,
+      entityType: null, // Standalone notes have null entityType
+      entityId: null, // Standalone notes have null entityId
+    },
+  })
+
+  if (!existingNote) {
+    throw new Error('Note not found or access denied')
+  }
+
+  // Delete note (attachments will be cascade deleted)
+  await prisma.note.delete({
+    where: {
+      id: validatedData.id,
+    },
+  })
+
+  revalidatePath('/notes')
 
   return {
     success: true,
