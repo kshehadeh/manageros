@@ -1,5 +1,16 @@
 # Changelog
 
+# [1.29.0](/compare/v1.27.0...v1.29.0) (2025-12-06)
+
+### Bug Fixes
+
+- Validate manager existence during CSV import f7306b6
+
+### Features
+
+- Add birthday column and partial updates to people import 91ed363
+- Implement CSV export functionality for people with optional filters afebefc
+
 # [1.28.0](/compare/v1.27.0...v1.28.0) (2025-12-05)
 
 ### Features
