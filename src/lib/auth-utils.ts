@@ -630,6 +630,7 @@ export async function getFilteredNavigation(user: UserBrief | null) {
       adminOnly: false,
     },
     { name: 'Meetings', href: '/meetings', icon: 'Calendar', adminOnly: false },
+    { name: 'Notes', href: '/notes', icon: 'FileText', adminOnly: false },
     { name: 'People', href: '/people', icon: 'User', adminOnly: false },
     { name: 'Teams', href: '/teams', icon: 'Users2', adminOnly: false },
     {
