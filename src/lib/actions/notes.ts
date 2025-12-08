@@ -1,7 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/db'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 import { uploadFilesToR2, FileUploadResult } from '@/lib/r2-upload'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -231,7 +231,18 @@ export async function deleteNote(formData: { id: string }) {
 
   const validatedData = DeleteNoteSchema.parse(formData)
 
-  // Check if note exists and user has permission
+  // Check permission using the centralized permission system
+  const hasPermission = await getActionPermission(
+    user,
+    'note.delete',
+    validatedData.id
+  )
+
+  if (!hasPermission) {
+    throw new Error('Note not found or you do not have permission to delete it')
+  }
+
+  // Verify note exists
   const existingNote = await prisma.note.findFirst({
     where: {
       id: validatedData.id,
@@ -918,7 +929,18 @@ export async function deleteStandaloneNote(formData: { id: string }) {
 
   const validatedData = DeleteNoteSchema.parse(formData)
 
-  // Check if note exists and user has permission
+  // Check permission using the centralized permission system
+  const hasPermission = await getActionPermission(
+    user,
+    'note.delete',
+    validatedData.id
+  )
+
+  if (!hasPermission) {
+    throw new Error('Note not found or you do not have permission to delete it')
+  }
+
+  // Verify note exists and is a standalone note
   const existingNote = await prisma.note.findFirst({
     where: {
       id: validatedData.id,
