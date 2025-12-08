@@ -24,27 +24,25 @@ export async function NotesSectionServer({
     case 'meeting':
       entityTypePermission = 'meeting.edit'
       break
+    case 'Initiative':
+      entityTypePermission = 'initiative.edit'
+      break
     default:
       entityTypePermission = null
       break
   }
-  if (!entityTypePermission) {
-    return null
+
+  // For Initiative, we still want to show the section even if permission check fails
+  // (users can view notes even if they can't edit)
+  let canEdit = false
+  if (entityTypePermission) {
+    canEdit = await getActionPermission(user, entityTypePermission, entityId)
   }
-  const canEdit = await getActionPermission(
-    user,
-    entityTypePermission,
-    entityId
-  )
 
   // Fetch notes for this entity
   const notes = await getNotesForEntity(entityType, entityId)
 
-  // Only show if there are notes
-  if (notes.length === 0) {
-    return null
-  }
-
+  // Always show the section (even if empty) so users can add notes
   return (
     <NotesSection
       entityType={entityType}

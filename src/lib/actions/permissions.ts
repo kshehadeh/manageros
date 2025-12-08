@@ -56,6 +56,11 @@ const ALL_PERMISSIONS = [
   'person.delete',
   'person.view',
   'person.overview.view',
+  // Note permissions
+  'note.create',
+  'note.edit',
+  'note.delete',
+  'note.view',
 ] as const
 
 /**
@@ -78,6 +83,8 @@ const PERMISSIONS_REQUIRING_ID = [
   'feedback-campaign.edit',
   'feedback-campaign.delete',
   'feedback-campaign.view',
+  'note.edit',
+  'note.delete',
 ] as const
 
 export interface PermissionStatus {

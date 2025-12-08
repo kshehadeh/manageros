@@ -88,7 +88,8 @@ model User {
   notificationResponses   NotificationResponse[]
   ownedReports            Report[]                 @relation("ReportOwner")
   reportRuns              ReportInstance[]
-  notes                   Note[]
+  notes                   Note[]                  @relation("NoteCreator")
+  sharedNotes             NoteShare[]              @relation("SharedNotes")
   fileAttachments         FileAttachment[]
   integrations            Integration[]            @relation("UserIntegrations")
   createdAt               DateTime                 @default(now())
@@ -787,22 +788,40 @@ model ReportInstance {
 }
 
 model Note {
-  id             String           @id @default(cuid())
-  entityType     String // The type of entity (e.g., "Initiative", "Task", "Meeting", "Person")
-  entityId       String // The ID of the entity
-  organizationId String
-  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  content        String
-  createdById    String
-  createdBy      User             @relation(fields: [createdById], references: [id], onDelete: Cascade)
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  attachments    FileAttachment[]
+  id                 String           @id @default(cuid())
+  title              String? // Title for standalone notes (optional)
+  entityType         String? // The type of entity (e.g., "Initiative", "Task", "Meeting", "Person") - optional for standalone notes
+  entityId           String? // The ID of the entity - optional for standalone notes
+  organizationId     String
+  organization       Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  content            String
+  createdById        String
+  createdBy          User             @relation("NoteCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  sharedWithEveryone Boolean          @default(false) // If true, note is shared with all organization members
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  attachments        FileAttachment[]
+  sharedWith         NoteShare[]
 
   @@index([entityType, entityId])
   @@index([organizationId])
   @@index([createdById])
   @@index([createdAt])
+  @@index([title])
+  @@index([sharedWithEveryone])
+}
+
+model NoteShare {
+  id        String   @id @default(cuid())
+  noteId   String
+  note     Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User     @relation("SharedNotes", fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([noteId, userId])
+  @@index([noteId])
+  @@index([userId])
 }
 
 model FileAttachment {
