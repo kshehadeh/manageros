@@ -22,7 +22,7 @@ import {
   MeetingInstance,
   Person,
   MeetingInstanceParticipant,
-} from '@prisma/client'
+} from '@/generated/prisma'
 
 type MeetingInstanceWithRelations = MeetingInstance & {
   participants: (MeetingInstanceParticipant & {

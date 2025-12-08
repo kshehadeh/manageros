@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Link } from '@/components/ui/link'
 import { TeamCard } from '@/components/teams/team-card'
-import { Team, Person, Initiative } from '@prisma/client'
+import { Team, Person, Initiative } from '@/generated/prisma'
 
 type TeamWithChildren = Team & {
   parent?: { id: string; name: string } | null

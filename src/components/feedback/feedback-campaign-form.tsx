@@ -18,7 +18,7 @@ import {
 } from '@/lib/actions/feedback-campaign'
 import { getFeedbackTemplates } from '@/lib/actions/feedback-template'
 import { type FeedbackCampaignFormData } from '@/lib/validations'
-import { type Person } from '@prisma/client'
+import { type Person } from '@/generated/prisma'
 import { X, Plus, Calendar, Mail, FileText } from 'lucide-react'
 import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
 import { FormTemplate, type FormSection } from '@/components/ui/form-template'

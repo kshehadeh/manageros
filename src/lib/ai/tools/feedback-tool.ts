@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { Prisma } from '@prisma/client'
+import { Prisma } from '@/generated/prisma'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
 

@@ -1,4 +1,4 @@
-import { Prisma, Person } from '@prisma/client'
+import { Prisma, Person } from '@/generated/prisma'
 
 // Re-export Person type for convenience
 export type { Person }

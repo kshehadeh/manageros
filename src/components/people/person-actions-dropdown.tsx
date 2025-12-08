@@ -8,7 +8,7 @@ import {
   type Team,
   type PersonJiraAccount,
   type PersonGithubAccount,
-} from '@prisma/client'
+} from '@/generated/prisma'
 import {
   Plus,
   Rocket,

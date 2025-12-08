@@ -8,7 +8,7 @@ import {
   User,
   MeetingParticipant,
   MeetingInstance,
-} from '@prisma/client'
+} from '@/generated/prisma'
 import { Calendar, Clock, MapPin, Users, Repeat } from 'lucide-react'
 
 type MeetingWithRelations = Meeting & {

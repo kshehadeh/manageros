@@ -9,7 +9,7 @@ import {
 } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
 import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
-import { Prisma } from '@prisma/client'
+import { Prisma } from '@/generated/prisma'
 import { getTasksForAssignee } from '@/lib/data/tasks'
 import { getLinkedAccountAvatars } from '@/lib/actions/avatar'
 import {

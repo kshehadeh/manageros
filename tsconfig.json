@@ -16,7 +16,8 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@/generated/prisma": ["src/generated/prisma/client"]
     },
     "types": ["node"],
     "typeRoots": ["./types", "./node_modules/@types"],

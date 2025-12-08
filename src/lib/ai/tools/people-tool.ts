@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
-import type { Prisma, EmployeeType } from '@prisma/client'
+import type { Prisma, EmployeeType } from '@/generated/prisma'
 
 export const peopleTool = {
   description: 'Get information about people in the organization',

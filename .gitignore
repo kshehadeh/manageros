@@ -14,6 +14,7 @@
 prisma/*.db
 prisma/dev.db
 prisma/dev.sqlite
+src/generated/prisma/
 
 .DS_Store
 

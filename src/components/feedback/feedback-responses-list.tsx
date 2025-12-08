@@ -5,7 +5,9 @@ import { Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { FeedbackResponseDetail } from './feedback-response-detail'
 import { Users } from 'lucide-react'
-import { JsonValue } from '@prisma/client/runtime/library'
+import type { Prisma } from '@/generated/prisma'
+
+type JsonValue = Prisma.JsonValue
 
 interface FeedbackQuestion {
   id: string

@@ -1,4 +1,4 @@
-import { Initiative } from '@prisma/client'
+import { Initiative } from '@/generated/prisma'
 
 /**
  * Type for initiative with all the relations needed by components

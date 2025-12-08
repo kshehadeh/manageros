@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { InitiativeSelect } from '@/components/ui/initiative-select'
-import { Meeting, Team, Person, User as PrismaUser } from '@prisma/client'
+import { Meeting, Team, Person, User as PrismaUser } from '@/generated/prisma'
 
 type MeetingWithRelations = Meeting & {
   team: Team | null

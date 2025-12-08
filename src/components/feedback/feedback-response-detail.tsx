@@ -2,7 +2,9 @@
 
 import { Badge } from '@/components/ui/badge'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
-import { JsonValue } from '@prisma/client/runtime/library'
+import type { Prisma } from '@/generated/prisma'
+
+type JsonValue = Prisma.JsonValue
 import { formatDistanceToNow } from 'date-fns'
 
 interface FeedbackQuestion {

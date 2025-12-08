@@ -3,7 +3,9 @@
 import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
-import { InputJsonValue } from '@prisma/client/runtime/library'
+import type { Prisma } from '@/generated/prisma'
+
+type InputJsonValue = Prisma.InputJsonValue
 import {
   acknowledgeException,
   ignoreException,

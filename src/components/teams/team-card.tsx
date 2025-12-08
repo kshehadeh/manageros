@@ -2,7 +2,7 @@
 
 import { Link } from '@/components/ui/link'
 import { Users, Target, ChevronDown, ChevronRight } from 'lucide-react'
-import { Team, Person, Initiative } from '@prisma/client'
+import { Team, Person, Initiative } from '@/generated/prisma'
 import { TeamActionsDropdown } from '@/components/teams/team-actions-dropdown'
 import { TeamAvatar } from '@/components/teams/team-avatar'
 import {

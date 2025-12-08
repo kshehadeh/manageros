@@ -5,7 +5,7 @@ import {
   MeetingInstance,
   Person,
   MeetingInstanceParticipant,
-} from '@prisma/client'
+} from '@/generated/prisma'
 import { Calendar, Users } from 'lucide-react'
 
 type MeetingInstanceWithRelations = MeetingInstance & {

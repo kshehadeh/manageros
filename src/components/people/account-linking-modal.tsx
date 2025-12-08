@@ -11,7 +11,7 @@ import { JiraAccountLinker } from '@/components/jira-account-linker'
 import { GithubAccountLinker } from '@/components/github-account-linker'
 import { FaJira, FaGithub } from 'react-icons/fa'
 import { User as UserIcon } from 'lucide-react'
-import type { PersonJiraAccount, PersonGithubAccount } from '@prisma/client'
+import type { PersonJiraAccount, PersonGithubAccount } from '@/generated/prisma'
 
 interface LinkedUser {
   id: string

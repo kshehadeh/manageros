@@ -5,7 +5,9 @@
 
 import { CronJob, CronJobResult, CronJobExecutionContext } from '../types'
 import { evaluateAllRules } from '@/lib/tolerance-rules/evaluator'
-import { InputJsonValue } from '@prisma/client/runtime/library'
+import type { Prisma } from '@/generated/prisma'
+
+type InputJsonValue = Prisma.InputJsonValue
 
 export class ToleranceRulesEvaluationJob extends CronJob {
   readonly id = 'tolerance-rules-evaluation'

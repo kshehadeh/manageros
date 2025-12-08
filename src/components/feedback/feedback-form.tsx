@@ -14,7 +14,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { createFeedback, updateFeedback } from '@/lib/actions/feedback'
 import { type FeedbackFormData } from '@/lib/validations'
-import { type Person } from '@prisma/client'
+import { type Person } from '@/generated/prisma'
 import { MarkdownEditor } from '@/components/markdown-editor'
 import { MessageSquare, Edit } from 'lucide-react'
 import {

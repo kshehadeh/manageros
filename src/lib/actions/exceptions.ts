@@ -11,7 +11,9 @@ import type {
   ExceptionFilters,
   ExceptionEntityType,
 } from '@/types/exception'
-import { InputJsonValue } from '@prisma/client/runtime/library'
+import type { Prisma } from '@/generated/prisma'
+
+type InputJsonValue = Prisma.InputJsonValue
 
 // Validation schemas
 const createExceptionSchema = z.object({

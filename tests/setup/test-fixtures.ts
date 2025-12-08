@@ -20,7 +20,7 @@ import {
   type TestData,
 } from './db-helpers'
 import { getClerkHelper } from './clerk-helpers'
-import type { Organization, User, Person } from '@prisma/client'
+import type { Organization, User, Person } from '@/generated/prisma'
 
 // Export types for use in test files
 export type { TestData, Organization, User, Person }
@@ -195,8 +195,18 @@ export const test = base.extend<TestFixtures>({
 
     // Link the Clerk user to the database user if not already linked
     // Use direct Prisma import to avoid Next.js server-side dependencies
-    const { PrismaClient } = await import('@prisma/client')
-    const prisma = new PrismaClient()
+    const { PrismaClient } = await import('@/generated/prisma')
+    const { PrismaPg } = await import('@prisma/adapter-pg')
+    const { Pool } = await import('pg')
+
+    const connectionString = process.env.DATABASE_URL
+    if (!connectionString) {
+      throw new Error('DATABASE_URL environment variable is not set')
+    }
+
+    const pool = new Pool({ connectionString })
+    const adapter = new PrismaPg(pool)
+    const prisma = new PrismaClient({ adapter })
 
     try {
       const existingUser = await prisma.user.findUnique({
