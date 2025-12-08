@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
-import { prisma } from './db'
+import { prisma, withConnectionPoolRetry } from './db'
 import {
   OrganizationBrief,
   UserBriefSchema,
@@ -456,29 +456,33 @@ export async function getCurrentUserWithPersonAndOrganization(options?: {
   // Get current user - use session claims by default to avoid unnecessary Clerk API calls
   // Only revalidate when explicitly needed (e.g., after org switch)
   const user = await getCurrentUser()
-  const person = await prisma.person.findUnique({
-    where: { id: user.managerOSPersonId || '' },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      avatar: true,
-    },
-  })
+  const person = await withConnectionPoolRetry(() =>
+    prisma.person.findUnique({
+      where: { id: user.managerOSPersonId || '' },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        avatar: true,
+      },
+    })
+  )
 
   let organizationBrief: OrganizationBrief | null = null
 
   // Only fetch organization details from Clerk if explicitly requested
   // This avoids unnecessary API calls when name/slug aren't needed
   if (user.managerOSOrganizationId && options?.includeOrganizationDetails) {
-    const organization = await prisma.organization.findUnique({
-      where: { id: user.managerOSOrganizationId || '' },
-      select: {
-        id: true,
-        clerkOrganizationId: true,
-      },
-    })
+    const organization = await withConnectionPoolRetry(() =>
+      prisma.organization.findUnique({
+        where: { id: user.managerOSOrganizationId || '' },
+        select: {
+          id: true,
+          clerkOrganizationId: true,
+        },
+      })
+    )
 
     if (organization) {
       const clerkOrganization = await getClerkOrganization(
@@ -495,13 +499,15 @@ export async function getCurrentUserWithPersonAndOrganization(options?: {
     }
   } else if (user.managerOSOrganizationId) {
     // Return basic org info without Clerk API call
-    const organization = await prisma.organization.findUnique({
-      where: { id: user.managerOSOrganizationId || '' },
-      select: {
-        id: true,
-        clerkOrganizationId: true,
-      },
-    })
+    const organization = await withConnectionPoolRetry(() =>
+      prisma.organization.findUnique({
+        where: { id: user.managerOSOrganizationId || '' },
+        select: {
+          id: true,
+          clerkOrganizationId: true,
+        },
+      })
+    )
 
     if (organization) {
       organizationBrief = {
@@ -630,6 +636,7 @@ export async function getFilteredNavigation(user: UserBrief | null) {
       adminOnly: false,
     },
     { name: 'Meetings', href: '/meetings', icon: 'Calendar', adminOnly: false },
+    { name: 'Notes', href: '/notes', icon: 'FileText', adminOnly: false },
     { name: 'People', href: '/people', icon: 'User', adminOnly: false },
     { name: 'Teams', href: '/teams', icon: 'Users2', adminOnly: false },
     {
@@ -795,6 +802,10 @@ const _PERMISSION_KEYS = [
   'job-role.delete',
   'job-role.view',
   'organization.invitation.view',
+  'note.create',
+  'note.edit',
+  'note.delete',
+  'note.view',
 ] as const
 
 /**
@@ -1614,6 +1625,70 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
   // Organization invitation permissions
   'organization.invitation.view': user => {
     return isAdminOrOwner(user) && !!user.managerOSOrganizationId
+  },
+  // Note permissions
+  'note.create': user => {
+    return !!user.managerOSOrganizationId
+  },
+  'note.edit': async (user, id) => {
+    if (!user.managerOSOrganizationId || !id) return false
+    if (isAdminOrOwner(user)) return true
+
+    // Check if user created the note
+    const note = await prisma.note.findFirst({
+      where: {
+        id,
+        organizationId: user.managerOSOrganizationId,
+        createdById: user.managerOSUserId || '',
+      },
+    })
+
+    return !!note
+  },
+  'note.delete': async (user, id) => {
+    if (!user.managerOSOrganizationId || !id) return false
+    if (isAdminOrOwner(user)) return true
+
+    // Check if user created the note
+    const note = await prisma.note.findFirst({
+      where: {
+        id,
+        organizationId: user.managerOSOrganizationId,
+        createdById: user.managerOSUserId || '',
+      },
+    })
+
+    return !!note
+  },
+  'note.view': async (user, id) => {
+    if (!user.managerOSOrganizationId) {
+      return false
+    }
+
+    if (!id) {
+      return !!user.managerOSOrganizationId
+    }
+
+    // Check if user can view the note (creator, shared with everyone, or shared with user)
+    const note = await prisma.note.findFirst({
+      where: {
+        id,
+        organizationId: user.managerOSOrganizationId,
+        OR: [
+          { createdById: user.managerOSUserId || '' },
+          { sharedWithEveryone: true },
+          {
+            sharedWith: {
+              some: {
+                userId: user.managerOSUserId || '',
+              },
+            },
+          },
+        ],
+      },
+    })
+
+    return !!note
   },
 }
 

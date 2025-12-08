@@ -27,6 +27,7 @@ import {
   Keyboard,
   Bug,
   BookOpen,
+  FileText,
 } from 'lucide-react'
 import { useState } from 'react'
 import { BugSubmissionModal } from '@/components/bug-submission-modal'
@@ -74,6 +75,7 @@ const iconMap = {
   Calendar,
   Building,
   CheckSquare,
+  FileText,
 }
 
 export default function Sidebar({
