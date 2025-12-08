@@ -1,5 +1,15 @@
 # Changelog
 
+# [1.30.0](/compare/v1.29.0...v1.30.0) (2025-12-08)
+
+### Bug Fixes
+
+- Implement centralized permission checks for note deletion 7fe2ce5
+
+### Features
+
+- Enhance note functionality with standalone notes and sharing capabilities 085ef0c
+
 # [1.29.0](/compare/v1.27.0...v1.29.0) (2025-12-06)
 
 ### Bug Fixes
