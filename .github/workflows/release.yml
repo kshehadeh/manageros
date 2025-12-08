@@ -8,6 +8,7 @@ on:
 jobs:
     release:
         runs-on: ubuntu-latest
+        environment: Production
         permissions:
             contents: write
             issues: write
@@ -28,6 +29,9 @@ jobs:
 
             - name: Install dependencies
               run: bun install
+              env:
+                  DIRECT_URL: ${{ vars.DIRECT_URL }}
+                  DATABASE_URL: ${{ vars.DATABASE_URL }}
 
             - name: Import GPG key
               uses: crazy-max/ghaction-import-gpg@v6
