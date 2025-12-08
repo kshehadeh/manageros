@@ -8,8 +8,8 @@ import { PageMain } from '@/components/ui/page-main'
 import { CalendarDays, Users, Briefcase, ArrowUpRight } from 'lucide-react'
 import { PersonViewDropdown } from './person-view-dropdown'
 import { Suspense } from 'react'
-import type { User, Person as PrismaPerson, Team } from '@prisma/client'
-import type { Prisma } from '@prisma/client'
+import type { User, Person as PrismaPerson, Team } from '@/generated/prisma'
+import type { Prisma } from '@/generated/prisma'
 
 // Use Prisma's generated type based on the includes used in getPersonById
 export type PersonWithDetailRelations = Prisma.PersonGetPayload<{

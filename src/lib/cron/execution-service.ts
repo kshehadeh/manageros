@@ -3,7 +3,9 @@
  */
 
 import { prisma } from '@/lib/db'
-import { InputJsonValue } from '@prisma/client/runtime/library'
+import type { Prisma } from '@/generated/prisma'
+
+type InputJsonValue = Prisma.InputJsonValue
 
 export interface CronJobExecutionData {
   jobId: string

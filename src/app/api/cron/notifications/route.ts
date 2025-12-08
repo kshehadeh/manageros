@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cronJobRegistry } from '@/lib/cron/registry'
 import { CronJobExecutionService } from '@/lib/cron/execution-service'
 import { prisma } from '@/lib/db'
-import { InputJsonValue } from '@prisma/client/runtime/library'
+import type { Prisma } from '@/generated/prisma'
+
+type InputJsonValue = Prisma.InputJsonValue
 
 /**
  * Vercel Cron Job API Route for Notification Runner

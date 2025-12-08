@@ -15,6 +15,7 @@ export default [
       '*.config.js',
       '*.config.ts',
       'prisma/**',
+      'src/generated/**',
       'test-*.js',
       'debug-*.js',
       'check-*.js',

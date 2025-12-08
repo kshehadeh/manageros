@@ -9,7 +9,9 @@ import { cronJobRegistry } from '../src/lib/cron/registry'
 import { CronJobExecutionService } from '../src/lib/cron/execution-service'
 import { prisma } from '../src/lib/db'
 import { CronJobResult } from '../src/lib/cron/types'
-import { InputJsonValue } from '@prisma/client/runtime/library'
+import type { Prisma } from '@/generated/prisma'
+
+type InputJsonValue = Prisma.InputJsonValue
 
 interface RunOptions {
   /** Specific job ID to run (if not provided, runs all jobs) */

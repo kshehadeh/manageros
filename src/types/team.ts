@@ -1,5 +1,5 @@
-import { Team, Person, Initiative } from '@prisma/client'
-import type { Prisma } from '@prisma/client'
+import { Team, Person, Initiative } from '@/generated/prisma'
+import type { Prisma } from '@/generated/prisma'
 
 /**
  * Recursive type for hierarchical team structure

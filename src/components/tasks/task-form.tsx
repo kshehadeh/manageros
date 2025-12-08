@@ -14,7 +14,7 @@ import { MarkdownEditor } from '@/components/markdown-editor'
 import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
 import { createTask, updateTask } from '@/lib/actions/task'
 import { type TaskFormData, taskSchema } from '@/lib/validations'
-import { Person, Objective } from '@prisma/client'
+import { Person, Objective } from '@/generated/prisma'
 import {
   type TaskStatus,
   taskStatusUtils,

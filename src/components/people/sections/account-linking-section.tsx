@@ -5,7 +5,7 @@ import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { Link as LinkIcon, User as UserIcon } from 'lucide-react'
 import { FaJira, FaGithub } from 'react-icons/fa'
-import type { PersonJiraAccount, PersonGithubAccount } from '@prisma/client'
+import type { PersonJiraAccount, PersonGithubAccount } from '@/generated/prisma'
 
 interface LinkedUser {
   id: string

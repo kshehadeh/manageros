@@ -11,7 +11,9 @@ import { Separator } from '@/components/ui/separator'
 import { RatingSelector } from '@/components/ui/rating-selector'
 import { submitFeedbackResponseByInviteLink } from '@/lib/actions/feedback-campaign'
 import { CheckCircle, AlertCircle, XCircle } from 'lucide-react'
-import { JsonValue } from '@prisma/client/runtime/library'
+import type { Prisma } from '@/generated/prisma'
+
+type JsonValue = Prisma.JsonValue
 import { Geist_Mono as GeistMono } from 'next/font/google'
 import { useEffect } from 'react'
 import { cn } from '@/lib/utils'

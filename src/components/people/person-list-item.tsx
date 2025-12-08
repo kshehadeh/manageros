@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { PersonDetailModal } from './person-detail-modal'
-import { Team } from '@prisma/client'
+import { Team } from '@/generated/prisma'
 
 interface PersonListItemProps {
   person: {

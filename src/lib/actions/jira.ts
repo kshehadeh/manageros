@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { encrypt } from '@/lib/encryption'
 import { JiraApiService } from '@/lib/jira-api'
-import type { Prisma } from '@prisma/client'
+import type { Prisma } from '@/generated/prisma'
 
 export async function saveJiraCredentials(formData: {
   jiraUsername: string

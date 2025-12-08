@@ -10,7 +10,9 @@ import {
 } from '../types'
 import { prisma } from '@/lib/db'
 import { createSystemNotification } from '../../actions/notification'
-import { InputJsonValue } from '@prisma/client/runtime/library'
+import type { Prisma } from '@/generated/prisma'
+
+type InputJsonValue = Prisma.InputJsonValue
 
 export class BirthdayNotificationJob extends CronJob {
   readonly id = 'birthday-notification'

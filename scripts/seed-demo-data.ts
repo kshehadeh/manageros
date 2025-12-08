@@ -1,7 +1,9 @@
 #!/usr/bin/env bun
 /* eslint-disable camelcase */
 
-import { PrismaClient, EmployeeType, Person } from '@prisma/client'
+import { PrismaClient, EmployeeType, Person } from '@/generated/prisma'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { Pool } from 'pg'
 import {
   createClerkOrganization,
   deleteClerkOrganization,
@@ -10,7 +12,16 @@ import {
 } from '../src/lib/clerk'
 import { getClerkHelper } from '../tests/setup/clerk-helpers'
 
-const prisma = new PrismaClient()
+// Create Prisma Client with adapter for Prisma 7
+const connectionString = process.env.DATABASE_URL
+
+if (!connectionString) {
+  throw new Error('DATABASE_URL environment variable is not set')
+}
+
+const pool = new Pool({ connectionString })
+const adapter = new PrismaPg(pool)
+const prisma = new PrismaClient({ adapter })
 
 // Helper functions for generating relative dates
 const getRelativeDate = (daysOffset: number): Date => {

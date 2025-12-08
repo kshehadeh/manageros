@@ -6,7 +6,7 @@
 'use server'
 
 import { prisma } from '@/lib/db'
-import type { Prisma } from '@prisma/client'
+import type { Prisma } from '@/generated/prisma'
 import { revalidatePath } from 'next/cache'
 import { getCurrentUser, requireAdmin } from '@/lib/auth-utils'
 import { encrypt } from '@/lib/encryption'

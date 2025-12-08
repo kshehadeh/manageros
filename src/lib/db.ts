@@ -1,4 +1,6 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@/generated/prisma'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { Pool } from 'pg'
 
 /**
  * Database Connection Pool Configuration
@@ -95,8 +97,18 @@ export async function withConnectionPoolRetry<T>(
 
 const createPrismaClient = () => {
   const logQueries = process.env.PRISMA_LOG === 'true'
+  const connectionString = process.env.DATABASE_URL
+
+  if (!connectionString) {
+    throw new Error('DATABASE_URL environment variable is not set')
+  }
+
+  // Create a pg Pool instance
+  const pool = new Pool({ connectionString })
+  const adapter = new PrismaPg(pool)
 
   const client = new PrismaClient({
+    adapter,
     log: logQueries
       ? [
           {

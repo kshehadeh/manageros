@@ -1,7 +1,7 @@
 'use server'
 
 import type { z } from 'zod'
-import type { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@/generated/prisma'
 
 export type ReportRendererId = 'markdown' | 'web'
 

@@ -19,7 +19,7 @@ import {
   importMeetingFromICS,
 } from '@/lib/actions/meeting'
 import { type MeetingFormData, meetingSchema } from '@/lib/validations'
-import { Team } from '@prisma/client'
+import { Team } from '@/generated/prisma'
 import {
   Plus,
   X,

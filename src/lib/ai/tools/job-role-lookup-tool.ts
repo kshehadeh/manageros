@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
-import type { Prisma } from '@prisma/client'
+import type { Prisma } from '@/generated/prisma'
 
 // Generate query variations for fuzzy matching (handles abbreviations)
 function generateQueryVariations(query: string): string[] {

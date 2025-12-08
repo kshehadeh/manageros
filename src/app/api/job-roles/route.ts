@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getCurrentUser } from '@/lib/auth-utils'
-import { Prisma } from '@prisma/client'
+import { Prisma } from '@/generated/prisma'
 
 export async function GET(request: NextRequest) {
   const user = await getCurrentUser()

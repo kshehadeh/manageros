@@ -2,7 +2,9 @@
  * Types for the extensible cron job system
  */
 
-import { InputJsonValue } from '@prisma/client/runtime/library'
+import type { Prisma } from '@/generated/prisma'
+
+type InputJsonValue = Prisma.InputJsonValue
 
 export interface CronJobConfig {
   /** Unique identifier for the job */

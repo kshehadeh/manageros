@@ -7,7 +7,7 @@ import {
   Initiative,
   Person,
   User as PrismaUser,
-} from '@prisma/client'
+} from '@/generated/prisma'
 import { SectionHeader } from '@/components/ui/section-header'
 import { Calendar } from 'lucide-react'
 import { CreateMeetingModal } from '@/components/initiatives/create-meeting-modal'

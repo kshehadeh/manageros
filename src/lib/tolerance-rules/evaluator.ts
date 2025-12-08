@@ -8,7 +8,9 @@ import {
   linkExceptionToNotification,
 } from '@/lib/actions/exceptions'
 import { createSystemNotification } from '@/lib/actions/notification'
-import { InputJsonValue } from '@prisma/client/runtime/library'
+import type { Prisma } from '@/generated/prisma'
+
+type InputJsonValue = Prisma.InputJsonValue
 import type {
   ToleranceRule,
   ToleranceRuleType,

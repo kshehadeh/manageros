@@ -13,7 +13,7 @@ import { useDataTableContextMenu } from '@/components/common/data-table-context-
 import { DeleteMenuItem } from '@/components/common/context-menu-items'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { MoreHorizontal, Calendar, Plus, Edit } from 'lucide-react'
-import { MeetingInstance, Person } from '@prisma/client'
+import { MeetingInstance, Person } from '@/generated/prisma'
 
 type MeetingInstanceWithRelations = MeetingInstance & {
   participants: {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
-import { Prisma } from '@prisma/client'
+import { Prisma } from '@/generated/prisma'
 
 // Type definitions for meeting and instance with includes
 type MeetingWithRelations = Prisma.MeetingGetPayload<{

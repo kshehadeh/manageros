@@ -13,7 +13,9 @@
  */
 
 import { select, confirm } from '@inquirer/prompts'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@/generated/prisma'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { Pool } from 'pg'
 
 // ============================================================================
 // Prisma Client Setup
@@ -24,7 +26,18 @@ const globalForPrisma = global as unknown as {
 }
 
 const createPrismaClient = () => {
+  const connectionString = process.env.DATABASE_URL
+
+  if (!connectionString) {
+    throw new Error('DATABASE_URL environment variable is not set')
+  }
+
+  // Create a pg Pool instance
+  const pool = new Pool({ connectionString })
+  const adapter = new PrismaPg(pool)
+
   return new PrismaClient({
+    adapter,
     log: ['error', 'warn'],
   })
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
-import { Prisma } from '@prisma/client'
+import { Prisma } from '@/generated/prisma'
 import { getTaskAccessWhereClause } from '@/lib/task-access-utils'
 
 // Helper function to parse comma-separated values
@@ -94,7 +94,7 @@ function createPrioritySqlCondition(priorityValues: string[]) {
   if (priorities.length === 1) {
     return Prisma.sql`AND t.priority = ${priorities[0]}`
   }
-  return Prisma.sql`AND t.priority IN (${Prisma.join(priorities.map(p => Prisma.sql`${p}`))})`
+  return Prisma.sql`AND t.priority IN (${Prisma.join(priorities)})`
 }
 
 // Helper function to parse sort parameter and build ORDER BY clause

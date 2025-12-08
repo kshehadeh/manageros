@@ -25,7 +25,7 @@ import { Badge } from '@/components/ui/badge'
 import { deleteMeeting } from '@/lib/actions/meeting'
 import { toast } from 'sonner'
 import { DeleteModal } from '@/components/common/delete-modal'
-import { Meeting, Team, Person, User as PrismaUser } from '@prisma/client'
+import { Meeting, Team, Person, User as PrismaUser } from '@/generated/prisma'
 import { useDataTableContextMenu } from '@/components/common/data-table-context-menu'
 import {
   ViewDetailsMenuItem,

@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { FeedbackForm } from '@/components/feedback/feedback-form'
 import { Edit, Eye, Calendar, User, Lock } from 'lucide-react'
-import { type Person } from '@prisma/client'
+import { type Person } from '@/generated/prisma'
 import { getKindLabel, getKindVariant } from '@/lib/utils/feedback'
 
 type FeedbackWithRelations = {

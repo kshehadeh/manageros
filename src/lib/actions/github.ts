@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { encrypt } from '@/lib/encryption'
 import { GithubApiService } from '@/lib/github-api'
-import type { Prisma } from '@prisma/client'
+import type { Prisma } from '@/generated/prisma'
 
 export async function saveGithubCredentials(formData: {
   githubUsername: string

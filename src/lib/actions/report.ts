@@ -5,7 +5,9 @@ import { getCurrentUser } from '@/lib/auth-utils'
 import { getReport, listReports } from '@/lib/reports/registry'
 import type { ReportRendererId } from '@/lib/reports/types'
 import '@/lib/reports/register-all'
-import { InputJsonValue } from '@prisma/client/runtime/library'
+import type { Prisma } from '@/generated/prisma'
+
+type InputJsonValue = Prisma.InputJsonValue
 
 export async function listAvailableReports() {
   const user = await getCurrentUser()
