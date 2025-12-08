@@ -9,7 +9,9 @@ jobs:
         environment: staging
         permissions:
             contents: read
-
+        env:
+            DIRECT_URL: ${{ vars.DIRECT_URL }}
+            DATABASE_URL: ${{ vars.DATABASE_URL }}
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -24,6 +26,3 @@ jobs:
 
             - name: Deploy migrations
               run: bun run db:migrate:deploy --verbose
-              env:
-                  DIRECT_URL: ${{ vars.DIRECT_URL }}
-                  DATABASE_URL: ${{ vars.DATABASE_URL }}
