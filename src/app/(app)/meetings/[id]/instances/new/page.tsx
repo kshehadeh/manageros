@@ -3,7 +3,7 @@ import { getMeeting } from '@/lib/actions/meeting'
 import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import { MeetingInstanceForm } from '@/components/meetings/meeting-instance-form'
-import { NewMeetingInstanceBreadcrumbClient } from '@/components/meetings/new-meeting-instance-breadcrumb-client'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
@@ -60,11 +60,16 @@ export default async function NewMeetingInstancePage({
   // Format as ISO string for the natural language date picker
   const defaultScheduledAt = todayWithParentTime.toISOString()
 
+  const pathname = `/meetings/${meeting.id}/instances/new`
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Meetings', href: '/meetings' },
+    { name: meeting.title, href: `/meetings/${meeting.id}` },
+    { name: 'New Instance', href: pathname },
+  ]
+
   return (
-    <NewMeetingInstanceBreadcrumbClient
-      meetingTitle={meeting.title}
-      meetingId={meeting.id}
-    >
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <PageContainer>
         <PageHeader
           title='Create New Instance'
@@ -81,6 +86,6 @@ export default async function NewMeetingInstancePage({
           />
         </PageContent>
       </PageContainer>
-    </NewMeetingInstanceBreadcrumbClient>
+    </PageBreadcrumbSetter>
   )
 }

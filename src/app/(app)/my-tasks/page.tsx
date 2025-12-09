@@ -7,26 +7,36 @@ import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 import { HELP_IDS } from '@/lib/help'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 
 export default async function MyTasksPage() {
   const user = await getCurrentUser()
   const canCreateTasks = isAdminOrOwner(user) || !!user.managerOSPersonId
 
-  return (
-    <PageContainer>
-      <PageHeader
-        title='My Tasks'
-        titleIcon={CheckSquare}
-        subtitle='Track and manage tasks assigned to you'
-        helpId={HELP_IDS.tasksProjectsTasks}
-        actions={canCreateTasks ? <CreateTaskButton variant='default' /> : null}
-      />
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'My Tasks', href: '/my-tasks' },
+  ]
 
-      <PageContent>
-        <PageSection>
-          <MyTasksPageClient personId={user.managerOSPersonId ?? null} />
-        </PageSection>
-      </PageContent>
-    </PageContainer>
+  return (
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
+      <PageContainer>
+        <PageHeader
+          title='My Tasks'
+          titleIcon={CheckSquare}
+          subtitle='Track and manage tasks assigned to you'
+          helpId={HELP_IDS.tasksProjectsTasks}
+          actions={
+            canCreateTasks ? <CreateTaskButton variant='default' /> : null
+          }
+        />
+
+        <PageContent>
+          <PageSection>
+            <MyTasksPageClient personId={user.managerOSPersonId ?? null} />
+          </PageSection>
+        </PageContent>
+      </PageContainer>
+    </PageBreadcrumbSetter>
   )
 }

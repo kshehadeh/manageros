@@ -43,7 +43,7 @@ export function SectionHeader({
   return (
     <div
       className={`flex items-start justify-between md:mx-0 md:px-lg ${className} mb-lg ${
-        variant === 'default' ? 'bg-muted p-lg rounded-md' : ''
+        variant === 'default' ? 'bg-muted/30 p-lg rounded-md' : ''
       }`}
     >
       <div className='flex-1 flex items-start gap-lg'>

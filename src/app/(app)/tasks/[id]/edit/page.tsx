@@ -4,7 +4,7 @@ import { getTask } from '@/lib/actions/task'
 import { redirect } from 'next/navigation'
 import { notFound } from 'next/navigation'
 import { TaskForm } from '@/components/tasks/task-form'
-import { TaskDetailBreadcrumbClient } from '@/components/tasks/task-detail-breadcrumb-client'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 import { PageSection } from '@/components/ui/page-section'
 import { type TaskStatus } from '@/lib/task-status'
 import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
@@ -59,8 +59,16 @@ export default async function EditTaskPage({
     objectiveId: task.objectiveId || '',
   }
 
+  const pathname = `/tasks/${task.id}/edit`
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Tasks', href: '/tasks' },
+    { name: task.title, href: `/tasks/${task.id}` },
+    { name: 'Edit', href: pathname },
+  ]
+
   return (
-    <TaskDetailBreadcrumbClient taskTitle={task.title} taskId={task.id}>
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <div className='page-container'>
         <PageSection>
           <TaskForm
@@ -76,6 +84,6 @@ export default async function EditTaskPage({
           />
         </PageSection>
       </div>
-    </TaskDetailBreadcrumbClient>
+    </PageBreadcrumbSetter>
   )
 }

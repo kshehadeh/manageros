@@ -3,6 +3,7 @@ import type { NoteWithAttachments } from '@/types/notes'
 
 interface NoteFilters {
   search?: string
+  entityType?: string[]
 }
 
 interface PaginationInfo {
@@ -51,15 +52,20 @@ export function useNotes({
       setLoading(true)
       setError(null)
 
-      const filterEntries = Object.entries(filters || {})
-        .filter(([_, value]) => value !== undefined && value !== '')
-        .map(([key, value]) => [key, String(value)])
-
       const searchParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
-        ...Object.fromEntries(filterEntries),
       })
+
+      // Handle search filter
+      if (filters?.search) {
+        searchParams.set('search', filters.search)
+      }
+
+      // Handle entityType filter (array)
+      if (filters?.entityType && filters.entityType.length > 0) {
+        searchParams.set('entityType', filters.entityType.join(','))
+      }
 
       if (sort) {
         searchParams.set('sort', sort)

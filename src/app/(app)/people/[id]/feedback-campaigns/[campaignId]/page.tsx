@@ -2,7 +2,7 @@ import { prisma } from '@/lib/db'
 import { notFound, redirect } from 'next/navigation'
 
 import { Link } from '@/components/ui/link'
-import { FeedbackCampaignDetailBreadcrumbClient } from '@/components/feedback/feedback-campaign-detail-breadcrumb-client'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 import { FeedbackCampaignActionsDropdown } from '@/components/feedback/feedback-campaign-actions-dropdown'
 import { FeedbackResponseLink } from '@/components/feedback/feedback-response-link'
 import { FeedbackInviteeList } from '@/components/feedback/feedback-invitee-list'
@@ -169,13 +169,17 @@ export default async function FeedbackCampaignDetailPage({
   const statusInfo = getStatusInfo(campaign.status)
   const StatusIcon = statusInfo.icon
 
+  const pathname = `/people/${person.id}/feedback-campaigns/${campaign.id}`
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'People', href: '/people' },
+    { name: person.name, href: `/people/${person.id}` },
+    { name: 'Feedback 360', href: `/people/${person.id}/feedback-campaigns` },
+    { name: campaignTitle, href: pathname },
+  ]
+
   return (
-    <FeedbackCampaignDetailBreadcrumbClient
-      personName={person.name}
-      personId={person.id}
-      campaignTitle={campaignTitle}
-      campaignId={campaign.id}
-    >
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <PageContainer>
         <PageHeader
           title={campaignTitle}
@@ -365,6 +369,6 @@ export default async function FeedbackCampaignDetailPage({
           </PageSidebar>
         </PageContent>
       </PageContainer>
-    </FeedbackCampaignDetailBreadcrumbClient>
+    </PageBreadcrumbSetter>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useMemo } from 'react'
+import { useLayoutEffect, useRef, useMemo } from 'react'
 import {
   useBreadcrumb,
   type BreadcrumbItem,
@@ -11,24 +11,25 @@ export type { BreadcrumbItem }
 
 /**
  * Hook to set breadcrumbs for a page
+ * Uses useLayoutEffect to set synchronously before paint, preventing race conditions
  * @param breadcrumbs - Array of breadcrumb items
  */
 export function useSetBreadcrumbs(breadcrumbs: BreadcrumbItem[]) {
-  const { setBreadcrumbs, setHasManualBreadcrumbs } = useBreadcrumb()
+  const { setBreadcrumbs } = useBreadcrumb()
   const prevBreadcrumbsRef = useRef<string>('')
 
   // Create a stable string representation for comparison
   const breadcrumbsString = JSON.stringify(breadcrumbs)
 
-  useEffect(() => {
+  // Use useLayoutEffect instead of useEffect to set synchronously before paint
+  // This prevents the "Loading..." flash that occurs with useEffect
+  useLayoutEffect(() => {
     // Always update breadcrumbs when they change
-    // This ensures client components can override default breadcrumbs
     if (breadcrumbsString !== prevBreadcrumbsRef.current) {
       setBreadcrumbs(breadcrumbs)
-      setHasManualBreadcrumbs(true)
       prevBreadcrumbsRef.current = breadcrumbsString
     }
-  }, [breadcrumbs, breadcrumbsString, setBreadcrumbs, setHasManualBreadcrumbs])
+  }, [breadcrumbs, breadcrumbsString, setBreadcrumbs])
 }
 
 /**

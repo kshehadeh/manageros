@@ -8,8 +8,8 @@ import { notFound } from 'next/navigation'
 
 import { isAdmin } from '@/lib/auth-utils'
 import { redirect } from 'next/navigation'
-import { PersonDetailClient } from '@/components/people/person-detail-client'
 import { getCurrentUser } from '@/lib/auth-utils'
+import { PageBreadcrumbSetter } from '../../../../../components/page-breadcrumb-setter'
 
 interface EditPersonPageProps {
   params: Promise<{
@@ -46,8 +46,15 @@ export default async function EditPersonPage({ params }: EditPersonPageProps) {
     notFound()
   }
 
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'People', href: '/people' },
+    { name: person.name, href: `/people/${person.id}` },
+    { name: 'Edit', href: `/people/${person.id}/edit` },
+  ]
+
   return (
-    <PersonDetailClient personName={person.name} personId={person.id}>
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <div className='space-y-6'>
         <PersonEditHeader
           personId={person.id}
@@ -64,6 +71,6 @@ export default async function EditPersonPage({ params }: EditPersonPageProps) {
           githubAccount={githubAccount}
         />
       </div>
-    </PersonDetailClient>
+    </PageBreadcrumbSetter>
   )
 }

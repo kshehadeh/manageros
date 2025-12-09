@@ -2,8 +2,8 @@ import { notFound, redirect } from 'next/navigation'
 import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 import { getPersonById } from '@/lib/data/people'
 import { getLatestPersonOverview } from '@/lib/actions/person-overview'
-import { OverviewBreadcrumbClient } from '@/components/people/overview/overview-breadcrumb-client'
 import { OverviewPageContent } from '@/components/people/overview/overview-page-content'
+import { PageBreadcrumbSetter } from '../../../../../components/page-breadcrumb-setter'
 
 interface OverviewPageProps {
   params: Promise<{
@@ -51,8 +51,15 @@ export default async function OverviewPage({ params }: OverviewPageProps) {
   const hasJiraAccount = !!('jiraAccount' in person && person.jiraAccount)
   const hasGithubAccount = !!('githubAccount' in person && person.githubAccount)
 
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'People', href: '/people' },
+    { name: person.name, href: `/people/${person.id}` },
+    { name: 'Overview', href: `/people/${person.id}/overview` },
+  ]
+
   return (
-    <OverviewBreadcrumbClient personName={person.name} personId={person.id}>
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <OverviewPageContent
         personId={person.id}
         personName={person.name}
@@ -66,6 +73,6 @@ export default async function OverviewPage({ params }: OverviewPageProps) {
         hasJiraAccount={hasJiraAccount}
         hasGithubAccount={hasGithubAccount}
       />
-    </OverviewBreadcrumbClient>
+    </PageBreadcrumbSetter>
   )
 }

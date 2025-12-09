@@ -1,6 +1,5 @@
 import { ReactNode } from 'react'
 import { BreadcrumbProvider } from '@/components/breadcrumb-provider'
-import { DefaultBreadcrumbHandler } from '@/components/default-breadcrumb-handler'
 import { MobileMenuProvider } from '@/components/mobile-menu-provider'
 import { AIChatProvider } from '@/components/ai-chat-provider'
 import TopBar from '@/components/top-bar'
@@ -99,7 +98,6 @@ export default async function AppLayout({ children }: AppLayoutProps) {
               <BreadcrumbProvider>
                 <MobileMenuProvider>
                   <CacheProvider>
-                    <DefaultBreadcrumbHandler />
                     <OfflineAwareLayout>
                       <div className='flex min-h-screen'>
                         <SidebarClient

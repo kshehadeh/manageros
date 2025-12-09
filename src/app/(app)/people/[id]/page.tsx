@@ -1,4 +1,3 @@
-import { PersonDetailClient } from '@/components/people/person-detail-client'
 import { PersonDetailContent } from '@/components/people/person-detail-content'
 import type { PersonWithDetailRelations } from '@/components/people/person-detail-content'
 import { notFound } from 'next/navigation'
@@ -8,6 +7,7 @@ import { redirect } from 'next/navigation'
 import { getLinkedAccountAvatars } from '@/lib/actions/avatar'
 import { getPersonById } from '@/lib/data/people'
 import { getCurrentUser } from '@/lib/auth-utils'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 
 interface PersonDetailPageProps {
   params: Promise<{
@@ -51,11 +51,15 @@ export default async function PersonDetailPage({
     console.error('Error fetching linked account avatars:', error)
   }
 
+  const pathname = `/people/${personWithLevel.id}`
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'People', href: '/people' },
+    { name: personWithLevel.name, href: pathname },
+  ]
+
   return (
-    <PersonDetailClient
-      personName={personWithLevel.name}
-      personId={personWithLevel.id as string}
-    >
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <PersonDetailContent
         person={personWithLevel as PersonWithDetailRelations}
         linkedAvatars={linkedAvatars}
@@ -64,6 +68,6 @@ export default async function PersonDetailPage({
         organizationId={user.managerOSOrganizationId}
         currentUserId={user.managerOSUserId || ''}
       />
-    </PersonDetailClient>
+    </PageBreadcrumbSetter>
   )
 }

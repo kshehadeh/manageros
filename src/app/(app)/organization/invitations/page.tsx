@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { getOrganizationInvitations } from '@/lib/actions/organization'
 import InvitationForm from '@/components/invitation-form'
 import InvitationList from '@/components/invitation-list'
-import { InvitationsBreadcrumbClient } from '@/components/organization/invitations-breadcrumb-client'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
@@ -18,8 +18,15 @@ export default async function OrganizationInvitationsPage() {
 
   const invitations = await getOrganizationInvitations()
 
+  const pathname = '/organization/invitations'
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Organization Settings', href: '/organization/settings' },
+    { name: 'Invitations', href: pathname },
+  ]
+
   return (
-    <InvitationsBreadcrumbClient>
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <PageContainer>
         <PageHeader
           title='Organization Invitations'
@@ -33,6 +40,6 @@ export default async function OrganizationInvitationsPage() {
           </PageSection>
         </PageContent>
       </PageContainer>
-    </InvitationsBreadcrumbClient>
+    </PageBreadcrumbSetter>
   )
 }

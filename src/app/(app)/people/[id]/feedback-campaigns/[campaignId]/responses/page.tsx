@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { getFeedbackCampaignResponses } from '@/lib/actions/feedback-campaign'
 import { FeedbackResponsesList } from '@/components/feedback/feedback-responses-list'
-import { FeedbackCampaignResponsesBreadcrumbClient } from '@/components/feedback/feedback-campaign-responses-breadcrumb-client'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 import { Badge } from '@/components/ui/badge'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
@@ -29,13 +29,27 @@ export default async function FeedbackCampaignResponsesPage({
   // Create a meaningful campaign title from the available data
   const campaignTitle = `${campaign.targetPerson.name} Feedback 360`
 
+  const pathname = `/people/${campaign.targetPerson.id}/feedback-campaigns/${campaignId}/responses`
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'People', href: '/people' },
+    {
+      name: campaign.targetPerson.name,
+      href: `/people/${campaign.targetPerson.id}`,
+    },
+    {
+      name: 'Feedback 360',
+      href: `/people/${campaign.targetPerson.id}/feedback-campaigns`,
+    },
+    {
+      name: campaignTitle,
+      href: `/people/${campaign.targetPerson.id}/feedback-campaigns/${campaignId}`,
+    },
+    { name: 'Responses', href: pathname },
+  ]
+
   return (
-    <FeedbackCampaignResponsesBreadcrumbClient
-      personName={campaign.targetPerson.name}
-      personId={campaign.targetPerson.id}
-      campaignTitle={campaignTitle}
-      campaignId={campaignId}
-    >
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <PageContainer>
         <PageHeader
           title='Feedback Responses'
@@ -118,6 +132,6 @@ export default async function FeedbackCampaignResponsesPage({
           </div>
         </PageContent>
       </PageContainer>
-    </FeedbackCampaignResponsesBreadcrumbClient>
+    </PageBreadcrumbSetter>
   )
 }

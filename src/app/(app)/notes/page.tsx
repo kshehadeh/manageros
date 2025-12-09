@@ -7,49 +7,59 @@ import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { NotesDataTable } from '@/components/notes/data-table'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 
 export default async function NotesPage() {
   const user = await getCurrentUser()
 
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Notes', href: '/notes' },
+  ]
+
   if (!user.managerOSOrganizationId) {
     return (
+      <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
+        <PageContainer>
+          <PageHeader
+            title='Notes'
+            titleIcon={FileText}
+            subtitle='Your personal notes and documents'
+          />
+          <PageContent>
+            <PageSection>
+              <p className='text-muted-foreground'>
+                You must belong to an organization to view notes.
+              </p>
+            </PageSection>
+          </PageContent>
+        </PageContainer>
+      </PageBreadcrumbSetter>
+    )
+  }
+
+  return (
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <PageContainer>
         <PageHeader
           title='Notes'
           titleIcon={FileText}
           subtitle='Your personal notes and documents'
+          actions={
+            <Button asChild className='flex items-center gap-md'>
+              <Link href='/notes/new'>
+                <Plus className='h-4 w-4' />
+                New Note
+              </Link>
+            </Button>
+          }
         />
         <PageContent>
           <PageSection>
-            <p className='text-muted-foreground'>
-              You must belong to an organization to view notes.
-            </p>
+            <NotesDataTable enablePagination={true} />
           </PageSection>
         </PageContent>
       </PageContainer>
-    )
-  }
-
-  return (
-    <PageContainer>
-      <PageHeader
-        title='Notes'
-        titleIcon={FileText}
-        subtitle='Your personal notes and documents'
-        actions={
-          <Button asChild className='flex items-center gap-md'>
-            <Link href='/notes/new'>
-              <Plus className='h-4 w-4' />
-              New Note
-            </Link>
-          </Button>
-        }
-      />
-      <PageContent>
-        <PageSection>
-          <NotesDataTable />
-        </PageSection>
-      </PageContent>
-    </PageContainer>
+    </PageBreadcrumbSetter>
   )
 }

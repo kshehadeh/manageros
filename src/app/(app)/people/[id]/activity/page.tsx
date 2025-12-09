@@ -2,8 +2,8 @@ import { notFound, redirect } from 'next/navigation'
 import { Suspense } from 'react'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { getPersonById } from '@/lib/data/people'
-import { ActivityBreadcrumbClient } from '@/components/people/activity/activity-breadcrumb-client'
 import { ActivityPageContent } from '@/components/people/activity/activity-page-content'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 
 interface ActivityPageProps {
   params: Promise<{
@@ -31,8 +31,16 @@ export default async function ActivityPage({
     notFound()
   }
 
+  const pathname = `/people/${person.id}/activity`
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'People', href: '/people' },
+    { name: person.name, href: `/people/${person.id}` },
+    { name: 'Activity', href: pathname },
+  ]
+
   return (
-    <ActivityBreadcrumbClient personName={person.name} personId={person.id}>
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <Suspense fallback={<div>Loading...</div>}>
         <ActivityPageContent
           personId={person.id}
@@ -43,6 +51,6 @@ export default async function ActivityPage({
           searchParams={searchParams}
         />
       </Suspense>
-    </ActivityBreadcrumbClient>
+    </PageBreadcrumbSetter>
   )
 }
