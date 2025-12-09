@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth-utils'
-import { getStandaloneNotes } from '@/lib/actions/notes'
+import { getAllNotes } from '@/lib/actions/notes'
 
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   const user = await getCurrentUser()
   try {
     if (!user.managerOSOrganizationId) {
@@ -12,18 +12,40 @@ export async function GET(_request: NextRequest) {
       )
     }
 
-    const notes = await getStandaloneNotes()
+    const searchParams = request.nextUrl.searchParams
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '20')
+    const search = searchParams.get('search') || ''
+    const entityTypeParam = searchParams.get('entityType')
+
+    // Parse entityType filter
+    let entityTypes: string[] | undefined
+    if (entityTypeParam) {
+      entityTypes = entityTypeParam.split(',').filter(Boolean)
+    }
+
+    const { notes, totalCount } = await getAllNotes({
+      page,
+      limit,
+      search: search || undefined,
+      entityType: entityTypes,
+    })
+
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(totalCount / limit)
+    const hasNextPage = page < totalPages
+    const hasPreviousPage = page > 1
 
     return NextResponse.json({
       notes,
       currentUserId: user.managerOSUserId,
       pagination: {
-        page: 1,
-        limit: notes.length,
-        totalCount: notes.length,
-        totalPages: 1,
-        hasNextPage: false,
-        hasPreviousPage: false,
+        page,
+        limit,
+        totalCount,
+        totalPages,
+        hasNextPage,
+        hasPreviousPage,
       },
     })
   } catch (error) {

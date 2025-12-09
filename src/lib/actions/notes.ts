@@ -679,6 +679,249 @@ export async function getStandaloneNotes(): Promise<NoteWithAttachments[]> {
 }
 
 /**
+ * Get all notes (standalone and entity-attached) for the organization
+ * Returns notes the user has access to based on:
+ * - Notes created by the user
+ * - Notes shared with everyone
+ * - Notes explicitly shared with the user
+ */
+export async function getAllNotes(options?: {
+  page?: number
+  limit?: number
+  search?: string
+  entityType?: string[]
+}): Promise<{
+  notes: NoteWithAttachments[]
+  totalCount: number
+}> {
+  const user = await getCurrentUser()
+  if (!user.managerOSOrganizationId) {
+    throw new Error('User must belong to an organization to view notes')
+  }
+
+  const page = options?.page || 1
+  const limit = options?.limit || 20
+  const skip = (page - 1) * limit
+  const search = options?.search
+  const entityTypes = options?.entityType
+
+  // Build where clause
+  const whereClause: any = {
+    organizationId: user.managerOSOrganizationId,
+    OR: [
+      { createdById: user.managerOSUserId || '' },
+      { sharedWithEveryone: true },
+      {
+        sharedWith: {
+          some: {
+            userId: user.managerOSUserId || '',
+          },
+        },
+      },
+    ],
+  }
+
+  // Add search filter
+  if (search) {
+    whereClause.AND = [
+      {
+        OR: [
+          { title: { contains: search, mode: 'insensitive' } },
+          { content: { contains: search, mode: 'insensitive' } },
+        ],
+      },
+    ]
+  }
+
+  // Add entityType filter
+  if (entityTypes && entityTypes.length > 0) {
+    const entityTypeConditions: any[] = []
+
+    if (entityTypes.includes('Standalone')) {
+      entityTypeConditions.push({ entityType: { equals: null } })
+    }
+
+    const otherTypes = entityTypes.filter((t: string) => t !== 'Standalone')
+    if (otherTypes.length > 0) {
+      entityTypeConditions.push({ entityType: { in: otherTypes } })
+    }
+
+    if (entityTypeConditions.length > 0) {
+      if (!whereClause.AND) {
+        whereClause.AND = []
+      }
+      whereClause.AND.push({
+        OR: entityTypeConditions,
+      })
+    }
+  }
+
+  // Get total count
+  const totalCount = await prisma.note.count({
+    where: whereClause,
+  })
+
+  // Get paginated notes
+  const notes = await prisma.note.findMany({
+    where: whereClause,
+    skip,
+    take: limit,
+    include: {
+      createdBy: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      attachments: {
+        include: {
+          uploadedBy: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      },
+      sharedWith: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      updatedAt: 'desc', // Most recently updated first
+    },
+  })
+
+  return {
+    notes: notes.map(note => ({
+      id: note.id,
+      title: note.title,
+      entityType: note.entityType,
+      entityId: note.entityId,
+      content: note.content,
+      createdAt: note.createdAt.toISOString(),
+      updatedAt: note.updatedAt.toISOString(),
+      sharedWithEveryone: note.sharedWithEveryone,
+      createdBy: note.createdBy,
+      attachments: note.attachments.map(att => ({
+        id: att.id,
+        fileName: att.fileName,
+        originalName: att.originalName,
+        fileSize: att.fileSize,
+        mimeType: att.mimeType,
+        r2Url: att.r2Url,
+        createdAt: att.createdAt.toISOString(),
+        uploadedBy: att.uploadedBy,
+      })),
+      sharedWith: note.sharedWith.map(share => share.user),
+    })),
+    totalCount,
+  }
+}
+
+/**
+ * Get a single note by ID (standalone or entity-attached)
+ */
+export async function getNoteById(
+  id: string
+): Promise<NoteWithAttachments | null> {
+  const user = await getCurrentUser()
+  if (!user.managerOSOrganizationId) {
+    throw new Error('User must belong to an organization to view notes')
+  }
+
+  const note = await prisma.note.findFirst({
+    where: {
+      id,
+      organizationId: user.managerOSOrganizationId,
+      OR: [
+        { createdById: user.managerOSUserId || '' },
+        { sharedWithEveryone: true },
+        {
+          sharedWith: {
+            some: {
+              userId: user.managerOSUserId || '',
+            },
+          },
+        },
+      ],
+    },
+    include: {
+      createdBy: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      attachments: {
+        include: {
+          uploadedBy: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      },
+      sharedWith: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!note) {
+    return null
+  }
+
+  return {
+    id: note.id,
+    title: note.title,
+    entityType: note.entityType,
+    entityId: note.entityId,
+    content: note.content,
+    createdAt: note.createdAt.toISOString(),
+    updatedAt: note.updatedAt.toISOString(),
+    sharedWithEveryone: note.sharedWithEveryone,
+    createdBy: note.createdBy,
+    attachments: note.attachments.map(att => ({
+      id: att.id,
+      fileName: att.fileName,
+      originalName: att.originalName,
+      fileSize: att.fileSize,
+      mimeType: att.mimeType,
+      r2Url: att.r2Url,
+      createdAt: att.createdAt.toISOString(),
+      uploadedBy: att.uploadedBy,
+    })),
+    sharedWith: note.sharedWith.map(share => share.user),
+  }
+}
+
+/**
  * Get a single standalone note by ID
  */
 export async function getStandaloneNoteById(

@@ -11,15 +11,21 @@ import { Save, Loader2 } from 'lucide-react'
 import { useDebounce } from '@/lib/hooks/use-debounce'
 import { NoteSharingPanel } from './note-sharing-panel'
 import { format } from 'date-fns'
+import { Link } from '@/components/ui/link'
+import { ExternalLink } from 'lucide-react'
 
 interface StandaloneNoteEditorProps {
   note?: NoteWithAttachments
   currentUserId?: string
+  entityLink?: string | null
+  entityTypeLabel?: string
 }
 
 export function StandaloneNoteEditor({
   note,
   currentUserId,
+  entityLink,
+  entityTypeLabel,
 }: StandaloneNoteEditorProps) {
   const router = useRouter()
   const [title, setTitle] = useState(note?.title || '')
@@ -171,6 +177,22 @@ export function StandaloneNoteEditor({
       {note && (
         <div className='mb-4 pb-4 border-b'>
           <div className='flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground'>
+            {entityTypeLabel && (
+              <div className='flex items-center gap-2'>
+                <span className='font-medium text-foreground'>Entity:</span>
+                {entityLink ? (
+                  <Link
+                    href={entityLink}
+                    className='text-primary hover:text-highlight/90 transition-colors flex items-center gap-1'
+                  >
+                    {entityTypeLabel}
+                    <ExternalLink className='h-3 w-3' />
+                  </Link>
+                ) : (
+                  <span>{entityTypeLabel}</span>
+                )}
+              </div>
+            )}
             <div className='flex items-center gap-2'>
               <span className='font-medium text-foreground'>Created by:</span>
               <span>{note.createdBy.name}</span>

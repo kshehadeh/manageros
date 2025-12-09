@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import type { ColumnDef } from '@tanstack/react-table'
 import type { NoteWithAttachments } from '@/types/notes'
 import { format } from 'date-fns'
-import { deleteStandaloneNote } from '@/lib/actions/notes'
+import { deleteNote } from '@/lib/actions/notes'
 import type { DataTableConfig } from '@/components/common/generic-data-table'
 import {
   DeleteMenuItem,
@@ -17,9 +17,69 @@ import { useNotes } from '@/hooks/use-notes'
 import { useNotesTableSettings } from '@/hooks/use-notes-table-settings'
 import { MoreHorizontal, Edit } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { MultiSelect } from '@/components/ui/multi-select'
+import type { MultiSelectOption } from '@/components/ui/multi-select'
 
 type NoteFilters = {
   search?: string
+  entityType?: string[]
+}
+
+const ENTITY_TYPE_OPTIONS: MultiSelectOption[] = [
+  { value: 'Initiative', label: 'Initiative' },
+  { value: 'Task', label: 'Task' },
+  { value: 'Meeting', label: 'Meeting' },
+  { value: 'MeetingInstance', label: 'Meeting Instance' },
+  { value: 'Person', label: 'Person' },
+  { value: 'Standalone', label: 'Standalone' },
+]
+
+function NoteFilterContent({
+  settings,
+  updateFilters,
+}: {
+  settings: { filters: NoteFilters } & Record<string, unknown>
+  updateFilters: (filters: Partial<NoteFilters>) => void
+}) {
+  return (
+    <div className='space-y-3'>
+      <div className='space-y-2'>
+        <label className='text-sm font-medium'>Entity Type</label>
+        <MultiSelect
+          options={ENTITY_TYPE_OPTIONS}
+          selected={
+            Array.isArray(settings.filters.entityType)
+              ? settings.filters.entityType
+              : settings.filters.entityType
+                ? [settings.filters.entityType]
+                : []
+          }
+          onChange={selected => updateFilters({ entityType: selected })}
+          placeholder='All types'
+        />
+      </div>
+    </div>
+  )
+}
+
+function getEntityTypeLabel(entityType: string | null | undefined): string {
+  if (!entityType) return 'Standalone'
+  return entityType
+}
+
+function getEntityLink(
+  entityType: string | null | undefined,
+  entityId: string | null | undefined
+): string | null {
+  if (!entityType || !entityId) return null
+
+  const basePath = entityType.toLowerCase()
+  if (entityType === 'MeetingInstance') {
+    // MeetingInstance needs special handling - we'd need the meeting ID
+    // For now, return null as we'd need more context
+    return null
+  }
+  return `/${basePath}s/${entityId}`
 }
 
 export const notesDataTableConfig: DataTableConfig<
@@ -41,7 +101,7 @@ export const notesDataTableConfig: DataTableConfig<
   },
 
   deleteAction: async (noteId: string) => {
-    await deleteStandaloneNote({ id: noteId })
+    await deleteNote({ id: noteId })
     toast.success('Note deleted successfully')
   },
 
@@ -65,6 +125,33 @@ export const notesDataTableConfig: DataTableConfig<
         size: 400,
         minSize: 200,
         maxSize: 600,
+      },
+      {
+        id: 'entityType',
+        header: 'Entity',
+        accessorFn: row => getEntityTypeLabel(row.entityType),
+        cell: ({ row }) => {
+          const note = row.original
+          const entityLink = getEntityLink(note.entityType, note.entityId)
+          const label = getEntityTypeLabel(note.entityType)
+
+          if (entityLink) {
+            return (
+              <Link
+                href={entityLink}
+                className='text-primary hover:text-highlight/90 transition-colors'
+                onClick={e => e.stopPropagation()}
+              >
+                {label}
+              </Link>
+            )
+          }
+
+          return <span className='text-muted-foreground'>{label}</span>
+        },
+        size: 150,
+        minSize: 120,
+        maxSize: 200,
       },
       {
         id: 'createdBy',
@@ -145,8 +232,16 @@ export const notesDataTableConfig: DataTableConfig<
 
   groupingOptions: [
     { value: 'none', label: 'None' },
+    { value: 'entityType', label: 'Entity Type' },
     { value: 'createdBy', label: 'Creator' },
   ],
+
+  getGroupLabel: (groupValue: string, groupingColumn: string) => {
+    if (groupingColumn === 'entityType') {
+      return getEntityTypeLabel(groupValue)
+    }
+    return groupValue
+  },
 
   sortOptions: [
     { value: 'updatedAt:desc', label: 'Last Updated (Newest)' },
@@ -156,6 +251,22 @@ export const notesDataTableConfig: DataTableConfig<
     { value: 'title:asc', label: 'Title (A-Z)' },
     { value: 'title:desc', label: 'Title (Z-A)' },
   ],
+
+  filterContent: ({ settings, updateFilters }) => (
+    <NoteFilterContent settings={settings} updateFilters={updateFilters} />
+  ),
+
+  hasActiveFiltersFn: filters => {
+    return (
+      Boolean(filters.search && filters.search !== '') ||
+      Boolean(filters.entityType && filters.entityType.length > 0)
+    )
+  },
+
+  clearFiltersFn: () => ({
+    search: '',
+    entityType: undefined,
+  }),
 
   contextMenuItems: ({ entityId, close, onDelete }) => {
     const NotesContextMenuItems = () => {

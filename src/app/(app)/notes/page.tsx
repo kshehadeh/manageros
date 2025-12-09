@@ -47,7 +47,7 @@ export default async function NotesPage() {
       />
       <PageContent>
         <PageSection>
-          <NotesDataTable />
+          <NotesDataTable enablePagination={true} />
         </PageSection>
       </PageContent>
     </PageContainer>
