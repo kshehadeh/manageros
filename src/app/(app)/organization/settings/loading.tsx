@@ -4,11 +4,16 @@ import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
 import { PageSidebar } from '@/components/ui/page-sidebar'
-import { OrganizationSettingsBreadcrumbClient } from '@/components/organization/organization-settings-breadcrumb-client'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 
 export default function LoadingPage() {
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Organization Settings', href: '/organization/settings' },
+  ]
+
   return (
-    <OrganizationSettingsBreadcrumbClient>
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <PageContainer>
         <PageHeader
           title={<Skeleton className='h-8 w-48' />}
@@ -34,6 +39,6 @@ export default function LoadingPage() {
           </PageSidebar>
         </PageContent>
       </PageContainer>
-    </OrganizationSettingsBreadcrumbClient>
+    </PageBreadcrumbSetter>
   )
 }

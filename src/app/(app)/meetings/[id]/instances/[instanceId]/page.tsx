@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation'
 import { Link } from '@/components/ui/link'
 import { Calendar, StickyNote, ChevronRight, Users } from 'lucide-react'
 import { LinkListSection } from '@/components/links/link-list-section'
-import { MeetingInstanceDetailBreadcrumbClient } from '@/components/meetings/meeting-instance-detail-breadcrumb-client'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 import { MeetingInstanceActionsDropdown } from '@/components/meetings/meeting-instance-actions-dropdown'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { SimplePeopleList } from '@/components/people/person-list'
@@ -73,12 +73,19 @@ export default async function MeetingInstanceDetailPage({
   ).length
   const totalParticipants = meetingInstance.participants.length
 
+  const pathname = `/meetings/${meetingInstance.meetingId}/instances/${meetingInstance.id}`
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Meetings', href: '/meetings' },
+    {
+      name: meetingInstance.meeting.title,
+      href: `/meetings/${meetingInstance.meetingId}`,
+    },
+    { name: 'Instance', href: pathname },
+  ]
+
   return (
-    <MeetingInstanceDetailBreadcrumbClient
-      meetingTitle={meetingInstance.meeting.title}
-      meetingId={meetingInstance.meetingId}
-      instanceId={meetingInstance.id}
-    >
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <PageContainer>
         <PageHeader
           title={meetingInstance.meeting.title}
@@ -201,6 +208,6 @@ export default async function MeetingInstanceDetailPage({
           </PageSidebar>
         </PageContent>
       </PageContainer>
-    </MeetingInstanceDetailBreadcrumbClient>
+    </PageBreadcrumbSetter>
   )
 }

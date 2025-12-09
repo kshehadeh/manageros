@@ -6,6 +6,7 @@ import { uploadFilesToR2, FileUploadResult } from '@/lib/r2-upload'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { NoteWithAttachments } from '@/types/notes'
+import type { Prisma } from '@/generated/prisma'
 
 // Validation schemas
 const CreateNoteSchema = z.object({
@@ -706,7 +707,7 @@ export async function getAllNotes(options?: {
   const entityTypes = options?.entityType
 
   // Build where clause
-  const whereClause: any = {
+  const whereClause: Prisma.NoteWhereInput = {
     organizationId: user.managerOSOrganizationId,
     OR: [
       { createdById: user.managerOSUserId || '' },
@@ -735,7 +736,7 @@ export async function getAllNotes(options?: {
 
   // Add entityType filter
   if (entityTypes && entityTypes.length > 0) {
-    const entityTypeConditions: any[] = []
+    const entityTypeConditions: Prisma.NoteWhereInput[] = []
 
     if (entityTypes.includes('Standalone')) {
       entityTypeConditions.push({ entityType: { equals: null } })
@@ -747,12 +748,16 @@ export async function getAllNotes(options?: {
     }
 
     if (entityTypeConditions.length > 0) {
-      if (!whereClause.AND) {
-        whereClause.AND = []
-      }
-      whereClause.AND.push({
+      // Ensure AND is always an array
+      const andArray: Prisma.NoteWhereInput[] = Array.isArray(whereClause.AND)
+        ? whereClause.AND
+        : whereClause.AND
+          ? [whereClause.AND]
+          : []
+      andArray.push({
         OR: entityTypeConditions,
       })
+      whereClause.AND = andArray
     }
   }
 

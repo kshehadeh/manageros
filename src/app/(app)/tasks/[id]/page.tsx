@@ -4,7 +4,7 @@ import { getEntityLinks } from '@/lib/data/entity-links'
 import { redirect } from 'next/navigation'
 import { Link } from '@/components/ui/link'
 import { notFound } from 'next/navigation'
-import { TaskDetailBreadcrumbClient } from '@/components/tasks/task-detail-breadcrumb-client'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 import { TaskActionsDropdown } from '@/components/tasks/task-actions-dropdown'
 import { InlineEditableText } from '@/components/common/inline-editable-text'
 import { TaskSidebar } from '@/components/tasks/task-sidebar'
@@ -56,8 +56,15 @@ export default async function TaskDetailPage({
     }
   >
 
+  const pathname = `/tasks/${task.id}`
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Tasks', href: '/tasks' },
+    { name: task.title, href: pathname },
+  ]
+
   return (
-    <TaskDetailBreadcrumbClient taskTitle={task.title} taskId={task.id}>
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <PageContainer>
         <PageHeader
           titleIcon={ListTodo}
@@ -161,6 +168,6 @@ export default async function TaskDetailPage({
           </PageSidebar>
         </PageContent>
       </PageContainer>
-    </TaskDetailBreadcrumbClient>
+    </PageBreadcrumbSetter>
   )
 }

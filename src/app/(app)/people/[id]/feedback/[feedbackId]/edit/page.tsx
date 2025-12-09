@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/db'
 import { FeedbackForm } from '@/components/feedback/feedback-form'
-import { EditFeedbackBreadcrumbClient } from '@/components/feedback/edit-feedback-breadcrumb-client'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 import { notFound } from 'next/navigation'
 
 import { redirect } from 'next/navigation'
@@ -77,12 +77,17 @@ export default async function FeedbackEditPage({
     notFound()
   }
 
+  const pathname = `/people/${person.id}/feedback/${feedback.id}/edit`
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'People', href: '/people' },
+    { name: person.name, href: `/people/${person.id}` },
+    { name: 'Feedback', href: `/people/${person.id}/feedback` },
+    { name: 'Edit Feedback', href: pathname },
+  ]
+
   return (
-    <EditFeedbackBreadcrumbClient
-      personName={person.name}
-      personId={person.id}
-      feedbackId={feedback.id}
-    >
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <div className='page-container'>
         <PageSection>
           <FeedbackForm
@@ -101,6 +106,6 @@ export default async function FeedbackEditPage({
           />
         </PageSection>
       </div>
-    </EditFeedbackBreadcrumbClient>
+    </PageBreadcrumbSetter>
   )
 }

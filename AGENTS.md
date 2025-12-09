@@ -13,4 +13,10 @@ This workspace uses Cursor context files stored under `.cursor/rules`. Each entr
 - Update Roadmap — `.cursor/rules/update-roadmap.mdc`
 - User Interface — `.cursor/rules/user-interface.mdc`
 
+## Additional Documentation
+
+For detailed implementation guides, see the `docs/` directory:
+
+- **Breadcrumbs** — `docs/breadcrumbs.md` - Complete guide to the breadcrumb system and how to implement breadcrumbs in pages
+
 Load the appropriate context file in Cursor before starting a task to keep the assistant aligned with the relevant guidance.

@@ -70,7 +70,7 @@
 
 - **Executive Dashboard** - Overview of teams, direct reports, initiatives, and recent 1:1s
 - **Enhanced Dashboard Layout** (September 24, 2025) - Restructured dashboard with tasks and campaigns at top, right sidebar for teams and direct reports
-- **Breadcrumb Navigation** - Context-aware navigation system
+- **Breadcrumb Navigation** (Refactored December 2024) - Explicit breadcrumb system with PageBreadcrumbSetter component. All pages set breadcrumbs explicitly to eliminate race conditions. See docs/breadcrumbs.md for implementation details.
 - **Sidebar Navigation** - Persistent navigation with role-based access
 - **Direct Reports View** - Dedicated manager view of team members
 - **Command Palette** (September 25, 2025) - Global Cmd/Ctrl+K palette with quick actions and search across tasks, initiatives, people, and meetings. Extensible sources for commands and server-backed results. Includes Create Task modal trigger, Create Meeting command (October 22, 2025), and View Meetings navigation command.

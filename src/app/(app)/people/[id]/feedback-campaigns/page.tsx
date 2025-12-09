@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { FeedbackCampaignList } from '@/components/feedback/feedback-campaign-list'
-import { FeedbackCampaignsBreadcrumbClient } from '@/components/feedback/feedback-campaigns-breadcrumb-client'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 import { Button } from '@/components/ui/button'
 import { Plus, MessageSquare, ArrowLeft } from 'lucide-react'
 import { Link } from '@/components/ui/link'
@@ -97,11 +97,16 @@ export default async function FeedbackCampaignsPage({
     }
   })
 
+  const pathname = `/people/${person.id}/feedback-campaigns`
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'People', href: '/people' },
+    { name: person.name, href: `/people/${person.id}` },
+    { name: 'Feedback 360', href: pathname },
+  ]
+
   return (
-    <FeedbackCampaignsBreadcrumbClient
-      personName={person.name}
-      personId={person.id}
-    >
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <PageContainer>
         <PageHeader
           title='Feedback 360'
@@ -138,6 +143,6 @@ export default async function FeedbackCampaignsPage({
           </PageSection>
         </PageContent>
       </PageContainer>
-    </FeedbackCampaignsBreadcrumbClient>
+    </PageBreadcrumbSetter>
   )
 }

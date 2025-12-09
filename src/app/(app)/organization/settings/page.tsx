@@ -11,7 +11,7 @@ import {
   getCurrentUserWithPersonAndOrganization,
   requireAdmin,
 } from '@/lib/auth-utils'
-import { OrganizationSettingsBreadcrumbClient } from '@/components/organization/organization-settings-breadcrumb-client'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 import { OrganizationProfileButton } from '@/components/organization/organization-profile-button'
 import { OrganizationSectionServer } from '@/components/settings/organization-section-server'
 import { OrganizationSectionSkeleton } from '@/components/settings/organization-section-skeleton'
@@ -47,8 +47,14 @@ export default async function OrganizationSettingsPage() {
   // Since requireAdmin passed, user is guaranteed to be admin
   const isAdmin = true
 
+  const pathname = '/organization/settings'
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Organization Settings', href: pathname },
+  ]
+
   return (
-    <OrganizationSettingsBreadcrumbClient>
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <PageContainer>
         <PageHeader
           title='Organization Settings'
@@ -184,6 +190,6 @@ export default async function OrganizationSettingsPage() {
           </PageSidebar>
         </PageContent>
       </PageContainer>
-    </OrganizationSettingsBreadcrumbClient>
+    </PageBreadcrumbSetter>
   )
 }

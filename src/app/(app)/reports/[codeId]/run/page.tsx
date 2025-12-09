@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { getReport } from '@/lib/reports/registry'
 import { DynamicReportForm } from '@/components/dynamic-report-form'
-import { ReportRunBreadcrumbClient } from '@/components/report-run-breadcrumb-client'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 import { extractSchemaFields } from '@/lib/utils/schema-extraction'
 import { z } from 'zod'
 
@@ -31,8 +31,15 @@ export default async function RunReportPage({
   // Extract serializable schema information
   const schemaFields = extractSchemaFields(def.inputSchema)
 
+  const pathname = `/reports/${codeId}/run`
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Reports', href: '/reports' },
+    { name: `Run ${def.name}`, href: pathname },
+  ]
+
   return (
-    <ReportRunBreadcrumbClient reportName={def.name} codeId={codeId}>
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <div className='p-6'>
         <DynamicReportForm
           reportName={def.name}
@@ -43,6 +50,6 @@ export default async function RunReportPage({
           supportedRenderers={def.supportedRenderers}
         />
       </div>
-    </ReportRunBreadcrumbClient>
+    </PageBreadcrumbSetter>
   )
 }

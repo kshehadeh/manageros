@@ -11,7 +11,7 @@ import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
 import { PageSidebar } from '@/components/ui/page-sidebar'
 import { notFound } from 'next/navigation'
-import { MeetingDetailBreadcrumbClient } from '@/components/meetings/meeting-detail-breadcrumb-client'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 import { MeetingInstanceList } from '@/components/meetings/meeting-instance-list'
 import { MeetingActionsDropdown } from '@/components/meetings/meeting-actions-dropdown'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
@@ -87,11 +87,15 @@ export default async function MeetingDetailPage({
     return `${mins} minute${mins !== 1 ? 's' : ''}`
   }
 
+  const pathname = `/meetings/${meeting.id}`
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Meetings', href: '/meetings' },
+    { name: meeting.title, href: pathname },
+  ]
+
   return (
-    <MeetingDetailBreadcrumbClient
-      meetingTitle={meeting.title}
-      meetingId={meeting.id}
-    >
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <PageContainer>
         <PageHeader
           title={meeting.title}
@@ -273,6 +277,6 @@ export default async function MeetingDetailPage({
           </PageSidebar>
         </PageContent>
       </PageContainer>
-    </MeetingDetailBreadcrumbClient>
+    </PageBreadcrumbSetter>
   )
 }

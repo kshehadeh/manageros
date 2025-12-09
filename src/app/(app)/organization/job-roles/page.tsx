@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { getJobLevels, getJobDomains } from '@/lib/actions/job-roles'
 import { JobRoleHeaderButton } from '@/components/jobs/job-role-header-button'
 import { JobRolesContent } from '@/components/jobs/job-roles-content'
-import { JobRolesBreadcrumbClient } from '@/components/jobs/job-roles-breadcrumb-client'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
@@ -19,8 +19,15 @@ export default async function JobRoleManagementPage() {
   // Get levels and domains for management
   const [levels, domains] = await Promise.all([getJobLevels(), getJobDomains()])
 
+  const pathname = '/organization/job-roles'
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Organization Settings', href: '/organization/settings' },
+    { name: 'Job Roles', href: pathname },
+  ]
+
   return (
-    <JobRolesBreadcrumbClient>
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <PageContainer>
         <PageHeader
           title='Job Role Management'
@@ -33,6 +40,6 @@ export default async function JobRoleManagementPage() {
           </PageSection>
         </PageContent>
       </PageContainer>
-    </JobRolesBreadcrumbClient>
+    </PageBreadcrumbSetter>
   )
 }

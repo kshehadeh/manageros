@@ -1,6 +1,6 @@
 import { getReportInstance } from '@/lib/actions/report'
 import ReactMarkdown from 'react-markdown'
-import { ReportInstanceBreadcrumbClient } from '@/components/report-instance-breadcrumb-client'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 import { DeleteReportButton } from '@/components/delete-report-button'
 import {
   PersonOverviewWebRenderer,
@@ -18,11 +18,15 @@ export default async function ReportInstancePage({
   const markdown = (instance as { outputMarkdown?: string }).outputMarkdown
   const isWebRenderer = instance.renderer === 'web'
 
+  const pathname = `/reports/instances/${instance.id}`
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Reports', href: '/reports' },
+    { name: instance.reportName, href: pathname },
+  ]
+
   return (
-    <ReportInstanceBreadcrumbClient
-      reportName={instance.reportName}
-      instanceId={instance.id}
-    >
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <div className='p-6 space-y-6'>
         <div className='flex items-start justify-between'>
           <div>
@@ -44,6 +48,6 @@ export default async function ReportInstancePage({
           </section>
         ) : null}
       </div>
-    </ReportInstanceBreadcrumbClient>
+    </PageBreadcrumbSetter>
   )
 }

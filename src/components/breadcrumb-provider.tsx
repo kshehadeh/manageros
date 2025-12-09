@@ -5,14 +5,11 @@ import { createContext, useContext, useState, ReactNode } from 'react'
 export interface BreadcrumbItem {
   name: string
   href: string
-  isLoading?: boolean
 }
 
 interface BreadcrumbContextType {
   breadcrumbs: BreadcrumbItem[]
   setBreadcrumbs: (_breadcrumbs: BreadcrumbItem[]) => void
-  hasManualBreadcrumbs: boolean
-  setHasManualBreadcrumbs: (_hasManual: boolean) => void
 }
 
 const BreadcrumbContext = createContext<BreadcrumbContextType | undefined>(
@@ -27,15 +24,12 @@ export function BreadcrumbProvider({ children }: BreadcrumbProviderProps) {
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([
     { name: 'Dashboard', href: '/dashboard' },
   ])
-  const [hasManualBreadcrumbs, setHasManualBreadcrumbs] = useState(false)
 
   return (
     <BreadcrumbContext.Provider
       value={{
         breadcrumbs,
         setBreadcrumbs,
-        hasManualBreadcrumbs,
-        setHasManualBreadcrumbs,
       }}
     >
       {children}

@@ -2,7 +2,7 @@ import { prisma } from '@/lib/db'
 import { notFound, redirect } from 'next/navigation'
 
 import { FeedbackCampaignForm } from '@/components/feedback/feedback-campaign-form'
-import { NewFeedbackCampaignBreadcrumbClient } from '@/components/feedback/new-feedback-campaign-breadcrumb-client'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 import { checkIfManagerOrSelf } from '@/lib/utils/people-utils'
 import { getCurrentUser } from '@/lib/auth-utils'
 
@@ -58,11 +58,17 @@ export default async function NewFeedbackCampaignPage({
     redirect('/people')
   }
 
+  const pathname = `/people/${person.id}/feedback-campaigns/new`
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'People', href: '/people' },
+    { name: person.name, href: `/people/${person.id}` },
+    { name: 'Feedback 360', href: `/people/${person.id}/feedback-campaigns` },
+    { name: 'New Campaign', href: pathname },
+  ]
+
   return (
-    <NewFeedbackCampaignBreadcrumbClient
-      personName={person.name}
-      personId={person.id}
-    >
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <div className='space-y-6'>
         <div>
           <h1 className='text-2xl font-bold'>Create Feedback 360</h1>
@@ -77,6 +83,6 @@ export default async function NewFeedbackCampaignPage({
           redirectTo={`/people/${person.id}/feedback-campaigns`}
         />
       </div>
-    </NewFeedbackCampaignBreadcrumbClient>
+    </PageBreadcrumbSetter>
   )
 }

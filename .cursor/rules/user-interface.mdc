@@ -13,7 +13,7 @@ Entities like meetings, initiatives, people, etc. should follow these rules:
   * `header` prop (optional): Use `SectionHeader` component for section titles
   * `children`: The main content of the section
   * `className` (optional): Additional CSS classes if needed
-* Use breadcrumbs to navigate between pages using the useBreadcrumb hook and the Breadcrumb component with the client specific component.
+* Use breadcrumbs to navigate between pages. All pages must explicitly set breadcrumbs using the `PageBreadcrumbSetter` component. See docs/breadcrumbs.md for details.
 * When displaying a list of entities, use the shadcn table component instead of a list of cards.  Limit the columns to those that are necessary and relevant to the entity.
 * When creating a new table list, add support for filtering using the same UI as the persons table.  Use the search bar and the filter button to filter the table. The filter button will popup a modal with the filters.
 * We do not need to include a "Back to..." button since we have the breadcrumbs to navigate back to the previous page.

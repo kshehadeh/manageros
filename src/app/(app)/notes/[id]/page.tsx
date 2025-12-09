@@ -2,9 +2,9 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { getNoteById } from '@/lib/actions/notes'
 import { StandaloneNoteEditor } from '@/components/notes/standalone-note-editor'
-import { NoteDetailBreadcrumbClient } from '@/components/notes/note-detail-breadcrumb-client'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageContent } from '@/components/ui/page-content'
+import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 
 function getEntityLink(
   entityType: string | null | undefined,
@@ -49,11 +49,15 @@ export default async function NoteDetailPage({
   const entityLink = getEntityLink(note.entityType, note.entityId)
   const entityTypeLabel = getEntityTypeLabel(note.entityType)
 
+  const pathname = `/notes/${note.id}`
+  const breadcrumbs = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Notes', href: '/notes' },
+    { name: note.title || 'Untitled', href: pathname },
+  ]
+
   return (
-    <NoteDetailBreadcrumbClient
-      noteTitle={note.title || 'Untitled'}
-      noteId={note.id}
-    >
+    <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
       <PageContainer>
         <PageContent>
           <StandaloneNoteEditor
@@ -64,6 +68,6 @@ export default async function NoteDetailPage({
           />
         </PageContent>
       </PageContainer>
-    </NoteDetailBreadcrumbClient>
+    </PageBreadcrumbSetter>
   )
 }
