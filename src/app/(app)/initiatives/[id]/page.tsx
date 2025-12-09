@@ -103,6 +103,7 @@ export default async function InitiativeDetail({
           actions={
             <InitiativeActionsDropdown
               initiativeId={init.id}
+              initiativeTitle={init.title}
               canEdit={canEdit}
               canDelete={canDelete}
               canCreateTask={canCreateTask}

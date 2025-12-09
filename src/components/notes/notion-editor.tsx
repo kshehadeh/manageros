@@ -3,9 +3,11 @@
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
+import CharacterCount from '@tiptap/extension-character-count'
+import Image from '@tiptap/extension-image'
 import { Markdown } from 'tiptap-markdown'
 import { useTheme } from '@/lib/hooks/use-theme'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import {
   Bold,
   Italic,
@@ -18,33 +20,196 @@ import {
   Code,
   Undo,
   Redo,
+  ImageIcon,
+  Loader2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
+
+/**
+ * Upload an image file to the server and return the URL
+ */
+async function uploadImage(file: File): Promise<string> {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const response = await fetch('/api/notes/upload-image', {
+    method: 'POST',
+    body: formData,
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.error || 'Failed to upload image')
+  }
+
+  const data = await response.json()
+  return data.url
+}
+
+/**
+ * Validate an image file before upload
+ */
+function validateImageFile(file: File): string | null {
+  const allowedTypes = [
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+  ]
+
+  if (!allowedTypes.includes(file.type)) {
+    return 'Only JPEG, PNG, GIF, and WebP images are allowed'
+  }
+
+  const maxSize = 10 * 1024 * 1024 // 10MB
+  if (file.size > maxSize) {
+    return 'Image size must be less than 10MB'
+  }
+
+  return null
+}
 
 interface NotionEditorProps {
   title?: string
-  content: string
+  content?: string
+  value?: string // Alias for content, for backward compatibility with MarkdownEditor
   onTitleChange?: (title: string) => void
   onChange: (content: string) => void
   placeholder?: string
   className?: string
+  heightClassName?: string
   autoFocus?: boolean
+  maxLength?: number
+  showToolbarAlways?: boolean // If true, toolbar is always visible (like MarkdownEditor)
 }
 
 export function NotionEditor({
   title,
   content,
+  value,
   onTitleChange,
   onChange,
   placeholder = 'Start writing...',
   className = '',
+  heightClassName,
   autoFocus = false,
+  maxLength,
+  showToolbarAlways = false,
 }: NotionEditorProps) {
   const { theme } = useTheme()
   const editorRef = useRef<ReturnType<typeof useEditor> | null>(null)
-  const [showToolbar, setShowToolbar] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [showToolbar, setShowToolbar] = useState(showToolbarAlways)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
   const titleInputRef = useRef<HTMLInputElement>(null)
+
+  // Use value prop if provided, otherwise use content
+  const editorContent = value ?? content ?? ''
+
+  // Handle image upload and insertion
+  const handleImageUpload = useCallback(async (file: File) => {
+    const validationError = validateImageFile(file)
+    if (validationError) {
+      toast.error(validationError)
+      return
+    }
+
+    if (!editorRef.current) return
+
+    setIsUploadingImage(true)
+    try {
+      const url = await uploadImage(file)
+      const editor = editorRef.current
+
+      // Insert image node directly using the schema
+      const { schema } = editor.state
+      const imageNode = schema.nodes.image?.create({
+        src: url,
+        alt: file.name,
+      })
+
+      if (imageNode) {
+        const transaction = editor.state.tr.replaceSelectionWith(imageNode)
+        editor.view.dispatch(transaction)
+        editor.commands.focus()
+      }
+
+      toast.success('Image uploaded successfully')
+    } catch (error) {
+      console.error('Failed to upload image:', error)
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to upload image'
+      )
+    } finally {
+      setIsUploadingImage(false)
+    }
+  }, [])
+
+  // Handle file input change
+  const handleFileInputChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0]
+      if (file) {
+        handleImageUpload(file)
+      }
+      event.target.value = ''
+    },
+    [handleImageUpload]
+  )
+
+  // Handle image button click
+  const handleImageButtonClick = useCallback(() => {
+    fileInputRef.current?.click()
+  }, [])
+
+  // Handle drag over
+  const handleDragOver = useCallback((event: React.DragEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+  }, [])
+
+  // Handle drop
+  const handleDrop = useCallback(
+    (event: React.DragEvent) => {
+      event.preventDefault()
+      event.stopPropagation()
+
+      const files = event.dataTransfer?.files
+      if (files && files.length > 0) {
+        for (const file of Array.from(files)) {
+          if (file.type.startsWith('image/')) {
+            handleImageUpload(file)
+            return
+          }
+        }
+      }
+    },
+    [handleImageUpload]
+  )
+
+  // Handle paste
+  const handlePaste = useCallback(
+    (event: React.ClipboardEvent) => {
+      const items = event.clipboardData?.items
+      if (items) {
+        for (const item of Array.from(items)) {
+          if (item.type.startsWith('image/')) {
+            event.preventDefault()
+            event.stopPropagation()
+            const file = item.getAsFile()
+            if (file) {
+              handleImageUpload(file)
+            }
+            return
+          }
+        }
+      }
+    },
+    [handleImageUpload]
+  )
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -57,15 +222,32 @@ export function NotionEditor({
       Placeholder.configure({
         placeholder,
       }),
+      ...(maxLength
+        ? [
+            CharacterCount.configure({
+              limit: maxLength,
+            }),
+          ]
+        : []),
+      Image.configure({
+        inline: false,
+        allowBase64: false,
+        HTMLAttributes: {
+          class: 'max-w-full h-auto rounded-lg my-4',
+        },
+      }),
       Markdown.configure({
-        html: false,
+        html: true,
       }),
     ],
-    content: content || '',
+    content: editorContent || '',
     editorProps: {
       attributes: {
         class: cn(
-          'prose prose-sm max-w-none focus:outline-none min-h-[400px] px-1 py-4',
+          'prose prose-sm max-w-none focus:outline-none',
+          showToolbarAlways
+            ? 'min-h-[300px] px-4 py-3'
+            : 'min-h-[400px] px-1 py-4',
           'prose-headings:font-semibold prose-headings:mt-6 prose-headings:mb-4',
           'prose-p:my-2 prose-p:leading-relaxed',
           'prose-ul:my-2 prose-ol:my-2',
@@ -82,15 +264,19 @@ export function NotionEditor({
       onChange(markdown)
     },
     onFocus: () => {
-      setShowToolbar(true)
+      if (!showToolbarAlways) {
+        setShowToolbar(true)
+      }
     },
     onBlur: () => {
       // Delay hiding toolbar to allow button clicks
-      setTimeout(() => {
-        if (!editor?.isFocused) {
-          setShowToolbar(false)
-        }
-      }, 200)
+      if (!showToolbarAlways) {
+        setTimeout(() => {
+          if (!editor?.isFocused) {
+            setShowToolbar(false)
+          }
+        }, 200)
+      }
     },
   })
 
@@ -104,17 +290,17 @@ export function NotionEditor({
     if (editor) {
       try {
         const currentMarkdown = editor.storage.markdown?.getMarkdown() || ''
-        if (content !== currentMarkdown) {
-          editor.commands.setContent(content || '')
+        if (editorContent !== currentMarkdown) {
+          editor.commands.setContent(editorContent || '')
         }
       } catch {
         const currentContent = editor.getHTML()
-        if (content !== currentContent) {
-          editor.commands.setContent(content || '')
+        if (editorContent !== currentContent) {
+          editor.commands.setContent(editorContent || '')
         }
       }
     }
-  }, [content, editor])
+  }, [editorContent, editor])
 
   // Auto-focus editor
   useEffect(() => {
@@ -154,7 +340,22 @@ export function NotionEditor({
   )
 
   return (
-    <div className={cn('flex flex-col', className)}>
+    <div
+      className={cn(
+        'flex flex-col',
+        showToolbarAlways && 'border rounded-md overflow-hidden',
+        className
+      )}
+    >
+      {/* Hidden file input for image upload */}
+      <input
+        ref={fileInputRef}
+        type='file'
+        accept='image/jpeg,image/jpg,image/png,image/gif,image/webp'
+        onChange={handleFileInputChange}
+        className='hidden'
+      />
+
       {/* Title Input */}
       {onTitleChange && (
         <input
@@ -173,9 +374,16 @@ export function NotionEditor({
         />
       )}
 
-      {/* Floating Toolbar */}
+      {/* Toolbar - Always visible if showToolbarAlways is true, otherwise floating */}
       {showToolbar && (
-        <div className='flex items-center gap-1 p-2 mb-2 border rounded-md bg-background shadow-sm sticky top-0 z-10'>
+        <div
+          className={cn(
+            'flex items-center gap-1 p-2',
+            showToolbarAlways
+              ? 'border-b bg-muted/50'
+              : 'mb-2 border rounded-md bg-background shadow-sm sticky top-0 z-10'
+          )}
+        >
           <MenuButton
             onClick={() => editor.chain().focus().toggleBold().run()}
             active={editor.isActive('bold')}
@@ -248,6 +456,22 @@ export function NotionEditor({
             <Code className='h-4 w-4' />
           </MenuButton>
           <div className='w-px h-6 bg-border mx-1' />
+          <Button
+            type='button'
+            onClick={handleImageButtonClick}
+            disabled={isUploadingImage}
+            variant='ghost'
+            size='sm'
+            className='h-8 w-8 p-0'
+            title='Insert image (or paste/drag an image)'
+          >
+            {isUploadingImage ? (
+              <Loader2 className='h-4 w-4 animate-spin' />
+            ) : (
+              <ImageIcon className='h-4 w-4' />
+            )}
+          </Button>
+          <div className='w-px h-6 bg-border mx-1' />
           <MenuButton
             onClick={() => editor.chain().focus().undo().run()}
             disabled={!editor.can().undo()}
@@ -266,9 +490,28 @@ export function NotionEditor({
       )}
 
       {/* Editor */}
-      <div className='flex-1 overflow-y-auto' data-scrollable-editor>
+      <div
+        className={cn(
+          heightClassName || 'flex-1',
+          'overflow-y-auto',
+          !heightClassName && 'flex-1'
+        )}
+        data-scrollable-editor
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+        onPaste={handlePaste}
+      >
         <EditorContent editor={editor} />
       </div>
+
+      {/* Character count */}
+      {maxLength && (
+        <div className='px-4 py-2 border-t text-xs text-muted-foreground bg-accent'>
+          {editor.storage.characterCount
+            ? `${editor.storage.characterCount.characters()}/${maxLength} characters`
+            : '0 characters'}
+        </div>
+      )}
     </div>
   )
 }

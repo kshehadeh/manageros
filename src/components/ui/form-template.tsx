@@ -82,9 +82,9 @@ export function FormTemplate({
         </div>
       )}
 
-      <div className='flex flex-col lg:flex-row gap-2xl'>
+      <div className='flex flex-col lg:flex-row gap-2xl min-w-0'>
         {/* Main Form Content */}
-        <div className='flex-1 space-y-2xl'>
+        <div className='flex-1 space-y-2xl min-w-0'>
           {sections.map((section, index) => (
             <div key={index} className='space-y-xl'>
               {section.title && section.icon && (

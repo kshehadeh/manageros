@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { MarkdownEditor } from '@/components/markdown-editor'
+import { NotionEditor } from '@/components/notes/notion-editor'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -174,12 +174,13 @@ export function JobRoleDialog({
 
           <div>
             <Label htmlFor='description'>Description (Markdown)</Label>
-            <MarkdownEditor
+            <NotionEditor
               value={formData.description || ''}
               onChange={value =>
                 setFormData({ ...formData, description: value })
               }
               placeholder='### Responsibilities...'
+              showToolbarAlways={true}
             />
           </div>
 

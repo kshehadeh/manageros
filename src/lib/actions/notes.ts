@@ -13,11 +13,13 @@ const CreateNoteSchema = z.object({
   entityType: z.string().min(1),
   entityId: z.string().min(1),
   content: z.string().min(1),
+  title: z.string().max(500).optional(),
 })
 
 const UpdateNoteSchema = z.object({
   id: z.string().min(1),
   content: z.string().min(1),
+  title: z.string().max(500).optional(),
 })
 
 const DeleteNoteSchema = z.object({
@@ -35,6 +37,7 @@ export async function createNote(formData: {
   entityType: string
   entityId: string
   content: string
+  title?: string
   files?: File[]
 }) {
   const user = await getCurrentUser()
@@ -61,6 +64,7 @@ export async function createNote(formData: {
       entityId: validatedData.entityId,
       organizationId: user.managerOSOrganizationId,
       content: validatedData.content,
+      title: validatedData.title || null,
       createdById: user.managerOSUserId || '',
       attachments: {
         create: fileUploadResults.map(file => ({
@@ -136,7 +140,11 @@ export async function createNote(formData: {
 /**
  * Update an existing note
  */
-export async function updateNote(formData: { id: string; content: string }) {
+export async function updateNote(formData: {
+  id: string
+  content: string
+  title?: string
+}) {
   const user = await getCurrentUser()
   if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to update notes')
@@ -163,6 +171,10 @@ export async function updateNote(formData: { id: string; content: string }) {
     },
     data: {
       content: validatedData.content,
+      title:
+        validatedData.title !== undefined
+          ? validatedData.title || null
+          : undefined,
       updatedAt: new Date(),
     },
     include: {

@@ -18,7 +18,7 @@ import { useRouter } from 'next/navigation'
 import { updateInitiative, createInitiative } from '@/lib/actions/initiative'
 import { type InitiativeFormData, initiativeSchema } from '@/lib/validations'
 import { RagCircle } from '@/components/rag'
-import { MarkdownEditor } from '@/components/markdown-editor'
+import { NotionEditor } from '@/components/notes/notion-editor'
 import {
   Trash2,
   Rocket,
@@ -348,11 +348,12 @@ export function InitiativeForm({
 
           <div className='space-y-2'>
             <Label htmlFor='summary'>Summary</Label>
-            <MarkdownEditor
+            <NotionEditor
               value={formData.summary || ''}
               onChange={value => handleInputChange('summary', value)}
               placeholder='Brief description of the initiative... Use Markdown for formatting!'
               heightClassName='max-h-[200px]'
+              showToolbarAlways={true}
             />
             {errors.summary && (
               <p className='text-sm text-destructive'>{errors.summary}</p>
@@ -361,11 +362,12 @@ export function InitiativeForm({
 
           <div className='space-y-2'>
             <Label htmlFor='outcome'>Expected Outcome</Label>
-            <MarkdownEditor
+            <NotionEditor
               value={formData.outcome || ''}
               onChange={value => handleInputChange('outcome', value)}
               placeholder='What success looks like... Use Markdown for formatting!'
               heightClassName='max-h-[200px]'
+              showToolbarAlways={true}
             />
             {errors.outcome && (
               <p className='text-sm text-destructive'>{errors.outcome}</p>

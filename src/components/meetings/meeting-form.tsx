@@ -33,7 +33,7 @@ import {
   Loader2,
   CheckCircle2,
 } from 'lucide-react'
-import { MarkdownEditor } from '@/components/markdown-editor'
+import { NotionEditor } from '@/components/notes/notion-editor'
 import { PersonSelect } from '@/components/ui/person-select'
 import { InitiativeSelect } from '@/components/ui/initiative-select'
 import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
@@ -300,10 +300,11 @@ export function MeetingForm({
 
           <div className='space-y-2'>
             <Label htmlFor='description'>Description</Label>
-            <MarkdownEditor
+            <NotionEditor
               value={formData.description}
               onChange={value => handleInputChange('description', value)}
               placeholder='Enter meeting description... Use Markdown for formatting!'
+              showToolbarAlways={true}
             />
           </div>
         </>
@@ -554,11 +555,12 @@ export function MeetingForm({
       icon: FileText,
       content: (
         <div className='space-y-2'>
-          <MarkdownEditor
+          <NotionEditor
             value={formData.notes}
             onChange={value => handleInputChange('notes', value)}
             placeholder='Meeting notes and agenda items... Use Markdown for formatting!'
             heightClassName='max-h-[300px]'
+            showToolbarAlways={true}
           />
         </div>
       ),

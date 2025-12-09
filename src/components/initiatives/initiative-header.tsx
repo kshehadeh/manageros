@@ -30,7 +30,10 @@ export function InitiativeHeader({ initiative }: InitiativeHeaderProps) {
         </div>
 
         {/* Action Buttons */}
-        <InitiativeActionsDropdown initiativeId={initiative.id} />
+        <InitiativeActionsDropdown
+          initiativeId={initiative.id}
+          initiativeTitle={initiative.title}
+        />
       </div>
     </div>
   )

@@ -32,7 +32,7 @@ import {
   Upload,
   Loader2,
 } from 'lucide-react'
-import { MarkdownEditor } from '@/components/markdown-editor'
+import { NotionEditor } from '@/components/notes/notion-editor'
 import { PersonSelect } from '@/components/ui/person-select'
 import { FormTemplate, type FormSection } from '@/components/ui/form-template'
 import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
@@ -317,10 +317,11 @@ export function MeetingInstanceForm({
       title: 'Notes',
       icon: StickyNote,
       content: (
-        <MarkdownEditor
+        <NotionEditor
           value={formData.notes || ''}
           onChange={value => handleInputChange('notes', value)}
           placeholder='Meeting notes and outcomes... Use Markdown for formatting!'
+          showToolbarAlways={true}
         />
       ),
     },

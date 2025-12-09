@@ -59,6 +59,7 @@ model Organization {
   entityIntegrationLinks EntityIntegrationLink[]
   toleranceRules         OrganizationToleranceRule[]
   exceptions             Exception[]
+  noteImages             NoteImage[]
 
   @@index([billingUserId])
   @@index([subscriptionPlanId])
@@ -91,6 +92,7 @@ model User {
   sharedNotes             NoteShare[]              @relation("SharedNotes")
   fileAttachments         FileAttachment[]
   integrations            Integration[]            @relation("UserIntegrations")
+  noteImages              NoteImage[]              @relation("NoteImageUploader")
   createdAt               DateTime                 @default(now())
   updatedAt               DateTime                 @updatedAt
 
@@ -821,6 +823,25 @@ model NoteShare {
   @@unique([noteId, userId])
   @@index([noteId])
   @@index([userId])
+}
+
+// Inline images embedded in note content - served through authenticated proxy
+model NoteImage {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  uploadedById   String
+  uploadedBy     User         @relation("NoteImageUploader", fields: [uploadedById], references: [id], onDelete: Cascade)
+  fileName       String       // Generated unique filename
+  originalName   String       // Original filename from upload
+  fileSize       Int
+  mimeType       String
+  r2Key          String       // Cloudflare R2 object key (private)
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+  @@index([uploadedById])
+  @@index([createdAt])
 }
 
 model FileAttachment {
