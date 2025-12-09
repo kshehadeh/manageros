@@ -1,5 +1,16 @@
 # Changelog
 
+# [1.32.0](/compare/v1.30.2...v1.32.0) (2025-12-09)
+
+### Bug Fixes
+
+- **form-template:** Add min-width to form layout for better responsiveness 3f25d84
+
+### Features
+
+- **initiative-actions-dropdown:** Enhance functionality with new modals for notes, links, check-ins, and objectives 3ad4845
+- **markdown-editor, notion-editor:** Add inline image support with upload functionality b8e0b0b
+
 ## [1.30.2](/compare/v1.30.1...v1.30.2) (2025-12-09)
 
 ## [1.30.1](/compare/v1.30.0...v1.30.1) (2025-12-08)
