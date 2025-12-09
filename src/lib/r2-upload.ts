@@ -1,4 +1,8 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from '@aws-sdk/client-s3'
 import { randomBytes } from 'crypto'
 import { validateFile } from '@/lib/file-utils'
 
@@ -175,4 +179,47 @@ export async function uploadFilesToR2(
   }
 
   return results
+}
+
+export interface FileDownloadResult {
+  body: ReadableStream<Uint8Array>
+  contentType: string
+  contentLength: number
+}
+
+/**
+ * Get a file from Cloudflare R2 by its key
+ */
+export async function getFileFromR2(
+  r2Key: string
+): Promise<FileDownloadResult> {
+  const config = getR2Config()
+  const client = getR2Client()
+
+  try {
+    const command = new GetObjectCommand({
+      Bucket: config.R2_BUCKET_NAME,
+      Key: r2Key,
+    })
+
+    const response = await client.send(command)
+
+    if (!response.Body) {
+      throw new Error('No body in R2 response')
+    }
+
+    // Convert the AWS SDK stream to a web ReadableStream
+    const webStream = response.Body.transformToWebStream()
+
+    return {
+      body: webStream as ReadableStream<Uint8Array>,
+      contentType: response.ContentType || 'application/octet-stream',
+      contentLength: response.ContentLength || 0,
+    }
+  } catch (error) {
+    console.error('Failed to get file from R2:', error)
+    throw new Error(
+      `Failed to get file: ${error instanceof Error ? error.message : 'Unknown error'}`
+    )
+  }
 }

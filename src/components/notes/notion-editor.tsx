@@ -3,9 +3,10 @@
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
+import Image from '@tiptap/extension-image'
 import { Markdown } from 'tiptap-markdown'
 import { useTheme } from '@/lib/hooks/use-theme'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import {
   Bold,
   Italic,
@@ -18,9 +19,57 @@ import {
   Code,
   Undo,
   Redo,
+  ImageIcon,
+  Loader2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
+
+/**
+ * Upload an image file to the server and return the URL
+ */
+async function uploadImage(file: File): Promise<string> {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const response = await fetch('/api/notes/upload-image', {
+    method: 'POST',
+    body: formData,
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.error || 'Failed to upload image')
+  }
+
+  const data = await response.json()
+  return data.url
+}
+
+/**
+ * Validate an image file before upload
+ */
+function validateImageFile(file: File): string | null {
+  const allowedTypes = [
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+  ]
+
+  if (!allowedTypes.includes(file.type)) {
+    return 'Only JPEG, PNG, GIF, and WebP images are allowed'
+  }
+
+  const maxSize = 10 * 1024 * 1024 // 10MB
+  if (file.size > maxSize) {
+    return 'Image size must be less than 10MB'
+  }
+
+  return null
+}
 
 interface NotionEditorProps {
   title?: string
@@ -43,8 +92,112 @@ export function NotionEditor({
 }: NotionEditorProps) {
   const { theme } = useTheme()
   const editorRef = useRef<ReturnType<typeof useEditor> | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [showToolbar, setShowToolbar] = useState(false)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
   const titleInputRef = useRef<HTMLInputElement>(null)
+
+  // Handle image upload and insertion
+  const handleImageUpload = useCallback(async (file: File) => {
+    const validationError = validateImageFile(file)
+    if (validationError) {
+      toast.error(validationError)
+      return
+    }
+
+    if (!editorRef.current) return
+
+    setIsUploadingImage(true)
+    try {
+      const url = await uploadImage(file)
+      const editor = editorRef.current
+
+      // Insert image node directly using the schema
+      const { schema } = editor.state
+      const imageNode = schema.nodes.image?.create({
+        src: url,
+        alt: file.name,
+      })
+
+      if (imageNode) {
+        const transaction = editor.state.tr.replaceSelectionWith(imageNode)
+        editor.view.dispatch(transaction)
+        editor.commands.focus()
+      }
+
+      toast.success('Image uploaded successfully')
+    } catch (error) {
+      console.error('Failed to upload image:', error)
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to upload image'
+      )
+    } finally {
+      setIsUploadingImage(false)
+    }
+  }, [])
+
+  // Handle file input change
+  const handleFileInputChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0]
+      if (file) {
+        handleImageUpload(file)
+      }
+      event.target.value = ''
+    },
+    [handleImageUpload]
+  )
+
+  // Handle image button click
+  const handleImageButtonClick = useCallback(() => {
+    fileInputRef.current?.click()
+  }, [])
+
+  // Handle drag over
+  const handleDragOver = useCallback((event: React.DragEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+  }, [])
+
+  // Handle drop
+  const handleDrop = useCallback(
+    (event: React.DragEvent) => {
+      event.preventDefault()
+      event.stopPropagation()
+
+      const files = event.dataTransfer?.files
+      if (files && files.length > 0) {
+        for (const file of Array.from(files)) {
+          if (file.type.startsWith('image/')) {
+            handleImageUpload(file)
+            return
+          }
+        }
+      }
+    },
+    [handleImageUpload]
+  )
+
+  // Handle paste
+  const handlePaste = useCallback(
+    (event: React.ClipboardEvent) => {
+      const items = event.clipboardData?.items
+      if (items) {
+        for (const item of Array.from(items)) {
+          if (item.type.startsWith('image/')) {
+            event.preventDefault()
+            event.stopPropagation()
+            const file = item.getAsFile()
+            if (file) {
+              handleImageUpload(file)
+            }
+            return
+          }
+        }
+      }
+    },
+    [handleImageUpload]
+  )
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -57,8 +210,15 @@ export function NotionEditor({
       Placeholder.configure({
         placeholder,
       }),
+      Image.configure({
+        inline: false,
+        allowBase64: false,
+        HTMLAttributes: {
+          class: 'max-w-full h-auto rounded-lg my-4',
+        },
+      }),
       Markdown.configure({
-        html: false,
+        html: true,
       }),
     ],
     content: content || '',
@@ -155,6 +315,15 @@ export function NotionEditor({
 
   return (
     <div className={cn('flex flex-col', className)}>
+      {/* Hidden file input for image upload */}
+      <input
+        ref={fileInputRef}
+        type='file'
+        accept='image/jpeg,image/jpg,image/png,image/gif,image/webp'
+        onChange={handleFileInputChange}
+        className='hidden'
+      />
+
       {/* Title Input */}
       {onTitleChange && (
         <input
@@ -248,6 +417,22 @@ export function NotionEditor({
             <Code className='h-4 w-4' />
           </MenuButton>
           <div className='w-px h-6 bg-border mx-1' />
+          <Button
+            type='button'
+            onClick={handleImageButtonClick}
+            disabled={isUploadingImage}
+            variant='ghost'
+            size='sm'
+            className='h-8 w-8 p-0'
+            title='Insert image (or paste/drag an image)'
+          >
+            {isUploadingImage ? (
+              <Loader2 className='h-4 w-4 animate-spin' />
+            ) : (
+              <ImageIcon className='h-4 w-4' />
+            )}
+          </Button>
+          <div className='w-px h-6 bg-border mx-1' />
           <MenuButton
             onClick={() => editor.chain().focus().undo().run()}
             disabled={!editor.can().undo()}
@@ -266,7 +451,13 @@ export function NotionEditor({
       )}
 
       {/* Editor */}
-      <div className='flex-1 overflow-y-auto' data-scrollable-editor>
+      <div
+        className='flex-1 overflow-y-auto'
+        data-scrollable-editor
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+        onPaste={handlePaste}
+      >
         <EditorContent editor={editor} />
       </div>
     </div>

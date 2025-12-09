@@ -11,6 +11,7 @@ The notes system allows users to attach notes with file attachments to various e
 ### Notes
 
 - **Content**: Rich text notes with markdown support
+- **Inline Images**: Embed images directly in note content via toolbar, paste, or drag-and-drop
 - **Timestamps**: Automatic creation and update timestamps
 - **User Attribution**: Notes are attributed to the user who created them
 - **Organization Isolation**: Notes are scoped to the user's organization
@@ -107,6 +108,101 @@ bucket-name/
 - **Default**: 50MB per file
 - **Configurable**: Can be adjusted per entity type
 - **Bug Reports**: 10MB limit for GitHub issue attachments
+- **Inline Images**: 10MB limit for images embedded in note content
+
+## Inline Image Embedding
+
+The markdown editor supports embedding images directly in note content. Images are uploaded to Cloudflare R2 and served through an authenticated proxy endpoint.
+
+### Security Model
+
+Inline images are protected by organization-level access control:
+
+- **Authentication Required**: Images are served through `/api/notes/images/[id]` which requires authentication
+- **Organization Isolation**: Only users in the same organization can view uploaded images
+- **No Public URLs**: Direct R2 URLs are never exposed to clients
+- **Database Tracking**: All uploaded images are tracked in the `NoteImage` table
+
+### How to Embed Images
+
+There are three ways to embed images in notes:
+
+1. **Toolbar Button**: Click the image icon in the editor toolbar to open a file picker
+2. **Paste**: Copy an image and paste it directly into the editor (Ctrl/Cmd+V)
+3. **Drag and Drop**: Drag an image file from your computer into the editor
+
+### Supported Formats
+
+- JPEG/JPG
+- PNG
+- GIF
+- WebP
+
+### Size Limits
+
+- Maximum file size: 10MB per image
+
+### API Endpoints
+
+#### Upload Image
+
+Images are uploaded via the `/api/notes/upload-image` endpoint:
+
+```typescript
+// POST /api/notes/upload-image
+// Content-Type: multipart/form-data
+
+const formData = new FormData()
+formData.append('file', imageFile)
+
+const response = await fetch('/api/notes/upload-image', {
+  method: 'POST',
+  body: formData,
+})
+
+const { url, fileName } = await response.json()
+// url: Proxy URL (e.g., /api/notes/images/abc123)
+// fileName: Original file name
+```
+
+#### Serve Image
+
+Images are served via the `/api/notes/images/[id]` endpoint:
+
+```typescript
+// GET /api/notes/images/[id]
+// Requires authentication
+// Returns: Image binary with appropriate Content-Type header
+```
+
+### Database Schema
+
+```prisma
+model NoteImage {
+  id             String       @id @default(cuid())
+  organizationId String
+  uploadedById   String
+  fileName       String       // Generated unique filename
+  originalName   String       // Original filename from upload
+  fileSize       Int
+  mimeType       String
+  r2Key          String       // Cloudflare R2 object key (private)
+  createdAt      DateTime     @default(now())
+}
+```
+
+### Storage Location
+
+Inline images are stored in R2 with the following path structure:
+
+```
+bucket-name/
+└── private/
+    └── note-images/
+        └── note-image/
+            └── {organizationId}/
+                └── {timestamp}-{randomId}.{extension}
+```
 
 ## API Reference
 
@@ -264,8 +360,7 @@ if (validationError) {
 
 ### Planned Features
 
-- **Rich Text Editor**: WYSIWYG editor for note content
-- **File Preview**: Inline preview for images and PDFs
+- **File Preview**: Inline preview for PDFs (images already supported inline)
 - **Version History**: Track changes to notes over time
 - **Comments**: Threaded discussions on notes
 - **Templates**: Predefined note templates for common use cases

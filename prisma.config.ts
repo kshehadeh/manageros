@@ -9,7 +9,6 @@ type Env = {
 export default defineConfig({
   schema: 'prisma/schema.prisma',
   datasource: {
-    url: env<Env>('DATABASE_URL') || process.env.DATABASE_URL || '',
-    shadowDatabaseUrl: env<Env>('DIRECT_URL') || process.env.DIRECT_URL || '',
+    url: env<Env>('DIRECT_URL') || process.env.DIRECT_URL || '',
   },
 })
