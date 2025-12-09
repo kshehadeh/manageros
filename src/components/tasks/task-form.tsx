@@ -10,7 +10,7 @@ import {
   TaskSummaryInputProvider,
   useTaskSummaryInput,
 } from '@/components/tasks/task-summary-input-provider'
-import { MarkdownEditor } from '@/components/markdown-editor'
+import { NotionEditor } from '@/components/notes/notion-editor'
 import { DateTimePickerWithNaturalInput } from '@/components/ui/datetime-picker-with-natural-input'
 import { createTask, updateTask } from '@/lib/actions/task'
 import { type TaskFormData, taskSchema } from '@/lib/validations'
@@ -239,11 +239,12 @@ function TaskFormContent({
           </div>
 
           <div>
-            <MarkdownEditor
+            <NotionEditor
               value={formData.description || ''}
               onChange={value => handleInputChange('description', value)}
               placeholder='Enter task description... Use Markdown for formatting!'
               className={errors.description ? 'border-red-500' : ''}
+              showToolbarAlways={true}
             />
             {errors.description && (
               <p className='text-sm text-red-500 mt-1'>{errors.description}</p>

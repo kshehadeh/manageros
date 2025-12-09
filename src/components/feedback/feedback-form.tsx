@@ -15,7 +15,7 @@ import { useRouter } from 'next/navigation'
 import { createFeedback, updateFeedback } from '@/lib/actions/feedback'
 import { type FeedbackFormData } from '@/lib/validations'
 import { type Person } from '@/generated/prisma'
-import { MarkdownEditor } from '@/components/markdown-editor'
+import { NotionEditor } from '@/components/notes/notion-editor'
 import { MessageSquare, Edit } from 'lucide-react'
 import {
   FormTemplate,
@@ -130,10 +130,11 @@ export function FeedbackForm({
 
           <div className='space-y-2'>
             <Label htmlFor='body'>Feedback Content</Label>
-            <MarkdownEditor
+            <NotionEditor
               value={formData.body}
               onChange={value => handleChange('body', value)}
               placeholder='Share your feedback... Use Markdown for formatting!'
+              showToolbarAlways={true}
             />
           </div>
         </>

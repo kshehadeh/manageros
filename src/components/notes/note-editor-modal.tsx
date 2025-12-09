@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { MarkdownEditor } from '@/components/markdown-editor'
+import { NotionEditor } from '@/components/notes/notion-editor'
 import { NoteWithAttachments } from '@/types/notes'
 import { Loader2 } from 'lucide-react'
 
@@ -106,11 +106,12 @@ export function NoteEditorModal({
           <div className='space-y-2 flex-1 min-h-0'>
             <Label htmlFor='note-content'>Content *</Label>
             <div className='min-h-[300px]'>
-              <MarkdownEditor
+              <NotionEditor
                 value={content}
                 onChange={setContent}
                 placeholder='Write your note here...'
                 heightClassName='min-h-[250px] max-h-[40vh]'
+                showToolbarAlways={true}
               />
             </div>
           </div>

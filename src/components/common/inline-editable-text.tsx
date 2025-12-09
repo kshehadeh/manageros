@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import ContentEditable, { ContentEditableEvent } from 'react-contenteditable'
 import { Button } from '@/components/ui/button'
-import { MarkdownEditor } from '@/components/markdown-editor'
+import { NotionEditor } from '@/components/notes/notion-editor'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import { Check, X, Edit2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -128,16 +128,17 @@ export function InlineEditableText({
     }
   }, [isEditing, multiline, handleSave, handleCancel])
 
-  // Multiline editing uses the existing MarkdownEditor
+  // Multiline editing uses NotionEditor
   if (multiline) {
     if (isEditing) {
       return (
         <div className={cn(className)}>
-          <MarkdownEditor
+          <NotionEditor
             value={editValue}
             onChange={setEditValue}
             placeholder={placeholder}
             heightClassName='max-h-[200px]'
+            showToolbarAlways={true}
           />
           <div className='flex items-center gap-2 mt-2'>
             <Button

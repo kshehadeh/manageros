@@ -3,6 +3,7 @@
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
+import CharacterCount from '@tiptap/extension-character-count'
 import Image from '@tiptap/extension-image'
 import { Markdown } from 'tiptap-markdown'
 import { useTheme } from '@/lib/hooks/use-theme'
@@ -73,29 +74,40 @@ function validateImageFile(file: File): string | null {
 
 interface NotionEditorProps {
   title?: string
-  content: string
+  content?: string
+  value?: string // Alias for content, for backward compatibility with MarkdownEditor
   onTitleChange?: (title: string) => void
   onChange: (content: string) => void
   placeholder?: string
   className?: string
+  heightClassName?: string
   autoFocus?: boolean
+  maxLength?: number
+  showToolbarAlways?: boolean // If true, toolbar is always visible (like MarkdownEditor)
 }
 
 export function NotionEditor({
   title,
   content,
+  value,
   onTitleChange,
   onChange,
   placeholder = 'Start writing...',
   className = '',
+  heightClassName,
   autoFocus = false,
+  maxLength,
+  showToolbarAlways = false,
 }: NotionEditorProps) {
   const { theme } = useTheme()
   const editorRef = useRef<ReturnType<typeof useEditor> | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [showToolbar, setShowToolbar] = useState(false)
+  const [showToolbar, setShowToolbar] = useState(showToolbarAlways)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
   const titleInputRef = useRef<HTMLInputElement>(null)
+
+  // Use value prop if provided, otherwise use content
+  const editorContent = value ?? content ?? ''
 
   // Handle image upload and insertion
   const handleImageUpload = useCallback(async (file: File) => {
@@ -210,6 +222,13 @@ export function NotionEditor({
       Placeholder.configure({
         placeholder,
       }),
+      ...(maxLength
+        ? [
+            CharacterCount.configure({
+              limit: maxLength,
+            }),
+          ]
+        : []),
       Image.configure({
         inline: false,
         allowBase64: false,
@@ -221,11 +240,14 @@ export function NotionEditor({
         html: true,
       }),
     ],
-    content: content || '',
+    content: editorContent || '',
     editorProps: {
       attributes: {
         class: cn(
-          'prose prose-sm max-w-none focus:outline-none min-h-[400px] px-1 py-4',
+          'prose prose-sm max-w-none focus:outline-none',
+          showToolbarAlways
+            ? 'min-h-[300px] px-4 py-3'
+            : 'min-h-[400px] px-1 py-4',
           'prose-headings:font-semibold prose-headings:mt-6 prose-headings:mb-4',
           'prose-p:my-2 prose-p:leading-relaxed',
           'prose-ul:my-2 prose-ol:my-2',
@@ -242,15 +264,19 @@ export function NotionEditor({
       onChange(markdown)
     },
     onFocus: () => {
-      setShowToolbar(true)
+      if (!showToolbarAlways) {
+        setShowToolbar(true)
+      }
     },
     onBlur: () => {
       // Delay hiding toolbar to allow button clicks
-      setTimeout(() => {
-        if (!editor?.isFocused) {
-          setShowToolbar(false)
-        }
-      }, 200)
+      if (!showToolbarAlways) {
+        setTimeout(() => {
+          if (!editor?.isFocused) {
+            setShowToolbar(false)
+          }
+        }, 200)
+      }
     },
   })
 
@@ -264,17 +290,17 @@ export function NotionEditor({
     if (editor) {
       try {
         const currentMarkdown = editor.storage.markdown?.getMarkdown() || ''
-        if (content !== currentMarkdown) {
-          editor.commands.setContent(content || '')
+        if (editorContent !== currentMarkdown) {
+          editor.commands.setContent(editorContent || '')
         }
       } catch {
         const currentContent = editor.getHTML()
-        if (content !== currentContent) {
-          editor.commands.setContent(content || '')
+        if (editorContent !== currentContent) {
+          editor.commands.setContent(editorContent || '')
         }
       }
     }
-  }, [content, editor])
+  }, [editorContent, editor])
 
   // Auto-focus editor
   useEffect(() => {
@@ -314,7 +340,13 @@ export function NotionEditor({
   )
 
   return (
-    <div className={cn('flex flex-col', className)}>
+    <div
+      className={cn(
+        'flex flex-col',
+        showToolbarAlways && 'border rounded-md overflow-hidden',
+        className
+      )}
+    >
       {/* Hidden file input for image upload */}
       <input
         ref={fileInputRef}
@@ -342,9 +374,16 @@ export function NotionEditor({
         />
       )}
 
-      {/* Floating Toolbar */}
+      {/* Toolbar - Always visible if showToolbarAlways is true, otherwise floating */}
       {showToolbar && (
-        <div className='flex items-center gap-1 p-2 mb-2 border rounded-md bg-background shadow-sm sticky top-0 z-10'>
+        <div
+          className={cn(
+            'flex items-center gap-1 p-2',
+            showToolbarAlways
+              ? 'border-b bg-muted/50'
+              : 'mb-2 border rounded-md bg-background shadow-sm sticky top-0 z-10'
+          )}
+        >
           <MenuButton
             onClick={() => editor.chain().focus().toggleBold().run()}
             active={editor.isActive('bold')}
@@ -452,7 +491,11 @@ export function NotionEditor({
 
       {/* Editor */}
       <div
-        className='flex-1 overflow-y-auto'
+        className={cn(
+          heightClassName || 'flex-1',
+          'overflow-y-auto',
+          !heightClassName && 'flex-1'
+        )}
         data-scrollable-editor
         onDragOver={handleDragOver}
         onDrop={handleDrop}
@@ -460,6 +503,15 @@ export function NotionEditor({
       >
         <EditorContent editor={editor} />
       </div>
+
+      {/* Character count */}
+      {maxLength && (
+        <div className='px-4 py-2 border-t text-xs text-muted-foreground bg-accent'>
+          {editor.storage.characterCount
+            ? `${editor.storage.characterCount.characters()}/${maxLength} characters`
+            : '0 characters'}
+        </div>
+      )}
     </div>
   )
 }

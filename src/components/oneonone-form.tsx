@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createOneOnOne, updateOneOnOne } from '@/lib/actions/oneonone'
 import { type OneOnOneFormData } from '@/lib/validations'
 import { Link } from '@/components/ui/link'
-import { MarkdownEditor } from './markdown-editor'
+import { NotionEditor } from '@/components/notes/notion-editor'
 import { Button } from '@/components/ui/button'
 import {
   Handshake,
@@ -207,7 +207,7 @@ export function OneOnOneForm({
       {/* Notes */}
       <div className='space-y-4'>
         <SectionHeader icon={FileText} title='Notes' />
-        <MarkdownEditor
+        <NotionEditor
           value={formData.notes || ''}
           onChange={value => setFormData({ ...formData, notes: value })}
           placeholder='Enter meeting notes... Use Markdown for formatting!'
