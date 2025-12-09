@@ -1,19 +1,11 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
-import { Textarea } from '@/components/ui/textarea'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { VisuallyHidden } from '@/components/ui/visually-hidden'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
 import {
@@ -22,7 +14,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   createNote,
@@ -37,17 +28,16 @@ import {
   MoreHorizontal,
   Edit,
   Trash2,
-  Paperclip,
   Download,
   FileText,
   X,
-  Loader2,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { getFileIcon, formatFileSize, isImageMimeType } from '@/lib/file-utils'
 import { SimpleNotesList } from './simple-notes-list'
+import { NoteEditorModal } from './note-editor-modal'
 
 interface NotesSectionProps {
   entityType: string
@@ -68,9 +58,6 @@ export function NotesSection({
     null
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isDragOver, setIsDragOver] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [expandedNotes, setExpandedNotes] = useState<Set<string>>(new Set())
   const [lightboxImage, setLightboxImage] = useState<{
     src: string
@@ -105,10 +92,8 @@ export function NotesSection({
     }
   }
 
-  const handleCreateNote = async (formData: FormData) => {
-    const content = formData.get('content') as string
-
-    if (!content.trim()) {
+  const handleCreateNote = async (data: { title: string; content: string }) => {
+    if (!data.content.trim()) {
       toast.error('Note content is required')
       return
     }
@@ -118,13 +103,12 @@ export function NotesSection({
       await createNote({
         entityType,
         entityId,
-        content: content.trim(),
-        files: selectedFiles.length > 0 ? selectedFiles : undefined,
+        content: data.content.trim(),
+        title: data.title.trim() || undefined,
       })
 
       toast.success('Note created successfully')
       setIsCreateDialogOpen(false)
-      setSelectedFiles([])
     } catch (error) {
       console.error('Error creating note:', error)
 
@@ -144,12 +128,10 @@ export function NotesSection({
     }
   }
 
-  const handleUpdateNote = async (formData: FormData) => {
+  const handleUpdateNote = async (data: { title: string; content: string }) => {
     if (!editingNote) return
 
-    const content = formData.get('content') as string
-
-    if (!content.trim()) {
+    if (!data.content.trim()) {
       toast.error('Note content is required')
       return
     }
@@ -158,7 +140,8 @@ export function NotesSection({
     try {
       await updateNote({
         id: editingNote.id,
-        content: content.trim(),
+        content: data.content.trim(),
+        title: data.title.trim() || undefined,
       })
 
       toast.success('Note updated successfully')
@@ -207,58 +190,9 @@ export function NotesSection({
     }
   }
 
-  const handleFileSelect = (files: FileList | null) => {
-    if (!files) return
-
-    const newFiles: File[] = []
-    Array.from(files).forEach(file => {
-      // Basic validation
-      if (file.size > 50 * 1024 * 1024) {
-        // 50MB
-        toast.error(`${file.name}: File size must be less than 50MB`)
-        return
-      }
-      newFiles.push(file)
-    })
-
-    if (newFiles.length > 0) {
-      setSelectedFiles(prev => [...prev, ...newFiles])
-    }
-  }
-
-  const removeFile = (index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index))
-  }
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragOver(true)
-  }
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragOver(false)
-  }
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragOver(false)
-    handleFileSelect(e.dataTransfer.files)
-  }
-
   const openEditDialog = (note: NoteWithAttachments) => {
     setEditingNote(note)
     setIsEditDialogOpen(true)
-  }
-
-  const closeCreateDialog = () => {
-    setIsCreateDialogOpen(false)
-    setSelectedFiles([])
-  }
-
-  const closeEditDialog = () => {
-    setIsEditDialogOpen(false)
-    setEditingNote(null)
   }
 
   const openLightbox = (src: string, alt: string) => {
@@ -488,178 +422,27 @@ export function NotesSection({
         )}
       </PageSection>
 
-      {/* Create Note Dialog */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Note</DialogTitle>
-            <DialogDescription>
-              Add a note with optional file attachments
-            </DialogDescription>
-          </DialogHeader>
-          <form action={handleCreateNote} className='space-y-4'>
-            <div className='space-y-2'>
-              <label htmlFor='content' className='text-sm font-medium'>
-                Content *
-              </label>
-              <Textarea
-                id='content'
-                name='content'
-                placeholder='Write your note here...'
-                rows={6}
-                required
-                disabled={isSubmitting}
-              />
-            </div>
+      {/* Create Note Modal */}
+      <NoteEditorModal
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        onSave={handleCreateNote}
+        isLoading={isSubmitting}
+        mode='create'
+      />
 
-            <div className='space-y-2'>
-              <label className='text-sm font-medium'>
-                Attachments (Optional)
-              </label>
-
-              {/* File Upload Area */}
-              <div
-                className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
-                  isDragOver
-                    ? 'border-primary bg-primary/5'
-                    : 'border-muted-foreground/25 hover:border-muted-foreground/50'
-                }`}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-              >
-                <Paperclip className='mx-auto h-8 w-8 text-muted-foreground mb-2' />
-                <p className='text-sm text-muted-foreground mb-2'>
-                  Drag & drop files here, or{' '}
-                  <button
-                    type='button'
-                    onClick={() => fileInputRef.current?.click()}
-                    className='text-primary hover:underline hover:text-highlight'
-                    disabled={isSubmitting}
-                  >
-                    browse files
-                  </button>
-                </p>
-                <p className='text-xs text-muted-foreground'>
-                  Supports images, PDFs, documents (max 50MB each)
-                </p>
-
-                <input
-                  ref={fileInputRef}
-                  type='file'
-                  multiple
-                  onChange={e => handleFileSelect(e.target.files)}
-                  className='hidden'
-                  disabled={isSubmitting}
-                />
-              </div>
-
-              {/* Selected Files */}
-              {selectedFiles.length > 0 && (
-                <div className='space-y-2'>
-                  <p className='text-sm font-medium'>Selected Files:</p>
-                  <div className='space-y-1'>
-                    {selectedFiles.map((file, index) => (
-                      <div
-                        key={index}
-                        className='flex items-center justify-between p-2 border rounded bg-muted/50'
-                      >
-                        <div className='flex items-center gap-2'>
-                          <span className='text-lg'>
-                            {getFileIcon(file.type)}
-                          </span>
-                          <span className='text-sm'>{file.name}</span>
-                          <Badge variant='secondary' className='text-xs'>
-                            {formatFileSize(file.size)}
-                          </Badge>
-                        </div>
-                        <Button
-                          type='button'
-                          variant='ghost'
-                          size='sm'
-                          onClick={() => removeFile(index)}
-                          className='h-6 w-6 p-0'
-                          disabled={isSubmitting}
-                        >
-                          <X className='h-3 w-3' />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <DialogFooter>
-              <Button
-                type='button'
-                variant='outline'
-                onClick={closeCreateDialog}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button type='submit' disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                    Creating...
-                  </>
-                ) : (
-                  'Create Note'
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Note Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Note</DialogTitle>
-            <DialogDescription>Update the note content</DialogDescription>
-          </DialogHeader>
-          <form action={handleUpdateNote} className='space-y-4'>
-            <div className='space-y-2'>
-              <label htmlFor='edit-content' className='text-sm font-medium'>
-                Content *
-              </label>
-              <Textarea
-                id='edit-content'
-                name='content'
-                placeholder='Write your note here...'
-                rows={6}
-                defaultValue={editingNote?.content}
-                required
-                disabled={isSubmitting}
-              />
-            </div>
-
-            <DialogFooter>
-              <Button
-                type='button'
-                variant='outline'
-                onClick={closeEditDialog}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button type='submit' disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                    Updating...
-                  </>
-                ) : (
-                  'Update Note'
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      {/* Edit Note Modal */}
+      <NoteEditorModal
+        open={isEditDialogOpen}
+        onOpenChange={open => {
+          setIsEditDialogOpen(open)
+          if (!open) setEditingNote(null)
+        }}
+        note={editingNote}
+        onSave={handleUpdateNote}
+        isLoading={isSubmitting}
+        mode='edit'
+      />
 
       {/* Image Lightbox */}
       <Dialog open={!!lightboxImage} onOpenChange={closeLightbox}>
