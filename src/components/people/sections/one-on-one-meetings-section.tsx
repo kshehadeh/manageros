@@ -4,9 +4,7 @@ import {
 } from '@/components/oneonones/oneonone-list'
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
-import { Button } from '@/components/ui/button'
-import { Handshake, Eye } from 'lucide-react'
-import { Link } from '@/components/ui/link'
+import { Handshake } from 'lucide-react'
 import { getPersonWithReportsAndManager } from '@/lib/data/people'
 import { getOneOnOnesForPerson } from '@/lib/data/one-on-ones'
 
@@ -73,20 +71,7 @@ export async function OneOnOneMeetingsSection({
   return (
     <PageSection
       className='flex-1 min-w-[300px]'
-      header={
-        <SectionHeader
-          icon={Handshake}
-          title='1:1 Meetings'
-          action={
-            <Button asChild variant='default' size='sm'>
-              <Link href='/oneonones' className='flex items-center gap-2'>
-                <Eye className='w-4 h-4' />
-                View All
-              </Link>
-            </Button>
-          }
-        />
-      }
+      header={<SectionHeader icon={Handshake} title='1:1 Meetings' />}
     >
       <SimpleOneOnOneList
         oneOnOnes={transformedOneOnOnes}
