@@ -1,6 +1,7 @@
 'use client'
 
 import { SignUp } from '@clerk/nextjs'
+import { shadcn } from '@clerk/themes'
 import { AnimatedGeometricPattern } from '@/components/marketing/animated-geometric-pattern'
 import { AuthMarketingPanel } from '@/components/auth/auth-marketing-panel'
 
@@ -30,7 +31,14 @@ export default function SignUpPage() {
 
         {/* Right side - Sign up form */}
         <div className='flex w-full items-start sm:justify-center p-4 lg:w-1/2'>
-          <SignUp routing='path' path='/auth/signup' signInUrl='/auth/signin' />
+          <SignUp
+            appearance={{
+              baseTheme: shadcn,
+            }}
+            routing='path'
+            path='/auth/signup'
+            signInUrl='/auth/signin'
+          />
         </div>
       </div>
     </div>

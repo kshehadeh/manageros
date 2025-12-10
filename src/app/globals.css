@@ -115,6 +115,9 @@
   --clerk-color-muted-foreground: var(--color-muted-foreground);
   --clerk-color-muted: var(--color-muted);
   --clerk-color-background: var(--color-background);
+  --clerk-color-card: var(--color-card);
+  --clerk-color-accent: var(--color-accent);
+  --clerk-color-accent-foreground: var(--color-accent-foreground);
   --clerk-color-input-foreground: var(--color-foreground);
   --clerk-color-input: var(--color-input);
   --clerk-color-border: var(--color-border);
@@ -205,6 +208,9 @@
   --clerk-color-muted-foreground: var(--color-muted-foreground);
   --clerk-color-muted: var(--color-muted);
   --clerk-color-background: var(--color-background);
+  --clerk-color-card: var(--color-card);
+  --clerk-color-accent: var(--color-accent);
+  --clerk-color-accent-foreground: var(--color-accent-foreground);
   --clerk-color-input-foreground: var(--color-foreground);
   --clerk-color-input: var(--color-input);
   --clerk-color-border: var(--color-border);
@@ -212,14 +218,14 @@
   --clerk-color-danger: var(--color-destructive);
   --clerk-color-success: var(--color-badge-success);
   --clerk-color-warning: var(--color-badge-warning);
-  --clerk-color-neutral: var(--color-foreground);
+  --clerk-color-neutral: var(--color-muted);
   --clerk-color-shadow: hsl(0 0% 0% / 0.3);
   --clerk-color-modal-backdrop: hsl(0 0% 0% / 0.7);
   --clerk-font-family: var(--font-family-sans);
   --clerk-font-family-buttons: var(--font-family-mono);
   --clerk-font-size: var(--font-size-sm);
-  --clerk-border-radius: var(--radius-sm);
-  --clerk-spacing: var(--spacing-lg);
+  --clerk-border-radius: var(--radius-md);
+  --clerk-spacing: var(--spacing-xl);
 }
 
 .rdp-root {
@@ -926,4 +932,127 @@ input[type='time']::-webkit-calendar-picker-indicator {
 
 .cl-organizationPreviewSecondaryIdentifier {
   font-size: var(--font-size-sm) !important;
+}
+
+/* Clerk authentication component styling overrides */
+/* Card/Container - Use card background instead of background */
+.cl-card,
+.cl-cardBox,
+.cl-main {
+  background-color: var(--clerk-color-card) !important;
+  border-color: var(--clerk-color-border) !important;
+}
+
+/* Primary buttons - Match app button styling */
+.cl-formButtonPrimary {
+  background-color: var(--clerk-color-primary) !important;
+  color: var(--clerk-color-primary-foreground) !important;
+  border-radius: var(--clerk-border-radius) !important;
+  font-family: var(--clerk-font-family-buttons) !important;
+}
+
+.cl-formButtonPrimary:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--clerk-color-primary) 90%,
+    transparent
+  ) !important;
+}
+
+/* Social login buttons - Match app outline button variant */
+.cl-socialButtonsBlockButton,
+.cl-socialButtonsBlockButtonText {
+  background-color: var(--clerk-color-background) !important;
+  border: 1px solid var(--clerk-color-border) !important;
+  color: var(--clerk-color-foreground) !important;
+  border-radius: var(--clerk-border-radius) !important;
+  font-family: var(--clerk-font-family-buttons) !important;
+}
+
+.cl-socialButtonsBlockButton:hover {
+  background-color: var(--clerk-color-accent) !important;
+  color: var(--clerk-color-accent-foreground) !important;
+}
+
+/* Input fields - Match app input styling */
+.cl-input,
+.cl-inputField {
+  background-color: var(--clerk-color-background) !important;
+  border: 1px solid var(--clerk-color-input) !important;
+  color: var(--clerk-color-input-foreground) !important;
+  border-radius: var(--clerk-border-radius) !important;
+}
+
+.cl-input:focus,
+.cl-inputField:focus {
+  outline: 2px solid var(--clerk-color-ring) !important;
+  outline-offset: 2px !important;
+  border-color: var(--clerk-color-ring) !important;
+}
+
+/* OTP Code input fields - Match app input styling */
+.cl-otpCodeFieldInput {
+  background-color: var(--clerk-color-background) !important;
+  border: 1px solid var(--clerk-color-input) !important;
+  color: var(--clerk-color-input-foreground) !important;
+  border-radius: var(--clerk-border-radius) !important;
+}
+
+.cl-otpCodeFieldInput:focus {
+  outline: 2px solid var(--clerk-color-ring) !important;
+  outline-offset: 2px !important;
+  border-color: var(--clerk-color-ring) !important;
+}
+
+/* Links - Match app link styling */
+.cl-footerActionLink,
+.cl-formFieldAction,
+.cl-link {
+  color: var(--clerk-color-primary) !important;
+}
+
+.cl-footerActionLink:hover,
+.cl-formFieldAction:hover,
+.cl-link:hover {
+  color: var(--color-highlight) !important;
+  text-decoration: underline !important;
+}
+
+/* Text colors - Ensure proper foreground colors */
+.cl-headerTitle,
+.cl-headerSubtitle,
+.cl-formFieldLabel,
+.cl-formFieldInputLabel {
+  color: var(--clerk-color-foreground) !important;
+}
+
+.cl-formFieldHint,
+.cl-footerActionText {
+  color: var(--clerk-color-muted-foreground) !important;
+}
+
+/* Divider styling */
+.cl-dividerLine {
+  background-color: var(--clerk-color-border) !important;
+}
+
+.cl-dividerText {
+  color: var(--clerk-color-muted-foreground) !important;
+}
+
+/* Error messages */
+.cl-alertText,
+.cl-fieldErrorText {
+  color: var(--clerk-color-danger) !important;
+}
+
+/* Alternative methods button */
+.cl-formButtonReset {
+  color: var(--clerk-color-foreground) !important;
+  border-color: var(--clerk-color-border) !important;
+}
+
+.cl-formButtonReset:hover {
+  background-color: var(--clerk-color-accent) !important;
+  color: var(--clerk-color-accent-foreground) !important;
 }
