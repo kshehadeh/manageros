@@ -262,13 +262,42 @@ export async function getCurrentUser(
       // If we don't have a user object in the database then we need to create one.
       const clerkUser = await getUserFromClerk(userId)
       if (clerkUser && clerkUser.primaryEmailAddress?.emailAddress) {
-        user = await prisma.user.create({
-          data: {
-            clerkUserId: userId,
-            email: clerkUser.primaryEmailAddress?.emailAddress,
-            name: combineName(clerkUser.firstName, clerkUser.lastName),
-          },
+        const email = clerkUser.primaryEmailAddress.emailAddress.toLowerCase()
+
+        // Check if a user with this email already exists (but without a clerkUserId)
+        const existingUserByEmail = await prisma.user.findUnique({
+          where: { email },
         })
+
+        if (existingUserByEmail) {
+          // Only link if the existing user doesn't already have a clerkUserId
+          // (if they do, it means there's a data inconsistency - the initial query should have found them)
+          if (existingUserByEmail.clerkUserId) {
+            // This shouldn't happen, but if it does, log a warning and use the existing user
+            console.warn(
+              `User with email ${email} already has clerkUserId ${existingUserByEmail.clerkUserId}, but we're trying to link ${userId}. Using existing user.`
+            )
+            user = existingUserByEmail
+          } else {
+            // Link the existing user to this Clerk account
+            user = await prisma.user.update({
+              where: { id: existingUserByEmail.id },
+              data: {
+                clerkUserId: userId,
+                name: combineName(clerkUser.firstName, clerkUser.lastName),
+              },
+            })
+          }
+        } else {
+          // Create a new user
+          user = await prisma.user.create({
+            data: {
+              clerkUserId: userId,
+              email,
+              name: combineName(clerkUser.firstName, clerkUser.lastName),
+            },
+          })
+        }
       } else {
         // The clerk user could not be found.  This is a fatal error and
         //  means that we cannot proceed.

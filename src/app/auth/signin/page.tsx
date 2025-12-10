@@ -1,6 +1,7 @@
 'use client'
 
 import { SignIn, useAuth } from '@clerk/nextjs'
+import { shadcn } from '@clerk/themes'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
 import { AnimatedGeometricPattern } from '@/components/marketing/animated-geometric-pattern'
@@ -59,6 +60,9 @@ export default function SignInPage() {
         {/* Right side - Sign in form */}
         <div className='flex w-full items-start sm:justify-center p-4 lg:w-1/2'>
           <SignIn
+            appearance={{
+              baseTheme: shadcn,
+            }}
             routing='hash'
             signUpUrl='/auth/signup'
             fallbackRedirectUrl='/dashboard'
