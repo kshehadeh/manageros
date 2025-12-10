@@ -1,12 +1,9 @@
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { LinksSection } from './links-section'
-import { ChangeTeamModal } from './change-team-modal'
 import { ManageOwnersModal } from './manage-owners-modal'
-import { Users, User } from 'lucide-react'
+import { User } from 'lucide-react'
 import { SimplePeopleList } from '@/components/people/person-list'
-import { TeamAvatar } from '@/components/teams/team-avatar'
-import { Link } from '@/components/ui/link'
 import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
 import { getEntityLinks } from '@/lib/actions/entity-links'
 import { prisma } from '@/lib/db'
@@ -30,7 +27,6 @@ export async function InitiativeSidebar({
     prisma.initiative.findUnique({
       where: { id: initiativeId },
       include: {
-        team: { select: { id: true, name: true, avatar: true } },
         owners: {
           include: {
             person: {
@@ -61,7 +57,6 @@ export async function InitiativeSidebar({
     return null
   }
 
-  const team = initiative.team
   const owners = initiative.owners
 
   // Transform owners for SimplePeopleList
@@ -79,76 +74,47 @@ export async function InitiativeSidebar({
 
   return (
     <div className='w-full lg:w-80 space-y-6'>
-      {/* Team Section */}
-      <PageSection
-        header={
-          <SectionHeader
-            icon={Users}
-            title='Team'
-            action={
-              canEdit ? (
-                <ChangeTeamModal
-                  initiativeId={initiativeId}
-                  currentTeam={team}
-                />
-              ) : undefined
-            }
-            className='mb-3'
+      {/* Associated People Section - only show if there are people */}
+      {ownerPeople.length > 0 && (
+        <PageSection
+          header={
+            <SectionHeader
+              icon={User}
+              title='People'
+              action={
+                canEdit ? (
+                  <ManageOwnersModal initiativeId={initiativeId} />
+                ) : undefined
+              }
+              className='mb-3'
+            />
+          }
+        >
+          <SimplePeopleList
+            people={ownerPeople}
+            variant='compact'
+            emptyStateText='No people associated with this initiative yet.'
+            showEmail={false}
+            showRole={false}
+            showTeam={false}
+            showJobRole={false}
+            showManager={false}
+            showReportsCount={false}
+            customSubtextMap={customSubtextMap}
+            className=''
           />
-        }
-      >
-        {team ? (
-          <div className='flex items-center gap-3'>
-            <TeamAvatar name={team.name} avatar={team.avatar} size='sm' />
-            <Link
-              href={`/teams/${team.id}`}
-              className='text-sm font-medium text-primary hover:underline'
-            >
-              {team.name}
-            </Link>
-          </div>
-        ) : (
-          <p className='text-sm text-muted-foreground'>No team assigned</p>
-        )}
-      </PageSection>
+        </PageSection>
+      )}
 
-      {/* Associated People Section */}
-      <PageSection
-        header={
-          <SectionHeader
-            icon={User}
-            title='People'
-            action={
-              canEdit ? (
-                <ManageOwnersModal initiativeId={initiativeId} />
-              ) : undefined
-            }
-            className='mb-3'
-          />
-        }
-      >
-        <SimplePeopleList
-          people={ownerPeople}
-          variant='compact'
-          emptyStateText='No people associated with this initiative yet.'
-          showEmail={false}
-          showRole={false}
-          showTeam={false}
-          showJobRole={false}
-          showManager={false}
-          showReportsCount={false}
-          customSubtextMap={customSubtextMap}
-          className=''
+      {/* Links Section - only show if there are links */}
+      {entityLinks.length > 0 && (
+        <LinksSection
+          links={entityLinks}
+          entityType='Initiative'
+          entityId={initiativeId}
+          canEdit={canEdit}
         />
-      </PageSection>
-
-      {/* Links Section */}
-      <LinksSection
-        links={entityLinks}
-        entityType='Initiative'
-        entityId={initiativeId}
-        canEdit={canEdit}
-      />
+      )}
     </div>
   )
 }

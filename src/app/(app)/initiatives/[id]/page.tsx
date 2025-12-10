@@ -35,6 +35,8 @@ import {
   initiativeStatusUtils,
   type InitiativeStatus,
 } from '@/lib/initiative-status'
+import { Link } from '@/components/ui/link'
+import { TeamAvatar } from '@/components/teams/team-avatar'
 
 export default async function InitiativeDetail({
   params,
@@ -62,6 +64,13 @@ export default async function InitiativeDetail({
       summary: true,
       rag: true,
       status: true,
+      team: {
+        select: {
+          id: true,
+          name: true,
+          avatar: true,
+        },
+      },
     },
   })
 
@@ -83,7 +92,7 @@ export default async function InitiativeDetail({
           title={init.title}
           titleIcon={Rocket}
           subtitle={
-            <div className='flex items-center gap-2'>
+            <div className='flex items-center gap-2 flex-wrap'>
               <Badge
                 variant={initiativeStatusUtils.getVariant(
                   init.status as InitiativeStatus
@@ -98,6 +107,24 @@ export default async function InitiativeDetail({
               <Suspense fallback={<InitiativeCompletionRateSkeleton />}>
                 <InitiativeCompletionRate initiativeId={init.id} />
               </Suspense>
+              {init.team && (
+                <div className='flex items-center gap-2'>
+                  <span className='text-muted-foreground'>•</span>
+                  <div className='flex items-center gap-2'>
+                    <TeamAvatar
+                      name={init.team.name}
+                      avatar={init.team.avatar}
+                      size='xs'
+                    />
+                    <Link
+                      href={`/teams/${init.team.id}`}
+                      className='text-sm text-muted-foreground hover:text-foreground transition-colors'
+                    >
+                      {init.team.name}
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
           }
           actions={

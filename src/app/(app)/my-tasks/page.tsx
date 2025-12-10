@@ -1,5 +1,5 @@
 import { MyTasksPageClient } from '@/components/tasks/my-tasks-page-client'
-import { CreateTaskButton } from '@/components/tasks/create-task-button'
+import { TasksListActionsDropdown } from '@/components/tasks/tasks-list-actions-dropdown'
 import { CheckSquare } from 'lucide-react'
 import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
@@ -26,9 +26,7 @@ export default async function MyTasksPage() {
           titleIcon={CheckSquare}
           subtitle='Track and manage tasks assigned to you'
           helpId={HELP_IDS.tasksProjectsTasks}
-          actions={
-            canCreateTasks ? <CreateTaskButton variant='default' /> : null
-          }
+          actions={<TasksListActionsDropdown canCreateTask={canCreateTasks} />}
         />
 
         <PageContent>

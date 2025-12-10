@@ -42,18 +42,18 @@ export function SectionHeader({
 
   return (
     <div
-      className={`flex items-start justify-between md:mx-0 md:px-lg ${className} mb-lg ${
-        variant === 'default' ? 'bg-muted/30 p-lg rounded-md' : ''
+      className={`flex items-start justify-between md:mx-0 md:px-xs ${className} mb-xs ${
+        variant === 'default' ? 'p-xs rounded-sm' : ''
       }`}
     >
-      <div className='flex-1 flex items-start gap-lg'>
-        <Icon className='w-6 h-6 shrink-0 mt-xs' />
+      <div className='flex-1 flex items-start gap-lg border-b border-dotted border-muted-foreground pb-sm mb-sm'>
+        <Icon className='w-4 h-4 shrink-0 mt-xs' />
         <div className='flex-1 min-w-0'>
-          <h3 className={`text-lg font-bold ${geistMono.className}`}>
+          <h3 className={`text-base font-bold ${geistMono.className} mb-0`}>
             {title}
           </h3>
           {description && (
-            <div className='text-sm text-muted-foreground mt-md'>
+            <div className='text-sm text-muted-foreground mt-0'>
               {description}
             </div>
           )}

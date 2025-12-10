@@ -36,7 +36,7 @@ export function PageTitle({
       {iconComponent ? (
         <div>{iconComponent}</div>
       ) : Icon ? (
-        <Icon className='h-6 w-6 text-muted-foreground hidden md:block' />
+        <Icon className='h-4 w-4 text-muted-foreground hidden md:block' />
       ) : null}
       <h1 className={`page-title ${geistMono.className}`}>{children}</h1>
       {helpId && <HelpIcon helpId={helpId} size='md' />}

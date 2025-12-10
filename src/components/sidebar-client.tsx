@@ -21,6 +21,7 @@ interface NavItem {
     | 'error'
     | 'info'
     | 'neutral'
+  section?: string
 }
 interface SidebarData {
   user: UserBrief | null

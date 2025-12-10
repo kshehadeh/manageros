@@ -93,19 +93,35 @@ export function NotesList({ notes }: NotesListProps) {
         >
           <CardHeader className='flex-1'>
             <div className='flex items-start justify-between gap-2'>
-              <CardTitle className='line-clamp-2 flex-1 flex items-center gap-2'>
-                <Link
-                  href={`/notes/${note.id}`}
-                  className='hover:text-primary transition-colors flex items-center gap-2'
-                >
-                  {note.title || 'Untitled'}
-                  {note.sharedWith && note.sharedWith.length > 0 && (
-                    <span title='Shared note'>
-                      <Users className='h-4 w-4 text-muted-foreground' />
-                    </span>
-                  )}
-                </Link>
-              </CardTitle>
+              <div className='flex-1 min-w-0'>
+                <CardTitle className='line-clamp-2 flex items-center gap-2 mb-1'>
+                  <Link
+                    href={`/notes/${note.id}`}
+                    className='hover:text-primary transition-colors flex items-center gap-2'
+                  >
+                    {note.title || 'Untitled'}
+                    {note.sharedWith && note.sharedWith.length > 0 && (
+                      <span title='Shared note'>
+                        <Users className='h-4 w-4 text-muted-foreground' />
+                      </span>
+                    )}
+                  </Link>
+                </CardTitle>
+                <CardDescription className='flex items-center gap-2 text-xs'>
+                  <span className='truncate'>
+                    {note.entityType || 'Standalone'}
+                  </span>
+                  <span>•</span>
+                  <span className='truncate'>{note.createdBy.name}</span>
+                  <span>•</span>
+                  <span>
+                    Updated{' '}
+                    {formatDistanceToNow(new Date(note.updatedAt), {
+                      addSuffix: true,
+                    })}
+                  </span>
+                </CardDescription>
+              </div>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
@@ -137,11 +153,6 @@ export function NotesList({ notes }: NotesListProps) {
                 </AlertDialogContent>
               </AlertDialog>
             </div>
-            <CardDescription>
-              {formatDistanceToNow(new Date(note.updatedAt), {
-                addSuffix: true,
-              })}
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <p className='text-sm text-muted-foreground line-clamp-3'>

@@ -9,6 +9,7 @@ import {
   Trash2,
   CheckCircle,
   Circle,
+  Link as LinkIcon,
 } from 'lucide-react'
 import { ActionDropdown } from '@/components/common/action-dropdown'
 import { DeleteModal } from '@/components/common/delete-modal'
@@ -16,6 +17,14 @@ import { deleteTask, updateTaskStatus } from '@/lib/actions/task'
 import { TASK_STATUS, type TaskStatus } from '@/lib/task-status'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { LinkForm } from '@/components/entity-links'
 
 interface TaskActionsDropdownProps {
   taskId: string
@@ -37,6 +46,7 @@ export function TaskActionsDropdown({
 }: TaskActionsDropdownProps) {
   const router = useRouter()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showLinkModal, setShowLinkModal] = useState(false)
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
 
   const handleDelete = async () => {
@@ -75,6 +85,11 @@ export function TaskActionsDropdown({
   }
 
   const isCompleted = task.status === TASK_STATUS.DONE
+
+  const handleLinkSuccess = () => {
+    setShowLinkModal(false)
+    router.refresh()
+  }
 
   return (
     <>
@@ -136,6 +151,20 @@ export function TaskActionsDropdown({
             <div className='border-t border-border my-1' />
 
             <button
+              className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
+              onClick={event => {
+                event.stopPropagation()
+                close()
+                setShowLinkModal(true)
+              }}
+            >
+              <LinkIcon className='w-4 h-4' />
+              Add Link
+            </button>
+
+            <div className='border-t border-border my-1' />
+
+            <button
               className='flex w-full items-center gap-3 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors text-left'
               onClick={event => {
                 event.stopPropagation()
@@ -157,6 +186,28 @@ export function TaskActionsDropdown({
         title='Delete Task'
         entityName='task'
       />
+
+      {/* Add Link Modal */}
+      <Dialog open={showLinkModal} onOpenChange={setShowLinkModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className='flex items-center gap-2'>
+              <LinkIcon className='h-5 w-5' />
+              Add Link
+            </DialogTitle>
+            <DialogDescription>
+              Add a link to provide additional context and resources for this
+              task.
+            </DialogDescription>
+          </DialogHeader>
+          <LinkForm
+            entityType='Task'
+            entityId={taskId}
+            onSuccess={handleLinkSuccess}
+            onCancel={() => setShowLinkModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

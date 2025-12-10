@@ -165,7 +165,6 @@ function SortableItem({
 
 export function JobLevelManagement({ levels }: JobLevelManagementProps) {
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [creating, setCreating] = useState(false)
   const [formData, setFormData] = useState<JobLevelFormData>({
     name: '',
     order: 0,
@@ -195,7 +194,6 @@ export function JobLevelManagement({ levels }: JobLevelManagementProps) {
         setEditingId(null)
       } else {
         await createJobLevel(formData)
-        setCreating(false)
       }
       setFormData({ name: '', order: 0 })
     } catch (error) {
@@ -212,7 +210,6 @@ export function JobLevelManagement({ levels }: JobLevelManagementProps) {
 
   const handleCancel = () => {
     setEditingId(null)
-    setCreating(false)
     setFormData({ name: '', order: 0 })
   }
 
@@ -230,11 +227,6 @@ export function JobLevelManagement({ levels }: JobLevelManagementProps) {
     } catch (error) {
       console.error('Error deleting job level:', error)
     }
-  }
-
-  const startCreating = () => {
-    setCreating(true)
-    setFormData({ name: '', order: 0 })
   }
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -268,48 +260,7 @@ export function JobLevelManagement({ levels }: JobLevelManagementProps) {
     <div className='space-y-4'>
       <div className='flex items-center justify-between'>
         <h3 className='text-lg font-semibold'>Job Levels</h3>
-        <Button
-          onClick={startCreating}
-          disabled={creating || editingId !== null}
-        >
-          Add Level
-        </Button>
       </div>
-
-      {/* Create Form */}
-      {creating && (
-        <div className='border border-primary rounded-lg p-4 bg-muted/50'>
-          <h4 className='font-medium mb-3'>Create New Job Level</h4>
-          <form onSubmit={e => handleSubmit(e)} className='space-y-3'>
-            <div>
-              <label className='block text-sm font-medium mb-2'>
-                Level Name
-              </label>
-              <input
-                type='text'
-                value={formData.name}
-                onChange={e =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className='input'
-                placeholder='e.g., Senior, Staff, Principal'
-                required
-              />
-            </div>
-            <div className='flex gap-2'>
-              <Button
-                type='submit'
-                disabled={isSubmitting || !formData.name.trim()}
-              >
-                {isSubmitting ? 'Creating...' : 'Create'}
-              </Button>
-              <Button type='button' variant='outline' onClick={handleCancel}>
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </div>
-      )}
 
       {/* Levels List */}
       <DndContext

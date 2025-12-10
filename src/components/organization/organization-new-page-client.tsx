@@ -99,7 +99,6 @@ export function OrganizationNewPageClient({
       <>
         {RemovedAlert}
         <PageSection
-          variant='bordered'
           header={
             <SectionHeader
               icon={Users}
@@ -121,7 +120,6 @@ export function OrganizationNewPageClient({
         {RemovedAlert}
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
           <PageSection
-            variant='bordered'
             header={
               <SectionHeader
                 icon={Mail}
@@ -135,7 +133,6 @@ export function OrganizationNewPageClient({
 
           {hasMemberships ? (
             <PageSection
-              variant='bordered'
               header={
                 <SectionHeader
                   icon={Users}
@@ -148,7 +145,6 @@ export function OrganizationNewPageClient({
             </PageSection>
           ) : (
             <PageSection
-              variant='bordered'
               header={
                 <SectionHeader
                   icon={Building2}
@@ -170,7 +166,6 @@ export function OrganizationNewPageClient({
     <>
       {RemovedAlert}
       <PageSection
-        variant='bordered'
         header={
           <SectionHeader
             icon={Building2}

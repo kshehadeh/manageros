@@ -19,7 +19,6 @@ export default function LoadingPage() {
         <PageMain>
           <div className='space-y-6'>
             <PageSection
-              variant='bordered'
               header={
                 <SectionHeader
                   icon={Mail}
@@ -35,7 +34,6 @@ export default function LoadingPage() {
             </PageSection>
 
             <PageSection
-              variant='bordered'
               header={
                 <SectionHeader
                   icon={Building2}

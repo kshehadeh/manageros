@@ -2,7 +2,6 @@
 
 import React from 'react'
 import { SimpleLinkList } from '@/components/links/link-list'
-import { AddLinkModal } from '@/components/links/add-link-modal'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { InlineEditableDropdown } from '@/components/common/inline-editable-dropdown'
@@ -270,21 +269,7 @@ export function TaskSidebar({
       )}
 
       {/* Links Section */}
-      <PageSection
-        header={
-          <SectionHeader
-            icon={LinkIcon}
-            title='Links'
-            action={
-              <AddLinkModal
-                entityType='Task'
-                entityId={entityId}
-                onLinkAdded={() => router.refresh()}
-              />
-            }
-          />
-        }
-      >
+      <PageSection header={<SectionHeader icon={LinkIcon} title='Links' />}>
         <SimpleLinkList
           links={links}
           entityType='Task'

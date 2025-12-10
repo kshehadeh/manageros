@@ -261,7 +261,7 @@ export default async function MeetingDetailPage({
               title='Links'
               emptyStateText='No links added yet.'
               className='mt-6'
-              canEdit={canEdit}
+              canEdit={false}
             />
             <PageSection
               header={

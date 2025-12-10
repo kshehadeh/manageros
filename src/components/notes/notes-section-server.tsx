@@ -42,7 +42,11 @@ export async function NotesSectionServer({
   // Fetch notes for this entity
   const notes = await getNotesForEntity(entityType, entityId)
 
-  // Always show the section (even if empty) so users can add notes
+  // Only show if there are notes (users can add notes via action menu)
+  if (notes.length === 0) {
+    return null
+  }
+
   return (
     <NotesSection
       entityType={entityType}

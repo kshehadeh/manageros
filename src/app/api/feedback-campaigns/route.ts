@@ -19,9 +19,9 @@ function createStatusSqlCondition(statusValues: string[]) {
     return null
   }
   if (statusValues.length === 1) {
-    return Prisma.sql`fc.status = ${statusValues[0]}`
+    return Prisma.sql`fc."status" = ${statusValues[0]}`
   }
-  return Prisma.sql`fc.status IN (${Prisma.join(statusValues)})`
+  return Prisma.sql`fc."status" IN (${Prisma.join(statusValues)})`
 }
 
 // Helper function to parse sort parameter and build ORDER BY clause
@@ -65,7 +65,7 @@ function buildOrderByClause(sortParam: string) {
             ? Prisma.sql`fc."startDate" DESC NULLS LAST`
             : Prisma.sql`fc."startDate" ASC NULLS LAST`
         case 'status':
-          return Prisma.sql`fc.status ${Prisma.raw(dir)}`
+          return Prisma.sql`fc."status" ${Prisma.raw(dir)}`
         case 'targetperson':
         case 'target_person':
           return direction === 'desc'
@@ -181,7 +181,7 @@ export async function GET(request: NextRequest) {
         fc."userId",
         fc."targetPersonId",
         fc."templateId",
-        fc.status,
+        fc."status",
         fc."startDate",
         fc."endDate",
         fc."createdAt",
@@ -217,7 +217,7 @@ export async function GET(request: NextRequest) {
         SELECT 
           "campaignId",
           COUNT(*)::int as "responseCount",
-          SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END)::int as "completedCount"
+          COUNT(*)::int as "completedCount"
         FROM "FeedbackResponse"
         WHERE "campaignId" IN (${Prisma.join(campaignIds)})
         GROUP BY "campaignId"

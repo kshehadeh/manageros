@@ -257,6 +257,23 @@ export interface UserSettings {
     }
   >
 
+  // Per-view feedback campaigns table settings
+  feedbackCampaignsTableSettings: Record<
+    string,
+    {
+      sorting: Array<{ id: string; desc: boolean }>
+      grouping: string
+      sort: {
+        field: string
+        direction: 'asc' | 'desc'
+      }
+      filters: {
+        search: string
+        status: string
+      }
+    }
+  >
+
   // Future expandable settings can be added here:
   // sidebarCollapsed: boolean
   // defaultPageSize: number
@@ -307,6 +324,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   organizationMembersTableSettings: {},
   toleranceRulesTableSettings: {},
   notesTableSettings: {},
+  feedbackCampaignsTableSettings: {},
   // When adding new settings, add their defaults here:
   // sidebarCollapsed: false
   // defaultPageSize: 25
@@ -1201,6 +1219,74 @@ export function updateNotesTableSettings(
     ...currentSettings,
     notesTableSettings: {
       ...currentSettings.notesTableSettings,
+      [settingsId]: updatedTableSettings,
+    },
+  }
+
+  saveUserSettings(userId, updatedSettings)
+}
+
+/**
+ * Get feedback campaigns table settings for a specific view
+ */
+export function getFeedbackCampaignsTableSettings(
+  userId: string,
+  settingsId: string
+): UserSettings['feedbackCampaignsTableSettings'][string] {
+  const settings = loadUserSettings(userId)
+  const tableSettings = settings.feedbackCampaignsTableSettings[settingsId]
+
+  if (!tableSettings) {
+    return {
+      sorting: [],
+      grouping: 'none',
+      sort: {
+        field: '',
+        direction: 'asc',
+      },
+      filters: {
+        search: '',
+        status: 'all',
+      },
+    }
+  }
+
+  return tableSettings
+}
+
+/**
+ * Update feedback campaigns table settings for a specific view
+ */
+export function updateFeedbackCampaignsTableSettings(
+  userId: string,
+  settingsId: string,
+  tableSettings: Partial<UserSettings['feedbackCampaignsTableSettings'][string]>
+): void {
+  const currentSettings = loadUserSettings(userId)
+  const currentTableSettings = currentSettings.feedbackCampaignsTableSettings[
+    settingsId
+  ] || {
+    sorting: [],
+    grouping: 'none',
+    sort: {
+      field: '',
+      direction: 'asc' as const,
+    },
+    filters: {
+      search: '',
+      status: 'all',
+    },
+  }
+
+  const updatedTableSettings = {
+    ...currentTableSettings,
+    ...tableSettings,
+  }
+
+  const updatedSettings = {
+    ...currentSettings,
+    feedbackCampaignsTableSettings: {
+      ...currentSettings.feedbackCampaignsTableSettings,
       [settingsId]: updatedTableSettings,
     },
   }

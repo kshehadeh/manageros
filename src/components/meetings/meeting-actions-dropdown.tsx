@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Link } from '@/components/ui/link'
 import {
   Edit,
@@ -9,11 +10,20 @@ import {
   Target,
   User,
   CalendarPlus,
+  Link as LinkIcon,
 } from 'lucide-react'
 import { deleteMeeting } from '@/lib/actions/meeting'
 import { ActionDropdown } from '@/components/common/action-dropdown'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { toast } from 'sonner'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { LinkForm } from '@/components/entity-links'
 
 interface MeetingActionsDropdownProps {
   meetingId: string
@@ -34,7 +44,9 @@ export function MeetingActionsDropdown({
   canEdit = false,
   canDelete = false,
 }: MeetingActionsDropdownProps) {
+  const router = useRouter()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showLinkModal, setShowLinkModal] = useState(false)
 
   const handleDelete = async () => {
     try {
@@ -46,6 +58,11 @@ export function MeetingActionsDropdown({
         error instanceof Error ? error.message : 'Failed to delete meeting'
       )
     }
+  }
+
+  const handleLinkSuccess = () => {
+    setShowLinkModal(false)
+    router.refresh()
   }
 
   const hasActions =
@@ -87,6 +104,18 @@ export function MeetingActionsDropdown({
                   <CalendarPlus className='w-4 h-4' />
                   Create Instance
                 </Link>
+
+                <button
+                  className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
+                  onClick={event => {
+                    event.stopPropagation()
+                    close()
+                    setShowLinkModal(true)
+                  }}
+                >
+                  <LinkIcon className='w-4 h-4' />
+                  Add Link
+                </button>
               </>
             )}
 
@@ -156,6 +185,28 @@ export function MeetingActionsDropdown({
         title='Delete Meeting'
         entityName='meeting'
       />
+
+      {/* Add Link Modal */}
+      <Dialog open={showLinkModal} onOpenChange={setShowLinkModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className='flex items-center gap-2'>
+              <LinkIcon className='h-5 w-5' />
+              Add Link
+            </DialogTitle>
+            <DialogDescription>
+              Add a link to provide additional context and resources for this
+              meeting.
+            </DialogDescription>
+          </DialogHeader>
+          <LinkForm
+            entityType='Meeting'
+            entityId={meetingId}
+            onSuccess={handleLinkSuccess}
+            onCancel={() => setShowLinkModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

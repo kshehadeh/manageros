@@ -168,7 +168,6 @@ export function InitiativeSidebarSkeleton() {
     <div className='w-full lg:w-80 space-y-6'>
       {/* Team Section */}
       <PageSection
-        variant='bordered'
         header={
           <SectionHeader
             icon={Users}
@@ -186,7 +185,6 @@ export function InitiativeSidebarSkeleton() {
 
       {/* People Section */}
       <PageSection
-        variant='bordered'
         header={
           <SectionHeader
             icon={User}
@@ -211,7 +209,6 @@ export function InitiativeSidebarSkeleton() {
 
       {/* Links Section */}
       <PageSection
-        variant='bordered'
         header={
           <SectionHeader
             icon={LinkIcon}

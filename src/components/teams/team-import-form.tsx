@@ -107,7 +107,6 @@ export function TeamImportForm() {
     <div className='space-y-6'>
       <PageSection
         header={<SectionHeader icon={FileText} title='Select CSV File' />}
-        variant='bordered'
       >
         <form onSubmit={handleSubmit} className='space-y-6'>
           <div>
@@ -185,7 +184,6 @@ export function TeamImportForm() {
       </PageSection>
 
       <PageSection
-        variant='bordered'
         header={
           <SectionHeader
             icon={FileText}

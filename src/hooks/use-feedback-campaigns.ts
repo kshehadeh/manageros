@@ -141,6 +141,6 @@ export function useFeedbackCampaigns({
     loading,
     error,
     refetch,
-    updateCampaign,
+    updateItem: updateCampaign,
   }
 }

@@ -66,7 +66,6 @@ export function HelpBlock({
 
   return (
     <PageSection
-      variant='bordered'
       className={cn(styles.container, className)}
       header={
         <SectionHeader
