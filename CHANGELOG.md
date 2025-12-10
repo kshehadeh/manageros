@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.35.0](/compare/v1.34.0...v1.35.0) (2025-12-10)
+
+### Features
+
+- Update authentication components and global styles 366e297
+
 # [1.34.0](/compare/v1.33.0...v1.34.0) (2025-12-10)
 
 ### Features
