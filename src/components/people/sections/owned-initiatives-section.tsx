@@ -5,9 +5,7 @@ import {
 } from '@/components/initiatives/initiative-list'
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
-import { Rocket, Eye } from 'lucide-react'
-import { Link } from '@/components/ui/link'
-import { Button } from '@/components/ui/button'
+import { Rocket } from 'lucide-react'
 
 interface OwnedInitiativesSectionProps {
   personId: string
@@ -69,19 +67,7 @@ export async function OwnedInitiativesSection({
   return (
     <div className='flex-1 min-w-[300px]'>
       <PageSection
-        header={
-          <SectionHeader
-            icon={Rocket}
-            title='Owned Initiatives'
-            action={
-              <Button asChild variant='outline' size='sm' title='View All'>
-                <Link href='/initiatives'>
-                  <Eye className='w-4 h-4' />
-                </Link>
-              </Button>
-            }
-          />
-        }
+        header={<SectionHeader icon={Rocket} title='Owned Initiatives' />}
       >
         <SimpleInitiativeList
           initiatives={transformedInitiatives}

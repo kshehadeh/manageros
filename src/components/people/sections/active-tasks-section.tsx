@@ -1,9 +1,7 @@
 import { SimpleTaskList, type Task } from '@/components/tasks/task-list'
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
-import { Button } from '@/components/ui/button'
-import { ListTodo, Eye } from 'lucide-react'
-import { Link } from '@/components/ui/link'
+import { ListTodo } from 'lucide-react'
 import { getTasksForAssignee } from '@/lib/data/tasks'
 import { getCurrentUser } from '@/lib/auth-utils'
 
@@ -72,20 +70,7 @@ export async function ActiveTasksSection({
     return (
       <PageSection
         className='flex-1 min-w-[300px] '
-        header={
-          <SectionHeader
-            icon={ListTodo}
-            title='Active Tasks'
-            action={
-              <Button asChild variant='outline' size='sm'>
-                <Link href='/my-tasks' className='flex items-center gap-2'>
-                  <Eye className='w-4 h-4' />
-                  View All
-                </Link>
-              </Button>
-            }
-          />
-        }
+        header={<SectionHeader icon={ListTodo} title='Active Tasks' />}
       >
         <SimpleTaskList
           tasks={transformedTasks}

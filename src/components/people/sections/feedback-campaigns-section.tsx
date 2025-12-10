@@ -1,9 +1,7 @@
 import { SimpleFeedbackCampaignList } from '@/components/feedback/feedback-campaign-simple-list'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
-import { Button } from '@/components/ui/button'
-import { MessageCircle, Eye, Plus } from 'lucide-react'
-import { Link } from '@/components/ui/link'
+import { MessageCircle } from 'lucide-react'
 import { getActiveAndDraftFeedbackCampaignsForPerson } from '@/lib/data/feedback-campaigns'
 
 interface FeedbackCampaignsSectionProps {
@@ -36,36 +34,7 @@ export async function FeedbackCampaignsSection({
   return (
     <PageSection
       className='flex-1 min-w-[300px]'
-      header={
-        <SectionHeader
-          icon={MessageCircle}
-          title={`Feedback 360`}
-          action={
-            <div className='flex items-center gap-2'>
-              <Button
-                asChild
-                variant='outline'
-                size='sm'
-                title='View All Feedback 360'
-              >
-                <Link href={`/people/${personId}/feedback-campaigns`}>
-                  <Eye className='w-4 h-4' />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant='outline'
-                size='sm'
-                title='Create New Feedback 360'
-              >
-                <Link href={`/people/${personId}/feedback-campaigns/new`}>
-                  <Plus className='w-4 h-4' />
-                </Link>
-              </Button>
-            </div>
-          }
-        />
-      }
+      header={<SectionHeader icon={MessageCircle} title={`Feedback 360`} />}
     >
       <SimpleFeedbackCampaignList
         campaigns={feedbackCampaigns}

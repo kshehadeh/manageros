@@ -4,9 +4,7 @@ import {
 } from '@/components/feedback/feedback-list'
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
-import { Button } from '@/components/ui/button'
-import { MessageCircle, Eye } from 'lucide-react'
-import { Link } from '@/components/ui/link'
+import { MessageCircle } from 'lucide-react'
 import { getFeedbackForPerson } from '@/lib/actions/feedback'
 
 interface FeedbackSectionProps {
@@ -51,19 +49,7 @@ export async function FeedbackSection({
   return (
     <PageSection
       className='flex-1 min-w-[300px]'
-      header={
-        <SectionHeader
-          icon={MessageCircle}
-          title='Recent Feedback'
-          action={
-            <Button asChild variant='outline' size='sm' title='View All'>
-              <Link href={`/feedback/about/${personId}`}>
-                <Eye className='w-4 h-4' />
-              </Link>
-            </Button>
-          }
-        />
-      }
+      header={<SectionHeader icon={MessageCircle} title='Recent Feedback' />}
     >
       <SimpleFeedbackList
         feedback={feedback}
