@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.33.0](/compare/v1.32.0...v1.33.0) (2025-12-10)
+
+### Features
+
+- **initiative-detail:** Display team information in initiative details 0020d4c
+- Update global styles and enhance page components 6cac6b2
+
 # [1.32.0](/compare/v1.30.2...v1.32.0) (2025-12-09)
 
 ### Bug Fixes
