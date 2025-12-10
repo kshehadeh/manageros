@@ -81,7 +81,6 @@ export function OnboardingSection({
 
   return (
     <PageSection
-      variant='bordered'
       className={cn(
         'relative bg-gradient-to-br from-highlight/5 to-transparent',
         className

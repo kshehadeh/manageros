@@ -40,7 +40,6 @@ export default async function SettingsPage() {
         <div className='space-y-6 flex flex-wrap gap-lg'>
           {/* User Info */}
           <PageSection
-            variant='bordered'
             header={<SectionHeader icon={User} title='User Info' />}
             className={cn('min-w-full md:min-w-[400px] flex-1')}
           >
@@ -53,7 +52,6 @@ export default async function SettingsPage() {
 
           {/* Person Linking Section */}
           <PageSection
-            variant='bordered'
             header={<SectionHeader icon={User} title='Account Linking' />}
             className='min-w-full md:min-w-[400px] flex-1'
           >
@@ -67,7 +65,6 @@ export default async function SettingsPage() {
 
           {/* Preferences */}
           <PageSection
-            variant='bordered'
             header={<SectionHeader icon={Sliders} title='Preferences' />}
             className={cn('min-w-full md:min-w-[400px] flex-1')}
           >
@@ -76,7 +73,6 @@ export default async function SettingsPage() {
 
           {/* Integration Settings */}
           <PageSection
-            variant='bordered'
             header={
               <SectionHeader icon={Settings} title='Integration Settings' />
             }

@@ -619,31 +619,85 @@ export async function getFilteredNavigation(user: UserBrief | null) {
       | 'error'
       | 'info'
       | 'neutral'
+    section?: string
   }
 
   const navigation: NavigationItem[] = [
-    { name: 'Dashboard', href: '/dashboard', icon: 'Home', adminOnly: false },
+    {
+      name: 'Dashboard',
+      href: '/dashboard',
+      icon: 'Home',
+      adminOnly: false,
+    },
     {
       name: 'My Tasks',
       href: '/my-tasks',
       icon: 'CheckSquare',
       adminOnly: false,
+      section: 'Planning',
     },
     {
       name: 'Initiatives',
       href: '/initiatives',
       icon: 'Rocket',
       adminOnly: false,
+      section: 'Planning',
     },
-    { name: 'Meetings', href: '/meetings', icon: 'Calendar', adminOnly: false },
-    { name: 'Notes', href: '/notes', icon: 'FileText', adminOnly: false },
-    { name: 'People', href: '/people', icon: 'User', adminOnly: false },
-    { name: 'Teams', href: '/teams', icon: 'Users2', adminOnly: false },
     {
-      name: 'Organization',
+      name: 'Meetings',
+      href: '/meetings',
+      icon: 'Calendar',
+      adminOnly: false,
+      section: 'Planning',
+    },
+    {
+      name: 'Notes',
+      href: '/notes',
+      icon: 'FileText',
+      adminOnly: false,
+      section: 'Planning',
+    },
+    {
+      name: 'People',
+      href: '/people',
+      icon: 'User',
+      adminOnly: false,
+      section: 'Teams and People',
+    },
+    {
+      name: 'Teams',
+      href: '/teams',
+      icon: 'Users2',
+      adminOnly: false,
+      section: 'Teams and People',
+    },
+    {
+      name: '360 Feedback',
+      href: '/feedback-campaigns',
+      icon: 'MessageSquare',
+      adminOnly: false,
+      section: 'Teams and People',
+    },
+    {
+      name: 'Settings',
       href: '/organization/settings',
       icon: 'Building',
       adminOnly: true,
+      section: 'Organization',
+    },
+    {
+      name: 'Job Roles',
+      href: '/organization/job-roles',
+      icon: 'Briefcase',
+      adminOnly: true,
+      section: 'Organization',
+    },
+    {
+      name: 'Notifications',
+      href: '/notifications',
+      icon: 'Bell',
+      adminOnly: false,
+      section: 'Organization',
     },
   ]
 

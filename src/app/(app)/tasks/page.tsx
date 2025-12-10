@@ -1,4 +1,4 @@
-import { CreateTaskButton } from '@/components/tasks/create-task-button'
+import { TasksListActionsDropdown } from '@/components/tasks/tasks-list-actions-dropdown'
 import { ListTodo } from 'lucide-react'
 import { TaskDataTable } from '../../../components/tasks/data-table'
 import { PageSection } from '@/components/ui/page-section'
@@ -24,9 +24,7 @@ export default async function TasksPage() {
           title='Tasks'
           titleIcon={ListTodo}
           subtitle='Manage and track all tasks across your organization'
-          actions={
-            canCreateTasks ? <CreateTaskButton variant='default' /> : null
-          }
+          actions={<TasksListActionsDropdown canCreateTask={canCreateTasks} />}
         />
 
         <PageContent>

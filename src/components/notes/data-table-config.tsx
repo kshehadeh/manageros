@@ -5,7 +5,7 @@ import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 import type { ColumnDef } from '@tanstack/react-table'
 import type { NoteWithAttachments } from '@/types/notes'
-import { format } from 'date-fns'
+import { format, formatDistanceToNow } from 'date-fns'
 import { deleteNote } from '@/lib/actions/notes'
 import type { DataTableConfig } from '@/components/common/generic-data-table'
 import {
@@ -113,13 +113,29 @@ export const notesDataTableConfig: DataTableConfig<
         cell: ({ row }) => {
           const note = row.original
           return (
-            <Link
-              href={`/notes/${note.id}`}
-              className='font-medium text-primary hover:text-highlight/90 transition-colors'
-              onClick={e => e.stopPropagation()}
-            >
-              {note.title || 'Untitled'}
-            </Link>
+            <div className='space-y-0.5 flex-1'>
+              <Link
+                href={`/notes/${note.id}`}
+                className='font-medium text-primary hover:text-highlight/90 transition-colors'
+                onClick={e => e.stopPropagation()}
+              >
+                {note.title || 'Untitled'}
+              </Link>
+              <div className='text-xs text-muted-foreground flex items-center gap-2'>
+                <span className='truncate'>
+                  {getEntityTypeLabel(note.entityType)}
+                </span>
+                <span>•</span>
+                <span className='truncate'>{note.createdBy.name}</span>
+                <span>•</span>
+                <span>
+                  Updated{' '}
+                  {formatDistanceToNow(new Date(note.updatedAt), {
+                    addSuffix: true,
+                  })}
+                </span>
+              </div>
+            </div>
           )
         },
         size: 400,
@@ -152,6 +168,9 @@ export const notesDataTableConfig: DataTableConfig<
         size: 150,
         minSize: 120,
         maxSize: 200,
+        meta: {
+          hidden: true,
+        },
       },
       {
         id: 'createdBy',
@@ -172,6 +191,9 @@ export const notesDataTableConfig: DataTableConfig<
         size: 200,
         minSize: 150,
         maxSize: 300,
+        meta: {
+          hidden: true,
+        },
       },
       {
         id: 'updatedAt',
@@ -192,6 +214,9 @@ export const notesDataTableConfig: DataTableConfig<
           const dateA = new Date(rowA.original.updatedAt).getTime()
           const dateB = new Date(rowB.original.updatedAt).getTime()
           return dateA - dateB
+        },
+        meta: {
+          hidden: true,
         },
       },
       {

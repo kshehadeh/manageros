@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { getJobLevels, getJobDomains } from '@/lib/actions/job-roles'
-import { JobRoleHeaderButton } from '@/components/jobs/job-role-header-button'
+import { JobRolesListActionsDropdown } from '@/components/jobs/job-roles-list-actions-dropdown'
 import { JobRolesContent } from '@/components/jobs/job-roles-content'
 import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 import { PageSection } from '@/components/ui/page-section'
@@ -17,7 +17,11 @@ export default async function JobRoleManagementPage() {
   }
 
   // Get levels and domains for management
-  const [levels, domains] = await Promise.all([getJobLevels(), getJobDomains()])
+  const [levels, domains, canCreateJobRole] = await Promise.all([
+    getJobLevels(),
+    getJobDomains(),
+    getActionPermission(user, 'job-role.create'),
+  ])
 
   const pathname = '/organization/job-roles'
   const breadcrumbs = [
@@ -32,7 +36,13 @@ export default async function JobRoleManagementPage() {
         <PageHeader
           title='Job Role Management'
           subtitle='Configure job levels, domains, and roles for your organization'
-          actions={<JobRoleHeaderButton levels={levels} domains={domains} />}
+          actions={
+            <JobRolesListActionsDropdown
+              canCreateJobRole={canCreateJobRole}
+              levels={levels}
+              domains={domains}
+            />
+          }
         />
         <PageContent>
           <PageSection>

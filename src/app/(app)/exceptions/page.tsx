@@ -26,7 +26,6 @@ export default async function ExceptionsPage() {
 
       <PageContent>
         <PageSection
-          variant='bordered'
           header={
             <SectionHeader
               icon={AlertTriangle}

@@ -34,7 +34,6 @@ export default async function ToleranceRuleEditPage({
 
       <PageContent>
         <PageSection
-          variant='bordered'
           header={
             <SectionHeader icon={AlertTriangle} title='Rule Configuration' />
           }

@@ -91,13 +91,19 @@ export function SimpleNotesList({
               )}
             </div>
             <div className='flex-1 min-w-0'>
-              <div className='flex items-center gap-2 mb-1'>
-                <span className='text-xs font-medium text-muted-foreground'>
-                  {note.createdBy.name}
+              <h3 className='font-medium text-sm truncate mb-1'>
+                {note.title || 'Untitled'}
+              </h3>
+              <div className='flex items-center gap-2 text-xs text-muted-foreground mb-1'>
+                <span className='truncate'>
+                  {note.entityType || 'Standalone'}
                 </span>
-                <span className='text-xs text-muted-foreground'>•</span>
-                <span className='text-xs text-muted-foreground'>
-                  {formatDistanceToNow(new Date(note.createdAt), {
+                <span>•</span>
+                <span className='truncate'>{note.createdBy.name}</span>
+                <span>•</span>
+                <span>
+                  Updated{' '}
+                  {formatDistanceToNow(new Date(note.updatedAt), {
                     addSuffix: true,
                   })}
                 </span>

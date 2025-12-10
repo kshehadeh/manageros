@@ -19,7 +19,6 @@ export default async function NewToleranceRulePage() {
 
       <PageContent>
         <PageSection
-          variant='bordered'
           header={
             <SectionHeader icon={AlertTriangle} title='Rule Configuration' />
           }

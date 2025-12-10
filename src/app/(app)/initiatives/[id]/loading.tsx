@@ -43,15 +43,15 @@ export default function LoadingPage() {
         </PageMain>
 
         <PageSidebar>
-          <PageSection variant='bordered'>
+          <PageSection>
             <Skeleton className='h-32 w-full' />
           </PageSection>
 
-          <PageSection variant='bordered'>
+          <PageSection>
             <Skeleton className='h-48 w-full' />
           </PageSection>
 
-          <PageSection variant='bordered'>
+          <PageSection>
             <Skeleton className='h-40 w-full' />
           </PageSection>
         </PageSidebar>

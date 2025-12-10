@@ -18,7 +18,6 @@ interface JobDomainManagementProps {
 
 export function JobDomainManagement({ domains }: JobDomainManagementProps) {
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [creating, setCreating] = useState(false)
   const [formData, setFormData] = useState<JobDomainFormData>({ name: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -32,7 +31,6 @@ export function JobDomainManagement({ domains }: JobDomainManagementProps) {
         setEditingId(null)
       } else {
         await createJobDomain(formData)
-        setCreating(false)
       }
       setFormData({ name: '' })
     } catch (error) {
@@ -49,7 +47,6 @@ export function JobDomainManagement({ domains }: JobDomainManagementProps) {
 
   const handleCancel = () => {
     setEditingId(null)
-    setCreating(false)
     setFormData({ name: '' })
   }
 
@@ -69,61 +66,11 @@ export function JobDomainManagement({ domains }: JobDomainManagementProps) {
     }
   }
 
-  const startCreating = () => {
-    setCreating(true)
-    setFormData({ name: '' })
-  }
-
   return (
     <div className='space-y-4'>
       <div className='flex items-center justify-between'>
         <h3 className='text-lg font-semibold'>Job Domains</h3>
-        <Button
-          onClick={startCreating}
-          disabled={creating || editingId !== null}
-        >
-          Add Domain
-        </Button>
       </div>
-
-      {/* Create Form */}
-      {creating && (
-        <div className='border border-primary rounded-lg p-3 bg-muted/50'>
-          <h4 className='font-medium mb-2'>Create New Job Domain</h4>
-          <form onSubmit={e => handleSubmit(e)} className='space-y-2'>
-            <div>
-              <label className='block text-sm font-medium mb-1'>
-                Domain Name
-              </label>
-              <input
-                type='text'
-                value={formData.name}
-                onChange={e => setFormData({ name: e.target.value })}
-                className='input'
-                placeholder='e.g., Engineering, Product, Design, Marketing'
-                required
-              />
-            </div>
-            <div className='flex gap-2'>
-              <Button
-                type='submit'
-                size='sm'
-                disabled={isSubmitting || !formData.name.trim()}
-              >
-                {isSubmitting ? 'Creating...' : 'Create'}
-              </Button>
-              <Button
-                type='button'
-                variant='outline'
-                size='sm'
-                onClick={handleCancel}
-              >
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </div>
-      )}
 
       {/* Domains List */}
       <div className='space-y-1'>

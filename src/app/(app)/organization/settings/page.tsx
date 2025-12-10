@@ -18,10 +18,10 @@ import { OrganizationSectionSkeleton } from '@/components/settings/organization-
 import {
   Building,
   Users,
-  Briefcase,
   BarChart3,
   Plug,
   AlertTriangle,
+  Settings,
 } from 'lucide-react'
 import { PlanLimitsSection } from '@/components/settings/plan-limits-section'
 import { PlanLimitsSectionSkeleton } from '@/components/settings/plan-limits-section-skeleton'
@@ -67,7 +67,6 @@ export default async function OrganizationSettingsPage() {
             <div className='space-y-6'>
               {/* Basic Information Section */}
               <PageSection
-                variant='bordered'
                 header={
                   <SectionHeader icon={Building} title='Basic Information' />
                 }
@@ -85,7 +84,6 @@ export default async function OrganizationSettingsPage() {
               {/* Plan Limits Section */}
               {organization.id && (
                 <PageSection
-                  variant='bordered'
                   header={
                     <SectionHeader
                       icon={BarChart3}
@@ -102,7 +100,6 @@ export default async function OrganizationSettingsPage() {
               {/* Integrations Section */}
               {organization.id && (
                 <PageSection
-                  variant='bordered'
                   header={<SectionHeader icon={Plug} title='Integrations' />}
                 >
                   <Suspense fallback={<IntegrationsSectionSkeleton />}>
@@ -115,19 +112,23 @@ export default async function OrganizationSettingsPage() {
 
           <PageSidebar>
             <div className='space-y-6'>
-              {/* Manager Users Section */}
+              {/* Administration Section */}
               <PageSection
                 header={
                   <SectionHeader
-                    icon={Users}
-                    title='Manager Users'
-                    description='Manage organization members and invitations'
+                    icon={Settings}
+                    title='Administration'
                     variant='no-background'
+                    description='Manage users and tolerance rules for your organization'
                   />
                 }
               >
                 <div className='space-y-4'>
-                  <Button asChild variant='outline'>
+                  <Button
+                    asChild
+                    variant='outline'
+                    className='w-full justify-start'
+                  >
                     <Link
                       href='/organization/users'
                       className='flex items-center gap-2'
@@ -136,46 +137,11 @@ export default async function OrganizationSettingsPage() {
                       Manage Users
                     </Link>
                   </Button>
-                </div>
-              </PageSection>
-
-              {/* Job Roles and Titles Section */}
-              <PageSection
-                header={
-                  <SectionHeader
-                    icon={Briefcase}
-                    title='Job Roles and Titles'
-                    variant='no-background'
-                    description='Manage job levels, domains, and roles for your organization'
-                  />
-                }
-              >
-                <div className='space-y-4'>
-                  <Button asChild variant='outline'>
-                    <Link
-                      href='/organization/job-roles'
-                      className='flex items-center gap-2'
-                    >
-                      <Briefcase className='w-4 h-4' />
-                      Manage Job Roles
-                    </Link>
-                  </Button>
-                </div>
-              </PageSection>
-
-              {/* Tolerance Rules Section */}
-              <PageSection
-                header={
-                  <SectionHeader
-                    icon={AlertTriangle}
-                    title='Tolerance Rules'
-                    variant='no-background'
-                    description='Configure organizational tolerance rules that monitor metrics and generate exceptions'
-                  />
-                }
-              >
-                <div className='space-y-4'>
-                  <Button asChild variant='outline'>
+                  <Button
+                    asChild
+                    variant='outline'
+                    className='w-full justify-start'
+                  >
                     <Link
                       href='/organization/settings/tolerance-rules'
                       className='flex items-center gap-2'

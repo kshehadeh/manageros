@@ -112,7 +112,6 @@ export function PersonImportForm() {
     <div className='space-y-6'>
       <PageSection
         header={<SectionHeader icon={FileText} title='Select CSV File' />}
-        variant='bordered'
       >
         <form onSubmit={handleSubmit} className='space-y-6'>
           <div>
@@ -190,7 +189,6 @@ export function PersonImportForm() {
       </PageSection>
 
       <PageSection
-        variant='bordered'
         header={
           <SectionHeader
             icon={FileText}
@@ -202,9 +200,9 @@ export function PersonImportForm() {
         <div className='space-y-4'>
           <p className='text-muted-foreground'>
             Your CSV file should have the following columns. The{' '}
-            <span className='font-semibold'>name</span> field is used as the
-            key to match existing people. Include other fields only when you
-            want to add or update that data.
+            <span className='font-semibold'>name</span> field is used as the key
+            to match existing people. Include other fields only when you want to
+            add or update that data.
           </p>
           <div className='overflow-x-auto'>
             <table className='min-w-full border rounded-lg'>

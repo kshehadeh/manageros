@@ -2,7 +2,6 @@ import { ReactNode } from 'react'
 import { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PageTitle } from './page-title'
-import { HelpIcon } from '@/components/help-icon'
 import { HelpId } from '@/lib/help'
 import { Geist_Mono as GeistMono } from 'next/font/google'
 
@@ -43,7 +42,7 @@ export function PageHeader({
               {iconComponent ? (
                 <div className='flex items-start'>{iconComponent}</div>
               ) : TitleIcon ? (
-                <TitleIcon className='h-6 w-6 text-muted-foreground hidden md:block flex-shrink-0 mt-sm' />
+                <TitleIcon className='h-4 w-4 text-muted-foreground hidden md:block flex-shrink-0 mt-sm' />
               ) : null}
               <div className='flex-1 flex flex-col'>
                 {title && (
@@ -51,24 +50,16 @@ export function PageHeader({
                     <h1
                       className={`page-title ${geistMono.className} m-0 leading-tight`}
                     >
-                      {title}
+                      {typeof title === 'string' ? (
+                        <>
+                          <span className='bracket-open'>[</span>
+                          <span className='text-highlight'>{title}</span>
+                          <span className='bracket-close'>]</span>
+                        </>
+                      ) : (
+                        title
+                      )}
                     </h1>
-                    {helpId && (
-                      <HelpIcon
-                        helpId={helpId}
-                        size='md'
-                        className='mt-sm flex-shrink-0'
-                      />
-                    )}
-                  </div>
-                )}
-                {subtitle && (
-                  <div className='text-muted-foreground text-sm mt-md'>
-                    {typeof subtitle === 'string' ? (
-                      <p>{subtitle}</p>
-                    ) : (
-                      subtitle
-                    )}
                   </div>
                 )}
               </div>
@@ -82,11 +73,19 @@ export function PageHeader({
                   helpId={helpId}
                   className='mb-md'
                 >
-                  {title}
+                  {typeof title === 'string' ? (
+                    <>
+                      <span className='bracket-open'>[</span>
+                      <span className='text-highlight'>{title}</span>
+                      <span className='bracket-close'>]</span>
+                    </>
+                  ) : (
+                    title
+                  )}
                 </PageTitle>
               )}
               {subtitle && (
-                <div className='text-muted-foreground text-sm mt-md'>
+                <div className='text-muted-foreground text-sm mt-xs'>
                   {typeof subtitle === 'string' ? <p>{subtitle}</p> : subtitle}
                 </div>
               )}

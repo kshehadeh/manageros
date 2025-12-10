@@ -31,7 +31,6 @@ export function OrganizationSetupCards({
   if (hasMemberships && !hasInvitations) {
     return (
       <PageSection
-        variant='bordered'
         header={
           <SectionHeader
             icon={Users}
@@ -50,7 +49,6 @@ export function OrganizationSetupCards({
     return (
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
         <PageSection
-          variant='bordered'
           header={
             <SectionHeader
               icon={Mail}
@@ -64,7 +62,6 @@ export function OrganizationSetupCards({
 
         {hasMemberships ? (
           <PageSection
-            variant='bordered'
             header={
               <SectionHeader
                 icon={Users}
@@ -77,7 +74,6 @@ export function OrganizationSetupCards({
           </PageSection>
         ) : (
           <PageSection
-            variant='bordered'
             header={
               <SectionHeader
                 icon={Building2}
@@ -96,7 +92,6 @@ export function OrganizationSetupCards({
   // Scenario 3: User has no memberships and no invitations - show create
   return (
     <PageSection
-      variant='bordered'
       header={
         <SectionHeader
           icon={Building2}
