@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.34.0](/compare/v1.33.0...v1.34.0) (2025-12-10)
+
+### Features
+
+- **feedback-campaigns:** Enhance actions dropdown with person selector modal 65dc6d9
+
 # [1.33.0](/compare/v1.32.0...v1.33.0) (2025-12-10)
 
 ### Features
