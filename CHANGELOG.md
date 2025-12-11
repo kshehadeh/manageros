@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.36.0](/compare/v1.35.0...v1.36.0) (2025-12-11)
+
+### Features
+
+- Enhance TeamsPage with team statistics and update job management components e2f3b1a
+
 # [1.35.0](/compare/v1.34.0...v1.35.0) (2025-12-10)
 
 ### Features
