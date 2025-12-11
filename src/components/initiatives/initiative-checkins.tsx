@@ -16,7 +16,7 @@ import { PageSection } from '@/components/ui/page-section'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { deleteCheckIn } from '@/lib/actions/checkin'
 import { toast } from 'sonner'
-import { CheckCircle, Plus, MoreHorizontal, Edit, Trash2 } from 'lucide-react'
+import { CheckCircle, MoreHorizontal, Edit, Trash2 } from 'lucide-react'
 import { SimpleListContainer } from '@/components/common/simple-list-container'
 import { SimpleListItem } from '@/components/common/simple-list-item'
 import { SimpleListItemsContainer } from '@/components/common/simple-list-items-container'
@@ -46,7 +46,6 @@ export function InitiativeCheckIns({
   initiativeTitle,
   checkIns,
 }: InitiativeCheckInsProps) {
-  const [showNewForm, setShowNewForm] = useState(false)
   const [editingCheckIn, setEditingCheckIn] = useState<
     (typeof checkIns)[0] | null
   >(null)
@@ -54,7 +53,6 @@ export function InitiativeCheckIns({
   const [isDeleting, setIsDeleting] = useState(false)
 
   const handleFormSuccess = () => {
-    setShowNewForm(false)
     setEditingCheckIn(null)
     // The page will be revalidated by the server action
   }
@@ -185,22 +183,7 @@ export function InitiativeCheckIns({
 
   return (
     <PageSection
-      header={
-        <SectionHeader
-          icon={CheckCircle}
-          title='Check-ins'
-          action={
-            <Button
-              onClick={() => setShowNewForm(true)}
-              variant='default'
-              size='sm'
-            >
-              <Plus className='h-4 w-4' />
-              Add Check-in
-            </Button>
-          }
-        />
-      }
+      header={<SectionHeader icon={CheckCircle} title='Check-ins' />}
     >
       <SimpleListContainer>
         <SimpleListItemsContainer
@@ -210,15 +193,6 @@ export function InitiativeCheckIns({
           {checkIns.map(renderCheckInItem)}
         </SimpleListItemsContainer>
       </SimpleListContainer>
-
-      {/* New Check-in Modal */}
-      <CheckInModal
-        initiativeId={initiativeId}
-        initiativeTitle={initiativeTitle}
-        open={showNewForm}
-        onOpenChange={setShowNewForm}
-        onSuccess={handleFormSuccess}
-      />
 
       {/* Edit Check-in Modal */}
       {editingCheckIn && (

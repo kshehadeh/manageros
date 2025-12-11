@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { PersonListItem } from '@/components/people/person-list-item'
-import { Edit2, Users, X } from 'lucide-react'
+import { Users, X } from 'lucide-react'
 import {
   addInitiativeOwner,
   removeInitiativeOwner,
@@ -43,11 +43,21 @@ interface InitiativeOwner {
 
 interface ManageOwnersModalProps {
   initiativeId: string
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  trigger?: React.ReactNode
 }
 
-export function ManageOwnersModal({ initiativeId }: ManageOwnersModalProps) {
+export function ManageOwnersModal({
+  initiativeId,
+  open: externalOpen,
+  onOpenChange: externalOnOpenChange,
+  trigger,
+}: ManageOwnersModalProps) {
   const router = useRouter()
-  const [isOpen, setIsOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isOpen = externalOpen !== undefined ? externalOpen : internalOpen
+  const setIsOpen = externalOnOpenChange || setInternalOpen
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingData, setIsLoadingData] = useState(false)
   const [owners, setOwners] = useState<InitiativeOwner[]>([])
@@ -135,14 +145,9 @@ export function ManageOwnersModal({ initiativeId }: ManageOwnersModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button variant='default' size='sm'>
-          <Edit2 className='h-4 w-4 mr-2' />
-          Edit
-        </Button>
-      </DialogTrigger>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
-      <DialogContent>
+      <DialogContent size='sm'>
         <DialogHeader>
           <DialogTitle className='flex items-center gap-2'>
             <Users className='h-5 w-5' />

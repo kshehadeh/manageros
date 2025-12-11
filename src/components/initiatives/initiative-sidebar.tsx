@@ -1,7 +1,6 @@
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { LinksSection } from './links-section'
-import { ManageOwnersModal } from './manage-owners-modal'
 import { User } from 'lucide-react'
 import { SimplePeopleList } from '@/components/people/person-list'
 import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
@@ -77,18 +76,7 @@ export async function InitiativeSidebar({
       {/* Associated People Section - only show if there are people */}
       {ownerPeople.length > 0 && (
         <PageSection
-          header={
-            <SectionHeader
-              icon={User}
-              title='People'
-              action={
-                canEdit ? (
-                  <ManageOwnersModal initiativeId={initiativeId} />
-                ) : undefined
-              }
-              className='mb-3'
-            />
-          }
+          header={<SectionHeader icon={User} title='People' className='mb-3' />}
         >
           <SimplePeopleList
             people={ownerPeople}

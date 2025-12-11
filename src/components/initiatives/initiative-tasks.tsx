@@ -5,23 +5,18 @@ import { SimpleTaskList, type Task } from '@/components/tasks/task-list'
 import { getTasksForInitiative } from '@/lib/actions/task'
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
-import { Button } from '@/components/ui/button'
-import { ListTodo, Plus } from 'lucide-react'
-import { TaskQuickEditDialog } from '@/components/tasks/task-quick-edit-dialog'
+import { ListTodo } from 'lucide-react'
 
 interface InitiativeTasksClientProps {
   initiativeId: string
   tasks: Task[]
-  canEdit?: boolean
 }
 
 export function InitiativeTasksClient({
   initiativeId,
   tasks: initialTasks,
-  canEdit = false,
 }: InitiativeTasksClientProps) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks)
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
   const handleTaskUpdate = async () => {
     try {
@@ -35,48 +30,15 @@ export function InitiativeTasksClient({
     }
   }
 
-  const handleTaskCreated = () => {
-    setIsAddModalOpen(false)
-    handleTaskUpdate()
-  }
-
-  const actions = canEdit
-    ? [
-        <Button
-          onClick={() => setIsAddModalOpen(true)}
-          variant='default'
-          size='sm'
-          key='add-task'
-        >
-          <Plus className='h-4 w-4 mr-2' />
-          Add Task
-        </Button>,
-      ]
-    : undefined
-
   return (
-    <>
-      <PageSection
-        header={
-          <SectionHeader icon={ListTodo} title='Tasks' action={actions} />
-        }
-      >
-        <SimpleTaskList
-          tasks={tasks}
-          variant='full'
-          emptyStateText='No tasks found for this initiative.'
-          onTaskUpdate={handleTaskUpdate}
-          immutableFilters={{ initiativeId }}
-        />
-      </PageSection>
-
-      {/* Add Task Dialog */}
-      <TaskQuickEditDialog
-        open={isAddModalOpen}
-        onOpenChange={setIsAddModalOpen}
-        initiativeId={initiativeId}
-        onSuccess={handleTaskCreated}
+    <PageSection header={<SectionHeader icon={ListTodo} title='Tasks' />}>
+      <SimpleTaskList
+        tasks={tasks}
+        variant='full'
+        emptyStateText='No tasks found for this initiative.'
+        onTaskUpdate={handleTaskUpdate}
+        immutableFilters={{ initiativeId }}
       />
-    </>
+    </PageSection>
   )
 }
