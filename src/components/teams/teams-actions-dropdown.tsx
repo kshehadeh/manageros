@@ -3,18 +3,20 @@
 import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 import { ActionDropdown } from '@/components/common/action-dropdown'
-import { Upload, Plus, ChevronDown, Pickaxe } from 'lucide-react'
+import { Upload, Plus, ChevronDown, Pickaxe, UserPlus } from 'lucide-react'
 
 interface TeamsActionsDropdownProps {
   canCreateTeam: boolean
   canImportTeam: boolean
+  canAddMember?: boolean
 }
 
 export function TeamsActionsDropdown({
   canCreateTeam,
   canImportTeam,
+  canAddMember = true,
 }: TeamsActionsDropdownProps) {
-  if (!canCreateTeam && !canImportTeam) {
+  if (!canCreateTeam && !canImportTeam && !canAddMember) {
     return null
   }
 
@@ -35,6 +37,16 @@ export function TeamsActionsDropdown({
     >
       {({ close }) => (
         <div className='py-1'>
+          {canAddMember && (
+            <Link
+              href='/people/new'
+              className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+              onClick={close}
+            >
+              <UserPlus className='w-4 h-4' />
+              Add Member
+            </Link>
+          )}
           {canCreateTeam && (
             <Link
               href='/teams/new'

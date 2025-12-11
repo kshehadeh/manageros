@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { Link } from '@/components/ui/link'
-import { Edit, Trash2 } from 'lucide-react'
+import { Edit, Trash2, UserPlus, Rocket, Building2 } from 'lucide-react'
 import { deleteTeam } from '@/lib/actions/team'
 import { ActionDropdown } from '@/components/common/action-dropdown'
 import { ConfirmAction } from '@/components/common/confirm-action'
@@ -35,6 +35,35 @@ export function TeamActionsDropdown({
     <ActionDropdown size={size}>
       {({ close }) => (
         <div className='py-1'>
+          <Link
+            href={`/people/new?teamId=${teamId}`}
+            className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+            onClick={close}
+          >
+            <UserPlus className='w-4 h-4' />
+            Add Member
+          </Link>
+
+          <Link
+            href={`/initiatives/new?teamId=${teamId}`}
+            className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+            onClick={close}
+          >
+            <Rocket className='w-4 h-4' />
+            Add Initiative
+          </Link>
+
+          <Link
+            href={`/teams/new?parentId=${teamId}`}
+            className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+            onClick={close}
+          >
+            <Building2 className='w-4 h-4' />
+            Add Child Team
+          </Link>
+
+          <div className='border-t border-border my-1' />
+
           <Link
             href={`/teams/${teamId}/edit`}
             className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
