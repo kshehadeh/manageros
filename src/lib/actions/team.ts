@@ -430,3 +430,54 @@ export async function getTeamsForSelection(
     return []
   }
 }
+
+/**
+ * Gets aggregate statistics for all teams in the organization
+ */
+export async function getTeamStatistics() {
+  try {
+    const user = await getCurrentUser()
+    if (!user.managerOSOrganizationId) {
+      return {
+        totalTeams: 0,
+        totalMembers: 0,
+        totalSubteams: 0,
+      }
+    }
+
+    const teams = await prisma.team.findMany({
+      where: { organizationId: user.managerOSOrganizationId },
+      include: {
+        _count: {
+          select: {
+            people: true,
+            children: true,
+          },
+        },
+      },
+    })
+
+    const totalTeams = teams.length
+    const totalMembers = teams.reduce(
+      (sum, team) => sum + team._count.people,
+      0
+    )
+    const totalSubteams = teams.reduce(
+      (sum, team) => sum + team._count.children,
+      0
+    )
+
+    return {
+      totalTeams,
+      totalMembers,
+      totalSubteams,
+    }
+  } catch (error) {
+    console.error('Error fetching team statistics:', error)
+    return {
+      totalTeams: 0,
+      totalMembers: 0,
+      totalSubteams: 0,
+    }
+  }
+}

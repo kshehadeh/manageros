@@ -14,8 +14,7 @@ import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
-import { Rocket, Plus, Users, Building2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Rocket, Users, Building2 } from 'lucide-react'
 import { TeamWithDetailRelations } from '@/types/team'
 import { useRouter } from 'next/navigation'
 
@@ -85,23 +84,7 @@ export function TeamDetailContent({ team, isAdmin }: TeamDetailContentProps) {
             <div className='space-y-6'>
               {/* Team Members */}
               <PageSection
-                header={
-                  <SectionHeader
-                    icon={Users}
-                    title={`Members`}
-                    action={
-                      <Button asChild variant='default' size='sm'>
-                        <Link
-                          href={`/people/new?teamId=${team.id}`}
-                          className='flex items-center gap-2'
-                        >
-                          <Plus className='w-4 h-4' />
-                          Add Member
-                        </Link>
-                      </Button>
-                    }
-                  />
-                }
+                header={<SectionHeader icon={Users} title={`Members`} />}
               >
                 <SimplePeopleList
                   people={team.people}
@@ -122,25 +105,7 @@ export function TeamDetailContent({ team, isAdmin }: TeamDetailContentProps) {
 
               {/* Team Initiatives */}
               <PageSection
-                header={
-                  <SectionHeader
-                    icon={Rocket}
-                    title={`Initiatives`}
-                    action={
-                      <div className='flex items-center gap-2'>
-                        <Button asChild variant='default' size='sm'>
-                          <Link
-                            href={`/initiatives/new?teamId=${team.id}`}
-                            className='flex items-center gap-2'
-                          >
-                            <Plus className='w-4 h-4' />
-                            Add Initiative
-                          </Link>
-                        </Button>
-                      </div>
-                    }
-                  />
-                }
+                header={<SectionHeader icon={Rocket} title={`Initiatives`} />}
               >
                 <SimpleInitiativeList
                   initiatives={team.initiatives}
@@ -157,23 +122,7 @@ export function TeamDetailContent({ team, isAdmin }: TeamDetailContentProps) {
 
               {/* Child Teams */}
               <PageSection
-                header={
-                  <SectionHeader
-                    icon={Building2}
-                    title={`Children`}
-                    action={
-                      <Button asChild variant='default' size='sm'>
-                        <Link
-                          href={`/teams/new?parentId=${team.id}`}
-                          className='flex items-center gap-2'
-                        >
-                          <Plus className='w-4 h-4' />
-                          Add Team
-                        </Link>
-                      </Button>
-                    }
-                  />
-                }
+                header={<SectionHeader icon={Building2} title={`Children`} />}
               >
                 <SimpleTeamList
                   teams={team.children}

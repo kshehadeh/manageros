@@ -19,6 +19,7 @@ import {
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Button } from '@/components/ui/button'
+import { DeleteModal } from '@/components/common/delete-modal'
 
 import {
   type JobLevelFormData,
@@ -83,7 +84,7 @@ function SortableItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={`border rounded-lg p-2 transition-all bg-background hover:bg-muted/50 ${isDragging ? 'shadow-lg' : ''}`}
+      className={`border rounded-sm p-2 transition-all bg-background hover:bg-muted/50 ${isDragging ? 'shadow-lg' : ''}`}
     >
       {editingId === level.id ? (
         // Edit Form
@@ -141,7 +142,10 @@ function SortableItem({
             <Button
               size='sm'
               variant='outline'
-              onClick={() => onEdit(level)}
+              onClick={e => {
+                e.stopPropagation()
+                onEdit(level)
+              }}
               className='h-8 w-8 p-0'
               title='Edit level'
             >
@@ -150,7 +154,10 @@ function SortableItem({
             <Button
               size='sm'
               variant='destructive'
-              onClick={() => onDelete(level.id)}
+              onClick={e => {
+                e.stopPropagation()
+                onDelete(level.id)
+              }}
               className='h-8 w-8 p-0'
               title='Delete level'
             >
@@ -171,6 +178,8 @@ export function JobLevelManagement({ levels }: JobLevelManagementProps) {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [localLevels, setLocalLevels] = useState<JobLevel[]>(levels)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -213,19 +222,22 @@ export function JobLevelManagement({ levels }: JobLevelManagementProps) {
     setFormData({ name: '', order: 0 })
   }
 
-  const handleDelete = async (id: string) => {
-    if (
-      !confirm(
-        'Are you sure you want to delete this job level? This action cannot be undone.'
-      )
-    ) {
-      return
-    }
+  const handleDeleteClick = (id: string) => {
+    setDeletingId(id)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingId) return
 
     try {
-      await deleteJobLevel(id)
+      setIsDeleting(true)
+      await deleteJobLevel(deletingId)
+      setDeletingId(null)
     } catch (error) {
       console.error('Error deleting job level:', error)
+      throw error
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -258,10 +270,6 @@ export function JobLevelManagement({ levels }: JobLevelManagementProps) {
 
   return (
     <div className='space-y-4'>
-      <div className='flex items-center justify-between'>
-        <h3 className='text-lg font-semibold'>Job Levels</h3>
-      </div>
-
       {/* Levels List */}
       <DndContext
         sensors={sensors}
@@ -286,7 +294,7 @@ export function JobLevelManagement({ levels }: JobLevelManagementProps) {
                   formData={formData}
                   isSubmitting={isSubmitting}
                   onEdit={handleEdit}
-                  onDelete={handleDelete}
+                  onDelete={handleDeleteClick}
                   onSubmit={handleSubmit}
                   onCancel={handleCancel}
                   onFormDataChange={setFormData}
@@ -303,6 +311,16 @@ export function JobLevelManagement({ levels }: JobLevelManagementProps) {
           job role selections.
         </p>
       )}
+
+      <DeleteModal
+        isOpen={deletingId !== null}
+        onClose={() => setDeletingId(null)}
+        onConfirm={handleDeleteConfirm}
+        title='Delete Job Level'
+        description='Are you sure you want to delete this job level? This action cannot be undone.'
+        entityName='job level'
+        isLoading={isDeleting}
+      />
     </div>
   )
 }
