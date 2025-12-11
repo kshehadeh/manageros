@@ -23,7 +23,7 @@ interface ColumnConfig {
 }
 
 interface DataTableLoadingProps {
-  title: string
+  title: string | ReactNode
   titleIcon: LucideIcon
   subtitle?: string | ReactNode
   actions?: ReactNode

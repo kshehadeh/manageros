@@ -1,37 +1,19 @@
 import { DataTableLoading } from '@/components/ui/data-table-loading'
-import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Users2, Plus, Upload, Workflow } from 'lucide-react'
+import { Users2 } from 'lucide-react'
 import { TableCell, TableRow } from '@/components/ui/table'
 
 export default function LoadingPage() {
   return (
     <DataTableLoading
-      title='Teams'
+      title={<Skeleton className='h-8 w-32' />}
       titleIcon={Users2}
-      subtitle="Manage your organization's team structure"
+      subtitle={<Skeleton className='h-5 w-64' />}
       actions={
         <div className='flex gap-2'>
-          <Button
-            disabled
-            variant='outline'
-            className='flex items-center gap-2'
-          >
-            <Workflow className='w-4 h-4' />
-            Chart
-          </Button>
-          <Button
-            disabled
-            variant='outline'
-            className='flex items-center gap-2'
-          >
-            <Upload className='w-4 h-4' />
-            Import Teams
-          </Button>
-          <Button disabled className='flex items-center gap-2'>
-            <Plus className='h-4 w-4' />
-            Create Team
-          </Button>
+          <Skeleton className='h-9 w-20 rounded-md' />
+          <Skeleton className='h-9 w-28 rounded-md' />
+          <Skeleton className='h-9 w-32 rounded-md' />
         </div>
       }
       columns={[

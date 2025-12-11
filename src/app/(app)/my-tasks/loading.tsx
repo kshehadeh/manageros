@@ -1,21 +1,15 @@
 import { DataTableLoading } from '@/components/ui/data-table-loading'
-import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { CheckSquare, Plus } from 'lucide-react'
+import { CheckSquare } from 'lucide-react'
 import { TableCell, TableRow } from '@/components/ui/table'
 
 export default function LoadingPage() {
   return (
     <DataTableLoading
-      title='My Tasks'
+      title={<Skeleton className='h-8 w-32' />}
       titleIcon={CheckSquare}
-      subtitle='Track and manage tasks assigned to you'
-      actions={
-        <Button disabled className='flex items-center gap-2'>
-          <Plus className='h-4 w-4' />
-          Create Task
-        </Button>
-      }
+      subtitle={<Skeleton className='h-5 w-64' />}
+      actions={<Skeleton className='h-9 w-32 rounded-md' />}
       columns={[
         { minWidth: '400px', skeletonWidth: '20px' },
         { width: '120px', skeletonWidth: '16px' },
