@@ -32,6 +32,8 @@ All APIs require authentication via Clerk. User sessions include:
 
 ManagerOS uses Clerk's built-in OAuth 2.0 provider to enable third-party applications to access the API using bearer tokens.
 
+For detailed OAuth documentation, see [OAuth Authentication](../oauth-authentication.md).
+
 #### Setting Up OAuth
 
 1. **Create OAuth Application in Clerk Dashboard:**
