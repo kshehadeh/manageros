@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.37.0](/compare/v1.36.0...v1.37.0) (2025-12-12)
+
+### Features
+
+- Add Manage People functionality to Initiative Actions Dropdown e7c78c9
+
 # [1.36.0](/compare/v1.35.0...v1.36.0) (2025-12-11)
 
 ### Features
