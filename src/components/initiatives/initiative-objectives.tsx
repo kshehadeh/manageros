@@ -1,7 +1,6 @@
 import { Target, TargetIcon } from 'lucide-react'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
-import { CreateObjectiveModal } from './create-objective-modal'
 
 interface InitiativeObjectivesProps {
   objectives: Array<{
@@ -11,13 +10,10 @@ interface InitiativeObjectivesProps {
     sortIndex: number
   }>
   initiativeId: string
-  canEdit?: boolean
 }
 
 export function InitiativeObjectives({
   objectives,
-  initiativeId,
-  canEdit = false,
 }: InitiativeObjectivesProps) {
   return (
     <PageSection
@@ -25,11 +21,6 @@ export function InitiativeObjectives({
         <SectionHeader
           icon={Target}
           title='Objectives & Key Results'
-          action={
-            canEdit ? (
-              <CreateObjectiveModal initiativeId={initiativeId} />
-            ) : undefined
-          }
           className='mb-4'
         />
       }

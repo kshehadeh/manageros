@@ -11,6 +11,7 @@ import {
   Link as LinkIcon,
   CheckCircle,
   Target,
+  Users,
 } from 'lucide-react'
 import { deleteInitiative, createObjective } from '@/lib/actions/initiative'
 import { ActionDropdown } from '@/components/common/action-dropdown'
@@ -35,6 +36,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
+import { ManageOwnersModal } from './manage-owners-modal'
 
 export interface InitiativeActionsDropdownProps {
   initiativeId: string
@@ -61,6 +63,7 @@ export function InitiativeActionsDropdown({
   const [showLinkModal, setShowLinkModal] = useState(false)
   const [showCheckInModal, setShowCheckInModal] = useState(false)
   const [showObjectiveModal, setShowObjectiveModal] = useState(false)
+  const [showManagePeopleModal, setShowManagePeopleModal] = useState(false)
   const [isSubmittingNote, setIsSubmittingNote] = useState(false)
   const [isSubmittingObjective, setIsSubmittingObjective] = useState(false)
   const [objectiveFormData, setObjectiveFormData] = useState({
@@ -188,6 +191,17 @@ export function InitiativeActionsDropdown({
                   onClick={event => {
                     event.stopPropagation()
                     close()
+                    setShowManagePeopleModal(true)
+                  }}
+                >
+                  <Users className='w-4 h-4' />
+                  Manage People
+                </button>
+                <button
+                  className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
+                  onClick={event => {
+                    event.stopPropagation()
+                    close()
                     setShowNoteModal(true)
                   }}
                 >
@@ -281,6 +295,7 @@ export function InitiativeActionsDropdown({
         initiativeId={initiativeId}
         onSuccess={() => {
           setShowTaskDialog(false)
+          router.refresh()
         }}
       />
 
@@ -390,6 +405,13 @@ export function InitiativeActionsDropdown({
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Manage People Modal */}
+      <ManageOwnersModal
+        initiativeId={initiativeId}
+        open={showManagePeopleModal}
+        onOpenChange={setShowManagePeopleModal}
+      />
     </>
   )
 }

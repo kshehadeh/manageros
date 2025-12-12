@@ -1,37 +1,19 @@
 import { DataTableLoading } from '@/components/ui/data-table-loading'
-import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { User, UserPlus, Upload, Workflow } from 'lucide-react'
+import { User } from 'lucide-react'
 import { TableCell, TableRow } from '@/components/ui/table'
 
 export default function LoadingPage() {
   return (
     <DataTableLoading
-      title='People'
+      title={<Skeleton className='h-8 w-32' />}
       titleIcon={User}
-      subtitle={<Skeleton className='h-5 w-5 rounded' />}
+      subtitle={<Skeleton className='h-5 w-64' />}
       actions={
         <div className='flex flex-wrap items-center gap-3'>
-          <Button
-            disabled
-            variant='outline'
-            className='flex items-center gap-2'
-          >
-            <Workflow className='w-4 h-4' />
-            <span className='hidden sm:inline'>Chart</span>
-          </Button>
-          <Button
-            disabled
-            variant='outline'
-            className='flex items-center gap-2'
-          >
-            <Upload className='w-4 h-4' />
-            <span className='hidden sm:inline'>Import CSV</span>
-          </Button>
-          <Button disabled className='flex items-center gap-2'>
-            <UserPlus className='w-4 h-4' />
-            <span className='hidden sm:inline'>Create Person</span>
-          </Button>
+          <Skeleton className='h-9 w-20 rounded-md' />
+          <Skeleton className='h-9 w-28 rounded-md' />
+          <Skeleton className='h-9 w-32 rounded-md' />
         </div>
       }
       columns={[

@@ -1,5 +1,4 @@
 import { InitiativeObjectives } from './initiative-objectives'
-import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
 
 interface InitiativeObjectivesServerProps {
@@ -9,13 +8,6 @@ interface InitiativeObjectivesServerProps {
 export async function InitiativeObjectivesServer({
   initiativeId,
 }: InitiativeObjectivesServerProps) {
-  const user = await getCurrentUser()
-  const canEdit = await getActionPermission(
-    user,
-    'initiative.edit',
-    initiativeId
-  )
-
   // Fetch objectives for this initiative
   const objectives = await prisma.objective.findMany({
     where: { initiativeId },
@@ -28,10 +20,6 @@ export async function InitiativeObjectivesServer({
   }
 
   return (
-    <InitiativeObjectives
-      objectives={objectives}
-      initiativeId={initiativeId}
-      canEdit={canEdit}
-    />
+    <InitiativeObjectives objectives={objectives} initiativeId={initiativeId} />
   )
 }

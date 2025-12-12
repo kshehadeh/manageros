@@ -3,8 +3,7 @@ import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
-import { Button } from '@/components/ui/button'
-import { Calendar, Plus } from 'lucide-react'
+import { Calendar } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -18,15 +17,10 @@ export default function LoadingPage() {
   return (
     <PageContainer>
       <PageHeader
-        title='Meetings'
+        title={<Skeleton className='h-8 w-32' />}
         titleIcon={Calendar}
-        subtitle="Manage and track your organization's meetings"
-        actions={
-          <Button disabled className='flex items-center gap-2'>
-            <Plus className='h-4 w-4' />
-            Create Meeting
-          </Button>
-        }
+        subtitle={<Skeleton className='h-5 w-64' />}
+        actions={<Skeleton className='h-9 w-36 rounded-md' />}
       />
 
       <PageContent>

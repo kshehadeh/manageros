@@ -1,6 +1,5 @@
 import { InitiativeTasksClient } from './initiative-tasks'
 import { getTasksForInitiative } from '@/lib/actions/task'
-import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
 import type { Task } from '@/components/tasks/task-list'
 
 interface InitiativeTasksProps {
@@ -8,13 +7,6 @@ interface InitiativeTasksProps {
 }
 
 export async function InitiativeTasks({ initiativeId }: InitiativeTasksProps) {
-  const user = await getCurrentUser()
-  const canEdit = await getActionPermission(
-    user,
-    'initiative.edit',
-    initiativeId
-  )
-
   // Fetch tasks for this initiative
   const tasks = await getTasksForInitiative(initiativeId)
 
@@ -62,7 +54,6 @@ export async function InitiativeTasks({ initiativeId }: InitiativeTasksProps) {
     <InitiativeTasksClient
       initiativeId={initiativeId}
       tasks={transformedTasks}
-      canEdit={canEdit}
     />
   )
 }
