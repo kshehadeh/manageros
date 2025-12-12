@@ -23,6 +23,11 @@ import { createServer } from 'http'
 import { parse } from 'url'
 import { config } from 'dotenv'
 import { resolve } from 'path'
+import {
+  InitiativesResponse,
+  PeopleResponse,
+  TasksResponse,
+} from '../src/types/api'
 
 // Load environment variables from .env file
 config({ path: resolve(process.cwd(), '.env') })
@@ -100,6 +105,29 @@ function startCallbackServer(): Promise<{
   state: string
 }> {
   return new Promise((resolve, reject) => {
+    let timeoutId: NodeJS.Timeout | null = null
+    let isResolved = false
+
+    const cleanup = () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+        timeoutId = null
+      }
+    }
+
+    const finish = (result: { code: string; state: string } | Error) => {
+      if (isResolved) return
+      isResolved = true
+      cleanup()
+      server.close(() => {
+        if (result instanceof Error) {
+          reject(result)
+        } else {
+          resolve(result)
+        }
+      })
+    }
+
     const server = createServer((req, res) => {
       if (!req.url) {
         res.writeHead(400)
@@ -119,8 +147,7 @@ function startCallbackServer(): Promise<{
           res.end(
             `<html><body><h1>OAuth Error</h1><p>${error}</p></body></html>`
           )
-          server.close()
-          reject(new Error(`OAuth error: ${error}`))
+          finish(new Error(`OAuth error: ${error}`))
           return
         }
 
@@ -129,8 +156,7 @@ function startCallbackServer(): Promise<{
           res.end(
             '<html><body><h1>Error</h1><p>No authorization code received</p></body></html>'
           )
-          server.close()
-          reject(new Error('No authorization code received'))
+          finish(new Error('No authorization code received'))
           return
         }
 
@@ -139,8 +165,7 @@ function startCallbackServer(): Promise<{
           res.end(
             '<html><body><h1>Error</h1><p>Invalid state parameter</p></body></html>'
           )
-          server.close()
-          reject(new Error('Invalid state parameter'))
+          finish(new Error('Invalid state parameter'))
           return
         }
 
@@ -148,8 +173,7 @@ function startCallbackServer(): Promise<{
         res.end(
           '<html><body><h1>Success!</h1><p>Authorization code received. You can close this window.</p></body></html>'
         )
-        server.close()
-        resolve({ code, state })
+        finish({ code, state })
       } else {
         res.writeHead(404)
         res.end('Not Found')
@@ -161,10 +185,9 @@ function startCallbackServer(): Promise<{
     })
 
     // Timeout after 5 minutes
-    setTimeout(
+    timeoutId = setTimeout(
       () => {
-        server.close()
-        reject(new Error('Timeout waiting for authorization callback'))
+        finish(new Error('Timeout waiting for authorization callback'))
       },
       5 * 60 * 1000
     )
@@ -360,22 +383,26 @@ async function main() {
     console.log('\n📡 Testing ManagerOS API endpoints...\n')
 
     // Test /api/user/current
-    await testApiEndpoint('/api/user/current', accessToken)
+    let result = await testApiEndpoint('/api/user/current', accessToken)
+    console.log('User Info:', JSON.stringify(result, null, 2))
 
     // Test /api/people (if scope allows)
-    if (tokenResponse.scope?.includes('read:people')) {
-      await testApiEndpoint('/api/people?limit=5', accessToken)
-    }
+    result = await testApiEndpoint('/api/people?limit=5', accessToken)
+    console.log(
+      'People Count:',
+      (result as PeopleResponse).pagination.totalCount
+    )
 
     // Test /api/tasks (if scope allows)
-    if (tokenResponse.scope?.includes('read:tasks')) {
-      await testApiEndpoint('/api/tasks?limit=5', accessToken)
-    }
+    result = await testApiEndpoint('/api/tasks?limit=5', accessToken)
+    console.log('Tasks Count:', (result as TasksResponse).pagination.totalCount)
 
     // Test /api/initiatives (if scope allows)
-    if (tokenResponse.scope?.includes('read:initiatives')) {
-      await testApiEndpoint('/api/initiatives?limit=5', accessToken)
-    }
+    result = await testApiEndpoint('/api/initiatives?limit=5', accessToken)
+    console.log(
+      'Initiatives Count:',
+      (result as InitiativesResponse).pagination.totalCount
+    )
 
     console.log('\n✅ All tests passed!')
     console.log('\n📝 Summary:')
@@ -386,6 +413,9 @@ async function main() {
       )
     }
     console.log(`   Scopes: ${tokenResponse.scope || 'N/A'}`)
+
+    // Explicitly exit to ensure the script terminates
+    process.exit(0)
   } catch (error) {
     console.error('\n❌ Error:', error instanceof Error ? error.message : error)
     process.exit(1)
@@ -393,4 +423,4 @@ async function main() {
 }
 
 // Run the script
-main()
+await main()
