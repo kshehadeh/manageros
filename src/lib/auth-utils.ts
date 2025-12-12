@@ -196,7 +196,18 @@ export type SessionClaims = z.infer<typeof SessionClaimsSchema>
 export async function getCurrentUser(
   options: { revalidateLinks?: boolean; request?: Request } = {}
 ): Promise<UserBrief> {
-  // First, check for OAuth bearer token in Authorization header
+  // First, check for MCP user context (for MCP server requests)
+  try {
+    const { getMCPUserContext } = await import('./mcp/tools')
+    const mcpUser = getMCPUserContext()
+    if (mcpUser) {
+      return mcpUser
+    }
+  } catch {
+    // MCP context not available, continue with normal authentication
+  }
+
+  // Then, check for OAuth bearer token in Authorization header
   try {
     let authHeader: string | null = null
 
