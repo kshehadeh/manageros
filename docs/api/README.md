@@ -14,12 +14,163 @@ ManagerOS uses a hybrid API architecture:
 
 ## Authentication
 
-All APIs require authentication via NextAuth.js. User sessions include:
+ManagerOS supports two authentication methods:
+
+1. **Clerk Session Authentication** (default) - For web UI and server-side requests
+2. **OAuth Bearer Token Authentication** - For third-party applications and API clients
+
+### Clerk Session Authentication
+
+All APIs require authentication via Clerk. User sessions include:
 
 - User ID
 - Organization ID
 - User role (ADMIN or USER)
 - Linked person ID (if applicable)
+
+### OAuth Bearer Token Authentication
+
+ManagerOS uses Clerk's built-in OAuth 2.0 provider to enable third-party applications to access the API using bearer tokens.
+
+#### Setting Up OAuth
+
+1. **Create OAuth Application in Clerk Dashboard:**
+   - Navigate to Clerk Dashboard > OAuth Applications
+   - Click "Add OAuth application"
+   - Enter name and select scopes (see [OAuth Scopes](#oauth-scopes) below)
+   - Copy Client ID and Client Secret (shown once - store securely)
+   - Add redirect URIs for your application
+
+2. **Configure Your Client Application:**
+   - **Discovery URL**: `{CLERK_FRONTEND_API_URL}/.well-known/openid-configuration`
+   - **Authorization URL**: `{CLERK_FRONTEND_API_URL}/oauth/authorize`
+   - **Token URL**: `{CLERK_FRONTEND_API_URL}/oauth/token`
+   - **UserInfo URL**: `{CLERK_FRONTEND_API_URL}/oauth/userinfo`
+
+   Your `CLERK_FRONTEND_API_URL` can be found in Clerk Dashboard > API Keys.
+
+#### OAuth Flow
+
+1. **Authorization**: Redirect user to Clerk's authorization endpoint
+
+   ```
+   GET {CLERK_FRONTEND_API_URL}/oauth/authorize?
+     client_id=YOUR_CLIENT_ID&
+     response_type=code&
+     redirect_uri=YOUR_REDIRECT_URI&
+     scope=read:people%20read:tasks&
+     state=RANDOM_STATE_STRING
+   ```
+
+2. **Token Exchange**: Exchange authorization code for access token
+
+   ```bash
+   POST {CLERK_FRONTEND_API_URL}/oauth/token
+   Content-Type: application/x-www-form-urlencoded
+   Authorization: Basic BASE64(CLIENT_ID:CLIENT_SECRET)
+
+   grant_type=authorization_code&
+   code=AUTHORIZATION_CODE&
+   redirect_uri=YOUR_REDIRECT_URI
+   ```
+
+3. **API Access**: Use access token in API requests
+   ```bash
+   GET /api/user/current
+   Authorization: Bearer YOUR_ACCESS_TOKEN
+   ```
+
+#### OAuth Scopes
+
+OAuth scopes define what permissions your application has. Available scopes:
+
+| Scope               | Description                                  | Permissions                                                 |
+| ------------------- | -------------------------------------------- | ----------------------------------------------------------- |
+| `read:people`       | Read people data                             | `person.view`                                               |
+| `write:people`      | Create, update, and delete people            | `person.create`, `person.edit`, `person.delete`             |
+| `read:tasks`        | Read tasks                                   | `task.view`                                                 |
+| `write:tasks`       | Create, update, and delete tasks             | `task.create`, `task.edit`, `task.delete`                   |
+| `read:initiatives`  | Read initiatives                             | `initiative.view`                                           |
+| `write:initiatives` | Create, update, and delete initiatives       | `initiative.create`, `initiative.edit`, `initiative.delete` |
+| `read:meetings`     | Read meetings                                | `meeting.view`                                              |
+| `write:meetings`    | Create, update, and delete meetings          | `meeting.create`, `meeting.edit`, `meeting.delete`          |
+| `admin`             | Full admin access (organization admins only) | All permissions                                             |
+
+**Note**: The `admin` scope is only granted to users who are organization administrators. Requesting this scope for a non-admin user will result in the scope being omitted from the token.
+
+#### Using Bearer Tokens
+
+Once you have an access token, include it in the `Authorization` header:
+
+```typescript
+const response = await fetch('/api/user/current', {
+  headers: {
+    Authorization: `Bearer ${accessToken}`,
+  },
+})
+```
+
+All ManagerOS API endpoints support bearer token authentication. The system automatically detects bearer tokens and validates them using Clerk's token introspection endpoint.
+
+#### Token Validation
+
+ManagerOS validates OAuth tokens by:
+
+1. Calling Clerk's `/oauth/token_info` endpoint to verify token validity
+2. Extracting user information from the token
+3. Mapping the Clerk user to ManagerOS user record
+4. Enforcing scope-based permissions
+
+#### Example: Complete OAuth Flow
+
+```typescript
+// 1. Redirect user to authorization (client-side)
+const authUrl = new URL(`${CLERK_FRONTEND_API_URL}/oauth/authorize`)
+authUrl.searchParams.set('client_id', CLIENT_ID)
+authUrl.searchParams.set('response_type', 'code')
+authUrl.searchParams.set('redirect_uri', REDIRECT_URI)
+authUrl.searchParams.set('scope', 'read:people read:tasks')
+authUrl.searchParams.set('state', generateState())
+window.location.href = authUrl.toString()
+
+// 2. Exchange code for token (server-side)
+const tokenResponse = await fetch(`${CLERK_FRONTEND_API_URL}/oauth/token`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded',
+    Authorization: `Basic ${btoa(`${CLIENT_ID}:${CLIENT_SECRET}`)}`,
+  },
+  body: new URLSearchParams({
+    grant_type: 'authorization_code',
+    code: authorizationCode,
+    redirect_uri: REDIRECT_URI,
+  }),
+})
+const { access_token, refresh_token } = await tokenResponse.json()
+
+// 3. Use token for API calls
+const apiResponse = await fetch('/api/tasks', {
+  headers: {
+    Authorization: `Bearer ${access_token}`,
+  },
+})
+const { tasks } = await apiResponse.json()
+```
+
+#### Token Refresh
+
+Access tokens expire after a set period. Use the refresh token to obtain a new access token:
+
+```bash
+POST {CLERK_FRONTEND_API_URL}/oauth/token
+Content-Type: application/x-www-form-urlencoded
+Authorization: Basic BASE64(CLIENT_ID:CLIENT_SECRET)
+
+grant_type=refresh_token&
+refresh_token=YOUR_REFRESH_TOKEN
+```
+
+For more details, see [Clerk's OAuth Documentation](https://clerk.com/docs/guides/configure/auth-strategies/oauth/single-sign-on#option-2-sign-in-with-your-app).
 
 ### Security Model
 
@@ -177,13 +328,13 @@ Errors are returned with appropriate HTTP status codes:
 
 ### Common Error Codes
 
-| Status Code                 | Meaning            | Common Causes                             |
-| --------------------------- | ------------------ | ----------------------------------------- |
-| `400 Bad Request`           | Invalid input      | Validation errors, malformed data         |
-| `401 Unauthorized`          | Not authenticated  | No session, expired session               |
-| `403 Forbidden`             | Access denied      | No organization, insufficient permissions |
-| `404 Not Found`             | Resource not found | Invalid ID, deleted resource              |
-| `500 Internal Server Error` | Server error       | Unexpected server issues                  |
+| Status Code                 | Meaning            | Common Causes                                    |
+| --------------------------- | ------------------ | ------------------------------------------------ |
+| `400 Bad Request`           | Invalid input      | Validation errors, malformed data                |
+| `401 Unauthorized`          | Not authenticated  | No session, expired session, invalid OAuth token |
+| `403 Forbidden`             | Access denied      | No organization, insufficient permissions        |
+| `404 Not Found`             | Resource not found | Invalid ID, deleted resource                     |
+| `500 Internal Server Error` | Server error       | Unexpected server issues                         |
 
 ### Server Action Errors
 

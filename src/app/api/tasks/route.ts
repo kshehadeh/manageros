@@ -205,7 +205,7 @@ function buildOrderByClause(sortParam: string) {
 }
 
 export async function GET(request: NextRequest) {
-  const user = await getCurrentUser()
+  const user = await getCurrentUser({ request })
   try {
     // Check if user belongs to an organization
     if (!user.managerOSOrganizationId) {

@@ -27,6 +27,7 @@
     "user:delete": "bun scripts/delete-user.ts",
     "org:delete": "bun scripts/delete-organization.ts",
     "test:email": "bun scripts/test-email-config.ts",
+    "test:oauth": "bun scripts/test-oauth.ts",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "test:debug": "playwright test --debug",
