@@ -1,5 +1,13 @@
 # Changelog
 
+# [1.38.0](/compare/v1.37.0...v1.38.0) (2025-12-13)
+
+### Features
+
+- Enhance organization membership handling in Clerk integration 24f97c6
+- Implement OAuth bearer token authentication and enhance user retrieval 30efec1
+- **mcp:** Implement Model Context Protocol (MCP) server with OAuth support 2b26366
+
 # [1.37.0](/compare/v1.36.0...v1.37.0) (2025-12-12)
 
 ### Features
