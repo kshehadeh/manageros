@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import { NextResponse } from 'next/server'
-import { getBaseUrl } from '@/lib/utils/url-utils'
+import { getBaseUrlFromRequest } from '@/lib/utils/url-utils'
 
 /**
  * OAuth Protected Resource Metadata endpoint
@@ -43,8 +43,10 @@ export async function GET(
   // The client will append /.well-known/oauth-authorization-server to discover metadata
   const cleanClerkUrl = clerkFrontendApiUrl.replace(/\/$/, '')
 
-  // Get base URL for the resource
-  const baseUrl = getBaseUrl()
+  // Get base URL from request headers to ensure it matches what the client is using
+  // This is critical for OAuth validation - the resource URL must match the URL
+  // the client used to connect (including protocol)
+  const baseUrl = getBaseUrlFromRequest(request)
 
   // Determine the resource URL based on the path
   // If path is ['api', 'mcp'], the resource is /api/mcp
