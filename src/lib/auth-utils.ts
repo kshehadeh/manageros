@@ -208,36 +208,29 @@ export async function getCurrentUser(
   }
 
   // Then, check for OAuth bearer token in Authorization header
-  try {
-    let authHeader: string | null = null
+  // If a bearer token is explicitly provided, we should NOT fall back to session auth
+  // Any errors during token validation should propagate to the caller
+  let authHeader: string | null = null
 
-    // Try to get header from request object first (for API routes)
-    if (options.request) {
-      authHeader = options.request.headers.get('authorization')
-    } else {
-      // Fall back to headers() function (for server components)
-      try {
-        const headersList = await headers()
-        authHeader = headersList.get('authorization')
-      } catch {
-        // headers() may not be available in all contexts
-      }
+  // Try to get header from request object first (for API routes)
+  if (options.request) {
+    authHeader = options.request.headers.get('authorization')
+  } else {
+    // Fall back to headers() function (for server components)
+    try {
+      const headersList = await headers()
+      authHeader = headersList.get('authorization')
+    } catch {
+      // headers() may not be available in all contexts
     }
+  }
 
-    const bearerToken = extractBearerToken(authHeader)
+  const bearerToken = extractBearerToken(authHeader)
 
-    if (bearerToken) {
-      // Validate and get user from OAuth token
-      return await getCurrentUserFromToken(bearerToken)
-    }
-  } catch (error) {
-    // If bearer token validation fails, fall through to Clerk session
-    // This allows API routes to work with either authentication method
-    if (error instanceof Error && error.message.includes('OAuth')) {
-      // Re-throw OAuth-specific errors
-      throw error
-    }
-    // Otherwise, continue to Clerk session authentication
+  if (bearerToken) {
+    // Validate and get user from OAuth token
+    // Errors here will propagate - we don't fall back to session auth when a token is provided
+    return await getCurrentUserFromToken(bearerToken)
   }
 
   // Fall back to Clerk session authentication
