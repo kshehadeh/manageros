@@ -53,6 +53,7 @@
             "group": "Integrations",
             "pages": [
               "integrations/integrations",
+              "integrations/oauth-api-access",
               "integrations/jira-integration",
               "integrations/github-integration"
             ]

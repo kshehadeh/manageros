@@ -60,6 +60,7 @@ model Organization {
   toleranceRules         OrganizationToleranceRule[]
   exceptions             Exception[]
   noteImages             NoteImage[]
+  oauthClients           OAuthClientMetadata[]   @relation("OAuthClients")
 
   @@index([billingUserId])
   @@index([subscriptionPlanId])
@@ -93,6 +94,7 @@ model User {
   fileAttachments         FileAttachment[]
   integrations            Integration[]            @relation("UserIntegrations")
   noteImages              NoteImage[]              @relation("NoteImageUploader")
+  createdOAuthClients     OAuthClientMetadata[]    @relation("OAuthClientCreator")
   createdAt               DateTime                 @default(now())
   updatedAt               DateTime                 @updatedAt
 
@@ -973,4 +975,25 @@ model Exception {
   @@index([status])
   @@index([severity])
   @@index([notificationId])
+}
+
+// Optional: OAuth Client Metadata
+// This model stores metadata about OAuth clients created in Clerk Dashboard
+// The actual OAuth clients are managed in Clerk, but we store metadata here
+// for UI display and organization tracking
+model OAuthClientMetadata {
+  id              String       @id @default(cuid())
+  clerkClientId  String       @unique // Clerk OAuth application client ID
+  name            String       // Display name
+  description     String?      // Optional description
+  organizationId  String       // Organization this client belongs to
+  organization    Organization @relation("OAuthClients", fields: [organizationId], references: [id], onDelete: Cascade)
+  createdById     String       // User who created this client
+  createdBy       User         @relation("OAuthClientCreator", fields: [createdById], references: [id])
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([organizationId])
+  @@index([createdById])
+  @@index([clerkClientId])
 }

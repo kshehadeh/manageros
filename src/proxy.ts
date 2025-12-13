@@ -11,6 +11,7 @@ const PUBLIC_ROUTES = [
   '/feedback-form/', // Matches /feedback-form and all sub-routes like /feedback-form/[token]
   '/auth/signin',
   '/auth/signup',
+  '/.well-known/', // Matches /.well-known and all sub-routes (for OAuth discovery, etc.)
 ]
 
 // Create a matcher for public routes

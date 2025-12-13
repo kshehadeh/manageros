@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { prisma, withConnectionPoolRetry } from './db'
 import {
   OrganizationBrief,
@@ -13,6 +13,11 @@ import { checkIfManagerOrSelf } from '@/lib/utils/people-utils'
 import { getClerkOrganization } from './clerk'
 import { combineName } from '@/lib/utils/name-utils'
 import { getTaskAccessWhereClause } from '@/lib/task-access-utils'
+import {
+  validateClerkToken,
+  getClerkUserFromToken,
+  mapClerkUserToManagerOS,
+} from './oauth-utils'
 
 // Cookie name for tracking organization removal
 const ORG_REMOVED_COOKIE = 'manageros_org_removed'
@@ -189,8 +194,46 @@ export type SessionClaims = z.infer<typeof SessionClaimsSchema>
  * 10. **Name Change**: No handling for name change in Clerk
  */
 export async function getCurrentUser(
-  options: { revalidateLinks?: boolean } = {}
+  options: { revalidateLinks?: boolean; request?: Request } = {}
 ): Promise<UserBrief> {
+  // First, check for MCP user context (for MCP server requests)
+  try {
+    const { getMCPUserContext } = await import('./mcp/tools')
+    const mcpUser = getMCPUserContext()
+    if (mcpUser) {
+      return mcpUser
+    }
+  } catch {
+    // MCP context not available, continue with normal authentication
+  }
+
+  // Then, check for OAuth bearer token in Authorization header
+  // If a bearer token is explicitly provided, we should NOT fall back to session auth
+  // Any errors during token validation should propagate to the caller
+  let authHeader: string | null = null
+
+  // Try to get header from request object first (for API routes)
+  if (options.request) {
+    authHeader = options.request.headers.get('authorization')
+  } else {
+    // Fall back to headers() function (for server components)
+    try {
+      const headersList = await headers()
+      authHeader = headersList.get('authorization')
+    } catch {
+      // headers() may not be available in all contexts
+    }
+  }
+
+  const bearerToken = extractBearerToken(authHeader)
+
+  if (bearerToken) {
+    // Validate and get user from OAuth token
+    // Errors here will propagate - we don't fall back to session auth when a token is provided
+    return await getCurrentUserFromToken(bearerToken)
+  }
+
+  // Fall back to Clerk session authentication
   // Use treatPendingAsSignedOut: false to handle pending sessions
   const authResult = await auth({ treatPendingAsSignedOut: false })
   const { userId, sessionClaims } = authResult
@@ -477,6 +520,55 @@ export async function getCurrentUser(
   }
 
   return syncObject
+}
+
+/**
+ * Get current user from OAuth bearer token
+ * Validates the token using Clerk's token introspection endpoint
+ * and maps the Clerk user to ManagerOS user
+ *
+ * @param bearerToken - The OAuth bearer token from Authorization header
+ * @returns UserBrief with ManagerOS user data
+ * @throws Error if token is invalid or user cannot be mapped
+ */
+export async function getCurrentUserFromToken(
+  bearerToken: string
+): Promise<UserBrief> {
+  // Validate token using Clerk's token introspection endpoint
+  const tokenInfo = await validateClerkToken(bearerToken)
+
+  if (!tokenInfo || !tokenInfo.sub) {
+    throw new Error('Invalid or expired OAuth token')
+  }
+
+  // Get user info from Clerk
+  const clerkUserInfo = await getClerkUserFromToken(bearerToken)
+
+  if (!clerkUserInfo || !clerkUserInfo.user_id) {
+    throw new Error('Unable to retrieve user information from token')
+  }
+
+  // Map Clerk user ID to ManagerOS user
+  const userBrief = await mapClerkUserToManagerOS(clerkUserInfo.user_id)
+
+  return userBrief
+}
+
+/**
+ * Extract bearer token from Authorization header
+ * @param authHeader - The Authorization header value
+ * @returns The token if present, null otherwise
+ */
+function extractBearerToken(authHeader: string | null): string | null {
+  if (!authHeader) {
+    return null
+  }
+
+  if (!authHeader.startsWith('Bearer ')) {
+    return null
+  }
+
+  return authHeader.substring(7).trim()
 }
 
 export async function getCurrentUserWithPersonAndOrganization(options?: {

@@ -58,6 +58,11 @@ DIRECT_URL="postgresql://username:password@localhost:5432/manageros"
 # Clerk Authentication
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..."
 CLERK_SECRET_KEY="sk_test_..."
+CLERK_FRONTEND_API_URL="https://your-app.clerk.accounts.dev" # For OAuth token validation
+
+# OAuth (Optional - for third-party API access)
+CLERK_OAUTH_CLIENT_ID="oauth_..." # Client ID for OAuth token validation
+CLERK_OAUTH_CLIENT_SECRET="oauth_..." # Client Secret for OAuth token validation
 
 # Cloudflare R2 (for file storage)
 R2_ACCOUNT_ID="..."
