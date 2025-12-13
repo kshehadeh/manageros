@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { getAuthenticatedMCPUser } from '@/lib/mcp/auth'
 import { getMCPToolDefinitions, executeMCPTool } from '@/lib/mcp/tools'
-import { getBaseUrl } from '@/lib/utils/url-utils'
+import { getBaseUrlFromRequest } from '@/lib/utils/url-utils'
 import type {
   JSONRPCMessage,
   JSONRPCRequest,
@@ -9,9 +9,10 @@ import type {
 
 /**
  * Get OAuth discovery URL for WWW-Authenticate header
+ * Uses request headers to ensure the URL matches what the client is using
  */
-function getOAuthDiscoveryUrl(): string {
-  const baseUrl = getBaseUrl()
+function getOAuthDiscoveryUrl(request: Request): string {
+  const baseUrl = getBaseUrlFromRequest(request)
   return `${baseUrl}/.well-known/oauth-protected-resource`
 }
 
@@ -66,7 +67,7 @@ async function handleMCPRequest(req: NextRequest): Promise<Response> {
         mcpContext = await getAuthenticatedMCPUser(authReq)
       } catch {
         // Return 401 with WWW-Authenticate header for non-initialize requests
-        const discoveryUrl = getOAuthDiscoveryUrl()
+        const discoveryUrl = getOAuthDiscoveryUrl(req)
         const headers: HeadersInit = {
           'Content-Type': 'application/json',
         }
@@ -121,7 +122,7 @@ async function handleMCPRequest(req: NextRequest): Promise<Response> {
         // Handle different MCP methods
         switch (request.method) {
           case 'initialize': {
-            const baseUrl = getBaseUrl()
+            const baseUrl = getBaseUrlFromRequest(req)
             const clerkFrontendApiUrl = process.env.CLERK_FRONTEND_API_URL
             const discoveryUrl = `${baseUrl}/.well-known/oauth-protected-resource`
 
@@ -272,7 +273,7 @@ async function handleMCPRequest(req: NextRequest): Promise<Response> {
 
     // If it's an authentication error, include WWW-Authenticate header with OAuth discovery
     if (error instanceof Error && error.message.includes('Unauthorized')) {
-      const discoveryUrl = getOAuthDiscoveryUrl()
+      const discoveryUrl = getOAuthDiscoveryUrl(req)
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
         'WWW-Authenticate': `Bearer resource_metadata="${discoveryUrl}"`,
@@ -336,7 +337,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('MCP POST error:', error)
     if (error instanceof Error && error.message.includes('Unauthorized')) {
-      const discoveryUrl = getOAuthDiscoveryUrl()
+      const discoveryUrl = getOAuthDiscoveryUrl(req)
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
         'WWW-Authenticate': `Bearer resource_metadata="${discoveryUrl}"`,
