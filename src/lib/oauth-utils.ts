@@ -50,6 +50,24 @@ function getClerkFrontendApiUrl(): string {
 
 /**
  * Validate a Clerk-issued OAuth access token using Clerk's token introspection endpoint
+ *
+ * This function calls Clerk's /oauth/token_info endpoint to verify that an OAuth token
+ * is valid, active, and not expired. This is required for MCP authentication.
+ *
+ * **Why CLERK_OAUTH_CLIENT_ID and CLERK_OAUTH_CLIENT_SECRET are required:**
+ *
+ * These credentials are NOT for dynamic client registration (which Clerk handles
+ * automatically at /oauth/register). They are required for TOKEN INTROSPECTION.
+ *
+ * When an MCP client sends a Bearer token, we must verify it's valid by calling
+ * Clerk's /oauth/token_info endpoint. This endpoint requires Basic Auth with
+ * the OAuth Client ID and Secret to prevent unauthorized token introspection.
+ *
+ * Flow:
+ * 1. MCP client sends: Authorization: Bearer <token>
+ * 2. ManagerOS calls: POST /oauth/token_info with Basic Auth (ID:Secret)
+ * 3. Clerk returns: { active: true, sub: "user_xxx", ... } or { active: false }
+ *
  * @param token - The OAuth access token to validate
  * @returns Token info if valid, null if invalid
  */
@@ -62,7 +80,8 @@ export async function validateClerkToken(
 
   if (!clientId || !clientSecret) {
     console.warn(
-      'CLERK_OAUTH_CLIENT_ID or CLERK_OAUTH_CLIENT_SECRET not set. Cannot validate OAuth tokens.'
+      'CLERK_OAUTH_CLIENT_ID or CLERK_OAUTH_CLIENT_SECRET not set. Cannot validate OAuth tokens. ' +
+        'These are required for token introspection (NOT dynamic client registration).'
     )
     return null
   }

@@ -27,6 +27,47 @@ The MCP server uses OAuth Bearer Token authentication. Clients must include a va
 Authorization: Bearer <oauth_access_token>
 ```
 
+### Required Environment Variables
+
+For OAuth authentication to work, you must configure these environment variables:
+
+| Variable                    | Description                                                               |
+| --------------------------- | ------------------------------------------------------------------------- |
+| `CLERK_FRONTEND_API_URL`    | Your Clerk Frontend API URL (e.g., `https://your-app.clerk.accounts.dev`) |
+| `CLERK_OAUTH_CLIENT_ID`     | OAuth Client ID from Clerk Dashboard                                      |
+| `CLERK_OAUTH_CLIENT_SECRET` | OAuth Client Secret from Clerk Dashboard                                  |
+
+#### Why Are Client ID and Secret Required?
+
+The `CLERK_OAUTH_CLIENT_ID` and `CLERK_OAUTH_CLIENT_SECRET` are **required for token introspection**, not for dynamic client registration.
+
+**Dynamic Client Registration** (RFC 7591) is handled automatically by Clerk at their `/oauth/register` endpoint. MCP clients that support OAuth will register themselves with Clerk directly - ManagerOS doesn't need credentials for this.
+
+**Token Introspection** is where these credentials are used. When an MCP client sends a request with a Bearer token:
+
+1. ManagerOS extracts the token from the `Authorization` header
+2. ManagerOS calls Clerk's `/oauth/token_info` endpoint to validate the token
+3. This introspection endpoint requires **Basic Auth** with `Client ID:Client Secret`
+4. Clerk returns token validity, user ID, scopes, and expiration info
+
+```
+┌─────────────┐     1. Bearer Token      ┌─────────────┐
+│  MCP Client │ ──────────────────────→ │  ManagerOS  │
+└─────────────┘                          │   /api/mcp  │
+                                         └──────┬──────┘
+                                                │
+                                         2. Validate Token
+                                         (Basic Auth: ID:Secret)
+                                                │
+                                                ↓
+                                         ┌─────────────┐
+                                         │   Clerk     │
+                                         │ /token_info │
+                                         └─────────────┘
+```
+
+Without these credentials, ManagerOS cannot verify that OAuth tokens are valid, and all authenticated MCP requests will fail.
+
 ### OAuth Discovery
 
 The MCP server supports OAuth discovery as per RFC 9728. Clients can discover OAuth configuration by:
@@ -40,6 +81,7 @@ The discovery endpoints provide:
 - `authorization_servers`: URLs of authorization servers (Clerk)
 - `scopes_supported`: List of available OAuth scopes (Clerk supports: `openid`, `profile`, `email`, `public_metadata`, `private_metadata`)
 - `jwks_uri`: JSON Web Key Set URI for token validation
+- `registration_endpoint`: Dynamic client registration endpoint (Clerk's `/oauth/register`)
 
 **Important**: Clerk supports standard OAuth scopes plus metadata scopes. ManagerOS does not use scope-based authorization. Instead, access control is based on:
 

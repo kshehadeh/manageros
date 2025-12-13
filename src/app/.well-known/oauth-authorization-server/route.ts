@@ -1,4 +1,5 @@
 /* eslint-disable camelcase */
+import { connection } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getBaseUrl } from '@/lib/utils/url-utils'
 
@@ -8,6 +9,8 @@ import { getBaseUrl } from '@/lib/utils/url-utils'
  * See: https://www.rfc-editor.org/rfc/rfc8414.html
  */
 export async function GET() {
+  // Opt out of static rendering - this route fetches from Clerk at runtime
+  await connection()
   const clerkFrontendApiUrl = process.env.CLERK_FRONTEND_API_URL
 
   if (!clerkFrontendApiUrl) {

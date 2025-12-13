@@ -3,7 +3,6 @@ import { PageSection } from '@/components/ui/page-section'
 import { LinksSection } from './links-section'
 import { User } from 'lucide-react'
 import { SimplePeopleList } from '@/components/people/person-list'
-import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
 import { getEntityLinks } from '@/lib/actions/entity-links'
 import { prisma } from '@/lib/db'
 
@@ -14,13 +13,6 @@ interface InitiativeSidebarProps {
 export async function InitiativeSidebar({
   initiativeId,
 }: InitiativeSidebarProps) {
-  const user = await getCurrentUser()
-  const canEdit = await getActionPermission(
-    user,
-    'initiative.edit',
-    initiativeId
-  )
-
   // Fetch all necessary data
   const [initiative, entityLinks] = await Promise.all([
     prisma.initiative.findUnique({
@@ -100,7 +92,6 @@ export async function InitiativeSidebar({
           links={entityLinks}
           entityType='Initiative'
           entityId={initiativeId}
-          canEdit={canEdit}
         />
       )}
     </div>
