@@ -166,6 +166,16 @@ async function handleMCPRequest(req: NextRequest): Promise<Response> {
               break
             }
 
+            // Require organization membership for tool execution
+            if (!mcpContext.user.managerOSOrganizationId) {
+              error = {
+                code: 403,
+                message:
+                  'Forbidden - user must belong to an organization to call tools',
+              }
+              break
+            }
+
             const { name, arguments: args } = (request.params || {}) as {
               name?: string
               arguments?: unknown

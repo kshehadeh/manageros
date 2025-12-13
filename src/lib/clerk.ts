@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { ClerkClient, createClerkClient } from '@clerk/backend'
 import { clerkClient, User } from '@clerk/nextjs/server'
 import type {
@@ -155,6 +156,49 @@ export async function getUserFromClerk(
   } catch (error) {
     console.error('Error getting user from Clerk:', error)
     return null
+  }
+}
+
+/**
+ * Get user's organization memberships from Clerk
+ * Returns list of organizations the user belongs to
+ */
+export async function getUserOrganizationMemberships(
+  clerkUserId: string
+): Promise<ClerkOrganizationMembership[]> {
+  try {
+    if (!process.env.CLERK_SECRET_KEY) {
+      console.warn(
+        'CLERK_SECRET_KEY not set. Cannot fetch user organization memberships.'
+      )
+      return []
+    }
+
+    const client = await clerkClient()
+    const memberships = await client.users.getOrganizationMembershipList({
+      userId: clerkUserId,
+    })
+
+    // Map to our ClerkOrganizationMembership type
+    return memberships.data.map(m => ({
+      id: m.id,
+      organization_id: m.organization.id,
+      public_user_data: {
+        user_id: clerkUserId,
+        first_name: m.publicUserData?.firstName || null,
+        last_name: m.publicUserData?.lastName || null,
+        image_url: m.publicUserData?.imageUrl || '',
+        has_image: !!m.publicUserData?.imageUrl,
+        identifier: m.publicUserData?.identifier || '',
+      },
+      role: m.role as 'org:admin' | 'org:member',
+      created_at: m.createdAt,
+      updated_at: m.updatedAt,
+      object: 'organization_membership' as const,
+    }))
+  } catch (error) {
+    console.error('Error getting user organization memberships:', error)
+    return []
   }
 }
 
@@ -356,7 +400,7 @@ export async function addUserToClerkOrganization(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        // eslint-disable-next-line camelcase
+         
         user_id: clerkUserId,
         role,
       }),

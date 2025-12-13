@@ -1,5 +1,5 @@
 import { prisma } from './db'
-import { getUserFromClerk } from './clerk'
+import { getUserFromClerk, getUserOrganizationMemberships } from './clerk'
 import type { UserBrief } from './auth-types'
 
 /**
@@ -150,6 +150,66 @@ export async function getClerkUserFromToken(
 }
 
 /**
+ * Result of auto-selecting an organization for a user
+ */
+interface AutoSelectOrgResult {
+  clerkOrganizationId: string
+  managerOSOrganizationId: string
+  role: string | null
+}
+
+/**
+ * Auto-select the first Clerk organization membership for a user
+ * If the user has organization memberships in Clerk, find the corresponding
+ * ManagerOS organization and return the IDs.
+ * @param clerkUserId - The Clerk user ID
+ * @returns Organization info if found, null otherwise
+ */
+async function autoSelectFirstOrganization(
+  clerkUserId: string
+): Promise<AutoSelectOrgResult | null> {
+  try {
+    // Get user's Clerk organization memberships
+    const memberships = await getUserOrganizationMemberships(clerkUserId)
+
+    if (memberships.length === 0) {
+      return null
+    }
+
+    // Use the first organization membership
+    const firstMembership = memberships[0]
+    const clerkOrgId = firstMembership.organization_id
+
+    // Find the corresponding ManagerOS organization
+    const managerOSOrg = await prisma.organization.findFirst({
+      where: { clerkOrganizationId: clerkOrgId },
+      select: { id: true },
+    })
+
+    if (!managerOSOrg) {
+      // ManagerOS organization doesn't exist for this Clerk org
+      // This can happen if the org was created in Clerk but not yet synced
+      console.log(
+        `No ManagerOS organization found for Clerk org ${clerkOrgId}. User will need to set up organization first.`
+      )
+      return null
+    }
+
+    // Determine role from membership
+    const role = firstMembership.role === 'org:admin' ? 'admin' : 'user'
+
+    return {
+      clerkOrganizationId: clerkOrgId,
+      managerOSOrganizationId: managerOSOrg.id,
+      role,
+    }
+  } catch (error) {
+    console.error('Error auto-selecting organization:', error)
+    return null
+  }
+}
+
+/**
  * Map Clerk user ID to ManagerOS UserBrief
  * This function retrieves the ManagerOS user record and builds a UserBrief
  * @param clerkUserId - The Clerk user ID from the token
@@ -212,16 +272,18 @@ export async function mapClerkUserToManagerOS(
       })
     }
 
-    // Return UserBrief - user won't have organization yet
+    // Try to auto-select first Clerk organization membership
+    const orgResult = await autoSelectFirstOrganization(clerkUserId)
+
     return {
       email: managerOSUser.email,
       name: managerOSUser.name,
       clerkUserId: managerOSUser.clerkUserId || null,
-      clerkOrganizationId: null,
+      clerkOrganizationId: orgResult?.clerkOrganizationId || null,
       managerOSUserId: managerOSUser.id,
-      managerOSOrganizationId: null,
+      managerOSOrganizationId: orgResult?.managerOSOrganizationId || null,
       managerOSPersonId: null,
-      role: null,
+      role: orgResult?.role || null,
     }
   }
 
@@ -240,8 +302,18 @@ export async function mapClerkUserToManagerOS(
     clerkOrganizationId = organization?.clerkOrganizationId || null
   }
 
-  // Try to get role from Clerk organization membership if we have an org
-  if (clerkOrganizationId) {
+  // If user has no organization, try to auto-select from Clerk memberships
+  if (!organizationId) {
+    const orgResult = await autoSelectFirstOrganization(clerkUserId)
+    if (orgResult) {
+      organizationId = orgResult.managerOSOrganizationId
+      clerkOrganizationId = orgResult.clerkOrganizationId
+      role = orgResult.role
+    }
+  }
+
+  // Try to get role from Clerk organization membership if we have an org but no role yet
+  if (clerkOrganizationId && !role) {
     try {
       const { getClerkOrganizationMembership } = await import('./clerk')
       const membership = await getClerkOrganizationMembership(
