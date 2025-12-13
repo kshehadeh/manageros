@@ -23,7 +23,7 @@ type InputJsonValue = Prisma.InputJsonValue
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
-  const authHeader = searchParams.get('authorization')
+  const authHeader = request.headers.get('authorization')
 
   try {
     // Verify cron secret for security
