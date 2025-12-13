@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.38.2](/compare/v1.38.1...v1.38.2) (2025-12-13)
+
+### Bug Fixes
+
+- Correctly retrieve authorization header from request in notifications route bd9279f
+
 ## [1.38.1](/compare/v1.38.0...v1.38.1) (2025-12-13)
 
 # [1.38.0](/compare/v1.37.0...v1.38.0) (2025-12-13)
