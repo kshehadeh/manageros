@@ -50,6 +50,7 @@ import {
   OneOnOneMeetingsSectionSkeleton,
   DirectReportsSectionSkeleton,
   JobRoleSectionSkeleton,
+  OnboardingSectionSkeleton,
 } from './person-detail-skeletons'
 
 // Import section components
@@ -60,6 +61,7 @@ import { ActiveTasksSection } from './sections/active-tasks-section'
 import { OneOnOneMeetingsSection } from './sections/one-on-one-meetings-section'
 import { DirectReportsSection } from './sections/direct-reports-section'
 import { JobRoleSection } from './sections/job-role-section'
+import { OnboardingSection } from './sections/onboarding-section'
 import { PersonStatusBadge } from './person-status-badge'
 
 interface PersonDetailContentProps {
@@ -223,6 +225,14 @@ export function PersonDetailContent({
       <PageContent>
         <PageMain>
           <div className='flex gap-lg flex-wrap space-y-6'>
+            {/* Onboarding Section - shows if person has active or recent onboarding */}
+            <Suspense fallback={<OnboardingSectionSkeleton />}>
+              <OnboardingSection
+                personId={person.id}
+                personName={person.name}
+              />
+            </Suspense>
+
             {/* Feedback Campaigns Section */}
             <Suspense fallback={<FeedbackCampaignsSectionSkeleton />}>
               <FeedbackCampaignsSection

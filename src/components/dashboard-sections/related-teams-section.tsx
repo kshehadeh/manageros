@@ -7,9 +7,8 @@ import { useTeams } from '@/hooks/use-teams'
 import { useUser } from '@clerk/nextjs'
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
-import { Button } from '@/components/ui/button'
+import { SectionHeaderAction } from '@/components/ui/section-header-action'
 import { Building2, Eye } from 'lucide-react'
-import { Link } from '@/components/ui/link'
 
 export function DashboardRelatedTeamsSection() {
   const { isLoaded } = useUser()
@@ -73,12 +72,10 @@ export function DashboardRelatedTeamsSection() {
           icon={Building2}
           title='Related Teams'
           action={
-            <Button asChild variant='outline' size='sm'>
-              <Link href='/teams' className='flex items-center gap-2'>
-                <Eye className='w-4 h-4' />
-                View All
-              </Link>
-            </Button>
+            <SectionHeaderAction href='/teams'>
+              <Eye className='w-3.5 h-3.5' />
+              View All
+            </SectionHeaderAction>
           }
         />
       }

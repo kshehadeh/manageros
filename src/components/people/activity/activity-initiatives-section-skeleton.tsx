@@ -1,9 +1,8 @@
 import { Skeleton } from '@/components/ui/skeleton'
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
+import { SectionHeaderAction } from '@/components/ui/section-header-action'
 import { Rocket, Eye } from 'lucide-react'
-import { Link } from '@/components/ui/link'
-import { Button } from '@/components/ui/button'
 
 export function ActivityInitiativesSectionSkeleton() {
   return (
@@ -14,11 +13,10 @@ export function ActivityInitiativesSectionSkeleton() {
             icon={Rocket}
             title='Initiatives'
             action={
-              <Button asChild variant='outline' size='sm' disabled>
-                <Link href='#' className='flex items-center gap-2'>
-                  <Eye className='w-4 h-4' />
-                </Link>
-              </Button>
+              <SectionHeaderAction href='#' disabled>
+                <Eye className='w-3.5 h-3.5' />
+                View All
+              </SectionHeaderAction>
             }
           />
         }

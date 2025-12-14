@@ -400,7 +400,6 @@ export async function addUserToClerkOrganization(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-         
         user_id: clerkUserId,
         role,
       }),
@@ -703,9 +702,13 @@ export async function getPendingInvitationsForUser(
     )
 
     if (!response.ok) {
-      console.error(
-        `Failed to fetch Clerk invitations: ${response.status} ${await response.text()}`
-      )
+      // 404 is expected when the user has been deleted from Clerk
+      // Don't log these as errors to avoid noise from stale user data
+      if (response.status !== 404) {
+        console.error(
+          `Failed to fetch Clerk invitations: ${response.status} ${await response.text()}`
+        )
+      }
       return []
     }
 

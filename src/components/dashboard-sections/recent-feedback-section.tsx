@@ -2,7 +2,7 @@ import { Link } from '@/components/ui/link'
 import { prisma } from '@/lib/db'
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
-import { Button } from '@/components/ui/button'
+import { SectionHeaderAction } from '@/components/ui/section-header-action'
 import { MessageSquare, Eye } from 'lucide-react'
 
 interface DashboardRecentFeedbackSectionProps {
@@ -40,11 +40,10 @@ export async function DashboardRecentFeedbackSection({
           icon={MessageSquare}
           title='Recent Feedback'
           action={
-            <Button asChild variant='outline' size='sm' title='View All'>
-              <Link href='/people'>
-                <Eye className='w-4 h-4' />
-              </Link>
-            </Button>
+            <SectionHeaderAction href='/people' title='View All'>
+              <Eye className='w-3.5 h-3.5' />
+              View All
+            </SectionHeaderAction>
           }
         />
       }

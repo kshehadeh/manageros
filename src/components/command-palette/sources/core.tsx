@@ -369,7 +369,7 @@ function createStaticItems(
   )
 
   // Add admin-only commands
-  if (userRole === 'ADMIN') {
+  if (isAdmin) {
     items.push(
       {
         id: 'person.create',
@@ -406,6 +406,24 @@ function createStaticItems(
         group: 'Administration',
         perform: ({ closePalette, router }) => {
           router.push('/organization/job-roles')
+          closePalette()
+        },
+      },
+      {
+        id: 'nav.onboarding-templates',
+        title: 'Onboarding Templates',
+        subtitle: 'Manage onboarding templates',
+        icon: <ClipboardList className='h-4 w-4' />,
+        keywords: [
+          'onboarding',
+          'templates',
+          'onboarding templates',
+          'new hire',
+          'orientation',
+        ],
+        group: 'Administration',
+        perform: ({ closePalette, router }) => {
+          router.push('/organization/onboarding-templates')
           closePalette()
         },
       }

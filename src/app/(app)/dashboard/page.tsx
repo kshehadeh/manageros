@@ -5,6 +5,8 @@ import { TodaysPrioritiesSectionServer } from '@/components/dashboard-sections/t
 import { ActiveInitiativesSectionServer } from '@/components/dashboard-sections/active-initiatives-section-server'
 import { TeamPulseSectionServer } from '@/components/dashboard-sections/team-pulse-section-server'
 import { OnboardingSection } from '@/components/dashboard-sections/onboarding-section'
+import { OnboardingProgressSectionServer } from '@/components/onboarding/onboarding-progress-section-server'
+import { OnboardingManagerSection } from '@/components/onboarding/onboarding-manager-section'
 import {
   HighlightsSectionSkeleton,
   TodaysPrioritiesSectionSkeleton,
@@ -117,6 +119,16 @@ async function DashboardContent() {
         </PageMain>
 
         <PageSidebar>
+          {/* Show user's onboarding progress if they have active onboarding */}
+          <Suspense fallback={null}>
+            <OnboardingProgressSectionServer />
+          </Suspense>
+
+          {/* Show manager's team onboarding if they have direct reports being onboarded */}
+          <Suspense fallback={null}>
+            <OnboardingManagerSection />
+          </Suspense>
+
           <Suspense fallback={<TeamPulseSectionSkeleton />}>
             <TeamPulseSectionServer />
           </Suspense>

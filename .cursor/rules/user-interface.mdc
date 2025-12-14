@@ -42,7 +42,46 @@ Entities like meetings, initiatives, people, etc. should follow these rules:
 ## Forms
 
 When creating forms, use the shadcn form components.
-Only use cards when there is more than one section.  Each section can be in a card, but do not use a card if there's only a single section.
+
+### Form Layout with PageSection
+
+* **Always use `PageSection` with `SectionHeader`** for form sections instead of Card components
+* Group related form fields into logical sections (e.g., "Basic Information", "Settings", "Phases")
+* Use appropriate icons for each section header
+* Example:
+
+  ```tsx
+  import { PageSection } from '@/components/ui/page-section'
+  import { SectionHeader } from '@/components/ui/section-header'
+  import { FileText, Settings } from 'lucide-react'
+
+  <form className='space-y-8'>
+    <PageSection
+      header={<SectionHeader icon={FileText} title='Basic Information' />}
+    >
+      <div className='space-y-4'>
+        {/* Form fields */}
+      </div>
+    </PageSection>
+
+    <PageSection
+      header={<SectionHeader icon={Settings} title='Settings' />}
+    >
+      <div className='space-y-4'>
+        {/* More form fields */}
+      </div>
+    </PageSection>
+
+    {/* Form actions */}
+    <div className='flex items-center justify-end gap-4 pt-4 border-t'>
+      <Button variant='outline'>Cancel</Button>
+      <Button type='submit'>Save</Button>
+    </div>
+  </form>
+  ```
+
+* For collapsible sections within forms (like phases with items), use a simple `border rounded-lg` div instead of Card
+* Use the `SectionHeader` `action` prop for section-level actions (like "Add Phase" buttons)
 
 ## Components
 

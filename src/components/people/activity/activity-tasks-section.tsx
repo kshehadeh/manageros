@@ -1,9 +1,8 @@
 import { SimpleTaskList, type Task } from '@/components/tasks/task-list'
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
+import { SectionHeaderAction } from '@/components/ui/section-header-action'
 import { ListTodo, Eye } from 'lucide-react'
-import { Link } from '@/components/ui/link'
-import { Button } from '@/components/ui/button'
 import { getTasksForAssignee } from '@/lib/data/tasks'
 import { getCurrentUser } from '@/lib/auth-utils'
 
@@ -93,15 +92,10 @@ export async function ActivityTasksSection({
               icon={ListTodo}
               title='Tasks'
               action={
-                <Button asChild variant='outline' size='sm'>
-                  <Link
-                    href={`/people/${personId}`}
-                    className='flex items-center gap-2'
-                  >
-                    <Eye className='w-4 h-4' />
-                    View All
-                  </Link>
-                </Button>
+                <SectionHeaderAction href={`/people/${personId}`}>
+                  <Eye className='w-3.5 h-3.5' />
+                  View All
+                </SectionHeaderAction>
               }
             />
           }
@@ -123,15 +117,10 @@ export async function ActivityTasksSection({
               icon={ListTodo}
               title='Tasks'
               action={
-                <Button asChild variant='outline' size='sm'>
-                  <Link
-                    href={`/people/${personId}`}
-                    className='flex items-center gap-2'
-                  >
-                    <Eye className='w-4 h-4' />
-                    View All
-                  </Link>
-                </Button>
+                <SectionHeaderAction href={`/people/${personId}`}>
+                  <Eye className='w-3.5 h-3.5' />
+                  View All
+                </SectionHeaderAction>
               }
             />
           }

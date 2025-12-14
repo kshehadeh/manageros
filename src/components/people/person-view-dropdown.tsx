@@ -9,6 +9,7 @@ import {
   Eye,
   ChevronDown,
   MessageSquare,
+  ClipboardList,
 } from 'lucide-react'
 
 interface PersonViewDropdownProps {
@@ -57,6 +58,14 @@ export function PersonViewDropdown({ personId }: PersonViewDropdownProps) {
           >
             <MessageSquare className='w-4 h-4' />
             Feedback 360
+          </Link>
+          <Link
+            href={`/people/${personId}/onboarding`}
+            className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+            onClick={close}
+          >
+            <ClipboardList className='w-4 h-4' />
+            Onboarding
           </Link>
         </div>
       )}

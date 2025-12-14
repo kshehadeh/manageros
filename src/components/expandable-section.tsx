@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { SectionHeader } from '@/components/ui/section-header'
+import { SectionHeaderAction } from '@/components/ui/section-header-action'
 import {
   ChevronDown,
   ChevronUp,
@@ -20,7 +21,6 @@ import {
   UserCheck,
   Handshake,
 } from 'lucide-react'
-import { Link } from '@/components/ui/link'
 
 // Icon mapping for commonly used icons
 const iconMap = {
@@ -74,12 +74,10 @@ export function ExpandableSection({
         icon={IconComponent || User}
         title={title}
         action={
-          <Button asChild variant='outline' size='sm'>
-            <Link href={viewAllHref} className='flex items-center gap-2'>
-              <Eye className='w-4 h-4' />
-              View all
-            </Link>
-          </Button>
+          <SectionHeaderAction href={viewAllHref}>
+            <Eye className='w-3.5 h-3.5' />
+            View all
+          </SectionHeaderAction>
         }
       />
       <div className='space-y-3'>

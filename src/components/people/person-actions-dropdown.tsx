@@ -17,6 +17,7 @@ import {
   Handshake,
   Edit,
   Link as LinkIcon,
+  ClipboardList,
 } from 'lucide-react'
 import { ActionDropdown } from '@/components/common/action-dropdown'
 import {
@@ -26,6 +27,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { AccountLinkingModal } from './account-linking-modal'
+import { StartOnboardingModal } from '@/components/onboarding/start-onboarding-modal'
 
 interface LinkedUser {
   id: string
@@ -47,6 +49,7 @@ interface PersonActionsDropdownProps {
   linkedUser?: LinkedUser | null
   jiraAccount?: PersonJiraAccount | null
   githubAccount?: PersonGithubAccount | null
+  people?: Pick<Person, 'id' | 'name'>[]
 }
 
 export function PersonActionsDropdown({
@@ -58,9 +61,11 @@ export function PersonActionsDropdown({
   linkedUser,
   jiraAccount,
   githubAccount,
+  people = [],
 }: PersonActionsDropdownProps) {
   const [showFeedbackForm, setShowFeedbackForm] = useState(false)
   const [showAccountLinking, setShowAccountLinking] = useState(false)
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false)
 
   const handleFeedbackSuccess = () => {
     setShowFeedbackForm(false)
@@ -160,6 +165,19 @@ export function PersonActionsDropdown({
                 Link Accounts
               </button>
             )}
+
+            {isAdmin && (
+              <button
+                className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
+                onClick={() => {
+                  setShowOnboardingModal(true)
+                  close()
+                }}
+              >
+                <ClipboardList className='w-4 h-4' />
+                Start Onboarding
+              </button>
+            )}
           </div>
         )}
       </ActionDropdown>
@@ -186,6 +204,19 @@ export function PersonActionsDropdown({
         linkedUser={linkedUser}
         jiraAccount={jiraAccount}
         githubAccount={githubAccount}
+      />
+
+      <StartOnboardingModal
+        isOpen={showOnboardingModal}
+        onClose={() => setShowOnboardingModal(false)}
+        person={{
+          id: person.id,
+          name: person.name,
+          teamId: person.teamId,
+          jobRoleId: person.jobRoleId,
+          managerId: person.managerId,
+        }}
+        people={people}
       />
     </>
   )
