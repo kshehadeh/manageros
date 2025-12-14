@@ -1,5 +1,15 @@
 # Changelog
 
+# [1.39.0](/compare/v1.38.2...v1.39.0) (2025-12-14)
+
+### Bug Fixes
+
+- Update initiative and feedback evaluation to use correct time variables d8db189
+
+### Features
+
+- Implement onboarding system and enhance dashboard sections ad5515f
+
 ## [1.38.2](/compare/v1.38.1...v1.38.2) (2025-12-13)
 
 ### Bug Fixes
