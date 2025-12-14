@@ -61,6 +61,8 @@ model Organization {
   exceptions             Exception[]
   noteImages             NoteImage[]
   oauthClients           OAuthClientMetadata[]   @relation("OAuthClients")
+  onboardingTemplates    OnboardingTemplate[]
+  onboardingInstances    OnboardingInstance[]
 
   @@index([billingUserId])
   @@index([subscriptionPlanId])
@@ -131,6 +133,7 @@ model Team {
   people         Person[]
   initiatives    Initiative[]
   meetings       Meeting[]
+  onboardingTemplates OnboardingTemplate[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -177,6 +180,12 @@ model Person {
   createdAt                   DateTime                     @default(now())
   updatedAt                   DateTime                     @updatedAt
   synopses                    PersonSynopsis[]
+
+  // Onboarding relationships
+  onboardingInstances          OnboardingInstance[]       // Onboardings this person is going through
+  managedOnboardings           OnboardingInstance[]       @relation("OnboardingManager")
+  mentoredOnboardings          OnboardingInstance[]       @relation("OnboardingMentor")
+  completedOnboardingItems     OnboardingItemProgress[]   // Items this person completed (for others)
 
   @@index([organizationId])
   @@index([jobRoleId])
@@ -636,6 +645,7 @@ model JobRole {
   domainId       String
   domain         JobDomain    @relation("JobRoleDomain", fields: [domainId], references: [id], onDelete: Restrict)
   people         Person[]
+  onboardingTemplates OnboardingTemplate[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -996,4 +1006,163 @@ model OAuthClientMetadata {
   @@index([organizationId])
   @@index([createdById])
   @@index([clerkClientId])
+}
+
+// ============================================================================
+// ONBOARDING SYSTEM
+// Template-to-instance pattern for structured employee onboarding
+// ============================================================================
+
+enum OnboardingItemType {
+  TASK        // Something to do
+  READING     // Documentation to read
+  MEETING     // Conversation to have
+  CHECKPOINT  // Verification point (manager confirms)
+  EXPECTATION // Context to understand
+}
+
+enum OnboardingStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum OnboardingItemStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+  BLOCKED
+}
+
+// Reusable onboarding template definitions
+model OnboardingTemplate {
+  id             String               @id @default(cuid())
+  name           String
+  description    String?
+  organizationId String
+  organization   Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  teamId         String?              // Optional: team-specific template
+  team           Team?                @relation(fields: [teamId], references: [id])
+  jobRoleId      String?              // Optional: role-specific template
+  jobRole        JobRole?             @relation(fields: [jobRoleId], references: [id])
+  isDefault      Boolean              @default(false)
+  isActive       Boolean              @default(true)
+  phases         OnboardingPhase[]
+  instances      OnboardingInstance[]
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@index([organizationId])
+  @@index([teamId])
+  @@index([jobRoleId])
+  @@index([isDefault])
+  @@index([isActive])
+}
+
+// Ordered groupings within a template (e.g., "Day 1", "Week 1", "First 30 Days")
+model OnboardingPhase {
+  id          String             @id @default(cuid())
+  templateId  String
+  template    OnboardingTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  name        String             // e.g., "Day 1", "Week 1", "First 30 Days"
+  description String?
+  sortOrder   Int                @default(0)
+  items       OnboardingItem[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([templateId])
+  @@index([sortOrder])
+}
+
+// Atomic steps within phases (tasks, readings, meetings, checkpoints, expectations)
+model OnboardingItem {
+  id          String             @id @default(cuid())
+  phaseId     String
+  phase       OnboardingPhase    @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  type        OnboardingItemType @default(TASK)
+  sortOrder   Int                @default(0)
+  isRequired  Boolean            @default(true)
+
+  // Optional references to existing entities (for context or materialization)
+  linkedTaskId       String? // Reference to Task template
+  linkedMeetingId    String? // Reference to Meeting template
+  linkedInitiativeId String? // Reference to Initiative (for context)
+  linkedUrl          String? // External resource URL
+
+  // Ownership hints for checkpoints
+  ownerType String? // "onboardee" | "manager" | "mentor"
+
+  progress  OnboardingItemProgress[]
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
+
+  @@index([phaseId])
+  @@index([sortOrder])
+  @@index([type])
+}
+
+// A live onboarding assigned to a specific person
+model OnboardingInstance {
+  id             String                   @id @default(cuid())
+  templateId     String
+  template       OnboardingTemplate       @relation(fields: [templateId], references: [id])
+  personId       String
+  person         Person                   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  status      OnboardingStatus @default(NOT_STARTED)
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  // Optional role assignments
+  managerId String? // Manager overseeing onboarding
+  manager   Person? @relation("OnboardingManager", fields: [managerId], references: [id])
+  mentorId  String? // Optional mentor/buddy
+  mentor    Person? @relation("OnboardingMentor", fields: [mentorId], references: [id])
+
+  itemProgress OnboardingItemProgress[]
+  createdAt    DateTime                 @default(now())
+  updatedAt    DateTime                 @updatedAt
+
+  @@unique([personId, templateId]) // One instance per template per person
+  @@index([organizationId])
+  @@index([personId])
+  @@index([templateId])
+  @@index([status])
+  @@index([managerId])
+  @@index([mentorId])
+}
+
+// Tracks completion of individual items within an onboarding instance
+model OnboardingItemProgress {
+  id         String             @id @default(cuid())
+  instanceId String
+  instance   OnboardingInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  itemId     String
+  item       OnboardingItem     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  status        OnboardingItemStatus @default(PENDING)
+  completedAt   DateTime?
+  completedById String?              // Who marked it complete
+  completedBy   Person?              @relation(fields: [completedById], references: [id])
+  notes         String?              // Optional notes on completion
+
+  // Materialized entity references (created from item templates)
+  materializedTaskId    String? // Actual Task created for this item
+  materializedMeetingId String? // Actual Meeting scheduled
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([instanceId, itemId])
+  @@index([instanceId])
+  @@index([itemId])
+  @@index([status])
+  @@index([completedById])
 }

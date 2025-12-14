@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /**
  * Database helper utilities for tests
  *
@@ -8,11 +9,106 @@
  *
  * For actual test scenarios (not setup), prefer using existing application functions
  * from src/lib/actions/ to ensure tests use the same code paths as production.
+ *
+ * IMPORTANT: This file uses direct Clerk API calls instead of @/lib/clerk to avoid
+ * importing @clerk/nextjs/server which doesn't work in Playwright's Node environment.
  */
 
-import { prisma } from '@/lib/db'
+import { PrismaClient } from '@/generated/prisma'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { Pool } from 'pg'
+import { config } from 'dotenv'
 import type { PersonFormData } from '@/lib/validations'
-import { createClerkOrganization, deleteClerkOrganization } from '@/lib/clerk'
+
+// Load environment variables from .env file
+config()
+
+// Lazy-initialized Prisma client for tests
+let prismaInstance: PrismaClient | null = null
+
+function getPrisma(): PrismaClient {
+  if (!prismaInstance) {
+    const connectionString = process.env.DATABASE_URL
+    if (!connectionString) {
+      throw new Error('DATABASE_URL environment variable is not set')
+    }
+
+    const pool = new Pool({ connectionString })
+    const adapter = new PrismaPg(pool)
+    prismaInstance = new PrismaClient({ adapter })
+  }
+  return prismaInstance
+}
+
+// Clerk API constants
+const CLERK_API_BASE = 'https://api.clerk.com/v1'
+
+/**
+ * Create a Clerk organization directly via API
+ */
+async function createClerkOrganizationDirect(
+  name: string,
+  slug: string
+): Promise<{ id: string; name: string; slug: string }> {
+  const apiKey = process.env.CLERK_SECRET_KEY
+  if (!apiKey) {
+    throw new Error('CLERK_SECRET_KEY environment variable is required')
+  }
+
+  const response = await fetch(`${CLERK_API_BASE}/organizations`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      name,
+      slug,
+      public_metadata: {
+        testOrganization: true,
+        createdAt: new Date().toISOString(),
+      },
+    }),
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(
+      `Failed to create Clerk organization: ${response.status} ${error}`
+    )
+  }
+
+  return await response.json()
+}
+
+/**
+ * Delete a Clerk organization directly via API
+ */
+async function deleteClerkOrganizationDirect(
+  clerkOrgId: string
+): Promise<void> {
+  const apiKey = process.env.CLERK_SECRET_KEY
+  if (!apiKey) {
+    throw new Error('CLERK_SECRET_KEY environment variable is required')
+  }
+
+  const response = await fetch(
+    `${CLERK_API_BASE}/organizations/${clerkOrgId}`,
+    {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+    }
+  )
+
+  if (!response.ok && response.status !== 404) {
+    const error = await response.text()
+    throw new Error(
+      `Failed to delete Clerk organization: ${response.status} ${error}`
+    )
+  }
+}
 
 /**
  * Test data cleanup tracker
@@ -25,7 +121,8 @@ export interface TestData {
   personIds: string[]
   clerkUserIds: string[]
   otherIds: Record<string, string[]>
-  clerkPasswords?: Array<{ clerkUserId: string; password: string }>
+  // Passwords for Clerk users created during tests (used for authentication)
+  clerkPasswords: Array<{ clerkUserId: string; password: string }>
 }
 
 /**
@@ -39,7 +136,7 @@ export async function createTestOrganization(
   // Create organization in Clerk first (name and slug are stored in Clerk)
   let clerkOrgId: string
   try {
-    const clerkOrg = await createClerkOrganization(name, slug)
+    const clerkOrg = await createClerkOrganizationDirect(name, slug)
     clerkOrgId = clerkOrg.id
   } catch (error) {
     console.error('Failed to create Clerk organization in test:', error)
@@ -50,7 +147,7 @@ export async function createTestOrganization(
 
   // Create organization in database with reference to Clerk organization
   // Note: name and slug are not stored in our database - they're in Clerk
-  const organization = await prisma.organization.create({
+  const organization = await getPrisma().organization.create({
     data: {
       clerkOrganizationId: clerkOrgId,
     },
@@ -70,7 +167,7 @@ export async function createTestUser(
   organizationId?: string,
   clerkUserId?: string
 ) {
-  const user = await prisma.user.create({
+  const user = await getPrisma().user.create({
     data: {
       email,
       name,
@@ -96,7 +193,7 @@ export async function createTestPerson(
 ) {
   // Note: createPerson requires authentication and admin role
   // For tests, we'll use direct DB access but note the production path
-  const person = await prisma.person.create({
+  const person = await getPrisma().person.create({
     data: {
       name: formData.name,
       email: formData.email,
@@ -121,6 +218,8 @@ export async function createTestPerson(
  */
 export async function cleanupTestData(testData: TestData) {
   // Cleanup in reverse order of dependencies
+
+  const prisma = getPrisma()
 
   // Clean up people first (they may reference users)
   for (const personId of testData.personIds) {
@@ -150,7 +249,7 @@ export async function cleanupTestData(testData: TestData) {
   // Delete Clerk organizations first, then database organizations
   for (const clerkOrgId of testData.clerkOrganizationIds) {
     try {
-      await deleteClerkOrganization(clerkOrgId)
+      await deleteClerkOrganizationDirect(clerkOrgId)
     } catch (error) {
       // Clerk organization may have already been deleted or not exist
       console.warn(`Failed to delete Clerk organization ${clerkOrgId}:`, error)
@@ -251,6 +350,7 @@ export async function createTestSetup(options?: {
       personIds: [person.id],
       clerkUserIds: options?.clerkUserId ? [options.clerkUserId] : [],
       otherIds: {},
+      clerkPasswords: [],
     },
   }
 }

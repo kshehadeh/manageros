@@ -5,9 +5,8 @@ import {
 } from '@/components/initiatives/initiative-list'
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
+import { SectionHeaderAction } from '@/components/ui/section-header-action'
 import { Rocket, Eye } from 'lucide-react'
-import { Link } from '@/components/ui/link'
-import { Button } from '@/components/ui/button'
 
 interface DashboardOpenInitiativesServerSectionProps {
   organizationId: string
@@ -27,12 +26,10 @@ export async function DashboardOpenInitiativesServerSection({
             icon={Rocket}
             title='Your Initiatives'
             action={
-              <Button asChild variant='outline' size='sm'>
-                <Link href='/initiatives' className='flex items-center gap-2'>
-                  <Eye className='w-4 h-4' />
-                  View All
-                </Link>
-              </Button>
+              <SectionHeaderAction href='/initiatives'>
+                <Eye className='w-3.5 h-3.5' />
+                View All
+              </SectionHeaderAction>
             }
           />
         }
@@ -91,12 +88,10 @@ export async function DashboardOpenInitiativesServerSection({
           icon={Rocket}
           title='Your Initiatives'
           action={
-            <Button asChild variant='outline' size='sm'>
-              <Link href='/initiatives' className='flex items-center gap-2'>
-                <Eye className='w-4 h-4' />
-                View All
-              </Link>
-            </Button>
+            <SectionHeaderAction href='/initiatives'>
+              <Eye className='w-3.5 h-3.5' />
+              View All
+            </SectionHeaderAction>
           }
         />
       }

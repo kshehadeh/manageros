@@ -30,7 +30,16 @@ export async function GET() {
 
     return NextResponse.json({ organizations })
   } catch (error) {
-    console.error('Error fetching organizations:', error)
+    // Check if this is a 404 error (user not found in Clerk)
+    // This can happen when the database has stale clerkUserId references
+    const isNotFoundError =
+      error &&
+      typeof error === 'object' &&
+      'status' in error &&
+      error.status === 404
+    if (!isNotFoundError) {
+      console.error('Error fetching organizations:', error)
+    }
     // User not authenticated or error occurred, return empty array
     return NextResponse.json({ organizations: [] })
   }

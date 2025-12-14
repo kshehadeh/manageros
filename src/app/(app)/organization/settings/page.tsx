@@ -22,6 +22,7 @@ import {
   Plug,
   AlertTriangle,
   Settings,
+  ClipboardList,
 } from 'lucide-react'
 import { PlanLimitsSection } from '@/components/settings/plan-limits-section'
 import { PlanLimitsSectionSkeleton } from '@/components/settings/plan-limits-section-skeleton'
@@ -135,6 +136,19 @@ export default async function OrganizationSettingsPage() {
                     >
                       <Users className='w-4 h-4' />
                       Manage Users
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    variant='outline'
+                    className='w-full justify-start'
+                  >
+                    <Link
+                      href='/organization/onboarding-templates'
+                      className='flex items-center gap-2'
+                    >
+                      <ClipboardList className='w-4 h-4' />
+                      Onboarding Templates
                     </Link>
                   </Button>
                   <Button

@@ -10,6 +10,7 @@ import {
   Briefcase,
   Link as LinkIcon,
   Sparkles,
+  ClipboardList,
 } from 'lucide-react'
 import { FaGithub, FaJira } from 'react-icons/fa'
 
@@ -101,6 +102,31 @@ export function FeedbackCampaignsSectionSkeleton() {
         </div>
       </PageSection>
     </div>
+  )
+}
+
+export function OnboardingSectionSkeleton() {
+  return (
+    <PageSection
+      className='flex-1 min-w-[300px]'
+      header={<SectionHeader icon={ClipboardList} title='Onboarding' />}
+    >
+      <div className='border rounded-lg p-4 space-y-4'>
+        <div className='flex items-start justify-between'>
+          <div className='space-y-1'>
+            <Skeleton className='h-5 w-40' />
+            <Skeleton className='h-4 w-24' />
+          </div>
+          <Skeleton className='h-5 w-20 rounded-full' />
+        </div>
+        <Skeleton className='h-2 w-full' />
+        <div className='flex gap-2'>
+          <Skeleton className='h-5 w-16 rounded-full' />
+          <Skeleton className='h-5 w-16 rounded-full' />
+          <Skeleton className='h-5 w-16 rounded-full' />
+        </div>
+      </div>
+    </PageSection>
   )
 }
 

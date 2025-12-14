@@ -471,3 +471,123 @@ export const meetingInstanceParticipantSchema = z.object({
 export type MeetingInstanceParticipantFormData = z.infer<
   typeof meetingInstanceParticipantSchema
 >
+
+// ============================================================================
+// ONBOARDING SCHEMAS
+// ============================================================================
+
+export const ONBOARDING_ITEM_TYPES = [
+  'TASK',
+  'READING',
+  'MEETING',
+  'CHECKPOINT',
+  'EXPECTATION',
+] as const
+
+export const ONBOARDING_STATUSES = [
+  'NOT_STARTED',
+  'IN_PROGRESS',
+  'COMPLETED',
+  'CANCELLED',
+] as const
+
+export const ONBOARDING_ITEM_STATUSES = [
+  'PENDING',
+  'IN_PROGRESS',
+  'COMPLETED',
+  'SKIPPED',
+  'BLOCKED',
+] as const
+
+export const ONBOARDING_OWNER_TYPES = [
+  'onboardee',
+  'manager',
+  'mentor',
+] as const
+
+// Schema for individual onboarding items within a phase
+export const onboardingItemSchema = z.object({
+  id: z.string().optional(), // Optional for new items
+  title: z
+    .string()
+    .min(1, 'Item title is required')
+    .max(200, 'Title must be less than 200 characters'),
+  description: z.string().optional(),
+  type: z.enum(ONBOARDING_ITEM_TYPES).default('TASK'),
+  sortOrder: z.number().default(0),
+  isRequired: z.boolean().default(true),
+  linkedTaskId: z.string().optional(),
+  linkedMeetingId: z.string().optional(),
+  linkedInitiativeId: z.string().optional(),
+  linkedUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  ownerType: z.enum(ONBOARDING_OWNER_TYPES).optional(),
+})
+
+export type OnboardingItemFormData = z.infer<typeof onboardingItemSchema>
+
+// Schema for onboarding phases within a template
+export const onboardingPhaseSchema = z.object({
+  id: z.string().optional(), // Optional for new phases
+  name: z
+    .string()
+    .min(1, 'Phase name is required')
+    .max(100, 'Phase name must be less than 100 characters'),
+  description: z.string().optional(),
+  sortOrder: z.number().default(0),
+  items: z.array(onboardingItemSchema).default([]),
+})
+
+export type OnboardingPhaseFormData = z.infer<typeof onboardingPhaseSchema>
+
+// Schema for creating/updating onboarding templates
+export const onboardingTemplateSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Template name is required')
+    .max(200, 'Template name must be less than 200 characters'),
+  description: z.string().optional(),
+  teamId: z.string().optional(),
+  jobRoleId: z.string().optional(),
+  isDefault: z.boolean().default(false),
+  isActive: z.boolean().default(true),
+  phases: z
+    .array(onboardingPhaseSchema)
+    .min(1, 'At least one phase is required'),
+})
+
+export type OnboardingTemplateFormData = z.infer<
+  typeof onboardingTemplateSchema
+>
+
+// Schema for assigning onboarding to a person (creating an instance)
+export const onboardingAssignmentSchema = z.object({
+  templateId: z.string().min(1, 'Template is required'),
+  personId: z.string().min(1, 'Person is required'),
+  managerId: z.string().optional(),
+  mentorId: z.string().optional(),
+})
+
+export type OnboardingAssignmentFormData = z.infer<
+  typeof onboardingAssignmentSchema
+>
+
+// Schema for updating onboarding instance status
+export const onboardingInstanceUpdateSchema = z.object({
+  status: z.enum(ONBOARDING_STATUSES).optional(),
+  managerId: z.string().optional().nullable(),
+  mentorId: z.string().optional().nullable(),
+})
+
+export type OnboardingInstanceUpdateData = z.infer<
+  typeof onboardingInstanceUpdateSchema
+>
+
+// Schema for updating item progress
+export const onboardingItemProgressUpdateSchema = z.object({
+  status: z.enum(ONBOARDING_ITEM_STATUSES),
+  notes: z.string().optional(),
+})
+
+export type OnboardingItemProgressUpdateData = z.infer<
+  typeof onboardingItemProgressUpdateSchema
+>

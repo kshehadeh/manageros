@@ -547,7 +547,7 @@ async function evaluateInitiativeCheckIn(
             initiative.id,
             'warning',
             config.warningThresholdDays,
-            0
+            daysSince
           )
           exceptionsCreated++
         }
@@ -736,7 +736,7 @@ async function evaluateFeedback360(
           person.id,
           'warning',
           config.warningThresholdMonths,
-          monthsSince === Infinity ? 0 : monthsSince
+          monthsSince
         )
         exceptionsCreated++
       }

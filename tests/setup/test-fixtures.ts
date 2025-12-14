@@ -53,6 +53,7 @@ export const test = base.extend<TestFixtures>({
       personIds: [],
       clerkUserIds: [],
       otherIds: {},
+      clerkPasswords: [],
     }
 
     await use(testData)
@@ -151,9 +152,6 @@ export const test = base.extend<TestFixtures>({
       testData.clerkUserIds.push(clerkUserId)
 
       // Store password in testData for use in authentication
-      if (!testData.clerkPasswords) {
-        testData.clerkPasswords = []
-      }
       testData.clerkPasswords.push({
         clerkUserId,
         password: result.password,

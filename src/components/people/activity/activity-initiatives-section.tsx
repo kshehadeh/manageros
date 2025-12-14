@@ -5,9 +5,8 @@ import {
 } from '@/components/initiatives/initiative-list'
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
+import { SectionHeaderAction } from '@/components/ui/section-header-action'
 import { Rocket, Eye } from 'lucide-react'
-import { Link } from '@/components/ui/link'
-import { Button } from '@/components/ui/button'
 
 interface ActivityInitiativesSectionProps {
   personId: string
@@ -96,11 +95,10 @@ export async function ActivityInitiativesSection({
             icon={Rocket}
             title='Initiatives'
             action={
-              <Button asChild variant='outline' size='sm' title='View All'>
-                <Link href='/initiatives'>
-                  <Eye className='w-4 h-4' />
-                </Link>
-              </Button>
+              <SectionHeaderAction href='/initiatives' title='View All'>
+                <Eye className='w-3.5 h-3.5' />
+                View All
+              </SectionHeaderAction>
             }
           />
         }
