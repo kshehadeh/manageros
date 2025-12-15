@@ -3,11 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Link } from '@/components/ui/link'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { PersonAvatar } from '@/components/people/person-avatar'
+import { PageSection } from '@/components/ui/page-section'
+import { SectionHeader } from '@/components/ui/section-header'
 import {
   Dialog,
   DialogContent,
@@ -37,8 +38,19 @@ import {
   ExternalLink,
   Check,
   X,
+  RefreshCw,
+  AlertTriangle,
+  Layers,
+  BarChart3,
+  Award,
 } from 'lucide-react'
-import { updateOnboardingItemProgress } from '@/lib/actions/onboarding-instance'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import {
+  updateOnboardingItemProgress,
+  syncOnboardingInstanceItems,
+  reinitializeOnboardingInstance,
+  completeOnboarding,
+} from '@/lib/actions/onboarding-instance'
 import type {
   OnboardingItemStatus,
   OnboardingItemType,
@@ -132,6 +144,7 @@ interface OnboardingData {
       title: string
       description: string | null
       type: OnboardingItemType
+      sortOrder: number
       isRequired: boolean
       linkedUrl: string | null
       ownerType: string | null
@@ -142,6 +155,7 @@ interface OnboardingData {
       }
     }
   }[]
+  missingItemCount: number
 }
 
 interface PersonOnboardingViewProps {
@@ -185,6 +199,8 @@ export function PersonOnboardingView({
     )
   })
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set())
+  const [isSyncing, setIsSyncing] = useState(false)
+  const [isCompleting, setIsCompleting] = useState(false)
 
   const togglePhase = (phaseId: string) => {
     setExpandedPhases(prev => {
@@ -196,6 +212,65 @@ export function PersonOnboardingView({
       }
       return next
     })
+  }
+
+  const handleSyncItems = async () => {
+    setIsSyncing(true)
+    try {
+      await syncOnboardingInstanceItems(onboarding.id)
+      router.refresh()
+    } catch (error) {
+      console.error('Error syncing items:', error)
+      alert(error instanceof Error ? error.message : 'Failed to sync items')
+    } finally {
+      setIsSyncing(false)
+    }
+  }
+
+  const handleReinitialize = async () => {
+    if (
+      !confirm(
+        'This will reset all progress and reload items from the template. Are you sure?'
+      )
+    ) {
+      return
+    }
+
+    setIsSyncing(true)
+    try {
+      await reinitializeOnboardingInstance(onboarding.id)
+      router.refresh()
+    } catch (error) {
+      console.error('Error reinitializing:', error)
+      alert(
+        error instanceof Error ? error.message : 'Failed to reinitialize items'
+      )
+    } finally {
+      setIsSyncing(false)
+    }
+  }
+
+  const handleCompleteOnboarding = async () => {
+    if (
+      !confirm(
+        `Are you sure you want to mark ${personName}'s onboarding as complete?`
+      )
+    ) {
+      return
+    }
+
+    setIsCompleting(true)
+    try {
+      await completeOnboarding(onboarding.id)
+      router.refresh()
+    } catch (error) {
+      console.error('Error completing onboarding:', error)
+      alert(
+        error instanceof Error ? error.message : 'Failed to complete onboarding'
+      )
+    } finally {
+      setIsCompleting(false)
+    }
   }
 
   const handleUpdateStatus = async (
@@ -222,22 +297,126 @@ export function PersonOnboardingView({
   const canCompleteItems = canManage || isSelf
   const isCheckpointCompleter = canManage
 
+  const isActive =
+    onboarding.status === 'NOT_STARTED' || onboarding.status === 'IN_PROGRESS'
+
+  // Check if all required items are complete
+  const allRequiredComplete =
+    onboarding.progress.requiredTotal > 0 &&
+    onboarding.progress.requiredCompleted === onboarding.progress.requiredTotal
+  const canCompleteOnboarding = isActive && allRequiredComplete && canManage
+
   return (
     <div className='space-y-6'>
-      {/* Header Card */}
-      <Card>
-        <CardHeader>
-          <div className='flex items-start justify-between'>
-            <div>
-              <CardTitle>{onboarding.template.name}</CardTitle>
-              <p className='text-sm text-muted-foreground mt-1'>
-                Onboarding progress for {personName}
-              </p>
+      {/* Empty Items Alert - shows when no items exist */}
+      {onboarding.progress.total === 0 && isActive && canManage && (
+        <Alert variant='destructive'>
+          <AlertTriangle className='h-4 w-4' />
+          <AlertTitle>No onboarding items found</AlertTitle>
+          <AlertDescription>
+            <div className='flex items-center justify-between gap-4'>
+              <span>
+                This onboarding has no items. This can happen if the template
+                was updated after the onboarding was assigned. Click to reload
+                items from the current template.
+              </span>
+              <Button
+                size='sm'
+                variant='outline'
+                className='shrink-0'
+                onClick={handleReinitialize}
+                disabled={isSyncing}
+              >
+                <RefreshCw
+                  className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`}
+                />
+                {isSyncing ? 'Loading...' : 'Load Items'}
+              </Button>
             </div>
-            <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>
-          </div>
-        </CardHeader>
-        <CardContent className='space-y-4'>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Out of Sync Alert - shows when some items are missing */}
+      {onboarding.missingItemCount > 0 &&
+        onboarding.progress.total > 0 &&
+        isActive &&
+        canManage && (
+          <Alert
+            variant='default'
+            className='border-badge-warning/50 bg-badge-warning/10'
+          >
+            <AlertTriangle className='h-4 w-4 text-badge-warning-text' />
+            <AlertTitle className='text-badge-warning-text'>
+              Template has been updated
+            </AlertTitle>
+            <AlertDescription className='text-foreground'>
+              <div className='flex items-center justify-between gap-4'>
+                <span>
+                  {onboarding.missingItemCount} new item
+                  {onboarding.missingItemCount === 1 ? '' : 's'} have been added
+                  to the template since this onboarding was assigned.
+                </span>
+                <Button
+                  size='sm'
+                  variant='outline'
+                  className='shrink-0 border-badge-warning text-badge-warning-text hover:bg-badge-warning/20'
+                  onClick={handleSyncItems}
+                  disabled={isSyncing}
+                >
+                  <RefreshCw
+                    className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`}
+                  />
+                  {isSyncing ? 'Syncing...' : 'Sync Items'}
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
+      {/* Ready to Complete Alert - shows when all required items are done */}
+      {canCompleteOnboarding && (
+        <Alert
+          variant='default'
+          className='border-badge-success/50 bg-badge-success/10'
+        >
+          <Award className='h-4 w-4 text-badge-success-text' />
+          <AlertTitle className='text-badge-success-text'>
+            Ready to complete
+          </AlertTitle>
+          <AlertDescription className='text-foreground'>
+            <div className='flex items-center justify-between gap-4'>
+              <span>
+                All {onboarding.progress.requiredTotal} required items have been
+                completed. You can now mark this onboarding as complete.
+              </span>
+              <Button
+                size='sm'
+                className='shrink-0 bg-badge-success hover:bg-badge-success/80 text-badge-success-foreground'
+                onClick={handleCompleteOnboarding}
+                disabled={isCompleting}
+              >
+                <Award className='w-4 h-4 mr-2' />
+                {isCompleting ? 'Completing...' : 'Complete Onboarding'}
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Progress Overview */}
+      <PageSection
+        header={
+          <SectionHeader
+            icon={BarChart3}
+            title='Progress Overview'
+            action={
+              <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>
+            }
+          />
+        }
+      >
+        <div className='space-y-4'>
           <div>
             <div className='flex items-center justify-between mb-2'>
               <span className='text-sm text-muted-foreground'>
@@ -301,29 +480,29 @@ export function PersonOnboardingView({
               )}
             </p>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </PageSection>
 
-      {/* Phase Cards */}
-      <div className='space-y-4'>
-        {sortedPhases.map(phase => {
-          const items = phaseItems.get(phase.id) || []
-          const isExpanded = expandedPhases.has(phase.id)
-          const isComplete = phase.completed === phase.total
-          const phasePercent =
-            phase.total > 0
-              ? Math.round((phase.completed / phase.total) * 100)
-              : 0
+      {/* Phases */}
+      <PageSection header={<SectionHeader icon={Layers} title='Phases' />}>
+        <div className='space-y-4'>
+          {sortedPhases.map(phase => {
+            const items = phaseItems.get(phase.id) || []
+            const isExpanded = expandedPhases.has(phase.id)
+            const isComplete = phase.completed === phase.total
+            const phasePercent =
+              phase.total > 0
+                ? Math.round((phase.completed / phase.total) * 100)
+                : 0
 
-          return (
-            <Card key={phase.id}>
-              <Collapsible
-                open={isExpanded}
-                onOpenChange={() => togglePhase(phase.id)}
-              >
-                <CollapsibleTrigger asChild>
-                  <CardHeader className='cursor-pointer hover:bg-muted/50 transition-colors'>
-                    <div className='flex items-center justify-between'>
+            return (
+              <div key={phase.id} className='border rounded-lg'>
+                <Collapsible
+                  open={isExpanded}
+                  onOpenChange={() => togglePhase(phase.id)}
+                >
+                  <CollapsibleTrigger asChild>
+                    <div className='flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50 transition-colors'>
                       <div className='flex items-center gap-3'>
                         {isExpanded ? (
                           <ChevronDown className='w-5 h-5' />
@@ -331,12 +510,12 @@ export function PersonOnboardingView({
                           <ChevronRight className='w-5 h-5' />
                         )}
                         <div>
-                          <CardTitle className='text-base flex items-center gap-2'>
+                          <div className='font-medium flex items-center gap-2'>
                             {phase.name}
                             {isComplete && (
                               <CheckCircle className='w-4 h-4 text-green-500' />
                             )}
-                          </CardTitle>
+                          </div>
                           <p className='text-sm text-muted-foreground'>
                             {phase.completed}/{phase.total} items
                           </p>
@@ -344,17 +523,12 @@ export function PersonOnboardingView({
                       </div>
                       <Progress value={phasePercent} className='w-24 h-2' />
                     </div>
-                  </CardHeader>
-                </CollapsibleTrigger>
+                  </CollapsibleTrigger>
 
-                <CollapsibleContent>
-                  <CardContent className='pt-0'>
-                    <div className='space-y-3'>
+                  <CollapsibleContent>
+                    <div className='p-4 pt-0 space-y-3'>
                       {items
-                        .sort(
-                          (a, b) =>
-                            a.item.phase.sortOrder - b.item.phase.sortOrder
-                        )
+                        .sort((a, b) => a.item.sortOrder - b.item.sortOrder)
                         .map(progress => (
                           <ItemCard
                             key={progress.id}
@@ -366,13 +540,13 @@ export function PersonOnboardingView({
                           />
                         ))}
                     </div>
-                  </CardContent>
-                </CollapsibleContent>
-              </Collapsible>
-            </Card>
-          )
-        })}
-      </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
+            )
+          })}
+        </div>
+      </PageSection>
     </div>
   )
 }

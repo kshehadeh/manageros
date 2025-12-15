@@ -550,6 +550,14 @@ export async function assignOnboarding(formData: OnboardingAssignmentFormData) {
     throw new Error('Template not found, inactive, or access denied')
   }
 
+  // Ensure template has at least one item
+  const allItems = template.phases.flatMap(phase => phase.items)
+  if (allItems.length === 0) {
+    throw new Error(
+      'Cannot assign this template - it has no items. Please add items to the template first.'
+    )
+  }
+
   // Check if person already has an active onboarding with this template
   const existingInstance = await prisma.onboardingInstance.findFirst({
     where: {
@@ -594,7 +602,7 @@ export async function assignOnboarding(formData: OnboardingAssignmentFormData) {
   }
 
   // Create the instance with progress records for all items
-  const allItems = template.phases.flatMap(phase => phase.items)
+  // Note: allItems was computed earlier for validation
 
   const instance = await prisma.onboardingInstance.create({
     data: {
@@ -1065,6 +1073,15 @@ export async function getOnboardingForPerson(personId: string) {
         select: {
           id: true,
           name: true,
+          phases: {
+            select: {
+              items: {
+                select: {
+                  id: true,
+                },
+              },
+            },
+          },
         },
       },
       manager: {
@@ -1089,6 +1106,7 @@ export async function getOnboardingForPerson(personId: string) {
               title: true,
               description: true,
               type: true,
+              sortOrder: true,
               isRequired: true,
               linkedUrl: true,
               ownerType: true,
@@ -1102,6 +1120,10 @@ export async function getOnboardingForPerson(personId: string) {
             },
           },
         },
+        orderBy: [
+          { item: { phase: { sortOrder: 'asc' } } },
+          { item: { sortOrder: 'asc' } },
+        ],
       },
     },
     orderBy: { createdAt: 'desc' },
@@ -1110,6 +1132,15 @@ export async function getOnboardingForPerson(personId: string) {
   if (!instance) {
     return null
   }
+
+  // Check for out-of-sync items (items in template but not in instance)
+  const templateItemIds = new Set(
+    instance.template.phases.flatMap(phase => phase.items.map(item => item.id))
+  )
+  const instanceItemIds = new Set(instance.itemProgress.map(p => p.item.id))
+  const missingItemCount = [...templateItemIds].filter(
+    id => !instanceItemIds.has(id)
+  ).length
 
   // Calculate progress
   const totalItems = instance.itemProgress.length
@@ -1154,8 +1185,13 @@ export async function getOnboardingForPerson(personId: string) {
     sortedPhases.find(p => p.completed < p.total) ||
     sortedPhases[sortedPhases.length - 1]
 
+  // Clean up template to not include phases (only needed for calculation)
+  const { phases: _templatePhases, ...templateWithoutPhases } =
+    instance.template
+
   return {
     ...instance,
+    template: templateWithoutPhases,
     progress: {
       total: totalItems,
       completed: completedItems,
@@ -1166,5 +1202,188 @@ export async function getOnboardingForPerson(personId: string) {
     },
     currentPhase,
     phases: sortedPhases,
+    missingItemCount,
+  }
+}
+
+/**
+ * Sync items from the template to an existing onboarding instance.
+ * This adds any items that exist in the template but are missing from the instance.
+ * Useful when items are added to a template after an onboarding has been assigned.
+ */
+export async function syncOnboardingInstanceItems(instanceId: string) {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error('User must belong to an organization')
+  }
+
+  // Get the instance with its current itemProgress
+  const instance = await prisma.onboardingInstance.findFirst({
+    where: {
+      id: instanceId,
+      organizationId: user.managerOSOrganizationId,
+    },
+    include: {
+      template: {
+        include: {
+          phases: {
+            include: {
+              items: true,
+            },
+          },
+        },
+      },
+      itemProgress: {
+        select: {
+          itemId: true,
+        },
+      },
+    },
+  })
+
+  if (!instance) {
+    throw new Error('Onboarding instance not found or access denied')
+  }
+
+  // Check permission: must be manager or admin
+  const isManager = instance.managerId === user.managerOSPersonId
+  const isAdmin = isAdminOrOwner(user)
+
+  if (!isManager && !isAdmin) {
+    throw new Error('Only the onboarding manager or an admin can sync items')
+  }
+
+  // Can only sync active instances
+  if (instance.status === 'COMPLETED' || instance.status === 'CANCELLED') {
+    throw new Error('Cannot sync items for completed or cancelled onboarding')
+  }
+
+  // Get all items from the template
+  const templateItems = instance.template.phases.flatMap(phase => phase.items)
+
+  // Find items that exist in template but not in instance
+  const existingItemIds = new Set(instance.itemProgress.map(p => p.itemId))
+  const missingItems = templateItems.filter(
+    item => !existingItemIds.has(item.id)
+  )
+
+  if (missingItems.length === 0) {
+    return { added: 0, message: 'All items are already synced' }
+  }
+
+  // Create progress records for missing items
+  await prisma.onboardingItemProgress.createMany({
+    data: missingItems.map(item => ({
+      instanceId: instance.id,
+      itemId: item.id,
+      status: 'PENDING',
+    })),
+  })
+
+  revalidatePath('/onboarding')
+  revalidatePath('/onboarding/overview')
+  revalidatePath(`/people/${instance.personId}`)
+  revalidatePath(`/people/${instance.personId}/onboarding`)
+
+  return {
+    added: missingItems.length,
+    message: `Added ${missingItems.length} item${missingItems.length === 1 ? '' : 's'} from the template`,
+  }
+}
+
+/**
+ * Reinitialize an onboarding instance with fresh items from the template.
+ * This deletes all existing progress and recreates itemProgress records.
+ * Use this when itemProgress was lost due to template updates.
+ */
+export async function reinitializeOnboardingInstance(instanceId: string) {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error('User must belong to an organization')
+  }
+
+  // Get the instance
+  const instance = await prisma.onboardingInstance.findFirst({
+    where: {
+      id: instanceId,
+      organizationId: user.managerOSOrganizationId,
+    },
+    include: {
+      template: {
+        include: {
+          phases: {
+            include: {
+              items: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!instance) {
+    throw new Error('Onboarding instance not found or access denied')
+  }
+
+  // Check permission: must be manager or admin
+  const isManager = instance.managerId === user.managerOSPersonId
+  const isAdmin = isAdminOrOwner(user)
+
+  if (!isManager && !isAdmin) {
+    throw new Error(
+      'Only the onboarding manager or an admin can reinitialize items'
+    )
+  }
+
+  // Can only reinitialize active instances
+  if (instance.status === 'COMPLETED' || instance.status === 'CANCELLED') {
+    throw new Error(
+      'Cannot reinitialize items for completed or cancelled onboarding'
+    )
+  }
+
+  // Get all items from the template
+  const templateItems = instance.template.phases.flatMap(phase => phase.items)
+
+  if (templateItems.length === 0) {
+    throw new Error(
+      'Template has no items. Please add items to the template first.'
+    )
+  }
+
+  // Delete all existing itemProgress for this instance
+  await prisma.onboardingItemProgress.deleteMany({
+    where: { instanceId: instance.id },
+  })
+
+  // Create fresh itemProgress records
+  await prisma.onboardingItemProgress.createMany({
+    data: templateItems.map(item => ({
+      instanceId: instance.id,
+      itemId: item.id,
+      status: 'PENDING',
+    })),
+  })
+
+  // Reset instance status to NOT_STARTED
+  await prisma.onboardingInstance.update({
+    where: { id: instance.id },
+    data: {
+      status: 'NOT_STARTED',
+      startedAt: null,
+      completedAt: null,
+    },
+  })
+
+  revalidatePath('/onboarding')
+  revalidatePath('/onboarding/overview')
+  revalidatePath(`/people/${instance.personId}`)
+  revalidatePath(`/people/${instance.personId}/onboarding`)
+
+  return {
+    itemCount: templateItems.length,
+    message: `Reinitialized onboarding with ${templateItems.length} item${templateItems.length === 1 ? '' : 's'} from the template`,
   }
 }
