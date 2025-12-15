@@ -4,14 +4,8 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { Link } from '@/components/ui/link'
 import { usePathname } from 'next/navigation'
-import { ChevronDown, Menu, X } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { Geist_Mono as GeistMono } from 'next/font/google'
 
 const geistMono = GeistMono({
@@ -45,7 +39,7 @@ export function MarketingHeader() {
             <p
               className={`text-xs text-white/60 hidden md:block ${geistMono.className}`}
             >
-              Built for engineering leaders
+              Built for team leaders
             </p>
           </div>
         </Link>
@@ -80,48 +74,6 @@ export function MarketingHeader() {
         >
           Help
         </Link>
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            className={`flex items-center gap-1 transition-colors hover:text-white outline-none ${geistMono.className}`}
-          >
-            Product Tour
-            <ChevronDown className='h-4 w-4' />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align='end'
-            className={`bg-white/95 backdrop-blur-sm border-white/20 ${geistMono.className}`}
-          >
-            <DropdownMenuItem asChild>
-              <Link
-                href='/landing/initiatives'
-                className='text-black cursor-pointer'
-              >
-                Initiatives
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link
-                href='/landing/people'
-                className='text-black cursor-pointer'
-              >
-                People
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link
-                href='/landing/meetings'
-                className='text-black cursor-pointer'
-              >
-                Meetings
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href='/landing/tasks' className='text-black cursor-pointer'>
-                Tasks
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </nav>
       {/* Mobile menu */}
       {isMobileMenuOpen && (
@@ -146,43 +98,13 @@ export function MarketingHeader() {
               Pricing
             </Link>
             <Link
-              href='/help'
+              href='https://help.mpath.dev'
+              target='_blank'
               onClick={() => setIsMobileMenuOpen(false)}
               className='text-sm font-medium text-white/70 transition-colors hover:text-white'
             >
               Help
             </Link>
-            <div className='flex flex-col gap-2'>
-              <p className='text-sm font-medium text-white/70'>Product Tour</p>
-              <Link
-                href='/landing/initiatives'
-                onClick={() => setIsMobileMenuOpen(false)}
-                className='text-sm text-white/60 transition-colors hover:text-white pl-4'
-              >
-                Initiatives
-              </Link>
-              <Link
-                href='/landing/people'
-                onClick={() => setIsMobileMenuOpen(false)}
-                className='text-sm text-white/60 transition-colors hover:text-white pl-4'
-              >
-                People
-              </Link>
-              <Link
-                href='/landing/meetings'
-                onClick={() => setIsMobileMenuOpen(false)}
-                className='text-sm text-white/60 transition-colors hover:text-white pl-4'
-              >
-                Meetings
-              </Link>
-              <Link
-                href='/landing/tasks'
-                onClick={() => setIsMobileMenuOpen(false)}
-                className='text-sm text-white/60 transition-colors hover:text-white pl-4'
-              >
-                Tasks
-              </Link>
-            </div>
           </nav>
           {/* Mobile auth buttons */}
           <div className='flex flex-col gap-2 pt-2 border-t border-white/20'>

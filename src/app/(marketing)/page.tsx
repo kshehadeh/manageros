@@ -1,75 +1,38 @@
 import { Link } from '@/components/ui/link'
 import {
   ArrowRight,
-  BarChart3,
-  CalendarRange,
+  Bot,
+  GitBranch,
+  ListTodo,
   MessageSquare,
-  ShieldCheck,
+  Network,
+  Plug,
+  Rocket,
+  Server,
+  Target,
+  UserPlus,
   Users,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { FadeInOnScroll } from '@/components/marketing/fade-in'
 import { CurrentYear } from '@/components/marketing/current-year'
+import { OpenChatButton } from '@/components/marketing/open-chat-button'
 import { Metadata } from 'next'
 
-const featureHighlights = [
-  {
-    name: 'Team clarity at a glance',
-    description:
-      'See execution, sentiment, and risk signals across every squad in one adaptive dashboard so you always know where to lean in.',
-    icon: BarChart3,
-  },
-  {
-    name: 'Coaching superpowers',
-    description:
-      'Bring context-rich notes, commitments, and AI-assisted follow ups into every 1:1 without digging through docs and scattered tools.',
-    icon: Users,
-  },
-  {
-    name: 'Continuous feedback loops',
-    description:
-      'Launch campaigns in minutes, close the loop with nudges, and celebrate growth with stories your engineers actually feel.',
-    icon: MessageSquare,
-  },
-  {
-    name: 'Confident delivery rhythm',
-    description:
-      'Plan initiatives, surface blockers early, and keep stakeholders aligned with living roadmaps that stay current automatically.',
-    icon: CalendarRange,
-  },
-]
-
-const proofPoints = [
-  {
-    title: 'Fewer surprise escalations',
-    description:
-      'Detect delivery and morale drift before it hits the sprint review.',
-  },
-  {
-    title: 'Time back for coaching',
-    description:
-      'Reclaim hours each week by automating prep and follow-up workflows.',
-  },
-  {
-    title: 'Happier engineering teams',
-    description:
-      'Celebrate wins, catch burnout signals, and keep career conversations moving.',
-  },
-]
-
 export const metadata: Metadata = {
-  title: 'Lead high-performing engineering teams | mpath',
+  title: 'Lead high-performing teams | mpath',
   description:
-    'mpath gives engineering managers a unified operating system for clarity, coaching, and continuous improvement across their teams.',
+    'mpath gives managers a unified operating system for clarity, coaching, and continuous improvement across their teams.',
 }
 
 export default async function MarketingHome() {
   return (
     <>
+      {/* Hero Section */}
       <section className='mx-auto flex w-full max-w-5xl flex-col gap-12 px-6 pb-20 pt-6 text-center sm:px-8 md:pt-24'>
         <FadeInOnScroll>
           <span className='inline-flex items-center justify-center gap-2 self-center rounded-full border border-white/10 bg-white/5 px-4 py-1 text-xs uppercase tracking-[0.3em] text-white/60'>
-            ENGINEERING MANAGEMENT, ELEVATED
+            MANAGEMENT, ELEVATED
           </span>
         </FadeInOnScroll>
         <FadeInOnScroll delay={100}>
@@ -81,9 +44,8 @@ export default async function MarketingHome() {
         <FadeInOnScroll delay={200}>
           <p className='mx-auto max-w-4xl text-base text-white/70 sm:text-lg'>
             mpath brings planning, 1:1s, feedback, and delivery signals together
-            so engineering managers can lead with confidence—not spreadsheets.
-            Stay aligned, move faster, and grow people without losing sight of
-            execution.
+            so managers can lead with confidence—not spreadsheets. Stay aligned,
+            move faster, and grow people without losing sight of execution.
           </p>
         </FadeInOnScroll>
         <FadeInOnScroll delay={300}>
@@ -111,95 +73,332 @@ export default async function MarketingHome() {
         <FadeInOnScroll delay={400}>
           <nav className='flex flex-wrap items-center justify-center gap-6 text-sm text-white/70'>
             <Link
-              href='#features'
+              href='#people-teams'
               className='transition-colors hover:text-white'
             >
-              Features
+              People & Teams
             </Link>
-            <Link href='#proof' className='transition-colors hover:text-white'>
-              Outcomes
+            <Link
+              href='#work-tracking'
+              className='transition-colors hover:text-white'
+            >
+              Work Tracking
             </Link>
-            <Link href='#cta' className='transition-colors hover:text-white'>
-              Get Started
+            <Link href='#ai' className='transition-colors hover:text-white'>
+              AI
+            </Link>
+            <Link
+              href='#integrations'
+              className='transition-colors hover:text-white'
+            >
+              Integrations
             </Link>
           </nav>
         </FadeInOnScroll>
       </section>
 
-      <section id='features' className='mx-auto max-w-6xl px-6 pb-24 sm:px-8'>
+      {/* People & Teams Section */}
+      <section
+        id='people-teams'
+        className='mx-auto max-w-6xl px-6 pb-24 sm:px-8'
+      >
         <FadeInOnScroll className='rounded-3xl border border-white/5 bg-white/[0.03] p-10 shadow-[0_25px_60px_rgba(7,16,29,0.45)] backdrop-blur'>
-          <div className='grid gap-10 md:grid-cols-[1.3fr_1fr] md:items-center'>
-            <div className='space-y-6'>
+          <div className='space-y-8'>
+            <div className='text-center'>
               <p className='text-sm font-semibold uppercase tracking-[0.3em] text-white/60'>
-                Why teams choose mpath
+                People & Teams
               </p>
-              <h2 className='text-3xl font-semibold text-white sm:text-4xl'>
-                Operational calm meets empowered engineering teams.
+              <h2 className='mt-4 text-3xl font-semibold text-white sm:text-4xl'>
+                Manage people and teams with clarity.
               </h2>
-              <p className='text-base text-white/70'>
-                Replace fragmented workflows with a single space designed for
-                engineering managers. Every interaction—planning, coaching, and
-                communicating—stays connected so you can focus on outcomes, not
-                orchestration.
+              <p className='mx-auto mt-4 text-base text-white/70'>
+                mpath understands that organizations are complex. Your team
+                structures don&apos;t always match your reporting lines, and
+                that&apos;s okay. We help you manage both.
               </p>
-              <div className='grid gap-4 sm:grid-cols-2'>
-                {featureHighlights.map((feature, index) => (
-                  <FadeInOnScroll
-                    key={feature.name}
-                    delay={index * 80}
-                    className='rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-left transition-colors duration-300 hover:border-white/30'
-                  >
-                    <feature.icon className='mb-4 h-8 w-8 text-white' />
-                    <h3 className='text-lg font-semibold text-white'>
-                      {feature.name}
-                    </h3>
-                    <p className='mt-2 text-sm text-white/70'>
-                      {feature.description}
-                    </p>
-                  </FadeInOnScroll>
-                ))}
-              </div>
             </div>
-            <div className='flex flex-col gap-4 rounded-2xl border border-emerald-400/20 bg-gradient-to-br from-emerald-400/10 via-emerald-500/10 to-transparent p-6 text-left shadow-[0_18px_50px_rgba(6,95,70,0.35)] backdrop-blur'>
-              <div className='flex items-center gap-3 text-emerald-200'>
-                <ShieldCheck className='h-6 w-6' />
-                <span className='text-sm font-medium uppercase tracking-[0.25em]'>
-                  Built for focus
-                </span>
-              </div>
-              <p className='text-lg font-semibold text-white'>
-                Your weekly workflow, from Monday kickoff to Friday retros, in a
-                single calm surface.
+
+            <div className='grid gap-6 md:grid-cols-3'>
+              <FadeInOnScroll
+                delay={100}
+                className='rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-left transition-colors duration-300 hover:border-white/30'
+              >
+                <Network className='mb-4 h-8 w-8 text-indigo-400' />
+                <h3 className='text-lg font-semibold text-white'>
+                  Organization vs. People Hierarchies
+                </h3>
+                <p className='mt-2 text-sm text-white/70'>
+                  Teams represent how work gets done—cross-functional squads,
+                  project teams, or working groups. People hierarchies show
+                  reporting relationships. mpath keeps both structures clear so
+                  you can see the full picture of how your organization
+                  operates.
+                </p>
+              </FadeInOnScroll>
+
+              <FadeInOnScroll
+                delay={200}
+                className='rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-left transition-colors duration-300 hover:border-white/30'
+              >
+                <MessageSquare className='mb-4 h-8 w-8 text-emerald-400' />
+                <h3 className='text-lg font-semibold text-white'>
+                  360° Feedback
+                </h3>
+                <p className='mt-2 text-sm text-white/70'>
+                  Collect rich, multi-perspective feedback through feedback
+                  campaigns. Get input from peers, direct reports, and
+                  collaborators. Track feedback over time to identify growth
+                  patterns and celebrate progress. Private or public—you control
+                  the visibility.
+                </p>
+              </FadeInOnScroll>
+
+              <FadeInOnScroll
+                delay={300}
+                className='rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-left transition-colors duration-300 hover:border-white/30'
+              >
+                <UserPlus className='mb-4 h-8 w-8 text-amber-400' />
+                <h3 className='text-lg font-semibold text-white'>
+                  Formalized Onboarding
+                </h3>
+                <p className='mt-2 text-sm text-white/70'>
+                  Create onboarding templates with structured tasks and
+                  milestones. When new team members join, launch their
+                  personalized onboarding journey with clear expectations.
+                  Managers stay informed on progress while new hires ramp up
+                  confidently.
+                </p>
+              </FadeInOnScroll>
+            </div>
+          </div>
+        </FadeInOnScroll>
+      </section>
+
+      {/* Work Tracking Section */}
+      <section
+        id='work-tracking'
+        className='mx-auto max-w-6xl px-6 pb-24 sm:px-8'
+      >
+        <FadeInOnScroll className='rounded-3xl border border-white/5 bg-white/[0.03] p-10 shadow-[0_25px_60px_rgba(7,16,29,0.45)] backdrop-blur'>
+          <div className='space-y-8'>
+            <div className='text-center'>
+              <p className='text-sm font-semibold uppercase tracking-[0.3em] text-white/60'>
+                Work Tracking
               </p>
-              <p className='text-sm text-emerald-100/80'>
-                Integrates with the tools you already love. Stay in flow with
-                minimal setup and effortless onboarding for your leads.
+              <h2 className='mt-4 text-3xl font-semibold text-white sm:text-4xl'>
+                Track work at every level.
+              </h2>
+              <p className='mx-auto mt-4 text-base text-white/70'>
+                From strategic initiatives that span quarters to daily tasks
+                that need to get done—mpath gives you the right tool for each
+                level of work.
+              </p>
+            </div>
+
+            <div className='grid gap-8 md:grid-cols-2'>
+              <FadeInOnScroll
+                delay={100}
+                className='rounded-2xl border border-indigo-400/20 bg-gradient-to-br from-indigo-400/10 via-indigo-500/10 to-transparent p-6 text-left shadow-[0_18px_50px_rgba(79,70,229,0.2)]'
+              >
+                <Rocket className='mb-4 h-10 w-10 text-indigo-400' />
+                <h3 className='text-xl font-semibold text-white'>
+                  Initiatives
+                </h3>
+                <p className='mt-3 text-white/70'>
+                  Some of the most important work doesn&apos;t fit neatly into
+                  tickets. Initiatives represent large-scale efforts that span
+                  teams, quarters, or even years—things like &quot;Improve
+                  Customer Experience&quot;, &quot;Launch New Market&quot;, or
+                  &quot;Operational Excellence&quot;.
+                </p>
+                <ul className='mt-4 space-y-2 text-sm text-white/70'>
+                  <li className='flex items-start gap-2'>
+                    <Target className='mt-0.5 h-4 w-4 flex-shrink-0 text-indigo-400' />
+                    <span>
+                      Define objectives that explain the why behind the work
+                    </span>
+                  </li>
+                  <li className='flex items-start gap-2'>
+                    <Users className='mt-0.5 h-4 w-4 flex-shrink-0 text-indigo-400' />
+                    <span>
+                      Connect people to the initiatives they&apos;re involved in
+                    </span>
+                  </li>
+                  <li className='flex items-start gap-2'>
+                    <GitBranch className='mt-0.5 h-4 w-4 flex-shrink-0 text-indigo-400' />
+                    <span>
+                      Track progress and keep stakeholders aligned over time
+                    </span>
+                  </li>
+                </ul>
+              </FadeInOnScroll>
+
+              <FadeInOnScroll
+                delay={200}
+                className='rounded-2xl border border-emerald-400/20 bg-gradient-to-br from-emerald-400/10 via-emerald-500/10 to-transparent p-6 text-left shadow-[0_18px_50px_rgba(6,95,70,0.2)]'
+              >
+                <ListTodo className='mb-4 h-10 w-10 text-emerald-400' />
+                <h3 className='text-xl font-semibold text-white'>Tasks</h3>
+                <p className='mt-3 text-white/70'>
+                  For day-to-day work, tasks keep things moving. Create them
+                  from anywhere in mpath with a quick keyboard shortcut. Assign
+                  ownership, set priorities, and link them back to the
+                  initiatives they support.
+                </p>
+                <ul className='mt-4 space-y-2 text-sm text-white/70'>
+                  <li className='flex items-start gap-2'>
+                    <ArrowRight className='mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-400' />
+                    <span>
+                      Press Q from anywhere to create a task instantly
+                    </span>
+                  </li>
+                  <li className='flex items-start gap-2'>
+                    <ArrowRight className='mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-400' />
+                    <span>Link tasks to initiatives and objectives</span>
+                  </li>
+                  <li className='flex items-start gap-2'>
+                    <ArrowRight className='mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-400' />
+                    <span>
+                      Track ownership, status, and priorities at a glance
+                    </span>
+                  </li>
+                </ul>
+              </FadeInOnScroll>
+            </div>
+          </div>
+        </FadeInOnScroll>
+      </section>
+
+      {/* AI Section */}
+      <section id='ai' className='mx-auto max-w-6xl px-6 pb-24 sm:px-8'>
+        <FadeInOnScroll className='rounded-3xl border border-white/5 bg-white/[0.03] p-10 shadow-[0_25px_60px_rgba(7,16,29,0.45)] backdrop-blur'>
+          <div className='space-y-8'>
+            <div className='text-center'>
+              <p className='text-sm font-semibold uppercase tracking-[0.3em] text-white/60'>
+                AI-Powered
+              </p>
+              <h2 className='mt-4 text-3xl font-semibold text-white sm:text-4xl'>
+                Your intelligent management assistant.
+              </h2>
+              <p className='mx-auto mt-4 text-base text-white/70'>
+                mpath isn&apos;t just a tool—it&apos;s a partner. Ask questions,
+                get insights, and let AI help you understand your team and work
+                better.
+              </p>
+            </div>
+
+            <div className='grid gap-6 md:grid-cols-2'>
+              <FadeInOnScroll
+                delay={100}
+                className='rounded-2xl border border-purple-400/20 bg-gradient-to-br from-purple-400/10 via-purple-500/10 to-transparent p-6 text-left shadow-[0_18px_50px_rgba(147,51,234,0.2)]'
+              >
+                <Bot className='mb-4 h-10 w-10 text-purple-400' />
+                <h3 className='text-xl font-semibold text-white'>
+                  Chat with mpath
+                </h3>
+                <p className='mt-3 text-white/70'>
+                  Have a conversation with mpath about your people, initiatives,
+                  tasks, and feedback. Ask about someone&apos;s recent
+                  contributions, get a summary of an initiative&apos;s progress,
+                  or prepare for your next 1:1 with context at your fingertips.
+                </p>
+                <p className='mt-3 text-sm text-purple-300/80'>
+                  &quot;What has Sarah been working on this quarter?&quot;
+                  <br />
+                  &quot;Summarize the Customer Experience initiative.&quot;
+                  <br />
+                  &quot;Help me prepare for my 1:1 with James.&quot;
+                </p>
+              </FadeInOnScroll>
+
+              <FadeInOnScroll
+                delay={200}
+                className='rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-cyan-400/10 via-cyan-500/10 to-transparent p-6 text-left shadow-[0_18px_50px_rgba(6,182,212,0.2)]'
+              >
+                <Server className='mb-4 h-10 w-10 text-cyan-400' />
+                <h3 className='text-xl font-semibold text-white'>MCP Server</h3>
+                <p className='mt-3 text-white/70'>
+                  mpath can act as an MCP (Model Context Protocol) server,
+                  allowing your AI tools to access your management data
+                  securely. Connect Claude, Cursor, or other MCP-compatible
+                  tools to get mpath context right where you work.
+                </p>
+                <p className='mt-3 text-sm text-cyan-300/80'>
+                  Query your team data from AI-powered tools. Get initiative
+                  context in your workflow. Let your AI assistant understand
+                  your organizational context.
+                </p>
+              </FadeInOnScroll>
+            </div>
+          </div>
+        </FadeInOnScroll>
+      </section>
+
+      {/* Integrations Section */}
+      <section
+        id='integrations'
+        className='mx-auto max-w-6xl px-6 pb-24 sm:px-8'
+      >
+        <FadeInOnScroll className='rounded-3xl border border-white/5 bg-white/[0.03] p-10 shadow-[0_25px_60px_rgba(7,16,29,0.45)] backdrop-blur'>
+          <div className='space-y-8'>
+            <div className='text-center'>
+              <p className='text-sm font-semibold uppercase tracking-[0.3em] text-white/60'>
+                Integrations
+              </p>
+              <h2 className='mt-4 text-3xl font-semibold text-white sm:text-4xl'>
+                Connect to where work happens.
+              </h2>
+              <p className='mx-auto mt-4 text-base text-white/70'>
+                mpath integrates with the tools your team already uses. Pull in
+                activity data to understand what people are working on and
+                provide richer context for feedback and overviews.
+              </p>
+            </div>
+
+            <div className='flex flex-col items-center gap-6 md:flex-row md:justify-center'>
+              <FadeInOnScroll
+                delay={100}
+                className='flex items-start gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition-colors duration-300 hover:border-white/30'
+              >
+                <div className='flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-blue-500/20'>
+                  <Plug className='h-6 w-6 text-blue-400' />
+                </div>
+                <div>
+                  <h3 className='text-lg font-semibold text-white'>Jira</h3>
+                  <p className='mt-1 text-sm text-white/70'>
+                    See what tickets people are working on, understand their
+                    workload, and get context for performance conversations.
+                  </p>
+                </div>
+              </FadeInOnScroll>
+
+              <FadeInOnScroll
+                delay={200}
+                className='flex w-full items-start gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition-colors duration-300 hover:border-white/30'
+              >
+                <div className='flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gray-500/20'>
+                  <GitBranch className='h-6 w-6 text-gray-400' />
+                </div>
+                <div>
+                  <h3 className='text-lg font-semibold text-white'>GitHub</h3>
+                  <p className='mt-1 text-sm text-white/70'>
+                    Track contributions, pull requests, and code activity. Get a
+                    complete picture of team activity for technical teams.
+                  </p>
+                </div>
+              </FadeInOnScroll>
+            </div>
+
+            <div className='text-center'>
+              <p className='text-sm text-white/50'>
+                More integrations coming soon—Slack, Linear, and more.
               </p>
             </div>
           </div>
         </FadeInOnScroll>
       </section>
 
-      <section id='proof' className='mx-auto max-w-6xl px-6 pb-24 sm:px-8'>
-        <div className='grid gap-8 md:grid-cols-3'>
-          {proofPoints.map((point, index) => (
-            <FadeInOnScroll
-              key={point.title}
-              delay={index * 120}
-              className='rounded-2xl border border-white/5 bg-white/[0.04] p-6 shadow-[0_22px_45px_rgba(7,16,29,0.35)] backdrop-blur'
-            >
-              <p className='text-xs font-semibold uppercase tracking-[0.3em] text-primary/60'>
-                Outcome
-              </p>
-              <h3 className='mt-3 text-xl font-semibold text-white'>
-                {point.title}
-              </h3>
-              <p className='mt-2 text-sm text-white/70'>{point.description}</p>
-            </FadeInOnScroll>
-          ))}
-        </div>
-      </section>
-
+      {/* CTA Section */}
       <section id='cta' className='mx-auto max-w-4xl px-6 pb-24 sm:px-8'>
         <FadeInOnScroll className='relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.06] p-10 text-center shadow-[0_28px_70px_rgba(7,16,29,0.55)] backdrop-blur'>
           <div className='pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.08),_rgba(255,255,255,0))]' />
@@ -208,12 +407,12 @@ export default async function MarketingHome() {
               Ready when you are
             </p>
             <h2 className='text-3xl font-semibold text-white sm:text-4xl'>
-              Bring harmony to how your engineering teams deliver.
+              Bring harmony to how your teams deliver.
             </h2>
             <p className='mx-auto max-w-4xl text-base text-white/70'>
               Get started with mpath today. Invite your leads, connect your
               rituals, and see how a shared operating system transforms the way
-              you support engineers.
+              you support your team.
             </p>
             <div className='flex flex-wrap items-center justify-center gap-4'>
               <Button
@@ -226,14 +425,9 @@ export default async function MarketingHome() {
                   <ArrowRight className='h-4 w-4' />
                 </Link>
               </Button>
-              <Button
-                asChild
-                size='lg'
-                variant='outline'
-                className='border-white/20 bg-white/10 text-white/80 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/40 hover:text-white'
-              >
-                <Link href='/auth/signin'>Talk with us</Link>
-              </Button>
+              <OpenChatButton className='border-white/20 bg-white/10 text-white/80 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/40 hover:text-white'>
+                Talk with us
+              </OpenChatButton>
             </div>
           </div>
         </FadeInOnScroll>
@@ -242,7 +436,7 @@ export default async function MarketingHome() {
       <footer className='border-t border-white/10 bg-black/20'>
         <div className='mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 text-sm text-white/50 sm:flex-row sm:px-8'>
           <p>
-            © <CurrentYear /> mpath. Designed for engineering leaders.
+            © <CurrentYear /> mpath. Designed for team leaders.
           </p>
           <div className='flex items-center gap-6'>
             <Link
