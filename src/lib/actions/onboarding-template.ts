@@ -362,8 +362,24 @@ export async function updateOnboardingTemplate(
     })
   }
 
-  // Delete existing phases and items, then recreate
-  // This is simpler than trying to diff and update
+  // Check if there are any active onboarding instances using this template
+  const activeInstanceCount = await prisma.onboardingInstance.count({
+    where: {
+      templateId: id,
+      status: {
+        in: ['NOT_STARTED', 'IN_PROGRESS'],
+      },
+    },
+  })
+
+  if (activeInstanceCount > 0) {
+    throw new Error(
+      `Cannot update template structure while ${activeInstanceCount} onboarding${activeInstanceCount === 1 ? ' is' : 's are'} in progress. ` +
+        'Complete or cancel active onboardings first, or create a new template.'
+    )
+  }
+
+  // No active instances - safe to delete all phases and items and recreate
   await prisma.onboardingPhase.deleteMany({
     where: { templateId: id },
   })

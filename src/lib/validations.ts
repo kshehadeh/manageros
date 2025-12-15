@@ -540,20 +540,35 @@ export const onboardingPhaseSchema = z.object({
 export type OnboardingPhaseFormData = z.infer<typeof onboardingPhaseSchema>
 
 // Schema for creating/updating onboarding templates
-export const onboardingTemplateSchema = z.object({
-  name: z
-    .string()
-    .min(1, 'Template name is required')
-    .max(200, 'Template name must be less than 200 characters'),
-  description: z.string().optional(),
-  teamId: z.string().optional(),
-  jobRoleId: z.string().optional(),
-  isDefault: z.boolean().default(false),
-  isActive: z.boolean().default(true),
-  phases: z
-    .array(onboardingPhaseSchema)
-    .min(1, 'At least one phase is required'),
-})
+export const onboardingTemplateSchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, 'Template name is required')
+      .max(200, 'Template name must be less than 200 characters'),
+    description: z.string().optional(),
+    teamId: z.string().optional(),
+    jobRoleId: z.string().optional(),
+    isDefault: z.boolean().default(false),
+    isActive: z.boolean().default(true),
+    phases: z
+      .array(onboardingPhaseSchema)
+      .min(1, 'At least one phase is required'),
+  })
+  .refine(
+    data => {
+      // Ensure at least one item exists across all phases
+      const totalItems = data.phases.reduce(
+        (sum, phase) => sum + phase.items.length,
+        0
+      )
+      return totalItems > 0
+    },
+    {
+      message: 'Template must have at least one item across all phases',
+      path: ['phases'],
+    }
+  )
 
 export type OnboardingTemplateFormData = z.infer<
   typeof onboardingTemplateSchema
