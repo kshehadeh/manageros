@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
-import type { GeneratedImage } from 'ai'
+import type { GeneratedFile } from 'ai'
 
-export type ImageProps = GeneratedImage & {
+export type ImageProps = GeneratedFile & {
   className?: string
   alt?: string
 }
