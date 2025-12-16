@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.41.0](/compare/v1.39.3...v1.41.0) (2025-12-16)
+
+### Features
+
+- add confirmation dialog for completing onboarding 7b8c861
+- migrate AI chat UI to Vercel AI Elements 16343b4
+
 ## [1.39.3](/compare/v1.39.2...v1.39.3) (2025-12-15)
 
 ## [1.39.2](/compare/v1.39.1...v1.39.2) (2025-12-15)
