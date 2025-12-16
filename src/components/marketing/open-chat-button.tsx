@@ -1,12 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-
-declare global {
-  interface Window {
-    $crisp: unknown[]
-  }
-}
+import { Crisp } from 'crisp-sdk-web'
 
 interface OpenChatButtonProps {
   children: React.ReactNode
@@ -28,8 +23,10 @@ export function OpenChatButton({
   variant = 'outline',
 }: OpenChatButtonProps) {
   const openChat = () => {
-    if (typeof window !== 'undefined' && window.$crisp) {
-      window.$crisp.push(['do', 'chat:open'])
+    try {
+      Crisp.chat.open()
+    } catch (error) {
+      console.error('Error opening Crisp chat:', error)
     }
   }
 

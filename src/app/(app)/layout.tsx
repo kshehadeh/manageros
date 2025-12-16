@@ -16,6 +16,7 @@ import { AIChatSidebarWrapper } from '@/components/ai-chat-sidebar-wrapper'
 import { CacheProvider } from '@/components/cache-provider'
 import SidebarClient from '@/components/sidebar-client'
 import { ClerkProvider } from '@clerk/nextjs'
+import { CrispIntegration } from '@/components/crisp-integration'
 import {
   getCurrentUserWithPersonAndOrganization,
   getFilteredNavigation,
@@ -130,6 +131,7 @@ export default async function AppLayout({ children }: AppLayoutProps) {
           </AIChatProvider>
           <Toaster theme='system' />
         </TooltipProvider>
+        <CrispIntegration hideButton={true} />
       </ThemeProvider>
     </ClerkProvider>
   )

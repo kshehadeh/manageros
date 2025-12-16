@@ -3,6 +3,7 @@ import { IndigoIcon } from '@/components/indigo-icon'
 import { ThemeProvider } from 'next-themes'
 import { Link } from '@/components/ui/link'
 import { ClerkProvider } from '@clerk/nextjs'
+import { CrispIntegration } from '@/components/crisp-integration'
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
@@ -24,6 +25,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           </div>
           {children}
         </div>
+        <CrispIntegration />
       </ThemeProvider>
     </ClerkProvider>
   )

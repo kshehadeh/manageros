@@ -8,6 +8,7 @@ import { useMobileMenu } from '@/components/mobile-menu-provider'
 import { IndigoIcon } from '@/components/indigo-icon'
 import type { UserBrief } from '@/lib/auth-types'
 import { Geist_Mono as GeistMono } from 'next/font/google'
+import { Crisp } from 'crisp-sdk-web'
 
 const geistMono = GeistMono({
   subsets: ['latin'],
@@ -24,24 +25,21 @@ import {
   Building,
   Bot,
   CheckSquare,
-  Keyboard,
   Bug,
-  BookOpen,
+  HelpCircle,
   FileText,
   Briefcase,
   Bell,
   MessageSquare,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BugSubmissionModal } from '@/components/bug-submission-modal'
-import { HELP_IDS } from '@/lib/help'
 import { useAIChat } from '@/components/ai-chat-provider'
 import { APP_VERSION } from '@/lib/version'
 import { PersonAvatar } from '@/components/people/person-avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PersonBrief } from '../types/person'
 import { SidebarOrganizationSwitcher } from '@/components/organization/sidebar-organization-switcher'
-import { HelpLink } from './shared'
 import { SidebarLink } from './sidebar/sidebar-link'
 import { SidebarButton } from './sidebar/sidebar-button'
 interface NavItem {
@@ -95,8 +93,73 @@ export default function Sidebar({
   const pathname = usePathname()
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useMobileMenu()
   const [isBugOpen, setIsBugOpen] = useState(false)
+  const [isCrispChatVisible, setIsCrispChatVisible] = useState(false)
   const { toggleAIChat } = useAIChat()
   const { signOut } = useClerk()
+
+  // Track Crisp chat visibility state
+  useEffect(() => {
+    const checkChatVisibility = () => {
+      try {
+        setIsCrispChatVisible(Crisp.chat.isVisible())
+      } catch {
+        // Crisp might not be loaded yet
+      }
+    }
+
+    // Check initial state
+    checkChatVisibility()
+
+    // Set up callbacks to track chat state changes
+    const onChatOpened = () => {
+      setIsCrispChatVisible(true)
+    }
+
+    const onChatClosed = () => {
+      setIsCrispChatVisible(false)
+    }
+
+    try {
+      Crisp.chat.onChatOpened(onChatOpened)
+      Crisp.chat.onChatClosed(onChatClosed)
+    } catch {
+      // Crisp might not be loaded yet, will be handled by periodic check
+    }
+
+    // Periodically check state in case callbacks aren't working
+    const interval = setInterval(checkChatVisibility, 500)
+
+    return () => {
+      clearInterval(interval)
+      try {
+        Crisp.chat.offChatOpened()
+        Crisp.chat.offChatClosed()
+      } catch {
+        // Ignore cleanup errors
+      }
+    }
+  }, [])
+
+  const toggleCrispChat = () => {
+    setIsMobileMenuOpen(false)
+    try {
+      // Check if chat is currently visible (not just opened, but visible including the overlay)
+      const isVisible = Crisp.chat.isVisible()
+
+      if (isVisible) {
+        // If visible, hide the entire chat widget (including the corner overlay)
+        Crisp.chat.hide()
+        setIsCrispChatVisible(false)
+      } else {
+        // If hidden, show and open it
+        Crisp.chat.show()
+        Crisp.chat.open()
+        setIsCrispChatVisible(true)
+      }
+    } catch (error) {
+      console.error('Error toggling Crisp chat:', error)
+    }
+  }
 
   // Use the navigation passed from server-side filtering
   const filteredNavigation = navigation
@@ -309,20 +372,25 @@ export default function Sidebar({
                       }}
                     />
                   )}
-                  <HelpLink
-                    helpId={HELP_IDS.keyboardShortcuts}
-                    className={`flex items-center justify-start gap-lg px-lg py-sm text-xs text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
+                  <a
+                    href='https://help.mpath.dev'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className={`flex items-center justify-start gap-lg px-lg py-sm text-xs text-muted-foreground hover:text-highlight hover:bg-accent rounded-sm transition-colors w-full ${geistMono.className}`}
                   >
-                    <Keyboard className='h-4 w-4' />
-                    <span className='text-left'>Keyboard Shortcuts</span>
-                  </HelpLink>
-                  <HelpLink
-                    helpId={HELP_IDS.concepts}
-                    className={`flex items-center justify-start gap-lg px-lg py-sm text-xs text-muted-foreground hover:text-highlight hover:bg-accent rounded-lg transition-colors w-full ${geistMono.className}`}
-                  >
-                    <BookOpen className='h-4 w-4' />
-                    <span className='text-left'>Core Concepts</span>
-                  </HelpLink>
+                    <HelpCircle className='h-4 w-4' />
+                    <span className='text-left'>Help</span>
+                  </a>
+                  <SidebarButton
+                    name='Contact Support'
+                    icon={MessageSquare}
+                    onClick={toggleCrispChat}
+                    className={
+                      isCrispChatVisible
+                        ? 'text-highlight [&_svg]:text-highlight'
+                        : undefined
+                    }
+                  />
                   <SidebarButton
                     name='Report a bug'
                     icon={Bug}

@@ -247,8 +247,22 @@
 
 ---
 
-_Last Updated: January 2025_
-_Next Review: February 2025_
+_Last Updated: December 2025_
+_Next Review: January 2026_
+
+### Updates on 2025-12-16
+
+- **AI Chat UI Migration** (Completed):
+  - Migrated from `assistant-ui` to Vercel AI SDK `@ai-sdk/react` with custom components
+  - Removed 4 dependencies: `@assistant-ui/react`, `@assistant-ui/react-ai-sdk`, `@assistant-ui/react-markdown`, `assistant-ui`
+  - Created new `src/components/ai-elements/` directory with simplified chat components:
+    - `ChatThread` - Main chat component using `useChat` hook from AI SDK
+    - `ChatMessage` - Message display with markdown rendering using `react-markdown`
+    - `ToolIndicator` - Visual indicators for AI tool invocations
+  - Simplified UI without branching, message editing, or file attachments
+  - Maintained all core functionality: chat, markdown rendering, tool call visualization
+  - Moved reusable components (`TooltipIconButton`, `ErrorBoundary`) to `src/components/ui/`
+  - Version bump to 1.40.0
 
 ### Updates on 2025-01-26
 

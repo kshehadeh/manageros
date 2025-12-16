@@ -4,31 +4,31 @@ import React from 'react'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-interface AssistantErrorBoundaryState {
+interface ErrorBoundaryState {
   hasError: boolean
   error?: Error
 }
 
-interface AssistantErrorBoundaryProps {
+interface ErrorBoundaryProps {
   children: React.ReactNode
   fallback?: React.ComponentType<{ error: Error; resetError: () => void }>
 }
 
-export class AssistantErrorBoundary extends React.Component<
-  AssistantErrorBoundaryProps,
-  AssistantErrorBoundaryState
+export class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
 > {
-  constructor(props: AssistantErrorBoundaryProps) {
+  constructor(props: ErrorBoundaryProps) {
     super(props)
     this.state = { hasError: false }
   }
 
-  static getDerivedStateFromError(error: Error): AssistantErrorBoundaryState {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, error }
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Assistant Error Boundary caught an error:', error, errorInfo)
+    console.error('Error Boundary caught an error:', error, errorInfo)
   }
 
   resetError = () => {
@@ -54,8 +54,8 @@ export class AssistantErrorBoundary extends React.Component<
           </div>
           <h3 className='mb-2 text-lg font-semibold'>Something went wrong</h3>
           <p className='mb-4 text-sm text-muted-foreground max-w-md'>
-            The assistant encountered an unexpected error. This has been logged
-            and we&apos;ll look into it.
+            An unexpected error occurred. This has been logged and we&apos;ll
+            look into it.
           </p>
           <div className='flex gap-2'>
             <Button variant='outline' onClick={this.resetError}>
@@ -85,7 +85,7 @@ export class AssistantErrorBoundary extends React.Component<
 }
 
 // Hook version for functional components
-export function useAssistantErrorHandler() {
+export function useErrorHandler() {
   const [error, setError] = React.useState<Error | null>(null)
 
   const resetError = React.useCallback(() => {
@@ -93,7 +93,7 @@ export function useAssistantErrorHandler() {
   }, [])
 
   const handleError = React.useCallback((error: Error) => {
-    console.error('Assistant error:', error)
+    console.error('Error handler:', error)
     setError(error)
   }, [])
 

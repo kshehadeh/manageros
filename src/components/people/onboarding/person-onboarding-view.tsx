@@ -18,6 +18,16 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -201,6 +211,7 @@ export function PersonOnboardingView({
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set())
   const [isSyncing, setIsSyncing] = useState(false)
   const [isCompleting, setIsCompleting] = useState(false)
+  const [showCompleteDialog, setShowCompleteDialog] = useState(false)
 
   const togglePhase = (phaseId: string) => {
     setExpandedPhases(prev => {
@@ -251,14 +262,7 @@ export function PersonOnboardingView({
   }
 
   const handleCompleteOnboarding = async () => {
-    if (
-      !confirm(
-        `Are you sure you want to mark ${personName}'s onboarding as complete?`
-      )
-    ) {
-      return
-    }
-
+    setShowCompleteDialog(false)
     setIsCompleting(true)
     try {
       await completeOnboarding(onboarding.id)
@@ -393,7 +397,7 @@ export function PersonOnboardingView({
               <Button
                 size='sm'
                 className='shrink-0 bg-badge-success hover:bg-badge-success/80 text-badge-success-foreground'
-                onClick={handleCompleteOnboarding}
+                onClick={() => setShowCompleteDialog(true)}
                 disabled={isCompleting}
               >
                 <Award className='w-4 h-4 mr-2' />
@@ -547,6 +551,29 @@ export function PersonOnboardingView({
           })}
         </div>
       </PageSection>
+
+      {/* Complete Onboarding Confirmation Dialog */}
+      <AlertDialog
+        open={showCompleteDialog}
+        onOpenChange={setShowCompleteDialog}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Complete Onboarding</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to mark {personName}&apos;s onboarding as
+              complete? This indicates the person has finished all required
+              onboarding items.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCompleteOnboarding}>
+              Complete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

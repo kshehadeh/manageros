@@ -40,7 +40,7 @@ export function SidebarButton({
     <button
       onClick={onClick}
       className={cn(
-        'relative flex items-center justify-start gap-lg px-lg py-sm text-xs text-muted-foreground hover:text-highlight rounded-lg overflow-hidden w-full',
+        'relative flex items-center justify-start gap-lg px-lg py-sm text-xs text-muted-foreground hover:text-highlight rounded-sm overflow-hidden w-full',
         geistMono.className,
         'before:absolute before:inset-0 before:bg-accent before:origin-left before:scale-x-0 hover:before:scale-x-100 before:transition-transform before:duration-300 before:ease-out',
         className
