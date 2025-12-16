@@ -1,9 +1,13 @@
 'use client'
 
 import { useEffect } from 'react'
+import { Bot, X, Expand, Shrink } from 'lucide-react'
 import { useUserSettings } from '@/lib/hooks/use-user-settings'
 import { useAIChat } from '@/components/ai-chat-provider'
-import { ManagerOSAssistantSidebar } from '@/components/assistant-ui/manageros-assistant-sidebar'
+import { Chat } from '@/components/ai-elements'
+import { ErrorBoundary } from '@/components/ui/error-boundary'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { DEFAULT_EXAMPLE_QUESTIONS } from '@/lib/ai/constants'
 
 interface AIChatSidebarProps {
@@ -14,9 +18,14 @@ interface AIChatSidebarProps {
 export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
   const { settings, updateSetting } = useUserSettings()
   const { openedViaKeyboard, setOpenedViaKeyboard } = useAIChat()
+  const isFullscreen = settings.chatWindowSettings.isFullscreen
 
-  // Note: Scroll locking is handled by Radix UI components (Dialog, etc.)
-  // No custom scroll locking needed here
+  const toggleFullscreen = () => {
+    updateSetting('chatWindowSettings', {
+      ...settings.chatWindowSettings,
+      isFullscreen: !isFullscreen,
+    })
+  }
 
   // Handle Escape key to close the AI chat (only when not typing in input)
   useEffect(() => {
@@ -77,29 +86,68 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
     return () => clearTimeout(timeoutId)
   }, [isOpen, openedViaKeyboard, setOpenedViaKeyboard])
 
+  if (!isOpen) return null
+
   return (
     <>
       {/* Mobile overlay - blocks interaction with page behind chat */}
-      {isOpen && (
-        <div
-          className='md:hidden fixed inset-0 bg-black/50 z-50'
-          onClick={onClose}
-          aria-hidden='true'
-        />
-      )}
-
-      <ManagerOSAssistantSidebar
-        isOpen={isOpen}
-        onClose={onClose}
-        isFullscreen={settings.chatWindowSettings.isFullscreen}
-        onToggleFullscreen={() =>
-          updateSetting('chatWindowSettings', {
-            ...settings.chatWindowSettings,
-            isFullscreen: !settings.chatWindowSettings.isFullscreen,
-          })
-        }
-        exampleQuestions={DEFAULT_EXAMPLE_QUESTIONS}
+      <div
+        className='md:hidden fixed inset-0 bg-black/50 z-50'
+        onClick={onClose}
+        aria-hidden='true'
       />
+
+      {/* Sidebar container */}
+      <div
+        className={cn(
+          'fixed top-0 h-full bg-card shadow-lg z-[60] flex flex-col',
+          // Mobile: always fullscreen (use inset to ensure full coverage)
+          'inset-x-0 w-screen',
+          // Desktop: sidebar mode unless fullscreen
+          'md:inset-x-auto md:w-96 md:right-0 md:border-l',
+          // Desktop fullscreen mode
+          isFullscreen && 'md:inset-x-0 md:w-full md:border-l-0'
+        )}
+      >
+        {/* Header */}
+        <div className='flex items-center justify-between p-4 border-b'>
+          <div className='flex items-center gap-2'>
+            <Bot className='h-5 w-5 text-primary' />
+            <h2 className='font-semibold'>AI Chat</h2>
+          </div>
+          <div className='flex items-center gap-1'>
+            {/* Desktop fullscreen toggle - hidden on mobile */}
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={toggleFullscreen}
+              className='hidden md:flex'
+              title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+            >
+              {isFullscreen ? (
+                <Shrink className='h-4 w-4' />
+              ) : (
+                <Expand className='h-4 w-4' />
+              )}
+            </Button>
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={onClose}
+              title='Close chat'
+            >
+              <X className='h-4 w-4' />
+            </Button>
+          </div>
+        </div>
+
+        {/* Chat */}
+        <div className='flex-1 overflow-hidden'>
+          <ErrorBoundary>
+            <Chat exampleQuestions={DEFAULT_EXAMPLE_QUESTIONS} />
+          </ErrorBoundary>
+        </div>
+      </div>
     </>
   )
 }

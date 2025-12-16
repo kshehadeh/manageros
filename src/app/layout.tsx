@@ -4,7 +4,6 @@ import type { ReactNode } from 'react'
 import '@/lib/reports/register-all'
 import { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
-import { CrispIntegration } from '../components/crisp-integration'
 
 const geist = Geist({
   subsets: ['latin'],
@@ -54,7 +53,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     >
       <body className='min-h-screen bg-background text-foreground antialiased'>
         {children}
-        <CrispIntegration />
       </body>
     </html>
   )

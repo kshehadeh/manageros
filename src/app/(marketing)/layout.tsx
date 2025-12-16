@@ -4,6 +4,7 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { ThemeProvider } from 'next-themes'
 import { ClerkProvider } from '@clerk/nextjs'
+import { CrispIntegration } from '@/components/crisp-integration'
 
 export default async function MarketingLayout({
   children,
@@ -34,6 +35,7 @@ export default async function MarketingLayout({
             {children}
           </div>
         </main>
+        <CrispIntegration />
       </ThemeProvider>
     </ClerkProvider>
   )
