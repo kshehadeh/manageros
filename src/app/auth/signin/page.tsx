@@ -65,7 +65,7 @@ export default function SignInPage() {
             }}
             routing='hash'
             signUpUrl='/auth/signup'
-            fallbackRedirectUrl='/dashboard'
+            forceRedirectUrl='/dashboard'
           />
         </div>
       </div>

@@ -307,9 +307,11 @@ export async function getCurrentUser(
       if (clerkUser && clerkUser.primaryEmailAddress?.emailAddress) {
         const email = clerkUser.primaryEmailAddress.emailAddress.toLowerCase()
 
-        // Check if a user with this email already exists (but without a clerkUserId)
-        const existingUserByEmail = await prisma.user.findUnique({
-          where: { email },
+        // Check if a user with this email already exists (case-insensitive)
+        // Using findFirst with case-insensitive mode because the email might be stored
+        // with different casing in the database
+        const existingUserByEmail = await prisma.user.findFirst({
+          where: { email: { equals: email, mode: 'insensitive' } },
         })
 
         if (existingUserByEmail) {
@@ -333,13 +335,44 @@ export async function getCurrentUser(
           }
         } else {
           // Create a new user
-          user = await prisma.user.create({
-            data: {
-              clerkUserId: userId,
-              email,
-              name: combineName(clerkUser.firstName, clerkUser.lastName),
-            },
-          })
+          try {
+            user = await prisma.user.create({
+              data: {
+                clerkUserId: userId,
+                email,
+                name: combineName(clerkUser.firstName, clerkUser.lastName),
+              },
+            })
+          } catch (error: unknown) {
+            // Handle unique constraint violation (race condition)
+            if (
+              error &&
+              typeof error === 'object' &&
+              'code' in error &&
+              error.code === 'P2002'
+            ) {
+              // User was created by another concurrent request - fetch it
+              const existingUser = await prisma.user.findFirst({
+                where: { email: { equals: email, mode: 'insensitive' } },
+              })
+              if (existingUser) {
+                // Link to clerk if not already linked
+                if (!existingUser.clerkUserId) {
+                  user = await prisma.user.update({
+                    where: { id: existingUser.id },
+                    data: { clerkUserId: userId },
+                  })
+                } else {
+                  user = existingUser
+                }
+              } else {
+                // Still can't find - re-throw the error
+                throw error
+              }
+            } else {
+              throw error
+            }
+          }
         }
       } else {
         // The clerk user could not be found.  This is a fatal error and
@@ -662,10 +695,9 @@ export async function requireAuth(options?: {
 }) {
   const user = await getCurrentUser()
 
-  // If organization is required but user doesn't have one, redirect to route handler
-  // that sets cookie (for removed users) and then redirects to org setup
+  // If organization is required but user doesn't have one, redirect to org setup
   if (options?.requireOrganization && !user.managerOSOrganizationId) {
-    redirect(options.redirectTo || '/api/auth/org-removed')
+    redirect(options.redirectTo || '/organization/new')
   }
 
   // If admin is required but user is not admin/owner, redirect to dashboard
@@ -687,7 +719,7 @@ export async function requireOrganization() {
   const user = await getCurrentUser()
 
   if (!user.managerOSOrganizationId) {
-    redirect('/api/auth/org-removed')
+    redirect('/organization/new')
   }
 
   return user
@@ -703,7 +735,7 @@ export async function requireAdmin() {
   const user = await getCurrentUser()
 
   if (!user.managerOSOrganizationId) {
-    redirect('/api/auth/org-removed')
+    redirect('/organization/new')
   }
 
   if (!isAdminOrOwner(user)) {
