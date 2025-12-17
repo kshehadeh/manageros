@@ -25,10 +25,11 @@ import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 async function DashboardContent() {
   const user = await getCurrentUser()
 
-  // If user doesn't have an organization, redirect to route handler that sets cookie
-  // This handles the case where user was removed from an organization
+  // If user doesn't have an organization, redirect to organization setup page
+  // The organization/new page will check for pending invitations and allow
+  // users to either join an existing org or create a new one
   if (!user.managerOSOrganizationId) {
-    redirect('/api/auth/org-removed')
+    redirect('/organization/new')
   }
 
   // Check if there are any people in the organization
