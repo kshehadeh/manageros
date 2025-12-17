@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.42.0](/compare/v1.41.0...v1.42.0) (2025-12-17)
+
+### Features
+
+- enhance organization setup and user redirection eacaa39
+
 # [1.41.0](/compare/v1.39.3...v1.41.0) (2025-12-16)
 
 ### Features
