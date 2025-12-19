@@ -34,14 +34,21 @@ export function DeleteModal({
   const handleConfirm = async () => {
     try {
       await onConfirm()
-      onClose()
+      // Don't close here - let the onConfirm handler close it after success
     } catch (error) {
-      console.error(`Failed to delete ${entityName}:`, error)
+      // Show error toast - the onConfirm handler should also show one, but this is a fallback
       toast.error(
         error instanceof Error
           ? error.message
           : `Failed to delete ${entityName}`
       )
+      // Don't close modal on error - let user see the error and try again or cancel
+    }
+  }
+
+  const handleClose = (open: boolean) => {
+    if (!open) {
+      onClose()
     }
   }
 
@@ -51,7 +58,7 @@ export function DeleteModal({
     `Are you sure you want to delete this ${entityName}? This action cannot be undone.`
 
   return (
-    <AlertDialog open={isOpen} onOpenChange={onClose}>
+    <AlertDialog open={isOpen} onOpenChange={handleClose}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{finalTitle}</AlertDialogTitle>

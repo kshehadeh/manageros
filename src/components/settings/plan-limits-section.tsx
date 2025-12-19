@@ -5,7 +5,16 @@ import {
 } from '@/lib/subscription-utils'
 import type { EntityName } from '@/lib/subscriptions'
 import { EntityNameValues } from '@/lib/subscriptions'
-import { Users, Target, Building2, MessageSquare, Sparkles } from 'lucide-react'
+import {
+  Users,
+  Target,
+  Building2,
+  MessageSquare,
+  Sparkles,
+  CreditCard,
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Link } from '@/components/ui/link'
 
 interface PlanLimitsSectionProps {
   organizationId: string
@@ -121,6 +130,14 @@ export async function PlanLimitsSection({
             </div>
           )
         })}
+      </div>
+      <div className='pt-4 border-t'>
+        <Button asChild variant='outline' className='w-full'>
+          <Link href='/organization/plans' className='flex items-center gap-2'>
+            <CreditCard className='h-4 w-4' />
+            Manage Plan
+          </Link>
+        </Button>
       </div>
     </div>
   )

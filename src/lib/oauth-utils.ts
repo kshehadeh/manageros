@@ -197,13 +197,20 @@ async function autoSelectFirstOrganization(
 
     // Use the first organization membership
     const firstMembership = memberships[0]
-    const clerkOrgId = firstMembership.organization_id
+    // Handle both flat and nested organization_id formats
+    const clerkOrgId =
+      firstMembership.organization_id || firstMembership.organization?.id
 
     // Find the corresponding ManagerOS organization
     const managerOSOrg = await prisma.organization.findFirst({
       where: { clerkOrganizationId: clerkOrgId },
       select: { id: true },
     })
+
+    if (!clerkOrgId) {
+      console.log('No organization ID found in membership')
+      return null
+    }
 
     if (!managerOSOrg) {
       // ManagerOS organization doesn't exist for this Clerk org

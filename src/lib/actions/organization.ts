@@ -18,6 +18,8 @@ import {
   removeUserFromClerkOrganization,
   getClerkOrganizationMembersCount,
   isBillingUser as isBillingUserFromClerk,
+  deleteClerkOrganization,
+  updateClerkOrganization,
 } from '../clerk'
 import {
   mapManagerOSRoleToClerkRole,
@@ -1120,6 +1122,16 @@ export async function updateUserRole(
 
   // Update user's role in Clerk organization
   try {
+    // Log the values being passed for debugging
+    console.log('Updating user role:', {
+      organizationClerkId: organization.clerkOrganizationId,
+      targetUserClerkId: targetUser.clerkUserId,
+      targetUserId: targetUser.id,
+      targetUserEmail: targetUser.email,
+      newRole,
+      clerkRole: await mapManagerOSRoleToClerkRole(newRole),
+    })
+
     await updateUserRoleInClerkOrganization(
       organization.clerkOrganizationId,
       targetUser.clerkUserId,
@@ -1127,7 +1139,12 @@ export async function updateUserRole(
     )
   } catch (error) {
     console.error('Failed to update user role in Clerk organization:', error)
-    throw new Error('Failed to update user role')
+    // Include more context in the error
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error'
+    throw new Error(
+      `Failed to update user role: ${errorMessage}. User: ${targetUser.email} (${targetUser.clerkUserId}), Org: ${organization.clerkOrganizationId}`
+    )
   }
 
   // Sync updated user data to Clerk (role changed)
@@ -1364,7 +1381,11 @@ export async function removeUserFromOrganization(userId: string) {
   }
 
   // Determine current role from Clerk membership
-  const isBillingUser = organization.billingUserId === userId
+  // Check if user is billing user from Clerk (more accurate than database field)
+  const isBillingUser = await isBillingUserFromClerk(
+    organization.clerkOrganizationId,
+    targetUser.clerkUserId
+  )
   const currentRole = await mapClerkRoleToManagerOSRole(
     targetClerkMembership.role,
     isBillingUser
@@ -1416,8 +1437,7 @@ export async function removeUserFromOrganization(userId: string) {
       organization.clerkOrganizationId,
       targetUser.clerkUserId
     )
-  } catch (error) {
-    console.error('Failed to remove user from Clerk organization:', error)
+  } catch {
     throw new Error('Failed to remove user from organization')
   }
 
@@ -1459,6 +1479,365 @@ export async function removeUserFromOrganization(userId: string) {
   revalidatePath('/organization/members')
   revalidatePath('/organization/users')
   revalidatePath('/organization/settings')
+}
+
+/**
+ * Leave the current organization
+ * Users cannot leave if they are the only admin or owner left
+ */
+export async function leaveOrganization() {
+  const currentUser = await getCurrentUser()
+
+  // Check if current user belongs to an organization
+  if (
+    !currentUser.managerOSOrganizationId ||
+    !currentUser.clerkOrganizationId
+  ) {
+    throw new Error('User must belong to an organization to leave it')
+  }
+
+  // Get organization with Clerk org ID and billing user
+  const organization = await prisma.organization.findUnique({
+    where: { id: currentUser.managerOSOrganizationId },
+    select: {
+      id: true,
+      clerkOrganizationId: true,
+      billingUserId: true,
+    },
+  })
+
+  if (!organization || !organization.clerkOrganizationId) {
+    throw new Error('Organization not found')
+  }
+
+  // Get current user's Clerk membership to determine role
+  const currentUserMembership = await getClerkOrganizationMembership(
+    organization.clerkOrganizationId,
+    currentUser.clerkUserId!
+  )
+
+  if (!currentUserMembership) {
+    throw new Error('User not found in organization')
+  }
+
+  // Determine current role from Clerk membership
+  const isBillingUser =
+    organization.billingUserId === currentUser.managerOSUserId
+  const currentRole = await mapClerkRoleToManagerOSRole(
+    currentUserMembership.role,
+    isBillingUser
+  )
+
+  // Prevent leaving if user is the only admin or owner
+  // This ensures the organization always has at least one admin
+  if (currentRole === 'ADMIN' || currentRole === 'OWNER') {
+    const clerkMembers = await getClerkOrganizationMembers(
+      organization.clerkOrganizationId
+    )
+
+    const adminOrOwnerPromises = clerkMembers.map(async m => {
+      const memberUserId = m.public_user_data.user_id
+      const isMemberBillingUser = await isBillingUserFromClerk(
+        organization.clerkOrganizationId,
+        memberUserId
+      )
+      const role = await mapClerkRoleToManagerOSRole(
+        m.role,
+        isMemberBillingUser
+      )
+      return role === 'ADMIN' || role === 'OWNER'
+    })
+    const adminOrOwnerResults = await Promise.all(adminOrOwnerPromises)
+    const adminOrOwnerCount = adminOrOwnerResults.filter(Boolean).length
+
+    if (adminOrOwnerCount <= 1) {
+      throw new Error(
+        'You cannot leave the organization because you are the only admin. Please assign another admin before leaving.'
+      )
+    }
+  }
+
+  // Get current user from database
+  const dbUser = await prisma.user.findUnique({
+    where: { id: currentUser.managerOSUserId },
+    select: {
+      id: true,
+      clerkUserId: true,
+      personId: true,
+    },
+  })
+
+  if (!dbUser || !dbUser.clerkUserId) {
+    throw new Error('User not found or does not have Clerk account')
+  }
+
+  // Remove user from Clerk organization first
+  try {
+    await removeUserFromClerkOrganization(
+      organization.clerkOrganizationId,
+      dbUser.clerkUserId
+    )
+  } catch (error) {
+    console.error('Failed to remove user from Clerk organization:', error)
+    throw new Error('Failed to leave organization')
+  }
+
+  // Unlink user from person if linked
+  if (dbUser.personId) {
+    await prisma.user.update({
+      where: { id: dbUser.id },
+      data: { personId: null },
+    })
+  }
+
+  // Sync updated user data to Clerk (organizationId and role changed)
+  // Fetch user data to construct UserBrief for syncing
+  const updatedUser = await prisma.user.findUnique({
+    where: { id: dbUser.id },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      clerkUserId: true,
+      personId: true,
+    },
+  })
+  if (updatedUser && updatedUser.clerkUserId) {
+    // User is no longer in organization, so construct minimal UserBrief
+    const userBrief: UserBrief = {
+      email: updatedUser.email,
+      name: updatedUser.name,
+      clerkUserId: updatedUser.clerkUserId,
+      clerkOrganizationId: null, // No longer in organization
+      role: 'user', // Default role
+      managerOSUserId: updatedUser.id,
+      managerOSOrganizationId: null, // No longer in organization
+      managerOSPersonId: updatedUser.personId,
+    }
+    await syncUserDataToClerk(userBrief)
+  }
+
+  revalidatePath('/', 'layout')
+  revalidatePath('/dashboard', 'page')
+  revalidatePath('/organization/settings')
+  revalidatePath('/organization/members')
+  revalidatePath('/organization/users')
+}
+
+/**
+ * Delete the current organization
+ * Only admins can delete organizations
+ * This will delete ALL associated data and cannot be undone
+ */
+export async function deleteOrganization() {
+  const currentUser = await getCurrentUser()
+
+  // Check if current user is admin or owner
+  if (!isAdminOrOwner(currentUser)) {
+    throw new Error('Only organization admins can delete the organization')
+  }
+
+  // Check if current user belongs to an organization
+  if (
+    !currentUser.managerOSOrganizationId ||
+    !currentUser.clerkOrganizationId
+  ) {
+    throw new Error('User must belong to an organization to delete it')
+  }
+
+  // Get organization with Clerk org ID
+  const organization = await prisma.organization.findUnique({
+    where: { id: currentUser.managerOSOrganizationId },
+    select: {
+      id: true,
+      clerkOrganizationId: true,
+    },
+  })
+
+  if (!organization || !organization.clerkOrganizationId) {
+    throw new Error('Organization not found')
+  }
+
+  const organizationId = organization.id
+  const clerkOrgId = organization.clerkOrganizationId
+
+  // Delete all related data in dependency order
+  // Organization invitations (before users)
+  await prisma.organizationInvitation.deleteMany({
+    where: { organizationId },
+  })
+
+  // Meeting instance participants
+  await prisma.meetingInstanceParticipant.deleteMany({
+    where: { meetingInstance: { organizationId } },
+  })
+
+  // Meeting instances
+  await prisma.meetingInstance.deleteMany({
+    where: { organizationId },
+  })
+
+  // Meeting participants
+  await prisma.meetingParticipant.deleteMany({
+    where: { meeting: { organizationId } },
+  })
+
+  // Meetings
+  await prisma.meeting.deleteMany({
+    where: { organizationId },
+  })
+
+  // Feedback
+  await prisma.feedback.deleteMany({
+    where: { about: { organizationId } },
+  })
+
+  // One-on-ones
+  await prisma.oneOnOne.deleteMany({
+    where: { manager: { organizationId } },
+  })
+
+  // Tasks (through initiatives or objectives)
+  await prisma.task.deleteMany({
+    where: {
+      OR: [
+        { initiative: { organizationId } },
+        { objective: { initiative: { organizationId } } },
+      ],
+    },
+  })
+
+  // Check-ins
+  await prisma.checkIn.deleteMany({
+    where: { initiative: { organizationId } },
+  })
+
+  // Objectives
+  await prisma.objective.deleteMany({
+    where: { initiative: { organizationId } },
+  })
+
+  // Initiative owners
+  await prisma.initiativeOwner.deleteMany({
+    where: { initiative: { organizationId } },
+  })
+
+  // Initiatives
+  await prisma.initiative.deleteMany({
+    where: { organizationId },
+  })
+
+  // People
+  await prisma.person.deleteMany({
+    where: { organizationId },
+  })
+
+  // Teams
+  await prisma.team.deleteMany({
+    where: { organizationId },
+  })
+
+  // Job roles
+  await prisma.jobRole.deleteMany({
+    where: { organizationId },
+  })
+
+  // Job levels
+  await prisma.jobLevel.deleteMany({
+    where: { organizationId },
+  })
+
+  // Job domains
+  await prisma.jobDomain.deleteMany({
+    where: { organizationId },
+  })
+
+  // Entity links
+  await prisma.entityLink.deleteMany({
+    where: { organizationId },
+  })
+
+  // Notifications
+  await prisma.notification.deleteMany({
+    where: { organizationId },
+  })
+
+  // Report instances
+  await prisma.reportInstance.deleteMany({
+    where: { organizationId },
+  })
+
+  // Cron job executions
+  await prisma.cronJobExecution.deleteMany({
+    where: { organizationId },
+  })
+
+  // Notes
+  await prisma.note.deleteMany({
+    where: { organizationId },
+  })
+
+  // File attachments
+  await prisma.fileAttachment.deleteMany({
+    where: { organizationId },
+  })
+
+  // Note images
+  await prisma.noteImage.deleteMany({
+    where: { organizationId },
+  })
+
+  // GitHub orgs
+  await prisma.organizationGithubOrg.deleteMany({
+    where: { organizationId },
+  })
+
+  // Tolerance rules
+  await prisma.organizationToleranceRule.deleteMany({
+    where: { organizationId },
+  })
+
+  // Exceptions
+  await prisma.exception.deleteMany({
+    where: { organizationId },
+  })
+
+  // OAuth clients
+  await prisma.oAuthClientMetadata.deleteMany({
+    where: { organizationId },
+  })
+
+  // Onboarding instances
+  await prisma.onboardingInstance.deleteMany({
+    where: { organizationId },
+  })
+
+  // Onboarding templates
+  await prisma.onboardingTemplate.deleteMany({
+    where: { organizationId },
+  })
+
+  // Integrations
+  await prisma.integration.deleteMany({
+    where: { organizationId },
+  })
+
+  // Delete Clerk organization
+  try {
+    await deleteClerkOrganization(clerkOrgId)
+  } catch (error) {
+    console.error('Failed to delete Clerk organization:', error)
+    // Continue with database deletion even if Clerk deletion fails
+  }
+
+  // Finally, delete the organization record
+  await prisma.organization.delete({
+    where: { id: organizationId },
+  })
+
+  revalidatePath('/', 'layout')
+  revalidatePath('/dashboard', 'page')
+  revalidatePath('/organization', 'layout')
 }
 
 // User Settings Actions - Allow users to link themselves to a person
@@ -1776,4 +2155,53 @@ export async function removeGithubOrganization(githubOrgId: string) {
     }
     throw error
   }
+}
+
+/**
+ * Update organization profile (name)
+ * Only admins can update organization profile
+ */
+export async function updateOrganizationProfile(formData: { name: string }) {
+  const user = await getCurrentUser()
+
+  // Check if user is admin or owner
+  if (!isAdminOrOwner(user)) {
+    throw new Error(
+      'Only organization admins or owners can update organization profile'
+    )
+  }
+
+  // Check if user belongs to an organization
+  if (!user.managerOSOrganizationId || !user.clerkOrganizationId) {
+    throw new Error(
+      'User must belong to an organization to update organization profile'
+    )
+  }
+
+  // Validate name
+  const name = formData.name.trim()
+  if (!name) {
+    throw new Error('Organization name cannot be empty')
+  }
+
+  if (name.length > 100) {
+    throw new Error('Organization name must be 100 characters or less')
+  }
+
+  // Update organization name in Clerk
+  try {
+    await updateClerkOrganization(user.clerkOrganizationId, { name })
+  } catch (error) {
+    console.error('Failed to update Clerk organization:', error)
+    throw new Error(
+      error instanceof Error
+        ? error.message
+        : 'Failed to update organization profile'
+    )
+  }
+
+  // Revalidate paths that depend on organization data
+  revalidatePath('/organization/settings')
+  revalidatePath('/dashboard')
+  revalidatePath('/', 'layout')
 }
