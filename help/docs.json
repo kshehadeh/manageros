@@ -27,7 +27,8 @@
             "pages": [
               "people-teams/people",
               "people-teams/teams",
-              "people-teams/job-roles"
+              "people-teams/job-roles",
+              "people-teams/onboarding"
             ]
           },
           {
@@ -39,7 +40,11 @@
           },
           {
             "group": "Tasks & Projects",
-            "pages": ["tasks-projects/tasks", "tasks-projects/initiatives"]
+            "pages": [
+              "tasks-projects/tasks",
+              "tasks-projects/initiatives",
+              "tasks-projects/notes"
+            ]
           },
           {
             "group": "Feedback & Development",

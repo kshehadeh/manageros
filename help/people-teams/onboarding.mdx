@@ -1,0 +1,311 @@
+---
+id: onboarding
+title: Onboarding
+category: People & Teams
+---
+
+<Info>
+  The onboarding system helps new team members become effective quickly through structured, trackable onboarding journeys. Create reusable templates, assign them to people, and track progress as they complete each step.
+</Info>
+
+Onboarding in mpath provides a systematic way to ensure new team members get up to speed with the right information, connections, and context. Instead of ad-hoc onboarding, you can create templates once and use them for many people.
+
+## Overview
+
+The onboarding system consists of:
+
+<CardGroup cols={2}>
+<Card title="Templates" icon="file-text">
+  Reusable definitions of onboarding steps. Create once, use for many people.
+</Card>
+
+<Card title="Instances" icon="clipboard-check">
+  Live onboarding assigned to specific people. Tracks their progress through the template.
+</Card>
+
+<Card title="Phases" icon="layers">
+  Organized groupings of items (Day 1, Week 1, etc.) that structure the onboarding journey.
+</Card>
+
+<Card title="Items" icon="check-square">
+  Individual steps within phases—tasks, readings, meetings, checkpoints, and expectations.
+</Card>
+</CardGroup>
+
+## Key Concepts
+
+<AccordionGroup>
+<Accordion title="Onboarding Templates">
+
+A **template** is a reusable definition of what onboarding looks like for a role or team:
+
+- **Name and description** - Identifies the template and its purpose
+- **Scope** - Optional team and/or job role association
+- **Phases** - Ordered groupings of items (e.g., "Day 1", "Week 1", "First 30 Days")
+- **Active status** - Whether the template can be assigned
+
+Templates can be marked as the **organization default**, which makes them the fallback when no specific team/role match is found.
+
+<Tip>
+  Create templates that match your actual onboarding process. Start with your most common onboarding path, then create variations for different roles or teams.
+</Tip>
+
+</Accordion>
+
+<Accordion title="Onboarding Phases">
+
+**Phases** organize items into logical time periods:
+
+- Each phase has a name (e.g., "Day 1", "Week 1", "First 30 Days")
+- Phases are ordered—items in earlier phases should be completed before later ones
+- Phases help onboardees understand what to focus on when
+
+<Info>
+  Phases are organizational tools. They don't enforce timing—you can complete items from multiple phases if needed. But they help structure the journey.
+</Info>
+
+</Accordion>
+
+<Accordion title="Onboarding Items">
+
+**Items** are the atomic steps within a phase. Each item has a type:
+
+| Type | Description | Who Completes |
+|------|-------------|---------------|
+| **TASK** | Something to do | Onboardee |
+| **READING** | Documentation to read | Onboardee |
+| **MEETING** | Conversation to have | Either |
+| **CHECKPOINT** | Verification point | Manager/Mentor only |
+| **EXPECTATION** | Context to understand | Onboardee |
+
+Items can:
+- Link to external URLs for resources and documentation
+- Be marked as **required** or **optional**
+- Have descriptions explaining what needs to be done
+
+</Accordion>
+
+<Accordion title="Onboarding Instances">
+
+An **instance** is a live onboarding assigned to a specific person:
+
+- References a template
+- Tracks the onboardee (person)
+- Has an assigned manager and optional mentor
+- Contains progress records for each item
+
+Each person can have one active instance per template. This prevents duplicate onboarding assignments.
+
+</Accordion>
+
+<Accordion title="Progress Tracking">
+
+Each item in an instance has a **progress status**:
+
+- **PENDING** - Not yet started
+- **IN_PROGRESS** - Work has begun
+- **COMPLETED** - Marked as done
+- **SKIPPED** - Deliberately skipped (optional items)
+- **BLOCKED** - Cannot proceed
+
+Progress is tracked at the item, phase, and instance level, giving you visibility into where people are in their onboarding journey.
+
+</Accordion>
+</AccordionGroup>
+
+## How to Use Onboarding
+
+<Steps>
+<Step title="Create an onboarding template (Admin)">
+
+1. Navigate to **Organization Settings → Onboarding Templates**
+2. Click **New Template**
+3. Enter template name and description
+4. Optionally select a team and/or job role to scope the template
+5. Mark as organization default if it should be the fallback
+6. Add phases with descriptive names (e.g., "Day 1", "Week 1")
+7. Add items to each phase:
+   - Set the item type (TASK, READING, MEETING, CHECKPOINT, EXPECTATION)
+   - Mark as required or optional
+   - Add description and optional links
+8. Save the template
+
+<Tip>
+  Start with your most common onboarding path. You can always create variations later for different roles or teams.
+</Tip>
+
+</Step>
+
+<Step title="Assign onboarding to a person (Manager)">
+
+1. Go to a person's profile page
+2. Open the actions dropdown
+3. Click **Start Onboarding**
+4. Select a template (smart suggestions based on team/role)
+5. Optionally assign a mentor
+6. Confirm to create the onboarding instance
+
+<Info>
+  The system will suggest templates based on the person's team and job role. If no match is found, it will suggest the organization default template.
+</Info>
+
+</Step>
+
+<Step title="Complete onboarding items (Onboardee)">
+
+1. View the onboarding widget on your dashboard
+2. Click to access the full onboarding page at `/onboarding`
+3. Expand each phase to see items
+4. Complete items by clicking the checkmark
+5. Add optional notes to completed items
+6. For CHECKPOINT items, wait for manager/mentor approval
+
+<Check>
+  Most items can be completed by the onboardee. CHECKPOINT items require manager or mentor confirmation to ensure quality.
+</Check>
+
+</Step>
+
+<Step title="Manager oversight">
+
+Managers can track their team's onboarding progress:
+
+1. View team onboarding status in the dashboard section
+2. Navigate to **Onboarding → Overview** for detailed view
+3. See progress percentages and stuck indicators
+4. Complete checkpoint items for team members
+5. Mark onboarding as complete when all required items are done
+
+<Warning>
+  Only managers and admins can mark onboarding as complete. This ensures quality and prevents premature completion.
+</Warning>
+
+</Step>
+</Steps>
+
+## Completion Logic
+
+### Item Completion
+
+- Most items can be completed by the onboardee
+- **CHECKPOINT** items require manager or mentor confirmation
+- Optional items don't block phase/instance completion
+
+### Phase Completion
+
+A phase is complete when all **required** items in that phase are complete.
+
+### Instance Completion
+
+- All phases must be complete
+- Requires explicit completion action by manager or admin
+- Generates completion timestamp
+
+### Why Time is Insufficient
+
+The system uses explicit completion rather than time-based:
+
+- "30 days" doesn't mean readiness
+- Progress varies by individual and role complexity
+- Managers need visibility into actual blockers
+
+## Access Control
+
+| Action | Who Can Do It |
+|--------|---------------|
+| View templates | All org members |
+| Create/edit templates | Admins only |
+| Assign onboarding | Person's manager or Admin |
+| View onboarding instance | Onboardee, Manager, Mentor, Admin |
+| Complete items | Onboardee (or Manager/Mentor for checkpoints) |
+| Complete onboarding | Manager or Admin |
+| View oversight | Managers see their team; Admins see all |
+
+## Best Practices
+
+<Tip>
+  **Start simple, iterate**  
+  Create a basic template first, then refine it based on feedback. You can always add more phases and items later.
+</Tip>
+
+- **Use phases to structure the journey**  
+  Group related items together (Day 1, Week 1, etc.) to help onboardees understand what to focus on when.
+
+- **Mix item types**  
+  Combine tasks, readings, meetings, and checkpoints to create a well-rounded onboarding experience.
+
+- **Link to external resources**  
+  Use item links to point to documentation, videos, or other resources that support onboarding.
+
+- **Mark checkpoints for critical items**  
+  Use CHECKPOINT items for things that must be verified (e.g., "Completed security training", "Met with manager").
+
+- **Review and update templates regularly**  
+  As your organization evolves, update templates to reflect current processes and expectations.
+
+- **Use optional items for nice-to-haves**  
+  Mark items as optional if they're helpful but not required. This keeps the focus on what matters most.
+
+## Real-World Examples
+
+<AccordionGroup>
+<Accordion title="Engineering Onboarding Template">
+
+**Phase: Day 1**
+- TASK: Set up development environment
+- READING: Engineering handbook
+- MEETING: Meet with manager
+- CHECKPOINT: Manager verifies environment setup
+
+**Phase: Week 1**
+- TASK: Complete first code review
+- READING: Code review guidelines
+- MEETING: Pair programming session
+- EXPECTATION: Understand team's development workflow
+
+**Phase: First 30 Days**
+- TASK: Ship first feature
+- MEETING: 30-day check-in with manager
+- CHECKPOINT: Manager confirms readiness
+
+</Accordion>
+
+<Accordion title="Sales Onboarding Template">
+
+**Phase: Day 1**
+- READING: Product documentation
+- MEETING: Meet with sales manager
+- EXPECTATION: Understand sales process
+
+**Phase: Week 1**
+- TASK: Complete CRM training
+- MEETING: Shadow a sales call
+- CHECKPOINT: Manager verifies CRM access
+
+**Phase: First 30 Days**
+- TASK: Close first deal
+- MEETING: 30-day check-in
+- CHECKPOINT: Manager confirms readiness
+
+</Accordion>
+</AccordionGroup>
+
+## Related Topics
+
+<CardGroup cols={2}>
+<Card title="People" icon="users" href="/people-teams/people">
+  Learn how to manage people and their profiles in your organization.
+</Card>
+
+<Card title="Teams" icon="users-round" href="/people-teams/teams">
+  Understand how teams are structured and organized.
+</Card>
+
+<Card title="Job Roles" icon="briefcase" href="/people-teams/job-roles">
+  See how job roles can scope onboarding templates.
+</Card>
+
+<Card title="One-on-Ones" icon="user-check" href="/meetings-communication/one-on-ones">
+  Use 1:1s to discuss onboarding progress and answer questions.
+</Card>
+</CardGroup>
