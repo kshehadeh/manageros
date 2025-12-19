@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.45.0](/compare/v1.44.0...v1.45.0) (2025-12-19)
+
+### Features
+
+- update documentation and enhance team and initiative features c90e002
+
 # [1.44.0](/compare/v1.43.0...v1.44.0) (2025-12-19)
 
 ### Features
