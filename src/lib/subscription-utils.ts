@@ -11,6 +11,11 @@ export interface OrganizationSubscription {
   subscriptionPlanName: string | null
   subscriptionStatus: string | null
   limits: PlanLimits | null | undefined
+  billingPeriod: 'month' | 'annual' | null
+  periodStart: number | null
+  periodEnd: number | null
+  nextPaymentDate: number | null
+  nextPaymentAmount: number | null
 }
 
 export async function getOrganizationLimits(
@@ -94,12 +99,28 @@ export async function getOrganizationSubscription(
           return acc
         }, {} as PlanLimits) || null
 
+      // Get next payment date - use subscription level nextPayment, or fallback to periodEnd
+      // For recurring subscriptions, the next payment typically occurs at periodEnd
+      const nextPaymentDate =
+        clerkSubscription.nextPayment?.date || firstItem.periodEnd || null
+
+      // Get next payment amount
+      const nextPaymentAmount =
+        typeof clerkSubscription.nextPayment?.amount === 'object'
+          ? clerkSubscription.nextPayment.amount.amount
+          : firstItem.nextPayment?.amount || null
+
       return {
         billingUserId: billingUserId,
         subscriptionPlanId: plan?.id || null,
         subscriptionPlanName: plan?.name || null,
         subscriptionStatus: clerkSubscription.status || 'active',
         limits: planLimits,
+        billingPeriod: firstItem.planPeriod || null,
+        periodStart: firstItem.periodStart || null,
+        periodEnd: firstItem.periodEnd || null,
+        nextPaymentDate,
+        nextPaymentAmount,
       }
     }
 

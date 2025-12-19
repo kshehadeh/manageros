@@ -11,6 +11,7 @@
 - **Responsive UI** - Tailwind CSS with dark theme and modern design
 - **Help System** - Centralized contextual help with markdown-rendered modals (January 2025)
 - **Reports Documentation** - Comprehensive help documentation for reports system with individual report guides (January 2025)
+- **Custom Billing Flow** - Custom subscription management using Clerk's billing hooks (usePlans, useCheckout, PaymentElement) for plan selection and checkout instead of default Clerk UI (December 2025)
 
 ### People Management
 
@@ -249,6 +250,19 @@
 
 _Last Updated: December 2025_
 _Next Review: January 2026_
+
+### Updates on 2025-12-19
+
+- **Custom Billing Flow** (Completed):
+  - Created custom subscription management using Clerk's experimental billing hooks
+  - Implemented `/organization/plans` page with plan comparison grid and monthly/annual toggle
+  - Implemented `/organization/checkout` page with full payment flow using PaymentElement
+  - Created reusable components: `PlanCard`, `PlansPageClient`, `CheckoutPageClient`
+  - Uses Clerk hooks: `usePlans()`, `useCheckout()`, `usePaymentElement()`, `usePaymentMethods()`
+  - Added "Manage Plan" button to organization settings' Plan Limits section
+  - Supports existing payment methods selection and new card entry
+  - Proper loading states and error handling throughout
+  - Admin-only access with organization scoping
 
 ### Updates on 2025-12-16
 
