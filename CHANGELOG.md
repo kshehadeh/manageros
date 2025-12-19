@@ -1,5 +1,14 @@
 # Changelog
 
+# [1.43.0](/compare/v1.42.0...v1.43.0) (2025-12-19)
+
+### Features
+
+- add organization leave and delete functionality 8c662d4
+- enhance organization members management and role handling 93a0554
+- implement custom billing flow and enhance subscription management a3e1ccd
+- streamline organization settings and enhance UI components b56442c
+
 # [1.42.0](/compare/v1.41.0...v1.42.0) (2025-12-17)
 
 ### Features
