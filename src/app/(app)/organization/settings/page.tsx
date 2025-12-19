@@ -13,6 +13,7 @@ import {
 } from '@/lib/auth-utils'
 import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 import { OrganizationProfileButton } from '@/components/organization/organization-profile-button'
+import { OrganizationSettingsActionsDropdown } from '@/components/organization/organization-settings-actions-dropdown'
 import { OrganizationSectionServer } from '@/components/settings/organization-section-server'
 import { OrganizationSectionSkeleton } from '@/components/settings/organization-section-skeleton'
 import {
@@ -60,7 +61,14 @@ export default async function OrganizationSettingsPage() {
         <PageHeader
           title='Organization Settings'
           subtitle='Manage your organization settings and members'
-          actions={<OrganizationProfileButton />}
+          actions={
+            <div className='flex items-center gap-2'>
+              <OrganizationSettingsActionsDropdown
+                organizationName={organization.name}
+              />
+              <OrganizationProfileButton />
+            </div>
+          }
         />
 
         <PageContent>
