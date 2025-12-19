@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.44.0](/compare/v1.43.0...v1.44.0) (2025-12-19)
+
+### Features
+
+- enhance organization creation and loading components 1393946
+
 # [1.43.0](/compare/v1.42.0...v1.43.0) (2025-12-19)
 
 ### Features
