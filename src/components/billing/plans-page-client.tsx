@@ -15,6 +15,7 @@ import { PlanCard, type PlanFeature } from './plan-card'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { PageSection } from '@/components/ui/page-section'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -211,160 +212,174 @@ function PlansContent({
     currentPlanName.toLowerCase() === 'free'
 
   return (
-    <div className='space-y-lg'>
+    <div className='space-y-xl'>
       {/* Current plan info */}
       {currentPlanName && (
-        <div className='rounded-2xl border bg-card p-lg'>
-          <div className='flex flex-col gap-sm'>
-            <p className='text-sm text-muted-foreground'>
-              You are currently on the{' '}
-              {!isFreePlan && (
-                <Sparkles className='inline h-4 w-4 text-primary mr-1' />
-              )}
-              <span
-                className={
-                  isFreePlan
-                    ? 'font-semibold text-foreground'
-                    : 'font-semibold bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent'
-                }
-              >
-                {currentPlanName}
-              </span>{' '}
-              plan.
-            </p>
+        <PageSection className='my-2xl'>
+          <div className='rounded-2xl border bg-card p-lg'>
+            <div className='flex flex-col gap-sm'>
+              <p className='text-sm text-muted-foreground'>
+                You are currently on the{' '}
+                {!isFreePlan && (
+                  <Sparkles className='inline h-4 w-4 text-primary mr-1' />
+                )}
+                <span
+                  className={
+                    isFreePlan
+                      ? 'font-semibold text-foreground'
+                      : 'font-semibold bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent'
+                  }
+                >
+                  {currentPlanName}
+                </span>{' '}
+                plan.
+              </p>
 
-            {/* Billing details for paid plans */}
-            {!isFreePlan && (currentBillingPeriod || nextPaymentDate) && (
-              <div className='flex flex-wrap gap-md pt-sm text-xs text-muted-foreground'>
-                {currentBillingPeriod && (
-                  <div className='flex items-center gap-1'>
-                    <Calendar className='h-3.5 w-3.5' />
-                    <span>
-                      Billed{' '}
-                      <span className='font-medium text-foreground'>
-                        {currentBillingPeriod === 'annual'
-                          ? 'annually'
-                          : 'monthly'}
+              {/* Billing details for paid plans */}
+              {!isFreePlan && (currentBillingPeriod || nextPaymentDate) && (
+                <div className='flex flex-wrap gap-md pt-sm text-xs text-muted-foreground'>
+                  {currentBillingPeriod && (
+                    <div className='flex items-center gap-1'>
+                      <Calendar className='h-3.5 w-3.5' />
+                      <span>
+                        Billed{' '}
+                        <span className='font-medium text-foreground'>
+                          {currentBillingPeriod === 'annual'
+                            ? 'annually'
+                            : 'monthly'}
+                        </span>
                       </span>
-                    </span>
-                  </div>
-                )}
-                {nextPaymentDate && (
-                  <div className='flex items-center gap-1'>
-                    <CreditCard className='h-3.5 w-3.5' />
-                    <span>
-                      Next payment{' '}
-                      <span className='font-medium text-foreground'>
-                        {formatDate(nextPaymentDate)}
+                    </div>
+                  )}
+                  {nextPaymentDate && (
+                    <div className='flex items-center gap-1'>
+                      <CreditCard className='h-3.5 w-3.5' />
+                      <span>
+                        Next payment{' '}
+                        <span className='font-medium text-foreground'>
+                          {formatDate(nextPaymentDate)}
+                        </span>
                       </span>
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        </PageSection>
       )}
 
       {/* Billing period toggle */}
-      <div className='flex items-center justify-center gap-md'>
-        <Label
-          htmlFor='billing-period'
-          className={billingPeriod === 'month' ? 'font-semibold' : ''}
-        >
-          Monthly
-        </Label>
-        <Switch
-          id='billing-period'
-          checked={billingPeriod === 'annual'}
-          onCheckedChange={checked =>
-            setBillingPeriod(checked ? 'annual' : 'month')
-          }
-        />
-        <Label
-          htmlFor='billing-period'
-          className={billingPeriod === 'annual' ? 'font-semibold' : ''}
-        >
-          Annual <span className='text-xs text-primary'>(Save up to 20%)</span>
-        </Label>
-      </div>
+      <PageSection className='my-2xl'>
+        <div className='flex items-center justify-center gap-md'>
+          <Label
+            htmlFor='billing-period'
+            className={billingPeriod === 'month' ? 'font-semibold' : ''}
+          >
+            Monthly
+          </Label>
+          <Switch
+            id='billing-period'
+            checked={billingPeriod === 'annual'}
+            onCheckedChange={checked =>
+              setBillingPeriod(checked ? 'annual' : 'month')
+            }
+          />
+          <Label
+            htmlFor='billing-period'
+            className={billingPeriod === 'annual' ? 'font-semibold' : ''}
+          >
+            Annual{' '}
+            <span className='text-xs text-primary'>(Save up to 20%)</span>
+          </Label>
+        </div>
+      </PageSection>
 
       {/* Error state */}
       {error && (
-        <Alert variant='destructive'>
-          <AlertCircle className='h-4 w-4' />
-          <AlertDescription>
-            Failed to load plans. Please try again later.
-          </AlertDescription>
-        </Alert>
+        <PageSection className='my-2xl'>
+          <Alert variant='destructive'>
+            <AlertCircle className='h-4 w-4' />
+            <AlertDescription>
+              Failed to load plans. Please try again later.
+            </AlertDescription>
+          </Alert>
+        </PageSection>
       )}
 
       {/* Loading state */}
       {isLoading && (
-        <div className='flex items-center justify-center py-3xl'>
-          <Loader2 className='h-8 w-8 animate-spin text-muted-foreground' />
-        </div>
+        <PageSection className='my-2xl'>
+          <div className='flex items-center justify-center py-3xl'>
+            <Loader2 className='h-8 w-8 animate-spin text-muted-foreground' />
+          </div>
+        </PageSection>
       )}
 
       {/* Plans grid */}
       {!isLoading && plans && plans.length > 0 && (
-        <div className='grid gap-lg md:grid-cols-2 lg:grid-cols-3'>
-          {plans.map(plan => {
-            // Extract features from plan
-            const features: PlanFeature[] =
-              plan.features?.map(f => ({
-                id: f.id,
-                name: f.name,
-                description: f.description,
-              })) ?? []
+        <PageSection className='my-2xl'>
+          <div className='flex w-full flex-wrap justify-center gap-lg'>
+            {plans.map(plan => {
+              // Extract features from plan
+              const features: PlanFeature[] =
+                plan.features?.map(f => ({
+                  id: f.id,
+                  name: f.name,
+                  description: f.description,
+                })) ?? []
 
-            // Determine if this is the current plan
-            const isCurrentPlan = plan.id === currentPlanId
+              // Determine if this is the current plan
+              const isCurrentPlan = plan.id === currentPlanId
 
-            // Determine if this is a free plan
-            const isFree = !plan.hasBaseFee
+              // Determine if this is a free plan
+              const isFree = !plan.hasBaseFee
 
-            // Get pricing info from fee object
-            const monthlyPrice = plan.fee?.amountFormatted ?? '0'
-            const annualMonthlyPrice = plan.annualMonthlyFee?.amountFormatted
-            const currencySymbol = plan.fee?.currencySymbol ?? '$'
+              // Get pricing info from fee object
+              const monthlyPrice = plan.fee?.amountFormatted ?? '0'
+              const annualMonthlyPrice = plan.annualMonthlyFee?.amountFormatted
+              const currencySymbol = plan.fee?.currencySymbol ?? '$'
 
-            return (
-              <PlanCard
-                key={plan.id}
-                id={plan.id}
-                name={plan.name}
-                description={plan.description}
-                price={isFree ? 'Free' : `${currencySymbol}${monthlyPrice}`}
-                priceSubtext={isFree ? '' : '/month'}
-                annualPrice={
-                  isFree || !annualMonthlyPrice
-                    ? undefined
-                    : `${currencySymbol}${annualMonthlyPrice}`
-                }
-                annualPriceSubtext={isFree ? undefined : '/month'}
-                features={features}
-                isCurrentPlan={isCurrentPlan}
-                isFree={isFree}
-                billingPeriod={billingPeriod}
-                onSelect={(planId, period) =>
-                  handlePlanSelect(planId, period, isFree, plan.name)
-                }
-                isLoading={isNavigating}
-                disabled={isNavigating}
-              />
-            )
-          })}
-        </div>
+              return (
+                <div key={plan.id}>
+                  <PlanCard
+                    id={plan.id}
+                    name={plan.name}
+                    description={plan.description}
+                    price={isFree ? 'Free' : `${currencySymbol}${monthlyPrice}`}
+                    priceSubtext={isFree ? '' : '/month'}
+                    annualPrice={
+                      isFree || !annualMonthlyPrice
+                        ? undefined
+                        : `${currencySymbol}${annualMonthlyPrice}`
+                    }
+                    annualPriceSubtext={isFree ? undefined : '/month'}
+                    features={features}
+                    isCurrentPlan={isCurrentPlan}
+                    isFree={isFree}
+                    billingPeriod={billingPeriod}
+                    onSelect={(planId, period) =>
+                      handlePlanSelect(planId, period, isFree, plan.name)
+                    }
+                    isLoading={isNavigating}
+                    disabled={isNavigating}
+                  />
+                </div>
+              )
+            })}
+          </div>
+        </PageSection>
       )}
 
       {/* No plans available */}
       {!isLoading && plans && plans.length === 0 && (
-        <div className='text-center py-3xl'>
-          <p className='text-muted-foreground'>
-            No subscription plans are currently available.
-          </p>
-        </div>
+        <PageSection className='my-2xl'>
+          <div className='text-center py-3xl'>
+            <p className='text-muted-foreground'>
+              No subscription plans are currently available.
+            </p>
+          </div>
+        </PageSection>
       )}
 
       {/* Downgrade Confirmation Modal */}

@@ -17,7 +17,7 @@ export function PageSection({
   return (
     <div className={cn('flex flex-col', className)}>
       {header}
-      <div className={cn('flex-1', hasHeader && 'pt-xs')}>{children}</div>
+      <div className={cn('flex-1', hasHeader && 'pt-md')}>{children}</div>
     </div>
   )
 }

@@ -15,12 +15,21 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { DeleteOrganizationDialog } from '@/components/organization/delete-organization-dialog'
+import { EditOrganizationProfileModal } from '@/components/organization/edit-organization-profile-modal'
 import {
   leaveOrganization,
   deleteOrganization,
 } from '@/lib/actions/organization'
 import { toast } from 'sonner'
-import { LogOut, Trash2, ChevronDown, Pickaxe } from 'lucide-react'
+import {
+  LogOut,
+  Trash2,
+  ChevronDown,
+  Pickaxe,
+  Edit,
+  CreditCard,
+  Package,
+} from 'lucide-react'
 
 interface OrganizationSettingsActionsDropdownProps {
   organizationName: string
@@ -29,6 +38,7 @@ interface OrganizationSettingsActionsDropdownProps {
 export function OrganizationSettingsActionsDropdown({
   organizationName,
 }: OrganizationSettingsActionsDropdownProps) {
+  const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false)
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isLeaving, setIsLeaving] = useState(false)
@@ -90,6 +100,39 @@ export function OrganizationSettingsActionsDropdown({
             <button
               type='button'
               onClick={() => {
+                setIsEditProfileModalOpen(true)
+                close()
+              }}
+              className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors w-full text-left'
+            >
+              <Edit className='w-4 h-4' />
+              Edit Organization
+            </button>
+            <button
+              type='button'
+              onClick={() => {
+                router.push('/organization/plans')
+                close()
+              }}
+              className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors w-full text-left'
+            >
+              <Package className='w-4 h-4' />
+              Manage Plan
+            </button>
+            <button
+              type='button'
+              onClick={() => {
+                router.push('/organization/billing')
+                close()
+              }}
+              className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors w-full text-left'
+            >
+              <CreditCard className='w-4 h-4' />
+              Organization Billing
+            </button>
+            <button
+              type='button'
+              onClick={() => {
                 setIsLeaveDialogOpen(true)
                 close()
               }}
@@ -135,6 +178,12 @@ export function OrganizationSettingsActionsDropdown({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <EditOrganizationProfileModal
+        open={isEditProfileModalOpen}
+        onOpenChange={setIsEditProfileModalOpen}
+        currentName={organizationName}
+      />
 
       <DeleteOrganizationDialog
         isOpen={isDeleteDialogOpen}

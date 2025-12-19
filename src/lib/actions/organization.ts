@@ -19,6 +19,7 @@ import {
   getClerkOrganizationMembersCount,
   isBillingUser as isBillingUserFromClerk,
   deleteClerkOrganization,
+  updateClerkOrganization,
 } from '../clerk'
 import {
   mapManagerOSRoleToClerkRole,
@@ -2154,4 +2155,53 @@ export async function removeGithubOrganization(githubOrgId: string) {
     }
     throw error
   }
+}
+
+/**
+ * Update organization profile (name)
+ * Only admins can update organization profile
+ */
+export async function updateOrganizationProfile(formData: { name: string }) {
+  const user = await getCurrentUser()
+
+  // Check if user is admin or owner
+  if (!isAdminOrOwner(user)) {
+    throw new Error(
+      'Only organization admins or owners can update organization profile'
+    )
+  }
+
+  // Check if user belongs to an organization
+  if (!user.managerOSOrganizationId || !user.clerkOrganizationId) {
+    throw new Error(
+      'User must belong to an organization to update organization profile'
+    )
+  }
+
+  // Validate name
+  const name = formData.name.trim()
+  if (!name) {
+    throw new Error('Organization name cannot be empty')
+  }
+
+  if (name.length > 100) {
+    throw new Error('Organization name must be 100 characters or less')
+  }
+
+  // Update organization name in Clerk
+  try {
+    await updateClerkOrganization(user.clerkOrganizationId, { name })
+  } catch (error) {
+    console.error('Failed to update Clerk organization:', error)
+    throw new Error(
+      error instanceof Error
+        ? error.message
+        : 'Failed to update organization profile'
+    )
+  }
+
+  // Revalidate paths that depend on organization data
+  revalidatePath('/organization/settings')
+  revalidatePath('/dashboard')
+  revalidatePath('/', 'layout')
 }

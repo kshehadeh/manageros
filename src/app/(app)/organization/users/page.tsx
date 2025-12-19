@@ -4,7 +4,6 @@ import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 import { requireAdmin } from '@/lib/auth-utils'
 import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
-import { OrganizationProfileButton } from '@/components/organization/organization-profile-button'
 import { Users } from 'lucide-react'
 
 export default async function OrganizationUsersPage() {
@@ -25,7 +24,6 @@ export default async function OrganizationUsersPage() {
           title='Manage Users'
           titleIcon={Users}
           subtitle='Manage organization members and invitations'
-          actions={<OrganizationProfileButton />}
         />
 
         <PageContent>

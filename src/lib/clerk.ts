@@ -244,6 +244,41 @@ export async function createClerkOrganization(
 }
 
 /**
+ * Update a Clerk organization
+ */
+export async function updateClerkOrganization(
+  clerkOrgId: string,
+  data: { name?: string; slug?: string }
+): Promise<ClerkOrganization> {
+  if (!process.env.CLERK_SECRET_KEY) {
+    throw new Error(
+      'CLERK_SECRET_KEY environment variable is not set. Cannot update Clerk organization.'
+    )
+  }
+
+  const response = await fetch(
+    `${CLERK_API_BASE}/organizations/${clerkOrgId}`,
+    {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    }
+  )
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(
+      `Failed to update Clerk organization: ${response.status} ${errorText}`
+    )
+  }
+
+  return (await response.json()) as ClerkOrganization
+}
+
+/**
  * Delete a Clerk organization
  */
 export async function deleteClerkOrganization(
