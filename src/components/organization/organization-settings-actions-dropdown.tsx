@@ -29,6 +29,7 @@ import {
   Edit,
   CreditCard,
   Package,
+  Building2,
 } from 'lucide-react'
 
 interface OrganizationSettingsActionsDropdownProps {
@@ -129,6 +130,17 @@ export function OrganizationSettingsActionsDropdown({
             >
               <CreditCard className='w-4 h-4' />
               Organization Billing
+            </button>
+            <button
+              type='button'
+              onClick={() => {
+                router.push('/organization/new')
+                close()
+              }}
+              className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors w-full text-left'
+            >
+              <Building2 className='w-4 h-4' />
+              Create Organization
             </button>
             <button
               type='button'

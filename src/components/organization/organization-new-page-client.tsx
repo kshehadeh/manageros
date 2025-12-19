@@ -93,22 +93,35 @@ export function OrganizationNewPageClient({
     </Alert>
   ) : null
 
-  // Scenario 1: User is already a member of organizations - show switcher
+  // Scenario 1: User is already a member of organizations - show switcher and create form
   if (hasMemberships && !hasInvitations) {
     return (
       <>
         {RemovedAlert}
-        <PageSection
-          header={
-            <SectionHeader
-              icon={Users}
-              title='Select Your Organization'
-              description='Choose which organization you want to work with.'
-            />
-          }
-        >
-          <OrganizationSelector organizations={organizations} />
-        </PageSection>
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+          <PageSection
+            header={
+              <SectionHeader
+                icon={Users}
+                title='Your Organizations'
+                description='Select which organization you want to work with.'
+              />
+            }
+          >
+            <OrganizationSelector organizations={organizations} />
+          </PageSection>
+          <PageSection
+            header={
+              <SectionHeader
+                icon={Building2}
+                title='Create New Organization'
+                description='Create a new organization to get started.'
+              />
+            }
+          >
+            <CreateOrganizationForm />
+          </PageSection>
+        </div>
       </>
     )
   }

@@ -14,11 +14,6 @@ export default async function OrganizationNewPage() {
     redirect('/auth/signin')
   }
 
-  // If user already has an organization, redirect to dashboard
-  if (user.managerOSOrganizationId) {
-    redirect('/dashboard')
-  }
-
   // Check if user was removed from an organization (via cookie set by getCurrentUser)
   const wasRemoved = await wasRemovedFromOrganization()
 
