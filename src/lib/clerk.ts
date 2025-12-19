@@ -42,7 +42,13 @@ export interface ClerkOrganization {
 
 export interface ClerkOrganizationMembership {
   id: string
-  organization_id: string
+  organization_id?: string // May be nested in organization object
+  organization?: {
+    id: string
+    name: string
+    slug: string
+    [key: string]: unknown
+  }
   public_user_data: {
     user_id: string
     first_name: string | null
@@ -330,14 +336,26 @@ export async function getClerkOrganizationMembership(
     }
 
     const data = (await response.json()) as {
-      data: ClerkOrganizationMembership[]
+      data: Array<
+        ClerkOrganizationMembership & { organization?: { id: string } }
+      >
     }
 
-    return (
-      data.data.find(
-        membership => membership.public_user_data.user_id === clerkUserId
-      ) || null
+    const membership = data.data.find(
+      m => m.public_user_data.user_id === clerkUserId
     )
+
+    if (!membership) {
+      return null
+    }
+
+    // Normalize the membership to ensure organization_id is set
+    const normalizedMembership: ClerkOrganizationMembership = {
+      ...membership,
+      organization_id:
+        membership.organization_id || membership.organization?.id || clerkOrgId,
+    }
+    return normalizedMembership
   } catch {
     return null
   }
@@ -440,7 +458,7 @@ export async function removeUserFromClerkOrganization(
     )
   }
 
-  // First, get the membership ID
+  // Verify membership exists first (for better error messages)
   const membership = await getClerkOrganizationMembership(
     clerkOrgId,
     clerkUserId
@@ -451,15 +469,17 @@ export async function removeUserFromClerkOrganization(
     return
   }
 
-  const response = await fetch(
-    `${CLERK_API_BASE}/organizations/${clerkOrgId}/memberships/${membership.id}`,
-    {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
-      },
-    }
-  )
+  // Use REST API - Clerk API v1 endpoint format
+  // DELETE /organizations/{organization_id}/memberships/{user_id}
+  // Note: Clerk API uses user_id in the path, NOT membership_id
+  const url = `${CLERK_API_BASE}/organizations/${clerkOrgId}/memberships/${clerkUserId}`
+
+  const response = await fetch(url, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
+    },
+  })
 
   if (!response.ok && response.status !== 404) {
     const errorText = await response.text()
@@ -483,18 +503,51 @@ export async function updateUserRoleInClerkOrganization(
     )
   }
 
-  // First, get the membership ID
+  // Validate inputs
+  if (!clerkOrgId || !clerkUserId) {
+    throw new Error(
+      `Missing required parameters: clerkOrgId=${clerkOrgId}, clerkUserId=${clerkUserId}`
+    )
+  }
+
+  // First, get the membership to ensure it exists and get the membership ID
   const membership = await getClerkOrganizationMembership(
     clerkOrgId,
     clerkUserId
   )
 
   if (!membership) {
-    throw new Error('User is not a member of the Clerk organization')
+    // Log detailed information for debugging
+    console.error('Membership not found:', {
+      clerkOrgId,
+      clerkUserId,
+      organizationId: clerkOrgId,
+      userId: clerkUserId,
+    })
+    throw new Error(
+      `User ${clerkUserId} is not a member of Clerk organization ${clerkOrgId}`
+    )
   }
 
+  // Extract organization ID from membership (handle both flat and nested formats)
+  const membershipOrgId =
+    membership.organization_id || membership.organization?.id || clerkOrgId
+
+  // Log membership details for debugging
+  console.log('Updating membership:', {
+    membershipId: membership.id,
+    organizationId: membershipOrgId,
+    userId: clerkUserId,
+    currentRole: membership.role,
+    newRole: role,
+    url: `${CLERK_API_BASE}/organizations/${membershipOrgId}/memberships/${clerkUserId}`,
+  })
+
+  // Use REST API - Clerk API v1 endpoint format
+  // PATCH /organizations/{organization_id}/memberships/{user_id}
+  // Note: Clerk API uses user_id in the path, NOT membership_id
   const response = await fetch(
-    `${CLERK_API_BASE}/organizations/${clerkOrgId}/memberships/${membership.id}`,
+    `${CLERK_API_BASE}/organizations/${membershipOrgId}/memberships/${clerkUserId}`,
     {
       method: 'PATCH',
       headers: {
@@ -509,12 +562,36 @@ export async function updateUserRoleInClerkOrganization(
 
   if (!response.ok) {
     const errorText = await response.text()
+    // Provide more detailed error information
+    console.error('Clerk API error details:', {
+      status: response.status,
+      statusText: response.statusText,
+      errorText,
+      clerkOrgId,
+      clerkUserId,
+      membershipId: membership.id,
+      membershipObject: membership,
+      url: `${CLERK_API_BASE}/organizations/${membershipOrgId}/memberships/${clerkUserId}`,
+      membershipOrgId,
+      requestBody: { role },
+    })
     throw new Error(
       `Failed to update user role in Clerk organization: ${response.status} ${errorText}`
     )
   }
 
-  return (await response.json()) as ClerkOrganizationMembership
+  const updatedMembership =
+    (await response.json()) as ClerkOrganizationMembership
+
+  // Verify the membership was updated correctly
+  if (updatedMembership.role !== role) {
+    console.warn('Role update may not have been applied correctly', {
+      expected: role,
+      actual: updatedMembership.role,
+    })
+  }
+
+  return updatedMembership
 }
 
 /**

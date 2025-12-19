@@ -32,6 +32,9 @@ export default async function OrganizationUsersPage() {
           <OrganizationMembersDataTable
             settingsId='organization-members'
             currentUserId={user.managerOSUserId || ''}
+            currentUserRole={
+              (user.role?.toUpperCase() as 'ADMIN' | 'OWNER' | 'USER') || 'USER'
+            }
           />
         </PageContent>
       </PageContainer>

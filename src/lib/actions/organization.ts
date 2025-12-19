@@ -1121,6 +1121,16 @@ export async function updateUserRole(
 
   // Update user's role in Clerk organization
   try {
+    // Log the values being passed for debugging
+    console.log('Updating user role:', {
+      organizationClerkId: organization.clerkOrganizationId,
+      targetUserClerkId: targetUser.clerkUserId,
+      targetUserId: targetUser.id,
+      targetUserEmail: targetUser.email,
+      newRole,
+      clerkRole: await mapManagerOSRoleToClerkRole(newRole),
+    })
+
     await updateUserRoleInClerkOrganization(
       organization.clerkOrganizationId,
       targetUser.clerkUserId,
@@ -1128,7 +1138,12 @@ export async function updateUserRole(
     )
   } catch (error) {
     console.error('Failed to update user role in Clerk organization:', error)
-    throw new Error('Failed to update user role')
+    // Include more context in the error
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error'
+    throw new Error(
+      `Failed to update user role: ${errorMessage}. User: ${targetUser.email} (${targetUser.clerkUserId}), Org: ${organization.clerkOrganizationId}`
+    )
   }
 
   // Sync updated user data to Clerk (role changed)
@@ -1365,7 +1380,11 @@ export async function removeUserFromOrganization(userId: string) {
   }
 
   // Determine current role from Clerk membership
-  const isBillingUser = organization.billingUserId === userId
+  // Check if user is billing user from Clerk (more accurate than database field)
+  const isBillingUser = await isBillingUserFromClerk(
+    organization.clerkOrganizationId,
+    targetUser.clerkUserId
+  )
   const currentRole = await mapClerkRoleToManagerOSRole(
     targetClerkMembership.role,
     isBillingUser
@@ -1417,8 +1436,7 @@ export async function removeUserFromOrganization(userId: string) {
       organization.clerkOrganizationId,
       targetUser.clerkUserId
     )
-  } catch (error) {
-    console.error('Failed to remove user from Clerk organization:', error)
+  } catch {
     throw new Error('Failed to remove user from organization')
   }
 
