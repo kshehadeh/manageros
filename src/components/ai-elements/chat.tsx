@@ -75,12 +75,15 @@ export const Chat: FC<ChatProps> = ({
 
       message.parts?.forEach(part => {
         const partType = part.type as string
+
+        // Check tool parts for action results
         if (partType.startsWith('tool-')) {
           const toolPart = part as ToolUIPart
           const toolOutput: ToolUIPart['output'] | undefined =
             toolPart.output as ToolUIPart['output'] | undefined
 
-          if (toolOutput && toolPart.state === 'output-available') {
+          // Check if tool has output (regardless of state - output might be available even if state isn't 'output-available')
+          if (toolOutput !== undefined && toolOutput !== null) {
             const actionResult = parseActionResponse(toolOutput)
 
             if (
@@ -88,7 +91,7 @@ export const Chat: FC<ChatProps> = ({
               actionResult.actionType === 'navigate' &&
               actionResult.url
             ) {
-              // Ensure URL is relative before navigating
+              // URL should already be normalized by parseActionResponse, but ensure it's relative
               const relativeUrl = ensureRelativeUrl(actionResult.url)
 
               // Create a unique key for this action to avoid duplicate navigations
@@ -99,6 +102,33 @@ export const Chat: FC<ChatProps> = ({
                 // Navigate automatically with relative URL
                 router.push(relativeUrl)
               }
+            }
+          }
+        }
+
+        // Also check text parts for URLs that might be action results
+        // (in case AI includes URLs in its text response)
+        if (part.type === 'text') {
+          const textPart = part as unknown as { text: string }
+          const text = textPart.text || ''
+
+          // Look for URLs in the text that match our action patterns
+          // Pattern: URLs like /oneonones/new, /people/new, etc.
+          const actionUrlPattern = /\/(?:oneonones|people)\/new[^\s)]*/g
+          const matches = text.match(actionUrlPattern)
+
+          if (matches && matches.length > 0) {
+            // Use the first match (most likely the action URL)
+            const url = matches[0]
+            const relativeUrl = ensureRelativeUrl(url)
+
+            // Create a unique key for this action to avoid duplicate navigations
+            const actionKey = `${message.id}-${relativeUrl}`
+
+            if (!processedActionRef.current.has(actionKey)) {
+              processedActionRef.current.add(actionKey)
+              // Navigate automatically with relative URL
+              router.push(relativeUrl)
             }
           }
         }
@@ -270,7 +300,9 @@ function getToolDisplayName(toolName: string): string {
     jira: 'Search Jira',
     dateTime: 'Get Date/Time',
     personLookup: 'Lookup Person',
+    teamLookup: 'Lookup Team',
     createOneOnOneAction: 'Create 1:1 Meeting',
+    createPersonAction: 'Create Person',
   }
   return names[toolName] || toolName
 }

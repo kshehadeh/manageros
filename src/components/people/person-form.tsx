@@ -33,6 +33,7 @@ interface PersonFormProps {
   }>
   initialManagerId?: string
   initialTeamId?: string
+  initialName?: string
   person?: {
     id: string
     name: string
@@ -76,6 +77,7 @@ export function PersonForm({
   jobRoles,
   initialManagerId,
   initialTeamId,
+  initialName,
   person,
   jiraAccount,
   githubAccount,
@@ -87,7 +89,7 @@ export function PersonForm({
   }
 
   const [formData, setFormData] = useState<PersonFormData>({
-    name: person?.name || '',
+    name: person?.name || initialName || '',
     email: person?.email || '',
     role: person?.role || '',
     status: (person?.status as PersonFormData['status']) || 'active',

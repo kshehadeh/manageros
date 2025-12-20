@@ -12,6 +12,8 @@ export { personLookupTool } from './tools/person-lookup-tool'
 export { jobRoleLookupTool } from './tools/job-role-lookup-tool'
 export { feedbackTool } from './tools/feedback-tool'
 export { createOneOnOneActionTool } from './tools/create-oneonone-action-tool'
+export { teamLookupTool } from './tools/team-lookup-tool'
+export { createPersonActionTool } from './tools/create-person-action-tool'
 
 // Import tools for the aiTools object
 import { peopleTool } from './tools/people-tool'
@@ -27,6 +29,8 @@ import { personLookupTool } from './tools/person-lookup-tool'
 import { jobRoleLookupTool } from './tools/job-role-lookup-tool'
 import { feedbackTool } from './tools/feedback-tool'
 import { createOneOnOneActionTool } from './tools/create-oneonone-action-tool'
+import { teamLookupTool } from './tools/team-lookup-tool'
+import { createPersonActionTool } from './tools/create-person-action-tool'
 import { toolIds } from './tool-ids'
 
 // Export all tools as a single object for easy access
@@ -41,7 +45,9 @@ export const aiTools = {
   [toolIds.jira]: jiraTool,
   [toolIds.dateTime]: dateTimeTool,
   [toolIds.personLookup]: personLookupTool,
+  [toolIds.teamLookup]: teamLookupTool,
   [toolIds.jobRoleLookup]: jobRoleLookupTool,
   [toolIds.feedback]: feedbackTool,
   [toolIds.createOneOnOneAction]: createOneOnOneActionTool,
+  [toolIds.createPersonAction]: createPersonActionTool,
 }

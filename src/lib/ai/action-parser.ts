@@ -1,6 +1,31 @@
 import type { ActionResult } from './tools/create-oneonone-action-tool'
 
 /**
+ * Ensures a URL is relative by removing any protocol/host/domain
+ * and ensuring it starts with a forward slash
+ */
+function ensureRelativeUrl(url: string): string {
+  try {
+    // If it's already a relative URL (starts with /), return as-is
+    if (url.startsWith('/')) {
+      return url
+    }
+
+    // If it's an absolute URL, extract the pathname
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      const urlObj = new URL(url)
+      return urlObj.pathname + urlObj.search
+    }
+
+    // If it doesn't start with /, add it
+    return url.startsWith('/') ? url : `/${url}`
+  } catch {
+    // If URL parsing fails, ensure it starts with /
+    return url.startsWith('/') ? url : `/${url}`
+  }
+}
+
+/**
  * Check if a value is an ActionResult
  */
 export function isActionResult(value: unknown): value is ActionResult {
@@ -37,9 +62,10 @@ export function parseActionResponse(toolOutput: unknown): ActionResult | null {
 
     // Check if it has actionType and message (basic ActionResult structure)
     if (typeof obj.actionType === 'string' && typeof obj.message === 'string') {
+      const url = typeof obj.url === 'string' ? obj.url : undefined
       return {
         actionType: obj.actionType as ActionResult['actionType'],
-        url: typeof obj.url === 'string' ? obj.url : undefined,
+        url: url ? ensureRelativeUrl(url) : undefined,
         message: obj.message,
         metadata:
           typeof obj.metadata === 'object' && obj.metadata !== null
