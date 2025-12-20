@@ -44,7 +44,7 @@ export interface ActionResult {
 
 export const createOneOnOneActionTool = {
   description:
-    'Create a 1:1 meeting action. Use this when the user wants to create or schedule a one-on-one meeting. The tool will identify the current user and the other participant, parse any date/time information, and return a navigation URL to the 1:1 creation form with all fields pre-filled. IMPORTANT: The URL returned will always be a relative path (starting with /) - do NOT convert it to an absolute URL or add any hostname/domain.',
+    'Create a 1:1 meeting action. Use this when the user wants to create or schedule a one-on-one meeting. The tool will identify the current user and the other participant, parse any date/time information, and return a navigation URL to the 1:1 creation form with all fields pre-filled. The tool returns an ActionResult object with a "url" field containing the relative path (e.g., "/oneonones/new?participant1Id=...&participant2Id=..."). CRITICAL: The URL in the tool output is the ONLY source of truth - do NOT generate any additional links in text responses. The URL is already a relative path (starting with /) and should be used exactly as returned - do NOT convert it to an absolute URL or add any hostname/domain.',
   parameters: z.object({
     otherParticipantName: z
       .string()

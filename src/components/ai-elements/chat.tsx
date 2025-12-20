@@ -73,26 +73,73 @@ export const Chat: FC<ChatProps> = ({
     messages.forEach(message => {
       if (message.role !== 'assistant') return
 
+      // First, check for action tools - these are the authoritative source
+      let hasActionTool = false
+      let actionToolUrl: string | null = null
+
       message.parts?.forEach(part => {
         const partType = part.type as string
 
-        // Check tool parts for action results
+        // Check tool parts for action results (authoritative source)
         if (partType.startsWith('tool-')) {
           const toolPart = part as ToolUIPart
+          const toolName = partType.replace('tool-', '')
           const toolOutput: ToolUIPart['output'] | undefined =
             toolPart.output as ToolUIPart['output'] | undefined
 
-          // Check if tool has output (regardless of state - output might be available even if state isn't 'output-available')
-          if (toolOutput !== undefined && toolOutput !== null) {
-            const actionResult = parseActionResponse(toolOutput)
+          // Check if this is an action tool
+          if (
+            toolName === 'createOneOnOneAction' ||
+            toolName === 'createPersonAction'
+          ) {
+            hasActionTool = true
 
-            if (
-              actionResult &&
-              actionResult.actionType === 'navigate' &&
-              actionResult.url
-            ) {
-              // URL should already be normalized by parseActionResponse, but ensure it's relative
-              const relativeUrl = ensureRelativeUrl(actionResult.url)
+            // Check if tool has output (regardless of state - output might be available even if state isn't 'output-available')
+            if (toolOutput !== undefined && toolOutput !== null) {
+              const actionResult = parseActionResponse(toolOutput)
+
+              if (
+                actionResult &&
+                actionResult.actionType === 'navigate' &&
+                actionResult.url
+              ) {
+                // URL should already be normalized by parseActionResponse, but ensure it's relative
+                actionToolUrl = ensureRelativeUrl(actionResult.url)
+              }
+            }
+          }
+        }
+      })
+
+      // If we found an action tool with a URL, use it (ignore any URLs in text)
+      if (hasActionTool && actionToolUrl) {
+        const actionKey = `${message.id}-${actionToolUrl}`
+
+        if (!processedActionRef.current.has(actionKey)) {
+          processedActionRef.current.add(actionKey)
+          // Navigate automatically with relative URL from tool output
+          router.push(actionToolUrl)
+        }
+        return // Don't check text parts if we have an action tool URL
+      }
+
+      // Fallback: check text parts for URLs only if no action tool was found
+      // (This should rarely be needed if the AI follows instructions)
+      if (!hasActionTool) {
+        message.parts?.forEach(part => {
+          if (part.type === 'text') {
+            const textPart = part as unknown as { text: string }
+            const text = textPart.text || ''
+
+            // Look for URLs in the text that match our action patterns
+            // Pattern: URLs like /oneonones/new, /people/new, etc.
+            const actionUrlPattern = /\/(?:oneonones|people)\/new[^\s)]*/g
+            const matches = text.match(actionUrlPattern)
+
+            if (matches && matches.length > 0) {
+              // Use the first match (most likely the action URL)
+              const url = matches[0]
+              const relativeUrl = ensureRelativeUrl(url)
 
               // Create a unique key for this action to avoid duplicate navigations
               const actionKey = `${message.id}-${relativeUrl}`
@@ -104,35 +151,8 @@ export const Chat: FC<ChatProps> = ({
               }
             }
           }
-        }
-
-        // Also check text parts for URLs that might be action results
-        // (in case AI includes URLs in its text response)
-        if (part.type === 'text') {
-          const textPart = part as unknown as { text: string }
-          const text = textPart.text || ''
-
-          // Look for URLs in the text that match our action patterns
-          // Pattern: URLs like /oneonones/new, /people/new, etc.
-          const actionUrlPattern = /\/(?:oneonones|people)\/new[^\s)]*/g
-          const matches = text.match(actionUrlPattern)
-
-          if (matches && matches.length > 0) {
-            // Use the first match (most likely the action URL)
-            const url = matches[0]
-            const relativeUrl = ensureRelativeUrl(url)
-
-            // Create a unique key for this action to avoid duplicate navigations
-            const actionKey = `${message.id}-${relativeUrl}`
-
-            if (!processedActionRef.current.has(actionKey)) {
-              processedActionRef.current.add(actionKey)
-              // Navigate automatically with relative URL
-              router.push(relativeUrl)
-            }
-          }
-        }
-      })
+        })
+      }
     })
   }, [messages, router])
 
