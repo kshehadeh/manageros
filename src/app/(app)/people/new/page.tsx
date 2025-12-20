@@ -6,6 +6,7 @@ interface NewPersonPageProps {
   searchParams: Promise<{
     managerId?: string
     teamId?: string
+    name?: string
   }>
 }
 
@@ -22,6 +23,7 @@ export default async function NewPersonPage({
   const params = await searchParams
   const managerId = params.managerId
   const teamId = params.teamId
+  const name = params.name
 
   const [jobRoles] = await Promise.all([getJobRolesForSelection()])
 
@@ -35,6 +37,7 @@ export default async function NewPersonPage({
         jobRoles={jobRoles}
         initialManagerId={managerId}
         initialTeamId={teamId}
+        initialName={name}
       />
     </div>
   )
