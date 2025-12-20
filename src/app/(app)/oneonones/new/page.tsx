@@ -8,6 +8,7 @@ interface NewOneOnOnePageProps {
   searchParams: Promise<{
     participant1Id?: string
     participant2Id?: string
+    scheduledAt?: string
     managerId?: string // Legacy support
     reportId?: string // Legacy support
   }>
@@ -18,7 +19,7 @@ export default async function NewOneOnOnePage({
 }: NewOneOnOnePageProps) {
   const user = await getCurrentUser()
 
-  const { participant1Id, participant2Id } = await searchParams
+  const { participant1Id, participant2Id, scheduledAt } = await searchParams
   if (!(await getActionPermission(user, 'oneonone.create'))) {
     redirect('/dashboard')
   }
@@ -35,6 +36,7 @@ export default async function NewOneOnOnePage({
       <OneOnOneForm
         preFilledManagerId={participant1Id}
         preFilledReportId={participant2Id}
+        preFilledScheduledAt={scheduledAt}
       />
     </div>
   )

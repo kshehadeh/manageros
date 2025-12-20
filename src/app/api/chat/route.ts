@@ -12,6 +12,7 @@ import { dateTimeTool } from '@/lib/ai/tools/date-time-tool'
 import { personLookupTool } from '@/lib/ai/tools/person-lookup-tool'
 import { jobRoleLookupTool } from '@/lib/ai/tools/job-role-lookup-tool'
 import { feedbackTool } from '@/lib/ai/tools/feedback-tool'
+import { createOneOnOneActionTool } from '@/lib/ai/tools/create-oneonone-action-tool'
 import { toolIds } from '../../../lib/ai/tool-ids'
 import { getCurrentUser } from '@/lib/auth-utils'
 
@@ -97,6 +98,11 @@ export async function POST(req: Request) {
           inputSchema: feedbackTool.parameters,
           execute: feedbackTool.execute,
         },
+        [toolIds.createOneOnOneAction]: {
+          description: createOneOnOneActionTool.description,
+          inputSchema: createOneOnOneActionTool.parameters,
+          execute: createOneOnOneActionTool.execute,
+        },
       },
       stopWhen: stepCountIs(10),
       system: `You are an AI assistant for mpath, a management platform for engineering managers. You help users understand and interact with their organizational data including people, initiatives, tasks, meetings, and teams.
@@ -112,6 +118,9 @@ Key guidelines:
 - When asked about the CURRENT USER'S OWN Jira activity (e.g., "my tickets", "my Jira issues"), call the jira tool WITHOUT providing a personId - it will automatically use the current user's linked account.
 - When asked about ANOTHER PERSON'S Jira activity, FIRST use personLookup to get their person ID, then use the jira tool with that personId parameter.
 - Do NOT include author:, involves:, or other username qualifiers in GitHub/Jira queries - the tools will automatically add the correct username.
+- When a user wants to CREATE or SCHEDULE a 1:1 meeting (e.g., "create a 1:1 with Alex", "schedule a meeting with John tomorrow at 2pm"), use the createOneOnOneAction tool. Extract the other participant's name and any date/time information from the user's prompt. The tool will handle identifying the current user and the other participant, parse date/time if provided, and return a navigation URL to the pre-filled form.
+- Extract date/time information from the user's prompt when creating 1:1s (e.g., "tomorrow at 2pm", "next Monday", "December 25th at 3pm") and pass it as the scheduledAt parameter - it can be natural language as the tool will parse it.
+- CRITICAL: When the createOneOnOneAction tool returns a URL, it will be a relative path (e.g., "/oneonones/new?..."). NEVER convert this to an absolute URL or add any hostname/domain. Always use the URL exactly as returned by the tool - it is already in the correct format for navigation.
 - After using tools, ALWAYS provide a clear, helpful response to the user based on the tool results
 - Provide clear, concise responses with relevant details
 - When listing entities, include key information like status, dates, and relationships but prefer to use conversational language instead of bulleted list unless the user specifically asks for a list.

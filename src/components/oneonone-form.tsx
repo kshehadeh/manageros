@@ -30,6 +30,7 @@ interface OneOnOneData {
 interface OneOnOneFormProps {
   preFilledManagerId?: string
   preFilledReportId?: string
+  preFilledScheduledAt?: string
   existingOneOnOne?: OneOnOneData
   onCancel?: () => void
 }
@@ -37,6 +38,7 @@ interface OneOnOneFormProps {
 export function OneOnOneForm({
   preFilledManagerId,
   preFilledReportId,
+  preFilledScheduledAt,
   existingOneOnOne,
   onCancel,
 }: OneOnOneFormProps) {
@@ -44,14 +46,27 @@ export function OneOnOneForm({
   // Use the people cache to get people data
   const { people, isLoading, error } = usePeopleCache()
 
+  // Determine initial scheduledAt value
+  const getInitialScheduledAt = (): string => {
+    if (existingOneOnOne?.scheduledAt) {
+      return existingOneOnOne.scheduledAt instanceof Date
+        ? existingOneOnOne.scheduledAt.toISOString()
+        : existingOneOnOne.scheduledAt
+    }
+    if (preFilledScheduledAt) {
+      // Validate the pre-filled date
+      const date = new Date(preFilledScheduledAt)
+      if (!isNaN(date.getTime())) {
+        return date.toISOString()
+      }
+    }
+    return new Date().toISOString()
+  }
+
   const [formData, setFormData] = useState<OneOnOneFormData>({
     participant1Id: existingOneOnOne?.managerId || preFilledManagerId || '',
     participant2Id: existingOneOnOne?.reportId || preFilledReportId || '',
-    scheduledAt: existingOneOnOne?.scheduledAt
-      ? existingOneOnOne.scheduledAt instanceof Date
-        ? existingOneOnOne.scheduledAt.toISOString()
-        : existingOneOnOne.scheduledAt
-      : new Date().toISOString(),
+    scheduledAt: getInitialScheduledAt(),
     notes: existingOneOnOne?.notes || '',
   })
 

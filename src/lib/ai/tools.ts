@@ -11,6 +11,7 @@ export { dateTimeTool } from './tools/date-time-tool'
 export { personLookupTool } from './tools/person-lookup-tool'
 export { jobRoleLookupTool } from './tools/job-role-lookup-tool'
 export { feedbackTool } from './tools/feedback-tool'
+export { createOneOnOneActionTool } from './tools/create-oneonone-action-tool'
 
 // Import tools for the aiTools object
 import { peopleTool } from './tools/people-tool'
@@ -25,6 +26,7 @@ import { dateTimeTool } from './tools/date-time-tool'
 import { personLookupTool } from './tools/person-lookup-tool'
 import { jobRoleLookupTool } from './tools/job-role-lookup-tool'
 import { feedbackTool } from './tools/feedback-tool'
+import { createOneOnOneActionTool } from './tools/create-oneonone-action-tool'
 import { toolIds } from './tool-ids'
 
 // Export all tools as a single object for easy access
@@ -41,4 +43,5 @@ export const aiTools = {
   [toolIds.personLookup]: personLookupTool,
   [toolIds.jobRoleLookup]: jobRoleLookupTool,
   [toolIds.feedback]: feedbackTool,
+  [toolIds.createOneOnOneAction]: createOneOnOneActionTool,
 }

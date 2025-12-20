@@ -11,6 +11,7 @@ export const toolIds = {
   personLookup: 'personLookup',
   jobRoleLookup: 'jobRoleLookup',
   feedback: 'feedback',
+  createOneOnOneAction: 'createOneOnOneAction',
 } as const
 
 export type ToolId = keyof typeof toolIds

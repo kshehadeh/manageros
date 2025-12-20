@@ -3,6 +3,8 @@
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import type { FC } from 'react'
+import { useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { Bot } from 'lucide-react'
 
 import {
@@ -19,9 +21,36 @@ import {
   PromptInputSubmit,
 } from './prompt-input'
 import { Button } from '@/components/ui/button'
-import { Tool, ToolHeader } from './tool'
+import { Tool, ToolHeader, ToolContent, ToolOutput } from './tool'
 import { Loader } from './loader'
 import { DEFAULT_EXAMPLE_QUESTIONS } from '@/lib/ai/constants'
+import { parseActionResponse } from '@/lib/ai/action-parser'
+import type { ToolUIPart } from 'ai'
+
+/**
+ * Ensures a URL is relative by removing any protocol/host/domain
+ * and ensuring it starts with a forward slash
+ */
+function ensureRelativeUrl(url: string): string {
+  try {
+    // If it's already a relative URL (starts with /), return as-is
+    if (url.startsWith('/')) {
+      return url
+    }
+
+    // If it's an absolute URL, extract the pathname
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      const urlObj = new URL(url)
+      return urlObj.pathname + urlObj.search
+    }
+
+    // If it doesn't start with /, add it
+    return url.startsWith('/') ? url : `/${url}`
+  } catch {
+    // If URL parsing fails, ensure it starts with /
+    return url.startsWith('/') ? url : `/${url}`
+  }
+}
 
 interface ChatProps {
   exampleQuestions?: string[]
@@ -30,12 +59,52 @@ interface ChatProps {
 export const Chat: FC<ChatProps> = ({
   exampleQuestions = DEFAULT_EXAMPLE_QUESTIONS,
 }) => {
+  const router = useRouter()
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({ api: '/api/chat' }),
   })
 
   const isLoading = status === 'streaming' || status === 'submitted'
   const isEmpty = messages.length === 0
+  const processedActionRef = useRef<Set<string>>(new Set())
+
+  // Auto-navigate when action results are detected
+  useEffect(() => {
+    messages.forEach(message => {
+      if (message.role !== 'assistant') return
+
+      message.parts?.forEach(part => {
+        const partType = part.type as string
+        if (partType.startsWith('tool-')) {
+          const toolPart = part as ToolUIPart
+          const toolOutput: ToolUIPart['output'] | undefined =
+            toolPart.output as ToolUIPart['output'] | undefined
+
+          if (toolOutput && toolPart.state === 'output-available') {
+            const actionResult = parseActionResponse(toolOutput)
+
+            if (
+              actionResult &&
+              actionResult.actionType === 'navigate' &&
+              actionResult.url
+            ) {
+              // Ensure URL is relative before navigating
+              const relativeUrl = ensureRelativeUrl(actionResult.url)
+
+              // Create a unique key for this action to avoid duplicate navigations
+              const actionKey = `${message.id}-${relativeUrl}`
+
+              if (!processedActionRef.current.has(actionKey)) {
+                processedActionRef.current.add(actionKey)
+                // Navigate automatically with relative URL
+                router.push(relativeUrl)
+              }
+            }
+          }
+        }
+      })
+    })
+  }, [messages, router])
 
   const handleSuggestionClick = (suggestion: string) => {
     sendMessage({ text: suggestion })
@@ -101,7 +170,7 @@ export const Chat: FC<ChatProps> = ({
                       // Handle tool parts (type starts with 'tool-')
                       const partType = part.type as string
                       if (partType.startsWith('tool-')) {
-                        const toolPart = part as unknown as { state: string }
+                        const toolPart = part as ToolUIPart
                         const toolName = partType.replace('tool-', '')
 
                         // Map state to allowed values
@@ -120,6 +189,13 @@ export const Chat: FC<ChatProps> = ({
                         const mappedState =
                           stateMap[toolPart.state] || 'input-available'
 
+                        // Check if tool output contains an action result
+                        const toolOutput: ToolUIPart['output'] | undefined =
+                          toolPart.output as ToolUIPart['output'] | undefined
+                        const actionResult = toolOutput
+                          ? parseActionResponse(toolOutput)
+                          : null
+
                         return (
                           <Tool key={index}>
                             <ToolHeader
@@ -127,6 +203,21 @@ export const Chat: FC<ChatProps> = ({
                               type={partType as `tool-${string}`}
                               state={mappedState}
                             />
+                            {toolOutput !== undefined &&
+                              toolOutput !== null && (
+                                <ToolContent>
+                                  <ToolOutput
+                                    output={toolOutput}
+                                    errorText={toolPart.errorText}
+                                  />
+                                  {actionResult &&
+                                    actionResult.actionType === 'navigate' && (
+                                      <div className='p-4 border-t text-sm text-muted-foreground'>
+                                        <p>Navigating to the form...</p>
+                                      </div>
+                                    )}
+                                </ToolContent>
+                              )}
                           </Tool>
                         )
                       }
@@ -179,6 +270,7 @@ function getToolDisplayName(toolName: string): string {
     jira: 'Search Jira',
     dateTime: 'Get Date/Time',
     personLookup: 'Lookup Person',
+    createOneOnOneAction: 'Create 1:1 Meeting',
   }
   return names[toolName] || toolName
 }
