@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.46.0](/compare/v1.45.0...v1.46.0) (2025-12-20)
+
+### Features
+
+- add createOneOnOne action tool and enhance scheduling features 3408568
+- enhance person creation and chat navigation features 11107d6
+
 # [1.45.0](/compare/v1.44.0...v1.45.0) (2025-12-19)
 
 ### Features
