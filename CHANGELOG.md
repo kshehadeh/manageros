@@ -1,5 +1,15 @@
 # Changelog
 
+# [1.48.0](/compare/v1.47.0...v1.48.0) (2025-12-21)
+
+### Bug Fixes
+
+- update tooltip implementation in PeopleBreakdownCharts for better data handling d2e80f7
+
+### Features
+
+- add recharts and update dependencies for improved data visualization 7e76cab
+
 # [1.47.0](/compare/v1.46.0...v1.47.0) (2025-12-21)
 
 ### Features
