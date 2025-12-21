@@ -62,9 +62,17 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
 
     // Focus the input when sidebar opens (either via keyboard or otherwise)
     const timeoutId = setTimeout(() => {
-      const composerInput = document.querySelector(
-        '[aria-label="Message input"]'
-      ) as HTMLTextAreaElement
+      // Try multiple selectors to find the prompt textarea
+      const composerInput =
+        (document.querySelector(
+          'textarea[aria-label="Message input"]'
+        ) as HTMLTextAreaElement) ||
+        (document.querySelector(
+          'textarea[name="message"]'
+        ) as HTMLTextAreaElement) ||
+        (document.querySelector(
+          '[data-slot="input-group-control"]'
+        ) as HTMLTextAreaElement)
 
       if (composerInput) {
         // Only focus if not already focused and if not disabled
@@ -74,6 +82,8 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
           composerInput.offsetParent !== null // Check if element is visible
         ) {
           composerInput.focus()
+          // Scroll into view if needed
+          composerInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
         }
       }
 
@@ -81,7 +91,7 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
       if (openedViaKeyboard) {
         setOpenedViaKeyboard(false)
       }
-    }, 150) // Slightly longer delay to ensure DOM is ready
+    }, 200) // Slightly longer delay to ensure DOM is ready and sidebar is rendered
 
     return () => clearTimeout(timeoutId)
   }, [isOpen, openedViaKeyboard, setOpenedViaKeyboard])

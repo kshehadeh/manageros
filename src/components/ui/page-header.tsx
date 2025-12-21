@@ -48,7 +48,7 @@ export function PageHeader({
                 {title && (
                   <div className='flex items-start gap-md'>
                     <h1
-                      className={`page-title ${geistMono.className} m-0 leading-tight`}
+                      className={`page-title ${geistMono.className} m-0 leading-tight flex flex-nowrap`}
                     >
                       {typeof title === 'string' ? (
                         <>
