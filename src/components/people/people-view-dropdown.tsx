@@ -3,9 +3,17 @@
 import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 import { ActionDropdown } from '@/components/common/action-dropdown'
-import { Workflow, ChevronDown, Eye } from 'lucide-react'
+import { Workflow, ChevronDown, Eye, LayoutDashboard, List } from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import { cn } from '@/lib/utils'
 
 export function PeopleViewDropdown() {
+  const pathname = usePathname()
+
+  const isDashboard = pathname === '/people'
+  const isList = pathname === '/people/list'
+  const isChart = pathname === '/people/chart'
+
   return (
     <ActionDropdown
       trigger={({ toggle }) => (
@@ -24,8 +32,33 @@ export function PeopleViewDropdown() {
       {({ close }) => (
         <div className='py-1'>
           <Link
+            href='/people'
+            className={cn(
+              'flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors',
+              isDashboard && 'bg-accent'
+            )}
+            onClick={close}
+          >
+            <LayoutDashboard className='w-4 h-4' />
+            Dashboard
+          </Link>
+          <Link
+            href='/people/list'
+            className={cn(
+              'flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors',
+              isList && 'bg-accent'
+            )}
+            onClick={close}
+          >
+            <List className='w-4 h-4' />
+            List
+          </Link>
+          <Link
             href='/people/chart'
-            className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+            className={cn(
+              'flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors',
+              isChart && 'bg-accent'
+            )}
             onClick={close}
           >
             <Workflow className='w-4 h-4' />
