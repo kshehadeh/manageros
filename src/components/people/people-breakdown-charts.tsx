@@ -2,7 +2,14 @@
 'use client'
 
 import { WidgetCard } from '@/components/people/widget-card'
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  type TooltipProps,
+} from 'recharts'
 import type { PeopleStats } from '@/lib/actions/people-stats'
 
 /**
@@ -122,19 +129,14 @@ export function PeopleBreakdownCharts({ stats }: PeopleBreakdownChartsProps) {
   }
 
   // Custom tooltip for charts
-  const CustomTooltip = ({
-    active,
-    payload,
-  }: {
-    active: boolean
-    payload: { name: string; value: number }[]
-  }) => {
-    if (active && payload && payload.length) {
+  const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+    if (active && payload && payload.length && payload[0]) {
+      const data = payload[0]
       return (
         <div className='rounded-md border border-border bg-card text-card-foreground p-2 shadow-md'>
-          <p className='text-xs font-medium'>{payload[0].name}</p>
+          <p className='text-xs font-medium'>{data.name || 'Unknown'}</p>
           <p className='text-xs text-muted-foreground font-mono'>
-            Count: {payload[0].value}
+            Count: {data.value}
           </p>
         </div>
       )
@@ -205,9 +207,7 @@ export function PeopleBreakdownCharts({ stats }: PeopleBreakdownChartsProps) {
                         />
                       ))}
                     </Pie>
-                    <Tooltip
-                      content={<CustomTooltip active={true} payload={[]} />}
-                    />
+                    <Tooltip content={CustomTooltip} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
