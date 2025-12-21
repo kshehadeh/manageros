@@ -3,7 +3,7 @@
 import { useUser } from '@clerk/nextjs'
 import Breadcrumb from './breadcrumb'
 import { ModeToggle } from '@/components/mode-toggle'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, Search } from 'lucide-react'
 import { useMobileMenu } from '@/components/mobile-menu-provider'
 import { useCommandPalette } from '@/components/command-palette/provider'
 import { NotificationBell } from '@/components/notifications/notification-bell'
@@ -13,7 +13,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { cn } from '@/lib/utils'
 import { UserBrief } from '../lib/auth-types'
+import { Button } from './ui/button'
 
 export default function TopBar() {
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useMobileMenu()
@@ -40,7 +42,7 @@ export default function TopBar() {
             )}
           </button>
           {/* Desktop breadcrumb */}
-          <div className='hidden md:block'>
+          <div className='hidden @md:block'>
             <Breadcrumb />
           </div>
         </div>
@@ -49,17 +51,25 @@ export default function TopBar() {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button
+                <Button
+                  variant='secondary'
                   onClick={toggle}
-                  className='flex items-center gap-md px-lg py-md md:px-xl md:py-lg flex-1 md:w-[280px] max-w-[200px] md:max-w-none bg-secondary/50 border rounded-lg hover:bg-secondary/70 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
+                  className={cn(
+                    'flex items-center justify-center gap-sm px-lg py-md',
+                    // Use container queries to respond to main content area width
+                    // When container is narrow (AI sidebar open), show icon + shortcut only
+                    // When container is wider, show text as well
+                    '@md:justify-start'
+                  )}
                 >
-                  <span className='flex-1 text-left text-sm text-muted-foreground truncate'>
+                  <Search className='h-4 w-4 shrink-0 text-muted-foreground' />
+                  <span className='hidden @lg:inline flex-1 text-left text-sm text-muted-foreground truncate'>
                     Search organization
                   </span>
-                  <kbd className='pointer-events-none inline-flex h-5 select-none items-center gap-sm rounded border bg-background px-md font-mono text-xs font-medium text-foreground shadow-sm shrink-0'>
+                  <kbd className='pointer-events-none inline-flex h-5 select-none items-center gap-sm rounded border bg-background px-sm font-mono text-xs font-medium text-foreground shadow-sm shrink-0'>
                     <span className='text-xs'>⌘</span>K
                   </kbd>
-                </button>
+                </Button>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Command Palette (Ctrl/⌘ + K)</p>

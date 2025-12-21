@@ -294,7 +294,10 @@ export const Chat: FC<ChatProps> = ({
       {/* Input area */}
       <div className='p-4 border-t'>
         <PromptInput onSubmit={handleSubmit}>
-          <PromptInputTextarea placeholder='Ask about your organization...' />
+          <PromptInputTextarea
+            placeholder='Ask about your organization...'
+            aria-label='Message input'
+          />
           <PromptInputFooter>
             <div />
             <PromptInputSubmit status={status} />
