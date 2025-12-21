@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.47.0](/compare/v1.46.0...v1.47.0) (2025-12-21)
+
+### Features
+
+- enhance AIChatSidebar and MainContentWrapper for improved user experience 897513c
+- integrate MainContentWrapper and enhance TopBar functionality eea2970
+
 # [1.46.0](/compare/v1.45.0...v1.46.0) (2025-12-20)
 
 ### Features
