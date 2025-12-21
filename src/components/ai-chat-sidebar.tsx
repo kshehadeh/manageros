@@ -100,13 +100,15 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
       {/* Sidebar container */}
       <div
         className={cn(
-          'fixed top-0 h-full bg-card shadow-lg z-[60] flex flex-col',
-          // Mobile: always fullscreen (use inset to ensure full coverage)
-          'inset-x-0 w-screen',
-          // Desktop: sidebar mode unless fullscreen
-          'md:inset-x-auto md:w-96 md:right-0 md:border-l',
-          // Desktop fullscreen mode
-          isFullscreen && 'md:inset-x-0 md:w-full md:border-l-0'
+          'bg-card shadow-lg flex flex-col',
+          // Mobile: fixed overlay (fullscreen)
+          'fixed top-0 h-full inset-x-0 w-screen z-[60]',
+          // Desktop: relative positioning when not fullscreen (pushes content, part of flex flow)
+          !isFullscreen &&
+            'md:relative md:inset-x-auto md:w-96 md:border-l md:shrink-0 md:h-screen md:z-auto',
+          // Desktop fullscreen mode: fixed overlay (overrides relative)
+          isFullscreen &&
+            'md:fixed md:top-0 md:h-full md:inset-x-0 md:w-full md:border-l-0 md:z-[60]'
         )}
       >
         {/* Header */}
