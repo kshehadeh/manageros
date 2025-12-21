@@ -1,13 +1,9 @@
 'use client'
 
-// This component is kept for backward compatibility
-// The dashboard is now shown via PeopleDashboardClient
-// This file can be removed if no longer needed
-
 import { PeopleDataTable } from '@/components/people/data-table'
 import { PageSection } from '@/components/ui/page-section'
 
-export function PeoplePageClient() {
+export function PeopleListClient() {
   return (
     <PageSection className='-mx-3 md:mx-0'>
       <PeopleDataTable enablePagination={true} limit={100} />

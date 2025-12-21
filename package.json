@@ -136,6 +136,7 @@
     "react-markdown": "^10.1.0",
     "react-resizable-panels": "^3.0.6",
     "reactflow": "^11.11.4",
+    "recharts": "^2.15.0",
     "remark-gfm": "^4.0.1",
     "resend": "^6.5.2",
     "shadcn-ui": "^0.9.5",
