@@ -8,6 +8,7 @@ import type { PeopleStats } from '@/lib/actions/people-stats'
 interface PeopleDashboardClientProps {
   stats: PeopleStats | null
   hasLinkedPerson: boolean
+  currentPersonId?: string | null
 }
 
 /**
@@ -18,6 +19,7 @@ interface PeopleDashboardClientProps {
 export function PeopleDashboardClient({
   stats,
   hasLinkedPerson,
+  currentPersonId,
 }: PeopleDashboardClientProps) {
   if (!stats) {
     return (
@@ -33,7 +35,11 @@ export function PeopleDashboardClient({
     <div className='space-y-4'>
       {/* Stats Cards Section */}
       <PageSection>
-        <PeopleStatsCards stats={stats} hasLinkedPerson={hasLinkedPerson} />
+        <PeopleStatsCards
+          stats={stats}
+          hasLinkedPerson={hasLinkedPerson}
+          currentPersonId={currentPersonId}
+        />
       </PageSection>
 
       {/* Charts Section */}

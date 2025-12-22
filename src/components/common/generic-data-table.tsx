@@ -742,12 +742,24 @@ export function GenericDataTable<
               }}
               filterContent={
                 config.filterContent
-                  ? config.filterContent({
-                      settings,
-                      updateFilters,
-                      immutableFilters,
-                    })
-                  : undefined
+                  ? (() => {
+                      const content = config.filterContent({
+                        settings,
+                        updateFilters,
+                        immutableFilters,
+                      })
+                      // Return null explicitly if content is null/undefined/false to properly hide filter section
+                      // This ensures the ViewDropdown can properly detect when there's no filter content
+                      if (
+                        content === null ||
+                        content === undefined ||
+                        content === false
+                      ) {
+                        return null
+                      }
+                      return content
+                    })()
+                  : null
               }
               className='shrink-0 min-w-fit'
             />

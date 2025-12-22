@@ -11,6 +11,7 @@ import { usePeople } from '@/hooks/use-people'
 import { usePeopleTableSettings } from '@/hooks/use-people-table-settings'
 import { deletePerson } from '@/lib/actions/person'
 import type { DataTableConfig } from '@/components/common/generic-data-table'
+import { PeopleFilterContent } from './people-filter-content'
 
 type PeopleFilters = {
   search?: string
@@ -274,4 +275,45 @@ export const peopleDataTableConfig: DataTableConfig<
     { value: 'status', label: 'Status' },
     { value: 'teamName', label: 'Team' },
   ],
+
+  // Filter configuration
+  filterContent: ({ settings, updateFilters, immutableFilters }) => {
+    // Get currentPersonId from immutableFilters if provided
+    // Note: currentPersonId is not part of PeopleFilters, so we access it from the immutableFilters object
+    const currentPersonId = (immutableFilters as Record<string, unknown>)
+      ?.currentPersonId as string | null | undefined
+
+    // If no currentPersonId, return null to hide filter section
+    if (!currentPersonId) {
+      return null
+    }
+
+    return (
+      <PeopleFilterContent
+        settings={settings}
+        updateFilters={updateFilters}
+        currentPersonId={currentPersonId}
+      />
+    )
+  },
+
+  hasActiveFiltersFn: filters => {
+    return !!(
+      (filters.search && filters.search !== '') ||
+      (filters.managerId && filters.managerId !== '') ||
+      (filters.teamId && filters.teamId !== '' && filters.teamId !== 'all') ||
+      (filters.jobRoleId &&
+        filters.jobRoleId !== '' &&
+        filters.jobRoleId !== 'all') ||
+      (filters.status && filters.status !== '' && filters.status !== 'all')
+    )
+  },
+
+  clearFiltersFn: () => ({
+    search: '',
+    managerId: undefined,
+    teamId: undefined,
+    jobRoleId: undefined,
+    status: undefined,
+  }),
 }

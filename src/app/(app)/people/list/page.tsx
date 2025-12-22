@@ -1,5 +1,9 @@
 import { PeopleListClient } from '@/components/people/people-list-client'
-import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
+import {
+  getActionPermission,
+  getCurrentUser,
+  getCurrentUserWithPersonAndOrganization,
+} from '@/lib/auth-utils'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
@@ -12,6 +16,9 @@ export default async function PeopleListPage() {
   const user = await getCurrentUser()
   const canCreatePeople = await getActionPermission(user, 'person.create')
   const canImportPeople = await getActionPermission(user, 'person.import')
+
+  // Get current person ID for filter
+  const { person } = await getCurrentUserWithPersonAndOrganization()
 
   const breadcrumbs = [
     { name: 'Dashboard', href: '/dashboard' },
@@ -38,7 +45,7 @@ export default async function PeopleListPage() {
         />
 
         <PageContent>
-          <PeopleListClient />
+          <PeopleListClient currentPersonId={person?.id} />
         </PageContent>
       </PageContainer>
     </PageBreadcrumbSetter>

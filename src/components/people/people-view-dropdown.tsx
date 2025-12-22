@@ -3,7 +3,14 @@
 import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 import { ActionDropdown } from '@/components/common/action-dropdown'
-import { Workflow, ChevronDown, Eye, LayoutDashboard, List } from 'lucide-react'
+import {
+  Workflow,
+  ChevronDown,
+  Eye,
+  LayoutDashboard,
+  List,
+  UserCheck,
+} from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
@@ -13,6 +20,7 @@ export function PeopleViewDropdown() {
   const isDashboard = pathname === '/people'
   const isList = pathname === '/people/list'
   const isChart = pathname === '/people/chart'
+  const isDirectReports = pathname === '/people/direct-reports'
 
   return (
     <ActionDropdown
@@ -52,6 +60,17 @@ export function PeopleViewDropdown() {
           >
             <List className='w-4 h-4' />
             List
+          </Link>
+          <Link
+            href='/people/direct-reports'
+            className={cn(
+              'flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors',
+              isDirectReports && 'bg-accent'
+            )}
+            onClick={close}
+          >
+            <UserCheck className='w-4 h-4' />
+            Direct Reports
           </Link>
           <Link
             href='/people/chart'

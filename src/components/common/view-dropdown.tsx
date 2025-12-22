@@ -79,7 +79,12 @@ export function ViewDropdown({
   // Check if sections should be shown
   const hasGroupingOptions = groupingOptions && groupingOptions.length > 0
   const hasSortOptions = sortOptions && sortOptions.length > 0
-  const hasFilterContent = filterContent !== null && filterContent !== undefined
+  // Check if filterContent exists and is not null/undefined/false
+  // When a component returns null, it's still a valid ReactNode, so we check for explicit null
+  const hasFilterContent =
+    filterContent !== null &&
+    filterContent !== undefined &&
+    filterContent !== false
 
   // Count active settings (only for available sections)
   const activeCount = [

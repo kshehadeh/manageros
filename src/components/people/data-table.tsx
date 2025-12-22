@@ -16,6 +16,7 @@ interface PeopleDataTableProps {
     managerId?: string
     jobRoleId?: string
     status?: string
+    currentPersonId?: string | null
   }
 }
 
