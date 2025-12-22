@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.49.0](/compare/v1.48.0...v1.49.0) (2025-12-22)
+
+### Features
+
+- enhance PeopleBreakdownCharts with bar chart support 964e90b
+
 # [1.48.0](/compare/v1.47.0...v1.48.0) (2025-12-21)
 
 ### Bug Fixes
