@@ -136,7 +136,7 @@ export function PeopleBreakdownCharts({ stats }: PeopleBreakdownChartsProps) {
     return null
   }
 
-  // Custom tooltip for charts
+  // Custom tooltip for pie charts
   const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
     if (active && payload && payload.length && payload[0]) {
       const data = payload[0]
@@ -145,6 +145,31 @@ export function PeopleBreakdownCharts({ stats }: PeopleBreakdownChartsProps) {
           <p className='text-xs font-medium'>{data.name || 'Unknown'}</p>
           <p className='text-xs text-muted-foreground font-mono'>
             Count: {data.value}
+          </p>
+        </div>
+      )
+    }
+    return null
+  }
+
+  // Custom tooltip for bar chart (team breakdown)
+  const BarChartTooltip = ({
+    active,
+    payload,
+  }: TooltipProps<number, string>) => {
+    if (active && payload && payload.length && payload[0]) {
+      const data = payload[0]
+      // For bar charts, the original data object is in payload.payload
+      // data.name is the dataKey name ("value"), not the team name
+      const originalData =
+        (data.payload as { name?: string; value?: number }) || {}
+      const teamName = originalData.name || 'Unknown'
+      const peopleCount = originalData.value || data.value || 0
+      return (
+        <div className='rounded-md border border-border bg-card text-card-foreground p-2 shadow-md'>
+          <p className='text-xs font-medium font-mono'>{teamName}</p>
+          <p className='text-xs text-muted-foreground font-mono'>
+            {peopleCount} {peopleCount === 1 ? 'person' : 'people'}
           </p>
         </div>
       )
@@ -184,7 +209,7 @@ export function PeopleBreakdownCharts({ stats }: PeopleBreakdownChartsProps) {
                       fontFamily: 'var(--font-family-mono)',
                     }}
                   />
-                  <Tooltip content={CustomTooltip} />
+                  <Tooltip content={BarChartTooltip} />
                   <Bar dataKey='value' fill={chart.colors[0]} />
                 </BarChart>
               </ResponsiveContainer>
