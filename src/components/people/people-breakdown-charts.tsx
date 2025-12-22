@@ -6,6 +6,10 @@ import {
   PieChart,
   Pie,
   Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
   ResponsiveContainer,
   Tooltip,
   type TooltipProps,
@@ -23,6 +27,8 @@ export const CHART_IDS = {
 
 export type ChartId = (typeof CHART_IDS)[keyof typeof CHART_IDS]
 
+type ChartType = 'pie' | 'bar'
+
 interface ChartConfig {
   id: ChartId
   title: string
@@ -30,6 +36,7 @@ interface ChartConfig {
   colors: string[]
   show: boolean
   minWidth?: string
+  chartType?: ChartType
 }
 
 // Color palette for charts
@@ -109,7 +116,8 @@ export function PeopleBreakdownCharts({ stats }: PeopleBreakdownChartsProps) {
       data: teamData,
       colors: CHART_COLORS,
       show: teamData.length > 0,
-      minWidth: '280px',
+      minWidth: '400px', // Wider for bar chart with team names
+      chartType: 'bar',
     },
     {
       id: CHART_IDS.JOB_ROLE_CHART,
@@ -153,90 +161,119 @@ export function PeopleBreakdownCharts({ stats }: PeopleBreakdownChartsProps) {
           minWidth={chart.minWidth}
         >
           {chart.data.length > 0 ? (
-            <div className='flex flex-col md:flex-row gap-3 items-center md:items-start'>
-              <div
-                className='flex-1 w-full md:w-auto'
-                style={{ minWidth: '200px' }}
-              >
-                <ResponsiveContainer width='100%' height={200}>
-                  <PieChart>
-                    <Pie
-                      data={chart.data}
-                      cx='50%'
-                      cy='50%'
-                      labelLine={false}
-                      label={({
-                        cx,
-                        cy,
-                        midAngle,
-                        innerRadius,
-                        outerRadius,
-                        percent,
-                      }) => {
-                        const RADIAN = Math.PI / 180
-                        const radius =
-                          innerRadius + (outerRadius - innerRadius) * 0.5
-                        const x = cx + radius * Math.cos(-midAngle * RADIAN)
-                        const y = cy + radius * Math.sin(-midAngle * RADIAN)
-
-                        return (
-                          <text
-                            x={x}
-                            y={y}
-                            fill='currentColor'
-                            textAnchor={x > cx ? 'start' : 'end'}
-                            dominantBaseline='central'
-                            style={{
-                              fontSize: '11px',
-                              fontFamily: 'var(--font-family-mono)',
-                            }}
-                            className='text-xs font-mono'
-                          >
-                            {`${(percent * 100).toFixed(0)}%`}
-                          </text>
-                        )
-                      }}
-                      outerRadius={70}
-                      fill='#8884d8'
-                      dataKey='value'
-                    >
-                      {chart.data.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={chart.colors[index % chart.colors.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip content={CustomTooltip} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className='flex-shrink-0 w-full md:w-auto'>
-                <div
-                  className='text-xs font-mono'
-                  style={{
-                    fontSize: '11px',
-                    fontFamily: 'var(--font-family-mono)',
-                  }}
+            chart.chartType === 'bar' ? (
+              <ResponsiveContainer width='100%' height={200}>
+                <BarChart
+                  data={chart.data}
+                  layout='vertical'
+                  margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
                 >
-                  {chart.data.map((entry, index) => (
-                    <div
-                      key={index}
-                      className='flex items-center gap-2 mb-2 last:mb-0'
-                    >
-                      <div
-                        className='w-3 h-3 rounded-full flex-shrink-0'
-                        style={{
-                          backgroundColor:
-                            chart.colors[index % chart.colors.length],
+                  <XAxis
+                    type='number'
+                    tick={{
+                      fontSize: 11,
+                      fontFamily: 'var(--font-family-mono)',
+                    }}
+                  />
+                  <YAxis
+                    type='category'
+                    dataKey='name'
+                    width={100}
+                    tick={{
+                      fontSize: 11,
+                      fontFamily: 'var(--font-family-mono)',
+                    }}
+                  />
+                  <Tooltip content={CustomTooltip} />
+                  <Bar dataKey='value' fill={chart.colors[0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className='flex flex-col md:flex-row gap-3 items-center md:items-start'>
+                <div
+                  className='flex-1 w-full md:w-auto'
+                  style={{ minWidth: '200px' }}
+                >
+                  <ResponsiveContainer width='100%' height={200}>
+                    <PieChart>
+                      <Pie
+                        data={chart.data}
+                        cx='50%'
+                        cy='50%'
+                        labelLine={false}
+                        label={({
+                          cx,
+                          cy,
+                          midAngle,
+                          innerRadius,
+                          outerRadius,
+                          percent,
+                        }) => {
+                          const RADIAN = Math.PI / 180
+                          const radius =
+                            innerRadius + (outerRadius - innerRadius) * 0.5
+                          const x = cx + radius * Math.cos(-midAngle * RADIAN)
+                          const y = cy + radius * Math.sin(-midAngle * RADIAN)
+
+                          return (
+                            <text
+                              x={x}
+                              y={y}
+                              fill='currentColor'
+                              textAnchor={x > cx ? 'start' : 'end'}
+                              dominantBaseline='central'
+                              style={{
+                                fontSize: '11px',
+                                fontFamily: 'var(--font-family-mono)',
+                              }}
+                              className='text-xs font-mono'
+                            >
+                              {`${(percent * 100).toFixed(0)}%`}
+                            </text>
+                          )
                         }}
-                      />
-                      <span className='text-xs font-mono'>{entry.name}</span>
-                    </div>
-                  ))}
+                        outerRadius={70}
+                        fill='#8884d8'
+                        dataKey='value'
+                      >
+                        {chart.data.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={chart.colors[index % chart.colors.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip content={CustomTooltip} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className='flex-shrink-0 w-full md:w-auto'>
+                  <div
+                    className='text-xs font-mono'
+                    style={{
+                      fontSize: '11px',
+                      fontFamily: 'var(--font-family-mono)',
+                    }}
+                  >
+                    {chart.data.map((entry, index) => (
+                      <div
+                        key={index}
+                        className='flex items-center gap-2 mb-2 last:mb-0'
+                      >
+                        <div
+                          className='w-3 h-3 rounded-full flex-shrink-0'
+                          style={{
+                            backgroundColor:
+                              chart.colors[index % chart.colors.length],
+                          }}
+                        />
+                        <span className='text-xs font-mono'>{entry.name}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            )
           ) : (
             <div className='flex items-center justify-center h-[200px] text-xs text-muted-foreground font-mono'>
               No data available
