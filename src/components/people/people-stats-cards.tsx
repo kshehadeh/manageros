@@ -1,12 +1,21 @@
 'use client'
 
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { WidgetCard } from '@/components/people/widget-card'
 import { Users, UserCheck, MessageSquare, Handshake } from 'lucide-react'
 import type { PeopleStats } from '@/lib/actions/people-stats'
+import { PeopleListModal } from '@/components/people/people-list-modal'
+import {
+  getReportsWithoutRecentOneOnOne,
+  getReportsWithoutRecentFeedback360,
+} from '@/lib/actions/people-stats-lists'
+import type { PersonForList } from '@/components/people/person-list'
 
 interface PeopleStatsCardsProps {
   stats: PeopleStats
   hasLinkedPerson: boolean
+  currentPersonId?: string | null
 }
 
 /**
@@ -34,8 +43,35 @@ export function PeopleStatsCards({
   stats,
   hasLinkedPerson,
 }: PeopleStatsCardsProps) {
+  const router = useRouter()
+  const [modalOpen, setModalOpen] = useState(false)
+  const [modalTitle, setModalTitle] = useState('')
+  const [modalPeople, setModalPeople] = useState<PersonForList[]>([])
+
+  const handleTotalPeopleClick = () => {
+    router.push('/people/list')
+  }
+
+  const handleDirectReportsClick = () => {
+    router.push('/people/direct-reports')
+  }
+
+  const handleOneOnOnesNeededClick = async () => {
+    const people = await getReportsWithoutRecentOneOnOne()
+    setModalTitle('Reports Needing 1:1s')
+    setModalPeople(people)
+    setModalOpen(true)
+  }
+
+  const handleFeedback360NeededClick = async () => {
+    const people = await getReportsWithoutRecentFeedback360()
+    setModalTitle('Reports Needing 360 Feedback')
+    setModalPeople(people)
+    setModalOpen(true)
+  }
+
   // Structure cards as config array for future customization support
-  const cardConfigs: StatCardConfig[] = [
+  const cardConfigs: (StatCardConfig & { onClick?: () => void })[] = [
     {
       id: STAT_CARD_IDS.TOTAL_PEOPLE,
       title: 'Total People',
@@ -43,6 +79,7 @@ export function PeopleStatsCards({
       icon: Users,
       show: true,
       minWidth: '160px',
+      onClick: handleTotalPeopleClick,
     },
     {
       id: STAT_CARD_IDS.DIRECT_REPORTS,
@@ -51,6 +88,7 @@ export function PeopleStatsCards({
       icon: UserCheck,
       show: hasLinkedPerson,
       minWidth: '160px',
+      onClick: handleDirectReportsClick,
     },
     {
       id: STAT_CARD_IDS.REPORTS_WITHOUT_RECENT_ONE_ON_ONE,
@@ -59,6 +97,7 @@ export function PeopleStatsCards({
       icon: Handshake,
       show: hasLinkedPerson && stats.directReports > 0,
       minWidth: '200px',
+      onClick: handleOneOnOnesNeededClick,
     },
     {
       id: STAT_CARD_IDS.REPORTS_WITHOUT_RECENT_FEEDBACK_360,
@@ -67,6 +106,7 @@ export function PeopleStatsCards({
       icon: MessageSquare,
       show: hasLinkedPerson && stats.directReports > 0,
       minWidth: '200px',
+      onClick: handleFeedback360NeededClick,
     },
   ]
 
@@ -78,21 +118,34 @@ export function PeopleStatsCards({
   }
 
   return (
-    <div className='flex flex-wrap gap-4'>
-      {visibleCards.map(card => {
-        return (
-          <WidgetCard
-            key={card.id}
-            title={card.title}
-            titleIcon={card.icon}
-            minWidth={card.minWidth}
-          >
-            <div className='flex items-center justify-center'>
-              <span className='text-4xl font-bold font-mono'>{card.value}</span>
-            </div>
-          </WidgetCard>
-        )
-      })}
-    </div>
+    <>
+      <div className='flex flex-wrap gap-4'>
+        {visibleCards.map(card => {
+          return (
+            <WidgetCard
+              key={card.id}
+              title={card.title}
+              titleIcon={card.icon}
+              minWidth={card.minWidth}
+              onClick={card.onClick}
+            >
+              <div className='flex items-center justify-center'>
+                <span className='text-4xl font-bold font-mono'>
+                  {card.value}
+                </span>
+              </div>
+            </WidgetCard>
+          )
+        })}
+      </div>
+
+      <PeopleListModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={modalTitle}
+        people={modalPeople}
+        emptyStateText='No people found.'
+      />
+    </>
   )
 }

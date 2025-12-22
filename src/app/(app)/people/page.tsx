@@ -48,7 +48,11 @@ export default async function PeoplePage() {
         />
 
         <PageContent>
-          <PeopleDashboardClient stats={stats} hasLinkedPerson={!!person} />
+          <PeopleDashboardClient
+            stats={stats}
+            hasLinkedPerson={!!person}
+            currentPersonId={person?.id}
+          />
         </PageContent>
       </PageContainer>
     </PageBreadcrumbSetter>

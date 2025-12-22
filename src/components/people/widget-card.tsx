@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LucideIcon } from 'lucide-react'
 import { ReactNode } from 'react'
+import { cn } from '@/lib/utils'
 
 interface WidgetCardProps {
   title: string
@@ -10,6 +11,7 @@ interface WidgetCardProps {
   children: ReactNode
   minWidth?: string
   className?: string
+  onClick?: () => void
 }
 
 /**
@@ -22,11 +24,17 @@ export function WidgetCard({
   children,
   minWidth,
   className = '',
+  onClick,
 }: WidgetCardProps) {
   return (
     <Card
-      className={`bg-card text-card-foreground rounded-sm ${className}`}
+      className={cn(
+        'bg-card text-card-foreground rounded-sm',
+        onClick && 'cursor-pointer hover:bg-accent/50 transition-colors',
+        className
+      )}
       style={{ minWidth, flex: '0 1 auto' }}
+      onClick={onClick}
     >
       <CardHeader className='px-lg py-md pb-3 border-b border-dotted border-border flex items-center justify-center'>
         <CardTitle className='text-sm font-bold font-mono flex items-center justify-center gap-2 text-muted-foreground'>
