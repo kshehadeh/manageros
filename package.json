@@ -1,7 +1,7 @@
 {
   "name": "manageros-starter",
   "private": true,
-  "version": "1.49.1",
+  "version": "1.50.0",
   "type": "module",
   "scripts": {
     "dev": "bun --bun next dev --turbo",

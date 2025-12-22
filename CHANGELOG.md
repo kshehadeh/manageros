@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.50.0](/compare/v1.49.1...v1.50.0) (2025-12-22)
+
+### Features
+
+- add custom tooltip for bar charts in PeopleBreakdownCharts c298f39
+
 ## [1.49.1](/compare/v1.49.0...v1.49.1) (2025-12-22)
 
 # [1.49.0](/compare/v1.48.0...v1.49.0) (2025-12-22)
