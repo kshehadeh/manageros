@@ -89,14 +89,6 @@ export async function getReportsWithoutRecentOneOnOne(): Promise<
             },
           },
         },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          status: true,
-          birthday: true,
-        },
       },
       reports: {
         select: {
@@ -299,14 +291,6 @@ export async function getReportsWithoutRecentFeedback360(): Promise<
               birthday: true,
             },
           },
-        },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          status: true,
-          birthday: true,
         },
       },
       reports: {
