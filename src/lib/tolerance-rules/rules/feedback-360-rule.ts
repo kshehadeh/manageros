@@ -29,10 +29,6 @@ export const feedback360ConfigSchema = z.object({
   warningThresholdMonths: z.number().int().positive(),
 })
 
-// Form component is imported from a separate client file
-import { Feedback360FormFields } from './feedback-360-rule-form'
-export { Feedback360FormFields }
-
 /**
  * Create exception for 360 feedback issue
  */
@@ -207,6 +203,5 @@ async function evaluateFeedback360(rule: ToleranceRule): Promise<number> {
 export const feedback360Rule: ToleranceRuleModule<Feedback360Config> = {
   ruleType: 'feedback_360',
   configSchema: feedback360ConfigSchema,
-  FormFields: Feedback360FormFields,
   evaluate: evaluateFeedback360,
 }

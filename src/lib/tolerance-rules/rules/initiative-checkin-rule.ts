@@ -29,10 +29,6 @@ export const initiativeCheckInConfigSchema = z.object({
   warningThresholdDays: z.number().int().positive(),
 })
 
-// Form component is imported from a separate client file
-import { InitiativeCheckInFormFields } from './initiative-checkin-rule-form'
-export { InitiativeCheckInFormFields }
-
 /**
  * Create exception for initiative check-in issue
  */
@@ -220,6 +216,5 @@ export const initiativeCheckInRule: ToleranceRuleModule<InitiativeCheckInConfig>
   {
     ruleType: 'initiative_checkin',
     configSchema: initiativeCheckInConfigSchema,
-    FormFields: InitiativeCheckInFormFields,
     evaluate: evaluateInitiativeCheckIn,
   }

@@ -29,10 +29,6 @@ export const managerSpanConfigSchema = z.object({
   maxDirectReports: z.number().int().positive(),
 })
 
-// Form component is imported from a separate client file
-import { ManagerSpanFormFields } from './manager-span-rule-form'
-export { ManagerSpanFormFields }
-
 /**
  * Create exception for manager span issue
  */
@@ -172,6 +168,5 @@ async function evaluateManagerSpan(rule: ToleranceRule): Promise<number> {
 export const managerSpanRule: ToleranceRuleModule<ManagerSpanConfig> = {
   ruleType: 'manager_span',
   configSchema: managerSpanConfigSchema,
-  FormFields: ManagerSpanFormFields,
   evaluate: evaluateManagerSpan,
 }

@@ -7,6 +7,8 @@ import type { z } from 'zod'
 
 /**
  * Interface that all tolerance rule modules must implement
+ * Note: FormFields are not included here as they are client components
+ * and should only be in the client-side form-registry.ts
  */
 export interface ToleranceRuleModule<Config = unknown> {
   /**
@@ -18,15 +20,6 @@ export interface ToleranceRuleModule<Config = unknown> {
    * Zod schema for validating the rule's configuration
    */
   configSchema: z.ZodSchema<Config>
-
-  /**
-   * React component for rendering rule-specific form fields
-   * Props: { config: Config, onChange: (config: Config) => void }
-   */
-  FormFields: React.ComponentType<{
-    config: Config
-    onChange: (config: Config) => void
-  }>
 
   /**
    * Evaluate the rule and create exceptions if thresholds are exceeded

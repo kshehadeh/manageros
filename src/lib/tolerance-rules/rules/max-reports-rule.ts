@@ -29,10 +29,6 @@ export const maxReportsConfigSchema = z.object({
   maxReports: z.number().int().positive(),
 })
 
-// Form component is imported from a separate client file
-import { MaxReportsFormFields } from './max-reports-rule-form'
-export { MaxReportsFormFields }
-
 /**
  * Create exception for max reports issue
  */
@@ -172,6 +168,5 @@ async function evaluateMaxReports(rule: ToleranceRule): Promise<number> {
 export const maxReportsRule: ToleranceRuleModule<MaxReportsConfig> = {
   ruleType: 'max_reports',
   configSchema: maxReportsConfigSchema,
-  FormFields: MaxReportsFormFields,
   evaluate: evaluateMaxReports,
 }

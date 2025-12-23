@@ -14,10 +14,6 @@ import type { Prisma } from '@/generated/prisma'
 
 type InputJsonValue = Prisma.InputJsonValue
 
-// Form component is imported from a separate client file
-import { OneOnOneFrequencyFormFields } from './one-on-one-frequency-rule-form'
-export { OneOnOneFrequencyFormFields }
-
 /**
  * Configuration for one-on-one frequency rule
  */
@@ -249,28 +245,48 @@ async function evaluateOneOnOneFrequency(rule: ToleranceRule): Promise<number> {
 
   // Batch fetch last 1:1 dates for all manager-report pairs
   // We need to check both directions (manager->report and report->manager)
-  const managerIds = managerReportPairs.map(p => p.managerId)
-  const reportIds = managerReportPairs.map(p => p.reportId)
-  const allPersonIds = Array.from(new Set([...managerIds, ...reportIds]))
+  // Query only for the specific pairs we care about to avoid fetching irrelevant records
+  const QUERY_BATCH_SIZE = 100 // Limit OR conditions to avoid query size issues
+  const allOneOnOnes: Array<{
+    managerId: string
+    reportId: string
+    scheduledAt: Date | null
+  }> = []
 
-  const allOneOnOnes = await prisma.oneOnOne.findMany({
-    where: {
-      OR: [
-        {
-          managerId: { in: allPersonIds },
-          reportId: { in: allPersonIds },
-        },
-      ],
-    },
-    select: {
-      managerId: true,
-      reportId: true,
-      scheduledAt: true,
-    },
-    orderBy: {
-      scheduledAt: 'desc',
-    },
-  })
+  // Query in batches to avoid creating overly large OR conditions
+  for (let i = 0; i < managerReportPairs.length; i += QUERY_BATCH_SIZE) {
+    const batch = managerReportPairs.slice(i, i + QUERY_BATCH_SIZE)
+
+    // Build OR conditions for this batch - check both directions for each pair
+    const orConditions = batch.flatMap(pair => [
+      // Forward direction: manager->report
+      {
+        managerId: pair.managerId,
+        reportId: pair.reportId,
+      },
+      // Reverse direction: report->manager (in case stored backwards)
+      {
+        managerId: pair.reportId,
+        reportId: pair.managerId,
+      },
+    ])
+
+    const batchOneOnOnes = await prisma.oneOnOne.findMany({
+      where: {
+        OR: orConditions,
+      },
+      select: {
+        managerId: true,
+        reportId: true,
+        scheduledAt: true,
+      },
+      orderBy: {
+        scheduledAt: 'desc',
+      },
+    })
+
+    allOneOnOnes.push(...batchOneOnOnes)
+  }
 
   // Create a map of managerId-reportId -> lastScheduledAt
   // Only store the actual direction (managerId-reportId), not both directions
@@ -387,6 +403,5 @@ export const oneOnOneFrequencyRule: ToleranceRuleModule<OneOnOneFrequencyConfig>
   {
     ruleType: 'one_on_one_frequency',
     configSchema: oneOnOneFrequencyConfigSchema,
-    FormFields: OneOnOneFrequencyFormFields,
     evaluate: evaluateOneOnOneFrequency,
   }
