@@ -6,6 +6,7 @@ import {
   forwardRef,
   useImperativeHandle,
   useRef,
+  useTransition,
 } from 'react'
 import { useRouter } from 'next/navigation'
 import { useIsMobile } from '@/lib/hooks/use-media-query'
@@ -110,6 +111,7 @@ const TaskQuickEditDialogContent = forwardRef<
       reset,
     } = useTaskSummaryInput()
     const router = useRouter()
+    const [_isPending, startTransition] = useTransition()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [errors, setErrors] = useState<Record<string, string>>({})
     const { people } = usePeopleForSelect()
@@ -228,8 +230,9 @@ const TaskQuickEditDialogContent = forwardRef<
           const taskDueDate = formData.dueDate || undefined
           const taskPriority = formData.priority
 
+          let createdTask
           if (initiativeId) {
-            await createQuickTaskForInitiative(
+            createdTask = await createQuickTaskForInitiative(
               taskTitle,
               initiativeId,
               undefined,
@@ -237,11 +240,31 @@ const TaskQuickEditDialogContent = forwardRef<
               taskPriority
             )
           } else {
-            await createQuickTask(taskTitle, taskDueDate, taskPriority)
+            createdTask = await createQuickTask(
+              taskTitle,
+              taskDueDate,
+              taskPriority
+            )
           }
 
           toast.success('Task created successfully!', {
             description: `"${taskTitle}" has been added to your tasks.`,
+            action: createdTask?.id
+              ? {
+                  label: 'View Task',
+                  onClick: () => {
+                    // Navigate to the task detail page
+                    // Use startTransition to batch the navigation
+                    startTransition(() => {
+                      router.push(`/tasks/${createdTask.id}`)
+                    })
+                    // Refresh after a brief delay to ensure server has processed the creation
+                    setTimeout(() => {
+                      router.refresh()
+                    }, 200)
+                  },
+                }
+              : undefined,
           })
 
           // Dispatch custom event to notify task lists to refresh

@@ -402,6 +402,10 @@ export async function createQuickTask(
     throw new Error('User must belong to an organization to create tasks')
   }
 
+  if (!user.managerOSUserId) {
+    throw new Error('User ID is required to create tasks')
+  }
+
   // Validate the title
   if (!title || title.trim().length === 0) {
     throw new Error('Task title is required')
@@ -410,6 +414,24 @@ export async function createQuickTask(
   if (title.length > 200) {
     throw new Error('Title must be less than 200 characters')
   }
+
+  // Ensure OrganizationMember record exists for the user
+  // This is needed for task access control queries to work correctly
+  await prisma.organizationMember.upsert({
+    where: {
+      // eslint-disable-next-line camelcase
+      userId_organizationId: {
+        userId: user.managerOSUserId,
+        organizationId: user.managerOSOrganizationId,
+      },
+    },
+    create: {
+      userId: user.managerOSUserId,
+      organizationId: user.managerOSOrganizationId,
+      role: 'USER', // Deprecated field, but required for schema
+    },
+    update: {}, // No update needed if record exists
+  })
 
   // Verify the person belongs to the user's organization if user is linked to a person
   let assigneeId = null
@@ -433,7 +455,7 @@ export async function createQuickTask(
       status: 'todo',
       priority: priority || DEFAULT_TASK_PRIORITY,
       assigneeId,
-      createdById: user.managerOSUserId || '',
+      createdById: user.managerOSUserId,
       dueDate: dueDate || null,
     },
     include: {
@@ -467,6 +489,10 @@ export async function createQuickTaskForInitiative(
     throw new Error('User must belong to an organization to create tasks')
   }
 
+  if (!user.managerOSUserId) {
+    throw new Error('User ID is required to create tasks')
+  }
+
   // Validate the title
   if (!title || title.trim().length === 0) {
     throw new Error('Task title is required')
@@ -475,6 +501,24 @@ export async function createQuickTaskForInitiative(
   if (title.length > 200) {
     throw new Error('Title must be less than 200 characters')
   }
+
+  // Ensure OrganizationMember record exists for the user
+  // This is needed for task access control queries to work correctly
+  await prisma.organizationMember.upsert({
+    where: {
+      // eslint-disable-next-line camelcase
+      userId_organizationId: {
+        userId: user.managerOSUserId,
+        organizationId: user.managerOSOrganizationId,
+      },
+    },
+    create: {
+      userId: user.managerOSUserId,
+      organizationId: user.managerOSOrganizationId,
+      role: 'USER', // Deprecated field, but required for schema
+    },
+    update: {}, // No update needed if record exists
+  })
 
   // Verify initiative belongs to user's organization
   const initiative = await prisma.initiative.findFirst({
@@ -524,7 +568,7 @@ export async function createQuickTaskForInitiative(
       status: 'todo',
       priority: priority || DEFAULT_TASK_PRIORITY,
       assigneeId,
-      createdById: user.managerOSUserId || '',
+      createdById: user.managerOSUserId,
       initiativeId,
       objectiveId: objectiveId || null,
       dueDate: dueDate || null,

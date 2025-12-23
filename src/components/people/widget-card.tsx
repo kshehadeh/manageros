@@ -33,7 +33,7 @@ export function WidgetCard({
         onClick && 'cursor-pointer hover:bg-accent/50 transition-colors',
         className
       )}
-      style={{ minWidth, flex: '0 1 auto' }}
+      style={{ minWidth }}
       onClick={onClick}
     >
       <CardHeader className='px-lg py-md pb-3 border-b border-dotted border-border flex items-center justify-center'>

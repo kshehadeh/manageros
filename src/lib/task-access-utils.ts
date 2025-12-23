@@ -23,9 +23,10 @@ export function getTaskAccessWhereClause(
     { objective: { initiative: { organizationId } } },
     // Tasks created by the current user AND creator is in the current organization
     // (for tasks without initiatives/objectives)
+    // Check createdById directly and verify membership via OrganizationMember relationship
     {
       AND: [
-        { createdBy: { id: userId } },
+        { createdById: userId },
         {
           createdBy: {
             organizationMemberships: {

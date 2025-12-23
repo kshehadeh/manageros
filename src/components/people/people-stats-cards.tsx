@@ -3,12 +3,19 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { WidgetCard } from '@/components/people/widget-card'
-import { Users, UserCheck, MessageSquare, Handshake } from 'lucide-react'
+import {
+  Users,
+  UserCheck,
+  MessageSquare,
+  Handshake,
+  AlertTriangle,
+} from 'lucide-react'
 import type { PeopleStats } from '@/lib/actions/people-stats'
 import { PeopleListModal } from '@/components/people/people-list-modal'
 import {
   getReportsWithoutRecentOneOnOne,
   getReportsWithoutRecentFeedback360,
+  getManagersExceedingMaxReports,
 } from '@/lib/actions/people-stats-lists'
 import type { PersonForList } from '@/components/people/person-list'
 
@@ -26,6 +33,7 @@ export const STAT_CARD_IDS = {
   DIRECT_REPORTS: 'direct-reports',
   REPORTS_WITHOUT_RECENT_ONE_ON_ONE: 'reports-without-recent-one-on-one',
   REPORTS_WITHOUT_RECENT_FEEDBACK_360: 'reports-without-recent-feedback-360',
+  MANAGERS_EXCEEDING_MAX_REPORTS: 'managers-exceeding-max-reports',
 } as const
 
 export type StatCardId = (typeof STAT_CARD_IDS)[keyof typeof STAT_CARD_IDS]
@@ -70,6 +78,13 @@ export function PeopleStatsCards({
     setModalOpen(true)
   }
 
+  const handleManagersExceedingMaxReportsClick = async () => {
+    const people = await getManagersExceedingMaxReports()
+    setModalTitle('Managers Exceeding Max Reports')
+    setModalPeople(people)
+    setModalOpen(true)
+  }
+
   // Structure cards as config array for future customization support
   const cardConfigs: (StatCardConfig & { onClick?: () => void })[] = [
     {
@@ -108,6 +123,15 @@ export function PeopleStatsCards({
       minWidth: '200px',
       onClick: handleFeedback360NeededClick,
     },
+    {
+      id: STAT_CARD_IDS.MANAGERS_EXCEEDING_MAX_REPORTS,
+      title: 'Max Reports Exceeded',
+      value: stats.managersExceedingMaxReports,
+      icon: AlertTriangle,
+      show: stats.hasMaxReportsRule,
+      minWidth: '200px',
+      onClick: handleManagersExceedingMaxReportsClick,
+    },
   ]
 
   // Filter cards based on visibility (future: can be filtered by user preferences)
@@ -128,6 +152,7 @@ export function PeopleStatsCards({
               titleIcon={card.icon}
               minWidth={card.minWidth}
               onClick={card.onClick}
+              className='flex-1 min-w-0'
             >
               <div className='flex items-center justify-center'>
                 <span className='text-4xl font-bold font-mono'>

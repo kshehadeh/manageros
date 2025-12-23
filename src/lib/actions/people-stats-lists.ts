@@ -396,3 +396,158 @@ export async function getReportsWithoutRecentFeedback360(): Promise<
     }
   })
 }
+
+/**
+ * Get list of managers who are exceeding the max reports threshold
+ */
+export async function getManagersExceedingMaxReports(): Promise<
+  PersonForList[]
+> {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    return []
+  }
+
+  const organizationId = user.managerOSOrganizationId
+
+  // Get tolerance rule for max reports
+  const toleranceRule = await prisma.organizationToleranceRule.findFirst({
+    where: {
+      organizationId,
+      ruleType: 'max_reports',
+      isEnabled: true,
+    },
+  })
+
+  if (!toleranceRule) {
+    return []
+  }
+
+  // Get all active exceptions for max_reports rule
+  const exceptions = await prisma.exception.findMany({
+    where: {
+      organizationId,
+      ruleId: toleranceRule.id,
+      entityType: 'Person',
+      status: 'active',
+    },
+    select: {
+      entityId: true,
+    },
+  })
+
+  if (exceptions.length === 0) {
+    return []
+  }
+
+  // Get person IDs from exceptions
+  const personIds = exceptions.map(e => e.entityId)
+
+  // Get all people with relations
+  const people = await prisma.person.findMany({
+    where: {
+      id: { in: personIds },
+      organizationId,
+      status: 'active',
+    },
+    include: {
+      team: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      jobRole: {
+        include: {
+          level: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          domain: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+      manager: {
+        include: {
+          reports: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+              status: true,
+              birthday: true,
+            },
+          },
+        },
+      },
+      reports: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          status: true,
+          birthday: true,
+        },
+      },
+    },
+  })
+
+  // Convert to PersonForList format
+  return people.map(person => {
+    // Type assertion to ensure all fields are available
+    const p = person as typeof person & { avatar: string | null }
+    return {
+      id: p.id,
+      name: p.name,
+      email: p.email,
+      role: p.role,
+      status: p.status,
+      avatar: p.avatar,
+      team: p.team
+        ? {
+            id: p.team.id,
+            name: p.team.name,
+          }
+        : null,
+      jobRole: p.jobRole
+        ? {
+            id: p.jobRole.id,
+            title: p.jobRole.title,
+            level: p.jobRole.level
+              ? {
+                  id: p.jobRole.level.id,
+                  name: p.jobRole.level.name,
+                }
+              : null,
+            domain: p.jobRole.domain
+              ? {
+                  id: p.jobRole.domain.id,
+                  name: p.jobRole.domain.name,
+                }
+              : null,
+          }
+        : null,
+      manager: p.manager
+        ? {
+            id: p.manager.id,
+            name: p.manager.name,
+            email: p.manager.email,
+            role: p.manager.role,
+            status: p.manager.status,
+            birthday: p.manager.birthday,
+            reports: p.manager.reports,
+          }
+        : null,
+      reports: p.reports,
+    }
+  })
+}
