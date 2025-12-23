@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.51.0](/compare/v1.50.0...v1.51.0) (2025-12-23)
+
+### Features
+
+- enhance People section and onboarding data management 4bda912
+
 # [1.50.0](/compare/v1.49.1...v1.50.0) (2025-12-22)
 
 ### Features
