@@ -3,9 +3,17 @@
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 
+type PeopleFilters = {
+  search?: string
+  teamId?: string
+  managerId?: string
+  jobRoleId?: string
+  status?: string
+}
+
 interface PeopleFilterContentProps {
-  settings: { filters: any }
-  updateFilters: (filters: Partial<any>) => void
+  settings: { filters: PeopleFilters }
+  updateFilters: (filters: Partial<PeopleFilters>) => void
   currentPersonId?: string | null
 }
 

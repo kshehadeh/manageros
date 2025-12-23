@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { getCurrentUser, isAdminOrOwner } from '@/lib/auth-utils'
 import { z } from 'zod'
 import { evaluateAllRules } from '@/lib/tolerance-rules/evaluator'
+import { getRuleConfigSchema } from '@/lib/tolerance-rules/registry'
 import type {
   ToleranceRule,
   ToleranceRuleType,
@@ -19,31 +20,16 @@ const toleranceRuleTypeSchema = z.enum([
   'initiative_checkin',
   'feedback_360',
   'manager_span',
+  'max_reports',
 ])
 
-const oneOnOneFrequencyConfigSchema = z.object({
-  warningThresholdDays: z.number().int().positive(),
-  urgentThresholdDays: z.number().int().positive(),
-  onlyFullTimeEmployees: z.boolean().optional(),
-})
-
-const initiativeCheckInConfigSchema = z.object({
-  warningThresholdDays: z.number().int().positive(),
-})
-
-const feedback360ConfigSchema = z.object({
-  warningThresholdMonths: z.number().int().positive(),
-})
-
-const managerSpanConfigSchema = z.object({
-  maxDirectReports: z.number().int().positive(),
-})
-
+// Create a union schema for all config types
 const toleranceRuleConfigSchema = z.union([
-  oneOnOneFrequencyConfigSchema,
-  initiativeCheckInConfigSchema,
-  feedback360ConfigSchema,
-  managerSpanConfigSchema,
+  getRuleConfigSchema('one_on_one_frequency'),
+  getRuleConfigSchema('initiative_checkin'),
+  getRuleConfigSchema('feedback_360'),
+  getRuleConfigSchema('manager_span'),
+  getRuleConfigSchema('max_reports'),
 ])
 
 const createToleranceRuleSchema = z.object({
@@ -363,20 +349,6 @@ function validateConfigForRuleType(
   ruleType: ToleranceRuleType,
   config: ToleranceRuleConfig
 ): void {
-  switch (ruleType) {
-    case 'one_on_one_frequency':
-      oneOnOneFrequencyConfigSchema.parse(config)
-      break
-    case 'initiative_checkin':
-      initiativeCheckInConfigSchema.parse(config)
-      break
-    case 'feedback_360':
-      feedback360ConfigSchema.parse(config)
-      break
-    case 'manager_span':
-      managerSpanConfigSchema.parse(config)
-      break
-    default:
-      throw new Error(`Unknown rule type: ${ruleType}`)
-  }
+  const schema = getRuleConfigSchema(ruleType)
+  schema.parse(config)
 }

@@ -184,6 +184,7 @@ export function PeopleBreakdownCharts({ stats }: PeopleBreakdownChartsProps) {
           key={chart.id}
           title={chart.title}
           minWidth={chart.minWidth}
+          className='flex-1 min-w-0'
         >
           {chart.data.length > 0 ? (
             chart.chartType === 'bar' ? (

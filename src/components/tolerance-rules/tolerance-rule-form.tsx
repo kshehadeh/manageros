@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,14 +17,12 @@ import {
   createToleranceRule,
   updateToleranceRule,
 } from '@/lib/actions/tolerance-rules'
+import { getRuleFormFields } from '@/lib/tolerance-rules/form-registry'
 import type {
   ToleranceRule,
   ToleranceRuleType,
   CreateToleranceRuleInput,
   UpdateToleranceRuleInput,
-  ManagerSpanConfig,
-  Feedback360Config,
-  OneOnOneFrequencyConfig,
   ToleranceRuleConfig,
 } from '@/types/tolerance-rule'
 
@@ -32,30 +30,53 @@ interface ToleranceRuleFormProps {
   rule?: ToleranceRule
 }
 
+// Default configs for each rule type
+const getDefaultConfig = (ruleType: ToleranceRuleType): ToleranceRuleConfig => {
+  switch (ruleType) {
+    case 'one_on_one_frequency':
+      return {
+        warningThresholdDays: 14,
+        urgentThresholdDays: 30,
+        onlyFullTimeEmployees: false,
+      }
+    case 'initiative_checkin':
+      return { warningThresholdDays: 14 }
+    case 'feedback_360':
+      return { warningThresholdMonths: 6 }
+    case 'manager_span':
+      return { maxDirectReports: 8 }
+    case 'max_reports':
+      return { maxReports: 10 }
+  }
+}
+
 export function ToleranceRuleForm({ rule }: ToleranceRuleFormProps) {
   const router = useRouter()
   const isEditing = !!rule
 
-  const [formData, setFormData] = useState({
-    ruleType: (rule?.ruleType || 'one_on_one_frequency') as ToleranceRuleType,
-    name: rule?.name || '',
-    description: rule?.description || '',
-    isEnabled: rule?.isEnabled ?? true,
-    // Config fields based on rule type
-    warningThresholdDays:
-      (rule?.config as OneOnOneFrequencyConfig)?.warningThresholdDays || 14,
-    urgentThresholdDays:
-      (rule?.config as OneOnOneFrequencyConfig)?.urgentThresholdDays || 30,
-    onlyFullTimeEmployees:
-      (rule?.config as OneOnOneFrequencyConfig)?.onlyFullTimeEmployees ?? false,
-    warningThresholdMonths:
-      (rule?.config as Feedback360Config)?.warningThresholdMonths || 6,
-    maxDirectReports:
-      (rule?.config as ManagerSpanConfig)?.maxDirectReports || 8,
-  })
+  const [ruleType, setRuleType] = useState<ToleranceRuleType>(
+    (rule?.ruleType || 'one_on_one_frequency') as ToleranceRuleType
+  )
+  const [name, setName] = useState(rule?.name || '')
+  const [description, setDescription] = useState(rule?.description || '')
+  const [isEnabled, setIsEnabled] = useState(rule?.isEnabled ?? true)
+  const [config, setConfig] = useState<ToleranceRuleConfig>(
+    rule?.config || getDefaultConfig(ruleType)
+  )
 
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Get the form component for the current rule type
+  const FormFields = useMemo(() => getRuleFormFields(ruleType), [ruleType])
+
+  // Update config when rule type changes
+  const handleRuleTypeChange = (newRuleType: ToleranceRuleType) => {
+    setRuleType(newRuleType)
+    if (!rule || rule.ruleType !== newRuleType) {
+      setConfig(getDefaultConfig(newRuleType))
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -63,37 +84,11 @@ export function ToleranceRuleForm({ rule }: ToleranceRuleFormProps) {
     setErrors({})
 
     try {
-      let config: ToleranceRuleConfig
-      switch (formData.ruleType) {
-        case 'one_on_one_frequency':
-          config = {
-            warningThresholdDays: Number(formData.warningThresholdDays),
-            urgentThresholdDays: Number(formData.urgentThresholdDays),
-            onlyFullTimeEmployees: formData.onlyFullTimeEmployees,
-          }
-          break
-        case 'initiative_checkin':
-          config = {
-            warningThresholdDays: Number(formData.warningThresholdDays),
-          }
-          break
-        case 'feedback_360':
-          config = {
-            warningThresholdMonths: Number(formData.warningThresholdMonths),
-          }
-          break
-        case 'manager_span':
-          config = {
-            maxDirectReports: Number(formData.maxDirectReports),
-          }
-          break
-      }
-
       const input: CreateToleranceRuleInput | UpdateToleranceRuleInput = {
-        ruleType: formData.ruleType,
-        name: formData.name,
-        description: formData.description || undefined,
-        isEnabled: formData.isEnabled,
+        ruleType,
+        name,
+        description: description || undefined,
+        isEnabled,
         config,
       }
 
@@ -117,130 +112,6 @@ export function ToleranceRuleForm({ rule }: ToleranceRuleFormProps) {
     }
   }
 
-  const renderConfigFields = () => {
-    switch (formData.ruleType) {
-      case 'one_on_one_frequency':
-        return (
-          <>
-            <div className='space-y-2'>
-              <Label htmlFor='warningThresholdDays'>
-                Warning Threshold (days)
-              </Label>
-              <Input
-                id='warningThresholdDays'
-                type='number'
-                min='1'
-                value={formData.warningThresholdDays}
-                onChange={e =>
-                  setFormData({
-                    ...formData,
-                    warningThresholdDays: parseInt(e.target.value) || 0,
-                  })
-                }
-                required
-              />
-            </div>
-            <div className='space-y-2'>
-              <Label htmlFor='urgentThresholdDays'>
-                Urgent Threshold (days)
-              </Label>
-              <Input
-                id='urgentThresholdDays'
-                type='number'
-                min='1'
-                value={formData.urgentThresholdDays}
-                onChange={e =>
-                  setFormData({
-                    ...formData,
-                    urgentThresholdDays: parseInt(e.target.value) || 0,
-                  })
-                }
-                required
-              />
-            </div>
-            <div className='flex items-center space-x-2'>
-              <input
-                type='checkbox'
-                id='onlyFullTimeEmployees'
-                checked={formData.onlyFullTimeEmployees}
-                onChange={e =>
-                  setFormData({
-                    ...formData,
-                    onlyFullTimeEmployees: e.target.checked,
-                  })
-                }
-                className='h-4 w-4 rounded border-gray-300'
-              />
-              <Label htmlFor='onlyFullTimeEmployees' className='cursor-pointer'>
-                Only check against full-time employees
-              </Label>
-            </div>
-          </>
-        )
-      case 'initiative_checkin':
-        return (
-          <div className='space-y-2'>
-            <Label htmlFor='warningThresholdDays'>
-              Warning Threshold (days)
-            </Label>
-            <Input
-              id='warningThresholdDays'
-              type='number'
-              min='1'
-              value={formData.warningThresholdDays}
-              onChange={e =>
-                setFormData({
-                  ...formData,
-                  warningThresholdDays: parseInt(e.target.value) || 0,
-                })
-              }
-              required
-            />
-          </div>
-        )
-      case 'feedback_360':
-        return (
-          <div className='space-y-2'>
-            <Label htmlFor='warningThresholdMonths'>
-              Warning Threshold (months)
-            </Label>
-            <Input
-              id='warningThresholdMonths'
-              type='number'
-              min='1'
-              value={formData.warningThresholdMonths}
-              onChange={e =>
-                setFormData({
-                  ...formData,
-                  warningThresholdMonths: parseInt(e.target.value) || 0,
-                })
-              }
-              required
-            />
-          </div>
-        )
-      case 'manager_span':
-        return (
-          <div className='space-y-2'>
-            <Label htmlFor='maxDirectReports'>Maximum Direct Reports</Label>
-            <Input
-              id='maxDirectReports'
-              type='number'
-              min='1'
-              value={formData.maxDirectReports}
-              onChange={e =>
-                setFormData({
-                  ...formData,
-                  maxDirectReports: parseInt(e.target.value) || 0,
-                })
-              }
-              required
-            />
-          </div>
-        )
-    }
-  }
-
   return (
     <form onSubmit={handleSubmit} className='space-y-6'>
       {errors.general && (
@@ -252,10 +123,8 @@ export function ToleranceRuleForm({ rule }: ToleranceRuleFormProps) {
       <div className='space-y-2'>
         <Label htmlFor='ruleType'>Rule Type</Label>
         <Select
-          value={formData.ruleType}
-          onValueChange={value =>
-            setFormData({ ...formData, ruleType: value as ToleranceRuleType })
-          }
+          value={ruleType}
+          onValueChange={handleRuleTypeChange}
           disabled={isEditing}
         >
           <SelectTrigger id='ruleType'>
@@ -268,6 +137,7 @@ export function ToleranceRuleForm({ rule }: ToleranceRuleFormProps) {
             </SelectItem>
             <SelectItem value='feedback_360'>360 Feedback</SelectItem>
             <SelectItem value='manager_span'>Manager Span</SelectItem>
+            <SelectItem value='max_reports'>Maximum Reports</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -278,8 +148,8 @@ export function ToleranceRuleForm({ rule }: ToleranceRuleFormProps) {
         </Label>
         <Input
           id='name'
-          value={formData.name}
-          onChange={e => setFormData({ ...formData, name: e.target.value })}
+          value={name}
+          onChange={e => setName(e.target.value)}
           required
         />
       </div>
@@ -288,24 +158,27 @@ export function ToleranceRuleForm({ rule }: ToleranceRuleFormProps) {
         <Label htmlFor='description'>Description</Label>
         <Textarea
           id='description'
-          value={formData.description}
-          onChange={e =>
-            setFormData({ ...formData, description: e.target.value })
-          }
+          value={description}
+          onChange={e => setDescription(e.target.value)}
           rows={3}
         />
       </div>
 
-      <div className='space-y-4'>{renderConfigFields()}</div>
+      <div className='space-y-4'>
+        {/* Type assertion needed because FormFields expects specific config type from registry */}
+        {/* The registry ensures type safety at runtime */}
+        {React.createElement(FormFields, {
+          config: config as never,
+          onChange: setConfig as never,
+        })}
+      </div>
 
       <div className='flex items-center space-x-2'>
         <input
           type='checkbox'
           id='isEnabled'
-          checked={formData.isEnabled}
-          onChange={e =>
-            setFormData({ ...formData, isEnabled: e.target.checked })
-          }
+          checked={isEnabled}
+          onChange={e => setIsEnabled(e.target.checked)}
           className='h-4 w-4 rounded border-gray-300'
         />
         <Label htmlFor='isEnabled' className='cursor-pointer'>

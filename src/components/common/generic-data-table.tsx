@@ -696,10 +696,10 @@ export function GenericDataTable<
   }
 
   return (
-    <div className='space-y-xl'>
+    <div className='space-y-md'>
       {/* Filter Controls */}
       {!hideFilters && (
-        <div className='space-y-xl px-lg md:px-0'>
+        <div className='space-y-md px-lg md:px-0'>
           <div className='flex items-center gap-xl'>
             {/* Search Input - Takes up most space */}
             {!immutableFilters?.search && (

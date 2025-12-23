@@ -11,6 +11,8 @@ export interface PeopleStats {
   directReports: number
   reportsWithoutRecentOneOnOne: number
   reportsWithoutRecentFeedback360: number
+  managersExceedingMaxReports: number
+  hasMaxReportsRule: boolean
   statusBreakdown: Array<{ status: string; count: number }>
   teamBreakdown: Array<{ teamName: string | null; count: number }>
   jobRoleBreakdown: Array<{ jobRoleTitle: string | null; count: number }>
@@ -307,11 +309,37 @@ export async function getPeopleStats(): Promise<PeopleStats | null> {
     }
   }
 
+  // Count managers exceeding max reports threshold (only if max_reports rule exists)
+  let managersExceedingMaxReports = 0
+  let hasMaxReportsRule = false
+  const maxReportsRule = await prisma.organizationToleranceRule.findFirst({
+    where: {
+      organizationId,
+      ruleType: 'max_reports',
+      isEnabled: true,
+    },
+  })
+
+  if (maxReportsRule) {
+    hasMaxReportsRule = true
+    // Count active exceptions for max_reports rule
+    managersExceedingMaxReports = await prisma.exception.count({
+      where: {
+        organizationId,
+        ruleId: maxReportsRule.id,
+        entityType: 'Person',
+        status: 'active',
+      },
+    })
+  }
+
   return {
     totalPeople,
     directReports,
     reportsWithoutRecentOneOnOne,
     reportsWithoutRecentFeedback360,
+    managersExceedingMaxReports,
+    hasMaxReportsRule,
     statusBreakdown: statusBreakdown.map(item => ({
       status: item.status,
       count: item._count.id,

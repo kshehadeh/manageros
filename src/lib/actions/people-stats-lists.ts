@@ -53,7 +53,13 @@ export async function getReportsWithoutRecentOneOnOne(): Promise<
       managerId: currentPersonId,
       status: 'active',
     },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      status: true,
+      avatar: true,
       team: {
         select: {
           id: true,
@@ -163,51 +169,49 @@ export async function getReportsWithoutRecentOneOnOne(): Promise<
 
   // Convert to PersonForList format
   return reportsNeedingOneOnOne.map(report => {
-    // Type assertion to ensure all fields are available
-    const person = report as typeof report & { avatar: string | null }
     return {
-      id: person.id,
-      name: person.name,
-      email: person.email,
-      role: person.role,
-      status: person.status,
-      avatar: person.avatar,
-      team: person.team
+      id: report.id,
+      name: report.name,
+      email: report.email,
+      role: report.role,
+      status: report.status,
+      avatar: report.avatar,
+      team: report.team
         ? {
-            id: person.team.id,
-            name: person.team.name,
+            id: report.team.id,
+            name: report.team.name,
           }
         : null,
-      jobRole: person.jobRole
+      jobRole: report.jobRole
         ? {
-            id: person.jobRole.id,
-            title: person.jobRole.title,
-            level: person.jobRole.level
+            id: report.jobRole.id,
+            title: report.jobRole.title,
+            level: report.jobRole.level
               ? {
-                  id: person.jobRole.level.id,
-                  name: person.jobRole.level.name,
+                  id: report.jobRole.level.id,
+                  name: report.jobRole.level.name,
                 }
               : null,
-            domain: person.jobRole.domain
+            domain: report.jobRole.domain
               ? {
-                  id: person.jobRole.domain.id,
-                  name: person.jobRole.domain.name,
+                  id: report.jobRole.domain.id,
+                  name: report.jobRole.domain.name,
                 }
               : null,
           }
         : null,
-      manager: person.manager
+      manager: report.manager
         ? {
-            id: person.manager.id,
-            name: person.manager.name,
-            email: person.manager.email,
-            role: person.manager.role,
-            status: person.manager.status,
-            birthday: person.manager.birthday,
-            reports: person.manager.reports,
+            id: report.manager.id,
+            name: report.manager.name,
+            email: report.manager.email,
+            role: report.manager.role,
+            status: report.manager.status,
+            birthday: report.manager.birthday,
+            reports: report.manager.reports,
           }
         : null,
-      reports: person.reports,
+      reports: report.reports,
     }
   })
 }
@@ -256,7 +260,13 @@ export async function getReportsWithoutRecentFeedback360(): Promise<
       managerId: currentPersonId,
       status: 'active',
     },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      status: true,
+      avatar: true,
       team: {
         select: {
           id: true,
@@ -348,8 +358,165 @@ export async function getReportsWithoutRecentFeedback360(): Promise<
 
   // Convert to PersonForList format
   return reportsNeedingFeedback360.map(report => {
-    // Type assertion to ensure all fields are available
-    const person = report as typeof report & { avatar: string | null }
+    return {
+      id: report.id,
+      name: report.name,
+      email: report.email,
+      role: report.role,
+      status: report.status,
+      avatar: report.avatar,
+      team: report.team
+        ? {
+            id: report.team.id,
+            name: report.team.name,
+          }
+        : null,
+      jobRole: report.jobRole
+        ? {
+            id: report.jobRole.id,
+            title: report.jobRole.title,
+            level: report.jobRole.level
+              ? {
+                  id: report.jobRole.level.id,
+                  name: report.jobRole.level.name,
+                }
+              : null,
+            domain: report.jobRole.domain
+              ? {
+                  id: report.jobRole.domain.id,
+                  name: report.jobRole.domain.name,
+                }
+              : null,
+          }
+        : null,
+      manager: report.manager
+        ? {
+            id: report.manager.id,
+            name: report.manager.name,
+            email: report.manager.email,
+            role: report.manager.role,
+            status: report.manager.status,
+            birthday: report.manager.birthday,
+            reports: report.manager.reports,
+          }
+        : null,
+      reports: report.reports,
+    }
+  })
+}
+
+/**
+ * Get list of managers who are exceeding the max reports threshold
+ */
+export async function getManagersExceedingMaxReports(): Promise<
+  PersonForList[]
+> {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    return []
+  }
+
+  const organizationId = user.managerOSOrganizationId
+
+  // Get tolerance rule for max reports
+  const toleranceRule = await prisma.organizationToleranceRule.findFirst({
+    where: {
+      organizationId,
+      ruleType: 'max_reports',
+      isEnabled: true,
+    },
+  })
+
+  if (!toleranceRule) {
+    return []
+  }
+
+  // Get all active exceptions for max_reports rule
+  const exceptions = await prisma.exception.findMany({
+    where: {
+      organizationId,
+      ruleId: toleranceRule.id,
+      entityType: 'Person',
+      status: 'active',
+    },
+    select: {
+      entityId: true,
+    },
+  })
+
+  if (exceptions.length === 0) {
+    return []
+  }
+
+  // Get person IDs from exceptions
+  const personIds = exceptions.map(e => e.entityId)
+
+  // Get all people with relations
+  const people = await prisma.person.findMany({
+    where: {
+      id: { in: personIds },
+      organizationId,
+      status: 'active',
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      status: true,
+      avatar: true,
+      team: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      jobRole: {
+        include: {
+          level: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          domain: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+      manager: {
+        include: {
+          reports: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+              status: true,
+              birthday: true,
+            },
+          },
+        },
+      },
+      reports: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          status: true,
+          birthday: true,
+        },
+      },
+    },
+  })
+
+  // Convert to PersonForList format
+  return people.map(person => {
     return {
       id: person.id,
       name: person.name,
