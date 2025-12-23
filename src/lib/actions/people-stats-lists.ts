@@ -53,7 +53,13 @@ export async function getReportsWithoutRecentOneOnOne(): Promise<
       managerId: currentPersonId,
       status: 'active',
     },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      status: true,
+      avatar: true,
       team: {
         select: {
           id: true,
@@ -163,51 +169,49 @@ export async function getReportsWithoutRecentOneOnOne(): Promise<
 
   // Convert to PersonForList format
   return reportsNeedingOneOnOne.map(report => {
-    // Type assertion to ensure all fields are available
-    const person = report as typeof report & { avatar: string | null }
     return {
-      id: person.id,
-      name: person.name,
-      email: person.email,
-      role: person.role,
-      status: person.status,
-      avatar: person.avatar,
-      team: person.team
+      id: report.id,
+      name: report.name,
+      email: report.email,
+      role: report.role,
+      status: report.status,
+      avatar: report.avatar,
+      team: report.team
         ? {
-            id: person.team.id,
-            name: person.team.name,
+            id: report.team.id,
+            name: report.team.name,
           }
         : null,
-      jobRole: person.jobRole
+      jobRole: report.jobRole
         ? {
-            id: person.jobRole.id,
-            title: person.jobRole.title,
-            level: person.jobRole.level
+            id: report.jobRole.id,
+            title: report.jobRole.title,
+            level: report.jobRole.level
               ? {
-                  id: person.jobRole.level.id,
-                  name: person.jobRole.level.name,
+                  id: report.jobRole.level.id,
+                  name: report.jobRole.level.name,
                 }
               : null,
-            domain: person.jobRole.domain
+            domain: report.jobRole.domain
               ? {
-                  id: person.jobRole.domain.id,
-                  name: person.jobRole.domain.name,
+                  id: report.jobRole.domain.id,
+                  name: report.jobRole.domain.name,
                 }
               : null,
           }
         : null,
-      manager: person.manager
+      manager: report.manager
         ? {
-            id: person.manager.id,
-            name: person.manager.name,
-            email: person.manager.email,
-            role: person.manager.role,
-            status: person.manager.status,
-            birthday: person.manager.birthday,
-            reports: person.manager.reports,
+            id: report.manager.id,
+            name: report.manager.name,
+            email: report.manager.email,
+            role: report.manager.role,
+            status: report.manager.status,
+            birthday: report.manager.birthday,
+            reports: report.manager.reports,
           }
         : null,
-      reports: person.reports,
+      reports: report.reports,
     }
   })
 }
@@ -256,7 +260,13 @@ export async function getReportsWithoutRecentFeedback360(): Promise<
       managerId: currentPersonId,
       status: 'active',
     },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      status: true,
+      avatar: true,
       team: {
         select: {
           id: true,
@@ -348,51 +358,49 @@ export async function getReportsWithoutRecentFeedback360(): Promise<
 
   // Convert to PersonForList format
   return reportsNeedingFeedback360.map(report => {
-    // Type assertion to ensure all fields are available
-    const person = report as typeof report & { avatar: string | null }
     return {
-      id: person.id,
-      name: person.name,
-      email: person.email,
-      role: person.role,
-      status: person.status,
-      avatar: person.avatar,
-      team: person.team
+      id: report.id,
+      name: report.name,
+      email: report.email,
+      role: report.role,
+      status: report.status,
+      avatar: report.avatar,
+      team: report.team
         ? {
-            id: person.team.id,
-            name: person.team.name,
+            id: report.team.id,
+            name: report.team.name,
           }
         : null,
-      jobRole: person.jobRole
+      jobRole: report.jobRole
         ? {
-            id: person.jobRole.id,
-            title: person.jobRole.title,
-            level: person.jobRole.level
+            id: report.jobRole.id,
+            title: report.jobRole.title,
+            level: report.jobRole.level
               ? {
-                  id: person.jobRole.level.id,
-                  name: person.jobRole.level.name,
+                  id: report.jobRole.level.id,
+                  name: report.jobRole.level.name,
                 }
               : null,
-            domain: person.jobRole.domain
+            domain: report.jobRole.domain
               ? {
-                  id: person.jobRole.domain.id,
-                  name: person.jobRole.domain.name,
+                  id: report.jobRole.domain.id,
+                  name: report.jobRole.domain.name,
                 }
               : null,
           }
         : null,
-      manager: person.manager
+      manager: report.manager
         ? {
-            id: person.manager.id,
-            name: person.manager.name,
-            email: person.manager.email,
-            role: person.manager.role,
-            status: person.manager.status,
-            birthday: person.manager.birthday,
-            reports: person.manager.reports,
+            id: report.manager.id,
+            name: report.manager.name,
+            email: report.manager.email,
+            role: report.manager.role,
+            status: report.manager.status,
+            birthday: report.manager.birthday,
+            reports: report.manager.reports,
           }
         : null,
-      reports: person.reports,
+      reports: report.reports,
     }
   })
 }
@@ -451,7 +459,13 @@ export async function getManagersExceedingMaxReports(): Promise<
       organizationId,
       status: 'active',
     },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      status: true,
+      avatar: true,
       team: {
         select: {
           id: true,
@@ -503,51 +517,49 @@ export async function getManagersExceedingMaxReports(): Promise<
 
   // Convert to PersonForList format
   return people.map(person => {
-    // Type assertion to ensure all fields are available
-    const p = person as typeof person & { avatar: string | null }
     return {
-      id: p.id,
-      name: p.name,
-      email: p.email,
-      role: p.role,
-      status: p.status,
-      avatar: p.avatar,
-      team: p.team
+      id: person.id,
+      name: person.name,
+      email: person.email,
+      role: person.role,
+      status: person.status,
+      avatar: person.avatar,
+      team: person.team
         ? {
-            id: p.team.id,
-            name: p.team.name,
+            id: person.team.id,
+            name: person.team.name,
           }
         : null,
-      jobRole: p.jobRole
+      jobRole: person.jobRole
         ? {
-            id: p.jobRole.id,
-            title: p.jobRole.title,
-            level: p.jobRole.level
+            id: person.jobRole.id,
+            title: person.jobRole.title,
+            level: person.jobRole.level
               ? {
-                  id: p.jobRole.level.id,
-                  name: p.jobRole.level.name,
+                  id: person.jobRole.level.id,
+                  name: person.jobRole.level.name,
                 }
               : null,
-            domain: p.jobRole.domain
+            domain: person.jobRole.domain
               ? {
-                  id: p.jobRole.domain.id,
-                  name: p.jobRole.domain.name,
+                  id: person.jobRole.domain.id,
+                  name: person.jobRole.domain.name,
                 }
               : null,
           }
         : null,
-      manager: p.manager
+      manager: person.manager
         ? {
-            id: p.manager.id,
-            name: p.manager.name,
-            email: p.manager.email,
-            role: p.manager.role,
-            status: p.manager.status,
-            birthday: p.manager.birthday,
-            reports: p.manager.reports,
+            id: person.manager.id,
+            name: person.manager.name,
+            email: person.manager.email,
+            role: person.manager.role,
+            status: person.manager.status,
+            birthday: person.manager.birthday,
+            reports: person.manager.reports,
           }
         : null,
-      reports: p.reports,
+      reports: person.reports,
     }
   })
 }
