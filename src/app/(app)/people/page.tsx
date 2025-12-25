@@ -1,10 +1,7 @@
-import { PeopleDashboardClient } from '@/components/people/people-dashboard-client'
-import {
-  getActionPermission,
-  getCurrentUser,
-  getCurrentUserWithPersonAndOrganization,
-} from '@/lib/auth-utils'
-import { getPeopleStats } from '@/lib/actions/people-stats'
+import { PeopleDashboardServer } from '@/components/people/people-dashboard-server'
+import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
+// Import widgets to register them
+import '@/components/widgets'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
@@ -17,12 +14,6 @@ export default async function PeoplePage() {
   const user = await getCurrentUser()
   const canCreatePeople = await getActionPermission(user, 'person.create')
   const canImportPeople = await getActionPermission(user, 'person.import')
-
-  // Fetch stats and person info in parallel
-  const [stats, { person }] = await Promise.all([
-    getPeopleStats(),
-    getCurrentUserWithPersonAndOrganization(),
-  ])
 
   const breadcrumbs = [
     { name: 'Dashboard', href: '/dashboard' },
@@ -48,11 +39,7 @@ export default async function PeoplePage() {
         />
 
         <PageContent>
-          <PeopleDashboardClient
-            stats={stats}
-            hasLinkedPerson={!!person}
-            currentPersonId={person?.id}
-          />
+          <PeopleDashboardServer />
         </PageContent>
       </PageContainer>
     </PageBreadcrumbSetter>
