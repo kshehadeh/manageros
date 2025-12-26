@@ -34,11 +34,22 @@ export async function PeopleDashboardServer() {
     hasLinkedPerson: !!person,
   }
 
-  // Get all registered widgets
+  // Get all registered widgets - filter out initiative widgets
   const allWidgets = widgetRegistry.getAll()
+  const initiativeWidgetIds = [
+    'total-open-initiatives',
+    'initiatives-in-exception',
+    'user-initiatives',
+    'overdue-initiatives',
+    'initiatives-status-chart',
+    'initiatives-rag-chart',
+  ]
+  const peopleWidgets = allWidgets.filter(
+    widget => !initiativeWidgetIds.includes(widget.metadata.id)
+  )
 
   // Check visibility and fetch data for each widget
-  const widgetPromises = allWidgets.map(async widget => {
+  const widgetPromises = peopleWidgets.map(async widget => {
     const visibility = await widget.checkVisibility(context)
 
     if (!visibility.visible) {
