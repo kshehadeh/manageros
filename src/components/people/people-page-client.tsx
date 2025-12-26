@@ -1,9 +1,5 @@
 'use client'
 
-// This component is kept for backward compatibility
-// The dashboard is now shown via PeopleDashboardClient
-// This file can be removed if no longer needed
-
 import { PeopleDataTable } from '@/components/people/data-table'
 import { PageSection } from '@/components/ui/page-section'
 

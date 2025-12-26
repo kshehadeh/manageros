@@ -1,0 +1,90 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Tooltip,
+  type TooltipProps,
+} from 'recharts'
+
+interface InitiativesStatusChartProps {
+  data: Array<{ name: string; value: number }>
+}
+
+// Custom tooltip for bar chart
+const BarChartTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+  if (active && payload && payload.length && payload[0]) {
+    const data = payload[0]
+    const originalData =
+      (data.payload as { name?: string; value?: number }) || {}
+    const statusName = originalData.name || 'Unknown'
+    const count = originalData.value || data.value || 0
+    return (
+      <div className='rounded-md border border-border bg-card text-card-foreground p-2 shadow-md'>
+        <p className='text-xs font-medium font-mono'>{statusName}</p>
+        <p className='text-xs text-muted-foreground font-mono'>
+          {count} {count === 1 ? 'initiative' : 'initiatives'}
+        </p>
+      </div>
+    )
+  }
+  return null
+}
+
+export function InitiativesStatusChart({ data }: InitiativesStatusChartProps) {
+  const [primaryColor, setPrimaryColor] = useState('#3b82f6') // fallback color
+
+  useEffect(() => {
+    // Get computed CSS variable value at runtime
+    if (typeof window !== 'undefined') {
+      const root = document.documentElement
+      const computed = getComputedStyle(root)
+      const primary = computed.getPropertyValue('--color-primary').trim()
+      if (primary) {
+        // CSS variable is already in HSL format like "hsl(221.2 83.2% 53.3%)"
+        setPrimaryColor(primary)
+      }
+    }
+  }, [])
+
+  if (data.length === 0) {
+    return (
+      <div className='flex items-center justify-center h-[200px] text-sm text-muted-foreground'>
+        No data available
+      </div>
+    )
+  }
+
+  return (
+    <ResponsiveContainer width='100%' height={200}>
+      <BarChart
+        data={data}
+        layout='vertical'
+        margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+      >
+        <XAxis
+          type='number'
+          tick={{
+            fontSize: 11,
+            fontFamily: 'var(--font-family-mono)',
+          }}
+        />
+        <YAxis
+          type='category'
+          dataKey='name'
+          width={100}
+          tick={{
+            fontSize: 11,
+            fontFamily: 'var(--font-family-mono)',
+          }}
+        />
+        <Tooltip content={BarChartTooltip} />
+        <Bar dataKey='value' fill={primaryColor} radius={[0, 4, 4, 0]} />
+      </BarChart>
+    </ResponsiveContainer>
+  )
+}
