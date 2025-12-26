@@ -14,7 +14,6 @@ import { OneOnOneFrequencyFormFields } from './rules/one-on-one-frequency-rule-f
 import { InitiativeCheckInFormFields } from './rules/initiative-checkin-rule-form'
 import { Feedback360FormFields } from './rules/feedback-360-rule-form'
 import { ManagerSpanFormFields } from './rules/manager-span-rule-form'
-import { MaxReportsFormFields } from './rules/max-reports-rule-form'
 
 /**
  * Registry of form components (client-safe)
@@ -40,10 +39,6 @@ export const toleranceRuleFormRegistry: Record<
     onChange: (config: unknown) => void
   }>,
   manager_span: ManagerSpanFormFields as React.ComponentType<{
-    config: unknown
-    onChange: (config: unknown) => void
-  }>,
-  max_reports: MaxReportsFormFields as React.ComponentType<{
     config: unknown
     onChange: (config: unknown) => void
   }>,

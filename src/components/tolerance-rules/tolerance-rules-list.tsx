@@ -21,7 +21,6 @@ import type {
   Feedback360Config,
   InitiativeCheckInConfig,
   ManagerSpanConfig,
-  MaxReportsConfig,
   OneOnOneFrequencyConfig,
   ToleranceRule,
   ToleranceRuleConfig,
@@ -81,8 +80,6 @@ export function ToleranceRulesList({ rules }: ToleranceRulesListProps) {
         return '360 Feedback'
       case 'manager_span':
         return 'Manager Span'
-      case 'max_reports':
-        return 'Max Reports'
       default:
         return ruleType
     }
@@ -106,10 +103,6 @@ export function ToleranceRulesList({ rules }: ToleranceRulesListProps) {
       case 'manager_span': {
         const managerConfig = config as ManagerSpanConfig
         return `Max: ${managerConfig.maxDirectReports} reports`
-      }
-      case 'max_reports': {
-        const maxReportsConfig = config as MaxReportsConfig
-        return `Max: ${maxReportsConfig.maxReports} reports`
       }
       default:
         return 'N/A'

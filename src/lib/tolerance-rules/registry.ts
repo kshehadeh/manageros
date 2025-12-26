@@ -11,7 +11,6 @@ import { oneOnOneFrequencyRule } from './rules/one-on-one-frequency-rule'
 import { initiativeCheckInRule } from './rules/initiative-checkin-rule'
 import { feedback360Rule } from './rules/feedback-360-rule'
 import { managerSpanRule } from './rules/manager-span-rule'
-import { maxReportsRule } from './rules/max-reports-rule'
 
 /**
  * Registry of all tolerance rule modules
@@ -25,7 +24,6 @@ export const toleranceRuleRegistry: Record<
   initiative_checkin: initiativeCheckInRule as ToleranceRuleModule,
   feedback_360: feedback360Rule as ToleranceRuleModule,
   manager_span: managerSpanRule as ToleranceRuleModule,
-  max_reports: maxReportsRule as ToleranceRuleModule,
 }
 
 /**

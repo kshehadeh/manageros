@@ -45,8 +45,6 @@ const getDefaultConfig = (ruleType: ToleranceRuleType): ToleranceRuleConfig => {
       return { warningThresholdMonths: 6 }
     case 'manager_span':
       return { maxDirectReports: 8 }
-    case 'max_reports':
-      return { maxReports: 10 }
   }
 }
 
@@ -137,7 +135,6 @@ export function ToleranceRuleForm({ rule }: ToleranceRuleFormProps) {
             </SelectItem>
             <SelectItem value='feedback_360'>360 Feedback</SelectItem>
             <SelectItem value='manager_span'>Manager Span</SelectItem>
-            <SelectItem value='max_reports'>Maximum Reports</SelectItem>
           </SelectContent>
         </Select>
       </div>

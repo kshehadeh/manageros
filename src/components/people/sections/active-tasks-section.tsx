@@ -4,15 +4,19 @@ import { SectionHeader } from '@/components/ui/section-header'
 import { ListTodo } from 'lucide-react'
 import { getTasksForAssignee } from '@/lib/data/tasks'
 import { getCurrentUser } from '@/lib/auth-utils'
+import { EmptyStateCard } from './empty-state-card'
+import { checkIfManagerOrSelf } from '@/lib/utils/people-utils'
 
 interface ActiveTasksSectionProps {
   personId: string
   organizationId: string
+  currentPersonId?: string | null
 }
 
 export async function ActiveTasksSection({
   personId,
   organizationId,
+  currentPersonId,
 }: ActiveTasksSectionProps) {
   if (!organizationId) {
     return null
@@ -47,8 +51,29 @@ export async function ActiveTasksSection({
       }
     >
 
-    // Only show if person has active tasks
+    // Show empty state card if person has no active tasks
+    // Only show if current user is a manager (direct or indirect) of this person
     if (tasks.length === 0) {
+      // Check if current user is a manager of this person
+      const isManager =
+        currentPersonId && currentPersonId !== personId
+          ? await checkIfManagerOrSelf(currentPersonId, personId)
+          : false
+
+      // Only show empty state if user is a manager (not self)
+      if (isManager && currentPersonId !== personId) {
+        return (
+          <EmptyStateCard
+            title='Start with a Task'
+            description='Create a task to help track work and progress. Tasks can be assigned to initiatives, have due dates, and be prioritized.'
+            actionLabel='Create Task'
+            actionHref={`/tasks/new?assigneeId=${personId}`}
+            icon={ListTodo}
+          />
+        )
+      }
+
+      // If not a manager, return null (don't show empty state)
       return null
     }
 
