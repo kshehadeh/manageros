@@ -1,16 +1,15 @@
-import { InitiativesDashboardServer } from '@/components/initiatives/initiatives-dashboard-server'
-import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
-// Import widgets to register them
-import '@/components/widgets'
+import { InitiativeDataTable } from '@/components/initiatives/data-table'
+import { Rocket } from 'lucide-react'
+import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
-import { Rocket } from 'lucide-react'
+import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
 import { InitiativesListActionsDropdown } from '@/components/initiatives/initiatives-list-actions-dropdown'
 import { InitiativesViewDropdown } from '@/components/initiatives/initiatives-view-dropdown'
 import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 
-export default async function InitiativesPage() {
+export default async function InitiativesListPage() {
   const user = await getCurrentUser()
   const canCreateInitiatives = await getActionPermission(
     user,
@@ -20,6 +19,7 @@ export default async function InitiativesPage() {
   const breadcrumbs = [
     { name: 'Dashboard', href: '/dashboard' },
     { name: 'Initiatives', href: '/initiatives' },
+    { name: 'List', href: '/initiatives/list' },
   ]
 
   return (
@@ -40,7 +40,9 @@ export default async function InitiativesPage() {
           }
         />
         <PageContent>
-          <InitiativesDashboardServer />
+          <PageSection>
+            <InitiativeDataTable enablePagination={true} />
+          </PageSection>
         </PageContent>
       </PageContainer>
     </PageBreadcrumbSetter>
