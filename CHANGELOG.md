@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.52.0](/compare/v1.51.0...v1.52.0) (2025-12-26)
+
+### Features
+
+- enhance initiatives page with new dashboard and widget registration 226459c
+
 # [1.51.0](/compare/v1.50.0...v1.51.0) (2025-12-23)
 
 ### Features
