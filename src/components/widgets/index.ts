@@ -50,6 +50,10 @@ export type {
 // Export WidgetCard component
 export { WidgetCard } from './widget-card'
 
+// Export skeleton components
+export { WidgetSkeleton, ChartWidgetSkeleton } from './widget-skeleton'
+export { DashboardWidgetsSkeleton } from './dashboard-widgets-skeleton'
+
 // Export individual widgets for direct access if needed
 export {
   totalPeopleWidget,
