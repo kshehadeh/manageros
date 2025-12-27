@@ -162,7 +162,9 @@ export async function OnboardingSection({
     }
 
     // Get people list for mentor selection
-    const people = await getPeopleForOrganization(user.managerOSOrganizationId)
+    const people = await getPeopleForOrganization(
+      user.managerOSOrganizationId
+    ).catch(() => [])
 
     return (
       <OnboardingEmptyStateCard
