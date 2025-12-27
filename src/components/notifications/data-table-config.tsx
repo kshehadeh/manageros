@@ -15,7 +15,10 @@ import {
 } from 'lucide-react'
 import { NotificationWithResponse } from '@/lib/actions/notification'
 import { useNotificationsTable } from '@/hooks/use-notifications-table'
-import { useNotificationTableSettings } from '@/hooks/use-notification-table-settings'
+import {
+  useNotificationTableSettings,
+  notificationsTableUrlConfig,
+} from '@/hooks/use-notification-table-settings'
 import { deleteNotification } from '@/lib/actions/notification'
 import type { DataTableConfig } from '@/components/common/generic-data-table'
 import {
@@ -51,6 +54,9 @@ export const notificationsDataTableConfig: DataTableConfig<
 
   // Settings management
   useSettingsHook: useNotificationTableSettings,
+
+  // URL synchronization
+  urlConfig: notificationsTableUrlConfig,
 
   // Additional props passed to columns
   columnProps: {},

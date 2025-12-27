@@ -31,7 +31,10 @@ import {
 } from '@/lib/task-priority'
 import type { ExtendedTaskListItem } from '@/lib/task-list-select'
 import { useTasks } from '@/hooks/use-tasks'
-import { useTaskTableSettings } from '@/hooks/use-task-table-settings'
+import {
+  useTaskTableSettings,
+  taskTableUrlConfig,
+} from '@/hooks/use-task-table-settings'
 import { deleteTask, updateTaskStatus } from '@/lib/actions/task'
 import type { DataTableConfig } from '@/components/common/generic-data-table'
 import {
@@ -172,6 +175,9 @@ export const taskDataTableConfig: DataTableConfig<
 
   // Settings management
   useSettingsHook: useTaskTableSettings,
+
+  // URL synchronization
+  urlConfig: taskTableUrlConfig,
 
   // Additional props passed to columns
   columnProps: {},

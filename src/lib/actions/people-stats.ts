@@ -309,24 +309,24 @@ export async function getPeopleStats(): Promise<PeopleStats | null> {
     }
   }
 
-  // Count managers exceeding max reports threshold (only if max_reports rule exists)
+  // Count managers exceeding manager span threshold (only if manager_span rule exists)
   let managersExceedingMaxReports = 0
   let hasMaxReportsRule = false
-  const maxReportsRule = await prisma.organizationToleranceRule.findFirst({
+  const managerSpanRule = await prisma.organizationToleranceRule.findFirst({
     where: {
       organizationId,
-      ruleType: 'max_reports',
+      ruleType: 'manager_span',
       isEnabled: true,
     },
   })
 
-  if (maxReportsRule) {
+  if (managerSpanRule) {
     hasMaxReportsRule = true
-    // Count active exceptions for max_reports rule
+    // Count active exceptions for manager_span rule
     managersExceedingMaxReports = await prisma.exception.count({
       where: {
         organizationId,
-        ruleId: maxReportsRule.id,
+        ruleId: managerSpanRule.id,
         entityType: 'Person',
         status: 'active',
       },

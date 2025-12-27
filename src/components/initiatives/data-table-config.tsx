@@ -20,7 +20,10 @@ import {
 } from '@/components/ui/multi-select'
 import { usePeopleCache, useTeamsCache } from '@/hooks/use-organization-cache'
 import { useInitiatives } from '@/hooks/use-initiatives'
-import { useInitiativeTableSettings } from '@/hooks/use-initiative-table-settings'
+import {
+  useInitiativeTableSettings,
+  initiativeTableUrlConfig,
+} from '@/hooks/use-initiative-table-settings'
 import { deleteInitiative } from '@/lib/actions/initiative'
 import type { DataTableConfig } from '@/components/common/generic-data-table'
 
@@ -150,6 +153,9 @@ export const initiativeDataTableConfig: DataTableConfig<
 
   // Settings management
   useSettingsHook: useInitiativeTableSettings,
+
+  // URL synchronization
+  urlConfig: initiativeTableUrlConfig,
 
   onRowClick: (router, initiativeId) => {
     router.push(`/initiatives/${initiativeId}`)

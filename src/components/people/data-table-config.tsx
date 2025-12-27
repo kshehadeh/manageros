@@ -8,7 +8,10 @@ import { MoreHorizontal, Users, Building, Briefcase } from 'lucide-react'
 import type { PersonListItem } from '@/types/api'
 import { PersonAvatar } from '@/components/people/person-avatar'
 import { usePeople } from '@/hooks/use-people'
-import { usePeopleTableSettings } from '@/hooks/use-people-table-settings'
+import {
+  usePeopleTableSettings,
+  peopleTableUrlConfig,
+} from '@/hooks/use-people-table-settings'
 import { deletePerson } from '@/lib/actions/person'
 import type { DataTableConfig } from '@/components/common/generic-data-table'
 import { PeopleFilterContent } from './people-filter-content'
@@ -35,6 +38,9 @@ export const peopleDataTableConfig: DataTableConfig<
 
   // Settings management
   useSettingsHook: usePeopleTableSettings,
+
+  // URL synchronization
+  urlConfig: peopleTableUrlConfig,
 
   onEdit: (router, { entityId }) => {
     router.push(`/people/${entityId}/edit`)

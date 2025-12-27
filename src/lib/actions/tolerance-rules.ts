@@ -20,7 +20,6 @@ const toleranceRuleTypeSchema = z.enum([
   'initiative_checkin',
   'feedback_360',
   'manager_span',
-  'max_reports',
 ])
 
 // Create a union schema for all config types
@@ -29,7 +28,6 @@ const toleranceRuleConfigSchema = z.union([
   getRuleConfigSchema('initiative_checkin'),
   getRuleConfigSchema('feedback_360'),
   getRuleConfigSchema('manager_span'),
-  getRuleConfigSchema('max_reports'),
 ])
 
 const createToleranceRuleSchema = z.object({

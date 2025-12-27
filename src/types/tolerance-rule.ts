@@ -7,14 +7,12 @@ export type ToleranceRuleType =
   | 'initiative_checkin'
   | 'feedback_360'
   | 'manager_span'
-  | 'max_reports'
 
 // Import config types from rule modules
 import type { OneOnOneFrequencyConfig } from '@/lib/tolerance-rules/rules/one-on-one-frequency-rule'
 import type { InitiativeCheckInConfig } from '@/lib/tolerance-rules/rules/initiative-checkin-rule'
 import type { Feedback360Config } from '@/lib/tolerance-rules/rules/feedback-360-rule'
 import type { ManagerSpanConfig } from '@/lib/tolerance-rules/rules/manager-span-rule'
-import type { MaxReportsConfig } from '@/lib/tolerance-rules/rules/max-reports-rule'
 
 // Re-export for backward compatibility
 export type {
@@ -22,7 +20,6 @@ export type {
   InitiativeCheckInConfig,
   Feedback360Config,
   ManagerSpanConfig,
-  MaxReportsConfig,
 }
 
 export type ToleranceRuleConfig =
@@ -30,7 +27,6 @@ export type ToleranceRuleConfig =
   | InitiativeCheckInConfig
   | Feedback360Config
   | ManagerSpanConfig
-  | MaxReportsConfig
 
 export interface ToleranceRule {
   id: string

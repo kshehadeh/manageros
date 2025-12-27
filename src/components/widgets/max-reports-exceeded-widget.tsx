@@ -19,28 +19,28 @@ export const maxReportsExceededWidget: Widget = {
   },
 
   async checkVisibility(context: WidgetContext): Promise<WidgetVisibility> {
-    // Check if max_reports rule exists
-    const maxReportsRule = await prisma.organizationToleranceRule.findFirst({
+    // Check if manager_span rule exists
+    const managerSpanRule = await prisma.organizationToleranceRule.findFirst({
       where: {
         organizationId: context.organizationId,
-        ruleType: 'max_reports',
+        ruleType: 'manager_span',
         isEnabled: true,
       },
     })
 
-    if (!maxReportsRule) {
-      return { visible: false, reason: 'No max reports rule configured' }
+    if (!managerSpanRule) {
+      return { visible: false, reason: 'No manager span rule configured' }
     }
 
-    return { visible: true, reason: 'Max reports rule exists' }
+    return { visible: true, reason: 'Manager span rule exists' }
   },
 
   async fetchData(context: WidgetContext): Promise<MaxReportsExceededData> {
-    // Get tolerance rule for max reports
+    // Get tolerance rule for manager span
     const toleranceRule = await prisma.organizationToleranceRule.findFirst({
       where: {
         organizationId: context.organizationId,
-        ruleType: 'max_reports',
+        ruleType: 'manager_span',
         isEnabled: true,
       },
     })
@@ -49,7 +49,7 @@ export const maxReportsExceededWidget: Widget = {
       return { count: 0 }
     }
 
-    // Get all active exceptions for max_reports rule
+    // Get all active exceptions for manager_span rule
     const exceptions = await prisma.exception.findMany({
       where: {
         organizationId: context.organizationId,

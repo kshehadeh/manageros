@@ -6,7 +6,10 @@ import { MoreHorizontal, Calendar, User as UserIcon } from 'lucide-react'
 import type { FeedbackListItem } from '@/types/api'
 import { getKindLabel } from '@/lib/utils/feedback'
 import { useFeedback } from '@/hooks/use-feedback'
-import { useFeedbackTableSettings } from '@/hooks/use-feedback-table-settings'
+import {
+  useFeedbackTableSettings,
+  feedbackTableUrlConfig,
+} from '@/hooks/use-feedback-table-settings'
 import { deleteFeedback } from '@/lib/actions/feedback'
 import type { DataTableConfig } from '@/components/common/generic-data-table'
 import { formatDistanceToNow } from 'date-fns'
@@ -22,6 +25,9 @@ export const feedbackDataTableConfig: DataTableConfig<FeedbackListItem> = {
 
   // Settings management
   useSettingsHook: useFeedbackTableSettings,
+
+  // URL synchronization
+  urlConfig: feedbackTableUrlConfig,
 
   // Column definitions
   createColumns: ({ onButtonClick, visibleColumns }) => {

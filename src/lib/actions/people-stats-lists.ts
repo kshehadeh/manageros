@@ -419,11 +419,11 @@ export async function getManagersExceedingMaxReports(): Promise<
 
   const organizationId = user.managerOSOrganizationId
 
-  // Get tolerance rule for max reports
+  // Get tolerance rule for manager span
   const toleranceRule = await prisma.organizationToleranceRule.findFirst({
     where: {
       organizationId,
-      ruleType: 'max_reports',
+      ruleType: 'manager_span',
       isEnabled: true,
     },
   })
@@ -432,7 +432,7 @@ export async function getManagersExceedingMaxReports(): Promise<
     return []
   }
 
-  // Get all active exceptions for max_reports rule
+  // Get all active exceptions for manager_span rule
   const exceptions = await prisma.exception.findMany({
     where: {
       organizationId,

@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import {
   PieChart,
   Pie,
@@ -10,7 +11,7 @@ import {
 } from 'recharts'
 
 interface InitiativesRagChartProps {
-  data: Array<{ name: string; value: number }>
+  data: Array<{ name: string; value: number; rag: string }>
   colors: string[]
 }
 
@@ -34,6 +35,26 @@ export function InitiativesRagChart({
   data: chartData,
   colors,
 }: InitiativesRagChartProps) {
+  const router = useRouter()
+
+  const handlePieClick = (
+    data: unknown,
+    _index: number,
+    e: React.MouseEvent
+  ) => {
+    // Stop event propagation to prevent widget-level click handler from firing
+    e.stopPropagation()
+
+    // Recharts passes the data object directly as the first parameter
+    const pieData = data as { rag?: string; name?: string; value?: number }
+    if (!pieData?.rag) return
+
+    // Navigate to initiatives list with RAG filter
+    const searchParams = new URLSearchParams()
+    searchParams.set('rag', pieData.rag)
+    router.push(`/initiatives/list?${searchParams.toString()}`)
+  }
+
   if (chartData.length === 0) {
     return (
       <div className='flex items-center justify-center h-[200px] text-sm text-muted-foreground'>
@@ -85,11 +106,13 @@ export function InitiativesRagChart({
               outerRadius={70}
               fill='#8884d8'
               dataKey='value'
+              onClick={handlePieClick}
             >
               {chartData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={colors[index % colors.length]}
+                  style={{ cursor: 'pointer' }}
                 />
               ))}
             </Pie>

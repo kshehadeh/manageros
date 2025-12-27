@@ -217,6 +217,7 @@ export function PersonDetailContent({
               jiraAccount={person.jiraAccount}
               githubAccount={person.githubAccount}
               size='sm'
+              organizationId={organizationId}
             />
           </div>
         }
@@ -230,6 +231,7 @@ export function PersonDetailContent({
               <OnboardingSection
                 personId={person.id}
                 personName={person.name}
+                currentPersonId={currentPersonId}
               />
             </Suspense>
 
@@ -255,6 +257,7 @@ export function PersonDetailContent({
               <OwnedInitiativesSection
                 personId={person.id}
                 organizationId={organizationId}
+                currentPersonId={currentPersonId}
               />
             </Suspense>
 
@@ -263,6 +266,7 @@ export function PersonDetailContent({
               <ActiveTasksSection
                 personId={person.id}
                 organizationId={organizationId}
+                currentPersonId={currentPersonId}
               />
             </Suspense>
 

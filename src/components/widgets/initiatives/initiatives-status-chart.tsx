@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   BarChart,
   Bar,
@@ -8,11 +9,12 @@ import {
   YAxis,
   ResponsiveContainer,
   Tooltip,
+  Cell,
   type TooltipProps,
 } from 'recharts'
 
 interface InitiativesStatusChartProps {
-  data: Array<{ name: string; value: number }>
+  data: Array<{ name: string; value: number; status: string }>
 }
 
 // Custom tooltip for bar chart
@@ -36,6 +38,7 @@ const BarChartTooltip = ({ active, payload }: TooltipProps<number, string>) => {
 }
 
 export function InitiativesStatusChart({ data }: InitiativesStatusChartProps) {
+  const router = useRouter()
   const [primaryColor, setPrimaryColor] = useState('#3b82f6') // fallback color
 
   useEffect(() => {
@@ -50,6 +53,24 @@ export function InitiativesStatusChart({ data }: InitiativesStatusChartProps) {
       }
     }
   }, [])
+
+  const handleBarClick = (
+    data: unknown,
+    _index: number,
+    e: React.MouseEvent
+  ) => {
+    // Stop event propagation to prevent widget-level click handler from firing
+    e.stopPropagation()
+
+    // Recharts passes the data object directly as the first parameter
+    const barData = data as { status?: string; name?: string; value?: number }
+    if (!barData?.status) return
+
+    // Navigate to initiatives list with status filter
+    const searchParams = new URLSearchParams()
+    searchParams.set('status', barData.status)
+    router.push(`/initiatives/list?${searchParams.toString()}`)
+  }
 
   if (data.length === 0) {
     return (
@@ -83,7 +104,21 @@ export function InitiativesStatusChart({ data }: InitiativesStatusChartProps) {
           }}
         />
         <Tooltip content={BarChartTooltip} />
-        <Bar dataKey='value' fill={primaryColor} radius={[0, 4, 4, 0]} />
+        <Bar
+          dataKey='value'
+          fill={primaryColor}
+          radius={[0, 4, 4, 0]}
+          onClick={handleBarClick}
+          style={{ cursor: 'pointer' }}
+        >
+          {data.map((entry, index) => (
+            <Cell
+              key={`cell-${index}`}
+              fill={primaryColor}
+              style={{ cursor: 'pointer' }}
+            />
+          ))}
+        </Bar>
       </BarChart>
     </ResponsiveContainer>
   )

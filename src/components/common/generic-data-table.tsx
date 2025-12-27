@@ -50,6 +50,8 @@ import {
   ContextMenuItem,
 } from '@/components/common/context-menu-items'
 import { ViewDropdown } from '@/components/common/view-dropdown'
+import { useTableSettingsUrlSync } from '@/hooks/use-table-settings-url-sync'
+import type { TableUrlConfig } from '@/lib/table-url-config'
 
 // Type for column meta
 interface ColumnMeta {
@@ -190,6 +192,10 @@ export interface DataTableConfig<
 
   // Custom row className function
   getRowClassName?: (_entity: TData) => string
+
+  // URL synchronization configuration (optional)
+  // If provided, table settings will be synced to URL query parameters
+  urlConfig?: TableUrlConfig
 }
 
 interface GenericDataTableProps<
@@ -246,6 +252,23 @@ export function GenericDataTable<
   } = config.useSettingsHook({
     settingsId: settingsId || 'default',
     enabled: true,
+  })
+
+  // Sync settings to URL parameters if URL config is provided
+  // Note: URL sync works even with immutableFilters - the URL params will eventually
+  // take precedence as the user interacts with filters
+  useTableSettingsUrlSync({
+    settings: {
+      filters: settings.filters,
+      sort: settings.sort,
+      grouping: settings.grouping,
+    },
+    config: config.urlConfig || {
+      filterParamMap: {},
+      defaultValues: {},
+    },
+    settingsId: settingsId || 'default',
+    enabled: !!config.urlConfig,
   })
 
   // Debounced search state - separate from internal filters to prevent immediate API calls

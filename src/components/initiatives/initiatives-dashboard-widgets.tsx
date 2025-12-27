@@ -50,9 +50,14 @@ export function InitiativesDashboardWidgetsClient({
       }
 
       case 'overdue-initiatives':
+        router.push('/initiatives/list')
+        break
+
       case 'initiatives-status-chart':
       case 'initiatives-rag-chart':
-        router.push('/initiatives/list')
+        // Chart-level clicks (bars/pie segments) are handled by the chart components themselves
+        // This case is kept for backward compatibility but shouldn't be triggered
+        // due to stopPropagation in the chart components
         break
 
       case 'initiatives-in-exception':

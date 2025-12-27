@@ -316,8 +316,9 @@ export async function updatePerson(id: string, formData: PersonFormData) {
     throw new Error('Person not found or access denied')
   }
 
-  // Store old manager ID to check for changes
+  // Store old manager ID and status to check for changes
   const oldManagerId = existingPerson.managerId
+  const oldStatus = existingPerson.status
 
   // Verify team belongs to user's organization if specified
   if (validatedData.teamId) {
@@ -402,6 +403,25 @@ export async function updatePerson(id: string, formData: PersonFormData) {
     }
     // Check new manager (if they were at threshold, adding a report might create an exception, but we don't resolve here)
     // The evaluation job will create exceptions if needed
+  }
+
+  // Auto-resolve manager span exceptions if status changed (affects active report count)
+  // If person's status changed from active to inactive, their manager's active report count decreased
+  // If person's status changed from inactive to active, their manager's active report count increased
+  // We only need to check if status changed and person has a manager
+  if (oldStatus !== updatedPerson.status && updatedPerson.managerId) {
+    const { resolveManagerSpanExceptions } = await import(
+      '@/lib/tolerance-rules/resolve-exceptions'
+    )
+    // If person became inactive, manager's active report count decreased (might be within threshold now)
+    // If person became active, manager's active report count increased (evaluation job will create exceptions if needed)
+    // We only resolve if person became inactive (report count decreased)
+    if (oldStatus === 'active' && updatedPerson.status === 'inactive') {
+      await resolveManagerSpanExceptions(
+        user.managerOSOrganizationId,
+        updatedPerson.managerId
+      )
+    }
   }
 
   // Revalidate the people page and person detail page
@@ -494,8 +514,9 @@ export async function updatePersonPartial(
 
   // Store old job role ID if it exists before update (for revalidation)
   const oldJobRoleId = existingPerson.jobRoleId
-  // Store old manager ID to check for changes
+  // Store old manager ID and status to check for changes
   const oldManagerId = existingPerson.managerId
+  const oldStatus = existingPerson.status
 
   // Build update data object with only provided fields
   const updateFields: Partial<Prisma.PersonUpdateInput> = {}
@@ -558,6 +579,28 @@ export async function updatePersonPartial(
     }
     // Check new manager (if they were at threshold, adding a report might create an exception, but we don't resolve here)
     // The evaluation job will create exceptions if needed
+  }
+
+  // Auto-resolve manager span exceptions if status changed (affects active report count)
+  // If person's status changed from active to inactive, their manager's active report count decreased
+  // We only need to check if status changed and person has a manager
+  if (
+    validatedData.status !== undefined &&
+    oldStatus !== updatedPerson.status &&
+    updatedPerson.managerId
+  ) {
+    const { resolveManagerSpanExceptions } = await import(
+      '@/lib/tolerance-rules/resolve-exceptions'
+    )
+    // If person became inactive, manager's active report count decreased (might be within threshold now)
+    // If person became active, manager's active report count increased (evaluation job will create exceptions if needed)
+    // We only resolve if person became inactive (report count decreased)
+    if (oldStatus === 'active' && updatedPerson.status === 'inactive') {
+      await resolveManagerSpanExceptions(
+        user.managerOSOrganizationId,
+        updatedPerson.managerId
+      )
+    }
   }
 
   // Revalidate the people page

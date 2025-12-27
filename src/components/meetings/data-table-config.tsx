@@ -23,7 +23,10 @@ import type {
   MeetingInstanceWithRelations,
 } from '@/components/meetings/shared-meetings-table'
 import { useMeetings } from '@/hooks/use-meetings'
-import { useMeetingTableSettings } from '@/hooks/use-meeting-table-settings'
+import {
+  useMeetingTableSettings,
+  meetingTableUrlConfig,
+} from '@/hooks/use-meeting-table-settings'
 import { deleteMeeting } from '@/lib/actions/meeting'
 import type { DataTableConfig } from '@/components/common/generic-data-table'
 
@@ -166,7 +169,7 @@ function MeetingFilterContent({
           value={settings.filters.meetingType || 'all'}
           onValueChange={value => {
             if (value === 'all') {
-              updateFilters({ meetingType: undefined })
+              updateFilters({ meetingType: '' })
             } else {
               updateFilters({ meetingType: value })
             }
@@ -232,6 +235,9 @@ export const meetingDataTableConfig: DataTableConfig<
 
   // Settings management
   useSettingsHook: useMeetingTableSettings,
+
+  // URL synchronization
+  urlConfig: meetingTableUrlConfig,
 
   // Custom ID extraction for meetings (handles both regular meetings and instances)
   getId: entity => {
@@ -577,7 +583,7 @@ export const meetingDataTableConfig: DataTableConfig<
     search: '',
     teamId: [],
     initiativeId: [],
-    meetingType: undefined,
+    meetingType: '',
     scheduledFrom: '',
     scheduledTo: '',
   }),
