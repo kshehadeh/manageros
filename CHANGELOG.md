@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.52.2](/compare/v1.52.1...v1.52.2) (2025-12-27)
+
+### Bug Fixes
+
+- handle errors when fetching people list in onboarding section 6973d7a
+
 ## [1.52.1](/compare/v1.52.0...v1.52.1) (2025-12-26)
 
 # [1.52.0](/compare/v1.51.0...v1.52.0) (2025-12-26)
