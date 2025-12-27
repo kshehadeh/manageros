@@ -6,7 +6,7 @@ import { InitiativesStatusChart } from './initiatives-status-chart'
 import type { Widget, WidgetContext, WidgetVisibility } from '../types'
 
 interface InitiativesStatusChartData {
-  data: Array<{ name: string; value: number }>
+  data: Array<{ name: string; value: number; status: string }>
 }
 
 export const initiativesStatusChartWidget: Widget = {
@@ -54,6 +54,7 @@ export const initiativesStatusChartWidget: Widget = {
       .map(([status, value]) => ({
         name: statusLabels[status] || status,
         value,
+        status, // Include the status value for navigation
       }))
       .sort((a, b) => b.value - a.value)
 

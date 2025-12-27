@@ -1,4 +1,3 @@
-import { InitiativeDataTable } from '@/components/initiatives/data-table'
 import { Rocket } from 'lucide-react'
 import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
@@ -8,6 +7,7 @@ import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
 import { InitiativesListActionsDropdown } from '@/components/initiatives/initiatives-list-actions-dropdown'
 import { InitiativesViewDropdown } from '@/components/initiatives/initiatives-view-dropdown'
 import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
+import { InitiativesListClient } from '@/components/initiatives/initiatives-list-client'
 
 export default async function InitiativesListPage() {
   const user = await getCurrentUser()
@@ -41,7 +41,7 @@ export default async function InitiativesListPage() {
         />
         <PageContent>
           <PageSection>
-            <InitiativeDataTable enablePagination={true} />
+            <InitiativesListClient />
           </PageSection>
         </PageContent>
       </PageContainer>

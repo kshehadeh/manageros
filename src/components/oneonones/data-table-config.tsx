@@ -6,7 +6,10 @@ import { Button } from '@/components/ui/button'
 import { MoreHorizontal, Calendar, Users } from 'lucide-react'
 import { OneOnOneListItem } from '@/hooks/use-oneonones'
 import { useOneOnOnes } from '@/hooks/use-oneonones'
-import { useOneOnOneTableSettings } from '@/hooks/use-oneonone-table-settings'
+import {
+  useOneOnOneTableSettings,
+  oneOnOneTableUrlConfig,
+} from '@/hooks/use-oneonone-table-settings'
 import { deleteOneOnOne } from '@/lib/actions/oneonone'
 import type { DataTableConfig } from '@/components/common/generic-data-table'
 
@@ -97,6 +100,9 @@ export const oneOnOneDataTableConfig: DataTableConfig<
 
   // Settings management
   useSettingsHook: useOneOnOneTableSettings,
+
+  // URL synchronization
+  urlConfig: oneOnOneTableUrlConfig,
 
   // Column definitions
   createColumns: ({ onButtonClick, visibleColumns, grouping }) => {

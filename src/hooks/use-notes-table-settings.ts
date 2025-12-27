@@ -1,12 +1,17 @@
 'use client'
 
 import { useUser } from '@clerk/nextjs'
+import { useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { SortingState } from '@tanstack/react-table'
 import {
   getNotesTableSettings,
   updateNotesTableSettings,
 } from '@/lib/user-settings'
+import { notesTableUrlConfig } from '@/lib/table-url-config'
+
+// Export URL config for use in data table config
+export { notesTableUrlConfig }
 
 interface NotesTableSettings {
   sorting: SortingState
@@ -34,6 +39,7 @@ export function useNotesTableSettings({
   enabled = true,
 }: UseNotesTableSettingsOptions) {
   const { user } = useUser()
+  const searchParams = useSearchParams()
 
   const userId = user?.id
 
@@ -53,12 +59,58 @@ export function useNotesTableSettings({
   useEffect(() => {
     if (userId && enabled) {
       const loadedSettings = getNotesTableSettings(userId, settingsId)
-      setSettings(loadedSettings)
+      let normalizedSettings = loadedSettings
+
+      // Merge URL params into settings if present
+      if (settingsId === 'default') {
+        const config = notesTableUrlConfig
+
+        // Read each filter from URL params
+        for (const [filterKey, paramName] of Object.entries(
+          config.filterParamMap
+        )) {
+          const paramValue = searchParams.get(paramName)
+          if (paramValue) {
+            normalizedSettings = {
+              ...normalizedSettings,
+              filters: {
+                ...normalizedSettings.filters,
+                [filterKey]: paramValue,
+              },
+            }
+          }
+        }
+
+        // Read sort from URL
+        const sortParam = searchParams.get(config.sortParamName || 'sort')
+        if (sortParam) {
+          const [field, direction] = sortParam.split(':')
+          if (field && (direction === 'asc' || direction === 'desc')) {
+            normalizedSettings = {
+              ...normalizedSettings,
+              sort: { field, direction: direction as 'asc' | 'desc' },
+            }
+          }
+        }
+
+        // Read grouping from URL
+        const groupingParam = searchParams.get(
+          config.groupingParamName || 'grouping'
+        )
+        if (groupingParam) {
+          normalizedSettings = {
+            ...normalizedSettings,
+            grouping: groupingParam,
+          }
+        }
+      }
+
+      setSettings(normalizedSettings)
       setIsLoaded(true)
     } else {
       setIsLoaded(false)
     }
-  }, [userId, settingsId, enabled])
+  }, [userId, settingsId, enabled, searchParams])
 
   const updateSorting = useCallback(
     (sorting: SortingState) => {

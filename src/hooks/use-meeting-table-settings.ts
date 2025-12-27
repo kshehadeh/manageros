@@ -1,12 +1,17 @@
 'use client'
 
 import { useUser } from '@clerk/nextjs'
+import { useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { SortingState } from '@tanstack/react-table'
 import {
   getMeetingTableSettings,
   updateMeetingTableSettings,
 } from '@/lib/user-settings'
+import { meetingTableUrlConfig } from '@/lib/table-url-config'
+
+// Export URL config for use in data table config
+export { meetingTableUrlConfig }
 
 interface MeetingTableSettings {
   sorting: SortingState
@@ -39,6 +44,7 @@ export function useMeetingTableSettings({
   enabled = true,
 }: UseMeetingTableSettingsOptions) {
   const { user } = useUser()
+  const searchParams = useSearchParams()
 
   // Use Clerk user ID directly (available immediately, no API call needed)
   const userId = user?.id
@@ -64,12 +70,74 @@ export function useMeetingTableSettings({
   useEffect(() => {
     if (userId && enabled) {
       const loadedSettings = getMeetingTableSettings(userId, settingsId)
-      setSettings(loadedSettings)
+      let normalizedSettings = loadedSettings
+
+      // Merge URL params into settings if present
+      if (settingsId === 'default') {
+        const config = meetingTableUrlConfig
+
+        // Read each filter from URL params
+        for (const [filterKey, paramName] of Object.entries(
+          config.filterParamMap
+        )) {
+          const paramValue = searchParams.get(paramName)
+          if (paramValue) {
+            const defaultValue = config.defaultValues[filterKey]
+            // Handle comma-separated values for array filters
+            if (Array.isArray(defaultValue)) {
+              const values = paramValue.split(',').filter(Boolean)
+              if (values.length > 0) {
+                normalizedSettings = {
+                  ...normalizedSettings,
+                  filters: {
+                    ...normalizedSettings.filters,
+                    [filterKey]: values,
+                  },
+                }
+              }
+            } else {
+              // Single value filter
+              normalizedSettings = {
+                ...normalizedSettings,
+                filters: {
+                  ...normalizedSettings.filters,
+                  [filterKey]: paramValue,
+                },
+              }
+            }
+          }
+        }
+
+        // Read sort from URL
+        const sortParam = searchParams.get(config.sortParamName || 'sort')
+        if (sortParam) {
+          const [field, direction] = sortParam.split(':')
+          if (field && (direction === 'asc' || direction === 'desc')) {
+            normalizedSettings = {
+              ...normalizedSettings,
+              sort: { field, direction: direction as 'asc' | 'desc' },
+            }
+          }
+        }
+
+        // Read grouping from URL
+        const groupingParam = searchParams.get(
+          config.groupingParamName || 'grouping'
+        )
+        if (groupingParam) {
+          normalizedSettings = {
+            ...normalizedSettings,
+            grouping: groupingParam,
+          }
+        }
+      }
+
+      setSettings(normalizedSettings)
       setIsLoaded(true)
     } else {
       setIsLoaded(false)
     }
-  }, [userId, settingsId, enabled])
+  }, [userId, settingsId, enabled, searchParams])
 
   // Update sorting
   const updateSorting = useCallback(
@@ -120,29 +188,35 @@ export function useMeetingTableSettings({
 
       setSettings(prev => {
         // Normalize filter arrays (convert strings to arrays)
+        // Handle undefined by setting to default values
         const normalizedFilters: Partial<MeetingTableSettings['filters']> = {}
 
         if (filters.search !== undefined) {
-          normalizedFilters.search = filters.search
+          normalizedFilters.search = filters.search || ''
         }
         if (filters.teamId !== undefined) {
           normalizedFilters.teamId = Array.isArray(filters.teamId)
             ? filters.teamId
-            : [filters.teamId]
+            : filters.teamId
+              ? [filters.teamId]
+              : []
         }
         if (filters.initiativeId !== undefined) {
           normalizedFilters.initiativeId = Array.isArray(filters.initiativeId)
             ? filters.initiativeId
-            : [filters.initiativeId]
+            : filters.initiativeId
+              ? [filters.initiativeId]
+              : []
         }
         if (filters.scheduledFrom !== undefined) {
-          normalizedFilters.scheduledFrom = filters.scheduledFrom
+          normalizedFilters.scheduledFrom = filters.scheduledFrom || ''
         }
         if (filters.scheduledTo !== undefined) {
-          normalizedFilters.scheduledTo = filters.scheduledTo
+          normalizedFilters.scheduledTo = filters.scheduledTo || ''
         }
         if (filters.meetingType !== undefined) {
-          normalizedFilters.meetingType = filters.meetingType
+          // Handle undefined by setting to empty string (default)
+          normalizedFilters.meetingType = filters.meetingType || ''
         }
 
         const newSettings = {

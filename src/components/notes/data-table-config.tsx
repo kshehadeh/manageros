@@ -14,7 +14,10 @@ import {
 } from '@/components/common/context-menu-items'
 import { toast } from 'sonner'
 import { useNotes } from '@/hooks/use-notes'
-import { useNotesTableSettings } from '@/hooks/use-notes-table-settings'
+import {
+  useNotesTableSettings,
+  notesTableUrlConfig,
+} from '@/hooks/use-notes-table-settings'
 import { MoreHorizontal, Edit } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { MultiSelect } from '@/components/ui/multi-select'
@@ -93,6 +96,9 @@ export const notesDataTableConfig: DataTableConfig<
   useDataHook: useNotes,
 
   useSettingsHook: useNotesTableSettings,
+
+  // URL synchronization
+  urlConfig: notesTableUrlConfig,
 
   columnProps: {},
 

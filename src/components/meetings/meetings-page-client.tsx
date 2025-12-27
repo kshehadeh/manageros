@@ -7,7 +7,7 @@ export function MeetingsPageClient() {
   return (
     <PageSection>
       <MeetingDataTable
-        settingsId='meetings-list'
+        settingsId='default'
         enablePagination={true}
         limit={20}
       />

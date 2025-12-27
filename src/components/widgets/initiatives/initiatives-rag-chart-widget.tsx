@@ -5,7 +5,7 @@ import { InitiativesRagChart } from './initiatives-rag-chart'
 import type { Widget, WidgetContext, WidgetVisibility } from '../types'
 
 interface InitiativesRagChartData {
-  data: Array<{ name: string; value: number }>
+  data: Array<{ name: string; value: number; rag: string }>
   colors: string[]
 }
 
@@ -63,6 +63,7 @@ export const initiativesRagChartWidget: Widget = {
       .map(([rag, value]) => ({
         name: ragLabels[rag] || rag,
         value,
+        rag, // Include the RAG value for navigation
       }))
       .sort((a, b) => {
         // Sort: Red, Amber, Green

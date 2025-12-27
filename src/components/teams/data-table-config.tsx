@@ -6,7 +6,10 @@ import { Users, Target, MoreHorizontal } from 'lucide-react'
 import type { TeamListItem } from '@/hooks/use-teams'
 import { TeamAvatar } from '@/components/teams/team-avatar'
 import { useTeams } from '@/hooks/use-teams'
-import { useTeamTableSettings } from '@/hooks/use-team-table-settings'
+import {
+  useTeamTableSettings,
+  teamTableUrlConfig,
+} from '@/hooks/use-team-table-settings'
 import { deleteTeam } from '@/lib/actions/team'
 import type { DataTableConfig } from '@/components/common/generic-data-table'
 
@@ -26,6 +29,9 @@ export const teamDataTableConfig: DataTableConfig<TeamListItem, TeamFilters> = {
 
   // Settings management
   useSettingsHook: useTeamTableSettings,
+
+  // URL synchronization
+  urlConfig: teamTableUrlConfig,
 
   onRowClick: (router, teamId) => {
     router.push(`/teams/${teamId}`)

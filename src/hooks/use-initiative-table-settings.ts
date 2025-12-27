@@ -1,12 +1,17 @@
 'use client'
 
 import { useUser } from '@clerk/nextjs'
+import { useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { SortingState } from '@tanstack/react-table'
 import {
   getInitiativeTableSettings,
   updateInitiativeTableSettings,
 } from '@/lib/user-settings'
+import { initiativeTableUrlConfig } from '@/lib/table-url-config'
+
+// Export URL config for use in data table config
+export { initiativeTableUrlConfig }
 
 interface InitiativeTableSettings {
   sorting: SortingState
@@ -40,6 +45,7 @@ export function useInitiativeTableSettings({
   enabled = true,
 }: UseInitiativeTableSettingsOptions) {
   const { user } = useUser()
+  const searchParams = useSearchParams()
 
   // Use Clerk user ID directly (available immediately, no API call needed)
   const userId = user?.id
@@ -67,7 +73,7 @@ export function useInitiativeTableSettings({
     if (userId && enabled) {
       const loadedSettings = getInitiativeTableSettings(userId, settingsId)
       // Normalize filter arrays (handle backward compatibility with string values)
-      const normalizedSettings = {
+      let normalizedSettings = {
         ...loadedSettings,
         filters: {
           ...loadedSettings.filters,
@@ -93,12 +99,74 @@ export function useInitiativeTableSettings({
               : [],
         },
       }
+
+      // Merge URL params into settings if present (for all filters, sort, and grouping)
+      // This ensures the filter UI reflects URL params when navigating from external links
+      if (settingsId === 'default') {
+        const config = initiativeTableUrlConfig
+
+        // Read each filter from URL params
+        for (const [filterKey, paramName] of Object.entries(
+          config.filterParamMap
+        )) {
+          const paramValue = searchParams.get(paramName)
+          if (paramValue) {
+            const defaultValue = config.defaultValues[filterKey]
+            // Handle comma-separated values for array filters
+            if (Array.isArray(defaultValue)) {
+              const values = paramValue.split(',').filter(Boolean)
+              if (values.length > 0) {
+                normalizedSettings = {
+                  ...normalizedSettings,
+                  filters: {
+                    ...normalizedSettings.filters,
+                    [filterKey]: values,
+                  },
+                }
+              }
+            } else {
+              // Single value filter
+              normalizedSettings = {
+                ...normalizedSettings,
+                filters: {
+                  ...normalizedSettings.filters,
+                  [filterKey]: paramValue,
+                },
+              }
+            }
+          }
+        }
+
+        // Read sort from URL
+        const sortParam = searchParams.get(config.sortParamName || 'sort')
+        if (sortParam) {
+          const [field, direction] = sortParam.split(':')
+          if (field && (direction === 'asc' || direction === 'desc')) {
+            normalizedSettings = {
+              ...normalizedSettings,
+              sort: { field, direction: direction as 'asc' | 'desc' },
+            }
+          }
+        }
+
+        // Read grouping from URL
+        const groupingParam = searchParams.get(
+          config.groupingParamName || 'grouping'
+        )
+        if (groupingParam) {
+          normalizedSettings = {
+            ...normalizedSettings,
+            grouping: groupingParam,
+          }
+        }
+      }
+
       setSettings(normalizedSettings)
       setIsLoaded(true)
     } else {
       setIsLoaded(false)
     }
-  }, [userId, settingsId, enabled])
+  }, [userId, settingsId, enabled, searchParams])
 
   // Update sorting
   const updateSorting = useCallback(

@@ -1,8 +1,13 @@
 'use client'
 
 import { useUser } from '@clerk/nextjs'
+import { useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { SortingState } from '@tanstack/react-table'
+import { notificationsTableUrlConfig } from '@/lib/table-url-config'
+
+// Export URL config for use in data table config
+export { notificationsTableUrlConfig }
 
 interface NotificationTableSettings {
   sorting: SortingState
@@ -32,6 +37,7 @@ export function useNotificationTableSettings({
   enabled = true,
 }: UseNotificationTableSettingsOptions) {
   const { user } = useUser()
+  const searchParams = useSearchParams()
 
   // Use Clerk user ID directly (available immediately, no API call needed)
   const userId = user?.id
@@ -55,18 +61,78 @@ export function useNotificationTableSettings({
     if (userId && enabled) {
       const key = `notification-table-settings-${userId}-${settingsId}`
       const stored = localStorage.getItem(key)
+      let loadedSettings: NotificationTableSettings = {
+        sorting: [],
+        grouping: 'none',
+        sort: {
+          field: '',
+          direction: 'asc',
+        },
+        filters: {
+          search: '',
+          type: '',
+          status: '',
+        },
+      }
+
       if (stored) {
         try {
-          setSettings(JSON.parse(stored))
+          loadedSettings = JSON.parse(stored)
         } catch {
           // Use defaults if parse fails
         }
       }
+
+      // Merge URL params into settings if present
+      if (settingsId === 'default') {
+        const config = notificationsTableUrlConfig
+
+        // Read each filter from URL params
+        for (const [filterKey, paramName] of Object.entries(
+          config.filterParamMap
+        )) {
+          const paramValue = searchParams.get(paramName)
+          if (paramValue) {
+            loadedSettings = {
+              ...loadedSettings,
+              filters: {
+                ...loadedSettings.filters,
+                [filterKey]: paramValue,
+              },
+            }
+          }
+        }
+
+        // Read sort from URL
+        const sortParam = searchParams.get(config.sortParamName || 'sort')
+        if (sortParam) {
+          const [field, direction] = sortParam.split(':')
+          if (field && (direction === 'asc' || direction === 'desc')) {
+            loadedSettings = {
+              ...loadedSettings,
+              sort: { field, direction: direction as 'asc' | 'desc' },
+            }
+          }
+        }
+
+        // Read grouping from URL
+        const groupingParam = searchParams.get(
+          config.groupingParamName || 'grouping'
+        )
+        if (groupingParam) {
+          loadedSettings = {
+            ...loadedSettings,
+            grouping: groupingParam,
+          }
+        }
+      }
+
+      setSettings(loadedSettings)
       setIsLoaded(true)
     } else {
       setIsLoaded(false)
     }
-  }, [userId, settingsId, enabled])
+  }, [userId, settingsId, enabled, searchParams])
 
   // Save settings to localStorage
   const saveSettings = useCallback(
