@@ -13,6 +13,17 @@ function parseValues(param: string): string[] {
     : []
 }
 
+// Helper function to normalize filter values (handles both arrays and strings)
+function normalizeFilterValue(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.filter((v): v is string => typeof v === 'string' && v !== '')
+  }
+  if (typeof value === 'string') {
+    return parseValues(value)
+  }
+  return []
+}
+
 // Helper function to create RAG filter for SQL
 function createRagSqlCondition(ragValues: string[]) {
   if (ragValues.length === 0 || ragValues.includes('all')) {
@@ -172,7 +183,7 @@ export async function GET(request: NextRequest) {
 
     // Apply RAG filter (immutable takes precedence)
     const ragFilter = immutableFilters.rag
-      ? parseValues(immutableFilters.rag as string)
+      ? normalizeFilterValue(immutableFilters.rag)
       : ragValues
     if (ragFilter.length > 0 && !ragFilter.includes('all')) {
       const ragCondition = createRagSqlCondition(ragFilter)
@@ -183,7 +194,7 @@ export async function GET(request: NextRequest) {
 
     // Apply status filter (immutable takes precedence)
     const statusFilter = immutableFilters.status
-      ? parseValues(immutableFilters.status as string)
+      ? normalizeFilterValue(immutableFilters.status)
       : statusValues
     if (statusFilter.length > 0 && !statusFilter.includes('all')) {
       const statusCondition = createStatusSqlCondition(statusFilter)
