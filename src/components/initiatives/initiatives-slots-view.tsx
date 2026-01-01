@@ -1,27 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { SlotCard } from './slot-card'
+import { SlotCard, type SlotInitiative } from './slot-card'
 import { SlotInitiativeSelectorModal } from './slot-initiative-selector-modal'
-
-interface SlotInitiative {
-  id: string
-  title: string
-  status: string
-  rag: string
-  slot: number | null
-  team?: {
-    id: string
-    name: string
-  } | null
-  owners?: Array<{
-    person: {
-      id: string
-      name: string
-      avatar: string | null
-    }
-  }>
-}
+import { swapInitiativeSlots } from '@/lib/actions/initiative'
+import { toast } from 'sonner'
 
 interface InitiativesSlotsViewProps {
   slottedInitiatives: SlotInitiative[]
@@ -36,10 +19,65 @@ export function InitiativesSlotsView({
 }: InitiativesSlotsViewProps) {
   const [selectorModalOpen, setSelectorModalOpen] = useState(false)
   const [selectedSlotNumber, setSelectedSlotNumber] = useState<number>(1)
+  const [draggedInitiative, setDraggedInitiative] =
+    useState<SlotInitiative | null>(null)
+  const [dragOverSlot, setDragOverSlot] = useState<number | null>(null)
 
   const handleAssignClick = (slotNumber: number) => {
     setSelectedSlotNumber(slotNumber)
     setSelectorModalOpen(true)
+  }
+
+  const handleDragStart = (initiative: SlotInitiative) => {
+    setDraggedInitiative(initiative)
+  }
+
+  const handleDragEnd = () => {
+    setDraggedInitiative(null)
+    setDragOverSlot(null)
+  }
+
+  const handleDragOver = (slotNumber: number) => {
+    if (draggedInitiative && draggedInitiative.slot !== slotNumber) {
+      setDragOverSlot(slotNumber)
+    }
+  }
+
+  const handleDragLeave = () => {
+    setDragOverSlot(null)
+  }
+
+  const handleDrop = async (
+    targetSlotNumber: number,
+    targetInitiative?: SlotInitiative
+  ) => {
+    if (!draggedInitiative) return
+    if (draggedInitiative.slot === targetSlotNumber) return
+
+    try {
+      await swapInitiativeSlots(
+        draggedInitiative.id,
+        targetSlotNumber,
+        targetInitiative?.id
+      )
+
+      if (targetInitiative) {
+        toast.success(
+          `Swapped "${draggedInitiative.title}" with "${targetInitiative.title}"`
+        )
+      } else {
+        toast.success(
+          `Moved "${draggedInitiative.title}" to slot ${targetSlotNumber}`
+        )
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to move initiative'
+      )
+    } finally {
+      setDraggedInitiative(null)
+      setDragOverSlot(null)
+    }
   }
 
   // Create a map of slot number to initiative
@@ -67,14 +105,24 @@ export function InitiativesSlotsView({
   return (
     <>
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'>
-        {slotNumbers.map(slotNumber => (
-          <SlotCard
-            key={slotNumber}
-            slotNumber={slotNumber}
-            initiative={slotMap.get(slotNumber)}
-            onAssignClick={handleAssignClick}
-          />
-        ))}
+        {slotNumbers.map(slotNumber => {
+          const initiative = slotMap.get(slotNumber)
+          return (
+            <SlotCard
+              key={slotNumber}
+              slotNumber={slotNumber}
+              initiative={initiative}
+              onAssignClick={handleAssignClick}
+              isDragging={draggedInitiative?.slot === slotNumber}
+              isDragOver={dragOverSlot === slotNumber}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDragOver={() => handleDragOver(slotNumber)}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            />
+          )
+        })}
       </div>
 
       <SlotInitiativeSelectorModal

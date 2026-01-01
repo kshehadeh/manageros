@@ -83,6 +83,7 @@ export async function createInitiative(formData: InitiativeFormData) {
         rag: validatedData.rag,
         confidence: validatedData.confidence,
         priority: validatedData.priority,
+        size: validatedData.size || null,
         teamId:
           validatedData.teamId && validatedData.teamId.trim() !== ''
             ? validatedData.teamId
@@ -214,6 +215,7 @@ export async function updateInitiative(
       rag: validatedData.rag,
       confidence: validatedData.confidence,
       priority: validatedData.priority,
+      size: validatedData.size || null,
       teamId: validatedData.teamId,
       // Clear slot when initiative is completed or canceled
       ...(shouldClearSlot && { slot: null }),
@@ -760,4 +762,79 @@ export async function removeInitiativeFromSlot(initiativeId: string) {
   revalidatePath('/initiatives/slots')
 
   return updated
+}
+
+/**
+ * Swap slots between two initiatives, or move an initiative to an empty slot
+ */
+export async function swapInitiativeSlots(
+  sourceInitiativeId: string,
+  targetSlotNumber: number,
+  targetInitiativeId?: string
+) {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error(
+      'User must belong to an organization to manage initiative slots'
+    )
+  }
+
+  // Check permission to edit source initiative
+  if (
+    !(await getActionPermission(user, 'initiative.edit', sourceInitiativeId))
+  ) {
+    throw new Error('You do not have permission to edit this initiative')
+  }
+
+  // If there's a target initiative, check permission for it too
+  if (
+    targetInitiativeId &&
+    !(await getActionPermission(user, 'initiative.edit', targetInitiativeId))
+  ) {
+    throw new Error('You do not have permission to edit the target initiative')
+  }
+
+  // Get the source initiative
+  const sourceInitiative = await prisma.initiative.findFirst({
+    where: {
+      id: sourceInitiativeId,
+      organizationId: user.managerOSOrganizationId,
+      status: { in: ['planned', 'in_progress', 'paused'] },
+    },
+  })
+
+  if (!sourceInitiative) {
+    throw new Error('Source initiative not found or is not active')
+  }
+
+  const sourceSlot = sourceInitiative.slot
+
+  // Use a transaction to swap slots atomically
+  await prisma.$transaction(async tx => {
+    // Temporarily set source to null to avoid unique constraint violation
+    await tx.initiative.update({
+      where: { id: sourceInitiativeId },
+      data: { slot: null },
+    })
+
+    // If there's a target initiative in the target slot, move it to source slot
+    if (targetInitiativeId) {
+      await tx.initiative.update({
+        where: { id: targetInitiativeId },
+        data: { slot: sourceSlot },
+      })
+    }
+
+    // Move source to target slot
+    await tx.initiative.update({
+      where: { id: sourceInitiativeId },
+      data: { slot: targetSlotNumber },
+    })
+  })
+
+  revalidatePath('/initiatives')
+  revalidatePath('/initiatives/slots')
+
+  return { success: true }
 }

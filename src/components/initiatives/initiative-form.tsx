@@ -34,6 +34,7 @@ import {
   DEFAULT_TASK_PRIORITY,
   type TaskPriority,
 } from '@/lib/task-priority'
+import { initiativeSizeUtils, type InitiativeSize } from '@/lib/initiative-size'
 
 interface InitiativeFormProps {
   initiative?: {
@@ -47,6 +48,7 @@ interface InitiativeFormProps {
     rag: string
     confidence: number
     priority: number
+    size: string | null
     teamId: string | null
     objectives: Array<{
       id: string
@@ -90,6 +92,7 @@ export function InitiativeForm({
     rag: (initiative?.rag as InitiativeFormData['rag']) || 'green',
     confidence: initiative?.confidence || 80,
     priority: initiative?.priority || DEFAULT_TASK_PRIORITY,
+    size: initiative?.size || '',
     teamId: initiative?.teamId || preselectedTeamId || '',
     objectives:
       initiative?.objectives.map(obj => ({
@@ -265,7 +268,7 @@ export function InitiativeForm({
             )}
           </div>
 
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4'>
             <div className='space-y-2'>
               <Label htmlFor='status'>Status</Label>
               <Select
@@ -378,6 +381,36 @@ export function InitiativeForm({
               </Select>
               {errors.priority && (
                 <p className='text-sm text-destructive'>{errors.priority}</p>
+              )}
+            </div>
+
+            <div className='space-y-2'>
+              <Label htmlFor='size'>Size</Label>
+              <Select
+                value={formData.size || 'none'}
+                onValueChange={value =>
+                  handleInputChange(
+                    'size',
+                    value === 'none' ? '' : (value as InitiativeSize)
+                  )
+                }
+              >
+                <SelectTrigger
+                  className={errors.size ? 'border-destructive' : ''}
+                >
+                  <SelectValue placeholder='Select size' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='none'>No size</SelectItem>
+                  {initiativeSizeUtils.getSelectOptions().map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.shortLabel} - {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.size && (
+                <p className='text-sm text-destructive'>{errors.size}</p>
               )}
             </div>
           </div>

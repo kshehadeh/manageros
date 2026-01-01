@@ -2205,3 +2205,84 @@ export async function updateOrganizationProfile(formData: { name: string }) {
   revalidatePath('/dashboard')
   revalidatePath('/', 'layout')
 }
+
+// Initiative Size Definitions Actions
+
+export type InitiativeSizeDefinitionsType = {
+  xs?: string
+  s?: string
+  m?: string
+  l?: string
+  xl?: string
+}
+
+/**
+ * Get initiative size definitions for the current organization
+ */
+export async function getInitiativeSizeDefinitions(): Promise<InitiativeSizeDefinitionsType | null> {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    return null
+  }
+
+  const organization = await prisma.organization.findUnique({
+    where: { id: user.managerOSOrganizationId },
+    select: { initiativeSizeDefinitions: true },
+  })
+
+  if (!organization || !organization.initiativeSizeDefinitions) {
+    return null
+  }
+
+  return organization.initiativeSizeDefinitions as InitiativeSizeDefinitionsType
+}
+
+/**
+ * Update initiative size definitions for the current organization
+ */
+export async function updateInitiativeSizeDefinitions(
+  definitions: InitiativeSizeDefinitionsType
+) {
+  const user = await getCurrentUser()
+
+  // Check if user is admin or owner
+  if (!isAdminOrOwner(user)) {
+    throw new Error(
+      'Only organization admins or owners can update initiative size definitions'
+    )
+  }
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error(
+      'User must belong to an organization to update initiative size definitions'
+    )
+  }
+
+  // Validate definitions - ensure all values are strings and not too long
+  const validSizes = ['xs', 's', 'm', 'l', 'xl'] as const
+  const sanitizedDefinitions: InitiativeSizeDefinitionsType = {}
+
+  for (const size of validSizes) {
+    if (definitions[size] !== undefined) {
+      const value = String(definitions[size]).trim()
+      if (value.length > 500) {
+        throw new Error(
+          `Definition for size "${size}" must be 500 characters or less`
+        )
+      }
+      if (value) {
+        sanitizedDefinitions[size] = value
+      }
+    }
+  }
+
+  await prisma.organization.update({
+    where: { id: user.managerOSOrganizationId },
+    data: { initiativeSizeDefinitions: sanitizedDefinitions },
+  })
+
+  revalidatePath('/organization/settings')
+  revalidatePath('/organization/settings/initiative-sizes')
+  revalidatePath('/initiatives')
+}

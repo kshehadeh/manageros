@@ -23,6 +23,7 @@ import {
   AlertTriangle,
   Settings,
   ClipboardList,
+  Ruler,
 } from 'lucide-react'
 import { PlanLimitsSection } from '@/components/settings/plan-limits-section'
 import { PlanLimitsSectionSkeleton } from '@/components/settings/plan-limits-section-skeleton'
@@ -166,6 +167,19 @@ export default async function OrganizationSettingsPage() {
                     >
                       <AlertTriangle className='w-4 h-4' />
                       Manage Tolerance Rules
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    variant='outline'
+                    className='w-full justify-start'
+                  >
+                    <Link
+                      href='/organization/settings/initiative-sizes'
+                      className='flex items-center gap-2'
+                    >
+                      <Ruler className='w-4 h-4' />
+                      Initiative Size Definitions
                     </Link>
                   </Button>
                 </div>

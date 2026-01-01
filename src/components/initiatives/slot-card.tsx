@@ -9,12 +9,12 @@ import {
   initiativeStatusUtils,
   type InitiativeStatus,
 } from '@/lib/initiative-status'
-import { Plus, X } from 'lucide-react'
+import { GripVertical, Plus, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { removeInitiativeFromSlot } from '@/lib/actions/initiative'
 import { toast } from 'sonner'
 
-interface SlotInitiative {
+export interface SlotInitiative {
   id: string
   title: string
   status: string
@@ -37,12 +37,26 @@ interface SlotCardProps {
   slotNumber: number
   initiative?: SlotInitiative
   onAssignClick: (slotNumber: number) => void
+  isDragging?: boolean
+  isDragOver?: boolean
+  onDragStart?: (initiative: SlotInitiative) => void
+  onDragEnd?: () => void
+  onDragOver?: (e: React.DragEvent) => void
+  onDragLeave?: () => void
+  onDrop?: (slotNumber: number, initiative?: SlotInitiative) => void
 }
 
 export function SlotCard({
   slotNumber,
   initiative,
   onAssignClick,
+  isDragging = false,
+  isDragOver = false,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDragLeave,
+  onDrop,
 }: SlotCardProps) {
   const [isRemoving, setIsRemoving] = useState(false)
 
@@ -67,23 +81,47 @@ export function SlotCard({
     }
   }
 
+  const handleDragStart = (e: React.DragEvent) => {
+    if (!initiative) return
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', initiative.id)
+    onDragStart?.(initiative)
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    onDragOver?.(e)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    onDrop?.(slotNumber, initiative)
+  }
+
   if (!initiative) {
     return (
       <button
         onClick={() => onAssignClick(slotNumber)}
+        onDragOver={handleDragOver}
+        onDragLeave={onDragLeave}
+        onDrop={handleDrop}
         className={cn(
           'group relative flex flex-col items-center justify-center',
           'min-h-[140px] p-4 rounded-lg border-2 border-dashed',
           'border-muted-foreground/25 hover:border-primary/50',
           'bg-muted/20 hover:bg-muted/40',
           'transition-all duration-200',
-          'cursor-pointer'
+          'cursor-pointer',
+          isDragOver && 'border-primary bg-primary/10 scale-[1.02]'
         )}
       >
         <div className='flex flex-col items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors'>
           <Plus className='h-8 w-8' />
           <span className='text-sm font-medium'>Slot {slotNumber}</span>
-          <span className='text-xs'>Click to assign initiative</span>
+          <span className='text-xs'>
+            {isDragOver ? 'Drop to assign' : 'Click to assign initiative'}
+          </span>
         </div>
       </button>
     )
@@ -94,26 +132,49 @@ export function SlotCard({
   )
 
   return (
-    <div className='group relative'>
-      <Link
-        href={`/initiatives/${initiative.id}`}
+    <div
+      className={cn(
+        'group relative',
+        isDragging && 'opacity-50 scale-95',
+        isDragOver && 'scale-[1.02]'
+      )}
+      draggable
+      onDragStart={handleDragStart}
+      onDragEnd={onDragEnd}
+      onDragOver={handleDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={handleDrop}
+    >
+      <div
         className={cn(
           'block min-h-[140px] p-4 rounded-lg border',
           'bg-card hover:bg-muted/50',
-          'transition-colors duration-200'
+          'transition-all duration-200',
+          'cursor-grab active:cursor-grabbing',
+          isDragOver && 'border-primary border-2 bg-primary/5'
         )}
       >
         <div className='flex flex-col h-full'>
           <div className='flex items-start justify-between gap-2 mb-2'>
-            <span className='text-xs text-muted-foreground font-mono'>
-              #{slotNumber}
-            </span>
+            <div className='flex items-center gap-1'>
+              <GripVertical className='h-3.5 w-3.5 text-muted-foreground/50' />
+              <span className='text-xs text-muted-foreground font-mono'>
+                #{slotNumber}
+              </span>
+            </div>
             <RagCircle rag={initiative.rag} size='small' />
           </div>
 
-          <h3 className='font-medium text-sm line-clamp-2 mb-2 flex-1'>
-            {initiative.title}
-          </h3>
+          <Link
+            href={`/initiatives/${initiative.id}`}
+            className='flex-1'
+            onClick={e => e.stopPropagation()}
+            draggable={false}
+          >
+            <h3 className='font-medium text-sm line-clamp-2 mb-2 hover:text-primary transition-colors'>
+              {initiative.title}
+            </h3>
+          </Link>
 
           <div className='flex items-center gap-2 flex-wrap'>
             <Badge variant={statusVariant} className='text-xs'>
@@ -128,7 +189,7 @@ export function SlotCard({
             )}
           </div>
         </div>
-      </Link>
+      </div>
 
       <Button
         variant='ghost'

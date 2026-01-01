@@ -38,6 +38,7 @@ import {
 import { Link } from '@/components/ui/link'
 import { TeamAvatar } from '@/components/teams/team-avatar'
 import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
+import { initiativeSizeUtils, type InitiativeSize } from '@/lib/initiative-size'
 import { formatShortDate } from '@/lib/utils/date-utils'
 
 export default async function InitiativeDetail({
@@ -67,6 +68,7 @@ export default async function InitiativeDetail({
       rag: true,
       status: true,
       priority: true,
+      size: true,
       startDate: true,
       targetDate: true,
       team: {
@@ -124,6 +126,21 @@ export default async function InitiativeDetail({
         className='text-xs'
       >
         {taskPriorityUtils.getLabel(init.priority as TaskPriority)}
+      </Badge>
+    ),
+    initiativeSizeUtils.isValid(init.size) && (
+      <Badge
+        key='size'
+        variant={
+          initiativeSizeUtils.getVariant(init.size as InitiativeSize) as
+            | 'default'
+            | 'secondary'
+            | 'destructive'
+            | 'outline'
+        }
+        className='text-xs'
+      >
+        {initiativeSizeUtils.getShortLabel(init.size as InitiativeSize)}
       </Badge>
     ),
     startDateFormatted ? (
