@@ -28,7 +28,10 @@ import {
   InitiativeCheckInsSkeleton,
   InitiativeSidebarSkeleton,
   InitiativeCompletionRateSkeleton,
+  InitiativePropertiesSidebarSkeleton,
 } from '@/components/initiatives/initiative-detail-skeletons'
+import { InitiativePropertiesSidebarServer } from '@/components/initiatives/initiative-properties-sidebar-server'
+import { MobileBottomPanel } from '@/components/ui/mobile-bottom-panel'
 import { Rag } from '../../../../components/rag'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -240,12 +243,27 @@ export default async function InitiativeDetail({
           </PageMain>
 
           <PageSidebar>
-            <Suspense fallback={<InitiativeSidebarSkeleton />}>
-              <InitiativeSidebar initiativeId={init.id} />
-            </Suspense>
+            <div className='space-y-6'>
+              {/* Properties sidebar - hidden on mobile, shown in bottom panel instead */}
+              <div className='hidden lg:block'>
+                <Suspense fallback={<InitiativePropertiesSidebarSkeleton />}>
+                  <InitiativePropertiesSidebarServer initiativeId={init.id} />
+                </Suspense>
+              </div>
+              <Suspense fallback={<InitiativeSidebarSkeleton />}>
+                <InitiativeSidebar initiativeId={init.id} />
+              </Suspense>
+            </div>
           </PageSidebar>
         </PageContent>
       </PageContainer>
+
+      {/* Mobile bottom panel for properties */}
+      <MobileBottomPanel title='Details'>
+        <Suspense fallback={<InitiativePropertiesSidebarSkeleton />}>
+          <InitiativePropertiesSidebarServer initiativeId={init.id} />
+        </Suspense>
+      </MobileBottomPanel>
     </InitiativeDetailClient>
   )
 }

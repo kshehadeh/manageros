@@ -629,7 +629,14 @@ export async function getSlottedInitiatives() {
       },
     },
     orderBy: [{ slot: 'asc' }, { updatedAt: 'desc' }],
-    include: {
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      rag: true,
+      slot: true,
+      size: true,
+      targetDate: true,
       team: {
         select: {
           id: true,
@@ -650,9 +657,55 @@ export async function getSlottedInitiatives() {
     },
   })
 
-  const slottedInitiatives = activeInitiatives.filter(i => i.slot !== null)
-  const unslottedInitiatives = activeInitiatives.filter(i => i.slot === null)
-  const totalSlots = activeInitiatives.length
+  // Get task counts for all initiatives to calculate progress
+  const initiativeIds = activeInitiatives.map(i => i.id)
+
+  const taskCounts = await prisma.task.groupBy({
+    by: ['initiativeId'],
+    where: {
+      OR: [
+        { initiativeId: { in: initiativeIds } },
+        { objective: { initiativeId: { in: initiativeIds } } },
+      ],
+    },
+    _count: { id: true },
+  })
+
+  const completedTaskCounts = await prisma.task.groupBy({
+    by: ['initiativeId'],
+    where: {
+      OR: [
+        { initiativeId: { in: initiativeIds } },
+        { objective: { initiativeId: { in: initiativeIds } } },
+      ],
+      status: 'done',
+    },
+    _count: { id: true },
+  })
+
+  // Create maps for quick lookup
+  const totalCountMap = new Map(
+    taskCounts.map(t => [t.initiativeId, t._count.id])
+  )
+  const completedCountMap = new Map(
+    completedTaskCounts.map(t => [t.initiativeId, t._count.id])
+  )
+
+  // Add progress to each initiative
+  const initiativesWithProgress = activeInitiatives.map(initiative => {
+    const total = totalCountMap.get(initiative.id) || 0
+    const completed = completedCountMap.get(initiative.id) || 0
+    const progress = total === 0 ? 0 : Math.round((completed / total) * 100)
+    return { ...initiative, progress }
+  })
+
+  const slottedInitiatives = initiativesWithProgress.filter(
+    i => i.slot !== null
+  )
+  const unslottedInitiatives = initiativesWithProgress.filter(
+    i => i.slot === null
+  )
+  const totalSlots = initiativesWithProgress.length
 
   return {
     slottedInitiatives,
@@ -837,4 +890,243 @@ export async function swapInitiativeSlots(
   revalidatePath('/initiatives/slots')
 
   return { success: true }
+}
+
+/**
+ * Update initiative status
+ */
+export async function updateInitiativeStatus(
+  initiativeId: string,
+  status: string
+) {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error('User must belong to an organization to update initiatives')
+  }
+
+  if (!(await getActionPermission(user, 'initiative.edit', initiativeId))) {
+    throw new Error('You do not have permission to edit this initiative')
+  }
+
+  const existingInitiative = await prisma.initiative.findFirst({
+    where: {
+      id: initiativeId,
+      organizationId: user.managerOSOrganizationId,
+    },
+  })
+
+  if (!existingInitiative) {
+    throw new Error('Initiative not found or access denied')
+  }
+
+  // Clear slot if status is being set to done or canceled
+  const shouldClearSlot = status === 'done' || status === 'canceled'
+
+  const updated = await prisma.initiative.update({
+    where: { id: initiativeId },
+    data: {
+      status,
+      ...(shouldClearSlot && { slot: null }),
+    },
+  })
+
+  revalidatePath('/initiatives')
+  revalidatePath('/initiatives/slots')
+  revalidatePath(`/initiatives/${initiativeId}`)
+
+  return updated
+}
+
+/**
+ * Update initiative RAG status
+ */
+export async function updateInitiativeRag(initiativeId: string, rag: string) {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error('User must belong to an organization to update initiatives')
+  }
+
+  if (!(await getActionPermission(user, 'initiative.edit', initiativeId))) {
+    throw new Error('You do not have permission to edit this initiative')
+  }
+
+  const existingInitiative = await prisma.initiative.findFirst({
+    where: {
+      id: initiativeId,
+      organizationId: user.managerOSOrganizationId,
+    },
+  })
+
+  if (!existingInitiative) {
+    throw new Error('Initiative not found or access denied')
+  }
+
+  const updated = await prisma.initiative.update({
+    where: { id: initiativeId },
+    data: { rag },
+  })
+
+  revalidatePath('/initiatives')
+  revalidatePath(`/initiatives/${initiativeId}`)
+
+  return updated
+}
+
+/**
+ * Update initiative priority
+ */
+export async function updateInitiativePriority(
+  initiativeId: string,
+  priority: number
+) {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error('User must belong to an organization to update initiatives')
+  }
+
+  if (!(await getActionPermission(user, 'initiative.edit', initiativeId))) {
+    throw new Error('You do not have permission to edit this initiative')
+  }
+
+  const existingInitiative = await prisma.initiative.findFirst({
+    where: {
+      id: initiativeId,
+      organizationId: user.managerOSOrganizationId,
+    },
+  })
+
+  if (!existingInitiative) {
+    throw new Error('Initiative not found or access denied')
+  }
+
+  const updated = await prisma.initiative.update({
+    where: { id: initiativeId },
+    data: { priority },
+  })
+
+  revalidatePath('/initiatives')
+  revalidatePath(`/initiatives/${initiativeId}`)
+
+  return updated
+}
+
+/**
+ * Update initiative size
+ */
+export async function updateInitiativeSize(
+  initiativeId: string,
+  size: string | null
+) {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error('User must belong to an organization to update initiatives')
+  }
+
+  if (!(await getActionPermission(user, 'initiative.edit', initiativeId))) {
+    throw new Error('You do not have permission to edit this initiative')
+  }
+
+  const existingInitiative = await prisma.initiative.findFirst({
+    where: {
+      id: initiativeId,
+      organizationId: user.managerOSOrganizationId,
+    },
+  })
+
+  if (!existingInitiative) {
+    throw new Error('Initiative not found or access denied')
+  }
+
+  const updated = await prisma.initiative.update({
+    where: { id: initiativeId },
+    data: { size },
+  })
+
+  revalidatePath('/initiatives')
+  revalidatePath('/initiatives/slots')
+  revalidatePath(`/initiatives/${initiativeId}`)
+
+  return updated
+}
+
+/**
+ * Update initiative start date
+ */
+export async function updateInitiativeStartDate(
+  initiativeId: string,
+  startDate: Date | null
+) {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error('User must belong to an organization to update initiatives')
+  }
+
+  if (!(await getActionPermission(user, 'initiative.edit', initiativeId))) {
+    throw new Error('You do not have permission to edit this initiative')
+  }
+
+  const existingInitiative = await prisma.initiative.findFirst({
+    where: {
+      id: initiativeId,
+      organizationId: user.managerOSOrganizationId,
+    },
+  })
+
+  if (!existingInitiative) {
+    throw new Error('Initiative not found or access denied')
+  }
+
+  const updated = await prisma.initiative.update({
+    where: { id: initiativeId },
+    data: { startDate },
+  })
+
+  revalidatePath('/initiatives')
+  revalidatePath(`/initiatives/${initiativeId}`)
+
+  return updated
+}
+
+/**
+ * Update initiative target date
+ */
+export async function updateInitiativeTargetDate(
+  initiativeId: string,
+  targetDate: Date | null
+) {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error('User must belong to an organization to update initiatives')
+  }
+
+  if (!(await getActionPermission(user, 'initiative.edit', initiativeId))) {
+    throw new Error('You do not have permission to edit this initiative')
+  }
+
+  const existingInitiative = await prisma.initiative.findFirst({
+    where: {
+      id: initiativeId,
+      organizationId: user.managerOSOrganizationId,
+    },
+  })
+
+  if (!existingInitiative) {
+    throw new Error('Initiative not found or access denied')
+  }
+
+  const updated = await prisma.initiative.update({
+    where: { id: initiativeId },
+    data: { targetDate },
+  })
+
+  revalidatePath('/initiatives')
+  revalidatePath(`/initiatives/${initiativeId}`)
+
+  return updated
 }

@@ -9,7 +9,17 @@ import {
   initiativeStatusUtils,
   type InitiativeStatus,
 } from '@/lib/initiative-status'
-import { GripVertical, Plus, X } from 'lucide-react'
+import { initiativeSizeUtils, type InitiativeSize } from '@/lib/initiative-size'
+import {
+  GripVertical,
+  Plus,
+  X,
+  Users,
+  Ruler,
+  Calendar,
+  TrendingUp,
+} from 'lucide-react'
+import { formatShortDate } from '@/lib/utils/date-utils'
 import { cn } from '@/lib/utils'
 import { removeInitiativeFromSlot } from '@/lib/actions/initiative'
 import { toast } from 'sonner'
@@ -20,6 +30,9 @@ export interface SlotInitiative {
   status: string
   rag: string
   slot: number | null
+  size?: string | null
+  targetDate?: Date | null
+  progress?: number
   team?: {
     id: string
     name: string
@@ -186,6 +199,42 @@ export function SlotCard({
               <span className='text-xs text-muted-foreground truncate'>
                 {initiative.team.name}
               </span>
+            )}
+          </div>
+
+          {/* People count, size, target date, and progress */}
+          <div className='flex items-center gap-3 mt-2 pt-2 border-t border-border/50 flex-wrap'>
+            {initiative.owners && initiative.owners.length > 0 && (
+              <div className='flex items-center gap-1 text-xs text-muted-foreground'>
+                <Users className='h-3 w-3' />
+                <span>
+                  {initiative.owners.length}{' '}
+                  {initiative.owners.length === 1 ? 'person' : 'people'}
+                </span>
+              </div>
+            )}
+            {initiative.size &&
+              initiativeSizeUtils.isValid(initiative.size) && (
+                <div className='flex items-center gap-1 text-xs text-muted-foreground'>
+                  <Ruler className='h-3 w-3' />
+                  <span>
+                    {initiativeSizeUtils.getShortLabel(
+                      initiative.size as InitiativeSize
+                    )}
+                  </span>
+                </div>
+              )}
+            {initiative.targetDate && (
+              <div className='flex items-center gap-1 text-xs text-muted-foreground'>
+                <Calendar className='h-3 w-3' />
+                <span>{formatShortDate(initiative.targetDate)}</span>
+              </div>
+            )}
+            {initiative.progress !== undefined && (
+              <div className='flex items-center gap-1 text-xs text-muted-foreground'>
+                <TrendingUp className='h-3 w-3' />
+                <span>{initiative.progress}%</span>
+              </div>
             )}
           </div>
         </div>
