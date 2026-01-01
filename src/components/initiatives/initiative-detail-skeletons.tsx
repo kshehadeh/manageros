@@ -238,3 +238,27 @@ export function InitiativeSidebarSkeleton() {
 export function InitiativeCompletionRateSkeleton() {
   return <Skeleton className='h-6 w-20' />
 }
+
+export function InitiativePropertiesSidebarSkeleton() {
+  return (
+    <div className='text-sm'>
+      <table className='w-full'>
+        <tbody>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <tr key={i}>
+              <td className='py-sm pr-lg'>
+                <div className='flex items-center gap-md'>
+                  <Skeleton className='h-3.5 w-3.5' />
+                  <Skeleton className='h-4 w-16' />
+                </div>
+              </td>
+              <td className='py-sm'>
+                <Skeleton className='h-4 w-20' />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}

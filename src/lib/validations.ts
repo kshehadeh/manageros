@@ -5,6 +5,10 @@ import {
   DEFAULT_TASK_PRIORITY,
   TaskPriority,
 } from '@/lib/task-priority'
+import {
+  ALL_INITIATIVE_SIZES,
+  type InitiativeSize,
+} from '@/lib/initiative-size'
 
 export const initiativeSchema = z.object({
   title: z
@@ -26,6 +30,15 @@ export const initiativeSchema = z.object({
       message: 'Priority must be between 1 and 5',
     })
     .default(DEFAULT_TASK_PRIORITY),
+  size: z
+    .string()
+    .refine(
+      val => !val || ALL_INITIATIVE_SIZES.includes(val as InitiativeSize),
+      {
+        message: 'Size must be xs, s, m, l, or xl',
+      }
+    )
+    .optional(),
   teamId: z.string().optional(),
   objectives: z
     .array(

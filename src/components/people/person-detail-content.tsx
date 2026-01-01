@@ -5,8 +5,11 @@ import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
+import { PageSidebar } from '@/components/ui/page-sidebar'
+import { MobileBottomPanel } from '@/components/ui/mobile-bottom-panel'
 import { CalendarDays, Users, Briefcase, ArrowUpRight } from 'lucide-react'
 import { PersonViewDropdown } from './person-view-dropdown'
+import { PersonPropertiesSidebar } from './person-properties-sidebar'
 import { Suspense } from 'react'
 import type { User, Person as PrismaPerson, Team } from '@/generated/prisma'
 import type { Prisma } from '@/generated/prisma'
@@ -296,7 +299,49 @@ export function PersonDetailContent({
             />
           </Suspense>
         </PageMain>
+
+        <PageSidebar>
+          {/* Properties sidebar - hidden on mobile, shown in bottom panel instead */}
+          <div className='hidden lg:block'>
+            <PersonPropertiesSidebar
+              person={{
+                id: person.id,
+                name: person.name,
+                email: person.email,
+                role: person.role,
+                status: person.status,
+                employeeType: person.employeeType,
+                startedAt: person.startedAt,
+                birthday: person.birthday,
+                team: person.team,
+                manager: person.manager,
+                jobRole: person.jobRole,
+                reportsCount: person.reports?.length,
+              }}
+            />
+          </div>
+        </PageSidebar>
       </PageContent>
+
+      {/* Mobile bottom panel for properties */}
+      <MobileBottomPanel title='Details'>
+        <PersonPropertiesSidebar
+          person={{
+            id: person.id,
+            name: person.name,
+            email: person.email,
+            role: person.role,
+            status: person.status,
+            employeeType: person.employeeType,
+            startedAt: person.startedAt,
+            birthday: person.birthday,
+            team: person.team,
+            manager: person.manager,
+            jobRole: person.jobRole,
+            reportsCount: person.reports?.length,
+          }}
+        />
+      </MobileBottomPanel>
     </PageContainer>
   )
 }

@@ -8,6 +8,7 @@ import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 import { TaskActionsDropdown } from '@/components/tasks/task-actions-dropdown'
 import { InlineEditableText } from '@/components/common/inline-editable-text'
 import { TaskSidebar } from '@/components/tasks/task-sidebar'
+import { TaskPropertiesSidebar } from '@/components/tasks/task-properties-sidebar'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
@@ -15,6 +16,7 @@ import { PageContent } from '@/components/ui/page-content'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageMain } from '@/components/ui/page-main'
 import { PageSidebar } from '@/components/ui/page-sidebar'
+import { MobileBottomPanel } from '@/components/ui/mobile-bottom-panel'
 import { Calendar, User, Clock, FileText, ListTodo } from 'lucide-react'
 import { type TaskStatus } from '@/lib/task-status'
 import { type TaskPriority } from '@/lib/task-priority'
@@ -144,30 +146,54 @@ export default async function TaskDetailPage({
           </PageMain>
 
           <PageSidebar>
-            <TaskSidebar
-              links={entityLinks.map(link => ({
-                id: link.id,
-                url: link.url,
-                title: link.title,
-                description: link.description,
-                createdAt: link.createdAt,
-                updatedAt: link.updatedAt,
-                createdBy: link.createdBy,
-              }))}
-              entityId={task.id}
-              status={task.status as TaskStatus}
-              priority={task.priority as TaskPriority}
-              assignee={task.assignee}
-              initiative={task.initiative}
-              objective={task.objective}
-              estimate={task.estimate}
-              dueDate={task.dueDate}
-              createdBy={task.createdBy}
-              updatedAt={task.updatedAt}
-            />
+            <div className='space-y-6'>
+              {/* Properties sidebar - hidden on mobile, shown in bottom panel instead */}
+              <div className='hidden lg:block'>
+                <TaskPropertiesSidebar
+                  taskId={task.id}
+                  status={task.status as TaskStatus}
+                  priority={task.priority as TaskPriority}
+                  assignee={task.assignee}
+                  initiative={task.initiative}
+                  objective={task.objective}
+                  estimate={task.estimate}
+                  dueDate={task.dueDate}
+                  createdBy={task.createdBy}
+                  updatedAt={task.updatedAt}
+                />
+              </div>
+              <TaskSidebar
+                links={entityLinks.map(link => ({
+                  id: link.id,
+                  url: link.url,
+                  title: link.title,
+                  description: link.description,
+                  createdAt: link.createdAt,
+                  updatedAt: link.updatedAt,
+                  createdBy: link.createdBy,
+                }))}
+                entityId={task.id}
+              />
+            </div>
           </PageSidebar>
         </PageContent>
       </PageContainer>
+
+      {/* Mobile bottom panel for properties */}
+      <MobileBottomPanel title='Details'>
+        <TaskPropertiesSidebar
+          taskId={task.id}
+          status={task.status as TaskStatus}
+          priority={task.priority as TaskPriority}
+          assignee={task.assignee}
+          initiative={task.initiative}
+          objective={task.objective}
+          estimate={task.estimate}
+          dueDate={task.dueDate}
+          createdBy={task.createdBy}
+          updatedAt={task.updatedAt}
+        />
+      </MobileBottomPanel>
     </PageBreadcrumbSetter>
   )
 }

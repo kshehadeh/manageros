@@ -5,7 +5,7 @@ import type { Prisma } from '@/generated/prisma'
 
 export const initiativesTool = {
   description:
-    'Get information about specific initiatives in the organization. It uses things like status, RAG, team and owners/collaborators, keywords or teams to filter the list.  The initiatives returned are limited to this filter.  Use this tool with each new query as opposed to using previous responses for future queries.',
+    'Get information about specific initiatives in the organization. It uses things like status, RAG, team and owners/collaborators, keywords, teams, priority, or slot assignment to filter the list. The initiatives returned are limited to this filter. Use this tool with each new query as opposed to using previous responses for future queries.',
   parameters: z.object({
     status: z
       .enum(['planned', 'in_progress', 'paused', 'done', 'canceled'])
@@ -26,6 +26,22 @@ export const initiativesTool = {
       .string()
       .optional()
       .describe('Search query to filter initiatives by title or summary'),
+    priority: z
+      .number()
+      .optional()
+      .describe(
+        'Filter by priority level (1 = highest priority, 2 = medium, 3 = low, etc.)'
+      ),
+    hasSlot: z
+      .boolean()
+      .optional()
+      .describe(
+        'Filter by slot assignment - true for initiatives assigned to a slot, false for unassigned'
+      ),
+    slotNumber: z
+      .number()
+      .optional()
+      .describe('Filter by specific slot number'),
   }),
   execute: async ({
     status,
@@ -33,12 +49,18 @@ export const initiativesTool = {
     teamId,
     personId,
     query,
+    priority,
+    hasSlot,
+    slotNumber,
   }: {
     status?: string
     rag?: string
     teamId?: string
     personId?: string
     query?: string
+    priority?: number
+    hasSlot?: boolean
+    slotNumber?: number
   }) => {
     console.log('🔧 initiativesTool called with parameters:', {
       status,
@@ -46,6 +68,9 @@ export const initiativesTool = {
       teamId,
       personId,
       query,
+      priority,
+      hasSlot,
+      slotNumber,
     })
     const user = await getCurrentUser()
     if (!user.managerOSOrganizationId) {
@@ -72,6 +97,11 @@ export const initiativesTool = {
         { summary: { contains: query, mode: 'insensitive' } },
       ]
     }
+    if (priority !== undefined) whereClause.priority = priority
+    if (hasSlot !== undefined) {
+      whereClause.slot = hasSlot ? { not: null } : null
+    }
+    if (slotNumber !== undefined) whereClause.slot = slotNumber
 
     console.log('🔍 whereClause:', whereClause)
 
@@ -117,6 +147,8 @@ export const initiativesTool = {
         status: initiative.status,
         rag: initiative.rag,
         confidence: initiative.confidence,
+        priority: initiative.priority,
+        slot: initiative.slot,
         startDate: initiative.startDate,
         targetDate: initiative.targetDate,
         team: initiative.team?.name,

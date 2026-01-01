@@ -36,6 +36,9 @@ model Organization {
   subscriptionStatus   String?
   clerkOrganizationId  String  @unique // Clerk organization ID (required) - name, slug, and subscription info are stored in Clerk
 
+  // Initiative size definitions - JSON object with keys: xs, s, m, l, xl and string values describing what each size means
+  initiativeSizeDefinitions Json?
+
   // Relationships
   billingUser            User?                    @relation("BillingUser", fields: [billingUserId], references: [id])
   members                OrganizationMember[]
@@ -206,6 +209,8 @@ model Initiative {
   rag            String            @default("green") // green|amber|red
   confidence     Int               @default(80)
   priority       Int               @default(2)
+  size           String?           // xs|s|m|l|xl - initiative size/effort estimation
+  slot           Int?              // slot position for slots view (null = unassigned)
   objectives     Objective[]
   owners         InitiativeOwner[]
   checkIns       CheckIn[]
@@ -215,6 +220,7 @@ model Initiative {
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 
+  @@unique([organizationId, slot])
   @@index([organizationId])
 }
 

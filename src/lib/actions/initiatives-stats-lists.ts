@@ -118,3 +118,60 @@ export async function getUserInitiatives(): Promise<Initiative[]> {
     _count: initiative._count,
   }))
 }
+
+/**
+ * Get list of overdue initiatives (open initiatives that have passed their target date)
+ */
+export async function getOverdueInitiatives(): Promise<Initiative[]> {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    return []
+  }
+
+  const organizationId = user.managerOSOrganizationId
+  const now = new Date()
+
+  // Get overdue initiatives (open initiatives with targetDate < now)
+  const initiatives = await prisma.initiative.findMany({
+    where: {
+      organizationId,
+      status: {
+        in: ['planned', 'in_progress'],
+      },
+      targetDate: {
+        lt: now,
+        not: null,
+      },
+    },
+    orderBy: { updatedAt: 'desc' },
+    include: {
+      team: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      _count: {
+        select: {
+          tasks: true,
+          checkIns: true,
+          objectives: true,
+        },
+      },
+    },
+  })
+
+  // Transform to Initiative format
+  return initiatives.map(initiative => ({
+    id: initiative.id,
+    title: initiative.title,
+    description: initiative.summary,
+    status: initiative.status,
+    rag: initiative.rag,
+    team: initiative.team,
+    updatedAt: initiative.updatedAt,
+    createdAt: initiative.createdAt,
+    _count: initiative._count,
+  }))
+}
