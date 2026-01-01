@@ -70,7 +70,7 @@ export function ViewDropdown({
   hasActiveFilters,
   onClearFilters,
   filterContent,
-  title = 'View',
+  title = 'Display',
   className,
 }: ViewDropdownProps) {
   const [isDesktopOpen, setIsDesktopOpen] = useState(false)
