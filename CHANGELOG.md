@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.53.0](/compare/v1.52.3...v1.53.0) (2026-01-01)
+
+### Features
+
+- enhance initiative management with priority feature e8e29d9
+
 ## [1.52.3](/compare/v1.52.2...v1.52.3) (2025-12-29)
 
 ## [1.52.2](/compare/v1.52.1...v1.52.2) (2025-12-27)
