@@ -7,6 +7,7 @@ import type { Initiative } from './initiative-list'
 import {
   getOpenInitiatives,
   getUserInitiatives,
+  getOverdueInitiatives,
 } from '@/lib/actions/initiatives-stats-lists'
 
 interface WidgetRenderResult {
@@ -49,9 +50,13 @@ export function InitiativesDashboardWidgetsClient({
         break
       }
 
-      case 'overdue-initiatives':
-        router.push('/initiatives/list')
+      case 'overdue-initiatives': {
+        const initiatives = await getOverdueInitiatives()
+        setModalTitle('Overdue Initiatives')
+        setModalInitiatives(initiatives)
+        setModalOpen(true)
         break
+      }
 
       case 'initiatives-status-chart':
       case 'initiatives-rag-chart':
