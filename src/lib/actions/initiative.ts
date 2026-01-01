@@ -197,6 +197,10 @@ export async function updateInitiative(
     }
   }
 
+  // Clear slot if status is being set to done or canceled
+  const shouldClearSlot =
+    validatedData.status === 'done' || validatedData.status === 'canceled'
+
   // Update the initiative with objectives and owners
   const initiative = await prisma.initiative.update({
     where: { id },
@@ -211,6 +215,8 @@ export async function updateInitiative(
       confidence: validatedData.confidence,
       priority: validatedData.priority,
       teamId: validatedData.teamId,
+      // Clear slot when initiative is completed or canceled
+      ...(shouldClearSlot && { slot: null }),
       // Update objectives by deleting existing and creating new ones
       objectives: {
         deleteMany: {},
@@ -244,6 +250,7 @@ export async function updateInitiative(
 
   // Revalidate the initiatives page
   revalidatePath('/initiatives')
+  revalidatePath('/initiatives/slots')
   revalidatePath(`/initiatives/${id}`)
   // Revalidate layout to update sidebar badge counts
   revalidatePath('/', 'layout')
@@ -596,4 +603,161 @@ export async function getInitiativeById(id: string) {
       },
     },
   })
+}
+
+/**
+ * Get all initiatives for the slots view (active initiatives only)
+ * Returns initiatives with their slot assignments
+ */
+export async function getSlottedInitiatives() {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    return { slottedInitiatives: [], unslottedInitiatives: [], totalSlots: 0 }
+  }
+
+  const organizationId = user.managerOSOrganizationId
+
+  // Get all active initiatives (not done or canceled)
+  const activeInitiatives = await prisma.initiative.findMany({
+    where: {
+      organizationId,
+      status: {
+        in: ['planned', 'in_progress', 'paused'],
+      },
+    },
+    orderBy: [{ slot: 'asc' }, { updatedAt: 'desc' }],
+    include: {
+      team: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      owners: {
+        include: {
+          person: {
+            select: {
+              id: true,
+              name: true,
+              avatar: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  const slottedInitiatives = activeInitiatives.filter(i => i.slot !== null)
+  const unslottedInitiatives = activeInitiatives.filter(i => i.slot === null)
+  const totalSlots = activeInitiatives.length
+
+  return {
+    slottedInitiatives,
+    unslottedInitiatives,
+    totalSlots,
+  }
+}
+
+/**
+ * Assign an initiative to a specific slot
+ */
+export async function assignInitiativeToSlot(
+  initiativeId: string,
+  slotNumber: number
+) {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error(
+      'User must belong to an organization to manage initiative slots'
+    )
+  }
+
+  // Check permission to edit initiatives
+  if (!(await getActionPermission(user, 'initiative.edit', initiativeId))) {
+    throw new Error('You do not have permission to edit this initiative')
+  }
+
+  // Verify initiative belongs to user's organization and is active
+  const initiative = await prisma.initiative.findFirst({
+    where: {
+      id: initiativeId,
+      organizationId: user.managerOSOrganizationId,
+      status: {
+        in: ['planned', 'in_progress', 'paused'],
+      },
+    },
+  })
+
+  if (!initiative) {
+    throw new Error(
+      'Initiative not found, access denied, or initiative is not active'
+    )
+  }
+
+  // Check if slot is already taken by another initiative
+  const existingSlot = await prisma.initiative.findFirst({
+    where: {
+      organizationId: user.managerOSOrganizationId,
+      slot: slotNumber,
+      id: { not: initiativeId },
+    },
+  })
+
+  if (existingSlot) {
+    throw new Error('This slot is already assigned to another initiative')
+  }
+
+  // Assign the slot
+  const updated = await prisma.initiative.update({
+    where: { id: initiativeId },
+    data: { slot: slotNumber },
+  })
+
+  revalidatePath('/initiatives')
+  revalidatePath('/initiatives/slots')
+
+  return updated
+}
+
+/**
+ * Remove an initiative from its slot
+ */
+export async function removeInitiativeFromSlot(initiativeId: string) {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error(
+      'User must belong to an organization to manage initiative slots'
+    )
+  }
+
+  // Check permission to edit initiatives
+  if (!(await getActionPermission(user, 'initiative.edit', initiativeId))) {
+    throw new Error('You do not have permission to edit this initiative')
+  }
+
+  // Verify initiative belongs to user's organization
+  const initiative = await prisma.initiative.findFirst({
+    where: {
+      id: initiativeId,
+      organizationId: user.managerOSOrganizationId,
+    },
+  })
+
+  if (!initiative) {
+    throw new Error('Initiative not found or access denied')
+  }
+
+  // Remove from slot
+  const updated = await prisma.initiative.update({
+    where: { id: initiativeId },
+    data: { slot: null },
+  })
+
+  revalidatePath('/initiatives')
+  revalidatePath('/initiatives/slots')
+
+  return updated
 }
