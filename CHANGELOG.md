@@ -1,5 +1,18 @@
 # Changelog
 
+# [1.54.0](/compare/v1.53.0...v1.54.0) (2026-01-01)
+
+### Bug Fixes
+
+- update dropdown title for clarity 3210f11
+
+### Features
+
+- add functionality to retrieve overdue initiatives 78ffdf4
+- add initiative size management and drag-and-drop functionality 19d9be4
+- enhance initiative and task detail views with mobile support 8730a81
+- implement slot management for initiatives 88571fb
+
 # [1.53.0](/compare/v1.52.3...v1.53.0) (2026-01-01)
 
 ### Features
