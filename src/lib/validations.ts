@@ -20,6 +20,12 @@ export const initiativeSchema = z.object({
     .default('planned'),
   rag: z.enum(['green', 'amber', 'red']).default('green'),
   confidence: z.number().min(0).max(100).default(80),
+  priority: z.coerce
+    .number()
+    .refine(val => ALL_TASK_PRIORITIES.includes(val as TaskPriority), {
+      message: 'Priority must be between 1 and 5',
+    })
+    .default(DEFAULT_TASK_PRIORITY),
   teamId: z.string().optional(),
   objectives: z
     .array(

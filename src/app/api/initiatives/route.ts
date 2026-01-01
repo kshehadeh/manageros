@@ -104,6 +104,8 @@ function buildOrderByClause(sortParam: string) {
         case 'updatedat':
         case 'updated_at':
           return Prisma.sql`i."updatedAt" ${Prisma.raw(dir)}`
+        case 'priority':
+          return Prisma.sql`i.priority ${Prisma.raw(dir)}`
         default:
           // If unknown field, skip it
           return null
@@ -257,6 +259,7 @@ export async function GET(request: NextRequest) {
         status: string
         rag: string
         confidence: number
+        priority: number
         startDate: Date | null
         targetDate: Date | null
         createdAt: Date
@@ -274,6 +277,7 @@ export async function GET(request: NextRequest) {
         i.status,
         i.rag,
         i.confidence,
+        i.priority,
         i."startDate",
         i."targetDate",
         i."createdAt",

@@ -82,6 +82,7 @@ export async function createInitiative(formData: InitiativeFormData) {
         status: validatedData.status,
         rag: validatedData.rag,
         confidence: validatedData.confidence,
+        priority: validatedData.priority,
         teamId:
           validatedData.teamId && validatedData.teamId.trim() !== ''
             ? validatedData.teamId
@@ -208,6 +209,7 @@ export async function updateInitiative(
       status: validatedData.status,
       rag: validatedData.rag,
       confidence: validatedData.confidence,
+      priority: validatedData.priority,
       teamId: validatedData.teamId,
       // Update objectives by deleting existing and creating new ones
       objectives: {

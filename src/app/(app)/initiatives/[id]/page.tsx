@@ -16,7 +16,7 @@ import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
 import { PageSidebar } from '@/components/ui/page-sidebar'
 import { ReadonlyNotesField } from '@/components/readonly-notes-field'
-import { Suspense } from 'react'
+import React, { Suspense } from 'react'
 import { FileText, Rocket } from 'lucide-react'
 import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 import { prisma } from '@/lib/db'
@@ -37,6 +37,8 @@ import {
 } from '@/lib/initiative-status'
 import { Link } from '@/components/ui/link'
 import { TeamAvatar } from '@/components/teams/team-avatar'
+import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
+import { formatShortDate } from '@/lib/utils/date-utils'
 
 export default async function InitiativeDetail({
   params,
@@ -64,6 +66,9 @@ export default async function InitiativeDetail({
       summary: true,
       rag: true,
       status: true,
+      priority: true,
+      startDate: true,
+      targetDate: true,
       team: {
         select: {
           id: true,
@@ -85,6 +90,68 @@ export default async function InitiativeDetail({
   )
   const canCreateTask = await getActionPermission(user, 'task.create')
 
+  const startDateFormatted = formatShortDate(init.startDate)
+  const targetDateFormatted = formatShortDate(init.targetDate)
+
+  // Build array of subtext items
+  const subtextItems = [
+    <Badge
+      key='status'
+      variant={initiativeStatusUtils.getVariant(
+        init.status as InitiativeStatus
+      )}
+      className='text-xs'
+    >
+      {initiativeStatusUtils.getLabel(init.status as InitiativeStatus)}
+    </Badge>,
+    <Rag key='rag' rag={init.rag} size='small' />,
+    <Suspense
+      key='completion-rate'
+      fallback={<InitiativeCompletionRateSkeleton />}
+    >
+      <InitiativeCompletionRate initiativeId={init.id} />
+    </Suspense>,
+    taskPriorityUtils.isValid(init.priority) && (
+      <Badge
+        key='priority'
+        variant={
+          taskPriorityUtils.getVariant(init.priority as TaskPriority) as
+            | 'default'
+            | 'secondary'
+            | 'destructive'
+            | 'outline'
+        }
+        className='text-xs'
+      >
+        {taskPriorityUtils.getLabel(init.priority as TaskPriority)}
+      </Badge>
+    ),
+    startDateFormatted ? (
+      <span key='start-date' className='text-sm text-muted-foreground'>
+        {startDateFormatted}
+      </span>
+    ) : null,
+    targetDateFormatted ? (
+      <span key='target-date' className='text-sm text-muted-foreground'>
+        {targetDateFormatted}
+      </span>
+    ) : null,
+    init.team && (
+      <div key='team' className='flex items-center gap-2'>
+        <TeamAvatar name={init.team.name} avatar={init.team.avatar} size='xs' />
+        <Link
+          href={`/teams/${init.team.id}`}
+          className='text-sm text-muted-foreground hover:text-foreground transition-colors'
+        >
+          {init.team.name}
+        </Link>
+      </div>
+    ),
+  ].filter(Boolean)
+
+  // Separator component
+  const Separator = () => <span className='text-muted-foreground'>•</span>
+
   return (
     <InitiativeDetailClient initiativeTitle={init.title} initiativeId={init.id}>
       <PageContainer>
@@ -93,38 +160,12 @@ export default async function InitiativeDetail({
           titleIcon={Rocket}
           subtitle={
             <div className='flex items-center gap-2 flex-wrap'>
-              <Badge
-                variant={initiativeStatusUtils.getVariant(
-                  init.status as InitiativeStatus
-                )}
-                className='text-xs'
-              >
-                {initiativeStatusUtils.getLabel(
-                  init.status as InitiativeStatus
-                )}
-              </Badge>
-              <Rag rag={init.rag} size='small' />
-              <Suspense fallback={<InitiativeCompletionRateSkeleton />}>
-                <InitiativeCompletionRate initiativeId={init.id} />
-              </Suspense>
-              {init.team && (
-                <div className='flex items-center gap-2'>
-                  <span className='text-muted-foreground'>•</span>
-                  <div className='flex items-center gap-2'>
-                    <TeamAvatar
-                      name={init.team.name}
-                      avatar={init.team.avatar}
-                      size='xs'
-                    />
-                    <Link
-                      href={`/teams/${init.team.id}`}
-                      className='text-sm text-muted-foreground hover:text-foreground transition-colors'
-                    >
-                      {init.team.name}
-                    </Link>
-                  </div>
-                </div>
-              )}
+              {subtextItems.map((item, index) => (
+                <React.Fragment key={index}>
+                  {index > 0 && <Separator />}
+                  {item}
+                </React.Fragment>
+              ))}
             </div>
           }
           actions={

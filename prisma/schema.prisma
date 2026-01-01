@@ -205,6 +205,7 @@ model Initiative {
   status         String            @default("planned") // planned|in_progress|paused|done|canceled
   rag            String            @default("green") // green|amber|red
   confidence     Int               @default(80)
+  priority       Int               @default(2)
   objectives     Objective[]
   owners         InitiativeOwner[]
   checkIns       CheckIn[]

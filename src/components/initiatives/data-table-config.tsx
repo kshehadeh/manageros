@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { MoreHorizontal, CheckCircle2, XCircle } from 'lucide-react'
 import { RagCircle } from '@/components/rag'
 import type { InitiativeWithRelations } from '@/types/initiative'
@@ -26,6 +26,7 @@ import {
 } from '@/hooks/use-initiative-table-settings'
 import { deleteInitiative } from '@/lib/actions/initiative'
 import type { DataTableConfig } from '@/components/common/generic-data-table'
+import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
 
 type InitiativeFilters = {
   search?: string
@@ -364,6 +365,28 @@ export const initiativeDataTableConfig: DataTableConfig<
         },
       },
       {
+        id: 'priority',
+        header: 'Priority',
+        accessorKey: 'priority',
+        cell: ({ row }) => {
+          const initiative = row.original
+          const priority = initiative.priority as TaskPriority
+          return (
+            <Badge
+              variant={taskPriorityUtils.getVariant(priority) as BadgeVariant}
+            >
+              {taskPriorityUtils.getLabel(priority)}
+            </Badge>
+          )
+        },
+        size: 120,
+        minSize: 100,
+        maxSize: 150,
+        meta: {
+          hidden: true, // Hidden from UI but still functional for sorting/grouping
+        },
+      },
+      {
         id: 'actions',
         header: '',
         cell: ({ row }) => {
@@ -415,6 +438,7 @@ export const initiativeDataTableConfig: DataTableConfig<
     { value: 'title', label: 'Title' },
     { value: 'status', label: 'Status' },
     { value: 'rag', label: 'RAG Status' },
+    { value: 'priority', label: 'Priority' },
   ],
 
   // Group label formatting
