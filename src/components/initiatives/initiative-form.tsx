@@ -29,6 +29,11 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { FormTemplate, type FormSection } from '@/components/ui/form-template'
+import {
+  taskPriorityUtils,
+  DEFAULT_TASK_PRIORITY,
+  type TaskPriority,
+} from '@/lib/task-priority'
 
 interface InitiativeFormProps {
   initiative?: {
@@ -41,6 +46,7 @@ interface InitiativeFormProps {
     status: string
     rag: string
     confidence: number
+    priority: number
     teamId: string | null
     objectives: Array<{
       id: string
@@ -83,6 +89,7 @@ export function InitiativeForm({
     status: (initiative?.status as InitiativeFormData['status']) || 'planned',
     rag: (initiative?.rag as InitiativeFormData['rag']) || 'green',
     confidence: initiative?.confidence || 80,
+    priority: initiative?.priority || DEFAULT_TASK_PRIORITY,
     teamId: initiative?.teamId || preselectedTeamId || '',
     objectives:
       initiative?.objectives.map(obj => ({
@@ -258,7 +265,7 @@ export function InitiativeForm({
             )}
           </div>
 
-          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
             <div className='space-y-2'>
               <Label htmlFor='status'>Status</Label>
               <Select
@@ -342,6 +349,35 @@ export function InitiativeForm({
               />
               {errors.confidence && (
                 <p className='text-sm text-destructive'>{errors.confidence}</p>
+              )}
+            </div>
+
+            <div className='space-y-2'>
+              <Label htmlFor='priority'>Priority</Label>
+              <Select
+                value={formData.priority.toString()}
+                onValueChange={value =>
+                  handleInputChange('priority', parseInt(value) as TaskPriority)
+                }
+              >
+                <SelectTrigger
+                  className={errors.priority ? 'border-destructive' : ''}
+                >
+                  <SelectValue placeholder='Select priority' />
+                </SelectTrigger>
+                <SelectContent>
+                  {taskPriorityUtils.getSelectOptions().map(option => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value.toString()}
+                    >
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.priority && (
+                <p className='text-sm text-destructive'>{errors.priority}</p>
               )}
             </div>
           </div>

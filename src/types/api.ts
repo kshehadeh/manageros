@@ -140,6 +140,7 @@ export interface InitiativeListItem {
   status: string
   rag: string
   confidence: number
+  priority: number
   startDate: Date | null
   targetDate: Date | null
   createdAt: Date
