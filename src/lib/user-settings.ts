@@ -7,6 +7,7 @@ export interface UserSettings {
   // People page settings
   peopleViewMode: 'list' | 'chart'
   peopleGrouping: 'manager' | 'team' | 'status' | 'jobRole' | 'none'
+  peopleDefaultView: 'dashboard' | 'list' | 'direct-reports' | 'chart'
 
   // Theme settings
   theme: 'light' | 'dark'
@@ -37,6 +38,10 @@ export interface UserSettings {
     startDate: string
     endDate: string
   }
+  initiativesDefaultView: 'dashboard' | 'list' | 'slots'
+
+  // Teams view settings
+  teamsDefaultView: 'list' | 'chart'
 
   // AI Chat settings
   chatWindowSettings: {
@@ -285,6 +290,7 @@ export interface UserSettings {
 export const DEFAULT_USER_SETTINGS: UserSettings = {
   peopleViewMode: 'chart',
   peopleGrouping: 'team',
+  peopleDefaultView: 'dashboard',
   theme: 'dark',
   taskGrouping: 'status',
   taskFilters: {
@@ -309,6 +315,8 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
     startDate: '',
     endDate: '',
   },
+  initiativesDefaultView: 'dashboard',
+  teamsDefaultView: 'list',
   chatWindowSettings: {
     isFullscreen: false,
   },

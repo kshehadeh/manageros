@@ -10,6 +10,7 @@ import { TeamsActionsDropdown } from '@/components/teams/teams-actions-dropdown'
 import { TeamsViewDropdown } from '@/components/teams/teams-view-dropdown'
 import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
 import { getTeamStatistics } from '@/lib/actions/team'
+import { TeamsViewRedirect } from '@/components/teams/teams-view-redirect'
 
 export default async function TeamsPage() {
   const user = await requireAuth({ requireOrganization: true })
@@ -50,6 +51,7 @@ export default async function TeamsPage() {
 
   return (
     <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
+      <TeamsViewRedirect />
       <PageContainer>
         <PageHeader
           title='Teams'

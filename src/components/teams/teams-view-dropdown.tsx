@@ -4,8 +4,10 @@ import { Link } from '@/components/ui/link'
 import { Button } from '@/components/ui/button'
 import { ActionDropdown } from '@/components/common/action-dropdown'
 import { Workflow, ChevronDown, Eye } from 'lucide-react'
+import { useUserSettings } from '@/lib/hooks/use-user-settings'
 
 export function TeamsViewDropdown() {
+  const { updateSetting } = useUserSettings()
   return (
     <ActionDropdown
       trigger={({ toggle }) => (
@@ -26,7 +28,10 @@ export function TeamsViewDropdown() {
           <Link
             href='/teams/chart'
             className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-            onClick={close}
+            onClick={() => {
+              updateSetting('teamsDefaultView', 'chart')
+              close()
+            }}
           >
             <Workflow className='w-4 h-4' />
             Organizational Chart

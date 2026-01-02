@@ -9,6 +9,7 @@ import { User } from 'lucide-react'
 import { PeopleActionsDropdown } from '@/components/people/people-actions-dropdown'
 import { PeopleViewDropdown } from '@/components/people/people-view-dropdown'
 import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
+import { PeopleViewRedirect } from '@/components/people/people-view-redirect'
 
 export default async function PeoplePage() {
   const user = await getCurrentUser()
@@ -22,6 +23,7 @@ export default async function PeoplePage() {
 
   return (
     <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
+      <PeopleViewRedirect />
       <PageContainer className='px-3 md:px-0'>
         <PageHeader
           title='People'

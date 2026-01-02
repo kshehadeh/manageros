@@ -9,6 +9,7 @@ import { Rocket } from 'lucide-react'
 import { InitiativesListActionsDropdown } from '@/components/initiatives/initiatives-list-actions-dropdown'
 import { InitiativesViewDropdown } from '@/components/initiatives/initiatives-view-dropdown'
 import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
+import { InitiativesViewRedirect } from '@/components/initiatives/initiatives-view-redirect'
 
 export default async function InitiativesPage() {
   const user = await getCurrentUser()
@@ -24,6 +25,7 @@ export default async function InitiativesPage() {
 
   return (
     <PageBreadcrumbSetter breadcrumbs={breadcrumbs}>
+      <InitiativesViewRedirect />
       <PageContainer>
         <PageHeader
           title='Initiatives'
