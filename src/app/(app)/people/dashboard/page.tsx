@@ -1,25 +1,24 @@
-import { getPeopleHierarchy } from '@/lib/actions/person'
-import { OrgChartReactFlow } from '@/components/org-chart-reactflow'
+import { PeopleDashboardServer } from '@/components/people/people-dashboard-server'
+import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
+// Import widgets to register them
+import '@/components/widgets'
 import { PageContainer } from '@/components/ui/page-container'
 import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
-import { PageSection } from '@/components/ui/page-section'
 import { User } from 'lucide-react'
 import { PeopleActionsDropdown } from '@/components/people/people-actions-dropdown'
 import { PeopleViewDropdown } from '@/components/people/people-view-dropdown'
 import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
-import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
 
-export default async function PeopleChartPage() {
+export default async function PeopleDashboardPage() {
   const user = await getCurrentUser()
   const canCreatePeople = await getActionPermission(user, 'person.create')
   const canImportPeople = await getActionPermission(user, 'person.import')
-  const people = await getPeopleHierarchy()
 
   const breadcrumbs = [
     { name: 'Dashboard', href: '/dashboard' },
     { name: 'People', href: '/people' },
-    { name: 'Organizational Chart', href: '/people/chart' },
+    { name: 'Dashboard', href: '/people/dashboard' },
   ]
 
   return (
@@ -39,10 +38,9 @@ export default async function PeopleChartPage() {
             </div>
           }
         />
+
         <PageContent>
-          <PageSection>
-            <OrgChartReactFlow people={people} />
-          </PageSection>
+          <PeopleDashboardServer />
         </PageContent>
       </PageContainer>
     </PageBreadcrumbSetter>

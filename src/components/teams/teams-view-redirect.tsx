@@ -15,18 +15,18 @@ export function TeamsViewRedirect() {
       return
     }
 
-    const defaultView = settings.teamsDefaultView
+    const defaultView = settings.teamsDefaultView || 'list'
 
     // Map view preference to route
     const viewRoutes: Record<string, string> = {
-      list: '/teams',
+      list: '/teams/list',
       chart: '/teams/chart',
     }
 
-    const targetRoute = viewRoutes[defaultView]
+    const targetRoute = viewRoutes[defaultView] || '/teams/list'
 
     // Only redirect if the target route is different from current pathname
-    if (targetRoute && targetRoute !== pathname) {
+    if (targetRoute !== pathname) {
       router.replace(targetRoute)
     }
   }, [pathname, router, settings.teamsDefaultView, isLoaded])

@@ -15,20 +15,20 @@ export function PeopleViewRedirect() {
       return
     }
 
-    const defaultView = settings.peopleDefaultView
+    const defaultView = settings.peopleDefaultView || 'dashboard'
 
     // Map view preference to route
     const viewRoutes: Record<string, string> = {
-      dashboard: '/people',
+      dashboard: '/people/dashboard',
       list: '/people/list',
       'direct-reports': '/people/direct-reports',
       chart: '/people/chart',
     }
 
-    const targetRoute = viewRoutes[defaultView]
+    const targetRoute = viewRoutes[defaultView] || '/people/dashboard'
 
     // Only redirect if the target route is different from current pathname
-    if (targetRoute && targetRoute !== pathname) {
+    if (targetRoute !== pathname) {
       router.replace(targetRoute)
     }
   }, [pathname, router, settings.peopleDefaultView, isLoaded])

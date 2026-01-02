@@ -12,7 +12,7 @@ export function InitiativesViewDropdown() {
   const pathname = usePathname()
   const { updateSetting } = useUserSettings()
 
-  const isDashboard = pathname === '/initiatives'
+  const isDashboard = pathname === '/initiatives/dashboard'
   const isList = pathname === '/initiatives/list'
   const isSlots = pathname === '/initiatives/slots'
 
@@ -34,7 +34,7 @@ export function InitiativesViewDropdown() {
       {({ close }) => (
         <div className='py-1'>
           <Link
-            href='/initiatives'
+            href='/initiatives/dashboard'
             className={cn(
               'flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors',
               isDashboard && 'bg-accent'

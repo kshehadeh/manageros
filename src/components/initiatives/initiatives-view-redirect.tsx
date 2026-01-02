@@ -15,19 +15,19 @@ export function InitiativesViewRedirect() {
       return
     }
 
-    const defaultView = settings.initiativesDefaultView
+    const defaultView = settings.initiativesDefaultView || 'dashboard'
 
     // Map view preference to route
     const viewRoutes: Record<string, string> = {
-      dashboard: '/initiatives',
+      dashboard: '/initiatives/dashboard',
       list: '/initiatives/list',
       slots: '/initiatives/slots',
     }
 
-    const targetRoute = viewRoutes[defaultView]
+    const targetRoute = viewRoutes[defaultView] || '/initiatives/dashboard'
 
     // Only redirect if the target route is different from current pathname
-    if (targetRoute && targetRoute !== pathname) {
+    if (targetRoute !== pathname) {
       router.replace(targetRoute)
     }
   }, [pathname, router, settings.initiativesDefaultView, isLoaded])

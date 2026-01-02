@@ -19,7 +19,7 @@ export function PeopleViewDropdown() {
   const pathname = usePathname()
   const { updateSetting } = useUserSettings()
 
-  const isDashboard = pathname === '/people'
+  const isDashboard = pathname === '/people/dashboard'
   const isList = pathname === '/people/list'
   const isChart = pathname === '/people/chart'
   const isDirectReports = pathname === '/people/direct-reports'
@@ -42,7 +42,7 @@ export function PeopleViewDropdown() {
       {({ close }) => (
         <div className='py-1'>
           <Link
-            href='/people'
+            href='/people/dashboard'
             className={cn(
               'flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors',
               isDashboard && 'bg-accent'
