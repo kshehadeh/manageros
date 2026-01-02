@@ -50,6 +50,7 @@ interface TaskPropertiesSidebarProps {
   } | null
   updatedAt: Date
   canEdit?: boolean
+  showHeader?: boolean
 }
 
 export function TaskPropertiesSidebar({
@@ -64,6 +65,7 @@ export function TaskPropertiesSidebar({
   createdBy,
   updatedAt,
   canEdit = true,
+  showHeader = true,
 }: TaskPropertiesSidebarProps) {
   const handleStatusChange = async (newStatus: string | number) => {
     await updateTaskStatus(taskId, newStatus as TaskStatus)
@@ -215,7 +217,7 @@ export function TaskPropertiesSidebar({
 
   return (
     <div>
-      <SectionHeader icon={Info} title='Details' />
+      {showHeader && <SectionHeader icon={Info} title='Details' />}
       <PropertiesSidebar properties={properties} />
     </div>
   )

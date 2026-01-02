@@ -340,6 +340,7 @@ export function PersonDetailContent({
             jobRole: person.jobRole,
             reportsCount: person.reports?.length,
           }}
+          showHeader={false}
         />
       </MobileBottomPanel>
     </PageContainer>

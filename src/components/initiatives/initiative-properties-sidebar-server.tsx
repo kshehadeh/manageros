@@ -6,10 +6,12 @@ import type { InitiativeStatus } from '@/lib/initiative-status'
 
 interface InitiativePropertiesSidebarServerProps {
   initiativeId: string
+  showHeader?: boolean
 }
 
 export async function InitiativePropertiesSidebarServer({
   initiativeId,
+  showHeader = true,
 }: InitiativePropertiesSidebarServerProps) {
   const user = await getCurrentUser()
 
@@ -55,6 +57,7 @@ export async function InitiativePropertiesSidebarServer({
       targetDate={initiative.targetDate}
       progress={progress}
       canEdit={canEdit}
+      showHeader={showHeader}
     />
   )
 }
