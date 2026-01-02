@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.55.0](/compare/v1.54.0...v1.55.0) (2026-01-02)
+
+### Features
+
+- add showHeader prop to sidebar components for conditional rendering f955b6b
+- add view redirection and user settings updates for initiatives, people, and teams 0da050b
+
 # [1.54.0](/compare/v1.53.0...v1.54.0) (2026-01-01)
 
 ### Bug Fixes
