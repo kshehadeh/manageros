@@ -45,6 +45,7 @@ interface InitiativePropertiesSidebarProps {
   targetDate: Date | null
   progress?: number
   canEdit?: boolean
+  showHeader?: boolean
 }
 
 export function InitiativePropertiesSidebar({
@@ -58,6 +59,7 @@ export function InitiativePropertiesSidebar({
   targetDate,
   progress,
   canEdit = true,
+  showHeader = true,
 }: InitiativePropertiesSidebarProps) {
   const handleStatusChange = async (newStatus: string | number) => {
     await updateInitiativeStatus(initiativeId, newStatus as string)
@@ -266,7 +268,7 @@ export function InitiativePropertiesSidebar({
 
   return (
     <div>
-      <SectionHeader icon={Info} title='Details' />
+      {showHeader && <SectionHeader icon={Info} title='Details' />}
       <PropertiesSidebar properties={properties} />
     </div>
   )

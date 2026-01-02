@@ -43,10 +43,12 @@ interface PersonPropertiesSidebarProps {
     } | null
     reportsCount?: number
   }
+  showHeader?: boolean
 }
 
 export function PersonPropertiesSidebar({
   person,
+  showHeader = true,
 }: PersonPropertiesSidebarProps) {
   const getEmployeeTypeLabel = (type: string) => {
     switch (type) {
@@ -209,7 +211,7 @@ export function PersonPropertiesSidebar({
 
   return (
     <div>
-      <SectionHeader icon={Info} title='Details' />
+      {showHeader && <SectionHeader icon={Info} title='Details' />}
       <PropertiesSidebar properties={properties} />
     </div>
   )

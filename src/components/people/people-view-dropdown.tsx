@@ -13,11 +13,13 @@ import {
 } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { useUserSettings } from '@/lib/hooks/use-user-settings'
 
 export function PeopleViewDropdown() {
   const pathname = usePathname()
+  const { updateSetting } = useUserSettings()
 
-  const isDashboard = pathname === '/people'
+  const isDashboard = pathname === '/people/dashboard'
   const isList = pathname === '/people/list'
   const isChart = pathname === '/people/chart'
   const isDirectReports = pathname === '/people/direct-reports'
@@ -40,12 +42,15 @@ export function PeopleViewDropdown() {
       {({ close }) => (
         <div className='py-1'>
           <Link
-            href='/people'
+            href='/people/dashboard'
             className={cn(
               'flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors',
               isDashboard && 'bg-accent'
             )}
-            onClick={close}
+            onClick={() => {
+              updateSetting('peopleDefaultView', 'dashboard')
+              close()
+            }}
           >
             <LayoutDashboard className='w-4 h-4' />
             Dashboard
@@ -56,7 +61,10 @@ export function PeopleViewDropdown() {
               'flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors',
               isList && 'bg-accent'
             )}
-            onClick={close}
+            onClick={() => {
+              updateSetting('peopleDefaultView', 'list')
+              close()
+            }}
           >
             <List className='w-4 h-4' />
             List
@@ -67,7 +75,10 @@ export function PeopleViewDropdown() {
               'flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors',
               isDirectReports && 'bg-accent'
             )}
-            onClick={close}
+            onClick={() => {
+              updateSetting('peopleDefaultView', 'direct-reports')
+              close()
+            }}
           >
             <UserCheck className='w-4 h-4' />
             Direct Reports
@@ -78,7 +89,10 @@ export function PeopleViewDropdown() {
               'flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors',
               isChart && 'bg-accent'
             )}
-            onClick={close}
+            onClick={() => {
+              updateSetting('peopleDefaultView', 'chart')
+              close()
+            }}
           >
             <Workflow className='w-4 h-4' />
             Organizational Chart

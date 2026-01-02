@@ -192,6 +192,7 @@ export default async function TaskDetailPage({
           dueDate={task.dueDate}
           createdBy={task.createdBy}
           updatedAt={task.updatedAt}
+          showHeader={false}
         />
       </MobileBottomPanel>
     </PageBreadcrumbSetter>

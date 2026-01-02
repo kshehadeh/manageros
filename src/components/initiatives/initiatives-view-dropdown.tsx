@@ -6,11 +6,13 @@ import { ActionDropdown } from '@/components/common/action-dropdown'
 import { ChevronDown, Eye, Grid3X3, LayoutDashboard, List } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { useUserSettings } from '@/lib/hooks/use-user-settings'
 
 export function InitiativesViewDropdown() {
   const pathname = usePathname()
+  const { updateSetting } = useUserSettings()
 
-  const isDashboard = pathname === '/initiatives'
+  const isDashboard = pathname === '/initiatives/dashboard'
   const isList = pathname === '/initiatives/list'
   const isSlots = pathname === '/initiatives/slots'
 
@@ -32,12 +34,15 @@ export function InitiativesViewDropdown() {
       {({ close }) => (
         <div className='py-1'>
           <Link
-            href='/initiatives'
+            href='/initiatives/dashboard'
             className={cn(
               'flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors',
               isDashboard && 'bg-accent'
             )}
-            onClick={close}
+            onClick={() => {
+              updateSetting('initiativesDefaultView', 'dashboard')
+              close()
+            }}
           >
             <LayoutDashboard className='w-4 h-4' />
             Dashboard
@@ -48,7 +53,10 @@ export function InitiativesViewDropdown() {
               'flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors',
               isList && 'bg-accent'
             )}
-            onClick={close}
+            onClick={() => {
+              updateSetting('initiativesDefaultView', 'list')
+              close()
+            }}
           >
             <List className='w-4 h-4' />
             List
@@ -59,7 +67,10 @@ export function InitiativesViewDropdown() {
               'flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors',
               isSlots && 'bg-accent'
             )}
-            onClick={close}
+            onClick={() => {
+              updateSetting('initiativesDefaultView', 'slots')
+              close()
+            }}
           >
             <Grid3X3 className='w-4 h-4' />
             Slots

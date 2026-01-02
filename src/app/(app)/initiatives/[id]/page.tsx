@@ -261,7 +261,10 @@ export default async function InitiativeDetail({
       {/* Mobile bottom panel for properties */}
       <MobileBottomPanel title='Details'>
         <Suspense fallback={<InitiativePropertiesSidebarSkeleton />}>
-          <InitiativePropertiesSidebarServer initiativeId={init.id} />
+          <InitiativePropertiesSidebarServer
+            initiativeId={init.id}
+            showHeader={false}
+          />
         </Suspense>
       </MobileBottomPanel>
     </InitiativeDetailClient>
