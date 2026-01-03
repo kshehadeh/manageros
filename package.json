@@ -1,7 +1,7 @@
 {
   "name": "manageros-starter",
   "private": true,
-  "version": "1.55.1",
+  "version": "1.55.0",
   "type": "module",
   "scripts": {
     "dev": "bun --bun next dev --turbo",
@@ -43,7 +43,7 @@
     "version:major": "bun scripts/bump-version.ts major",
     "commit:auto": "bun scripts/auto-commit.ts",
     "og:generate": "bun scripts/generate-og-image.ts",
-    "postinstall": "[ -n \"$VERCEL\" ] || bunx prisma generate",
+    "postinstall": "bunx prisma generate",
     "prepare": "husky",
     "release": "release-it --ci",
     "release:patch": "release-it patch --ci",

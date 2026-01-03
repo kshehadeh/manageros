@@ -13,6 +13,6 @@
       "schedule": "0 8 * * *"
     }
   ],
-  "buildCommand": "bunx prisma generate && next build --turbo",
+  "buildCommand": "bun run build",
   "installCommand": "bun install"
 }
