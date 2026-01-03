@@ -128,6 +128,7 @@
     "reactflow": "^11.11.4",
     "recharts": "^2.15.0",
     "resend": "^6.5.2",
+    "server-only": "^0.0.1",
     "shiki": "^3.20.0",
     "slate": "^0.118.1",
     "slate-dom": "^0.119.0",

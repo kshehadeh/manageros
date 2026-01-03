@@ -93,13 +93,3 @@ export interface WidgetConfig {
     height?: string
   }
 }
-
-/**
- * Dashboard configuration
- */
-export interface DashboardConfig {
-  /** Widget configurations */
-  widgets: WidgetConfig[]
-  /** Layout mode */
-  layout?: 'grid' | 'list'
-}

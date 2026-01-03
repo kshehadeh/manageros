@@ -74,25 +74,3 @@ export function HelpIcon({
     </a>
   )
 }
-
-/**
- * Wrapper component that adds a help icon to any existing content
- */
-function HelpWrapper({
-  children,
-  helpId,
-  position = 'top-right',
-  size = 'md',
-}: {
-  children: React.ReactNode
-  helpId?: HelpId
-  position?: Exclude<HelpIconProps['position'], 'inline'>
-  size?: HelpIconProps['size']
-}) {
-  return (
-    <div className='relative'>
-      {children}
-      <HelpIcon helpId={helpId} position={position} size={size} />
-    </div>
-  )
-}

@@ -62,7 +62,6 @@ export const initiativeSchema = z.object({
 
 export type InitiativeFormData = z.infer<typeof initiativeSchema>
 
-
 export const personSchema = z.object({
   name: z
     .string()
@@ -233,48 +232,6 @@ export const feedbackCampaignSchema = z
 
 export type FeedbackCampaignFormData = z.infer<typeof feedbackCampaignSchema>
 
-export const feedbackResponseSchema = z.object({
-  campaignId: z.string().min(1, 'Campaign ID is required'),
-  responderEmail: z.string().email('Invalid email address'),
-  responses: z.record(
-    z.string(),
-    z.union([z.string(), z.number(), z.boolean(), z.null()])
-  ), // Prisma Json type compatible
-})
-
-export type FeedbackResponseFormData = z.infer<typeof feedbackResponseSchema>
-
-const feedbackResponseByInviteLinkSchema = z.object({
-  inviteLink: z.string().min(1, 'Invite link is required'),
-  responderEmail: z.string().email('Invalid email address'),
-  responses: z.record(
-    z.string(),
-    z.union([z.string(), z.number(), z.boolean(), z.null()])
-  ), // Prisma Json type compatible
-})
-
-type FeedbackResponseByInviteLinkFormData = z.infer<
-  typeof feedbackResponseByInviteLinkSchema
->
-
-export const feedbackTemplateSchema = z.object({
-  name: z.string().min(1, 'Template name is required'),
-  description: z.string().optional(),
-  questions: z
-    .array(
-      z.object({
-        question: z.string().min(1, 'Question text is required'),
-        type: z.enum(['text', 'rating', 'multiple_choice']).default('text'),
-        required: z.boolean().default(true),
-        options: z.array(z.string()).optional(),
-        sortOrder: z.number().default(0),
-      })
-    )
-    .min(1, 'At least one question is required'),
-})
-
-export type FeedbackTemplateFormData = z.infer<typeof feedbackTemplateSchema>
-
 export const meetingSchema = z
   .object({
     title: z
@@ -394,24 +351,6 @@ export const meetingUpdateSchema = z
 
 export type MeetingUpdateData = z.infer<typeof meetingUpdateSchema>
 
-const meetingParticipantSchema = z.object({
-  personId: z.string().min(1, 'Person ID is required'),
-  status: z
-    .enum([
-      'invited',
-      'accepted',
-      'declined',
-      'tentative',
-      'attended',
-      'absent',
-    ])
-    .default('invited'),
-})
-
-type MeetingParticipantFormData = z.infer<
-  typeof meetingParticipantSchema
->
-
 export const meetingInstanceSchema = z.object({
   meetingId: z.string().min(1, 'Meeting ID is required'),
   scheduledAt: z.string().min(1, 'Scheduled date and time is required'),
@@ -467,24 +406,6 @@ export type MeetingInstanceUpdateData = z.infer<
   typeof meetingInstanceUpdateSchema
 >
 
-const meetingInstanceParticipantSchema = z.object({
-  personId: z.string().min(1, 'Person ID is required'),
-  status: z
-    .enum([
-      'invited',
-      'accepted',
-      'declined',
-      'tentative',
-      'attended',
-      'absent',
-    ])
-    .default('invited'),
-})
-
-type MeetingInstanceParticipantFormData = z.infer<
-  typeof meetingInstanceParticipantSchema
->
-
 // ============================================================================
 // ONBOARDING SCHEMAS
 // ============================================================================
@@ -495,13 +416,6 @@ export const ONBOARDING_ITEM_TYPES = [
   'MEETING',
   'CHECKPOINT',
   'EXPECTATION',
-] as const
-
-const ONBOARDING_STATUSES = [
-  'NOT_STARTED',
-  'IN_PROGRESS',
-  'COMPLETED',
-  'CANCELLED',
 ] as const
 
 const ONBOARDING_ITEM_STATUSES = [
@@ -597,17 +511,6 @@ export const onboardingAssignmentSchema = z.object({
 
 export type OnboardingAssignmentFormData = z.infer<
   typeof onboardingAssignmentSchema
->
-
-// Schema for updating onboarding instance status
-export const onboardingInstanceUpdateSchema = z.object({
-  status: z.enum(ONBOARDING_STATUSES).optional(),
-  managerId: z.string().optional().nullable(),
-  mentorId: z.string().optional().nullable(),
-})
-
-export type OnboardingInstanceUpdateData = z.infer<
-  typeof onboardingInstanceUpdateSchema
 >
 
 // Schema for updating item progress

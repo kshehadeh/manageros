@@ -44,15 +44,10 @@ export type {
   WidgetContext,
   WidgetVisibility,
   WidgetConfig,
-  DashboardConfig,
 } from './types'
 
 // Export WidgetCard component
 
-
 // Export skeleton components
 
-
-
 // Export individual widgets for direct access if needed
-

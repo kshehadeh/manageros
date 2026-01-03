@@ -357,58 +357,6 @@ export async function createObjective(
   return objective
 }
 
-async function updateInitiativeTeam(
-  initiativeId: string,
-  teamId: string | null
-) {
-  const user = await getCurrentUser()
-
-  // Check if user belongs to an organization
-  if (!user.managerOSOrganizationId) {
-    throw new Error('User must belong to an organization to update initiatives')
-  }
-
-  // Verify initiative belongs to user's organization
-  const existingInitiative = await prisma.initiative.findFirst({
-    where: {
-      id: initiativeId,
-      organizationId: user.managerOSOrganizationId,
-    },
-  })
-  if (!existingInitiative) {
-    throw new Error('Initiative not found or access denied')
-  }
-
-  // Verify team belongs to user's organization if specified
-  if (teamId) {
-    const team = await prisma.team.findFirst({
-      where: {
-        id: teamId,
-        organizationId: user.managerOSOrganizationId,
-      },
-    })
-    if (!team) {
-      throw new Error('Team not found or access denied')
-    }
-  }
-
-  // Update the initiative team
-  const initiative = await prisma.initiative.update({
-    where: { id: initiativeId },
-    data: {
-      teamId: teamId,
-    },
-    include: {
-      team: true,
-    },
-  })
-
-  // Revalidate the initiative page
-  revalidatePath(`/initiatives/${initiativeId}`)
-
-  return initiative
-}
-
 export async function addInitiativeOwner(
   initiativeId: string,
   personId: string,
@@ -540,67 +488,6 @@ export async function getInitiativeOwners(initiativeId: string) {
           name: true,
           email: true,
           avatar: true,
-        },
-      },
-    },
-  })
-}
-
-/**
- * Get an initiative by ID with all necessary relations for the detail page
- */
-async function getInitiativeById(id: string) {
-  const user = await getCurrentUser()
-
-  const hasPermission = await getActionPermission(user, 'initiative.view', id)
-
-  if (!hasPermission) {
-    throw new Error('You do not have permission to view this initiative')
-  }
-
-  // Filter by organizationId to ensure organization isolation
-  return await prisma.initiative.findFirst({
-    where: {
-      id,
-      organizationId: user.managerOSOrganizationId || '',
-    },
-    include: {
-      objectives: true,
-      tasks: {
-        include: {
-          assignee: true,
-          createdBy: true,
-          objective: true,
-          initiative: true,
-        },
-        orderBy: { createdAt: 'desc' },
-      },
-      checkIns: {
-        orderBy: { createdAt: 'desc' },
-        include: {
-          createdBy: true,
-        },
-      },
-      team: true,
-      owners: {
-        include: {
-          person: {
-            include: {
-              team: true,
-              jobRole: {
-                include: {
-                  level: true,
-                  domain: true,
-                },
-              },
-              manager: {
-                include: {
-                  reports: true,
-                },
-              },
-              reports: true,
-            },
-          },
         },
       },
     },

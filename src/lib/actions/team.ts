@@ -4,12 +4,7 @@ import { prisma } from '@/lib/db'
 import { teamSchema, type TeamFormData } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth-utils'
-import type {
-  TeamWithHierarchy,
-  TeamForSelection,
-  TeamWithRelations,
-  TeamWithCounts,
-} from '@/types/team'
+import type { TeamWithHierarchy, TeamWithRelations } from '@/types/team'
 import {
   checkOrganizationLimit,
   getOrganizationCounts,
@@ -27,95 +22,6 @@ export async function getTeams() {
     })
   } catch (error) {
     console.error('Error fetching teams:', error)
-    return []
-  }
-}
-
-/**
- * Gets all teams with parent info and relation counts for data table display
- * Returns a flat list of all teams (not hierarchical)
- */
-async function getAllTeamsWithRelations(): Promise<TeamWithCounts[]> {
-  try {
-    const user = await getCurrentUser()
-    if (!user.managerOSOrganizationId) {
-      return []
-    }
-    return await prisma.team.findMany({
-      where: { organizationId: user.managerOSOrganizationId },
-      include: {
-        parent: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        _count: {
-          select: {
-            people: true,
-            initiatives: true,
-            children: true,
-          },
-        },
-      },
-      orderBy: { name: 'asc' },
-    })
-  } catch (error) {
-    console.error('Error fetching all teams with relations:', error)
-    return []
-  }
-}
-
-/**
- * Recursively fetches team hierarchy with all related data
- * This is more efficient than deeply nested includes and handles unlimited depth
- */
-async function getTeamHierarchy(
-  organizationId: string,
-  parentId: string | null = null
-): Promise<TeamWithHierarchy[]> {
-  const teams = await prisma.team.findMany({
-    where: {
-      organizationId,
-      parentId,
-    },
-    include: {
-      people: true,
-      initiatives: true,
-      parent: true,
-    },
-    orderBy: { name: 'asc' },
-  })
-
-  // Recursively fetch children for each team
-  const teamsWithChildren = await Promise.all(
-    teams.map(async team => {
-      const children = await getTeamHierarchy(organizationId, team.id)
-      return {
-        ...team,
-        children,
-      }
-    })
-  )
-
-  return teamsWithChildren
-}
-
-/**
- * Gets the complete team hierarchy for an organization
- * Returns only top-level teams with their full nested structure
- * Uses caching for better performance
- */
-async function getCompleteTeamHierarchy(): Promise<TeamWithHierarchy[]> {
-  try {
-    const user = await getCurrentUser()
-    if (!user.managerOSOrganizationId) {
-      return []
-    }
-
-    return await getTeamHierarchy(user.managerOSOrganizationId || '', null)
-  } catch (error) {
-    console.error('Error fetching team hierarchy:', error)
     return []
   }
 }
@@ -402,32 +308,6 @@ export async function getTeam(id: string): Promise<TeamWithRelations | null> {
   } catch (error) {
     console.error('Error fetching team:', error)
     return null
-  }
-}
-
-async function getTeamsForSelection(
-  excludeId?: string
-): Promise<TeamForSelection[]> {
-  try {
-    const user = await getCurrentUser()
-    if (!user.managerOSOrganizationId) {
-      return []
-    }
-    return await prisma.team.findMany({
-      where: {
-        organizationId: user.managerOSOrganizationId,
-        ...(excludeId && { id: { not: excludeId } }),
-      },
-      select: {
-        id: true,
-        name: true,
-        parentId: true,
-      },
-      orderBy: { name: 'asc' },
-    })
-  } catch (error) {
-    console.error('Error fetching teams for selection:', error)
-    return []
   }
 }
 

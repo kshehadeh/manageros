@@ -163,32 +163,3 @@ export async function deleteCheckIn(checkInId: string) {
 
   return { success: true }
 }
-
-async function getCheckIn(checkInId: string) {
-  const user = await getCurrentUser()
-
-  // Check if user belongs to an organization
-  if (!user.managerOSOrganizationId) {
-    throw new Error('User must belong to an organization to view check-ins')
-  }
-
-  // Get the check-in with initiative details
-  const checkIn = await prisma.checkIn.findFirst({
-    where: {
-      id: checkInId,
-      initiative: {
-        organizationId: user.managerOSOrganizationId,
-      },
-    },
-    include: {
-      initiative: true,
-      createdBy: true,
-    },
-  })
-
-  if (!checkIn) {
-    throw new Error('Check-in not found or access denied')
-  }
-
-  return checkIn
-}

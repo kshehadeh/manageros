@@ -667,20 +667,10 @@ async function getClerkOrganizationSubscription(
 }
 
 /**
- * Get the number of members of a Clerk organization
- */
-export async function getClerkOrganizationMembersCount(
-  clerkOrgId: string
-): Promise<number> {
-  const members = await getClerkOrganizationMembers(clerkOrgId)
-  return members.length
-}
-
-/**
  * Get the billing user's Clerk user ID from an organization's subscription
  * Returns null if no subscription or payer found
  */
-export async function getBillingUserClerkId(
+async function getBillingUserClerkId(
   clerkOrgId: string
 ): Promise<string | null> {
   try {

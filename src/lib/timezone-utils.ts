@@ -20,30 +20,3 @@ export function utcToLocalDateTimeString(utcDate: Date): string {
 
   return `${year}-${month}-${day}T${hours}:${minutes}`
 }
-
-/**
- * Converts a local datetime-local input string to a UTC Date object
- * This ensures that form submissions are properly converted to UTC for storage
- */
-function localDateTimeStringToUtc(localDateTimeString: string): Date {
-  // The datetime-local input provides a string in YYYY-MM-DDTHH:MM format
-  // We need to create a Date object that represents this local time
-  // and then convert it to UTC for storage
-  return new Date(localDateTimeString)
-}
-
-/**
- * Gets the current local date and time formatted for datetime-local input
- * Rounds to the nearest 15 minutes for better UX
- */
-function getCurrentLocalDateTimeString(): string {
-  const now = new Date()
-
-  // Round to the nearest 15 minutes
-  const minutes = now.getMinutes()
-  const roundedMinutes = Math.round(minutes / 15) * 15
-  const roundedDate = new Date(now)
-  roundedDate.setMinutes(roundedMinutes, 0, 0)
-
-  return utcToLocalDateTimeString(roundedDate)
-}

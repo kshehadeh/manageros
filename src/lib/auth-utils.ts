@@ -1863,10 +1863,6 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
   },
 }
 
-type PermissionKey = PermissionType
-
-type ActionPermissionOption = PermissionType
-
 /**
  * Central permission function to check if a user can perform a specific action
  * @param user - The user object

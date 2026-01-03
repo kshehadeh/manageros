@@ -33,45 +33,6 @@ export async function getIntegration(
 }
 
 /**
- * Get an integration instance by type and scope
- */
-async function getIntegrationByType(
-  organizationId: string | null,
-  userId: string | null,
-  type: IntegrationType,
-  scope: IntegrationScope
-): Promise<BaseIntegration | null> {
-  const where: {
-    integrationType: string
-    scope: string
-    organizationId?: string
-    userId?: string
-  } = {
-    integrationType: type,
-    scope,
-  }
-
-  if (scope === 'organization' && organizationId) {
-    where.organizationId = organizationId
-  } else if (scope === 'user' && userId) {
-    where.userId = userId
-  } else {
-    return null
-  }
-
-  const integration = await prisma.integration.findFirst({
-    where,
-    orderBy: { createdAt: 'desc' },
-  })
-
-  if (!integration) {
-    return null
-  }
-
-  return createIntegrationFromRecord(integration)
-}
-
-/**
  * Create an integration instance from a database record
  */
 function createIntegrationFromRecord(record: {
