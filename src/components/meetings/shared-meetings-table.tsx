@@ -401,7 +401,7 @@ function renderActionsCell(
   )
 }
 
-export function SharedMeetingsTable({
+function SharedMeetingsTable({
   meetings,
   filteredMeetings,
   columns,

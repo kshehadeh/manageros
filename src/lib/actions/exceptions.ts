@@ -211,7 +211,7 @@ export async function getExceptions(
 /**
  * Get a single exception by ID
  */
-export async function getExceptionById(id: string): Promise<Exception | null> {
+async function getExceptionById(id: string): Promise<Exception | null> {
   const user = await getCurrentUser()
 
   if (!user.managerOSOrganizationId) {

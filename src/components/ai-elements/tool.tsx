@@ -108,7 +108,7 @@ export type ToolInputProps = ComponentProps<'div'> & {
   input: ToolUIPart['input']
 }
 
-export const ToolInput = ({ className, input, ...props }: ToolInputProps) => (
+const ToolInput = ({ className, input, ...props }: ToolInputProps) => (
   <div className={cn('space-y-2 overflow-hidden p-4', className)} {...props}>
     <h4 className='font-medium text-muted-foreground text-xs uppercase tracking-wide'>
       Parameters

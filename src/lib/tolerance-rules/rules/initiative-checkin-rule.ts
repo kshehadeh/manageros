@@ -25,7 +25,7 @@ export interface InitiativeCheckInConfig {
 /**
  * Zod schema for initiative check-in config
  */
-export const initiativeCheckInConfigSchema = z.object({
+const initiativeCheckInConfigSchema = z.object({
   warningThresholdDays: z.number().int().positive(),
 })
 

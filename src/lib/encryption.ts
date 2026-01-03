@@ -40,19 +40,3 @@ export function decrypt(encryptedText: string): string {
     throw new Error('Failed to decrypt data')
   }
 }
-
-/**
- * Validate that the encryption key is properly set
- */
-export function validateEncryptionKey(): boolean {
-  if (
-    !process.env.ENCRYPTION_KEY ||
-    process.env.ENCRYPTION_KEY === 'default-key-change-in-production'
-  ) {
-    console.warn(
-      'WARNING: Using default encryption key. Set ENCRYPTION_KEY environment variable for production.'
-    )
-    return false
-  }
-  return true
-}

@@ -148,7 +148,7 @@ const DOMAIN_ICON_MAP: Record<string, IconComponent> = {
 /**
  * Extract domain from URL
  */
-export function extractDomain(url: string): string {
+function extractDomain(url: string): string {
   try {
     const urlObj = new URL(url)
     return urlObj.hostname.toLowerCase()

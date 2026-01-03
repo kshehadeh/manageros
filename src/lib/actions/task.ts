@@ -269,46 +269,6 @@ export async function getTasksForInitiative(initiativeId: string) {
 }
 
 /**
- * Get all tasks associated with an initiative (both direct and through objectives)
- * Used for calculating completion rates and displaying all related tasks
- */
-export async function getAllTasksForInitiative(initiativeId: string) {
-  const user = await getCurrentUser()
-
-  // Check if user belongs to an organization
-  if (!user.managerOSOrganizationId) {
-    throw new Error('User must belong to an organization to view tasks')
-  }
-
-  return await prisma.task.findMany({
-    where: {
-      AND: [
-        {
-          OR: [{ initiativeId }, { objective: { initiativeId } }],
-        },
-        {
-          OR: [
-            { initiative: { organizationId: user.managerOSOrganizationId } },
-            {
-              objective: {
-                initiative: { organizationId: user.managerOSOrganizationId },
-              },
-            },
-          ],
-        },
-      ],
-    },
-    include: {
-      assignee: true,
-      createdBy: true,
-      objective: true,
-      initiative: true,
-    },
-    orderBy: { createdAt: 'desc' },
-  })
-}
-
-/**
  * Get task completion counts for an initiative (both direct and through objectives)
  * Optimized query that only returns counts, not full task data
  * @param initiativeId The initiative ID
@@ -697,7 +657,7 @@ export async function updateTaskTitle(taskId: string, title: string) {
   return task
 }
 
-export async function updateTaskAssignee(
+async function updateTaskAssignee(
   taskId: string,
   assigneeId: string | null
 ) {

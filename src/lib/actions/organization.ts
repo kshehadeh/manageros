@@ -25,84 +25,6 @@ import {
   mapManagerOSRoleToClerkRole,
   mapClerkRoleToManagerOSRole,
 } from '../clerk-organization-utils'
-export async function createOrganization(formData: {
-  name: string
-  slug: string
-}) {
-  const user = await getCurrentUser()
-
-  // Check if user already has an organization
-  if (user.clerkUserId && user.managerOSOrganizationId) {
-    throw new Error('User already belongs to an organization')
-  }
-
-  // Determine role - creator is always OWNER
-  const userRole = 'OWNER'
-
-  // Create Clerk organization first (Clerk will handle slug uniqueness)
-  let clerkOrgId: string
-  try {
-    const clerkOrg = await createClerkOrganization(formData.name, formData.slug)
-    clerkOrgId = clerkOrg.id
-  } catch (error) {
-    console.error('Failed to create Clerk organization:', error)
-    // Re-throw with user-friendly message if it's a slug conflict
-    if (
-      error instanceof Error &&
-      (error.message.includes('422') || error.message.includes('slug'))
-    ) {
-      throw new Error(
-        'Organization slug already exists. Please choose a different slug.'
-      )
-    }
-    throw new Error(
-      'Failed to create organization. Please try again or contact support.'
-    )
-  }
-
-  // Create organization in a transaction
-  // Subscription information is stored in Clerk, not in our database
-  const result = await prisma.$transaction(async tx => {
-    // Create organization - subscription info is stored in Clerk
-    // Name, slug, and subscription details are stored in Clerk, not in our database
-    const organization = await tx.organization.create({
-      data: {
-        clerkOrganizationId: clerkOrgId,
-      },
-    })
-
-    return organization
-  })
-
-  // Add user to Clerk organization with admin role (OWNER maps to org:admin)
-  if (user.clerkUserId) {
-    try {
-      await addUserToClerkOrganization(
-        clerkOrgId,
-        user.clerkUserId,
-        await mapManagerOSRoleToClerkRole(userRole)
-      )
-    } catch (error) {
-      console.error('Failed to add user to Clerk organization:', error)
-      // Don't fail the whole operation - user is already in ManagerOS org
-    }
-  }
-
-  // Sync updated user data to Clerk (organizationId and role changed)
-  // Wait for sync to complete to ensure Clerk metadata is updated
-  const updatedUser = await getCurrentUser()
-  await syncUserDataToClerk(updatedUser)
-
-  // Revalidate paths that depend on organization status
-  revalidatePath('/', 'layout')
-  revalidatePath('/dashboard', 'page')
-  revalidatePath('/settings', 'page')
-
-  return {
-    ...result,
-    clerkOrganizationId: clerkOrgId,
-  }
-}
 
 export async function linkUserToPerson(userId: string, personId: string) {
   const currentUser = await getCurrentUser()
@@ -651,7 +573,7 @@ export async function revokeOrganizationInvitation(invitationId: string) {
   revalidatePath('/organization/invitations')
 }
 
-export async function reactivateOrganizationInvitation(invitationId: string) {
+async function reactivateOrganizationInvitation(invitationId: string) {
   const user = await getCurrentUser()
 
   // Check if user is admin or owner
@@ -728,7 +650,7 @@ export async function reactivateOrganizationInvitation(invitationId: string) {
   revalidatePath('/organization/members')
 }
 
-export async function acceptOrganizationInvitation(email: string) {
+async function acceptOrganizationInvitation(email: string) {
   // Find pending invitation for this email
   const invitation = await prisma.organizationInvitation.findFirst({
     where: {
@@ -820,7 +742,7 @@ export async function syncOrgDataToClerk() {
  * Fetches name and slug from Clerk API
  * Returns both Clerk organization details and ManagerOS organization statistics
  */
-export async function getOrganizationDetails() {
+async function getOrganizationDetails() {
   const user = await getCurrentUser()
 
   // Fetch name and slug from Clerk
@@ -1174,7 +1096,7 @@ export async function updateUserRole(
  * 4. Sets current user's role to OWNER
  * 5. If there's already an owner, sets that user's role to ADMIN
  */
-export async function becomeOrganizationOwner() {
+async function becomeOrganizationOwner() {
   const currentUser = await getCurrentUser()
 
   // Check if current user is admin
@@ -1998,7 +1920,7 @@ export async function unlinkSelfFromPerson() {
 
 // GitHub Organization Settings Actions
 
-export async function getGithubOrganizations() {
+async function getGithubOrganizations() {
   const user = await getCurrentUser()
 
   // Check if user is admin or owner
@@ -2038,7 +1960,7 @@ export async function getGithubOrganizations() {
   }
 }
 
-export async function addGithubOrganization(githubOrgName: string) {
+async function addGithubOrganization(githubOrgName: string) {
   const user = await getCurrentUser()
 
   // Check if user is admin or owner
@@ -2105,7 +2027,7 @@ export async function addGithubOrganization(githubOrgName: string) {
   }
 }
 
-export async function removeGithubOrganization(githubOrgId: string) {
+async function removeGithubOrganization(githubOrgId: string) {
   const user = await getCurrentUser()
 
   // Check if user is admin or owner

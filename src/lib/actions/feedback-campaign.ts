@@ -279,7 +279,7 @@ export async function deleteFeedbackCampaign(id: string) {
   revalidatePath(`/people/${existingCampaign.targetPersonId}`)
 }
 
-export async function getFeedbackCampaignsForPerson(personId: string) {
+async function getFeedbackCampaignsForPerson(personId: string) {
   const user = await getCurrentUser()
 
   if (!user.managerOSOrganizationId) {
@@ -357,7 +357,7 @@ export async function getFeedbackCampaignsForPerson(personId: string) {
   return campaigns
 }
 
-export async function getFeedbackCampaignById(id: string) {
+async function getFeedbackCampaignById(id: string) {
   const user = await getCurrentUser()
 
   const hasPermission = await getActionPermission(
@@ -403,7 +403,7 @@ export async function getFeedbackCampaignById(id: string) {
   return campaign
 }
 
-export async function submitFeedbackResponse(
+async function submitFeedbackResponse(
   formData: FeedbackResponseFormData
 ) {
   // Validate the form data
@@ -690,7 +690,7 @@ export async function getFeedbackCampaignResponses(campaignId: string) {
   return campaign
 }
 
-export async function getAllFeedbackCampaignsForOrganization() {
+async function getAllFeedbackCampaignsForOrganization() {
   const user = await getCurrentUser()
 
   if (!user) {

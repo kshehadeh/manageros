@@ -28,7 +28,7 @@ export const ALL_INITIATIVE_STATUSES: InitiativeStatus[] = [
 ]
 
 // Human-readable labels for each status
-export const INITIATIVE_STATUS_LABELS: Record<InitiativeStatus, string> = {
+const INITIATIVE_STATUS_LABELS: Record<InitiativeStatus, string> = {
   [INITIATIVE_STATUS.PLANNED]: 'Planned',
   [INITIATIVE_STATUS.IN_PROGRESS]: 'In Progress',
   [INITIATIVE_STATUS.PAUSED]: 'Paused',
@@ -37,7 +37,7 @@ export const INITIATIVE_STATUS_LABELS: Record<InitiativeStatus, string> = {
 }
 
 // Badge variants for each status
-export const INITIATIVE_STATUS_VARIANTS: Record<
+const INITIATIVE_STATUS_VARIANTS: Record<
   InitiativeStatus,
   BadgeVariant
 > = {
@@ -49,7 +49,7 @@ export const INITIATIVE_STATUS_VARIANTS: Record<
 }
 
 // UI variants for Badge component
-export const INITIATIVE_STATUS_UI_VARIANTS: Record<
+const INITIATIVE_STATUS_UI_VARIANTS: Record<
   InitiativeStatus,
   'neutral' | 'warning' | 'error' | 'success'
 > = {
@@ -61,7 +61,7 @@ export const INITIATIVE_STATUS_UI_VARIANTS: Record<
 }
 
 // Status groups for filtering and organization
-export const IN_PROGRESS_STATUSES: InitiativeStatus[] = [
+const IN_PROGRESS_STATUSES: InitiativeStatus[] = [
   INITIATIVE_STATUS.IN_PROGRESS,
 ]
 
@@ -70,7 +70,7 @@ export const COMPLETED_STATUSES: InitiativeStatus[] = [
   INITIATIVE_STATUS.CANCELED,
 ]
 
-export const ACTIVE_STATUSES: InitiativeStatus[] = [
+const ACTIVE_STATUSES: InitiativeStatus[] = [
   INITIATIVE_STATUS.PLANNED,
   INITIATIVE_STATUS.IN_PROGRESS,
   INITIATIVE_STATUS.PAUSED,
@@ -132,7 +132,3 @@ export const initiativeStatusUtils = {
     ALL_INITIATIVE_STATUSES.includes(status as InitiativeStatus),
 }
 
-// Type guard function
-export function isInitiativeStatus(status: string): status is InitiativeStatus {
-  return initiativeStatusUtils.isValid(status)
-}

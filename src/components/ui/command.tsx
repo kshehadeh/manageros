@@ -128,5 +128,5 @@ export {
   CommandGroup,
   CommandItem,
   CommandSeparator,
-  CommandShortcut,
+  
 }

@@ -48,25 +48,11 @@ export type {
 } from './types'
 
 // Export WidgetCard component
-export { WidgetCard } from './widget-card'
+
 
 // Export skeleton components
-export { WidgetSkeleton, ChartWidgetSkeleton } from './widget-skeleton'
-export { DashboardWidgetsSkeleton } from './dashboard-widgets-skeleton'
+
+
 
 // Export individual widgets for direct access if needed
-export {
-  totalPeopleWidget,
-  directReportsWidget,
-  oneOnOnesNeededWidget,
-  feedback360NeededWidget,
-  maxReportsExceededWidget,
-  teamBreakdownWidget,
-  jobRoleBreakdownWidget,
-  totalOpenInitiativesWidget,
-  initiativesInExceptionWidget,
-  userInitiativesWidget,
-  overdueInitiativesWidget,
-  initiativesStatusChartWidget,
-  initiativesRagChartWidget,
-}
+

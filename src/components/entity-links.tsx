@@ -58,7 +58,7 @@ interface LinkDisplayProps {
   showActions?: boolean
 }
 
-export function LinkDisplay({
+function LinkDisplay({
   link,
   onEdit,
   onDelete,
@@ -299,7 +299,7 @@ interface LinkManagerProps {
   onLinksChange?: () => void
 }
 
-export function LinkManager({
+function LinkManager({
   entityType,
   entityId,
   links,

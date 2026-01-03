@@ -27,7 +27,7 @@ interface TaskContainer {
  * @param tasks Array of tasks with status information
  * @returns Completion percentage (0-100)
  */
-export function calculateTaskCompletionPercentage(
+function calculateTaskCompletionPercentage(
   tasks: TaskWithStatus[]
 ): number {
   if (tasks.length === 0) return 0
@@ -59,7 +59,7 @@ export function calculateInitiativeCompletionPercentage(
  * @param tasks Array of tasks with status information
  * @returns Number of completed tasks
  */
-export function countCompletedTasks(tasks: TaskWithStatus[]): number {
+function countCompletedTasks(tasks: TaskWithStatus[]): number {
   return tasks.filter(task =>
     COMPLETED_STATUSES.includes(task.status as TaskStatus)
   ).length
@@ -70,7 +70,7 @@ export function countCompletedTasks(tasks: TaskWithStatus[]): number {
  * @param tasks Array of tasks with status information
  * @returns Number of active tasks
  */
-export function countActiveTasks(tasks: TaskWithStatus[]): number {
+function countActiveTasks(tasks: TaskWithStatus[]): number {
   return tasks.filter(
     task => !COMPLETED_STATUSES.includes(task.status as TaskStatus)
   ).length
@@ -81,7 +81,7 @@ export function countActiveTasks(tasks: TaskWithStatus[]): number {
  * @param tasks Array of tasks with status information
  * @returns Object with completion statistics
  */
-export function getTaskCompletionStats(tasks: TaskWithStatus[]) {
+function getTaskCompletionStats(tasks: TaskWithStatus[]) {
   const total = tasks.length
   const completed = countCompletedTasks(tasks)
   const active = countActiveTasks(tasks)
@@ -98,7 +98,7 @@ export function getTaskCompletionStats(tasks: TaskWithStatus[]) {
 /**
  * Utility functions for completion calculations
  */
-export const completionUtils = {
+const completionUtils = {
   /**
    * Calculate completion percentage for tasks
    */

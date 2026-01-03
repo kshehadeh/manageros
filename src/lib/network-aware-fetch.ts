@@ -29,7 +29,7 @@ const DEFAULT_RETRY_OPTIONS: Required<RetryOptions> = {
   },
 }
 
-export class NetworkError extends Error {
+class NetworkError extends Error {
   constructor(
     message: string,
     public originalError?: Error,
@@ -116,32 +116,4 @@ export async function networkAwareFetch(
     lastError || undefined,
     false
   )
-}
-
-// Utility function to check if we're online
-export function isOnline(): boolean {
-  return typeof navigator !== 'undefined' ? navigator.onLine : true
-}
-
-// Utility function to wait for online status
-export function waitForOnline(timeout: number = 30000): Promise<boolean> {
-  return new Promise(resolve => {
-    if (isOnline()) {
-      resolve(true)
-      return
-    }
-
-    const timeoutId = setTimeout(() => {
-      window.removeEventListener('online', handleOnline)
-      resolve(false)
-    }, timeout)
-
-    const handleOnline = () => {
-      clearTimeout(timeoutId)
-      window.removeEventListener('online', handleOnline)
-      resolve(true)
-    }
-
-    window.addEventListener('online', handleOnline)
-  })
 }

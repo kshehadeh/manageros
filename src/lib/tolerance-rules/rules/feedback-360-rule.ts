@@ -25,7 +25,7 @@ export interface Feedback360Config {
 /**
  * Zod schema for feedback 360 config
  */
-export const feedback360ConfigSchema = z.object({
+const feedback360ConfigSchema = z.object({
   warningThresholdMonths: z.number().int().positive(),
 })
 

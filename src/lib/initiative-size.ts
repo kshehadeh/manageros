@@ -4,7 +4,7 @@
  */
 
 // Initiative size enum values
-export const INITIATIVE_SIZE = {
+const INITIATIVE_SIZE = {
   XS: 'xs',
   S: 's',
   M: 'm',
@@ -26,7 +26,7 @@ export const INITIATIVE_SIZE_LABELS: Record<InitiativeSize, string> = {
 }
 
 // Short labels for compact display
-export const INITIATIVE_SIZE_SHORT_LABELS: Record<InitiativeSize, string> = {
+const INITIATIVE_SIZE_SHORT_LABELS: Record<InitiativeSize, string> = {
   [INITIATIVE_SIZE.XS]: 'XS',
   [INITIATIVE_SIZE.S]: 'S',
   [INITIATIVE_SIZE.M]: 'M',
@@ -47,7 +47,7 @@ export const INITIATIVE_SIZE_DEFAULT_DESCRIPTIONS: Record<
 }
 
 // CSS class variants for each size (for badges, buttons, etc.)
-export const INITIATIVE_SIZE_VARIANTS: Record<InitiativeSize, string> = {
+const INITIATIVE_SIZE_VARIANTS: Record<InitiativeSize, string> = {
   [INITIATIVE_SIZE.XS]: 'outline',
   [INITIATIVE_SIZE.S]: 'secondary',
   [INITIATIVE_SIZE.M]: 'default',
@@ -170,7 +170,3 @@ export const initiativeSizeUtils = {
   }),
 }
 
-// Type guard function
-export function isInitiativeSize(size: string): size is InitiativeSize {
-  return initiativeSizeUtils.isValid(size)
-}

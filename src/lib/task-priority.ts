@@ -25,7 +25,7 @@ export const TASK_PRIORITY_LABELS: Record<TaskPriority, string> = {
 }
 
 // Short labels for compact display
-export const TASK_PRIORITY_SHORT_LABELS: Record<TaskPriority, string> = {
+const TASK_PRIORITY_SHORT_LABELS: Record<TaskPriority, string> = {
   [TASK_PRIORITY.CRITICAL]: 'P1',
   [TASK_PRIORITY.HIGH]: 'P2',
   [TASK_PRIORITY.MEDIUM]: 'P3',
@@ -34,7 +34,7 @@ export const TASK_PRIORITY_SHORT_LABELS: Record<TaskPriority, string> = {
 }
 
 // CSS class variants for each priority (for badges, buttons, etc.)
-export const TASK_PRIORITY_VARIANTS: Record<TaskPriority, string> = {
+const TASK_PRIORITY_VARIANTS: Record<TaskPriority, string> = {
   [TASK_PRIORITY.CRITICAL]: 'destructive',
   [TASK_PRIORITY.HIGH]: 'secondary',
   [TASK_PRIORITY.MEDIUM]: 'default',
@@ -43,7 +43,7 @@ export const TASK_PRIORITY_VARIANTS: Record<TaskPriority, string> = {
 }
 
 // Alternative variants for different UI contexts (matching task-status.ts pattern)
-export const TASK_PRIORITY_UI_VARIANTS: Record<
+const TASK_PRIORITY_UI_VARIANTS: Record<
   TaskPriority,
   'neutral' | 'warning' | 'error' | 'success'
 > = {
@@ -55,7 +55,7 @@ export const TASK_PRIORITY_UI_VARIANTS: Record<
 }
 
 // RAG (Red-Amber-Green) color classes for priority display
-export const TASK_PRIORITY_RAG_VARIANTS: Record<TaskPriority, string> = {
+const TASK_PRIORITY_RAG_VARIANTS: Record<TaskPriority, string> = {
   [TASK_PRIORITY.CRITICAL]: 'rag-red',
   [TASK_PRIORITY.HIGH]: 'rag-amber',
   [TASK_PRIORITY.MEDIUM]: 'badge',
@@ -67,19 +67,19 @@ export const TASK_PRIORITY_RAG_VARIANTS: Record<TaskPriority, string> = {
 export const ALL_TASK_PRIORITIES: TaskPriority[] = Object.values(TASK_PRIORITY)
 
 // Array of high priority tasks (Critical and High)
-export const HIGH_PRIORITY_TASKS: TaskPriority[] = [
+const HIGH_PRIORITY_TASKS: TaskPriority[] = [
   TASK_PRIORITY.CRITICAL,
   TASK_PRIORITY.HIGH,
 ]
 
 // Array of low priority tasks (Low and Very Low)
-export const LOW_PRIORITY_TASKS: TaskPriority[] = [
+const LOW_PRIORITY_TASKS: TaskPriority[] = [
   TASK_PRIORITY.LOW,
   TASK_PRIORITY.VERY_LOW,
 ]
 
 // Array of urgent priorities (Critical only)
-export const URGENT_PRIORITIES: TaskPriority[] = [TASK_PRIORITY.CRITICAL]
+const URGENT_PRIORITIES: TaskPriority[] = [TASK_PRIORITY.CRITICAL]
 
 // Utility functions
 export const taskPriorityUtils = {
@@ -168,16 +168,11 @@ export const taskPriorityUtils = {
   },
 }
 
-// Type guard function
-export function isTaskPriority(priority: number): priority is TaskPriority {
-  return taskPriorityUtils.isValid(priority)
-}
-
 // Default task priority
 export const DEFAULT_TASK_PRIORITY: TaskPriority = TASK_PRIORITY.HIGH
 
 // Priority comparison functions
-export const priorityComparison = {
+const priorityComparison = {
   /**
    * Compare two priorities (lower number = higher priority)
    * Returns: -1 if a < b, 0 if a === b, 1 if a > b

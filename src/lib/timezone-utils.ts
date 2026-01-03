@@ -25,7 +25,7 @@ export function utcToLocalDateTimeString(utcDate: Date): string {
  * Converts a local datetime-local input string to a UTC Date object
  * This ensures that form submissions are properly converted to UTC for storage
  */
-export function localDateTimeStringToUtc(localDateTimeString: string): Date {
+function localDateTimeStringToUtc(localDateTimeString: string): Date {
   // The datetime-local input provides a string in YYYY-MM-DDTHH:MM format
   // We need to create a Date object that represents this local time
   // and then convert it to UTC for storage
@@ -36,7 +36,7 @@ export function localDateTimeStringToUtc(localDateTimeString: string): Date {
  * Gets the current local date and time formatted for datetime-local input
  * Rounds to the nearest 15 minutes for better UX
  */
-export function getCurrentLocalDateTimeString(): string {
+function getCurrentLocalDateTimeString(): string {
   const now = new Date()
 
   // Round to the nearest 15 minutes

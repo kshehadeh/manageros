@@ -304,7 +304,7 @@ export async function submitGitHubIssue(formData: {
   }
 }
 
-export async function uploadImageToR2(file: File): Promise<string> {
+async function uploadImageToR2(file: File): Promise<string> {
   const { uploadFileToR2 } = await import('@/lib/r2-upload')
 
   const result = await uploadFileToR2(file, {

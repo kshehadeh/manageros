@@ -36,7 +36,7 @@ export type JobLevelFormData = z.infer<typeof jobLevelSchema>
 export type JobDomainFormData = z.infer<typeof jobDomainSchema>
 
 // JobRole Actions
-export async function getJobRoles() {
+async function getJobRoles() {
   try {
     const user = await getCurrentUser()
     if (!user.managerOSOrganizationId) {
@@ -391,7 +391,7 @@ export async function getJobLevels() {
   }
 }
 
-export async function getJobLevelsForSelection() {
+async function getJobLevelsForSelection() {
   try {
     const user = await getCurrentUser()
     if (!user.managerOSOrganizationId) {
@@ -643,7 +643,7 @@ export async function getJobDomains() {
   }
 }
 
-export async function getJobDomainsForSelection() {
+async function getJobDomainsForSelection() {
   try {
     const user = await getCurrentUser()
     if (!user.managerOSOrganizationId) {

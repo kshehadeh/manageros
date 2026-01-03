@@ -200,7 +200,7 @@ export async function getEntityLinks(entityType: string, entityId: string) {
 /**
  * Get a single entity link by ID
  */
-export async function getEntityLinkById(id: string) {
+async function getEntityLinkById(id: string) {
   const user = await getCurrentUser()
   if (!user) {
     throw new Error('Authentication required')

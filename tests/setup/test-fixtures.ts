@@ -507,36 +507,3 @@ export const test = base.extend<TestFixtures>({
 })
 
 export { expect }
-
-/**
- * Helper function to wait for navigation or network idle
- * Uses a more lenient approach to avoid timeouts on pages with long-polling
- */
-export async function waitForPageLoad(page: Page, timeout: number = 10000) {
-  try {
-    await page.waitForLoadState('domcontentloaded', { timeout })
-    // Wait for networkidle with a shorter timeout, but don't fail if it times out
-    await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {
-      // Ignore timeout - some pages have ongoing requests
-    })
-  } catch {
-    // If domcontentloaded times out, at least wait a bit for the page to render
-    await page.waitForTimeout(1000)
-  }
-}
-
-/**
- * Helper function to take a screenshot on test failure
- */
-export async function takeScreenshotOnFailure(
-  page: Page,
-  testInfo: { title: string; outputDir: string }
-) {
-  if (testInfo.title) {
-    const screenshotPath = `screenshots/${testInfo.title.replace(
-      /\s+/g,
-      '-'
-    )}.png`
-    await page.screenshot({ path: screenshotPath, fullPage: true })
-  }
-}

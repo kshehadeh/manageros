@@ -8,7 +8,7 @@ import { createClerkOrganization } from './clerk'
  * Note: Clerk doesn't have a direct API to create subscriptions - they're created via checkout
  * This function is a placeholder for future use if Clerk adds this API
  */
-export async function _createClerkOrganizationSubscription(
+async function _createClerkOrganizationSubscription(
   _clerkOrgId: string,
   _planId: string
 ): Promise<void> {
@@ -33,7 +33,7 @@ export async function mapManagerOSRoleToClerkRole(
  * Creates it if it doesn't exist
  * Note: This function requires name and slug to be provided since they're no longer stored in DB
  */
-export async function ensureClerkOrganization(
+async function ensureClerkOrganization(
   organizationId: string,
   name: string,
   slug: string

@@ -71,7 +71,7 @@ export function Loading({
   return null
 }
 
-export function PageLoading({ className }: { className?: string }) {
+function PageLoading({ className }: { className?: string }) {
   return (
     <div
       className={cn(

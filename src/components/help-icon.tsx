@@ -78,7 +78,7 @@ export function HelpIcon({
 /**
  * Wrapper component that adds a help icon to any existing content
  */
-export function HelpWrapper({
+function HelpWrapper({
   children,
   helpId,
   position = 'top-right',

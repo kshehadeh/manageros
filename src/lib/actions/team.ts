@@ -35,7 +35,7 @@ export async function getTeams() {
  * Gets all teams with parent info and relation counts for data table display
  * Returns a flat list of all teams (not hierarchical)
  */
-export async function getAllTeamsWithRelations(): Promise<TeamWithCounts[]> {
+async function getAllTeamsWithRelations(): Promise<TeamWithCounts[]> {
   try {
     const user = await getCurrentUser()
     if (!user.managerOSOrganizationId) {
@@ -70,7 +70,7 @@ export async function getAllTeamsWithRelations(): Promise<TeamWithCounts[]> {
  * Recursively fetches team hierarchy with all related data
  * This is more efficient than deeply nested includes and handles unlimited depth
  */
-export async function getTeamHierarchy(
+async function getTeamHierarchy(
   organizationId: string,
   parentId: string | null = null
 ): Promise<TeamWithHierarchy[]> {
@@ -106,7 +106,7 @@ export async function getTeamHierarchy(
  * Returns only top-level teams with their full nested structure
  * Uses caching for better performance
  */
-export async function getCompleteTeamHierarchy(): Promise<TeamWithHierarchy[]> {
+async function getCompleteTeamHierarchy(): Promise<TeamWithHierarchy[]> {
   try {
     const user = await getCurrentUser()
     if (!user.managerOSOrganizationId) {
@@ -405,7 +405,7 @@ export async function getTeam(id: string): Promise<TeamWithRelations | null> {
   }
 }
 
-export async function getTeamsForSelection(
+async function getTeamsForSelection(
   excludeId?: string
 ): Promise<TeamForSelection[]> {
   try {

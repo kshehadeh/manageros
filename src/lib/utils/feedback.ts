@@ -2,7 +2,6 @@
  * Utility functions for feedback-related operations
  */
 
-export type FeedbackKind = 'praise' | 'concern' | 'note'
 
 export type BadgeVariant =
   | 'default'
@@ -34,7 +33,7 @@ export function getKindLabel(kind: string): string {
 /**
  * Get the badge variant for a feedback kind
  */
-export function getKindVariant(kind: string): BadgeVariant {
+function getKindVariant(kind: string): BadgeVariant {
   switch (kind) {
     case 'praise':
       return 'success'
@@ -50,7 +49,7 @@ export function getKindVariant(kind: string): BadgeVariant {
 /**
  * Get the icon for a feedback kind
  */
-export function getKindIcon(kind: string): string {
+function getKindIcon(kind: string): string {
   switch (kind) {
     case 'praise':
       return '👍'

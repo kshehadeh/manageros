@@ -62,12 +62,6 @@ export const initiativeSchema = z.object({
 
 export type InitiativeFormData = z.infer<typeof initiativeSchema>
 
-export const objectiveSchema = z.object({
-  title: z.string().min(1, 'Objective title is required'),
-  keyResult: z.string().optional(),
-})
-
-export type ObjectiveFormData = z.infer<typeof objectiveSchema>
 
 export const personSchema = z.object({
   name: z
@@ -250,7 +244,7 @@ export const feedbackResponseSchema = z.object({
 
 export type FeedbackResponseFormData = z.infer<typeof feedbackResponseSchema>
 
-export const feedbackResponseByInviteLinkSchema = z.object({
+const feedbackResponseByInviteLinkSchema = z.object({
   inviteLink: z.string().min(1, 'Invite link is required'),
   responderEmail: z.string().email('Invalid email address'),
   responses: z.record(
@@ -259,7 +253,7 @@ export const feedbackResponseByInviteLinkSchema = z.object({
   ), // Prisma Json type compatible
 })
 
-export type FeedbackResponseByInviteLinkFormData = z.infer<
+type FeedbackResponseByInviteLinkFormData = z.infer<
   typeof feedbackResponseByInviteLinkSchema
 >
 
@@ -400,7 +394,7 @@ export const meetingUpdateSchema = z
 
 export type MeetingUpdateData = z.infer<typeof meetingUpdateSchema>
 
-export const meetingParticipantSchema = z.object({
+const meetingParticipantSchema = z.object({
   personId: z.string().min(1, 'Person ID is required'),
   status: z
     .enum([
@@ -414,7 +408,7 @@ export const meetingParticipantSchema = z.object({
     .default('invited'),
 })
 
-export type MeetingParticipantFormData = z.infer<
+type MeetingParticipantFormData = z.infer<
   typeof meetingParticipantSchema
 >
 
@@ -473,7 +467,7 @@ export type MeetingInstanceUpdateData = z.infer<
   typeof meetingInstanceUpdateSchema
 >
 
-export const meetingInstanceParticipantSchema = z.object({
+const meetingInstanceParticipantSchema = z.object({
   personId: z.string().min(1, 'Person ID is required'),
   status: z
     .enum([
@@ -487,7 +481,7 @@ export const meetingInstanceParticipantSchema = z.object({
     .default('invited'),
 })
 
-export type MeetingInstanceParticipantFormData = z.infer<
+type MeetingInstanceParticipantFormData = z.infer<
   typeof meetingInstanceParticipantSchema
 >
 
@@ -503,14 +497,14 @@ export const ONBOARDING_ITEM_TYPES = [
   'EXPECTATION',
 ] as const
 
-export const ONBOARDING_STATUSES = [
+const ONBOARDING_STATUSES = [
   'NOT_STARTED',
   'IN_PROGRESS',
   'COMPLETED',
   'CANCELLED',
 ] as const
 
-export const ONBOARDING_ITEM_STATUSES = [
+const ONBOARDING_ITEM_STATUSES = [
   'PENDING',
   'IN_PROGRESS',
   'COMPLETED',
@@ -525,7 +519,7 @@ export const ONBOARDING_OWNER_TYPES = [
 ] as const
 
 // Schema for individual onboarding items within a phase
-export const onboardingItemSchema = z.object({
+const onboardingItemSchema = z.object({
   id: z.string().optional(), // Optional for new items
   title: z
     .string()
@@ -545,7 +539,7 @@ export const onboardingItemSchema = z.object({
 export type OnboardingItemFormData = z.infer<typeof onboardingItemSchema>
 
 // Schema for onboarding phases within a template
-export const onboardingPhaseSchema = z.object({
+const onboardingPhaseSchema = z.object({
   id: z.string().optional(), // Optional for new phases
   name: z
     .string()

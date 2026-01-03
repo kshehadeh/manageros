@@ -632,7 +632,7 @@ export async function updateUserRoleInClerkOrganization(
 /**
  * Get subscription for a Clerk organization
  */
-export async function getClerkOrganizationSubscription(
+async function getClerkOrganizationSubscription(
   clerkOrgId: string
 ): Promise<ClerkCommerceSubscription | null> {
   if (!process.env.CLERK_SECRET_KEY) {

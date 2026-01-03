@@ -54,10 +54,6 @@ export interface CreateExceptionInput {
   metadata?: Record<string, unknown>
 }
 
-export interface UpdateExceptionStatusInput {
-  status: ExceptionStatus
-}
-
 export interface ExceptionFilters {
   status?: ExceptionStatus
   severity?: ExceptionSeverity

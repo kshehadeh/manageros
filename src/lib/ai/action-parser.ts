@@ -28,7 +28,7 @@ function ensureRelativeUrl(url: string): string {
 /**
  * Check if a value is an ActionResult
  */
-export function isActionResult(value: unknown): value is ActionResult {
+function isActionResult(value: unknown): value is ActionResult {
   if (!value || typeof value !== 'object') {
     return false
   }
@@ -92,46 +92,4 @@ export function parseActionResponse(toolOutput: unknown): ActionResult | null {
   }
 
   return null
-}
-
-/**
- * Extract action results from tool call outputs
- * This handles the case where a tool might return multiple results or nested structures
- */
-export function extractActionsFromToolOutput(
-  toolOutput: unknown
-): ActionResult[] {
-  const actions: ActionResult[] = []
-
-  // If it's a single action result
-  const singleAction = parseActionResponse(toolOutput)
-  if (singleAction) {
-    actions.push(singleAction)
-    return actions
-  }
-
-  // If it's an array, check each item
-  if (Array.isArray(toolOutput)) {
-    for (const item of toolOutput) {
-      const action = parseActionResponse(item)
-      if (action) {
-        actions.push(action)
-      }
-    }
-  }
-
-  // If it's an object with an actions array
-  if (typeof toolOutput === 'object' && toolOutput !== null) {
-    const obj = toolOutput as Record<string, unknown>
-    if (Array.isArray(obj.actions)) {
-      for (const item of obj.actions) {
-        const action = parseActionResponse(item)
-        if (action) {
-          actions.push(action)
-        }
-      }
-    }
-  }
-
-  return actions
 }

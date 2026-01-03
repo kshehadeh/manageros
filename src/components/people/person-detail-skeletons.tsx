@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import { FaGithub, FaJira } from 'react-icons/fa'
 
-export function PersonDetailHeaderSkeleton() {
+function PersonDetailHeaderSkeleton() {
   return (
     <div className='page-container'>
       <div className='page-header'>
@@ -45,7 +45,7 @@ export function PersonDetailHeaderSkeleton() {
   )
 }
 
-export function OverviewSectionSkeleton() {
+function OverviewSectionSkeleton() {
   return (
     <PageSection>
       <SectionHeader
@@ -280,7 +280,7 @@ export function OneOnOneMeetingsSectionSkeleton() {
   )
 }
 
-export function JiraWorkActivitySectionSkeleton() {
+function JiraWorkActivitySectionSkeleton() {
   return (
     <section>
       <SectionHeader icon={FaJira} title='Jira Work Activity' />
@@ -295,7 +295,7 @@ export function JiraWorkActivitySectionSkeleton() {
   )
 }
 
-export function GithubPrsActivitySectionSkeleton() {
+function GithubPrsActivitySectionSkeleton() {
   return (
     <section>
       <SectionHeader icon={FaGithub} title='GitHub PR Activity' />
@@ -338,7 +338,7 @@ export function DirectReportsSectionSkeleton() {
   )
 }
 
-export function AccountLinkingSectionSkeleton() {
+function AccountLinkingSectionSkeleton() {
   return (
     <PageSection
       header={<SectionHeader icon={LinkIcon} title='Account Linking' />}

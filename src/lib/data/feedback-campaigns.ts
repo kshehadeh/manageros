@@ -135,61 +135,6 @@ export const getFeedbackCampaignsForPerson = cache(
   }
 )
 
-export const getFeedbackResponseCountsByCampaign = cache(
-  async (campaignIds: string[]) => {
-    if (campaignIds.length === 0) {
-      return []
-    }
-
-    return prisma.feedbackResponse.groupBy({
-      by: ['campaignId'],
-      where: {
-        campaignId: { in: campaignIds },
-      },
-      _count: true,
-    })
-  }
-)
-
-export const getFeedbackCampaignById = cache(
-  async (
-    campaignId: string,
-    userId: string,
-    options?: {
-      includeTargetPerson?: boolean
-      includeTemplate?: boolean
-    }
-  ) => {
-    const include: Record<string, unknown> = {}
-    if (options?.includeTargetPerson) {
-      include.targetPerson = {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      }
-    }
-    if (options?.includeTemplate) {
-      include.template = {
-        select: {
-          id: true,
-          name: true,
-          description: true,
-        },
-      }
-    }
-
-    return prisma.feedbackCampaign.findFirst({
-      where: {
-        id: campaignId,
-        userId,
-      },
-      include: Object.keys(include).length > 0 ? include : undefined,
-    })
-  }
-)
-
 export const getActiveAndDraftFeedbackCampaignsForPerson = cache(
   async (personId: string, organizationId: string, currentUserId: string) => {
     return prisma.feedbackCampaign.findMany({

@@ -357,7 +357,7 @@ export async function createObjective(
   return objective
 }
 
-export async function updateInitiativeTeam(
+async function updateInitiativeTeam(
   initiativeId: string,
   teamId: string | null
 ) {
@@ -549,7 +549,7 @@ export async function getInitiativeOwners(initiativeId: string) {
 /**
  * Get an initiative by ID with all necessary relations for the detail page
  */
-export async function getInitiativeById(id: string) {
+async function getInitiativeById(id: string) {
   const user = await getCurrentUser()
 
   const hasPermission = await getActionPermission(user, 'initiative.view', id)

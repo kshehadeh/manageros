@@ -20,7 +20,7 @@ export interface PeopleGroup {
  * @param groupingOption - The grouping criteria to use
  * @returns Array of grouped people
  */
-export function groupPeople(
+function groupPeople(
   people: Person[],
   groupingOption: GroupingOption
 ): PeopleGroup[] {

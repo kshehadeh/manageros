@@ -71,7 +71,7 @@ export async function createOneOnOne(formData: OneOnOneFormData) {
   return { id: created.id }
 }
 
-export async function getOneOnOnes() {
+async function getOneOnOnes() {
   const user = await getCurrentUser()
 
   if (!user.managerOSOrganizationId) {

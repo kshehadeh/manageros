@@ -8,7 +8,7 @@ import {
 import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth-utils'
 
-export async function createFeedbackTemplate(
+async function createFeedbackTemplate(
   formData: FeedbackTemplateFormData
 ) {
   const user = await getCurrentUser()
@@ -69,7 +69,7 @@ export async function getFeedbackTemplates() {
   return templates
 }
 
-export async function getFeedbackTemplateById(id: string) {
+async function getFeedbackTemplateById(id: string) {
   const user = await getCurrentUser()
 
   if (!user.managerOSOrganizationId) {
@@ -94,7 +94,7 @@ export async function getFeedbackTemplateById(id: string) {
   return template
 }
 
-export async function getDefaultFeedbackTemplate() {
+async function getDefaultFeedbackTemplate() {
   const user = await getCurrentUser()
 
   if (!user.managerOSOrganizationId) {
@@ -115,7 +115,7 @@ export async function getDefaultFeedbackTemplate() {
   return template
 }
 
-export async function updateFeedbackTemplate(
+async function updateFeedbackTemplate(
   id: string,
   formData: FeedbackTemplateFormData
 ) {
@@ -167,7 +167,7 @@ export async function updateFeedbackTemplate(
   return template
 }
 
-export async function deleteFeedbackTemplate(id: string) {
+async function deleteFeedbackTemplate(id: string) {
   const user = await getCurrentUser()
 
   if (!user.managerOSOrganizationId) {
@@ -204,7 +204,7 @@ export async function deleteFeedbackTemplate(id: string) {
   revalidatePath('/feedback-templates')
 }
 
-export async function setDefaultTemplate(id: string) {
+async function setDefaultTemplate(id: string) {
   const user = await getCurrentUser()
 
   if (!user.managerOSOrganizationId) {

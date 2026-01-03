@@ -7,7 +7,7 @@ import { randomBytes } from 'crypto'
 import { validateFile } from '@/lib/file-utils'
 
 // R2 Configuration - Get at runtime to ensure env vars are loaded
-export function getR2Config() {
+function getR2Config() {
   // Check if we're on the server side
   if (typeof window !== 'undefined') {
     throw new Error('R2 upload functions can only be called on the server side')

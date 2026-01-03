@@ -740,7 +740,7 @@ export async function searchExternalEntities(formData: {
 // Migration helpers
 // ============================================================================
 
-export async function checkMigrationStatus() {
+async function checkMigrationStatus() {
   const user = await getCurrentUser()
 
   if (!user.managerOSUserId) {
@@ -784,7 +784,7 @@ export async function checkMigrationStatus() {
   }
 }
 
-export async function migrateJiraIntegration() {
+async function migrateJiraIntegration() {
   const user = await getCurrentUser()
 
   if (!user.managerOSUserId) {
@@ -864,7 +864,7 @@ export async function migrateJiraIntegration() {
   return { success: true, integrationId: integration.id }
 }
 
-export async function migrateGithubIntegration() {
+async function migrateGithubIntegration() {
   const user = await getCurrentUser()
 
   if (!user.managerOSUserId) {

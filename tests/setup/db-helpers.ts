@@ -129,7 +129,7 @@ export interface TestData {
  * Create a test organization by creating it in Clerk first, then referencing it in the database
  * This matches the production flow where organizations are created in Clerk and referenced in our DB
  */
-export async function createTestOrganization(
+async function createTestOrganization(
   name: string = `Test Org ${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
   slug: string = `test-org-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
 ) {

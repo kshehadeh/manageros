@@ -696,7 +696,7 @@ export async function getPerson(id: string) {
   }
 }
 
-export async function getDirectReports() {
+async function getDirectReports() {
   try {
     const user = await getCurrentUser()
     if (!user.managerOSOrganizationId || !user.managerOSPersonId) {

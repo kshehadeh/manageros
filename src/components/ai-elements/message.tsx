@@ -66,7 +66,7 @@ export const MessageContent = ({
 
 export type MessageActionsProps = ComponentProps<'div'>
 
-export const MessageActions = ({
+const MessageActions = ({
   className,
   children,
   ...props
@@ -81,7 +81,7 @@ export type MessageActionProps = ComponentProps<typeof Button> & {
   label?: string
 }
 
-export const MessageAction = ({
+const MessageAction = ({
   tooltip,
   children,
   label,
@@ -142,7 +142,7 @@ export type MessageBranchProps = HTMLAttributes<HTMLDivElement> & {
   onBranchChange?: (branchIndex: number) => void
 }
 
-export const MessageBranch = ({
+const MessageBranch = ({
   defaultBranch = 0,
   onBranchChange,
   className,
@@ -189,7 +189,7 @@ export const MessageBranch = ({
 
 export type MessageBranchContentProps = HTMLAttributes<HTMLDivElement>
 
-export const MessageBranchContent = ({
+const MessageBranchContent = ({
   children,
   ...props
 }: MessageBranchContentProps) => {
@@ -224,7 +224,7 @@ export type MessageBranchSelectorProps = HTMLAttributes<HTMLDivElement> & {
   from: UIMessage['role']
 }
 
-export const MessageBranchSelector = ({
+const MessageBranchSelector = ({
   ...props
 }: MessageBranchSelectorProps) => {
   const { totalBranches } = useMessageBranch()
@@ -245,7 +245,7 @@ export const MessageBranchSelector = ({
 
 export type MessageBranchPreviousProps = ComponentProps<typeof Button>
 
-export const MessageBranchPrevious = ({
+const MessageBranchPrevious = ({
   children,
   ...props
 }: MessageBranchPreviousProps) => {
@@ -268,7 +268,7 @@ export const MessageBranchPrevious = ({
 
 export type MessageBranchNextProps = ComponentProps<typeof Button>
 
-export const MessageBranchNext = ({
+const MessageBranchNext = ({
   children,
   ...props
 }: MessageBranchNextProps) => {
@@ -291,7 +291,7 @@ export const MessageBranchNext = ({
 
 export type MessageBranchPageProps = HTMLAttributes<HTMLSpanElement>
 
-export const MessageBranchPage = ({
+const MessageBranchPage = ({
   className,
   ...props
 }: MessageBranchPageProps) => {
@@ -462,7 +462,7 @@ export type MessageAttachmentProps = HTMLAttributes<HTMLDivElement> & {
   onRemove?: () => void
 }
 
-export function MessageAttachment({
+function MessageAttachment({
   data,
   className,
   onRemove,
@@ -542,7 +542,7 @@ export function MessageAttachment({
 
 export type MessageAttachmentsProps = ComponentProps<'div'>
 
-export function MessageAttachments({
+function MessageAttachments({
   children,
   className,
   ...props
@@ -566,7 +566,7 @@ export function MessageAttachments({
 
 export type MessageToolbarProps = ComponentProps<'div'>
 
-export const MessageToolbar = ({
+const MessageToolbar = ({
   className,
   children,
   ...props

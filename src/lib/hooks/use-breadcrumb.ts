@@ -14,7 +14,7 @@ export type { BreadcrumbItem }
  * Uses useLayoutEffect to set synchronously before paint, preventing race conditions
  * @param breadcrumbs - Array of breadcrumb items
  */
-export function useSetBreadcrumbs(breadcrumbs: BreadcrumbItem[]) {
+function useSetBreadcrumbs(breadcrumbs: BreadcrumbItem[]) {
   const { setBreadcrumbs } = useBreadcrumb()
   const prevBreadcrumbsRef = useRef<string>('')
 

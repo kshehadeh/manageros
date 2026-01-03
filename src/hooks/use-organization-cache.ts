@@ -82,7 +82,7 @@ export function usePeopleCache() {
  * Hook for accessing people data with a simpler API
  * Returns just the people array and loading state
  */
-export function usePeople() {
+function usePeople() {
   const { people, isLoading, error } = usePeopleCache()
 
   const peopleWithoutUser = people.filter(person => !person.user)
@@ -194,7 +194,7 @@ export function useTeamsCache() {
  * Hook for accessing teams data with a simpler API
  * Returns just the teams array and loading state
  */
-export function useTeams() {
+function useTeams() {
   const { teams, isLoading, error } = useTeamsCache()
 
   return {

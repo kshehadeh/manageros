@@ -137,4 +137,3 @@ const footer = {
   padding: '0 40px',
 }
 
-export default FeedbackCampaignReminderEmail

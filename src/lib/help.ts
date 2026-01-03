@@ -49,10 +49,3 @@ export type HelpId = (typeof HELP_IDS)[keyof typeof HELP_IDS]
 export function getHelpUrl(helpId: HelpId): string {
   return `https://help.mpath.dev/${helpId}`
 }
-
-/**
- * Type guard to check if a string is a valid help ID
- */
-export function isValidHelpId(id: string): id is HelpId {
-  return Object.values(HELP_IDS).includes(id as HelpId)
-}

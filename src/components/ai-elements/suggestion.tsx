@@ -7,7 +7,7 @@ import type { ComponentProps } from 'react'
 
 export type SuggestionsProps = ComponentProps<typeof ScrollArea>
 
-export const Suggestions = ({
+const Suggestions = ({
   className,
   children,
   ...props
@@ -25,7 +25,7 @@ export type SuggestionProps = Omit<ComponentProps<typeof Button>, 'onClick'> & {
   onClick?: (suggestion: string) => void
 }
 
-export const Suggestion = ({
+const Suggestion = ({
   suggestion,
   onClick,
   className,

@@ -156,21 +156,3 @@ export async function parseICSFile(
     )
   }
 }
-
-/**
- * Validate that a file is an ICS file
- */
-export function validateICSFile(file: File): string | null {
-  // Check file extension
-  if (!file.name.toLowerCase().endsWith('.ics')) {
-    return 'Please select a valid ICS calendar file (.ics)'
-  }
-
-  // Check file size (max 5MB for an ICS file)
-  const maxSize = 5 * 1024 * 1024 // 5MB
-  if (file.size > maxSize) {
-    return 'ICS file is too large. Maximum size is 5MB'
-  }
-
-  return null
-}

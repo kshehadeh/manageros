@@ -254,7 +254,7 @@ export async function getMeetingInstance(id: string) {
   return meetingInstance
 }
 
-export async function getMeetingInstances(meetingId: string) {
+async function getMeetingInstances(meetingId: string) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization
@@ -320,7 +320,7 @@ export async function getMeetingInstances(meetingId: string) {
   return meetingInstances
 }
 
-export async function addMeetingInstanceParticipant(
+async function addMeetingInstanceParticipant(
   meetingInstanceId: string,
   personId: string,
   status: string = 'invited'
@@ -391,7 +391,7 @@ export async function addMeetingInstanceParticipant(
   return participant
 }
 
-export async function updateMeetingInstanceParticipantStatus(
+async function updateMeetingInstanceParticipantStatus(
   meetingInstanceId: string,
   personId: string,
   status: string
@@ -439,7 +439,7 @@ export async function updateMeetingInstanceParticipantStatus(
   return participant
 }
 
-export async function removeMeetingInstanceParticipant(
+async function removeMeetingInstanceParticipant(
   meetingInstanceId: string,
   personId: string
 ) {

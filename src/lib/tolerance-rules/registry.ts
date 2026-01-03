@@ -16,7 +16,7 @@ import { managerSpanRule } from './rules/manager-span-rule'
  * Registry of all tolerance rule modules
  * Using type assertion to allow different config types in the registry
  */
-export const toleranceRuleRegistry: Record<
+const toleranceRuleRegistry: Record<
   ToleranceRuleType,
   ToleranceRuleModule
 > = {
@@ -29,7 +29,7 @@ export const toleranceRuleRegistry: Record<
 /**
  * Get a rule module by type
  */
-export function getRuleModule(
+function getRuleModule(
   ruleType: ToleranceRuleType
 ): ToleranceRuleModule {
   const module = toleranceRuleRegistry[ruleType]

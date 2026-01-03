@@ -164,7 +164,7 @@ export async function deleteCheckIn(checkInId: string) {
   return { success: true }
 }
 
-export async function getCheckIn(checkInId: string) {
+async function getCheckIn(checkInId: string) {
   const user = await getCurrentUser()
 
   // Check if user belongs to an organization

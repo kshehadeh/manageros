@@ -85,7 +85,7 @@ export class ErrorBoundary extends React.Component<
 }
 
 // Hook version for functional components
-export function useErrorHandler() {
+function useErrorHandler() {
   const [error, setError] = React.useState<Error | null>(null)
 
   const resetError = React.useCallback(() => {
