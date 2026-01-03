@@ -209,48 +209,6 @@ export async function getExceptions(
 }
 
 /**
- * Get a single exception by ID
- */
-export async function getExceptionById(id: string): Promise<Exception | null> {
-  const user = await getCurrentUser()
-
-  if (!user.managerOSOrganizationId) {
-    throw new Error('User must belong to an organization to view exceptions')
-  }
-
-  const exception = await prisma.exception.findFirst({
-    where: {
-      id,
-      organizationId: user.managerOSOrganizationId,
-    },
-    include: {
-      rule: {
-        select: {
-          id: true,
-          name: true,
-          ruleType: true,
-        },
-      },
-      notification: {
-        select: {
-          id: true,
-          title: true,
-          message: true,
-          type: true,
-        },
-      },
-    },
-  })
-
-  return exception
-    ? ({
-        ...exception,
-        metadata: exception.metadata as Record<string, unknown> | null,
-      } as Exception)
-    : null
-}
-
-/**
  * Acknowledge an exception
  */
 export async function acknowledgeException(id: string): Promise<Exception> {

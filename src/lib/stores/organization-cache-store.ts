@@ -327,19 +327,3 @@ export const useOrganizationCacheStore = create<OrganizationCacheState>()(
     }
   )
 )
-
-// Export convenience functions for direct access
-export const {
-  fetchPeople,
-  invalidatePeople,
-  getPeople: getCachedPeople,
-  isPeopleStale,
-  isPeopleLoading,
-  getPeopleError,
-  fetchTeams,
-  invalidateTeams,
-  getTeams: getCachedTeams,
-  isTeamsStale,
-  isTeamsLoading,
-  getTeamsError,
-} = useOrganizationCacheStore.getState()

@@ -269,46 +269,6 @@ export async function getTasksForInitiative(initiativeId: string) {
 }
 
 /**
- * Get all tasks associated with an initiative (both direct and through objectives)
- * Used for calculating completion rates and displaying all related tasks
- */
-export async function getAllTasksForInitiative(initiativeId: string) {
-  const user = await getCurrentUser()
-
-  // Check if user belongs to an organization
-  if (!user.managerOSOrganizationId) {
-    throw new Error('User must belong to an organization to view tasks')
-  }
-
-  return await prisma.task.findMany({
-    where: {
-      AND: [
-        {
-          OR: [{ initiativeId }, { objective: { initiativeId } }],
-        },
-        {
-          OR: [
-            { initiative: { organizationId: user.managerOSOrganizationId } },
-            {
-              objective: {
-                initiative: { organizationId: user.managerOSOrganizationId },
-              },
-            },
-          ],
-        },
-      ],
-    },
-    include: {
-      assignee: true,
-      createdBy: true,
-      objective: true,
-      initiative: true,
-    },
-    orderBy: { createdAt: 'desc' },
-  })
-}
-
-/**
  * Get task completion counts for an initiative (both direct and through objectives)
  * Optimized query that only returns counts, not full task data
  * @param initiativeId The initiative ID
@@ -678,70 +638,6 @@ export async function updateTaskTitle(taskId: string, title: string) {
     where: { id: taskId },
     data: {
       title: title.trim(),
-    },
-    include: {
-      assignee: true,
-      initiative: true,
-      objective: true,
-      createdBy: true,
-    },
-  })
-
-  // Revalidate the tasks page and task detail page
-  revalidatePath('/tasks')
-  revalidatePath('/my-tasks')
-  // Revalidate layout to update sidebar badge counts
-  revalidatePath('/', 'layout')
-  revalidatePath(`/tasks/${taskId}`)
-
-  return task
-}
-
-export async function updateTaskAssignee(
-  taskId: string,
-  assigneeId: string | null
-) {
-  const user = await getCurrentUser()
-
-  // Check if user belongs to an organization
-  if (!user.managerOSOrganizationId) {
-    throw new Error('User must belong to an organization to update tasks')
-  }
-
-  // Verify task belongs to user's organization
-  const existingTask = await prisma.task.findFirst({
-    where: {
-      id: taskId,
-      ...getTaskAccessWhereClause(
-        user.managerOSOrganizationId,
-        user.managerOSUserId || '',
-        user.managerOSPersonId || undefined
-      ),
-    },
-  })
-
-  if (!existingTask) {
-    throw new Error('Task not found or access denied')
-  }
-
-  // Verify assignee belongs to user's organization if specified
-  if (assigneeId) {
-    const assignee = await prisma.person.findFirst({
-      where: {
-        id: assigneeId,
-        organizationId: user.managerOSOrganizationId,
-      },
-    })
-    if (!assignee) {
-      throw new Error('Assignee not found or access denied')
-    }
-  }
-
-  // Update only the assignee
-  const task = await prisma.task.update({
-    where: { id: taskId },
-    data: {
-      assigneeId,
     },
     include: {
       assignee: true,

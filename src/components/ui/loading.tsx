@@ -71,22 +71,6 @@ export function Loading({
   return null
 }
 
-export function PageLoading({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn(
-        'flex items-center justify-center min-h-[200px]',
-        className
-      )}
-    >
-      <div className='flex flex-col items-center space-y-xl'>
-        <Loading size='lg' />
-        <p className='text-sm text-muted-foreground'>Loading...</p>
-      </div>
-    </div>
-  )
-}
-
 export function Skeleton({ className }: { className?: string }) {
   return <div className={cn('animate-pulse bg-muted rounded', className)} />
 }

@@ -18,7 +18,7 @@ export const TASK_STATUS = {
 export type TaskStatus = (typeof TASK_STATUS)[keyof typeof TASK_STATUS]
 
 // Human-readable labels for each status
-export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
+const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   [TASK_STATUS.TODO]: 'To Do',
   [TASK_STATUS.DOING]: 'Doing',
   [TASK_STATUS.BLOCKED]: 'Blocked',
@@ -27,7 +27,7 @@ export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
 }
 
 // Badge variants for each status
-export const TASK_STATUS_VARIANTS: Record<TaskStatus, BadgeVariant> = {
+const TASK_STATUS_VARIANTS: Record<TaskStatus, BadgeVariant> = {
   [TASK_STATUS.TODO]: 'secondary',
   [TASK_STATUS.DOING]: 'warning',
   [TASK_STATUS.BLOCKED]: 'error',
@@ -36,7 +36,7 @@ export const TASK_STATUS_VARIANTS: Record<TaskStatus, BadgeVariant> = {
 }
 
 // Alternative variants for different UI contexts
-export const TASK_STATUS_UI_VARIANTS: Record<
+const TASK_STATUS_UI_VARIANTS: Record<
   TaskStatus,
   'neutral' | 'warning' | 'error' | 'success'
 > = {
@@ -51,7 +51,7 @@ export const TASK_STATUS_UI_VARIANTS: Record<
 export const ALL_TASK_STATUSES: TaskStatus[] = Object.values(TASK_STATUS)
 
 // Array of task statuses that indicate work in progress
-export const IN_PROGRESS_STATUSES: TaskStatus[] = [
+const IN_PROGRESS_STATUSES: TaskStatus[] = [
   TASK_STATUS.DOING,
   TASK_STATUS.BLOCKED,
 ]
@@ -70,7 +70,7 @@ export const ACTIVE_STATUSES: TaskStatus[] = [
 ]
 
 // Array of task statuses in logical workflow order for sorting/grouping
-export const TASK_STATUS_SORT_ORDER: TaskStatus[] = [
+const TASK_STATUS_SORT_ORDER: TaskStatus[] = [
   TASK_STATUS.TODO,
   TASK_STATUS.DOING,
   TASK_STATUS.BLOCKED,
@@ -138,11 +138,6 @@ export const taskStatusUtils = {
     const index = TASK_STATUS_SORT_ORDER.indexOf(status)
     return index === -1 ? 999 : index // Unknown statuses go to the end
   },
-}
-
-// Type guard function
-export function isTaskStatus(status: string): status is TaskStatus {
-  return taskStatusUtils.isValid(status)
 }
 
 // Default task status

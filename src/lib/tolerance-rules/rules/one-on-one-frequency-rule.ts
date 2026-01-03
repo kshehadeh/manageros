@@ -26,7 +26,7 @@ export interface OneOnOneFrequencyConfig {
 /**
  * Zod schema for one-on-one frequency config
  */
-export const oneOnOneFrequencyConfigSchema = z.object({
+const oneOnOneFrequencyConfigSchema = z.object({
   warningThresholdDays: z.number().int().positive(),
   urgentThresholdDays: z.number().int().positive(),
   onlyFullTimeEmployees: z.boolean().optional(),

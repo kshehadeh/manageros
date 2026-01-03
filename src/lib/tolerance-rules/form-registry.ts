@@ -19,7 +19,7 @@ import { ManagerSpanFormFields } from './rules/manager-span-rule-form'
  * Registry of form components (client-safe)
  * Using type assertion to allow different config types in the registry
  */
-export const toleranceRuleFormRegistry: Record<
+const toleranceRuleFormRegistry: Record<
   ToleranceRuleType,
   React.ComponentType<{
     config: unknown

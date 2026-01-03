@@ -70,8 +70,6 @@ const SessionClaimsSchema = z.object({
   metadata: z.union([UserBriefSchema.optional().nullable(), z.object({})]),
 })
 
-export type SessionClaims = z.infer<typeof SessionClaimsSchema>
-
 /**
  * Get the current authenticated user from Clerk
  * Throws an error if no user is authenticated
@@ -564,7 +562,7 @@ export async function getCurrentUser(
  * @returns UserBrief with ManagerOS user data
  * @throws Error if token is invalid or user cannot be mapped
  */
-export async function getCurrentUserFromToken(
+async function getCurrentUserFromToken(
   bearerToken: string
 ): Promise<UserBrief> {
   // Validate token using Clerk's token introspection endpoint
@@ -648,7 +646,7 @@ export async function getCurrentUserWithPersonAndOrganization(options?: {
           clerkOrganizationId: organization.clerkOrganizationId,
           name: clerkOrganization.name,
           slug: clerkOrganization.slug,
-        } satisfies OrganizationBrief
+        }
       }
     }
   } else if (user.managerOSOrganizationId) {
@@ -892,32 +890,6 @@ export async function getFilteredNavigation(user: UserBrief | null) {
   )
 }
 
-/**
- * Check if a user is an admin or owner in a specific organization
- * @param userId - The user ID
- * @param organizationId - The organization ID
- * @returns Promise<boolean> indicating if the user is an admin or owner in that organization
- */
-export async function isAdminOrOwnerInOrganization(
-  user: UserBrief
-): Promise<boolean> {
-  return (
-    user.role?.toLowerCase() === 'admin' || user.role?.toLowerCase() === 'owner'
-  )
-}
-
-/**
- * Get the role of a user in a specific organization
- * @param userId - The user ID
- * @param organizationId - The organization ID
- * @returns Promise<string | null> The role ('ADMIN', 'OWNER', or 'USER') or null if not a member
- */
-export async function getUserRoleInOrganization(
-  user: UserBrief
-): Promise<string | null> {
-  return user.role?.toLowerCase() || null
-}
-
 // Helper functions for role-based access control
 // These use the role from the User object which is already org-scoped via getCurrentUser
 export function isAdmin(user: UserBrief) {
@@ -929,7 +901,7 @@ export function isAdmin(user: UserBrief) {
  * @param user - User object with role property
  * @returns boolean indicating if the user is an owner
  */
-export function isOwner(user: UserBrief) {
+function isOwner(user: UserBrief) {
   return user.role?.toLowerCase() === 'owner'
 }
 
@@ -940,14 +912,6 @@ export function isOwner(user: UserBrief) {
  */
 export function isAdminOrOwner(user: UserBrief) {
   return isAdmin(user) || isOwner(user)
-}
-
-export function isUser(user: UserBrief) {
-  return user.role?.toLowerCase() === 'user'
-}
-
-export function canAccessOrganization(user: UserBrief, organizationId: string) {
-  return user.managerOSOrganizationId === organizationId
 }
 
 /**
@@ -1898,10 +1862,6 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
     return !!note
   },
 }
-
-export type PermissionKey = PermissionType
-
-export type ActionPermissionOption = PermissionType
 
 /**
  * Central permission function to check if a user can perform a specific action

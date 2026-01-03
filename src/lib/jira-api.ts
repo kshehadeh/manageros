@@ -56,7 +56,7 @@ export interface JiraAssignedTicket {
   created: string
 }
 
-export class JiraApiError extends Error {
+class JiraApiError extends Error {
   constructor(
     message: string,
     public _statusCode?: number,

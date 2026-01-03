@@ -71,44 +71,6 @@ export async function createOneOnOne(formData: OneOnOneFormData) {
   return { id: created.id }
 }
 
-export async function getOneOnOnes() {
-  const user = await getCurrentUser()
-
-  if (!user.managerOSOrganizationId) {
-    throw new Error('User must belong to an organization')
-  }
-
-  // Get the person ID from the user session
-  if (!user.managerOSPersonId) {
-    throw new Error('No person record found for current user')
-  }
-
-  const currentPerson = await prisma.person.findUnique({
-    where: {
-      id: user.managerOSPersonId || '',
-    },
-  })
-
-  return await prisma.oneOnOne.findMany({
-    where: {
-      OR: [
-        { managerId: currentPerson?.id || '' }, // participant1
-        { reportId: currentPerson?.id || '' }, // participant2
-      ],
-      // Ensure both manager and report belong to the current organization
-      AND: [
-        { manager: { organizationId: user.managerOSOrganizationId } },
-        { report: { organizationId: user.managerOSOrganizationId } },
-      ],
-    },
-    include: {
-      manager: true,
-      report: true,
-    },
-    orderBy: { scheduledAt: 'desc' },
-  })
-}
-
 export async function getOneOnOneById(id: string) {
   const user = await getCurrentUser()
 

@@ -4,7 +4,7 @@ import { generateText } from '@/lib/ai'
 import { GithubApiService } from '@/lib/github-api'
 import { JiraApiService } from '@/lib/jira-api'
 
-export const personAiSynopsisInput = z.object({
+const personAiSynopsisInput = z.object({
   personId: z.string(),
   fromDate: z.string(),
   toDate: z.string(),

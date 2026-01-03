@@ -148,7 +148,7 @@ const DOMAIN_ICON_MAP: Record<string, IconComponent> = {
 /**
  * Extract domain from URL
  */
-export function extractDomain(url: string): string {
+function extractDomain(url: string): string {
   try {
     const urlObj = new URL(url)
     return urlObj.hostname.toLowerCase()
@@ -291,55 +291,4 @@ export function getUrlTitle(url: string): string {
   } catch {
     return 'External Link'
   }
-}
-
-/**
- * Check if URL is likely to be a specific type of content
- */
-export function getUrlType(
-  url: string
-): 'video' | 'document' | 'image' | 'code' | 'social' | 'other' {
-  const domain = extractDomain(url)
-
-  if (
-    domain.includes('youtube.com') ||
-    domain.includes('youtu.be') ||
-    domain.includes('vimeo.com')
-  ) {
-    return 'video'
-  }
-
-  if (
-    domain.includes('github.com') ||
-    domain.includes('gitlab.com') ||
-    domain.includes('bitbucket.org')
-  ) {
-    return 'code'
-  }
-
-  if (
-    domain.includes('docs.google.com') ||
-    domain.includes('notion.so') ||
-    domain.includes('confluence.com')
-  ) {
-    return 'document'
-  }
-
-  if (
-    domain.includes('figma.com') ||
-    domain.includes('sketch.com') ||
-    domain.includes('canva.com')
-  ) {
-    return 'image'
-  }
-
-  if (
-    domain.includes('slack.com') ||
-    domain.includes('discord.com') ||
-    domain.includes('teams.microsoft.com')
-  ) {
-    return 'social'
-  }
-
-  return 'other'
 }

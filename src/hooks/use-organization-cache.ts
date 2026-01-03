@@ -79,22 +79,6 @@ export function usePeopleCache() {
 }
 
 /**
- * Hook for accessing people data with a simpler API
- * Returns just the people array and loading state
- */
-export function usePeople() {
-  const { people, isLoading, error } = usePeopleCache()
-
-  const peopleWithoutUser = people.filter(person => !person.user)
-  return {
-    peopleWithoutUser,
-    people,
-    isLoading,
-    error,
-  }
-}
-
-/**
  * Hook for accessing people data optimized for select components
  * Returns simplified person objects with just id, name, email, role, avatar
  */
@@ -187,20 +171,6 @@ export function useTeamsCache() {
     lastFetched: teamsMetadata.lastFetched,
     isStale: isTeamsStale(),
     isOnline,
-  }
-}
-
-/**
- * Hook for accessing teams data with a simpler API
- * Returns just the teams array and loading state
- */
-export function useTeams() {
-  const { teams, isLoading, error } = useTeamsCache()
-
-  return {
-    teams,
-    isLoading,
-    error,
   }
 }
 

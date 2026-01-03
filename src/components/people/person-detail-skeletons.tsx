@@ -8,62 +8,8 @@ import {
   ListTodo,
   Users,
   Briefcase,
-  Link as LinkIcon,
-  Sparkles,
   ClipboardList,
 } from 'lucide-react'
-import { FaGithub, FaJira } from 'react-icons/fa'
-
-export function PersonDetailHeaderSkeleton() {
-  return (
-    <div className='page-container'>
-      <div className='page-header'>
-        <div className='flex items-start justify-between'>
-          <div className='flex-1'>
-            <div className='flex items-center gap-3 mb-2'>
-              <Skeleton className='h-16 w-16 rounded-full' />
-              <div className='flex items-center gap-3'>
-                <Skeleton className='h-8 w-48' />
-                <Skeleton className='h-6 w-20' />
-              </div>
-            </div>
-            <Skeleton className='h-5 w-32 mb-2' />
-            <Skeleton className='h-4 w-40' />
-
-            {/* Basic Information with Icons */}
-            <div className='flex flex-wrap items-center gap-4 mt-3'>
-              <Skeleton className='h-4 w-24' />
-              <Skeleton className='h-4 w-28' />
-              <Skeleton className='h-4 w-32' />
-              <Skeleton className='h-4 w-20' />
-            </div>
-          </div>
-          <Skeleton className='h-8 w-8' />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export function OverviewSectionSkeleton() {
-  return (
-    <PageSection>
-      <SectionHeader
-        icon={Sparkles}
-        title='AI Overview'
-        action={<Skeleton className='h-8 w-8 rounded-md' />}
-      />
-      <div className='space-y-3 mt-2'>
-        <div className='space-y-2'>
-          <Skeleton className='h-4 w-full' />
-          <Skeleton className='h-4 w-full' />
-          <Skeleton className='h-4 w-3/4' />
-        </div>
-        <Skeleton className='h-3 w-32' />
-      </div>
-    </PageSection>
-  )
-}
 
 export function FeedbackCampaignsSectionSkeleton() {
   return (
@@ -280,36 +226,6 @@ export function OneOnOneMeetingsSectionSkeleton() {
   )
 }
 
-export function JiraWorkActivitySectionSkeleton() {
-  return (
-    <section>
-      <SectionHeader icon={FaJira} title='Jira Work Activity' />
-      <div className='border rounded-lg p-4'>
-        <div className='space-y-3'>
-          <Skeleton className='h-4 w-full' />
-          <Skeleton className='h-4 w-3/4' />
-          <Skeleton className='h-4 w-1/2' />
-        </div>
-      </div>
-    </section>
-  )
-}
-
-export function GithubPrsActivitySectionSkeleton() {
-  return (
-    <section>
-      <SectionHeader icon={FaGithub} title='GitHub PR Activity' />
-      <div className='border rounded-lg p-4'>
-        <div className='space-y-3'>
-          <Skeleton className='h-4 w-full' />
-          <Skeleton className='h-4 w-3/4' />
-          <Skeleton className='h-4 w-1/2' />
-        </div>
-      </div>
-    </section>
-  )
-}
-
 export function DirectReportsSectionSkeleton() {
   return (
     <PageSection
@@ -333,52 +249,6 @@ export function DirectReportsSectionSkeleton() {
             <Skeleton className='h-8 w-8 rounded-md shrink-0' />
           </div>
         ))}
-      </div>
-    </PageSection>
-  )
-}
-
-export function AccountLinkingSectionSkeleton() {
-  return (
-    <PageSection
-      header={<SectionHeader icon={LinkIcon} title='Account Linking' />}
-    >
-      <div className='space-y-6'>
-        {/* User Account Subsection Skeleton */}
-        <div className='space-y-3'>
-          <div className='flex items-center gap-2 pb-2 border-b border-muted'>
-            <Skeleton className='h-4 w-4 rounded' />
-            <Skeleton className='h-4 w-24 rounded' />
-          </div>
-          <div className='space-y-3'>
-            <Skeleton className='h-10 w-full rounded-md' />
-            <Skeleton className='h-8 w-24 rounded-md' />
-          </div>
-        </div>
-
-        {/* Jira Account Subsection Skeleton */}
-        <div className='space-y-3'>
-          <div className='flex items-center gap-2 pb-2 border-b border-muted'>
-            <Skeleton className='h-4 w-4 rounded' />
-            <Skeleton className='h-4 w-24 rounded' />
-          </div>
-          <div className='space-y-3'>
-            <Skeleton className='h-10 w-full rounded-md' />
-            <Skeleton className='h-8 w-24 rounded-md' />
-          </div>
-        </div>
-
-        {/* GitHub Account Subsection Skeleton */}
-        <div className='space-y-3'>
-          <div className='flex items-center gap-2 pb-2 border-b border-muted'>
-            <Skeleton className='h-4 w-4 rounded' />
-            <Skeleton className='h-4 w-24 rounded' />
-          </div>
-          <div className='space-y-3'>
-            <Skeleton className='h-10 w-full rounded-md' />
-            <Skeleton className='h-8 w-24 rounded-md' />
-          </div>
-        </div>
       </div>
     </PageSection>
   )

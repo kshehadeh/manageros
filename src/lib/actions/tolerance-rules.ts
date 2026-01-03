@@ -207,34 +207,6 @@ export async function deleteToleranceRule(id: string): Promise<void> {
 }
 
 /**
- * Get all tolerance rules for the current user's organization
- */
-export async function getToleranceRules(): Promise<ToleranceRule[]> {
-  const user = await getCurrentUser()
-
-  if (!user.managerOSOrganizationId) {
-    throw new Error(
-      'User must belong to an organization to view tolerance rules'
-    )
-  }
-
-  const rules = await prisma.organizationToleranceRule.findMany({
-    where: {
-      organizationId: user.managerOSOrganizationId,
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  })
-
-  return rules.map(rule => ({
-    ...rule,
-    ruleType: rule.ruleType as ToleranceRuleType,
-    config: rule.config as unknown as ToleranceRuleConfig,
-  })) as ToleranceRule[]
-}
-
-/**
  * Get a single tolerance rule by ID
  */
 export async function getToleranceRuleById(

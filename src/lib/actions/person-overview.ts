@@ -31,8 +31,6 @@ export type GenerateAISummaryResponse =
       error: string
     }
 
-export type SynopsisType = 'overview' | 'jira-activity' | 'github-activity'
-
 export async function generatePersonOverview(
   personId: string,
   options?: {

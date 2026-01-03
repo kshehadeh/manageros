@@ -632,7 +632,7 @@ export async function updateUserRoleInClerkOrganization(
 /**
  * Get subscription for a Clerk organization
  */
-export async function getClerkOrganizationSubscription(
+async function getClerkOrganizationSubscription(
   clerkOrgId: string
 ): Promise<ClerkCommerceSubscription | null> {
   if (!process.env.CLERK_SECRET_KEY) {
@@ -667,20 +667,10 @@ export async function getClerkOrganizationSubscription(
 }
 
 /**
- * Get the number of members of a Clerk organization
- */
-export async function getClerkOrganizationMembersCount(
-  clerkOrgId: string
-): Promise<number> {
-  const members = await getClerkOrganizationMembers(clerkOrgId)
-  return members.length
-}
-
-/**
  * Get the billing user's Clerk user ID from an organization's subscription
  * Returns null if no subscription or payer found
  */
-export async function getBillingUserClerkId(
+async function getBillingUserClerkId(
   clerkOrgId: string
 ): Promise<string | null> {
   try {

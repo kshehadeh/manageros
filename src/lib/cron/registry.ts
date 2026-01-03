@@ -13,7 +13,7 @@ import { ActivityMonitoringJob } from './jobs/activity-monitoring-job'
 import { OverdueTasksNotificationJob } from './jobs/overdue-tasks-notification-job'
 import { ToleranceRulesEvaluationJob } from './jobs/tolerance-rules-evaluation-job'
 
-export class CronJobRegistry {
+class CronJobRegistry {
   private jobs: Map<string, CronJob> = new Map()
 
   constructor() {

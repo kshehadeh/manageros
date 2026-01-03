@@ -35,38 +35,6 @@ export type JobRoleFormData = z.infer<typeof jobRoleSchema>
 export type JobLevelFormData = z.infer<typeof jobLevelSchema>
 export type JobDomainFormData = z.infer<typeof jobDomainSchema>
 
-// JobRole Actions
-export async function getJobRoles() {
-  try {
-    const user = await getCurrentUser()
-    if (!user.managerOSOrganizationId) {
-      return []
-    }
-
-    return await prisma.jobRole.findMany({
-      where: { organizationId: user.managerOSOrganizationId },
-      include: {
-        level: true,
-        domain: true,
-        people: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-      orderBy: [
-        { level: { order: 'asc' } },
-        { domain: { name: 'asc' } },
-        { title: 'asc' },
-      ],
-    })
-  } catch (error) {
-    console.error('Error fetching job roles:', error)
-    return []
-  }
-}
-
 export async function getJobRole(id: string) {
   try {
     const user = await getCurrentUser()
@@ -391,27 +359,6 @@ export async function getJobLevels() {
   }
 }
 
-export async function getJobLevelsForSelection() {
-  try {
-    const user = await getCurrentUser()
-    if (!user.managerOSOrganizationId) {
-      return []
-    }
-
-    return await prisma.jobLevel.findMany({
-      where: { organizationId: user.managerOSOrganizationId },
-      select: {
-        id: true,
-        name: true,
-      },
-      orderBy: { order: 'asc' },
-    })
-  } catch (error) {
-    console.error('Error fetching job levels for selection:', error)
-    return []
-  }
-}
-
 export async function createJobLevel(data: JobLevelFormData) {
   try {
     const user = await getCurrentUser()
@@ -639,27 +586,6 @@ export async function getJobDomains() {
     })
   } catch (error) {
     console.error('Error fetching job domains:', error)
-    return []
-  }
-}
-
-export async function getJobDomainsForSelection() {
-  try {
-    const user = await getCurrentUser()
-    if (!user.managerOSOrganizationId) {
-      return []
-    }
-
-    return await prisma.jobDomain.findMany({
-      where: { organizationId: user.managerOSOrganizationId },
-      select: {
-        id: true,
-        name: true,
-      },
-      orderBy: { name: 'asc' },
-    })
-  } catch (error) {
-    console.error('Error fetching job domains for selection:', error)
     return []
   }
 }

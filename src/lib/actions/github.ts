@@ -304,20 +304,6 @@ export async function submitGitHubIssue(formData: {
   }
 }
 
-export async function uploadImageToR2(file: File): Promise<string> {
-  const { uploadFileToR2 } = await import('@/lib/r2-upload')
-
-  const result = await uploadFileToR2(file, {
-    entityType: 'BugReport',
-    entityId: 'github-issues',
-    folder: 'bug-reports',
-    maxSizeBytes: 10 * 1024 * 1024, // 10MB for bug reports
-    allowedMimeTypes: ['image/*'],
-  })
-
-  return result.r2Url
-}
-
 export async function fetchGithubPullRequests(
   personId: string,
   daysBack: number = 30

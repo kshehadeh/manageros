@@ -33,45 +33,6 @@ export async function getIntegration(
 }
 
 /**
- * Get an integration instance by type and scope
- */
-export async function getIntegrationByType(
-  organizationId: string | null,
-  userId: string | null,
-  type: IntegrationType,
-  scope: IntegrationScope
-): Promise<BaseIntegration | null> {
-  const where: {
-    integrationType: string
-    scope: string
-    organizationId?: string
-    userId?: string
-  } = {
-    integrationType: type,
-    scope,
-  }
-
-  if (scope === 'organization' && organizationId) {
-    where.organizationId = organizationId
-  } else if (scope === 'user' && userId) {
-    where.userId = userId
-  } else {
-    return null
-  }
-
-  const integration = await prisma.integration.findFirst({
-    where,
-    orderBy: { createdAt: 'desc' },
-  })
-
-  if (!integration) {
-    return null
-  }
-
-  return createIntegrationFromRecord(integration)
-}
-
-/**
  * Create an integration instance from a database record
  */
 function createIntegrationFromRecord(record: {
@@ -124,60 +85,4 @@ function createIntegrationFromRecord(record: {
     default:
       throw new Error(`Unknown integration type: ${record.integrationType}`)
   }
-}
-
-/**
- * Get all integrations for an organization
- */
-export async function getOrganizationIntegrations(
-  organizationId: string
-): Promise<BaseIntegration[]> {
-  const integrations = await prisma.integration.findMany({
-    where: {
-      organizationId,
-      scope: 'organization',
-      isEnabled: true,
-    },
-  })
-
-  return integrations
-    .map(record => {
-      try {
-        return createIntegrationFromRecord(record)
-      } catch (error) {
-        console.error(`Failed to create integration ${record.id}:`, error)
-        return null
-      }
-    })
-    .filter(
-      (integration): integration is BaseIntegration => integration !== null
-    )
-}
-
-/**
- * Get all integrations for a user
- */
-export async function getUserIntegrations(
-  userId: string
-): Promise<BaseIntegration[]> {
-  const integrations = await prisma.integration.findMany({
-    where: {
-      userId,
-      scope: 'user',
-      isEnabled: true,
-    },
-  })
-
-  return integrations
-    .map(record => {
-      try {
-        return createIntegrationFromRecord(record)
-      } catch (error) {
-        console.error(`Failed to create integration ${record.id}:`, error)
-        return null
-      }
-    })
-    .filter(
-      (integration): integration is BaseIntegration => integration !== null
-    )
 }

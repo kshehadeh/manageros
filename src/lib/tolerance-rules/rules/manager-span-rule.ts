@@ -25,7 +25,7 @@ export interface ManagerSpanConfig {
 /**
  * Zod schema for manager span config
  */
-export const managerSpanConfigSchema = z.object({
+const managerSpanConfigSchema = z.object({
   maxDirectReports: z.number().int().positive(),
 })
 

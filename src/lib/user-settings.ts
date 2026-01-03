@@ -407,22 +407,6 @@ export function updateUserSetting<K extends keyof UserSettings>(
 }
 
 /**
- * Clear all user settings (useful for logout)
- */
-export function clearUserSettings(userId: string): void {
-  if (typeof window === 'undefined') {
-    return
-  }
-
-  try {
-    const key = getUserSettingsKey(userId)
-    localStorage.removeItem(key)
-  } catch (error) {
-    console.warn('Failed to clear user settings:', error)
-  }
-}
-
-/**
  * Get task table settings for a specific view
  */
 export function getTaskTableSettings(

@@ -8,7 +8,7 @@ import {
   type TaskStatus,
 } from '@/lib/task-status'
 
-export const personOverviewInput = z.object({
+const personOverviewInput = z.object({
   personId: z.string(),
   fromDate: z.string(),
   toDate: z.string(),

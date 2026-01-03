@@ -16,4 +16,3 @@ export const toolIds = {
   createPersonAction: 'createPersonAction',
 } as const
 
-export type ToolId = keyof typeof toolIds

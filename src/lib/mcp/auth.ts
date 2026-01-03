@@ -26,7 +26,7 @@ function extractBearerToken(authHeader: string | null): string | null {
  * @param request - The incoming request
  * @returns Authenticated user context or null if authentication fails
  */
-export async function authenticateMCPRequest(
+async function authenticateMCPRequest(
   request: Request
 ): Promise<MCPUserContext | null> {
   try {
