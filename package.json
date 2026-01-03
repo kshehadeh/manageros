@@ -43,7 +43,7 @@
     "version:major": "bun scripts/bump-version.ts major",
     "commit:auto": "bun scripts/auto-commit.ts",
     "og:generate": "bun scripts/generate-og-image.ts",
-    "postinstall": "bunx prisma generate",
+    "postinstall": "[ -n \"$VERCEL\" ] || bunx prisma generate",
     "prepare": "husky",
     "release": "release-it --ci",
     "release:patch": "release-it patch --ci",
