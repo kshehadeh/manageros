@@ -18,11 +18,38 @@ import { FadeInOnScroll } from '@/components/marketing/fade-in'
 import { CurrentYear } from '@/components/marketing/current-year'
 import { OpenChatButton } from '@/components/marketing/open-chat-button'
 import { Metadata } from 'next'
+import { getBaseUrl } from '@/lib/utils/url-utils'
+
+const baseUrl = getBaseUrl()
 
 export const metadata: Metadata = {
   title: 'Lead high-performing teams | mpath',
   description:
     'mpath gives managers a unified operating system for clarity, coaching, and continuous improvement across their teams.',
+  openGraph: {
+    title: 'Lead high-performing teams | mpath',
+    description:
+      'mpath gives managers a unified operating system for clarity, coaching, and continuous improvement across their teams.',
+    url: baseUrl,
+    siteName: 'mpath',
+    images: [
+      {
+        url: `${baseUrl}/og-image.png`,
+        width: 1200,
+        height: 1200,
+        alt: 'mpath - Management Operating System',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Lead high-performing teams | mpath',
+    description:
+      'mpath gives managers a unified operating system for clarity, coaching, and continuous improvement across their teams.',
+    images: [`${baseUrl}/og-image.png`],
+  },
 }
 
 export default async function MarketingHome() {
