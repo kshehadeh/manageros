@@ -1,5 +1,10 @@
 # Changelog
 
+- Merge pull request #161 from kshehadeh/staging (ca1b6c1)
+- fix(build): Another build fix attempt (7907123)
+- fix(build): Another build fix attempt (8d24650)
+- fix(build): Fix build error on vercel (8b2092e)
+
 ## [1.55.1](https://github.com/kshehadeh/manageros/compare/v1.55.0...v1.55.1) (2026-01-03)
 
 # [1.55.0](/compare/v1.54.0...v1.55.0) (2026-01-02)
