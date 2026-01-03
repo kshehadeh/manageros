@@ -7,25 +7,19 @@
     "dev": "bun --bun next dev --turbo",
     "build": "bun --bun next build --turbo",
     "start": "bun --bun next start",
-    "lint": "eslint .",
-    "lint:fix": "eslint --fix .",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint-staged": "lint-staged",
     "prisma:generate": "bunx prisma generate",
     "prisma:push": "bunx prisma db push",
-    "db:init": "bun scripts/init-database.ts",
-    "db:backup": "bun scripts/backup-database.ts --verbose",
-    "db:restore": "bun scripts/restore-database.ts",
-    "db:migrate:deploy": "bun scripts/deploy-migrations.ts",
     "db:seed-demo": "bun scripts/seed-demo-data.ts",
     "cleanup:tokens": "bun scripts/cleanup-expired-tokens.ts",
     "cleanup:branches": "bun scripts/cleanup-branches.ts",
     "cleanup:branches:dry-run": "bun scripts/cleanup-branches.ts --dry-run",
     "cleanup:branches:remote": "bun scripts/cleanup-branches.ts --remote",
     "cleanup:branches:all": "bun scripts/cleanup-branches.ts --remote",
-    "user:delete": "bun scripts/delete-user.ts",
-    "org:delete": "bun scripts/delete-organization.ts",
     "test:email": "bun scripts/test-email-config.ts",
     "test:oauth": "bun scripts/test-oauth.ts",
     "test": "playwright test",
@@ -57,7 +51,7 @@
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "prettier --write",
-      "eslint --fix"
+      "oxlint --fix"
     ],
     "*.{json,md,css,scss}": [
       "prettier --write"
@@ -145,7 +139,6 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
     "@playwright/test": "^1.56.1",
     "@prisma/config": "^7.2.0",
     "@release-it/conventional-changelog": "^10.0.2",
@@ -154,13 +147,9 @@
     "@types/node": "^25.0.3",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
-    "@typescript-eslint/eslint-plugin": "^8.51.0",
-    "@typescript-eslint/parser": "^8.51.0",
     "autoprefixer": "^10.4.22",
     "canvas": "^3.2.0",
-    "eslint": "9.39.1",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "globals": "^16.5.0",
+    "oxlint": "^1.0.0",
     "husky": "^9.1.7",
     "knip": "^5.79.0",
     "lint-staged": "^16.2.7",
