@@ -120,13 +120,4 @@ const CommandShortcut = ({
 }
 CommandShortcut.displayName = 'CommandShortcut'
 
-export {
-  Command,
-  CommandInput,
-  CommandList,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-  CommandSeparator,
-  
-}
+export { Command, CommandList, CommandEmpty, CommandGroup, CommandItem }

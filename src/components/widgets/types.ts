@@ -76,20 +76,3 @@ export interface Widget {
     context: WidgetContext
   ): ReactNode
 }
-
-/**
- * Widget configuration for dashboard layout
- */
-export interface WidgetConfig {
-  /** Widget instance */
-  widget: Widget
-  /** Whether widget is currently visible */
-  visible: boolean
-  /** Widget order/position */
-  order?: number
-  /** Custom size overrides */
-  size?: {
-    minWidth?: string
-    height?: string
-  }
-}

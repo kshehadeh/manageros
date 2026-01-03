@@ -646,7 +646,7 @@ export async function getCurrentUserWithPersonAndOrganization(options?: {
           clerkOrganizationId: organization.clerkOrganizationId,
           name: clerkOrganization.name,
           slug: clerkOrganization.slug,
-        } satisfies OrganizationBrief
+        }
       }
     }
   } else if (user.managerOSOrganizationId) {

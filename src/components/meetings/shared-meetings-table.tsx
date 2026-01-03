@@ -53,22 +53,3 @@ export type MeetingInstanceWithRelations = {
 export type UpcomingMeeting =
   | (MeetingWithRelations & { type: 'meeting' })
   | (MeetingInstanceWithRelations & { type: 'instance' })
-
-// Column configuration types
-export type MeetingColumnType =
-  | 'title'
-  | 'dateTime'
-  | 'time'
-  | 'scheduled'
-  | 'duration'
-  | 'team'
-  | 'initiative'
-  | 'participants'
-  | 'actions'
-
-export interface MeetingColumnConfig {
-  type: MeetingColumnType
-  header: string
-  show?: boolean
-  width?: string
-}

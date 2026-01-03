@@ -43,7 +43,6 @@ export type {
   WidgetMetadata,
   WidgetContext,
   WidgetVisibility,
-  WidgetConfig,
 } from './types'
 
 // Export WidgetCard component
