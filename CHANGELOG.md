@@ -1,5 +1,7 @@
 # Changelog
 
+## [1.55.1](https://github.com/kshehadeh/manageros/compare/v1.55.0...v1.55.1) (2026-01-03)
+
 # [1.55.0](/compare/v1.54.0...v1.55.0) (2026-01-02)
 
 ### Features
