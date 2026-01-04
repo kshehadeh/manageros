@@ -167,113 +167,114 @@ export function InitiativeActionsDropdown({
       <ActionDropdown size={size}>
         {({ close }) => (
           <div className='py-1'>
-            {canCreateTask && (
-              <button
-                className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
-                onClick={event => {
-                  event.stopPropagation()
-                  close()
-                  handleTaskDialogOpen()
-                }}
+            {canEdit && (
+              <Link
+                href={`/initiatives/${initiativeId}/edit`}
+                className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                onClick={close}
               >
-                <Plus className='w-4 h-4' />
-                Add Task
-              </button>
+                <Edit className='w-4 h-4' />
+                Edit Initiative
+              </Link>
             )}
 
-            {canEdit && (
-              <>
-                {canCreateTask && (
-                  <div className='border-t border-border my-1' />
-                )}
-                <button
-                  className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
-                  onClick={event => {
-                    event.stopPropagation()
-                    close()
-                    setShowManagePeopleModal(true)
-                  }}
-                >
-                  <Users className='w-4 h-4' />
-                  Manage People
-                </button>
-                <button
-                  className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
-                  onClick={event => {
-                    event.stopPropagation()
-                    close()
-                    setShowNoteModal(true)
-                  }}
-                >
-                  <FileText className='w-4 h-4' />
-                  Add Note
-                </button>
-                <button
-                  className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
-                  onClick={event => {
-                    event.stopPropagation()
-                    close()
-                    setShowLinkModal(true)
-                  }}
-                >
-                  <LinkIcon className='w-4 h-4' />
-                  Add Link
-                </button>
-                <button
-                  className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
-                  onClick={event => {
-                    event.stopPropagation()
-                    close()
-                    setShowCheckInModal(true)
-                  }}
-                >
-                  <CheckCircle className='w-4 h-4' />
-                  Add Check-In
-                </button>
-                <button
-                  className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
-                  onClick={event => {
-                    event.stopPropagation()
-                    close()
-                    setShowObjectiveModal(true)
-                  }}
-                >
-                  <Target className='w-4 h-4' />
-                  Add Objective
-                </button>
-              </>
-            )}
-
-            {canEdit && (
+            {(canEdit || canCreateTask) && (
               <>
                 <div className='border-t border-border my-1' />
-                <Link
-                  href={`/initiatives/${initiativeId}/edit`}
-                  className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-                  onClick={close}
-                >
-                  <Edit className='w-4 h-4' />
-                  Edit Initiative
-                </Link>
+                {canEdit && (
+                  <button
+                    className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
+                    onClick={event => {
+                      event.stopPropagation()
+                      close()
+                      setShowManagePeopleModal(true)
+                    }}
+                  >
+                    <Users className='w-4 h-4' />
+                    Manage People
+                  </button>
+                )}
+                {canCreateTask && (
+                  <button
+                    className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
+                    onClick={event => {
+                      event.stopPropagation()
+                      close()
+                      handleTaskDialogOpen()
+                    }}
+                  >
+                    <Plus className='w-4 h-4' />
+                    Add Task
+                  </button>
+                )}
+                {canEdit && (
+                  <>
+                    <button
+                      className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
+                      onClick={event => {
+                        event.stopPropagation()
+                        close()
+                        setShowNoteModal(true)
+                      }}
+                    >
+                      <FileText className='w-4 h-4' />
+                      Add Note
+                    </button>
+                    <button
+                      className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
+                      onClick={event => {
+                        event.stopPropagation()
+                        close()
+                        setShowLinkModal(true)
+                      }}
+                    >
+                      <LinkIcon className='w-4 h-4' />
+                      Add Link
+                    </button>
+                    <button
+                      className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
+                      onClick={event => {
+                        event.stopPropagation()
+                        close()
+                        setShowCheckInModal(true)
+                      }}
+                    >
+                      <CheckCircle className='w-4 h-4' />
+                      Add Check-In
+                    </button>
+                    <button
+                      className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
+                      onClick={event => {
+                        event.stopPropagation()
+                        close()
+                        setShowObjectiveModal(true)
+                      }}
+                    >
+                      <Target className='w-4 h-4' />
+                      Add Objective
+                    </button>
+                  </>
+                )}
               </>
-            )}
-
-            {(canCreateTask || canEdit) && canDelete && (
-              <div className='border-t border-border my-1' />
             )}
 
             {canDelete && (
-              <button
-                className='flex w-full items-center gap-3 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors text-left'
-                onClick={event => {
-                  event.stopPropagation()
-                  close()
-                  setShowDeleteModal(true)
-                }}
-              >
-                <Trash2 className='w-4 h-4' />
-                Delete Initiative
-              </button>
+              <>
+                {(canEdit || canCreateTask) && (
+                  <div className='border-t border-border my-1' />
+                )}
+                <button
+                  className='flex w-full items-center gap-3 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors text-left'
+                  onClick={event => {
+                    event.stopPropagation()
+                    close()
+                    setShowDeleteModal(true)
+                  }}
+                >
+                  <Trash2 className='w-4 h-4' />
+                  Delete Initiative
+                </button>
+              </>
             )}
           </div>
         )}

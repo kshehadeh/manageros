@@ -2,18 +2,21 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useOrganizationList, useOrganization } from '@clerk/nextjs'
-import { Building2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Building2, Plus } from 'lucide-react'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectSeparator,
 } from '@/components/ui/select'
 import { Loading } from '@/components/ui/loading'
 import { Link } from '../ui/link'
 
 export function SidebarOrganizationSwitcher() {
+  const router = useRouter()
   const { userMemberships, setActive, isLoaded } = useOrganizationList({
     userMemberships: {
       infinite: true,
@@ -66,7 +69,15 @@ export function SidebarOrganizationSwitcher() {
     }
   }, [revalidateMemberships])
 
-  const handleValueChange = async (organizationId: string) => {
+  const handleValueChange = async (value: string) => {
+    // Handle "Create Organization" action
+    if (value === 'create-organization') {
+      router.push('/organization/new')
+      return
+    }
+
+    const organizationId = value
+
     // Prevent multiple simultaneous switches
     if (isSwitchingRef.current) {
       return
@@ -160,6 +171,13 @@ export function SidebarOrganizationSwitcher() {
             </div>
           </SelectItem>
         ))}
+        <SelectSeparator />
+        <SelectItem value='create-organization'>
+          <div className='flex items-center gap-sm'>
+            <Plus className='h-4 w-4' />
+            <span>Create Organization</span>
+          </div>
+        </SelectItem>
       </SelectContent>
     </Select>
   )

@@ -224,3 +224,75 @@ For list pages (no sidebar):
     {/* Content */}
   </PageSection>
   ```
+
+## Section Header Actions
+
+When adding actions to `SectionHeader` (via the `action` prop), use consistent styling patterns:
+
+### For Navigation Links
+
+Use the `SectionHeaderAction` component for links that navigate to other pages:
+
+```tsx
+import { SectionHeaderAction } from '@/components/ui/section-header-action'
+import { Eye } from 'lucide-react'
+
+<SectionHeader
+  icon={ListTodo}
+  title='Tasks'
+  action={
+    <SectionHeaderAction href='/tasks'>
+      <Eye className='w-3.5 h-3.5' />
+      View All
+    </SectionHeaderAction>
+  }
+/>
+```
+
+### For Buttons (Modals, Dialogs, onClick handlers)
+
+For actions that open modals, dialogs, or perform onClick actions, use a plain `<button>` element with styling that matches `SectionHeaderAction`:
+
+```tsx
+import { cn } from '@/lib/utils'
+import { Plus } from 'lucide-react'
+
+<SectionHeader
+  icon={ListTodo}
+  title='Tasks'
+  action={
+    <button
+      onClick={handleAddTask}
+      className={cn(
+        'inline-flex items-center gap-1 text-sm text-muted-foreground',
+        'hover:text-foreground transition-colors',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        'bg-transparent border-none p-0 cursor-pointer'
+      )}
+      title='Add Task'
+    >
+      <Plus className='w-3.5 h-3.5' />
+      Add Task
+    </button>
+  }
+/>
+```
+
+**Key styling requirements:**
+* Use `cn()` utility to combine classes
+* Include: `inline-flex items-center gap-1 text-sm text-muted-foreground`
+* Include: `hover:text-foreground transition-colors`
+* Include: `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`
+* Include: `bg-transparent border-none p-0 cursor-pointer`
+* Icon size: `w-3.5 h-3.5`
+* Always include a `title` attribute for accessibility
+
+**Do NOT use:**
+* `Button` component with `variant='ghost'` or `size='sm'` (adds unwanted padding/styling)
+* Different icon sizes or spacing
+* Different text colors or hover states
+
+**Examples in codebase:**
+* `src/components/initiatives/manage-people-header-action.tsx` - Button action pattern
+* `src/components/initiatives/initiative-tasks.tsx` - Button action pattern
+* `src/components/ui/section-header-action.tsx` - Link action pattern

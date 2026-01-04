@@ -50,8 +50,10 @@ export function FeedbackActionsDropdown({
               onClick={close}
             >
               <Edit className='w-4 h-4' />
-              Edit
+              Edit Feedback
             </Link>
+
+            <div className='border-t border-border my-1' />
 
             <button
               className='flex w-full items-center gap-3 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors text-left'
@@ -61,7 +63,7 @@ export function FeedbackActionsDropdown({
               }}
             >
               <Trash2 className='w-4 h-4' />
-              Delete
+              Delete Feedback
             </button>
           </div>
         )}

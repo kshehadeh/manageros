@@ -5,6 +5,7 @@ import { User } from 'lucide-react'
 import { SimplePeopleList } from '@/components/people/person-list'
 import { getEntityLinks } from '@/lib/actions/entity-links'
 import { prisma } from '@/lib/db'
+import { ManagePeopleHeaderAction } from './manage-people-header-action'
 
 interface InitiativeSidebarProps {
   initiativeId: string
@@ -68,7 +69,14 @@ export async function InitiativeSidebar({
       {/* Associated People Section - only show if there are people */}
       {ownerPeople.length > 0 && (
         <PageSection
-          header={<SectionHeader icon={User} title='People' className='mb-3' />}
+          header={
+            <SectionHeader
+              icon={User}
+              title='People'
+              className='mb-3'
+              action={<ManagePeopleHeaderAction initiativeId={initiativeId} />}
+            />
+          }
         >
           <SimplePeopleList
             people={ownerPeople}

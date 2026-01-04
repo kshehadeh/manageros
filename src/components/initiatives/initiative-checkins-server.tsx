@@ -1,5 +1,6 @@
 import { InitiativeCheckIns } from './initiative-checkins'
 import { prisma } from '@/lib/db'
+import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 
 interface InitiativeCheckInsServerProps {
   initiativeId: string
@@ -8,6 +9,13 @@ interface InitiativeCheckInsServerProps {
 export async function InitiativeCheckInsServer({
   initiativeId,
 }: InitiativeCheckInsServerProps) {
+  const user = await getCurrentUser()
+  const canEdit = await getActionPermission(
+    user,
+    'initiative.edit',
+    initiativeId
+  )
+
   // Fetch check-ins and initiative title
   const [checkIns, initiative] = await Promise.all([
     prisma.checkIn.findMany({
@@ -21,8 +29,9 @@ export async function InitiativeCheckInsServer({
     }),
   ])
 
-  // Only show if there are check-ins
-  if (checkIns.length === 0 || !initiative) {
+  // Show section if there are check-ins or if user can edit
+  // This allows users to add the first check-in from the section header
+  if ((checkIns.length === 0 && !canEdit) || !initiative) {
     return null
   }
 
@@ -44,6 +53,7 @@ export async function InitiativeCheckInsServer({
           name: ci.createdBy.name,
         },
       }))}
+      canEdit={canEdit}
     />
   )
 }

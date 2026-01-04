@@ -608,18 +608,28 @@ export async function getCurrentUserWithPersonAndOrganization(options?: {
   // Get current user - use session claims by default to avoid unnecessary Clerk API calls
   // Only revalidate when explicitly needed (e.g., after org switch)
   const user = await getCurrentUser()
-  const person = await withConnectionPoolRetry(() =>
-    prisma.person.findUnique({
-      where: { id: user.managerOSPersonId || '' },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        avatar: true,
-      },
-    })
-  )
+
+  // Fetch person only if both personId and organizationId exist
+  // Filter by organization to ensure user only sees person from current org
+  // This handles cases where session claims might have stale personId from a different org
+  const person =
+    user.managerOSPersonId && user.managerOSOrganizationId
+      ? await withConnectionPoolRetry(() =>
+          prisma.person.findFirst({
+            where: {
+              id: user.managerOSPersonId!,
+              organizationId: user.managerOSOrganizationId!,
+            },
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+              avatar: true,
+            },
+          })
+        )
+      : null
 
   let organizationBrief: OrganizationBrief | null = null
 

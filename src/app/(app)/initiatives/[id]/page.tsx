@@ -15,7 +15,8 @@ import { PageHeader } from '@/components/ui/page-header'
 import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
 import { PageSidebar } from '@/components/ui/page-sidebar'
-import { ReadonlyNotesField } from '@/components/readonly-notes-field'
+import { InlineEditableText } from '@/components/common/inline-editable-text'
+import { updateInitiativeSummary } from '@/lib/actions/initiative'
 import React, { Suspense } from 'react'
 import { FileText, Rocket } from 'lucide-react'
 import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
@@ -203,19 +204,23 @@ export default async function InitiativeDetail({
           <PageMain>
             <div className='space-y-10'>
               {/* Summary Section */}
-              {init.summary && (
+              {canEdit || init.summary ? (
                 <PageSection
                   header={<SectionHeader icon={FileText} title='Summary' />}
                 >
-                  <ReadonlyNotesField
-                    content={init.summary}
-                    variant='default'
-                    emptyStateText='No summary provided'
-                    truncateMode={true}
-                    maxHeight='200px'
+                  <InlineEditableText
+                    value={init.summary || ''}
+                    onValueChange={async newSummary => {
+                      'use server'
+                      await updateInitiativeSummary(init.id, newSummary)
+                    }}
+                    placeholder='Enter initiative summary'
+                    multiline={true}
+                    emptyStateText='Click to add summary'
+                    disabled={!canEdit}
                   />
                 </PageSection>
-              )}
+              ) : null}
 
               <Suspense fallback={<InitiativeTasksSkeleton />}>
                 <InitiativeTasks initiativeId={init.id} />

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Link } from '@/components/ui/link'
 import { Rag } from '@/components/rag'
 import { CheckInModal } from '@/components/checkin-modal'
@@ -16,11 +17,12 @@ import { PageSection } from '@/components/ui/page-section'
 import { DeleteModal } from '@/components/common/delete-modal'
 import { deleteCheckIn } from '@/lib/actions/checkin'
 import { toast } from 'sonner'
-import { CheckCircle, MoreHorizontal, Edit, Trash2 } from 'lucide-react'
+import { CheckCircle, MoreHorizontal, Edit, Trash2, Plus } from 'lucide-react'
 import { SimpleListContainer } from '@/components/common/simple-list-container'
 import { SimpleListItem } from '@/components/common/simple-list-item'
 import { SimpleListItemsContainer } from '@/components/common/simple-list-items-container'
 import { formatDistanceToNow } from 'date-fns'
+import { cn } from '@/lib/utils'
 
 interface InitiativeCheckInsProps {
   initiativeId: string
@@ -39,22 +41,27 @@ interface InitiativeCheckInsProps {
       name: string
     }
   }>
+  canEdit?: boolean
 }
 
 export function InitiativeCheckIns({
   initiativeId,
   initiativeTitle,
   checkIns,
+  canEdit = false,
 }: InitiativeCheckInsProps) {
+  const router = useRouter()
   const [editingCheckIn, setEditingCheckIn] = useState<
     (typeof checkIns)[0] | null
   >(null)
+  const [showCreateModal, setShowCreateModal] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
   const handleFormSuccess = () => {
     setEditingCheckIn(null)
-    // The page will be revalidated by the server action
+    setShowCreateModal(false)
+    router.refresh()
   }
 
   const handleEditOpenChange = (open: boolean) => {
@@ -183,7 +190,29 @@ export function InitiativeCheckIns({
 
   return (
     <PageSection
-      header={<SectionHeader icon={CheckCircle} title='Check-ins' />}
+      header={
+        <SectionHeader
+          icon={CheckCircle}
+          title='Check-ins'
+          action={
+            canEdit ? (
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className={cn(
+                  'inline-flex items-center gap-1 text-sm text-muted-foreground',
+                  'hover:text-foreground transition-colors',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                  'bg-transparent border-none p-0 cursor-pointer'
+                )}
+                title='Add Check-in'
+              >
+                <Plus className='w-3.5 h-3.5' />
+                Add Check-in
+              </button>
+            ) : undefined
+          }
+        />
+      }
     >
       <SimpleListContainer>
         <SimpleListItemsContainer
@@ -193,6 +222,15 @@ export function InitiativeCheckIns({
           {checkIns.map(renderCheckInItem)}
         </SimpleListItemsContainer>
       </SimpleListContainer>
+
+      {/* Create Check-in Modal */}
+      <CheckInModal
+        initiativeId={initiativeId}
+        initiativeTitle={initiativeTitle}
+        open={showCreateModal}
+        onOpenChange={setShowCreateModal}
+        onSuccess={handleFormSuccess}
+      />
 
       {/* Edit Check-in Modal */}
       {editingCheckIn && (
