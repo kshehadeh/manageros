@@ -37,8 +37,6 @@ class NetworkError extends Error {
   ) {
     super(message)
     this.name = 'NetworkError'
-    this.originalError = originalError
-    this.isRetryable = isRetryable
   }
 }
 

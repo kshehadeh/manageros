@@ -25,7 +25,7 @@ export default async function NewPersonPage({
   const teamId = params.teamId
   const name = params.name
 
-  const [jobRoles] = await Promise.all([getJobRolesForSelection()])
+  const jobRoles = await getJobRolesForSelection()
 
   return (
     <div className='space-y-6'>
