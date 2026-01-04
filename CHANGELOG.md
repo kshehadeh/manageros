@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.57.0](https://github.com/kshehadeh/manageros/compare/v1.56.0...v1.57.0) (2026-01-04)
+
+### Features
+
+- **initiatives:** enhance initiative management with new action patterns and role updates ([5798438](https://github.com/kshehadeh/manageros/commit/5798438c35ea6a4a2c6c943ce5f3a45bdb46369b))
+- **organization-switcher:** add "Create Organization" option to sidebar switcher ([5165ef3](https://github.com/kshehadeh/manageros/commit/5165ef33abe629e2abcf3904bdd9decaaf61b021))
+
 # [1.56.0](https://github.com/kshehadeh/manageros/compare/v1.55.1...v1.56.0) (2026-01-04)
 
 ### Bug Fixes
