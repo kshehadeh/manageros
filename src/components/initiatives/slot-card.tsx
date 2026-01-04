@@ -50,6 +50,7 @@ interface SlotCardProps {
   slotNumber: number
   initiative?: SlotInitiative
   onAssignClick: (slotNumber: number) => void
+  onInitiativeClick?: (initiative: SlotInitiative) => void
   isDragging?: boolean
   isDragOver?: boolean
   onDragStart?: (initiative: SlotInitiative) => void
@@ -63,6 +64,7 @@ export function SlotCard({
   slotNumber,
   initiative,
   onAssignClick,
+  onInitiativeClick,
   isDragging = false,
   isDragOver = false,
   onDragStart,
@@ -178,16 +180,32 @@ export function SlotCard({
             <RagCircle rag={initiative.rag} size='small' />
           </div>
 
-          <Link
-            href={`/initiatives/${initiative.id}`}
-            className='flex-1'
-            onClick={e => e.stopPropagation()}
-            draggable={false}
-          >
-            <h3 className='font-medium text-sm line-clamp-2 mb-2 hover:text-primary transition-colors'>
-              {initiative.title}
-            </h3>
-          </Link>
+          {onInitiativeClick ? (
+            <button
+              type='button'
+              className='flex-1 text-left'
+              onClick={e => {
+                e.stopPropagation()
+                onInitiativeClick(initiative)
+              }}
+              draggable={false}
+            >
+              <h3 className='font-medium text-sm line-clamp-2 mb-2 hover:text-primary transition-colors'>
+                {initiative.title}
+              </h3>
+            </button>
+          ) : (
+            <Link
+              href={`/initiatives/${initiative.id}`}
+              className='flex-1'
+              onClick={e => e.stopPropagation()}
+              draggable={false}
+            >
+              <h3 className='font-medium text-sm line-clamp-2 mb-2 hover:text-primary transition-colors'>
+                {initiative.title}
+              </h3>
+            </Link>
+          )}
 
           <div className='flex items-center gap-2 flex-wrap'>
             <Badge variant={statusVariant} className='text-xs'>

@@ -23,7 +23,7 @@ export const getOneOnOnesForPerson = cache(
 
     if (options?.dateAfter || options?.dateBefore) {
       where.scheduledAt = {
-        ...((where.scheduledAt as Record<string, unknown>) || {}),
+        ...(where.scheduledAt as Record<string, unknown> | undefined),
         ...(options?.dateAfter ? { gte: options.dateAfter } : {}),
         ...(options?.dateBefore ? { lte: options.dateBefore } : {}),
       }
@@ -82,7 +82,7 @@ export const getOneOnOnesForManagerAndReports = cache(
 
     if (options?.dateAfter || options?.dateBefore) {
       where.scheduledAt = {
-        ...((where.scheduledAt as Record<string, unknown>) || {}),
+        ...(where.scheduledAt as Record<string, unknown> | undefined),
         ...(options?.dateAfter ? { gte: options.dateAfter } : {}),
         ...(options?.dateBefore ? { lte: options.dateBefore } : {}),
       }

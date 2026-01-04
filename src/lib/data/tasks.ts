@@ -38,9 +38,9 @@ export const getTasksForAssignee = cache(
 
     if (options?.dueDateBefore || options?.dueDateAfter) {
       where.dueDate = {
-        ...((where.dueDate as Record<string, unknown>) || {}),
-        ...(options?.dueDateBefore ? { lt: options.dueDateBefore } : {}),
-        ...(options?.dueDateAfter ? { gte: options.dueDateAfter } : {}),
+        ...(where.dueDate as Record<string, unknown> | undefined),
+        ...(options?.dueDateBefore && { lt: options.dueDateBefore }),
+        ...(options?.dueDateAfter && { gte: options.dueDateAfter }),
       }
     }
 

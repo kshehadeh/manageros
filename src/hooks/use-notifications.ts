@@ -58,10 +58,7 @@ export function useNotifications({
 
         // Only fetch full notifications if count changed
         if (newCount !== lastNotificationCountRef.current) {
-          const [unreadNotifications] = await Promise.all([
-            getUnreadNotifications(limit),
-          ])
-
+          const unreadNotifications = await getUnreadNotifications(limit)
           setNotifications(unreadNotifications)
           setHasNewNotifications(true)
           // Auto-hide the "new notifications" indicator after 3 seconds
@@ -72,10 +69,8 @@ export function useNotifications({
         lastNotificationCountRef.current = newCount
       } else {
         // Fallback to original method if live endpoint fails
-        const [unreadNotifications, count] = await Promise.all([
-          getUnreadNotifications(limit),
-          getUnreadNotificationCount(),
-        ])
+        const unreadNotifications = await getUnreadNotifications(limit)
+        const count = await getUnreadNotificationCount()
 
         const hasNew =
           count > lastNotificationCountRef.current &&

@@ -31,7 +31,7 @@ export const getActiveFeedbackCampaignsForUser = cache(
 
     if (options?.endDateAfter || options?.endDateBefore) {
       where.endDate = {
-        ...((where.endDate as Record<string, unknown>) || {}),
+        ...(where.endDate as Record<string, unknown> | undefined),
         ...(options?.endDateAfter ? { gte: options.endDateAfter } : {}),
         ...(options?.endDateBefore ? { lte: options.endDateBefore } : {}),
       }
