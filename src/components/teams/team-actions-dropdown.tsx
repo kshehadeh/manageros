@@ -36,6 +36,17 @@ export function TeamActionsDropdown({
       {({ close }) => (
         <div className='py-1'>
           <Link
+            href={`/teams/${teamId}/edit`}
+            className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+            onClick={close}
+          >
+            <Edit className='w-4 h-4' />
+            Edit Team
+          </Link>
+
+          <div className='border-t border-border my-1' />
+
+          <Link
             href={`/people/new?teamId=${teamId}`}
             className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
             onClick={close}
@@ -60,17 +71,6 @@ export function TeamActionsDropdown({
           >
             <Building2 className='w-4 h-4' />
             Add Child Team
-          </Link>
-
-          <div className='border-t border-border my-1' />
-
-          <Link
-            href={`/teams/${teamId}/edit`}
-            className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-            onClick={close}
-          >
-            <Edit className='w-4 h-4' />
-            Edit Team
           </Link>
 
           <div className='border-t border-border my-1' />

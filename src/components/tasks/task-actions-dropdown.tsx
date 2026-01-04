@@ -96,6 +96,17 @@ export function TaskActionsDropdown({
       <ActionDropdown size={size}>
         {({ close }) => (
           <div className='py-1'>
+            <Link
+              href={`/tasks/${taskId}/edit`}
+              className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+              onClick={close}
+            >
+              <Edit className='w-4 h-4' />
+              Edit Task
+            </Link>
+
+            <div className='border-t border-border my-1' />
+
             <button
               className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
               onClick={event => {
@@ -116,15 +127,6 @@ export function TaskActionsDropdown({
                   ? 'Mark Incomplete'
                   : 'Mark Complete'}
             </button>
-
-            <Link
-              href={`/tasks/${taskId}/edit`}
-              className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-              onClick={close}
-            >
-              <Edit className='w-4 h-4' />
-              Edit Task
-            </Link>
 
             {task.initiative && (
               <Link
@@ -147,8 +149,6 @@ export function TaskActionsDropdown({
                 View Team
               </Link>
             )}
-
-            <div className='border-t border-border my-1' />
 
             <button
               className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'

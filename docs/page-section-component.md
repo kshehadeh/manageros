@@ -28,19 +28,70 @@ import { FileText } from 'lucide-react'
 
 ### With Header and Actions
 
+There are two patterns for section header actions:
+
+#### For Navigation Links
+
+Use `SectionHeaderAction` component for links that navigate to other pages:
+
 ```tsx
-<PageSection
+import { SectionHeaderAction } from '@/components/ui/section-header-action'
+import { Eye } from 'lucide-react'
+
+;<PageSection
   header={
     <SectionHeader
       icon={FileText}
       title='Section Title'
-      action={<Button onClick={handleAction}>Action</Button>}
+      action={
+        <SectionHeaderAction href='/tasks'>
+          <Eye className='w-3.5 h-3.5' />
+          View All
+        </SectionHeaderAction>
+      }
     />
   }
 >
   {/* Your content here */}
 </PageSection>
 ```
+
+#### For Buttons (Modals, Dialogs, onClick handlers)
+
+For actions that open modals, dialogs, or perform onClick actions, use a plain `<button>` element with styling that matches `SectionHeaderAction`:
+
+```tsx
+import { cn } from '@/lib/utils'
+import { Plus } from 'lucide-react'
+
+;<PageSection
+  header={
+    <SectionHeader
+      icon={FileText}
+      title='Section Title'
+      action={
+        <button
+          onClick={handleAction}
+          className={cn(
+            'inline-flex items-center gap-1 text-sm text-muted-foreground',
+            'hover:text-foreground transition-colors',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+            'bg-transparent border-none p-0 cursor-pointer'
+          )}
+          title='Add Item'
+        >
+          <Plus className='w-3.5 h-3.5' />
+          Add Item
+        </button>
+      }
+    />
+  }
+>
+  {/* Your content here */}
+</PageSection>
+```
+
+**Important:** Do NOT use `Button` component with `variant='ghost'` or `size='sm'` as it adds unwanted padding and styling that doesn't match the link-style actions.
 
 ### With Custom Class Names
 

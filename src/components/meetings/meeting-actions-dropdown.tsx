@@ -86,70 +86,79 @@ export function MeetingActionsDropdown({
         {({ close }) => (
           <div className='py-1'>
             {canEdit && (
+              <Link
+                href={`/meetings/${meetingId}/edit`}
+                className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                onClick={close}
+              >
+                <Edit className='w-4 h-4' />
+                Edit Meeting
+              </Link>
+            )}
+
+            {(canEdit ||
+              meeting.team ||
+              meeting.initiative ||
+              meeting.owner) && (
               <>
-                <Link
-                  href={`/meetings/${meetingId}/edit`}
-                  className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-                  onClick={close}
-                >
-                  <Edit className='w-4 h-4' />
-                  Edit Meeting
-                </Link>
+                {canEdit && <div className='border-t border-border my-1' />}
+                {canEdit && (
+                  <>
+                    <Link
+                      href={`/meetings/${meetingId}/instances/new`}
+                      className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                      onClick={close}
+                    >
+                      <CalendarPlus className='w-4 h-4' />
+                      Create Instance
+                    </Link>
+                    <button
+                      className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
+                      onClick={event => {
+                        event.stopPropagation()
+                        close()
+                        setShowLinkModal(true)
+                      }}
+                    >
+                      <LinkIcon className='w-4 h-4' />
+                      Add Link
+                    </button>
+                  </>
+                )}
 
-                <Link
-                  href={`/meetings/${meetingId}/instances/new`}
-                  className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-                  onClick={close}
-                >
-                  <CalendarPlus className='w-4 h-4' />
-                  Create Instance
-                </Link>
+                {meeting.team && (
+                  <Link
+                    href={`/teams/${meeting.team.id}`}
+                    className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                    onClick={close}
+                  >
+                    <Building2 className='w-4 h-4' />
+                    View Team
+                  </Link>
+                )}
 
-                <button
-                  className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
-                  onClick={event => {
-                    event.stopPropagation()
-                    close()
-                    setShowLinkModal(true)
-                  }}
-                >
-                  <LinkIcon className='w-4 h-4' />
-                  Add Link
-                </button>
+                {meeting.initiative && (
+                  <Link
+                    href={`/initiatives/${meeting.initiative.id}`}
+                    className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                    onClick={close}
+                  >
+                    <Target className='w-4 h-4' />
+                    View Initiative
+                  </Link>
+                )}
+
+                {meeting.owner && (
+                  <Link
+                    href={`/people/${meeting.owner.id}`}
+                    className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                    onClick={close}
+                  >
+                    <User className='w-4 h-4' />
+                    View Owner
+                  </Link>
+                )}
               </>
-            )}
-
-            {meeting.team && (
-              <Link
-                href={`/teams/${meeting.team.id}`}
-                className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-                onClick={close}
-              >
-                <Building2 className='w-4 h-4' />
-                View Team
-              </Link>
-            )}
-
-            {meeting.initiative && (
-              <Link
-                href={`/initiatives/${meeting.initiative.id}`}
-                className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-                onClick={close}
-              >
-                <Target className='w-4 h-4' />
-                View Initiative
-              </Link>
-            )}
-
-            {meeting.owner && (
-              <Link
-                href={`/people/${meeting.owner.id}`}
-                className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-                onClick={close}
-              >
-                <User className='w-4 h-4' />
-                View Owner
-              </Link>
             )}
 
             {canDelete && (

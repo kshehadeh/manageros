@@ -94,90 +94,83 @@ export function PersonActionsDropdown({
       <ActionDropdown size={size}>
         {({ close }) => (
           <div className='py-1'>
-            {/* People/Team Management Group */}
+            {/* Edit Person */}
             {isAdmin && (
-              <>
-                <Link
-                  href={`/people/${person.id}/edit`}
-                  className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-                  onClick={close}
-                >
-                  <Edit className='w-4 h-4' />
-                  Edit
-                </Link>
-                <Link
-                  href={`/people/new?managerId=${person.id}`}
-                  className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-                  onClick={close}
-                >
-                  <Plus className='w-4 h-4' />
-                  Add Report
-                </Link>
-              </>
+              <Link
+                href={`/people/${person.id}/edit`}
+                className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                onClick={close}
+              >
+                <Edit className='w-4 h-4' />
+                Edit
+              </Link>
             )}
 
-            {/* Work Items Group */}
-            {isAdmin && (
+            {/* Other Actions */}
+            {(isAdmin || !showFeedbackForm || canCreateOneOnOne) && (
               <>
                 {isAdmin && <Separator />}
-                <Link
-                  href={`/initiatives/new?ownerId=${person.id}${
-                    person.team ? `&teamId=${person.team.id}` : ''
-                  }`}
-                  className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-                  onClick={close}
-                >
-                  <Rocket className='w-4 h-4' />
-                  New Initiative
-                </Link>
-                {organizationId && (
-                  <button
-                    className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
-                    onClick={async () => {
-                      close()
-                      // Fetch existing initiative IDs before opening modal
-                      try {
-                        const response = await fetch(
-                          `/api/initiatives?ownerId=${person.id}&limit=100`
-                        )
-                        if (response.ok) {
-                          const data = await response.json()
-                          const ids =
-                            data.initiatives?.map(
-                              (init: { id: string }) => init.id
-                            ) || []
-                          setExistingInitiativeIds(ids)
-                        }
-                      } catch (error) {
-                        console.error(
-                          'Error fetching existing initiatives:',
-                          error
-                        )
-                        setExistingInitiativeIds([])
-                      }
-                      setShowAssociateInitiativeModal(true)
-                    }}
-                  >
-                    <LinkIcon className='w-4 h-4' />
-                    Associate Initiative
-                  </button>
-                )}
-                <Link
-                  href={`/tasks/new?assigneeId=${person.id}`}
-                  className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
-                  onClick={close}
-                >
-                  <ListTodo className='w-4 h-4' />
-                  New Task
-                </Link>
-              </>
-            )}
-
-            {/* Communication/Development Group */}
-            {(!showFeedbackForm || canCreateOneOnOne || isAdmin) && (
-              <>
-                {(isAdmin || !showFeedbackForm || canCreateOneOnOne) && (
-                  <Separator />
+                {isAdmin && (
+                  <>
+                    <Link
+                      href={`/people/new?managerId=${person.id}`}
+                      className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                      onClick={close}
+                    >
+                      <Plus className='w-4 h-4' />
+                      Add Report
+                    </Link>
+                    <Link
+                      href={`/initiatives/new?ownerId=${person.id}${
+                        person.team ? `&teamId=${person.team.id}` : ''
+                      }`}
+                      className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                      onClick={close}
+                    >
+                      <Rocket className='w-4 h-4' />
+                      New Initiative
+                    </Link>
+                    {organizationId && (
+                      <button
+                        className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
+                        onClick={async () => {
+                          close()
+                          // Fetch existing initiative IDs before opening modal
+                          try {
+                            const response = await fetch(
+                              `/api/initiatives?ownerId=${person.id}&limit=100`
+                            )
+                            if (response.ok) {
+                              const data = await response.json()
+                              const ids =
+                                data.initiatives?.map(
+                                  (init: { id: string }) => init.id
+                                ) || []
+                              setExistingInitiativeIds(ids)
+                            }
+                          } catch (error) {
+                            console.error(
+                              'Error fetching existing initiatives:',
+                              error
+                            )
+                            setExistingInitiativeIds([])
+                          }
+                          setShowAssociateInitiativeModal(true)
+                        }}
+                      >
+                        <LinkIcon className='w-4 h-4' />
+                        Associate Initiative
+                      </button>
+                    )}
+                    <Link
+                      href={`/tasks/new?assigneeId=${person.id}`}
+                      className='flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors'
+                      onClick={close}
+                    >
+                      <ListTodo className='w-4 h-4' />
+                      New Task
+                    </Link>
+                  </>
                 )}
                 {!showFeedbackForm && (
                   <button
@@ -213,23 +206,18 @@ export function PersonActionsDropdown({
                     Start Onboarding
                   </button>
                 )}
-              </>
-            )}
-
-            {/* Account Management Group */}
-            {isAdmin && (
-              <>
-                <Separator />
-                <button
-                  className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
-                  onClick={() => {
-                    setShowAccountLinking(true)
-                    close()
-                  }}
-                >
-                  <LinkIcon className='w-4 h-4' />
-                  Link Accounts
-                </button>
+                {isAdmin && (
+                  <button
+                    className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
+                    onClick={() => {
+                      setShowAccountLinking(true)
+                      close()
+                    }}
+                  >
+                    <LinkIcon className='w-4 h-4' />
+                    Link Accounts
+                  </button>
+                )}
               </>
             )}
           </div>

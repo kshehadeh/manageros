@@ -1,17 +1,22 @@
 import { InitiativeTasksClient } from './initiative-tasks'
 import { getTasksForInitiative } from '@/lib/actions/task'
 import type { Task } from '@/components/tasks/task-list'
+import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 
 interface InitiativeTasksProps {
   initiativeId: string
 }
 
 export async function InitiativeTasks({ initiativeId }: InitiativeTasksProps) {
+  const user = await getCurrentUser()
+  const canCreateTask = await getActionPermission(user, 'task.create')
+
   // Fetch tasks for this initiative
   const tasks = await getTasksForInitiative(initiativeId)
 
-  // Only show if there are tasks
-  if (tasks.length === 0) {
+  // Show section if there are tasks or if user can create tasks
+  // This allows users to add the first task from the section header
+  if (tasks.length === 0 && !canCreateTask) {
     return null
   }
 
@@ -54,6 +59,7 @@ export async function InitiativeTasks({ initiativeId }: InitiativeTasksProps) {
     <InitiativeTasksClient
       initiativeId={initiativeId}
       tasks={transformedTasks}
+      canCreateTask={canCreateTask}
     />
   )
 }

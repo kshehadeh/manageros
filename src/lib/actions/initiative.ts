@@ -463,6 +463,88 @@ export async function removeInitiativeOwner(
   revalidatePath('/', 'layout')
 }
 
+export async function updateInitiativeOwnerRole(
+  initiativeId: string,
+  personId: string,
+  role: string
+) {
+  const user = await getCurrentUser()
+
+  // Check if user belongs to an organization
+  if (!user.managerOSOrganizationId) {
+    throw new Error(
+      'User must belong to an organization to manage initiative owners'
+    )
+  }
+
+  // Verify initiative belongs to user's organization
+  const initiative = await prisma.initiative.findFirst({
+    where: {
+      id: initiativeId,
+      organizationId: user.managerOSOrganizationId,
+    },
+  })
+  if (!initiative) {
+    throw new Error('Initiative not found or access denied')
+  }
+
+  // Verify person belongs to user's organization
+  const person = await prisma.person.findFirst({
+    where: {
+      id: personId,
+      organizationId: user.managerOSOrganizationId,
+    },
+  })
+  if (!person) {
+    throw new Error('Person not found or access denied')
+  }
+
+  // Check if owner exists
+  const existingOwner = await prisma.initiativeOwner.findFirst({
+    where: {
+      initiativeId,
+      personId,
+    },
+  })
+
+  if (!existingOwner) {
+    throw new Error('This person is not an owner of this initiative')
+  }
+
+  // Update the owner role
+  await prisma.initiativeOwner.updateMany({
+    where: {
+      initiativeId,
+      personId,
+    },
+    data: {
+      role,
+    },
+  })
+
+  // Fetch the updated owner
+  const owner = await prisma.initiativeOwner.findFirst({
+    where: {
+      initiativeId,
+      personId,
+    },
+    include: {
+      person: true,
+    },
+  })
+
+  if (!owner) {
+    throw new Error('Failed to update owner role')
+  }
+
+  // Revalidate the initiative page
+  revalidatePath(`/initiatives/${initiativeId}`)
+  // Revalidate layout to update sidebar badge counts
+  revalidatePath('/', 'layout')
+
+  return owner
+}
+
 /**
  * Get initiative owners for a specific initiative
  */
@@ -1016,6 +1098,56 @@ export async function updateInitiativeTargetDate(
   revalidatePath(`/initiatives/${initiativeId}`)
 
   return updated
+}
+
+export async function updateInitiativeSummary(
+  initiativeId: string,
+  summary: string
+) {
+  const user = await getCurrentUser()
+  const { getActionPermission } = await import('@/lib/auth-utils')
+
+  // Check if user belongs to an organization
+  if (!user.managerOSOrganizationId) {
+    throw new Error('User must belong to an organization to update initiatives')
+  }
+
+  // Check permission to edit initiatives
+  if (!(await getActionPermission(user, 'initiative.edit', initiativeId))) {
+    throw new Error('You do not have permission to edit initiatives')
+  }
+
+  // Verify initiative belongs to user's organization
+  const existingInitiative = await prisma.initiative.findFirst({
+    where: {
+      id: initiativeId,
+      organizationId: user.managerOSOrganizationId,
+    },
+  })
+
+  if (!existingInitiative) {
+    throw new Error('Initiative not found or access denied')
+  }
+
+  // Update the initiative summary
+  const initiative = await prisma.initiative.update({
+    where: { id: initiativeId },
+    data: {
+      summary: summary.trim() || null,
+    },
+    select: {
+      id: true,
+      title: true,
+      summary: true,
+    },
+  })
+
+  // Revalidate the initiative page
+  revalidatePath(`/initiatives/${initiativeId}`)
+  // Revalidate layout to update sidebar badge counts
+  revalidatePath('/', 'layout')
+
+  return initiative
 }
 
 /**

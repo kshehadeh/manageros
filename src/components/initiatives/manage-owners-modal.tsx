@@ -21,6 +21,7 @@ import { Users, X } from 'lucide-react'
 import {
   addInitiativeOwner,
   removeInitiativeOwner,
+  updateInitiativeOwnerRole,
   getInitiativeOwners,
 } from '@/lib/actions/initiative'
 import { getPeopleForOrganization } from '@/lib/actions/person'
@@ -134,6 +135,25 @@ export function ManageOwnersModal({
     }
   }
 
+  const handleRoleChange = async (personId: string, newRole: string) => {
+    setIsLoading(true)
+    try {
+      await updateInitiativeOwnerRole(initiativeId, personId, newRole)
+      toast.success('Role updated successfully')
+      // Refresh owners list
+      const fetchedOwners = await getInitiativeOwners(initiativeId)
+      setOwners(fetchedOwners)
+      router.refresh()
+    } catch (error) {
+      console.error('Failed to update role:', error)
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to update role'
+      )
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       // Reset form when closing
@@ -172,7 +192,7 @@ export function ManageOwnersModal({
                     {owners.map(owner => (
                       <div
                         key={`${owner.initiativeId}-${owner.personId}`}
-                        className='flex items-center justify-between p-2 border rounded-lg'
+                        className='flex items-center justify-between gap-2 p-2 border rounded-lg'
                       >
                         <PersonListItem
                           person={owner.person}
@@ -182,15 +202,35 @@ export function ManageOwnersModal({
                               : undefined
                           }
                         />
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          onClick={() => handleRemoveOwner(owner.personId)}
-                          disabled={isLoading}
-                          className='h-6 w-6 p-0 text-destructive hover:text-destructive'
-                        >
-                          <X className='h-3 w-3' />
-                        </Button>
+                        <div className='flex items-center gap-2'>
+                          <Select
+                            value={owner.role}
+                            onValueChange={newRole =>
+                              handleRoleChange(owner.personId, newRole)
+                            }
+                            disabled={isLoading}
+                          >
+                            <SelectTrigger className='w-32 h-8 text-xs'>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value='owner'>Owner</SelectItem>
+                              <SelectItem value='sponsor'>Sponsor</SelectItem>
+                              <SelectItem value='collaborator'>
+                                Collaborator
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            onClick={() => handleRemoveOwner(owner.personId)}
+                            disabled={isLoading}
+                            className='h-6 w-6 p-0 text-destructive hover:text-destructive'
+                          >
+                            <X className='h-3 w-3' />
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
