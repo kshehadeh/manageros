@@ -1,9 +1,23 @@
 # Changelog
 
-- Merge pull request #161 from kshehadeh/staging (ca1b6c1)
-- fix(build): Another build fix attempt (7907123)
-- fix(build): Another build fix attempt (8d24650)
-- fix(build): Fix build error on vercel (8b2092e)
+# [1.56.0](https://github.com/kshehadeh/manageros/compare/v1.55.1...v1.56.0) (2026-01-04)
+
+### Bug Fixes
+
+- **build:** Another build fix attempt ([7907123](https://github.com/kshehadeh/manageros/commit/7907123d8ead336095c7bf8f4d612e07169146b9))
+- **build:** Another build fix attempt ([8d24650](https://github.com/kshehadeh/manageros/commit/8d24650d57c55d3f14b7915ad28b823baa8c7cc2))
+- **build:** Fix build error on vercel ([8b2092e](https://github.com/kshehadeh/manageros/commit/8b2092e028b05e90ee31a2acee823231018ba284))
+- **initiatives:** prevent race conditions in InitiativeDetailModal data fetching ([2c2d6ab](https://github.com/kshehadeh/manageros/commit/2c2d6ab2c6a71e004a1682d5d2068df74c2b0e8a))
+
+### Features
+
+- **initiatives:** add InitiativeDetailModal component and integrate with initiatives slots view ([9d8e615](https://github.com/kshehadeh/manageros/commit/9d8e6150289db4383ce1963ff29544db757450c4))
+- **package:** add db:migrate:deploy script to package.json for database migration ([a563d1e](https://github.com/kshehadeh/manageros/commit/a563d1ebcb671a0b57f7e2d09e27cc1feaeb7945))
+
+* Merge pull request #161 from kshehadeh/staging (ca1b6c1)
+* fix(build): Another build fix attempt (7907123)
+* fix(build): Another build fix attempt (8d24650)
+* fix(build): Fix build error on vercel (8b2092e)
 
 ## [1.55.1](https://github.com/kshehadeh/manageros/compare/v1.55.0...v1.55.1) (2026-01-03)
 
