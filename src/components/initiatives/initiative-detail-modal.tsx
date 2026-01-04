@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from '@/components/ui/link'
 import {
   Dialog,
@@ -85,33 +85,48 @@ export function InitiativeDetailModal({
   const [loading, setLoading] = useState(false)
   const [initiativeData, setInitiativeData] =
     useState<InitiativeSummaryData | null>(null)
+  const currentRequestIdRef = useRef<string | null>(null)
 
   useEffect(() => {
     if (isOpen && initiativeId) {
+      // Track the current request ID to prevent race conditions
+      const requestId = initiativeId
+      currentRequestIdRef.current = requestId
+
       const loadInitiativeData = async () => {
         setLoading(true)
         try {
           const data = await getInitiativeSummaryForModal(initiativeId)
 
-          if (!data) {
+          // Only update state if this is still the current request
+          if (currentRequestIdRef.current === requestId) {
+            if (!data) {
+              toast.error('Failed to load initiative data')
+              onClose()
+              return
+            }
+
+            setInitiativeData(data)
+          }
+        } catch (error) {
+          // Only handle error if this is still the current request
+          if (currentRequestIdRef.current === requestId) {
+            console.error('Error loading initiative data:', error)
             toast.error('Failed to load initiative data')
             onClose()
-            return
           }
-
-          setInitiativeData(data)
-        } catch (error) {
-          console.error('Error loading initiative data:', error)
-          toast.error('Failed to load initiative data')
-          onClose()
         } finally {
-          setLoading(false)
+          // Only update loading state if this is still the current request
+          if (currentRequestIdRef.current === requestId) {
+            setLoading(false)
+          }
         }
       }
 
       loadInitiativeData()
     } else {
       // Reset data when modal closes
+      currentRequestIdRef.current = null
       setInitiativeData(null)
     }
   }, [isOpen, initiativeId, onClose])
