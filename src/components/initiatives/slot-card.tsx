@@ -53,6 +53,7 @@ interface SlotCardProps {
   onInitiativeClick?: (initiative: SlotInitiative) => void
   isDragging?: boolean
   isDragOver?: boolean
+  isFilteredOut?: boolean
   onDragStart?: (initiative: SlotInitiative) => void
   onDragEnd?: () => void
   onDragOver?: (e: React.DragEvent) => void
@@ -67,6 +68,7 @@ export function SlotCard({
   onInitiativeClick,
   isDragging = false,
   isDragOver = false,
+  isFilteredOut = false,
   onDragStart,
   onDragEnd,
   onDragOver,
@@ -97,19 +99,21 @@ export function SlotCard({
   }
 
   const handleDragStart = (e: React.DragEvent) => {
-    if (!initiative) return
+    if (!initiative || isFilteredOut) return
     e.dataTransfer.effectAllowed = 'move'
     e.dataTransfer.setData('text/plain', initiative.id)
     onDragStart?.(initiative)
   }
 
   const handleDragOver = (e: React.DragEvent) => {
+    if (isFilteredOut) return
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
     onDragOver?.(e)
   }
 
   const handleDrop = (e: React.DragEvent) => {
+    if (isFilteredOut) return
     e.preventDefault()
     onDrop?.(slotNumber, initiative)
   }
@@ -118,9 +122,9 @@ export function SlotCard({
     return (
       <button
         onClick={() => onAssignClick(slotNumber)}
-        onDragOver={handleDragOver}
-        onDragLeave={onDragLeave}
-        onDrop={handleDrop}
+        onDragOver={isFilteredOut ? undefined : handleDragOver}
+        onDragLeave={isFilteredOut ? undefined : onDragLeave}
+        onDrop={isFilteredOut ? undefined : handleDrop}
         className={cn(
           'group relative flex flex-col items-center justify-center',
           'min-h-[140px] p-4 rounded-lg border-2 border-dashed',
@@ -128,14 +132,18 @@ export function SlotCard({
           'bg-muted/20 hover:bg-muted/40',
           'transition-all duration-200',
           'cursor-pointer',
-          isDragOver && 'border-primary bg-primary/10 scale-[1.02]'
+          isDragOver &&
+            !isFilteredOut &&
+            'border-primary bg-primary/10 scale-[1.02]'
         )}
       >
         <div className='flex flex-col items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors'>
           <Plus className='h-8 w-8' />
           <span className='text-sm font-medium'>Slot {slotNumber}</span>
           <span className='text-xs'>
-            {isDragOver ? 'Drop to assign' : 'Click to assign initiative'}
+            {isDragOver && !isFilteredOut
+              ? 'Drop to assign'
+              : 'Click to assign initiative'}
           </span>
         </div>
       </button>
@@ -151,29 +159,41 @@ export function SlotCard({
       className={cn(
         'group relative',
         isDragging && 'opacity-50 scale-95',
-        isDragOver && 'scale-[1.02]'
+        isDragOver && !isFilteredOut && 'scale-[1.02]',
+        isFilteredOut && 'opacity-60'
       )}
-      draggable
-      onDragStart={handleDragStart}
-      onDragEnd={onDragEnd}
-      onDragOver={handleDragOver}
-      onDragLeave={onDragLeave}
-      onDrop={handleDrop}
+      draggable={!isFilteredOut}
+      onDragStart={isFilteredOut ? undefined : handleDragStart}
+      onDragEnd={isFilteredOut ? undefined : onDragEnd}
+      onDragOver={isFilteredOut ? undefined : handleDragOver}
+      onDragLeave={isFilteredOut ? undefined : onDragLeave}
+      onDrop={isFilteredOut ? undefined : handleDrop}
     >
       <div
         className={cn(
           'block min-h-[140px] p-4 rounded-lg border',
           'bg-card hover:bg-muted/50',
           'transition-all duration-200',
-          'cursor-grab active:cursor-grabbing',
-          isDragOver && 'border-primary border-2 bg-primary/5'
+          isFilteredOut
+            ? 'cursor-default'
+            : 'cursor-grab active:cursor-grabbing',
+          isDragOver && !isFilteredOut && 'border-primary border-2 bg-primary/5'
         )}
       >
         <div className='flex flex-col h-full'>
           <div className='flex items-start justify-between gap-2 mb-2'>
             <div className='flex items-center gap-1'>
-              <GripVertical className='h-3.5 w-3.5 text-muted-foreground/50' />
-              <span className='text-xs text-muted-foreground font-mono'>
+              {!isFilteredOut && (
+                <GripVertical className='h-3.5 w-3.5 text-muted-foreground/50' />
+              )}
+              <span
+                className={cn(
+                  'text-xs font-mono',
+                  isFilteredOut
+                    ? 'text-muted-foreground'
+                    : 'text-muted-foreground'
+                )}
+              >
                 #{slotNumber}
               </span>
             </div>
@@ -190,7 +210,12 @@ export function SlotCard({
               }}
               draggable={false}
             >
-              <h3 className='font-medium text-sm line-clamp-2 mb-2 hover:text-primary transition-colors'>
+              <h3
+                className={cn(
+                  'font-medium text-sm line-clamp-2 mb-2 transition-colors',
+                  isFilteredOut ? 'text-muted-foreground' : 'hover:text-primary'
+                )}
+              >
                 {initiative.title}
               </h3>
             </button>
@@ -201,29 +226,56 @@ export function SlotCard({
               onClick={e => e.stopPropagation()}
               draggable={false}
             >
-              <h3 className='font-medium text-sm line-clamp-2 mb-2 hover:text-primary transition-colors'>
+              <h3
+                className={cn(
+                  'font-medium text-sm line-clamp-2 mb-2 transition-colors',
+                  isFilteredOut ? 'text-muted-foreground' : 'hover:text-primary'
+                )}
+              >
                 {initiative.title}
               </h3>
             </Link>
           )}
 
           <div className='flex items-center gap-2 flex-wrap'>
-            <Badge variant={statusVariant} className='text-xs'>
+            <Badge
+              variant={statusVariant}
+              className={cn('text-xs', isFilteredOut && 'opacity-60')}
+            >
               {initiativeStatusUtils.getLabel(
                 initiative.status as InitiativeStatus
               )}
             </Badge>
             {initiative.team && (
-              <span className='text-xs text-muted-foreground truncate'>
+              <span
+                className={cn(
+                  'text-xs truncate',
+                  isFilteredOut
+                    ? 'text-muted-foreground'
+                    : 'text-muted-foreground'
+                )}
+              >
                 {initiative.team.name}
               </span>
             )}
           </div>
 
           {/* People count, size, target date, and progress */}
-          <div className='flex items-center gap-3 mt-2 pt-2 border-t border-border/50 flex-wrap'>
+          <div
+            className={cn(
+              'flex items-center gap-3 mt-2 pt-2 border-t flex-wrap',
+              isFilteredOut ? 'border-border/30' : 'border-border/50'
+            )}
+          >
             {initiative.owners && initiative.owners.length > 0 && (
-              <div className='flex items-center gap-1 text-xs text-muted-foreground'>
+              <div
+                className={cn(
+                  'flex items-center gap-1 text-xs',
+                  isFilteredOut
+                    ? 'text-muted-foreground'
+                    : 'text-muted-foreground'
+                )}
+              >
                 <Users className='h-3 w-3' />
                 <span>
                   {initiative.owners.length}{' '}
@@ -233,7 +285,14 @@ export function SlotCard({
             )}
             {initiative.size &&
               initiativeSizeUtils.isValid(initiative.size) && (
-                <div className='flex items-center gap-1 text-xs text-muted-foreground'>
+                <div
+                  className={cn(
+                    'flex items-center gap-1 text-xs',
+                    isFilteredOut
+                      ? 'text-muted-foreground'
+                      : 'text-muted-foreground'
+                  )}
+                >
                   <Ruler className='h-3 w-3' />
                   <span>
                     {initiativeSizeUtils.getShortLabel(
@@ -243,13 +302,27 @@ export function SlotCard({
                 </div>
               )}
             {initiative.targetDate && (
-              <div className='flex items-center gap-1 text-xs text-muted-foreground'>
+              <div
+                className={cn(
+                  'flex items-center gap-1 text-xs',
+                  isFilteredOut
+                    ? 'text-muted-foreground'
+                    : 'text-muted-foreground'
+                )}
+              >
                 <Calendar className='h-3 w-3' />
                 <span>{formatShortDate(initiative.targetDate)}</span>
               </div>
             )}
             {initiative.progress !== undefined && (
-              <div className='flex items-center gap-1 text-xs text-muted-foreground'>
+              <div
+                className={cn(
+                  'flex items-center gap-1 text-xs',
+                  isFilteredOut
+                    ? 'text-muted-foreground'
+                    : 'text-muted-foreground'
+                )}
+              >
                 <TrendingUp className='h-3 w-3' />
                 <span>{initiative.progress}%</span>
               </div>
