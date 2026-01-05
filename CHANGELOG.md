@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.58.0](https://github.com/kshehadeh/manageros/compare/v1.57.0...v1.58.0) (2026-01-05)
+
+### Features
+
+- **initiatives:** refactor initiatives slots view and enhance filtering capabilities ([23a2480](https://github.com/kshehadeh/manageros/commit/23a2480a219de18067897369d93bd6425a9de267))
+
 # [1.57.0](https://github.com/kshehadeh/manageros/compare/v1.56.0...v1.57.0) (2026-01-04)
 
 ### Features
