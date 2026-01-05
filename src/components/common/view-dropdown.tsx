@@ -205,9 +205,9 @@ export function ViewDropdown({
           <PopoverTrigger asChild>
             <Button
               variant='outline'
-              size='icon-lg'
+              size='sm'
               className={cn(
-                'flex items-center gap-md px-md',
+                'flex items-center gap-md',
                 hasActiveSettings && 'border-primary bg-primary/5',
                 className
               )}

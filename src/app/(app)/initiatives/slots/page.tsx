@@ -7,8 +7,8 @@ import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
 import { InitiativesListActionsDropdown } from '@/components/initiatives/initiatives-list-actions-dropdown'
 import { InitiativesViewDropdown } from '@/components/initiatives/initiatives-view-dropdown'
 import { PageBreadcrumbSetter } from '@/components/page-breadcrumb-setter'
-import { InitiativesSlotsView } from '@/components/initiatives/initiatives-slots-view'
 import { getSlottedInitiatives } from '@/lib/actions/initiative'
+import { SlotsPageClient } from '@/components/initiatives/slots-page-client'
 
 export default async function InitiativesSlotsPage() {
   const user = await getCurrentUser()
@@ -45,7 +45,7 @@ export default async function InitiativesSlotsPage() {
         />
         <PageContent>
           <PageSection>
-            <InitiativesSlotsView
+            <SlotsPageClient
               slottedInitiatives={slottedInitiatives}
               unslottedInitiatives={unslottedInitiatives}
               totalSlots={totalSlots}

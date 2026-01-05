@@ -1,22 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { SlotCard, type SlotInitiative } from './slot-card'
 import { SlotInitiativeSelectorModal } from './slot-initiative-selector-modal'
 import { InitiativeDetailModal } from './initiative-detail-modal'
 import { swapInitiativeSlots } from '@/lib/actions/initiative'
 import { toast } from 'sonner'
+import type { InitiativeSlotsFilters } from './initiatives-slots-filters'
 
 interface InitiativesSlotsViewProps {
   slottedInitiatives: SlotInitiative[]
   unslottedInitiatives: SlotInitiative[]
   totalSlots: number
+  filters?: InitiativeSlotsFilters
 }
 
 export function InitiativesSlotsView({
   slottedInitiatives,
   unslottedInitiatives,
   totalSlots,
+  filters = { teamIds: [], personIds: [] },
 }: InitiativesSlotsViewProps) {
   const [selectorModalOpen, setSelectorModalOpen] = useState(false)
   const [selectedSlotNumber, setSelectedSlotNumber] = useState<number>(1)
@@ -27,6 +30,36 @@ export function InitiativesSlotsView({
   const [selectedInitiativeId, setSelectedInitiativeId] = useState<
     string | null
   >(null)
+
+  // Check if any filters are active
+  const hasActiveFilters =
+    filters.teamIds.length > 0 || filters.personIds.length > 0
+
+  // Filter matching logic
+  const matchesFilters = (initiative: SlotInitiative): boolean => {
+    // If no filters are active, all initiatives match
+    if (!hasActiveFilters) {
+      return true
+    }
+
+    // Check team filter
+    const matchesTeam =
+      filters.teamIds.length === 0 ||
+      Boolean(initiative.team && filters.teamIds.includes(initiative.team.id))
+
+    // Check person/owner filter
+    const matchesPerson =
+      filters.personIds.length === 0 ||
+      Boolean(
+        initiative.owners &&
+        initiative.owners.some(owner =>
+          filters.personIds.includes(owner.person.id)
+        )
+      )
+
+    // Initiative matches if it matches ALL active filters (AND logic)
+    return matchesTeam && matchesPerson
+  }
 
   const handleAssignClick = (slotNumber: number) => {
     setSelectedSlotNumber(slotNumber)
@@ -39,6 +72,8 @@ export function InitiativesSlotsView({
   }
 
   const handleDragStart = (initiative: SlotInitiative) => {
+    // Don't allow drag if filters are active
+    if (hasActiveFilters) return
     setDraggedInitiative(initiative)
   }
 
@@ -48,6 +83,8 @@ export function InitiativesSlotsView({
   }
 
   const handleDragOver = (slotNumber: number) => {
+    // Don't allow drag over if filters are active
+    if (hasActiveFilters) return
     if (draggedInitiative && draggedInitiative.slot !== slotNumber) {
       setDragOverSlot(slotNumber)
     }
@@ -61,6 +98,8 @@ export function InitiativesSlotsView({
     targetSlotNumber: number,
     targetInitiative?: SlotInitiative
   ) => {
+    // Don't allow drop if filters are active
+    if (hasActiveFilters) return
     if (!draggedInitiative) return
     if (draggedInitiative.slot === targetSlotNumber) return
 
@@ -91,12 +130,15 @@ export function InitiativesSlotsView({
   }
 
   // Create a map of slot number to initiative
-  const slotMap = new Map<number, SlotInitiative>()
-  slottedInitiatives.forEach(initiative => {
-    if (initiative.slot !== null) {
-      slotMap.set(initiative.slot, initiative)
-    }
-  })
+  const slotMap = useMemo(() => {
+    const map = new Map<number, SlotInitiative>()
+    slottedInitiatives.forEach(initiative => {
+      if (initiative.slot !== null) {
+        map.set(initiative.slot, initiative)
+      }
+    })
+    return map
+  }, [slottedInitiatives])
 
   // Generate slot numbers from 1 to totalSlots
   const slotNumbers = Array.from({ length: totalSlots }, (_, i) => i + 1)
@@ -117,6 +159,19 @@ export function InitiativesSlotsView({
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'>
         {slotNumbers.map(slotNumber => {
           const initiative = slotMap.get(slotNumber)
+          const isFilteredOut =
+            initiative !== undefined && !matchesFilters(initiative)
+
+          const dragHandlers = hasActiveFilters
+            ? {}
+            : {
+                onDragStart: handleDragStart,
+                onDragEnd: handleDragEnd,
+                onDragOver: () => handleDragOver(slotNumber),
+                onDragLeave: handleDragLeave,
+                onDrop: handleDrop,
+              }
+
           return (
             <SlotCard
               key={slotNumber}
@@ -126,11 +181,8 @@ export function InitiativesSlotsView({
               onInitiativeClick={handleInitiativeClick}
               isDragging={draggedInitiative?.slot === slotNumber}
               isDragOver={dragOverSlot === slotNumber}
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-              onDragOver={() => handleDragOver(slotNumber)}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
+              isFilteredOut={isFilteredOut}
+              {...dragHandlers}
             />
           )
         })}
