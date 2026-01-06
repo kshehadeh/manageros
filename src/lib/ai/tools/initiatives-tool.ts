@@ -5,7 +5,7 @@ import type { Prisma } from '@/generated/prisma'
 
 export const initiativesTool = {
   description:
-    'Get information about specific initiatives in the organization. It uses things like status, RAG, team and owners/collaborators, keywords, teams, priority, or slot assignment to filter the list. The initiatives returned are limited to this filter. Use this tool with each new query as opposed to using previous responses for future queries.',
+    'Get information about specific initiatives in the organization. It uses things like status, RAG, team and owners/collaborators, keywords, teams, priority, or slot assignment to filter the list. The initiatives returned are limited to this filter. Use this tool with each new query as opposed to using previous responses for future queries. IMPORTANT: When the user asks about "my initiatives", "initiatives I\'m involved in", or anything related to their own initiatives, FIRST use the currentUser tool to get the current user\'s person ID, then use this tool with that personId parameter.',
   parameters: z.object({
     status: z
       .enum(['planned', 'in_progress', 'paused', 'done', 'canceled'])
@@ -19,7 +19,7 @@ export const initiativesTool = {
       .string()
       .optional()
       .describe(
-        'Filter by people who are in the list of owners of the initiative. This is the ID of the person - use the prompt to look up the person using a different tool and pass in the ID of the person here.'
+        'Filter by people who are in the list of owners of the initiative. This is the ID of the person. When the user asks about "my initiatives" or refers to themselves (e.g., "I", "me", "my"), FIRST use the currentUser tool to get their person ID, then pass it here. For other people, use the personLookup tool to find their person ID.'
       ),
     teamId: z.string().optional().describe('Filter by team ID'),
     query: z
