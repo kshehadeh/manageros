@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.59.0](https://github.com/kshehadeh/manageros/compare/v1.58.0...v1.59.0) (2026-01-06)
+
+### Features
+
+- **initiatives:** enhance initiative querying with user context ([8152b8f](https://github.com/kshehadeh/manageros/commit/8152b8fe7c90fbe86674398454a30fd52db71c16))
+
 # [1.58.0](https://github.com/kshehadeh/manageros/compare/v1.57.0...v1.58.0) (2026-01-05)
 
 ### Features
