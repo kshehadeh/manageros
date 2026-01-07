@@ -914,17 +914,17 @@ export async function insertInitiativeAtSlot(
     })
 
     // Get all initiatives that need to be shifted
-    // If source is before target: shift initiatives between source+1 and target down by 1
+    // If source is before target: shift initiatives between source+1 and target-1 down by 1
     // If source is after target (or null): shift initiatives >= target up by 1
     if (sourceSlot !== null && sourceSlot < targetSlotNumber) {
-      // Moving forward: shift initiatives between old position and new position down
+      // Moving forward: shift initiatives between old position and target position down
       const initiativesToShift = await tx.initiative.findMany({
         where: {
           organizationId,
           status: { in: ['planned', 'in_progress', 'paused'] },
           slot: {
             gt: sourceSlot,
-            lte: targetSlotNumber,
+            lt: targetSlotNumber,
           },
           id: { not: sourceInitiativeId },
         },
@@ -941,10 +941,10 @@ export async function insertInitiativeAtSlot(
         }
       }
 
-      // Place source at target slot (which is now one less due to shifting)
+      // Place source at target slot - 1 (adjusted because items shifted down)
       await tx.initiative.update({
         where: { id: sourceInitiativeId },
-        data: { slot: targetSlotNumber },
+        data: { slot: targetSlotNumber - 1 },
       })
     } else {
       // Moving backward or from unslotted: shift initiatives >= target up by 1
