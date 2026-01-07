@@ -12,16 +12,6 @@ const ALL_PERMISSIONS = [
   'task.edit',
   'task.delete',
   'task.view',
-  // Meeting permissions
-  'meeting.create',
-  'meeting.edit',
-  'meeting.delete',
-  'meeting.view',
-  // Meeting Instance permissions
-  'meeting-instance.create',
-  'meeting-instance.edit',
-  'meeting-instance.delete',
-  'meeting-instance.view',
   // Initiative permissions
   'initiative.create',
   'initiative.edit',
@@ -70,11 +60,6 @@ const ALL_PERMISSIONS = [
 const PERMISSIONS_REQUIRING_ID = [
   'task.edit',
   'task.delete',
-  'meeting.edit',
-  'meeting.delete',
-  'meeting-instance.edit',
-  'meeting-instance.delete',
-  'meeting-instance.view',
   'feedback.edit',
   'feedback.delete',
   'oneonone.edit',

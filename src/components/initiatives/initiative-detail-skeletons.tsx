@@ -4,7 +4,6 @@ import { PageSection } from '@/components/ui/page-section'
 import {
   ListTodo,
   Target,
-  Calendar,
   FileText,
   Users,
   User,
@@ -67,37 +66,6 @@ export function InitiativeObjectivesSkeleton() {
         ))}
       </div>
     </PageSection>
-  )
-}
-
-export function InitiativeMeetingsSkeleton() {
-  return (
-    <div className='rounded-xl py-4 space-y-4'>
-      <SectionHeader
-        icon={Calendar}
-        title='Meetings'
-        action={<Skeleton className='h-8 w-24' />}
-      />
-      <div className='space-y-3'>
-        {Array.from({ length: 2 }).map((_, i) => (
-          <div key={i} className='border rounded-lg p-4 space-y-2'>
-            <div className='flex items-center justify-between'>
-              <Skeleton className='h-5 w-48' />
-              <Skeleton className='h-5 w-20 rounded-full' />
-            </div>
-            <div className='flex items-center gap-4'>
-              <Skeleton className='h-4 w-32' />
-              <Skeleton className='h-4 w-24' />
-            </div>
-            <div className='flex items-center gap-2 pt-2'>
-              {Array.from({ length: 3 }).map((_, j) => (
-                <Skeleton key={j} className='h-8 w-8 rounded-full' />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
   )
 }
 

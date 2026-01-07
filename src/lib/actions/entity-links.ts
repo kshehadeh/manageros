@@ -1,7 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/db'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getActionPermission, getCurrentUser } from '@/lib/auth-utils'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
@@ -28,6 +28,28 @@ export type CreateEntityLinkData = z.infer<typeof CreateEntityLinkSchema>
 export type UpdateEntityLinkData = z.infer<typeof UpdateEntityLinkSchema>
 export type DeleteEntityLinkData = z.infer<typeof DeleteEntityLinkSchema>
 
+type EntityPermission = {
+  view: Parameters<typeof getActionPermission>[1]
+  edit: Parameters<typeof getActionPermission>[1]
+}
+
+function getEntityPermissions(entityType: string): EntityPermission | null {
+  const normalized = entityType.replace(/[\s_-]/g, '').toLowerCase()
+
+  switch (normalized) {
+    case 'task':
+      return { view: 'task.view', edit: 'task.edit' }
+    case 'initiative':
+      return { view: 'initiative.view', edit: 'initiative.edit' }
+    case 'oneonone':
+      return { view: 'oneonone.view', edit: 'oneonone.edit' }
+    case 'person':
+      return { view: 'person.view', edit: 'person.edit' }
+    default:
+      return null
+  }
+}
+
 /**
  * Create a new entity link
  */
@@ -43,6 +65,21 @@ export async function createEntityLink(data: CreateEntityLinkData) {
 
   // Validate input
   const validatedData = CreateEntityLinkSchema.parse(data)
+  const permissions = getEntityPermissions(validatedData.entityType)
+
+  if (!permissions) {
+    throw new Error('Unsupported entity type for links')
+  }
+
+  const canEditEntity = await getActionPermission(
+    user,
+    permissions.edit,
+    validatedData.entityId
+  )
+
+  if (!canEditEntity) {
+    throw new Error('You do not have permission to add links to this entity')
+  }
 
   try {
     const link = await prisma.entityLink.create({
@@ -92,6 +129,22 @@ export async function updateEntityLink(data: UpdateEntityLinkData) {
 
     if (!existingLink) {
       throw new Error('Link not found or access denied')
+    }
+
+    const permissions = getEntityPermissions(existingLink.entityType)
+
+    if (!permissions) {
+      throw new Error('Unsupported entity type for links')
+    }
+
+    const canEditEntity = await getActionPermission(
+      user,
+      permissions.edit,
+      existingLink.entityId
+    )
+
+    if (!canEditEntity) {
+      throw new Error('You do not have permission to update this link')
     }
 
     const link = await prisma.entityLink.update({
@@ -144,6 +197,22 @@ export async function deleteEntityLink(data: DeleteEntityLinkData) {
       throw new Error('Link not found or access denied')
     }
 
+    const permissions = getEntityPermissions(existingLink.entityType)
+
+    if (!permissions) {
+      throw new Error('Unsupported entity type for links')
+    }
+
+    const canEditEntity = await getActionPermission(
+      user,
+      permissions.edit,
+      existingLink.entityId
+    )
+
+    if (!canEditEntity) {
+      throw new Error('You do not have permission to delete this link')
+    }
+
     await prisma.entityLink.delete({
       where: { id: validatedData.id },
     })
@@ -167,6 +236,22 @@ export async function getEntityLinks(entityType: string, entityId: string) {
 
   if (!user.managerOSOrganizationId) {
     throw new Error('User must belong to an organization to view links')
+  }
+
+  const permissions = getEntityPermissions(entityType)
+
+  if (!permissions) {
+    throw new Error('Unsupported entity type for links')
+  }
+
+  const canViewEntity = await getActionPermission(
+    user,
+    permissions.view,
+    entityId
+  )
+
+  if (!canViewEntity) {
+    throw new Error('You do not have permission to view links for this entity')
   }
 
   try {

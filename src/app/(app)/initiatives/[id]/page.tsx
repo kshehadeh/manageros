@@ -4,7 +4,6 @@ import { InitiativeActionsDropdown } from '@/components/initiatives/initiative-a
 import { InitiativeObjectivesServer } from '@/components/initiatives/initiative-objectives-server'
 import { InitiativeTasks } from '@/components/initiatives/initiative-tasks-server'
 import { InitiativeCheckInsServer } from '@/components/initiatives/initiative-checkins-server'
-import { InitiativeMeetingsServer } from '@/components/initiatives/initiative-meetings-server'
 import { InitiativeSidebar } from '@/components/initiatives/initiative-sidebar'
 import { NotesSectionServer } from '@/components/notes/notes-section-server'
 import { InitiativeCompletionRate } from '@/components/initiatives/initiative-completion-rate'
@@ -24,7 +23,6 @@ import { prisma } from '@/lib/db'
 import {
   InitiativeTasksSkeleton,
   InitiativeObjectivesSkeleton,
-  InitiativeMeetingsSkeleton,
   InitiativeNotesSkeleton,
   InitiativeCheckInsSkeleton,
   InitiativeSidebarSkeleton,
@@ -228,10 +226,6 @@ export default async function InitiativeDetail({
 
               <Suspense fallback={<InitiativeObjectivesSkeleton />}>
                 <InitiativeObjectivesServer initiativeId={init.id} />
-              </Suspense>
-
-              <Suspense fallback={<InitiativeMeetingsSkeleton />}>
-                <InitiativeMeetingsServer initiativeId={init.id} />
               </Suspense>
 
               <Suspense fallback={<InitiativeNotesSkeleton />}>

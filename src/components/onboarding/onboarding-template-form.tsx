@@ -41,7 +41,6 @@ import {
   ChevronRight,
   ClipboardCheck,
   BookOpen,
-  Users as UsersIcon,
   CheckCircle,
   Lightbulb,
   FileText,
@@ -59,7 +58,6 @@ import type {
 const ITEM_TYPE_ICONS = {
   TASK: ClipboardCheck,
   READING: BookOpen,
-  MEETING: UsersIcon,
   CHECKPOINT: CheckCircle,
   EXPECTATION: Lightbulb,
 }
@@ -67,7 +65,6 @@ const ITEM_TYPE_ICONS = {
 const ITEM_TYPE_LABELS = {
   TASK: 'Task',
   READING: 'Reading',
-  MEETING: 'Meeting',
   CHECKPOINT: 'Checkpoint',
   EXPECTATION: 'Expectation',
 }
@@ -116,7 +113,6 @@ export function OnboardingTemplateForm({
           sortOrder: item.sortOrder,
           isRequired: item.isRequired,
           linkedTaskId: item.linkedTaskId || undefined,
-          linkedMeetingId: item.linkedMeetingId || undefined,
           linkedInitiativeId: item.linkedInitiativeId || undefined,
           linkedUrl: item.linkedUrl || '',
           ownerType:
@@ -469,7 +465,7 @@ export function OnboardingTemplateForm({
 
                       {phase.items.length === 0 ? (
                         <p className='text-sm text-muted-foreground text-center py-4'>
-                          No items yet. Add tasks, readings, meetings, or
+                          No items yet. Add tasks, readings, checkpoints, or
                           checkpoints.
                         </p>
                       ) : (
@@ -603,7 +599,7 @@ function ItemRow({ item, onUpdate, onRemove }: ItemRowProps) {
               />
             </div>
 
-            {(item.type === 'CHECKPOINT' || item.type === 'MEETING') && (
+            {item.type === 'CHECKPOINT' && (
               <div className='space-y-2'>
                 <Label>Owner</Label>
                 <Select

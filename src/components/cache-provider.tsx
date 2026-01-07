@@ -26,7 +26,6 @@ export function CacheProvider({ children }: { children: React.ReactNode }) {
       // Invalidate cache when navigating to people/teams pages
       if (
         currentPath.includes('/people') ||
-        currentPath.includes('/meetings') ||
         currentPath.includes('/initiatives') ||
         currentPath.includes('/teams')
       ) {

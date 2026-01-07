@@ -20,7 +20,6 @@ export const HELP_IDS = {
   peopleTeamsJobRoles: 'people-teams/job-roles',
 
   // Meetings & Communication
-  meetingsCommunicationMeetings: 'meetings-communication/meetings',
   meetingsCommunicationOneOnOnes: 'meetings-communication/one-on-ones',
 
   // Tasks & Projects

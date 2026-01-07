@@ -2,7 +2,6 @@ export const toolIds = {
   people: 'people',
   initiatives: 'initiatives',
   tasks: 'tasks',
-  meetings: 'meetings',
   teams: 'teams',
   currentUser: 'currentUser',
   github: 'github',
@@ -15,4 +14,3 @@ export const toolIds = {
   createOneOnOneAction: 'createOneOnOneAction',
   createPersonAction: 'createPersonAction',
 } as const
-

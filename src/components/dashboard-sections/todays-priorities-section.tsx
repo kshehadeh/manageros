@@ -1,13 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import {
-  ListTodo,
-  Calendar,
-  Users,
-  MessageSquare,
-  MoreHorizontal,
-} from 'lucide-react'
+import { ListTodo, Users, MessageSquare, MoreHorizontal } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -27,7 +21,7 @@ import {
   SetDueDateMenuItem,
 } from '@/components/common/context-menu-items'
 
-export type PriorityItemType = 'task' | 'meeting' | 'oneonone' | 'feedback'
+export type PriorityItemType = 'task' | 'oneonone' | 'feedback'
 
 export interface PriorityItem {
   id: string
@@ -85,8 +79,6 @@ function getPriorityIcon(item: PriorityItem) {
         return <ListTodo className='h-4 w-4 text-red-500' />
       }
       return <ListTodo className='h-4 w-4 text-muted-foreground' />
-    case 'meeting':
-      return <Calendar className='h-4 w-4 text-blue-500' />
     case 'oneonone':
       return <Users className='h-4 w-4 text-purple-500' />
     case 'feedback':
@@ -130,7 +122,6 @@ function getPriorityLabel(item: PriorityItem): string {
         return 'Overdue'
       }
       return `Due ${formatDate(item.date)}`
-    case 'meeting':
     case 'oneonone':
       if (!item.date) return 'Scheduled'
       return isToday(new Date(item.date))

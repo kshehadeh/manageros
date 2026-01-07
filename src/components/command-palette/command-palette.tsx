@@ -35,7 +35,6 @@ const SEARCH_ENTITY_TYPES = [
   'people',
   'feedback',
   'one-on-ones',
-  'meetings',
 ] as const
 
 type SearchEntityType = (typeof SEARCH_ENTITY_TYPES)[number]

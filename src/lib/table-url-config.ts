@@ -76,32 +76,6 @@ export const taskTableUrlConfig: TableUrlConfig = {
 }
 
 /**
- * Meeting table URL configuration
- */
-export const meetingTableUrlConfig: TableUrlConfig = {
-  filterParamMap: {
-    search: 'search',
-    teamId: 'teamId',
-    initiativeId: 'initiativeId',
-    scheduledFrom: 'scheduledFrom',
-    scheduledTo: 'scheduledTo',
-    meetingType: 'meetingType',
-  },
-  defaultValues: {
-    search: '',
-    teamId: [],
-    initiativeId: [],
-    scheduledFrom: '',
-    scheduledTo: '',
-    meetingType: '',
-    sort: { field: '', direction: 'asc' },
-    grouping: 'none',
-  },
-  sortParamName: DEFAULT_SORT_PARAM,
-  groupingParamName: DEFAULT_GROUPING_PARAM,
-}
-
-/**
  * Feedback table URL configuration
  */
 export const feedbackTableUrlConfig: TableUrlConfig = {

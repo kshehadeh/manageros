@@ -94,8 +94,6 @@ OAuth scopes define what permissions your application has. Available scopes:
 | `write:tasks`       | Create, update, and delete tasks             | `task.create`, `task.edit`, `task.delete`                   |
 | `read:initiatives`  | Read initiatives                             | `initiative.view`                                           |
 | `write:initiatives` | Create, update, and delete initiatives       | `initiative.create`, `initiative.edit`, `initiative.delete` |
-| `read:meetings`     | Read meetings                                | `meeting.view`                                              |
-| `write:meetings`    | Create, update, and delete meetings          | `meeting.create`, `meeting.edit`, `meeting.delete`          |
 | `admin`             | Full admin access (organization admins only) | All permissions                                             |
 
 **Note**: The `admin` scope is only granted to users who are organization administrators. Requesting this scope for a non-admin user will result in the scope being omitted from the token.
@@ -193,7 +191,6 @@ See [Security Requirements](../../.cursor/rules/security-requirements.mdc) for d
 | **People**          | Manage people in the organization             | [View Docs](./people.md)                     |
 | **Teams**           | Organize people into hierarchical teams       | [View Docs](./teams.md)                      |
 | **Initiatives**     | Track strategic initiatives and objectives    | [View Docs](./initiatives.md)                |
-| **Meetings**        | Schedule and manage meetings                  | [View Docs](./meetings.md)                   |
 | **One-on-Ones**     | Manage one-on-one meetings                    | [View Docs](./oneonones.md)                  |
 | **Feedback**        | Give and receive feedback                     | [View Docs](./feedback.md)                   |
 | **Tolerance Rules** | Monitor organizational metrics and exceptions | [View Docs](./tolerance-rules-exceptions.md) |
@@ -377,7 +374,6 @@ Each entity has specific access rules:
 - **People**: Admins can create/update/delete; all users can view
 - **Feedback**: Private feedback only visible to author; public feedback visible to all in org
 - **One-on-Ones**: Only visible to the two participants
-- **Meetings**: Public meetings visible to all; private meetings only to creator and participants
 
 See individual API documentation for detailed access rules.
 
