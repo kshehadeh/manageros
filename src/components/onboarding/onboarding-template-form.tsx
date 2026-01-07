@@ -116,7 +116,6 @@ export function OnboardingTemplateForm({
           sortOrder: item.sortOrder,
           isRequired: item.isRequired,
           linkedTaskId: item.linkedTaskId || undefined,
-          linkedMeetingId: item.linkedMeetingId || undefined,
           linkedInitiativeId: item.linkedInitiativeId || undefined,
           linkedUrl: item.linkedUrl || '',
           ownerType:
