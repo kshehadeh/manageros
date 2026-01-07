@@ -1,5 +1,15 @@
 # Changelog
 
+# [1.60.0](https://github.com/kshehadeh/manageros/compare/v1.59.0...v1.60.0) (2026-01-07)
+
+### Bug Fixes
+
+- **initiatives:** correct initiative slot shifting logic ([5f517b1](https://github.com/kshehadeh/manageros/commit/5f517b1f8aa5f3aa1429b0540dac0200c770777f))
+
+### Features
+
+- **initiatives:** enhance drag-and-drop functionality for initiative slots ([56369b5](https://github.com/kshehadeh/manageros/commit/56369b5747e5911b822a237123f4944951ab38d0))
+
 # [1.59.0](https://github.com/kshehadeh/manageros/compare/v1.58.0...v1.59.0) (2026-01-06)
 
 ### Features
