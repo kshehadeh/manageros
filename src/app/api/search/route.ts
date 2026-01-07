@@ -18,8 +18,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ results: [] })
     }
 
-    const [tasks, initiatives, people, feedback, oneOnOnes, meetings] =
-      await Promise.all([
+    const [tasks, initiatives, people, feedback, oneOnOnes] = await Promise.all(
+      [
         prisma.task.findMany({
           where: {
             title: { contains: q, mode: 'insensitive' },
@@ -112,44 +112,8 @@ export async function GET(request: Request) {
               take: 6,
             })
           : Promise.resolve([]), // Return empty array if user has no personId
-        // Get the current user's person record for meeting access control
-        user.managerOSPersonId
-          ? prisma.meeting.findMany({
-              where: {
-                OR: [
-                  { title: { contains: q, mode: 'insensitive' } },
-                  { description: { contains: q, mode: 'insensitive' } },
-                  { notes: { contains: q, mode: 'insensitive' } },
-                ],
-                AND: [
-                  { organizationId: user.managerOSOrganizationId },
-                  {
-                    OR: [
-                      { isPrivate: false }, // Public meetings
-                      { createdById: user.managerOSUserId || '' }, // Private meetings created by current user
-                      {
-                        participants: {
-                          some: {
-                            personId: user.managerOSPersonId,
-                          },
-                        },
-                      }, // Meetings where user is a participant
-                    ],
-                  },
-                ],
-              },
-              select: {
-                id: true,
-                title: true,
-                description: true,
-                scheduledAt: true,
-                location: true,
-                owner: { select: { id: true, name: true } },
-              },
-              take: 6,
-            })
-          : Promise.resolve([]), // Return empty array if user has no personId
-      ])
+      ]
+    )
 
     const results = [
       ...tasks.map(
@@ -202,23 +166,6 @@ export async function GET(request: Request) {
             ? `Scheduled for ${new Date(o.scheduledAt).toLocaleDateString()}`
             : 'Not scheduled',
           type: 'oneOnOne' as const,
-        })
-      ),
-      ...meetings.map(
-        (m: {
-          id: string
-          title: string
-          description: string | null
-          scheduledAt: Date
-          location: string | null
-          owner: { id: string; name: string } | null
-        }) => ({
-          id: m.id,
-          title: m.title,
-          subtitle: m.scheduledAt
-            ? `Scheduled for ${new Date(m.scheduledAt).toLocaleDateString()}${m.location ? ` at ${m.location}` : ''}${m.owner ? ` - Owner: ${m.owner.name}` : ''}`
-            : 'No date set',
-          type: 'meeting' as const,
         })
       ),
     ]

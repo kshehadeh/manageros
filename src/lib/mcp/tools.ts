@@ -6,7 +6,6 @@ import type { UserBrief } from '../auth-types'
 import { peopleTool } from '../ai/tools/people-tool'
 import { tasksTool } from '../ai/tools/tasks-tool'
 import { initiativesTool } from '../ai/tools/initiatives-tool'
-import { meetingsTool } from '../ai/tools/meetings-tool'
 import { teamsTool } from '../ai/tools/teams-tool'
 import { feedbackTool } from '../ai/tools/feedback-tool'
 import { currentUserTool } from '../ai/tools/current-user-tool'
@@ -206,8 +205,6 @@ export async function executeMCPTool(
         return tasksTool.execute(args || {})
       case 'initiatives':
         return initiativesTool.execute(args || {})
-      case 'meetings':
-        return meetingsTool.execute(args || {})
       case 'teams':
         return teamsTool.execute(args || {})
       case 'feedback':
@@ -244,11 +241,6 @@ export function getMCPToolDefinitions(): Tool[] {
       'initiatives',
       initiativesTool.description,
       initiativesTool.parameters
-    ),
-    createMCPTool(
-      'meetings',
-      meetingsTool.description,
-      meetingsTool.parameters
     ),
     createMCPTool('teams', teamsTool.description, teamsTool.parameters),
     createMCPTool(

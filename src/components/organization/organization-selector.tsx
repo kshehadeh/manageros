@@ -50,7 +50,6 @@ export function OrganizationSelector({
         '/initiatives',
         '/tasks',
         '/people',
-        '/meetings',
         '/teams',
         '/oneonones',
         '/feedback',

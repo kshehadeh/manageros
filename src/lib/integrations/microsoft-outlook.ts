@@ -1,6 +1,6 @@
 /**
  * Microsoft Outlook integration
- * Organization-level integration for associating meetings with Microsoft Outlook calendar events
+ * Organization-level integration for calendar events
  */
 
 import 'server-only'

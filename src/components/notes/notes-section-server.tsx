@@ -21,9 +21,6 @@ export async function NotesSectionServer({
     case 'task':
       entityTypePermission = 'task.edit'
       break
-    case 'meeting':
-      entityTypePermission = 'meeting.edit'
-      break
     case 'Initiative':
       entityTypePermission = 'initiative.edit'
       break

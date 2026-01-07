@@ -1,10 +1,4 @@
-import {
-  AlertCircle,
-  Calendar,
-  Users,
-  ClipboardCheck,
-  Sparkles,
-} from 'lucide-react'
+import { AlertCircle, Users, ClipboardCheck, Sparkles } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
@@ -13,14 +7,12 @@ import { Link } from '@/components/ui/link'
 interface HighlightsSectionProps {
   overdueTasksCount: number
   upcomingOneOnOnesCount: number
-  upcomingMeetingsCount: number
   reviewsDueCount: number
 }
 
 export function HighlightsSection({
   overdueTasksCount,
   upcomingOneOnOnesCount,
-  upcomingMeetingsCount,
   reviewsDueCount,
 }: HighlightsSectionProps) {
   const highlights = [
@@ -39,15 +31,6 @@ export function HighlightsSection({
       color: 'text-yellow-500',
       bgColor: 'bg-yellow-500/5',
       href: '/oneonones',
-    },
-    {
-      count: upcomingMeetingsCount,
-      label:
-        upcomingMeetingsCount === 1 ? 'upcoming meeting' : 'upcoming meetings',
-      icon: Calendar,
-      color: 'text-blue-500',
-      bgColor: 'bg-blue-500/5',
-      href: '/meetings',
     },
     {
       count: reviewsDueCount,

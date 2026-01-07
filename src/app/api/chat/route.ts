@@ -3,7 +3,6 @@ import { streamText, convertToModelMessages, stepCountIs } from 'ai'
 import { peopleTool } from '@/lib/ai/tools/people-tool'
 import { initiativesTool } from '@/lib/ai/tools/initiatives-tool'
 import { tasksTool } from '@/lib/ai/tools/tasks-tool'
-import { meetingsTool } from '@/lib/ai/tools/meetings-tool'
 import { teamsTool } from '@/lib/ai/tools/teams-tool'
 import { currentUserTool } from '@/lib/ai/tools/current-user-tool'
 import { githubTool } from '@/lib/ai/tools/github-tool'
@@ -54,11 +53,6 @@ export async function POST(req: Request) {
           description: tasksTool.description,
           inputSchema: tasksTool.parameters,
           execute: tasksTool.execute,
-        },
-        [toolIds.meetings]: {
-          description: meetingsTool.description,
-          inputSchema: meetingsTool.parameters,
-          execute: meetingsTool.execute,
         },
         [toolIds.teams]: {
           description: teamsTool.description,
@@ -117,7 +111,7 @@ export async function POST(req: Request) {
         },
       },
       stopWhen: stepCountIs(10),
-      system: `You are an AI assistant for mpath, a management platform for engineering managers. You help users understand and interact with their organizational data including people, initiatives, tasks, meetings, and teams.
+      system: `You are an AI assistant for mpath, a management platform for engineering managers. You help users understand and interact with their organizational data including people, initiatives, tasks, and teams.
 
 Key guidelines:
 - If a time-based prompt is provided, always use the dateTime tool to get the current date and helpful date ranges
@@ -177,7 +171,6 @@ Key guidelines:
 - If a user asks about someone's manager or reports, use the people tool with includeManager/includeReports flags
 - When discussing initiatives, mention their RAG status, confidence level, and key metrics
 - For tasks, highlight priority, status, and assignments
-- For meetings, include participant information and recent instances
 `,
     })
 

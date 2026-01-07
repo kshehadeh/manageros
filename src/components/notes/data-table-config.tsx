@@ -31,8 +31,6 @@ type NoteFilters = {
 const ENTITY_TYPE_OPTIONS: MultiSelectOption[] = [
   { value: 'Initiative', label: 'Initiative' },
   { value: 'Task', label: 'Task' },
-  { value: 'Meeting', label: 'Meeting' },
-  { value: 'MeetingInstance', label: 'Meeting Instance' },
   { value: 'Person', label: 'Person' },
   { value: 'Standalone', label: 'Standalone' },
 ]

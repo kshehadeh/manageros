@@ -180,17 +180,6 @@ const sampleData = {
     'Update dependencies',
   ],
 
-  meetingTitles: [
-    'Weekly sync',
-    'Monthly all-hands',
-    'Quarterly business review',
-    'One-on-one check-in',
-    'Project kickoff',
-    'Sprint planning',
-    'Design review',
-    'Technical deep dive',
-  ],
-
   feedbackKinds: ['praise', 'concern', 'note'],
   feedbackExamples: {
     praise: [
@@ -282,19 +271,6 @@ async function seedDemoData() {
       )
 
       // Delete in dependency order
-      await prisma.meetingInstanceParticipant.deleteMany({
-        where: { meetingInstance: { organizationId: existingDbOrg.id } },
-      })
-      await prisma.meetingInstance.deleteMany({
-        where: { organizationId: existingDbOrg.id },
-      })
-      await prisma.meetingParticipant.deleteMany({
-        where: { meeting: { organizationId: existingDbOrg.id } },
-      })
-      // Delete meetings (createdBy references User)
-      await prisma.meeting.deleteMany({
-        where: { organizationId: existingDbOrg.id },
-      })
       await prisma.feedback.deleteMany({
         where: { about: { organizationId: existingDbOrg.id } },
       })
@@ -1041,53 +1017,7 @@ async function seedDemoData() {
     }
     console.log(`✓ Created ${feedbackCount} feedback items\n`)
 
-    // Step 13: Create meetings
-    console.log('📅 Creating meetings...')
-    let meetingCount = 0
-    for (let i = 0; i < 8; i++) {
-      // Schedule meetings in the next 30 days
-      const meetingDate = getRandomFutureDate(1, 30)
-      meetingDate.setHours(Math.floor(Math.random() * 8) + 9, 0, 0, 0)
-
-      // Shuffle and select unique participants
-      const shuffledPeople = [...people].sort(() => Math.random() - 0.5)
-      const participantCount = Math.min(
-        2 + Math.floor(Math.random() * 4),
-        people.length
-      )
-      const participants = shuffledPeople
-        .slice(0, participantCount)
-        .map(person => ({
-          personId: person.id,
-          status: 'invited',
-        }))
-
-      await prisma.meeting.create({
-        data: {
-          title:
-            sampleData.meetingTitles[
-              Math.floor(Math.random() * sampleData.meetingTitles.length)
-            ],
-          description: 'Team meeting to discuss progress and plan next steps',
-          scheduledAt: meetingDate,
-          duration: [30, 60, 90][Math.floor(Math.random() * 3)],
-          location: 'Virtual - Zoom',
-          isRecurring: Math.random() > 0.6,
-          recurrenceType: Math.random() > 0.6 ? 'weekly' : undefined,
-          isPrivate: false,
-          organizationId: organization.id,
-          teamId: teams[Math.floor(Math.random() * teams.length)].id,
-          createdById: adminUser.id,
-          participants: {
-            create: participants,
-          },
-        },
-      })
-      meetingCount++
-    }
-    console.log(`✓ Created ${meetingCount} meetings\n`)
-
-    // Step 14: Create feedback template
+    // Step 13: Create feedback template
     console.log('📋 Creating feedback template...')
     const existingTemplate = await prisma.feedbackTemplate.findFirst({
       where: { isDefault: true },
@@ -1425,7 +1355,6 @@ async function seedDemoData() {
     console.log(`   - Check-ins: ${checkInCount}`)
     console.log(`   - One-on-ones: ${oneOnOnes.length}`)
     console.log(`   - Feedback: ${feedbackCount}`)
-    console.log(`   - Meetings: ${meetingCount}`)
     console.log(`   - Onboarding Templates: 1`)
     console.log(`   - Onboarding Instances: 3`)
     console.log(`\nLogin credentials (all passwords: ${DEMO_PASSWORD}):`)

@@ -46,8 +46,6 @@ model Organization {
   people                 Person[]
   initiatives            Initiative[]
   invitations            OrganizationInvitation[]
-  meetings               Meeting[]
-  meetingInstances       MeetingInstance[]
   entityLinks            EntityLink[]
   jobRoles               JobRole[]
   levels                 JobLevel[]
@@ -88,7 +86,6 @@ model User {
   githubCredentials       UserGithubCredentials?
   feedbackCampaigns       FeedbackCampaign[]
   createdTasks            Task[]
-  createdMeetings         Meeting[]
   createdEntityLinks      EntityLink[]
   notifications           Notification[]
   notificationResponses   NotificationResponse[]
@@ -135,7 +132,6 @@ model Team {
   children       Team[]       @relation("TeamHierarchy")
   people         Person[]
   initiatives    Initiative[]
-  meetings       Meeting[]
   onboardingTemplates OnboardingTemplate[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -176,10 +172,6 @@ model Person {
   jiraAccount        PersonJiraAccount?
   githubAccount      PersonGithubAccount?
   feedbackCampaigns  FeedbackCampaign[]   @relation("CampaignTarget")
-  ownedMeetings      Meeting[]            @relation("MeetingOwner")
-
-  meetingParticipants         MeetingParticipant[]         @relation("MeetingParticipant")
-  meetingInstanceParticipants MeetingInstanceParticipant[] @relation("MeetingInstanceParticipant")
   createdAt                   DateTime                     @default(now())
   updatedAt                   DateTime                     @updatedAt
   synopses                    PersonSynopsis[]
@@ -216,7 +208,6 @@ model Initiative {
   checkIns       CheckIn[]
   metrics        Metric[]
   tasks          Task[]
-  meetings       Meeting[]
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 
@@ -518,91 +509,6 @@ model NotificationRecord {
   @@index([type])
 }
 
-model Meeting {
-  id             String               @id @default(cuid())
-  title          String
-  description    String?
-  scheduledAt    DateTime
-  duration       Int? // Duration in minutes
-  location       String? // Physical or virtual location
-  notes          String? // Open area for notes
-  isRecurring    Boolean              @default(false)
-  recurrenceType String? // daily|weekly|monthly|bi_monthly|semi_annually
-  isPrivate      Boolean              @default(true) // Private meetings are only visible to creator and participants
-  organizationId String
-  organization   Organization         @relation(fields: [organizationId], references: [id])
-  teamId         String? // Optional team association
-  team           Team?                @relation(fields: [teamId], references: [id])
-  initiativeId   String? // Optional initiative association
-  initiative     Initiative?          @relation(fields: [initiativeId], references: [id])
-  ownerId        String? // Meeting owner (assigned to a person)
-  owner          Person?              @relation("MeetingOwner", fields: [ownerId], references: [id])
-  createdById    String // User who created the meeting
-  createdBy      User                 @relation(fields: [createdById], references: [id])
-  participants   MeetingParticipant[]
-  instances      MeetingInstance[]
-  createdAt      DateTime             @default(now())
-  updatedAt      DateTime             @updatedAt
-
-  @@index([organizationId])
-  @@index([teamId])
-  @@index([initiativeId])
-  @@index([ownerId])
-  @@index([createdById])
-  @@index([scheduledAt])
-  @@index([isRecurring])
-}
-
-model MeetingParticipant {
-  id        String   @id @default(cuid())
-  meetingId String
-  meeting   Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
-  personId  String
-  person    Person   @relation("MeetingParticipant", fields: [personId], references: [id])
-  status    String   @default("invited") // invited|accepted|declined|tentative
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([meetingId, personId])
-  @@index([meetingId])
-  @@index([personId])
-  @@index([status])
-}
-
-model MeetingInstance {
-  id             String                       @id @default(cuid())
-  meetingId      String
-  meeting        Meeting                      @relation(fields: [meetingId], references: [id], onDelete: Cascade)
-  scheduledAt    DateTime // Specific date/time for this instance
-  notes          String? // Notes for this specific instance
-  isPrivate      Boolean                      @default(true) // Inherits privacy from parent meeting
-  organizationId String
-  organization   Organization                 @relation(fields: [organizationId], references: [id])
-  participants   MeetingInstanceParticipant[]
-  createdAt      DateTime                     @default(now())
-  updatedAt      DateTime                     @updatedAt
-
-  @@index([meetingId])
-  @@index([organizationId])
-  @@index([scheduledAt])
-}
-
-model MeetingInstanceParticipant {
-  id                String          @id @default(cuid())
-  meetingInstanceId String
-  meetingInstance   MeetingInstance @relation(fields: [meetingInstanceId], references: [id], onDelete: Cascade)
-  personId          String
-  person            Person          @relation("MeetingInstanceParticipant", fields: [personId], references: [id])
-  status            String          @default("invited") // invited|accepted|declined|tentative|attended|absent
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-
-  @@unique([meetingInstanceId, personId])
-  @@index([meetingInstanceId])
-  @@index([personId])
-  @@index([status])
-}
-
 model PersonSynopsis {
   id              String   @id @default(cuid())
   personId        String
@@ -627,7 +533,7 @@ model EntityLink {
   url            String
   title          String?
   description    String?
-  entityType     String // The type of entity (e.g., "Initiative", "Task", "Meeting", "MeetingInstance", "Team", "Person", "OneOnOne")
+  entityType     String // The type of entity (e.g., "Initiative", "Task", "Team", "Person", "OneOnOne")
   entityId       String // The ID of the entity
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -810,7 +716,7 @@ model ReportInstance {
 model Note {
   id                 String           @id @default(cuid())
   title              String? // Title for standalone notes (optional)
-  entityType         String? // The type of entity (e.g., "Initiative", "Task", "Meeting", "Person") - optional for standalone notes
+  entityType         String? // The type of entity (e.g., "Initiative", "Task", "Person") - optional for standalone notes
   entityId           String? // The ID of the entity - optional for standalone notes
   organizationId     String
   organization       Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -867,7 +773,7 @@ model FileAttachment {
   id             String       @id @default(cuid())
   noteId         String?
   note           Note?        @relation(fields: [noteId], references: [id], onDelete: Cascade)
-  entityType     String // The type of entity (e.g., "Initiative", "Task", "Meeting", "Person")
+  entityType     String // The type of entity (e.g., "Initiative", "Task", "Person")
   entityId       String // The ID of the entity
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -928,7 +834,7 @@ model EntityIntegrationLink {
   id                String       @id @default(cuid())
   organizationId    String
   organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  entityType        String // The type of entity (e.g., "Meeting", "MeetingInstance", "Person")
+  entityType        String // The type of entity (e.g., "Person")
   entityId          String // The ID of the entity
   integrationId     String
   integration       Integration  @relation(fields: [integrationId], references: [id], onDelete: Cascade)
@@ -1097,7 +1003,6 @@ model OnboardingItem {
 
   // Optional references to existing entities (for context or materialization)
   linkedTaskId       String? // Reference to Task template
-  linkedMeetingId    String? // Reference to Meeting template
   linkedInitiativeId String? // Reference to Initiative (for context)
   linkedUrl          String? // External resource URL
 
@@ -1162,7 +1067,6 @@ model OnboardingItemProgress {
 
   // Materialized entity references (created from item templates)
   materializedTaskId    String? // Actual Task created for this item
-  materializedMeetingId String? // Actual Meeting scheduled
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

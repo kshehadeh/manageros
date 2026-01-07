@@ -603,7 +603,7 @@ function ItemRow({ item, onUpdate, onRemove }: ItemRowProps) {
               />
             </div>
 
-            {(item.type === 'CHECKPOINT' || item.type === 'MEETING') && (
+            {item.type === 'CHECKPOINT' && (
               <div className='space-y-2'>
                 <Label>Owner</Label>
                 <Select

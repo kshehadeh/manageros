@@ -2,10 +2,6 @@ import { getCurrentUser } from '@/lib/auth-utils'
 import { HighlightsSection } from './highlights-section'
 import { getOverdueTasksForAssignee } from '@/lib/data/tasks'
 import { getUpcomingOneOnOnesForPerson } from '@/lib/data/one-on-ones'
-import {
-  getUpcomingMeetingInstancesForPerson,
-  getUpcomingNonRecurringMeetingsForPerson,
-} from '@/lib/data/meetings'
 import { getActiveFeedbackCampaignsForUser } from '@/lib/data/feedback-campaigns'
 
 export async function HighlightsSectionServer() {
@@ -17,7 +13,6 @@ export async function HighlightsSectionServer() {
         <HighlightsSection
           overdueTasksCount={0}
           upcomingOneOnOnesCount={0}
-          upcomingMeetingsCount={0}
           reviewsDueCount={0}
         />
       )
@@ -47,26 +42,6 @@ export async function HighlightsSectionServer() {
       oneWeekFromNow
     )
 
-    // Count upcoming meetings (instances and non-recurring)
-    const [meetingInstances, nonRecurringMeetings] = await Promise.all([
-      getUpcomingMeetingInstancesForPerson(
-        user.managerOSPersonId,
-        user.managerOSOrganizationId,
-        now,
-        oneWeekFromNow
-      ),
-      getUpcomingNonRecurringMeetingsForPerson(
-        user.managerOSPersonId,
-        user.managerOSOrganizationId,
-        user.managerOSUserId,
-        now,
-        oneWeekFromNow
-      ),
-    ])
-
-    const upcomingMeetingsCount =
-      meetingInstances.length + nonRecurringMeetings.length
-
     // Count reviews due (feedback campaigns ending soon)
     const reviewsDue = await getActiveFeedbackCampaignsForUser(
       user.managerOSUserId,
@@ -81,7 +56,6 @@ export async function HighlightsSectionServer() {
       <HighlightsSection
         overdueTasksCount={overdueTasks.length}
         upcomingOneOnOnesCount={upcomingOneOnOnes.length}
-        upcomingMeetingsCount={upcomingMeetingsCount}
         reviewsDueCount={reviewsDue.length}
       />
     )
@@ -90,7 +64,6 @@ export async function HighlightsSectionServer() {
       <HighlightsSection
         overdueTasksCount={0}
         upcomingOneOnOnesCount={0}
-        upcomingMeetingsCount={0}
         reviewsDueCount={0}
       />
     )

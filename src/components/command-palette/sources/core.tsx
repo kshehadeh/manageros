@@ -10,7 +10,6 @@ import {
   Handshake,
   CheckSquare,
   UserPlus,
-  Calendar,
   Briefcase,
   ClipboardList,
   Building,
@@ -65,8 +64,6 @@ function createStaticItems(
   // Use permissions from server if available, otherwise fall back to client-side checks
   const canCreateTasks =
     permissions?.['task.create'] ?? (isAdmin || hasLinkedPerson)
-  const canCreateMeetings =
-    permissions?.['meeting.create'] ?? (isAdmin || hasLinkedPerson)
   const canCreateInitiatives =
     permissions?.['initiative.create'] ?? (isAdmin || hasLinkedPerson)
   const canCreateFeedback =
@@ -107,28 +104,6 @@ function createStaticItems(
           ? `/oneonones/new?participant1Id=${currentUserPersonId}`
           : '/oneonones/new'
         router.push(url)
-        closePalette()
-      },
-    })
-  }
-
-  // Meeting creation - use permission check
-  if (canCreateMeetings) {
-    items.push({
-      id: 'meeting.create',
-      title: 'Create Meeting',
-      subtitle: 'Schedule a new team meeting',
-      icon: <Calendar className='h-4 w-4' />,
-      keywords: [
-        'meeting',
-        'schedule',
-        'calendar',
-        'team meeting',
-        'new meeting',
-      ],
-      group: 'Quick Actions',
-      perform: ({ closePalette, router }) => {
-        router.push('/meetings/new')
         closePalette()
       },
     })
@@ -280,18 +255,6 @@ function createStaticItems(
       group: 'Navigation',
       perform: ({ closePalette, router }) => {
         router.push('/feedback-campaigns')
-        closePalette()
-      },
-    },
-    {
-      id: 'nav.meetings',
-      title: 'View Meetings',
-      subtitle: 'Go to meetings page',
-      icon: <Calendar className='h-4 w-4' />,
-      keywords: ['meetings', 'calendar', 'schedule'],
-      group: 'Navigation',
-      perform: ({ closePalette, router }) => {
-        router.push('/meetings')
         closePalette()
       },
     },
