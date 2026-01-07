@@ -26,10 +26,10 @@ export async function GET() {
     return NextResponse.json({
       permissions: {
         'task.create': permissions[0],
-        'initiative.create': permissions[2],
-        'feedback.create': permissions[3],
-        'oneonone.create': permissions[4],
-        'feedback-campaign.create': permissions[5],
+        'initiative.create': permissions[1],
+        'feedback.create': permissions[2],
+        'oneonone.create': permissions[3],
+        'feedback-campaign.create': permissions[4],
         'report.create': permissions[5],
         isAdmin: isAdminOrOwner(user),
       },
