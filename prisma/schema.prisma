@@ -929,7 +929,6 @@ model OAuthClientMetadata {
 enum OnboardingItemType {
   TASK        // Something to do
   READING     // Documentation to read
-  MEETING     // Conversation to have
   CHECKPOINT  // Verification point (manager confirms)
   EXPECTATION // Context to understand
 }

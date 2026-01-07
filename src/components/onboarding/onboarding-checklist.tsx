@@ -15,7 +15,6 @@ import { Textarea } from '@/components/ui/textarea'
 import {
   ClipboardCheck,
   BookOpen,
-  Users,
   CheckCircle,
   Lightbulb,
   ChevronDown,
@@ -36,7 +35,6 @@ import type {
 const ITEM_TYPE_ICONS: Record<OnboardingItemType, typeof ClipboardCheck> = {
   TASK: ClipboardCheck,
   READING: BookOpen,
-  MEETING: Users,
   CHECKPOINT: CheckCircle,
   EXPECTATION: Lightbulb,
 }
@@ -44,7 +42,6 @@ const ITEM_TYPE_ICONS: Record<OnboardingItemType, typeof ClipboardCheck> = {
 const ITEM_TYPE_LABELS: Record<OnboardingItemType, string> = {
   TASK: 'Task',
   READING: 'Reading',
-  MEETING: 'Meeting',
   CHECKPOINT: 'Checkpoint',
   EXPECTATION: 'Expectation',
 }

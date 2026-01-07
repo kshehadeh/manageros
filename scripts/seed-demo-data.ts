@@ -1109,7 +1109,7 @@ async function seedDemoData() {
                   {
                     title: 'Welcome meeting with manager',
                     description: 'Initial meeting with your direct manager',
-                    type: OnboardingItemType.MEETING,
+                    type: OnboardingItemType.TASK,
                     sortOrder: 3,
                     isRequired: true,
                   },
@@ -1133,7 +1133,7 @@ async function seedDemoData() {
                   {
                     title: 'Meet the team',
                     description: 'Introduction meetings with team members',
-                    type: OnboardingItemType.MEETING,
+                    type: OnboardingItemType.TASK,
                     sortOrder: 1,
                     isRequired: true,
                   },
@@ -1173,7 +1173,7 @@ async function seedDemoData() {
                   {
                     title: 'Attend company all-hands',
                     description: 'Participate in company-wide meeting',
-                    type: OnboardingItemType.MEETING,
+                    type: OnboardingItemType.TASK,
                     sortOrder: 1,
                     isRequired: false,
                   },
