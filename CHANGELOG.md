@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.61.0](https://github.com/kshehadeh/manageros/compare/v1.60.0...v1.61.0) (2026-01-07)
+
+### Features
+
+- **entity-links:** implement entity permissions for create, update, and delete actions ([bbfe1a5](https://github.com/kshehadeh/manageros/commit/bbfe1a5c7f111bc0e6bbfc06df8f2b6cb433a6d6))
+
 # [1.60.0](https://github.com/kshehadeh/manageros/compare/v1.59.0...v1.60.0) (2026-01-07)
 
 ### Bug Fixes
