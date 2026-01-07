@@ -602,18 +602,6 @@ async function deleteUserByIdentifier(identifier: string) {
       console.log(`  ✓ Deleted ${taskCount} task(s)`)
     }
 
-    // Delete meetings created by the user
-    const meetingCount = await prisma.meeting.count({
-      where: { createdById: user.id },
-    })
-    if (meetingCount > 0) {
-      console.log(`  Deleting ${meetingCount} meeting(s) created by user...`)
-      await prisma.meeting.deleteMany({
-        where: { createdById: user.id },
-      })
-      console.log(`  ✓ Deleted ${meetingCount} meeting(s)`)
-    }
-
     // Delete organization invitations sent by the user
     const invitationCount = await prisma.organizationInvitation.count({
       where: { invitedById: user.id },
@@ -861,7 +849,6 @@ async function getOrganizationStats(organizationId: string) {
     teamCount,
     personCount,
     initiativeCount,
-    meetingCount,
     invitationCount,
     jobRoleCount,
     jobLevelCount,
@@ -877,7 +864,6 @@ async function getOrganizationStats(organizationId: string) {
     prisma.team.count({ where: { organizationId } }),
     prisma.person.count({ where: { organizationId } }),
     prisma.initiative.count({ where: { organizationId } }),
-    prisma.meeting.count({ where: { organizationId } }),
     prisma.organizationInvitation.count({ where: { organizationId } }),
     prisma.jobRole.count({ where: { organizationId } }),
     prisma.jobLevel.count({ where: { organizationId } }),
@@ -895,7 +881,6 @@ async function getOrganizationStats(organizationId: string) {
     teamCount,
     personCount,
     initiativeCount,
-    meetingCount,
     invitationCount,
     jobRoleCount,
     jobLevelCount,
@@ -990,7 +975,6 @@ async function deleteOrganization(slug?: string) {
     console.log(`  Teams: ${stats.teamCount}`)
     console.log(`  People: ${stats.personCount}`)
     console.log(`  Initiatives: ${stats.initiativeCount}`)
-    console.log(`  Meetings: ${stats.meetingCount}`)
     console.log(`  Invitations: ${stats.invitationCount}`)
     console.log(`  Job Roles: ${stats.jobRoleCount}`)
     console.log(`  Job Levels: ${stats.jobLevelCount}`)
@@ -1065,45 +1049,6 @@ async function deleteOrganization(slug?: string) {
 
     // Delete in dependency order (following seed script pattern)
     console.log(`\nDeleting organization data in dependency order...`)
-
-    // Meeting instance participants
-    const meetingInstanceParticipantCount =
-      await prisma.meetingInstanceParticipant.deleteMany({
-        where: { meetingInstance: { organizationId: organization.id } },
-      })
-    if (meetingInstanceParticipantCount.count > 0) {
-      console.log(
-        `  ✓ Deleted ${meetingInstanceParticipantCount.count} meeting instance participant(s)`
-      )
-    }
-
-    // Meeting instances
-    const meetingInstanceCount = await prisma.meetingInstance.deleteMany({
-      where: { organizationId: organization.id },
-    })
-    if (meetingInstanceCount.count > 0) {
-      console.log(
-        `  ✓ Deleted ${meetingInstanceCount.count} meeting instance(s)`
-      )
-    }
-
-    // Meeting participants
-    const meetingParticipantCount = await prisma.meetingParticipant.deleteMany({
-      where: { meeting: { organizationId: organization.id } },
-    })
-    if (meetingParticipantCount.count > 0) {
-      console.log(
-        `  ✓ Deleted ${meetingParticipantCount.count} meeting participant(s)`
-      )
-    }
-
-    // Meetings
-    const meetingCount = await prisma.meeting.deleteMany({
-      where: { organizationId: organization.id },
-    })
-    if (meetingCount.count > 0) {
-      console.log(`  ✓ Deleted ${meetingCount.count} meeting(s)`)
-    }
 
     // Feedback
     const feedbackCount = await prisma.feedback.deleteMany({
