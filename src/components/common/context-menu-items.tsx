@@ -49,13 +49,7 @@ export function ContextMenuItem({
 
 interface ViewDetailsItemProps {
   entityId: string
-  entityType:
-    | 'people'
-    | 'teams'
-    | 'initiatives'
-    | 'tasks'
-    | 'meetings'
-    | 'oneonones'
+  entityType: 'people' | 'teams' | 'initiatives' | 'tasks' | 'oneonones'
   close: () => void
 }
 
@@ -81,13 +75,7 @@ export function ViewDetailsMenuItem({
 
 interface EditItemProps {
   entityId: string
-  entityType:
-    | 'people'
-    | 'teams'
-    | 'initiatives'
-    | 'tasks'
-    | 'meetings'
-    | 'oneonones'
+  entityType: 'people' | 'teams' | 'initiatives' | 'tasks' | 'oneonones'
   close: () => void
 }
 

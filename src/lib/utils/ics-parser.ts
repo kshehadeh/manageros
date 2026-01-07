@@ -82,7 +82,7 @@ export async function parseICSFile(
 
     // Extract and format scheduled time
     if (!event.start) {
-      throw new Error('Meeting start time not found in ICS file')
+      throw new Error('Event start time not found in ICS file')
     }
 
     const scheduledAt = new Date(event.start).toISOString()

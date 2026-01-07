@@ -4,10 +4,6 @@ import {
   type PriorityItem,
 } from './todays-priorities-section'
 import { getTasksForAssignee } from '@/lib/data/tasks'
-import {
-  getUpcomingMeetingInstancesForPerson,
-  getUpcomingNonRecurringMeetingsForPerson,
-} from '@/lib/data/meetings'
 import { getUpcomingOneOnOnesForPerson } from '@/lib/data/one-on-ones'
 import { getActiveFeedbackCampaignsForUser } from '@/lib/data/feedback-campaigns'
 
@@ -46,57 +42,6 @@ export async function TodaysPrioritiesSectionServer() {
         description: task.description,
         assigneeId: task.assigneeId,
         priority: task.priority,
-      })
-    })
-
-    // Fetch upcoming meeting instances where user is a participant
-    const meetingInstancesResult = await getUpcomingMeetingInstancesForPerson(
-      user.managerOSPersonId,
-      user.managerOSOrganizationId,
-      now,
-      oneWeekFromNow,
-      {
-        limit: 5,
-        includeMeeting: true,
-      }
-    )
-
-    // Type assertion: when includeMeeting is true, meeting will be included
-    const meetingInstances = meetingInstancesResult as Array<
-      (typeof meetingInstancesResult)[0] & {
-        meeting: { title: string }
-      }
-    >
-
-    meetingInstances.forEach(instance => {
-      priorityItems.push({
-        id: instance.id,
-        type: 'meeting',
-        title: instance.meeting.title,
-        date: instance.scheduledAt,
-        href: `/meetings/${instance.meetingId}/instances/${instance.id}`,
-      })
-    })
-
-    // Fetch non-recurring meetings where user is a participant
-    const nonRecurringMeetings = await getUpcomingNonRecurringMeetingsForPerson(
-      user.managerOSPersonId,
-      user.managerOSOrganizationId,
-      user.managerOSUserId || '',
-      now,
-      oneWeekFromNow,
-      {
-        limit: 5,
-      }
-    )
-
-    nonRecurringMeetings.forEach(meeting => {
-      priorityItems.push({
-        id: meeting.id,
-        type: 'meeting',
-        title: meeting.title,
-        date: meeting.scheduledAt,
-        href: `/meetings/${meeting.id}`,
       })
     })
 

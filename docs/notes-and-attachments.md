@@ -4,7 +4,7 @@ This document explains the notes and file attachment system in ManagerOS.
 
 ## Overview
 
-The notes system allows users to attach notes with file attachments to various entities in the system (initiatives, tasks, meetings, people, etc.). Notes provide a way to capture additional context, documentation, and supporting materials.
+The notes system allows users to attach notes with file attachments to various entities in the system (initiatives, tasks, people, etc.). Notes provide a way to capture additional context, documentation, and supporting materials.
 
 ## Features
 
@@ -31,7 +31,7 @@ The notes system allows users to attach notes with file attachments to various e
 ```prisma
 model Note {
   id             String   @id @default(cuid())
-  entityType     String   // The type of entity (e.g., "Initiative", "Task", "Meeting", "Person")
+  entityType     String   // The type of entity (e.g., "Initiative", "Task", "Person")
   entityId       String   // The ID of the entity
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -51,7 +51,7 @@ model FileAttachment {
   id             String   @id @default(cuid())
   noteId         String?
   note           Note?    @relation(fields: [noteId], references: [id], onDelete: Cascade)
-  entityType     String   // The type of entity (e.g., "Initiative", "Task", "Meeting", "Person")
+  entityType     String   // The type of entity (e.g., "Initiative", "Task", "Person")
   entityId       String   // The ID of the entity
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)

@@ -39,10 +39,6 @@ function getEntityPermissions(entityType: string): EntityPermission | null {
   switch (normalized) {
     case 'task':
       return { view: 'task.view', edit: 'task.edit' }
-    case 'meeting':
-      return { view: 'meeting.view', edit: 'meeting.edit' }
-    case 'meetinginstance':
-      return { view: 'meeting-instance.view', edit: 'meeting-instance.edit' }
     case 'initiative':
       return { view: 'initiative.view', edit: 'initiative.edit' }
     case 'oneonone':

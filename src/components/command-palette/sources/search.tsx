@@ -6,7 +6,6 @@ import {
   type CommandPermissions,
 } from '../types'
 import {
-  Calendar,
   ListTodo,
   Rocket,
   User,
@@ -20,7 +19,7 @@ interface SearchResultBase {
   id: string
   title: string
   subtitle?: string
-  type: 'task' | 'initiative' | 'person' | 'feedback' | 'oneOnOne' | 'meeting'
+  type: 'task' | 'initiative' | 'person' | 'feedback' | 'oneOnOne'
 }
 
 async function searchAll(query: string): Promise<SearchResultBase[]> {
@@ -97,18 +96,6 @@ export const searchCommandSource: CommandSource = {
             icon: <Handshake className='h-4 w-4' />,
             perform: ({ closePalette, router }) => {
               router.push(`/oneonones/${r.id}`)
-              closePalette()
-            },
-          },
-        ]
-      }
-      if (r.type === 'meeting') {
-        return [
-          {
-            ...base,
-            icon: <Calendar className='h-4 w-4' />,
-            perform: ({ closePalette, router }) => {
-              router.push(`/meetings/${r.id}`)
               closePalette()
             },
           },

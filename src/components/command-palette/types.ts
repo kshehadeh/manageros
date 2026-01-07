@@ -20,7 +20,6 @@ export interface CommandItemDescriptor {
 
 export interface CommandPermissions {
   'task.create': boolean
-  'meeting.create': boolean
   'initiative.create': boolean
   'feedback.create': boolean
   'oneonone.create': boolean

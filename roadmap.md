@@ -74,7 +74,7 @@
 - **Breadcrumb Navigation** (Refactored December 2024) - Explicit breadcrumb system with PageBreadcrumbSetter component. All pages set breadcrumbs explicitly to eliminate race conditions. See docs/breadcrumbs.md for implementation details.
 - **Sidebar Navigation** - Persistent navigation with role-based access
 - **Direct Reports View** - Dedicated manager view of team members
-- **Command Palette** (September 25, 2025) - Global Cmd/Ctrl+K palette with quick actions and search across tasks, initiatives, people, and meetings. Extensible sources for commands and server-backed results. Includes Create Task modal trigger, Create Meeting command (October 22, 2025), and View Meetings navigation command.
+- **Command Palette** (September 25, 2025) - Global Cmd/Ctrl+K palette with quick actions and search across tasks, initiatives, and people. Extensible sources for commands and server-backed results. Includes Create Task modal trigger.
 - **Notification System** (October 1, 2025) - Real-time notifications with bell icon, notification responses (read/dismissed), and full notification management page
 
 ### Data Management
@@ -179,13 +179,13 @@
 #### 10. AI-Powered Features
 
 - **Smart Suggestions** - AI-powered task and initiative recommendations
-- **Automated Summaries** - AI-generated meeting notes and check-in summaries
+- **Automated Summaries** - AI-generated check-in summaries
 - **Intelligent Routing** - Smart assignment of tasks based on skills and availability
 - **Predictive Insights** - Early warning system for at-risk initiatives
 
 #### 11. Advanced Collaboration
 
-- **Video Integration** - Built-in video calls for 1:1s and team meetings
+- **Video Integration** - Built-in video calls for 1:1s
 - **Document Collaboration** - Real-time document editing and sharing
 - **Knowledge Base** - Centralized knowledge management system
 - **Best Practices Library** - Template library for common scenarios
@@ -352,7 +352,7 @@ _Next Review: January 2026_
   - Added file type validation, size limits, and proper error handling
   - Created comprehensive documentation in `docs/notes-and-attachments.md`
   - Updated existing GitHub bug reporting to use new R2 upload system
-  - System supports multiple entity types (initiatives, tasks, meetings, people) for future expansion
+  - System supports multiple entity types (initiatives, tasks, people) for future expansion
   - Files organized in R2 with proper folder structure and unique naming
   - Added file icons, size formatting, and download functionality
 

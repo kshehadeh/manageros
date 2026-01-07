@@ -33,10 +33,7 @@
           },
           {
             "group": "Meetings & Communication",
-            "pages": [
-              "meetings-communication/meetings",
-              "meetings-communication/one-on-ones"
-            ]
+            "pages": ["meetings-communication/one-on-ones"]
           },
           {
             "group": "Tasks & Projects",

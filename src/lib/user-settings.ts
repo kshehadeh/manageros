@@ -150,27 +150,6 @@ export interface UserSettings {
     }
   >
 
-  // Per-view meeting table settings
-  meetingTableSettings: Record<
-    string,
-    {
-      sorting: Array<{ id: string; desc: boolean }>
-      grouping: string
-      sort: {
-        field: string
-        direction: 'asc' | 'desc'
-      }
-      filters: {
-        search: string
-        teamId: string[]
-        initiativeId: string[]
-        scheduledFrom: string
-        scheduledTo: string
-        meetingType: string
-      }
-    }
-  >
-
   // Per-view feedback table settings
   feedbackTableSettings: Record<
     string,
@@ -326,7 +305,6 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   peopleTableSettings: {},
   teamTableSettings: {},
   oneOnOneTableSettings: {},
-  meetingTableSettings: {},
   feedbackTableSettings: {},
   jobRolesTableSettings: {},
   organizationMembersTableSettings: {},
@@ -801,78 +779,6 @@ export function updateOneOnOneTableSettings(
     ...currentSettings,
     oneOnOneTableSettings: {
       ...currentSettings.oneOnOneTableSettings,
-      [settingsId]: updatedTableSettings,
-    },
-  }
-
-  saveUserSettings(userId, updatedSettings)
-}
-
-/**
- * Get meeting table settings for a specific view
- */
-export function getMeetingTableSettings(
-  userId: string,
-  settingsId: string
-): UserSettings['meetingTableSettings'][string] {
-  const settings = loadUserSettings(userId)
-  return (
-    settings.meetingTableSettings[settingsId] || {
-      sorting: [],
-      grouping: 'none',
-      sort: {
-        field: '',
-        direction: 'asc',
-      },
-      filters: {
-        search: '',
-        teamId: [],
-        initiativeId: [],
-        scheduledFrom: '',
-        scheduledTo: '',
-        meetingType: '',
-      },
-    }
-  )
-}
-
-/**
- * Update meeting table settings for a specific view
- */
-export function updateMeetingTableSettings(
-  userId: string,
-  settingsId: string,
-  tableSettings: Partial<UserSettings['meetingTableSettings'][string]>
-): void {
-  const currentSettings = loadUserSettings(userId)
-  const currentTableSettings = currentSettings.meetingTableSettings[
-    settingsId
-  ] || {
-    sorting: [],
-    grouping: 'none',
-    sort: {
-      field: '',
-      direction: 'asc' as const,
-    },
-    filters: {
-      search: '',
-      teamId: '',
-      initiativeId: '',
-      scheduledFrom: '',
-      scheduledTo: '',
-      meetingType: '',
-    },
-  }
-
-  const updatedTableSettings = {
-    ...currentTableSettings,
-    ...tableSettings,
-  }
-
-  const updatedSettings = {
-    ...currentSettings,
-    meetingTableSettings: {
-      ...currentSettings.meetingTableSettings,
       [settingsId]: updatedTableSettings,
     },
   }

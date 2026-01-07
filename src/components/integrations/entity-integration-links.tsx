@@ -1,5 +1,5 @@
 /**
- * Display integration links for an entity (Meeting, Person, etc.)
+ * Display integration links for an entity (Person, etc.)
  */
 
 'use client'

@@ -25,10 +25,6 @@ export function EditFormNavigator() {
       else if (pathname.match(/^\/initiatives\/[^/]+$/)) {
         editUrl = `${pathname}/edit`
       }
-      // Meeting detail page: /meetings/[id] -> /meetings/[id]/edit
-      else if (pathname.match(/^\/meetings\/[^/]+$/)) {
-        editUrl = `${pathname}/edit`
-      }
       // Task detail page: /tasks/[id] -> /tasks/[id]/edit
       else if (pathname.match(/^\/tasks\/[^/]+$/)) {
         editUrl = `${pathname}/edit`
@@ -43,10 +39,6 @@ export function EditFormNavigator() {
       }
       // Team detail page: /teams/[id] -> /teams/[id]/edit
       else if (pathname.match(/^\/teams\/[^/]+$/)) {
-        editUrl = `${pathname}/edit`
-      }
-      // Meeting instance detail page: /meetings/[id]/instances/[instanceId] -> /meetings/[id]/instances/[instanceId]/edit
-      else if (pathname.match(/^\/meetings\/[^/]+\/instances\/[^/]+$/)) {
         editUrl = `${pathname}/edit`
       }
       // Person feedback detail page: /people/[id]/feedback/[feedbackId] -> /people/[id]/feedback/[feedbackId]/edit

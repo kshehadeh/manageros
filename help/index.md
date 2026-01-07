@@ -1,7 +1,7 @@
 ---
-id: "getting-started"
-title: "Getting Started with mpath"
-category: "Getting Started"
+id: 'getting-started'
+title: 'Getting Started with mpath'
+category: 'Getting Started'
 ---
 
 # Welcome to mpath
@@ -25,10 +25,9 @@ See more: Tasks & Projects → [Initiatives](/initiatives), [Tasks](/tasks)
 
 ## Meetings
 
-- **Meetings**: Scheduled sessions with agendas, notes, and instances. Meetings can recur and generate individual meeting instances.
 - **One‑on‑Ones**: Private meetings between a manager and a report. Only participants can view the details.
 
-See more: Meetings & Communication → [Meetings](/meetings), [One‑on‑Ones](/oneonones)
+See more: Meetings & Communication → [One‑on‑Ones](/oneonones)
 
 ## Feedback & Growth
 
@@ -47,7 +46,7 @@ See more: Integrations → [GitHub Integration](/settings), [Jira Integration](/
 
 ## Entity Links
 
-Attach external links (docs, dashboards, tickets) to people, teams, initiatives, tasks, meetings, and more to centralize context.
+Attach external links (docs, dashboards, tickets) to people, teams, initiatives, tasks, and more to centralize context.
 
 See more: Add links via the “Links” section on entity detail pages
 
@@ -57,7 +56,7 @@ See more: Add links via the “Links” section on entity detail pages
 2. Build your team structure
 3. Define initiatives and objectives
 4. Create and assign tasks
-5. Schedule meetings and 1:1s
+5. Schedule 1:1s
 6. Run a feedback campaign for growth cycles
 7. Connect GitHub/Jira for richer context
 
@@ -65,7 +64,7 @@ See more: Add links via the “Links” section on entity detail pages
 
 - Look for the small help icon on pages to open targeted help.
 - Use the Command Palette (⌘/Ctrl + K) to jump to pages and actions.
-- Start with an initiative and link tasks, meetings, and docs for one source of truth.
+- Start with an initiative and link tasks and docs for one source of truth.
 
 ## Learn More
 
@@ -73,6 +72,6 @@ Open these pages and click the help icon for deep dives:
 
 - People & Teams: org structure, reporting, direct reports
 - Tasks & Projects: statuses, priorities, planning
-- Meetings & Communication: recurring meetings, instances, 1:1 best practices
+- Meetings & Communication: 1:1 best practices
 - Feedback & Development: campaigns, response visibility, synopses
 - Integrations: GitHub and Jira linking and data shown

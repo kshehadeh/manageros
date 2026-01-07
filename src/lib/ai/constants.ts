@@ -10,5 +10,4 @@ export const DEFAULT_EXAMPLE_QUESTIONS: string[] = [
   'Who manages me?',
   'Show me all high priority tasks',
   'What teams do we have?',
-  'Find meetings scheduled for this week',
 ]

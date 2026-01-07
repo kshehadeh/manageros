@@ -1350,26 +1350,6 @@ export async function deleteOrganization() {
     where: { organizationId },
   })
 
-  // Meeting instance participants
-  await prisma.meetingInstanceParticipant.deleteMany({
-    where: { meetingInstance: { organizationId } },
-  })
-
-  // Meeting instances
-  await prisma.meetingInstance.deleteMany({
-    where: { organizationId },
-  })
-
-  // Meeting participants
-  await prisma.meetingParticipant.deleteMany({
-    where: { meeting: { organizationId } },
-  })
-
-  // Meetings
-  await prisma.meeting.deleteMany({
-    where: { organizationId },
-  })
-
   // Feedback
   await prisma.feedback.deleteMany({
     where: { about: { organizationId } },

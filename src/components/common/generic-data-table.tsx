@@ -1085,7 +1085,6 @@ export function GenericDataTable<
                       | 'people'
                       | 'teams'
                       | 'initiatives'
-                      | 'meetings'
                       | 'oneonones'
                       | 'tasks'
                   }
@@ -1113,7 +1112,6 @@ export function GenericDataTable<
                       | 'people'
                       | 'teams'
                       | 'initiatives'
-                      | 'meetings'
                       | 'oneonones'
                       | 'tasks'
                   }
