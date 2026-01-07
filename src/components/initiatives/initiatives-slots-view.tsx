@@ -1,12 +1,25 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { SlotCard, type SlotInitiative } from './slot-card'
+import {
+  SlotCard,
+  type SlotInitiative,
+  type InsertMarkerDirection,
+  type DragMode,
+} from './slot-card'
 import { SlotInitiativeSelectorModal } from './slot-initiative-selector-modal'
 import { InitiativeDetailModal } from './initiative-detail-modal'
-import { swapInitiativeSlots } from '@/lib/actions/initiative'
+import {
+  swapInitiativeSlots,
+  insertInitiativeAtSlot,
+} from '@/lib/actions/initiative'
 import { toast } from 'sonner'
 import type { InitiativeSlotsFilters } from './initiatives-slots-filters'
+
+interface InsertPosition {
+  slotNumber: number
+  direction: InsertMarkerDirection
+}
 
 interface InitiativesSlotsViewProps {
   slottedInitiatives: SlotInitiative[]
@@ -25,7 +38,10 @@ export function InitiativesSlotsView({
   const [selectedSlotNumber, setSelectedSlotNumber] = useState<number>(1)
   const [draggedInitiative, setDraggedInitiative] =
     useState<SlotInitiative | null>(null)
-  const [dragOverSlot, setDragOverSlot] = useState<number | null>(null)
+  const [swapTargetSlot, setSwapTargetSlot] = useState<number | null>(null)
+  const [insertPosition, setInsertPosition] = useState<InsertPosition | null>(
+    null
+  )
   const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [selectedInitiativeId, setSelectedInitiativeId] = useState<
     string | null
@@ -79,45 +95,102 @@ export function InitiativesSlotsView({
 
   const handleDragEnd = () => {
     setDraggedInitiative(null)
-    setDragOverSlot(null)
+    setSwapTargetSlot(null)
+    setInsertPosition(null)
   }
 
-  const handleDragOver = (slotNumber: number) => {
+  const handleDragOver = (info: {
+    slotNumber: number
+    mode: DragMode
+    insertDirection: InsertMarkerDirection
+  }) => {
     // Don't allow drag over if filters are active
     if (hasActiveFilters) return
-    if (draggedInitiative && draggedInitiative.slot !== slotNumber) {
-      setDragOverSlot(slotNumber)
+    if (!draggedInitiative) return
+    if (draggedInitiative.slot === info.slotNumber) {
+      // Clear states when hovering over source
+      setSwapTargetSlot(null)
+      setInsertPosition(null)
+      return
+    }
+
+    if (info.mode === 'swap') {
+      setSwapTargetSlot(info.slotNumber)
+      setInsertPosition(null)
+    } else if (info.mode === 'insert' && info.insertDirection) {
+      setSwapTargetSlot(null)
+      setInsertPosition({
+        slotNumber: info.slotNumber,
+        direction: info.insertDirection,
+      })
     }
   }
 
   const handleDragLeave = () => {
-    setDragOverSlot(null)
+    setSwapTargetSlot(null)
+    setInsertPosition(null)
+  }
+
+  /**
+   * Calculate the target slot number for insert operations
+   * Based on the current slot and insert direction
+   */
+  const calculateInsertTargetSlot = (
+    currentSlot: number,
+    direction: InsertMarkerDirection
+  ): number => {
+    if (direction === 'left' || direction === 'top') {
+      // Insert before this slot
+      return currentSlot
+    }
+    // Insert after this slot (right or bottom)
+    return currentSlot + 1
   }
 
   const handleDrop = async (
     targetSlotNumber: number,
-    targetInitiative?: SlotInitiative
+    targetInitiative?: SlotInitiative,
+    mode?: DragMode
   ) => {
     // Don't allow drop if filters are active
     if (hasActiveFilters) return
     if (!draggedInitiative) return
-    if (draggedInitiative.slot === targetSlotNumber) return
+    if (draggedInitiative.slot === targetSlotNumber && mode === 'swap') return
 
     try {
-      await swapInitiativeSlots(
-        draggedInitiative.id,
-        targetSlotNumber,
-        targetInitiative?.id
-      )
+      if (mode === 'insert' && insertPosition?.direction) {
+        // Insert operation - shift slots
+        const insertTargetSlot = calculateInsertTargetSlot(
+          targetSlotNumber,
+          insertPosition.direction
+        )
 
-      if (targetInitiative) {
+        // Don't insert at the same position
+        if (draggedInitiative.slot === insertTargetSlot) {
+          return
+        }
+
+        await insertInitiativeAtSlot(draggedInitiative.id, insertTargetSlot)
         toast.success(
-          `Swapped "${draggedInitiative.title}" with "${targetInitiative.title}"`
+          `Inserted "${draggedInitiative.title}" at slot ${insertTargetSlot}`
         )
       } else {
-        toast.success(
-          `Moved "${draggedInitiative.title}" to slot ${targetSlotNumber}`
+        // Swap operation
+        await swapInitiativeSlots(
+          draggedInitiative.id,
+          targetSlotNumber,
+          targetInitiative?.id
         )
+
+        if (targetInitiative) {
+          toast.success(
+            `Swapped "${draggedInitiative.title}" with "${targetInitiative.title}"`
+          )
+        } else {
+          toast.success(
+            `Moved "${draggedInitiative.title}" to slot ${targetSlotNumber}`
+          )
+        }
       }
     } catch (error) {
       toast.error(
@@ -125,7 +198,8 @@ export function InitiativesSlotsView({
       )
     } finally {
       setDraggedInitiative(null)
-      setDragOverSlot(null)
+      setSwapTargetSlot(null)
+      setInsertPosition(null)
     }
   }
 
@@ -154,6 +228,17 @@ export function InitiativesSlotsView({
     )
   }
 
+  /**
+   * Determine the insert marker direction for a specific slot
+   */
+  const getInsertMarkerDirection = (
+    slotNumber: number
+  ): InsertMarkerDirection => {
+    if (!insertPosition) return null
+    if (insertPosition.slotNumber !== slotNumber) return null
+    return insertPosition.direction
+  }
+
   return (
     <>
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'>
@@ -167,7 +252,7 @@ export function InitiativesSlotsView({
             : {
                 onDragStart: handleDragStart,
                 onDragEnd: handleDragEnd,
-                onDragOver: () => handleDragOver(slotNumber),
+                onDragOver: handleDragOver,
                 onDragLeave: handleDragLeave,
                 onDrop: handleDrop,
               }
@@ -180,7 +265,8 @@ export function InitiativesSlotsView({
               onAssignClick={handleAssignClick}
               onInitiativeClick={handleInitiativeClick}
               isDragging={draggedInitiative?.slot === slotNumber}
-              isDragOver={dragOverSlot === slotNumber}
+              isSwapTarget={swapTargetSlot === slotNumber}
+              insertMarkerDirection={getInsertMarkerDirection(slotNumber)}
               isFilteredOut={isFilteredOut}
               {...dragHandlers}
             />
