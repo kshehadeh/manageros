@@ -46,19 +46,33 @@ export interface SlotInitiative {
   }>
 }
 
+export type InsertMarkerDirection = 'left' | 'right' | 'top' | 'bottom' | null
+export type DragMode = 'insert' | 'swap' | null
+
+interface DragPositionInfo {
+  slotNumber: number
+  mode: DragMode
+  insertDirection: InsertMarkerDirection
+}
+
 interface SlotCardProps {
   slotNumber: number
   initiative?: SlotInitiative
   onAssignClick: (slotNumber: number) => void
   onInitiativeClick?: (initiative: SlotInitiative) => void
   isDragging?: boolean
-  isDragOver?: boolean
+  isSwapTarget?: boolean
+  insertMarkerDirection?: InsertMarkerDirection
   isFilteredOut?: boolean
   onDragStart?: (initiative: SlotInitiative) => void
   onDragEnd?: () => void
-  onDragOver?: (e: React.DragEvent) => void
+  onDragOver?: (info: DragPositionInfo) => void
   onDragLeave?: () => void
-  onDrop?: (slotNumber: number, initiative?: SlotInitiative) => void
+  onDrop?: (
+    slotNumber: number,
+    initiative?: SlotInitiative,
+    mode?: DragMode
+  ) => void
 }
 
 export function SlotCard({
@@ -67,7 +81,8 @@ export function SlotCard({
   onAssignClick,
   onInitiativeClick,
   isDragging = false,
-  isDragOver = false,
+  isSwapTarget = false,
+  insertMarkerDirection = null,
   isFilteredOut = false,
   onDragStart,
   onDragEnd,
@@ -105,48 +120,151 @@ export function SlotCard({
     onDragStart?.(initiative)
   }
 
+  /**
+   * Determine drag mode based on mouse position within the card
+   * Edge zones (25%) = insert mode, Center zone (50%) = swap mode
+   */
+  const getDragPositionInfo = (e: React.DragEvent): DragPositionInfo => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    const width = rect.width
+    const height = rect.height
+
+    // Calculate relative positions (0-1)
+    const relX = x / width
+    const relY = y / height
+
+    // Edge threshold (25% from each edge)
+    const edgeThreshold = 0.25
+
+    // Check if in edge zones
+    const inLeftEdge = relX < edgeThreshold
+    const inRightEdge = relX > 1 - edgeThreshold
+    const inTopEdge = relY < edgeThreshold
+    const inBottomEdge = relY > 1 - edgeThreshold
+
+    // Determine insert direction based on edge proximity
+    // Prioritize the edge that's closest
+    if (inLeftEdge || inRightEdge || inTopEdge || inBottomEdge) {
+      // Calculate distances to each edge
+      const distToLeft = relX
+      const distToRight = 1 - relX
+      const distToTop = relY
+      const distToBottom = 1 - relY
+
+      const minDist = Math.min(distToLeft, distToRight, distToTop, distToBottom)
+
+      let insertDirection: InsertMarkerDirection = null
+      if (minDist === distToLeft && inLeftEdge) {
+        insertDirection = 'left'
+      } else if (minDist === distToRight && inRightEdge) {
+        insertDirection = 'right'
+      } else if (minDist === distToTop && inTopEdge) {
+        insertDirection = 'top'
+      } else if (minDist === distToBottom && inBottomEdge) {
+        insertDirection = 'bottom'
+      }
+
+      if (insertDirection) {
+        return {
+          slotNumber,
+          mode: 'insert',
+          insertDirection,
+        }
+      }
+    }
+
+    // Default to swap mode (center area)
+    return {
+      slotNumber,
+      mode: 'swap',
+      insertDirection: null,
+    }
+  }
+
   const handleDragOver = (e: React.DragEvent) => {
     if (isFilteredOut) return
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
-    onDragOver?.(e)
+
+    const positionInfo = getDragPositionInfo(e)
+    onDragOver?.(positionInfo)
+  }
+
+  const handleDragLeave = () => {
+    onDragLeave?.()
   }
 
   const handleDrop = (e: React.DragEvent) => {
     if (isFilteredOut) return
     e.preventDefault()
-    onDrop?.(slotNumber, initiative)
+    const positionInfo = getDragPositionInfo(e)
+    onDrop?.(slotNumber, initiative, positionInfo.mode)
+  }
+
+  // Render insert marker
+  const renderInsertMarker = (direction: InsertMarkerDirection) => {
+    if (!direction) return null
+
+    const isVertical = direction === 'left' || direction === 'right'
+    const baseClasses = 'absolute bg-primary z-10 transition-all duration-150'
+
+    if (isVertical) {
+      return (
+        <div
+          className={cn(
+            baseClasses,
+            'w-[3px] top-0 bottom-0 rounded-full',
+            direction === 'left' ? '-left-[10px]' : '-right-[10px]'
+          )}
+        />
+      )
+    }
+
+    return (
+      <div
+        className={cn(
+          baseClasses,
+          'h-[3px] left-0 right-0 rounded-full',
+          direction === 'top' ? '-top-[10px]' : '-bottom-[10px]'
+        )}
+      />
+    )
   }
 
   if (!initiative) {
     return (
-      <button
-        onClick={() => onAssignClick(slotNumber)}
-        onDragOver={isFilteredOut ? undefined : handleDragOver}
-        onDragLeave={isFilteredOut ? undefined : onDragLeave}
-        onDrop={isFilteredOut ? undefined : handleDrop}
-        className={cn(
-          'group relative flex flex-col items-center justify-center',
-          'min-h-[140px] p-4 rounded-lg border-2 border-dashed',
-          'border-muted-foreground/25 hover:border-primary/50',
-          'bg-muted/20 hover:bg-muted/40',
-          'transition-all duration-200',
-          'cursor-pointer',
-          isDragOver &&
-            !isFilteredOut &&
-            'border-primary bg-primary/10 scale-[1.02]'
-        )}
-      >
-        <div className='flex flex-col items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors'>
-          <Plus className='h-8 w-8' />
-          <span className='text-sm font-medium'>Slot {slotNumber}</span>
-          <span className='text-xs'>
-            {isDragOver && !isFilteredOut
-              ? 'Drop to assign'
-              : 'Click to assign initiative'}
-          </span>
-        </div>
-      </button>
+      <div className='relative'>
+        {renderInsertMarker(insertMarkerDirection)}
+        <button
+          onClick={() => onAssignClick(slotNumber)}
+          onDragOver={isFilteredOut ? undefined : handleDragOver}
+          onDragLeave={isFilteredOut ? undefined : handleDragLeave}
+          onDrop={isFilteredOut ? undefined : handleDrop}
+          className={cn(
+            'group relative flex flex-col items-center justify-center w-full',
+            'min-h-[140px] p-4 rounded-lg border-2 border-dashed',
+            'border-muted-foreground/25 hover:border-primary/50',
+            'bg-muted/20 hover:bg-muted/40',
+            'transition-all duration-200',
+            'cursor-pointer',
+            isSwapTarget &&
+              !isFilteredOut &&
+              'border-primary bg-primary/10 scale-[1.02]'
+          )}
+        >
+          <div className='flex flex-col items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors'>
+            <Plus className='h-8 w-8' />
+            <span className='text-sm font-medium'>Slot {slotNumber}</span>
+            <span className='text-xs'>
+              {isSwapTarget && !isFilteredOut
+                ? 'Drop to assign'
+                : 'Click to assign initiative'}
+            </span>
+          </div>
+        </button>
+      </div>
     )
   }
 
@@ -159,16 +277,16 @@ export function SlotCard({
       className={cn(
         'group relative',
         isDragging && 'opacity-50 scale-95',
-        isDragOver && !isFilteredOut && 'scale-[1.02]',
         isFilteredOut && 'opacity-60'
       )}
       draggable={!isFilteredOut}
       onDragStart={isFilteredOut ? undefined : handleDragStart}
       onDragEnd={isFilteredOut ? undefined : onDragEnd}
       onDragOver={isFilteredOut ? undefined : handleDragOver}
-      onDragLeave={isFilteredOut ? undefined : onDragLeave}
+      onDragLeave={isFilteredOut ? undefined : handleDragLeave}
       onDrop={isFilteredOut ? undefined : handleDrop}
     >
+      {renderInsertMarker(insertMarkerDirection)}
       <div
         className={cn(
           'block min-h-[140px] p-4 rounded-lg border',
@@ -177,7 +295,9 @@ export function SlotCard({
           isFilteredOut
             ? 'cursor-default'
             : 'cursor-grab active:cursor-grabbing',
-          isDragOver && !isFilteredOut && 'border-primary border-2 bg-primary/5'
+          isSwapTarget &&
+            !isFilteredOut &&
+            'border-primary border-2 bg-primary/5 scale-[1.02]'
         )}
       >
         <div className='flex flex-col h-full'>

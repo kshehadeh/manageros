@@ -862,6 +862,130 @@ export async function swapInitiativeSlots(
 }
 
 /**
+ * Insert an initiative at a specific slot position, shifting all subsequent initiatives down
+ */
+export async function insertInitiativeAtSlot(
+  sourceInitiativeId: string,
+  targetSlotNumber: number
+) {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    throw new Error(
+      'User must belong to an organization to manage initiative slots'
+    )
+  }
+
+  // Check permission to edit source initiative
+  if (
+    !(await getActionPermission(user, 'initiative.edit', sourceInitiativeId))
+  ) {
+    throw new Error('You do not have permission to edit this initiative')
+  }
+
+  // Get the source initiative
+  const sourceInitiative = await prisma.initiative.findFirst({
+    where: {
+      id: sourceInitiativeId,
+      organizationId: user.managerOSOrganizationId,
+      status: { in: ['planned', 'in_progress', 'paused'] },
+    },
+  })
+
+  if (!sourceInitiative) {
+    throw new Error('Source initiative not found or is not active')
+  }
+
+  const sourceSlot = sourceInitiative.slot
+
+  // If source is already at target, nothing to do
+  if (sourceSlot === targetSlotNumber) {
+    return { success: true }
+  }
+
+  const organizationId = user.managerOSOrganizationId
+
+  // Use a transaction to insert and shift slots atomically
+  await prisma.$transaction(async tx => {
+    // First, temporarily set source to null to avoid conflicts
+    await tx.initiative.update({
+      where: { id: sourceInitiativeId },
+      data: { slot: null },
+    })
+
+    // Get all initiatives that need to be shifted
+    // If source is before target: shift initiatives between source+1 and target-1 down by 1
+    // If source is after target (or null): shift initiatives >= target up by 1
+    if (sourceSlot !== null && sourceSlot < targetSlotNumber) {
+      // Moving forward: shift initiatives between old position and target position down
+      const initiativesToShift = await tx.initiative.findMany({
+        where: {
+          organizationId,
+          status: { in: ['planned', 'in_progress', 'paused'] },
+          slot: {
+            gt: sourceSlot,
+            lt: targetSlotNumber,
+          },
+          id: { not: sourceInitiativeId },
+        },
+        orderBy: { slot: 'asc' },
+      })
+
+      // Shift each down by 1
+      for (const initiative of initiativesToShift) {
+        if (initiative.slot !== null) {
+          await tx.initiative.update({
+            where: { id: initiative.id },
+            data: { slot: initiative.slot - 1 },
+          })
+        }
+      }
+
+      // Place source at target slot - 1 (adjusted because items shifted down)
+      await tx.initiative.update({
+        where: { id: sourceInitiativeId },
+        data: { slot: targetSlotNumber - 1 },
+      })
+    } else {
+      // Moving backward or from unslotted: shift initiatives >= target up by 1
+      const initiativesToShift = await tx.initiative.findMany({
+        where: {
+          organizationId,
+          status: { in: ['planned', 'in_progress', 'paused'] },
+          slot: {
+            gte: targetSlotNumber,
+            ...(sourceSlot !== null ? { lt: sourceSlot } : {}),
+          },
+          id: { not: sourceInitiativeId },
+        },
+        orderBy: { slot: 'desc' }, // Process in descending order to avoid conflicts
+      })
+
+      // Shift each up by 1 (process in descending order)
+      for (const initiative of initiativesToShift) {
+        if (initiative.slot !== null) {
+          await tx.initiative.update({
+            where: { id: initiative.id },
+            data: { slot: initiative.slot + 1 },
+          })
+        }
+      }
+
+      // Place source at target slot
+      await tx.initiative.update({
+        where: { id: sourceInitiativeId },
+        data: { slot: targetSlotNumber },
+      })
+    }
+  })
+
+  revalidatePath('/initiatives')
+  revalidatePath('/initiatives/slots')
+
+  return { success: true }
+}
+
+/**
  * Update initiative status
  */
 export async function updateInitiativeStatus(
