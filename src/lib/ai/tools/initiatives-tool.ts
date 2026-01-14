@@ -5,7 +5,7 @@ import type { Prisma } from '@/generated/prisma'
 
 export const initiativesTool = {
   description:
-    'Get information about specific initiatives in the organization. It uses things like status, RAG, team and owners/collaborators, keywords, teams, priority, or slot assignment to filter the list. The initiatives returned are limited to this filter. Use this tool with each new query as opposed to using previous responses for future queries. IMPORTANT: When the user asks about "my initiatives", "initiatives I\'m involved in", or anything related to their own initiatives, FIRST use the currentUser tool to get the current user\'s person ID, then use this tool with that personId parameter.',
+    'Get information about specific initiatives in the organization. It uses things like status, RAG, team and owners/collaborators, keywords, teams, priority, or slot assignment to filter the list. The initiatives returned are limited to this filter. The response includes a latestCheckIn field (when available) which represents the most recent check-in for that initiative; use it when the user asks about the initiative\'s current state. Use this tool with each new query as opposed to using previous responses for future queries. IMPORTANT: When the user asks about "my initiatives", "initiatives I\'m involved in", or anything related to their own initiatives, FIRST use the currentUser tool to get the current user\'s person ID, then use this tool with that personId parameter.',
   parameters: z.object({
     status: z
       .enum(['planned', 'in_progress', 'paused', 'done', 'canceled'])
@@ -139,29 +139,80 @@ export const initiativesTool = {
       orderBy: { updatedAt: 'desc' },
     })
 
+    // Fetch the most recent check-in for each initiative
+    const initiativeIds = initiatives.map(i => i.id)
+    const checkIns = await prisma.checkIn.findMany({
+      where: {
+        initiativeId: { in: initiativeIds },
+        initiative: { organizationId: user.managerOSOrganizationId },
+      },
+      select: {
+        id: true,
+        initiativeId: true,
+        weekOf: true,
+        rag: true,
+        confidence: true,
+        summary: true,
+        blockers: true,
+        nextSteps: true,
+        createdAt: true,
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+
+    // Group check-ins by initiativeId and get the most recent one for each
+    const latestCheckInsByInitiative = new Map<string, (typeof checkIns)[0]>()
+    for (const checkIn of checkIns) {
+      if (!latestCheckInsByInitiative.has(checkIn.initiativeId)) {
+        latestCheckInsByInitiative.set(checkIn.initiativeId, checkIn)
+      }
+    }
+
     return {
-      initiatives: initiatives.map(initiative => ({
-        id: initiative.id,
-        title: initiative.title,
-        summary: initiative.summary,
-        status: initiative.status,
-        rag: initiative.rag,
-        confidence: initiative.confidence,
-        priority: initiative.priority,
-        slot: initiative.slot,
-        startDate: initiative.startDate,
-        targetDate: initiative.targetDate,
-        team: initiative.team?.name,
-        owners: initiative.owners,
-        objectivesCount: initiative._count.objectives,
-        tasksCount: initiative._count.tasks,
-        checkInsCount: initiative._count.checkIns,
-        tasks: initiative.tasks.map(t => ({
-          id: t.id,
-          title: t.title,
-          status: t.status,
-        })),
-      })),
+      initiatives: initiatives.map(initiative => {
+        const latestCheckIn = latestCheckInsByInitiative.get(initiative.id)
+        return {
+          id: initiative.id,
+          title: initiative.title,
+          summary: initiative.summary,
+          status: initiative.status,
+          rag: initiative.rag,
+          confidence: initiative.confidence,
+          priority: initiative.priority,
+          slot: initiative.slot,
+          startDate: initiative.startDate,
+          targetDate: initiative.targetDate,
+          team: initiative.team?.name,
+          owners: initiative.owners,
+          objectivesCount: initiative._count.objectives,
+          tasksCount: initiative._count.tasks,
+          checkInsCount: initiative._count.checkIns,
+          latestCheckIn: latestCheckIn
+            ? {
+                id: latestCheckIn.id,
+                weekOf: latestCheckIn.weekOf,
+                rag: latestCheckIn.rag,
+                confidence: latestCheckIn.confidence,
+                summary: latestCheckIn.summary,
+                blockers: latestCheckIn.blockers,
+                nextSteps: latestCheckIn.nextSteps,
+                createdAt: latestCheckIn.createdAt,
+                createdBy: latestCheckIn.createdBy,
+              }
+            : null,
+          tasks: initiative.tasks.map(t => ({
+            id: t.id,
+            title: t.title,
+            status: t.status,
+          })),
+        }
+      }),
     }
   },
 }
