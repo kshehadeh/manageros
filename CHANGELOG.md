@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.62.0](https://github.com/kshehadeh/manageros/compare/v1.61.1...v1.62.0) (2026-01-14)
+
+### Features
+
+- **initiatives-tool:** enhance initiative state reporting with latest check-in details ([fb290dd](https://github.com/kshehadeh/manageros/commit/fb290ddd0d66f08e57797954a9196a41b7eefc31))
+- **initiatives-tool:** filter check-ins by organization ID ([f41d959](https://github.com/kshehadeh/manageros/commit/f41d959eb83b5bd6fc845f7d998d5c89183da293))
+
 ## [1.61.1](https://github.com/kshehadeh/manageros/compare/v1.61.0...v1.61.1) (2026-01-07)
 
 # [1.61.0](https://github.com/kshehadeh/manageros/compare/v1.60.0...v1.61.0) (2026-01-07)
