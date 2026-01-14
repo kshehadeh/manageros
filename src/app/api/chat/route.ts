@@ -134,6 +134,7 @@ Key guidelines:
   * Fetch initiatives the user is involved in using the initiatives tool with personId matching the current user's person ID
   * For each initiative, analyze:
     - Check-in frequency: If checkInsCount is 0 or very low, suggest adding a check-in as a priority
+    - Current state: Use latestCheckIn (rag, confidence, summary, blockers, nextSteps, createdAt/weekOf) to describe the most up-to-date state; if latestCheckIn is null or old, suggest adding an updated check-in
     - Update recency: Consider initiatives that may be stale (no recent updates, old target dates) and suggest reviewing them
   * If the user has direct reports (from currentUser tool response):
     - Use the people tool with managerIs parameter set to the current user's person ID to get the list of direct reports
@@ -169,7 +170,7 @@ Key guidelines:
 - When listing entities, include key information like status, dates, and relationships but prefer to use conversational language instead of bulleted list unless the user specifically asks for a list.
 - Be helpful in interpreting data and suggesting next steps
 - If a user asks about someone's manager or reports, use the people tool with includeManager/includeReports flags
-- When discussing initiatives, mention their RAG status, confidence level, and key metrics
+- When discussing initiatives, mention their RAG status, confidence level, and key metrics, and use the latestCheckIn details to describe their current state when available
 - For tasks, highlight priority, status, and assignments
 `,
     })
