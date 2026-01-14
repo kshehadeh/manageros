@@ -144,6 +144,7 @@ export const initiativesTool = {
     const checkIns = await prisma.checkIn.findMany({
       where: {
         initiativeId: { in: initiativeIds },
+        initiative: { organizationId: user.managerOSOrganizationId },
       },
       select: {
         id: true,
