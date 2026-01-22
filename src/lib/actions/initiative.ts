@@ -1489,6 +1489,13 @@ export async function getInitiativeSlotPopupData(initiativeId: string) {
 
     // Get open tasks (not done or dropped) that are directly tied to this initiative
     // Tasks can be directly on the initiative or on objectives of the initiative
+    // Apply task access control to ensure user has permission to view these tasks
+    const taskAccessClause = getTaskAccessWhereClause(
+      organizationId,
+      user.managerOSUserId || '',
+      user.managerOSPersonId || undefined
+    )
+
     const openTasks = await prisma.task.findMany({
       where: {
         AND: [
@@ -1517,6 +1524,7 @@ export async function getInitiativeSlotPopupData(initiativeId: string) {
               notIn: ['done', 'dropped'],
             },
           },
+          taskAccessClause,
         ],
       },
       select: {
