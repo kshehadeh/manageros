@@ -1,5 +1,16 @@
 # Changelog
 
+# [1.63.0](https://github.com/kshehadeh/manageros/compare/v1.62.0...v1.63.0) (2026-01-22)
+
+### Bug Fixes
+
+- **initiatives-tool:** improve data handling in InitiativeSlotPopup ([a4a177d](https://github.com/kshehadeh/manageros/commit/a4a177d866c71dfda5e3069d6d8b334db3874fb5))
+
+### Features
+
+- **initiatives-tool:** add initiative slot popup data retrieval ([a8ec53b](https://github.com/kshehadeh/manageros/commit/a8ec53b9f998fffd3499efdb7bb4eca5cee1340c))
+- **initiatives-tool:** implement task access control in initiative data retrieval ([df4fc2f](https://github.com/kshehadeh/manageros/commit/df4fc2ffd06ac03aa5d206c1ab4e200e74fed293))
+
 # [1.62.0](https://github.com/kshehadeh/manageros/compare/v1.61.1...v1.62.0) (2026-01-14)
 
 ### Features
