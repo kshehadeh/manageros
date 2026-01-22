@@ -23,6 +23,7 @@ import { formatShortDate } from '@/lib/utils/date-utils'
 import { cn } from '@/lib/utils'
 import { removeInitiativeFromSlot } from '@/lib/actions/initiative'
 import { toast } from 'sonner'
+import { InitiativeSlotPopup } from './initiative-slot-popup'
 
 export interface SlotInitiative {
   id: string
@@ -287,185 +288,195 @@ export function SlotCard({
       onDrop={isFilteredOut ? undefined : handleDrop}
     >
       {renderInsertMarker(insertMarkerDirection)}
-      <div
-        className={cn(
-          'block min-h-[140px] p-4 rounded-lg border',
-          'bg-card hover:bg-muted/50',
-          'transition-all duration-200',
-          isFilteredOut
-            ? 'cursor-default'
-            : 'cursor-grab active:cursor-grabbing',
-          isSwapTarget &&
-            !isFilteredOut &&
-            'border-primary border-2 bg-primary/5 scale-[1.02]'
-        )}
-      >
-        <div className='flex flex-col h-full'>
-          <div className='flex items-start justify-between gap-2 mb-2'>
-            <div className='flex items-center gap-1'>
-              {!isFilteredOut && (
-                <GripVertical className='h-3.5 w-3.5 text-muted-foreground/50' />
-              )}
-              <span
-                className={cn(
-                  'text-xs font-mono',
-                  isFilteredOut
-                    ? 'text-muted-foreground'
-                    : 'text-muted-foreground'
-                )}
-              >
-                #{slotNumber}
-              </span>
-            </div>
-            <RagCircle rag={initiative.rag} size='small' />
-          </div>
-
-          {onInitiativeClick ? (
-            <button
-              type='button'
-              className='flex-1 text-left'
-              onClick={e => {
-                e.stopPropagation()
-                onInitiativeClick(initiative)
-              }}
-              draggable={false}
-            >
-              <h3
-                className={cn(
-                  'font-medium text-sm line-clamp-2 mb-2 transition-colors',
-                  isFilteredOut ? 'text-muted-foreground' : 'hover:text-primary'
-                )}
-              >
-                {initiative.title}
-              </h3>
-            </button>
-          ) : (
-            <Link
-              href={`/initiatives/${initiative.id}`}
-              className='flex-1'
-              onClick={e => e.stopPropagation()}
-              draggable={false}
-            >
-              <h3
-                className={cn(
-                  'font-medium text-sm line-clamp-2 mb-2 transition-colors',
-                  isFilteredOut ? 'text-muted-foreground' : 'hover:text-primary'
-                )}
-              >
-                {initiative.title}
-              </h3>
-            </Link>
-          )}
-
-          <div className='flex items-center gap-2 flex-wrap'>
-            <Badge
-              variant={statusVariant}
-              className={cn('text-xs', isFilteredOut && 'opacity-60')}
-            >
-              {initiativeStatusUtils.getLabel(
-                initiative.status as InitiativeStatus
-              )}
-            </Badge>
-            {initiative.team && (
-              <span
-                className={cn(
-                  'text-xs truncate',
-                  isFilteredOut
-                    ? 'text-muted-foreground'
-                    : 'text-muted-foreground'
-                )}
-              >
-                {initiative.team.name}
-              </span>
-            )}
-          </div>
-
-          {/* People count, size, target date, and progress */}
+      {initiative ? (
+        <InitiativeSlotPopup initiativeId={initiative.id}>
           <div
             className={cn(
-              'flex items-center gap-3 mt-2 pt-2 border-t flex-wrap',
-              isFilteredOut ? 'border-border/30' : 'border-border/50'
+              'block min-h-[140px] p-4 rounded-lg border',
+              'bg-card hover:bg-muted/50',
+              'transition-all duration-200',
+              isFilteredOut
+                ? 'cursor-default'
+                : 'cursor-grab active:cursor-grabbing',
+              isSwapTarget &&
+                !isFilteredOut &&
+                'border-primary border-2 bg-primary/5 scale-[1.02]'
             )}
           >
-            {initiative.owners && initiative.owners.length > 0 && (
-              <div
-                className={cn(
-                  'flex items-center gap-1 text-xs',
-                  isFilteredOut
-                    ? 'text-muted-foreground'
-                    : 'text-muted-foreground'
-                )}
-              >
-                <Users className='h-3 w-3' />
-                <span>
-                  {initiative.owners.length}{' '}
-                  {initiative.owners.length === 1 ? 'person' : 'people'}
-                </span>
-              </div>
-            )}
-            {initiative.size &&
-              initiativeSizeUtils.isValid(initiative.size) && (
-                <div
-                  className={cn(
-                    'flex items-center gap-1 text-xs',
-                    isFilteredOut
-                      ? 'text-muted-foreground'
-                      : 'text-muted-foreground'
+            <div className='flex flex-col h-full'>
+              <div className='flex items-start justify-between gap-2 mb-2'>
+                <div className='flex items-center gap-1'>
+                  {!isFilteredOut && (
+                    <GripVertical className='h-3.5 w-3.5 text-muted-foreground/50' />
                   )}
-                >
-                  <Ruler className='h-3 w-3' />
-                  <span>
-                    {initiativeSizeUtils.getShortLabel(
-                      initiative.size as InitiativeSize
+                  <span
+                    className={cn(
+                      'text-xs font-mono',
+                      isFilteredOut
+                        ? 'text-muted-foreground'
+                        : 'text-muted-foreground'
                     )}
+                  >
+                    #{slotNumber}
                   </span>
                 </div>
-              )}
-            {initiative.targetDate && (
-              <div
-                className={cn(
-                  'flex items-center gap-1 text-xs',
-                  isFilteredOut
-                    ? 'text-muted-foreground'
-                    : 'text-muted-foreground'
-                )}
-              >
-                <Calendar className='h-3 w-3' />
-                <span>{formatShortDate(initiative.targetDate)}</span>
+                <RagCircle rag={initiative.rag} size='small' />
               </div>
-            )}
-            {initiative.progress !== undefined && (
-              <div
-                className={cn(
-                  'flex items-center gap-1 text-xs',
-                  isFilteredOut
-                    ? 'text-muted-foreground'
-                    : 'text-muted-foreground'
-                )}
-              >
-                <TrendingUp className='h-3 w-3' />
-                <span>{initiative.progress}%</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
 
-      <Button
-        variant='ghost'
-        size='sm'
-        className={cn(
-          'absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full',
-          'bg-destructive/10 hover:bg-destructive/20 text-destructive',
-          'opacity-0 group-hover:opacity-100 transition-opacity',
-          'shadow-sm'
-        )}
-        onClick={handleRemove}
-        disabled={isRemoving}
-        title='Remove from slot'
-      >
-        <X className='h-3.5 w-3.5' />
-      </Button>
+              {onInitiativeClick ? (
+                <button
+                  type='button'
+                  className='flex-1 text-left'
+                  onClick={e => {
+                    e.stopPropagation()
+                    onInitiativeClick(initiative)
+                  }}
+                  draggable={false}
+                >
+                  <h3
+                    className={cn(
+                      'font-medium text-sm line-clamp-2 mb-2 transition-colors',
+                      isFilteredOut
+                        ? 'text-muted-foreground'
+                        : 'hover:text-primary'
+                    )}
+                  >
+                    {initiative.title}
+                  </h3>
+                </button>
+              ) : (
+                <Link
+                  href={`/initiatives/${initiative.id}`}
+                  className='flex-1'
+                  onClick={e => e.stopPropagation()}
+                  draggable={false}
+                >
+                  <h3
+                    className={cn(
+                      'font-medium text-sm line-clamp-2 mb-2 transition-colors',
+                      isFilteredOut
+                        ? 'text-muted-foreground'
+                        : 'hover:text-primary'
+                    )}
+                  >
+                    {initiative.title}
+                  </h3>
+                </Link>
+              )}
+
+              <div className='flex items-center gap-2 flex-wrap'>
+                <Badge
+                  variant={statusVariant}
+                  className={cn('text-xs', isFilteredOut && 'opacity-60')}
+                >
+                  {initiativeStatusUtils.getLabel(
+                    initiative.status as InitiativeStatus
+                  )}
+                </Badge>
+                {initiative.team && (
+                  <span
+                    className={cn(
+                      'text-xs truncate',
+                      isFilteredOut
+                        ? 'text-muted-foreground'
+                        : 'text-muted-foreground'
+                    )}
+                  >
+                    {initiative.team.name}
+                  </span>
+                )}
+              </div>
+
+              {/* People count, size, target date, and progress */}
+              <div
+                className={cn(
+                  'flex items-center gap-3 mt-2 pt-2 border-t flex-wrap',
+                  isFilteredOut ? 'border-border/30' : 'border-border/50'
+                )}
+              >
+                {initiative.owners && initiative.owners.length > 0 && (
+                  <div
+                    className={cn(
+                      'flex items-center gap-1 text-xs',
+                      isFilteredOut
+                        ? 'text-muted-foreground'
+                        : 'text-muted-foreground'
+                    )}
+                  >
+                    <Users className='h-3 w-3' />
+                    <span>
+                      {initiative.owners.length}{' '}
+                      {initiative.owners.length === 1 ? 'person' : 'people'}
+                    </span>
+                  </div>
+                )}
+                {initiative.size &&
+                  initiativeSizeUtils.isValid(initiative.size) && (
+                    <div
+                      className={cn(
+                        'flex items-center gap-1 text-xs',
+                        isFilteredOut
+                          ? 'text-muted-foreground'
+                          : 'text-muted-foreground'
+                      )}
+                    >
+                      <Ruler className='h-3 w-3' />
+                      <span>
+                        {initiativeSizeUtils.getShortLabel(
+                          initiative.size as InitiativeSize
+                        )}
+                      </span>
+                    </div>
+                  )}
+                {initiative.targetDate && (
+                  <div
+                    className={cn(
+                      'flex items-center gap-1 text-xs',
+                      isFilteredOut
+                        ? 'text-muted-foreground'
+                        : 'text-muted-foreground'
+                    )}
+                  >
+                    <Calendar className='h-3 w-3' />
+                    <span>{formatShortDate(initiative.targetDate)}</span>
+                  </div>
+                )}
+                {initiative.progress !== undefined && (
+                  <div
+                    className={cn(
+                      'flex items-center gap-1 text-xs',
+                      isFilteredOut
+                        ? 'text-muted-foreground'
+                        : 'text-muted-foreground'
+                    )}
+                  >
+                    <TrendingUp className='h-3 w-3' />
+                    <span>{initiative.progress}%</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </InitiativeSlotPopup>
+      ) : null}
+
+      {initiative && (
+        <Button
+          variant='ghost'
+          size='sm'
+          className={cn(
+            'absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full',
+            'bg-destructive/10 hover:bg-destructive/20 text-destructive',
+            'opacity-0 group-hover:opacity-100 transition-opacity',
+            'shadow-sm'
+          )}
+          onClick={handleRemove}
+          disabled={isRemoving}
+          title='Remove from slot'
+        >
+          <X className='h-3.5 w-3.5' />
+        </Button>
+      )}
     </div>
   )
 }
