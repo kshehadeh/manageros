@@ -63,18 +63,30 @@ export function InitiativeSlotPopup({
   children,
 }: InitiativeSlotPopupProps) {
   const [data, setData] = useState<InitiativeSlotPopupData | null>(null)
+  const [dataInitiativeId, setDataInitiativeId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isOpen, setIsOpen] = useState(false)
 
+  // Clear data when initiativeId changes
   useEffect(() => {
-    if (isOpen && !data && !loading) {
+    if (dataInitiativeId !== initiativeId) {
+      setData(null)
+      setDataInitiativeId(null)
+      setError(null)
+    }
+  }, [initiativeId, dataInitiativeId])
+
+  useEffect(() => {
+    // Only fetch if we don't have data for this specific initiative
+    if (isOpen && dataInitiativeId !== initiativeId && !loading) {
       setLoading(true)
       setError(null)
       getInitiativeSlotPopupData(initiativeId)
         .then(result => {
           if (result) {
             setData(result)
+            setDataInitiativeId(initiativeId)
           } else {
             setError('Failed to load data')
           }
@@ -87,7 +99,7 @@ export function InitiativeSlotPopup({
           setLoading(false)
         })
     }
-  }, [isOpen, initiativeId, data, loading])
+  }, [isOpen, initiativeId, dataInitiativeId, loading])
 
   return (
     <HoverCard openDelay={500} onOpenChange={setIsOpen}>
