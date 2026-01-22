@@ -8,6 +8,7 @@ import {
   checkOrganizationLimit,
   getOrganizationCounts,
 } from '@/lib/subscription-utils'
+import { getTaskAccessWhereClause } from '@/lib/task-access-utils'
 
 export async function createInitiative(formData: InitiativeFormData) {
   const user = await getCurrentUser()
@@ -1415,6 +1416,160 @@ export async function getInitiativeSummaryForModal(initiativeId: string) {
     }
   } catch (error) {
     console.error('Error fetching initiative summary:', error)
+    return null
+  }
+}
+
+/**
+ * Get popup data for initiative slot card hover
+ * Returns people involved, last check-in, and open tasks
+ */
+export async function getInitiativeSlotPopupData(initiativeId: string) {
+  const user = await getCurrentUser()
+
+  if (!user.managerOSOrganizationId) {
+    return null
+  }
+
+  const organizationId = user.managerOSOrganizationId
+
+  try {
+    // Verify initiative exists and belongs to user's organization
+    const initiative = await prisma.initiative.findFirst({
+      where: {
+        id: initiativeId,
+        organizationId,
+      },
+      select: {
+        id: true,
+        owners: {
+          include: {
+            person: {
+              select: {
+                id: true,
+                name: true,
+                avatar: true,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (!initiative) {
+      return null
+    }
+
+    // Get most recent check-in
+    const lastCheckIn = await prisma.checkIn.findFirst({
+      where: {
+        initiativeId,
+        initiative: {
+          organizationId,
+        },
+      },
+      select: {
+        id: true,
+        weekOf: true,
+        rag: true,
+        confidence: true,
+        summary: true,
+        blockers: true,
+        nextSteps: true,
+        createdAt: true,
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+
+    // Get open tasks (not done or dropped) that are directly tied to this initiative
+    // Tasks can be directly on the initiative or on objectives of the initiative
+    const openTasks = await prisma.task.findMany({
+      where: {
+        AND: [
+          {
+            OR: [
+              // Tasks directly on the initiative
+              {
+                initiativeId,
+                initiative: {
+                  organizationId,
+                },
+              },
+              // Tasks on objectives of this initiative
+              {
+                objective: {
+                  initiativeId,
+                  initiative: {
+                    organizationId,
+                  },
+                },
+              },
+            ],
+          },
+          {
+            status: {
+              notIn: ['done', 'dropped'],
+            },
+          },
+        ],
+      },
+      select: {
+        id: true,
+        title: true,
+        dueDate: true,
+        priority: true,
+        status: true,
+        assignee: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: [
+        { priority: 'desc' },
+        { dueDate: { sort: 'asc', nulls: 'last' } },
+      ],
+      take: 10, // Limit to 10 tasks to avoid overwhelming the popup
+    })
+
+    return {
+      people: initiative.owners.map(owner => ({
+        id: owner.person.id,
+        name: owner.person.name,
+        avatar: owner.person.avatar,
+        role: owner.role,
+      })),
+      lastCheckIn: lastCheckIn
+        ? {
+            id: lastCheckIn.id,
+            weekOf: lastCheckIn.weekOf,
+            rag: lastCheckIn.rag,
+            confidence: lastCheckIn.confidence,
+            summary: lastCheckIn.summary,
+            blockers: lastCheckIn.blockers,
+            nextSteps: lastCheckIn.nextSteps,
+            createdAt: lastCheckIn.createdAt,
+            createdBy: lastCheckIn.createdBy,
+          }
+        : null,
+      openTasks: openTasks.map(task => ({
+        id: task.id,
+        title: task.title,
+        assignee: task.assignee,
+        dueDate: task.dueDate,
+        priority: task.priority,
+        status: task.status,
+      })),
+    }
+  } catch (error) {
+    console.error('Error fetching initiative slot popup data:', error)
     return null
   }
 }
