@@ -27,8 +27,10 @@ import {
   Users,
   SettingsIcon,
   ArrowRight,
+  Plus,
 } from 'lucide-react'
 import { FormTemplate, type FormSection } from '@/components/ui/form-template'
+import { cn } from '@/lib/utils'
 import {
   taskPriorityUtils,
   DEFAULT_TASK_PRIORITY,
@@ -501,14 +503,20 @@ export function InitiativeForm({
       title: 'Objectives',
       icon: Target,
       action: (
-        <Button
+        <button
           type='button'
           onClick={addObjective}
-          variant='outline'
-          size='sm'
+          className={cn(
+            'inline-flex items-center gap-1 text-sm text-muted-foreground',
+            'hover:text-foreground transition-colors',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+            'bg-transparent border-none p-0 cursor-pointer'
+          )}
+          title='Add Objective'
         >
+          <Plus className='w-3.5 h-3.5' />
           Add Objective
-        </Button>
+        </button>
       ),
       content: (
         <div className='space-y-4'>
@@ -564,9 +572,20 @@ export function InitiativeForm({
       title: 'People',
       icon: Users,
       action: (
-        <Button type='button' onClick={addOwner} variant='outline' size='sm'>
+        <button
+          type='button'
+          onClick={addOwner}
+          className={cn(
+            'inline-flex items-center gap-1 text-sm text-muted-foreground',
+            'hover:text-foreground transition-colors',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+            'bg-transparent border-none p-0 cursor-pointer'
+          )}
+          title='Add Person'
+        >
+          <Plus className='w-3.5 h-3.5' />
           Add Person
-        </Button>
+        </button>
       ),
       content: (
         <div className='space-y-0'>

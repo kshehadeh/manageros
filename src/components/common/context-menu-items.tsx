@@ -194,17 +194,17 @@ export function SetDueDateMenuItem({
     }
   }
 
-  // Calculate the quick date options
+  // Calculate the quick date options (all pinned to the hour, no minutes/seconds)
   const now = new Date()
 
-  // Later today: current time + 4 hours, rounded to nearest hour
+  // Later today: current time + 4 hours, rounded up to the next full hour
   const laterToday = new Date(now)
   laterToday.setHours(laterToday.getHours() + 4)
-  // Round to nearest hour
-  const roundedHour = Math.round(
-    laterToday.getHours() + laterToday.getMinutes() / 60
-  )
-  laterToday.setHours(roundedHour, 0, 0, 0)
+  const laterHour = laterToday.getHours()
+  const laterMin = laterToday.getMinutes()
+  const laterSec = laterToday.getSeconds()
+  const hourToSet = laterMin > 0 || laterSec > 0 ? laterHour + 1 : laterHour
+  laterToday.setHours(hourToSet, 0, 0, 0)
 
   // Tomorrow: next day at 9am
   const tomorrow = new Date(now)

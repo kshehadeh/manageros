@@ -6,7 +6,6 @@ import { InitiativeTasks } from '@/components/initiatives/initiative-tasks-serve
 import { InitiativeCheckInsServer } from '@/components/initiatives/initiative-checkins-server'
 import { InitiativeSidebar } from '@/components/initiatives/initiative-sidebar'
 import { NotesSectionServer } from '@/components/notes/notes-section-server'
-import { InitiativeCompletionRate } from '@/components/initiatives/initiative-completion-rate'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
@@ -26,22 +25,17 @@ import {
   InitiativeNotesSkeleton,
   InitiativeCheckInsSkeleton,
   InitiativeSidebarSkeleton,
-  InitiativeCompletionRateSkeleton,
   InitiativePropertiesSidebarSkeleton,
 } from '@/components/initiatives/initiative-detail-skeletons'
 import { InitiativePropertiesSidebarServer } from '@/components/initiatives/initiative-properties-sidebar-server'
 import { MobileBottomPanel } from '@/components/ui/mobile-bottom-panel'
-import { Rag } from '../../../../components/rag'
 import { Badge } from '@/components/ui/badge'
 import {
   initiativeStatusUtils,
   type InitiativeStatus,
 } from '@/lib/initiative-status'
 import { Link } from '@/components/ui/link'
-import { TeamAvatar } from '@/components/teams/team-avatar'
-import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
 import { initiativeSizeUtils, type InitiativeSize } from '@/lib/initiative-size'
-import { formatShortDate } from '@/lib/utils/date-utils'
 
 export default async function InitiativeDetail({
   params,
@@ -94,10 +88,7 @@ export default async function InitiativeDetail({
   )
   const canCreateTask = await getActionPermission(user, 'task.create')
 
-  const startDateFormatted = formatShortDate(init.startDate)
-  const targetDateFormatted = formatShortDate(init.targetDate)
-
-  // Build array of subtext items
+  // Build subtitle items: status, team, size (full text only)
   const subtextItems = [
     <Badge
       key='status'
@@ -108,63 +99,19 @@ export default async function InitiativeDetail({
     >
       {initiativeStatusUtils.getLabel(init.status as InitiativeStatus)}
     </Badge>,
-    <Rag key='rag' rag={init.rag} size='small' />,
-    <Suspense
-      key='completion-rate'
-      fallback={<InitiativeCompletionRateSkeleton />}
-    >
-      <InitiativeCompletionRate initiativeId={init.id} />
-    </Suspense>,
-    taskPriorityUtils.isValid(init.priority) && (
-      <Badge
-        key='priority'
-        variant={
-          taskPriorityUtils.getVariant(init.priority as TaskPriority) as
-            | 'default'
-            | 'secondary'
-            | 'destructive'
-            | 'outline'
-        }
-        className='text-xs'
+    init.team && (
+      <Link
+        key='team'
+        href={`/teams/${init.team.id}`}
+        className='text-sm text-muted-foreground hover:text-foreground transition-colors'
       >
-        {taskPriorityUtils.getLabel(init.priority as TaskPriority)}
-      </Badge>
+        {init.team.name}
+      </Link>
     ),
     initiativeSizeUtils.isValid(init.size) && (
-      <Badge
-        key='size'
-        variant={
-          initiativeSizeUtils.getVariant(init.size as InitiativeSize) as
-            | 'default'
-            | 'secondary'
-            | 'destructive'
-            | 'outline'
-        }
-        className='text-xs'
-      >
-        {initiativeSizeUtils.getShortLabel(init.size as InitiativeSize)}
-      </Badge>
-    ),
-    startDateFormatted ? (
-      <span key='start-date' className='text-sm text-muted-foreground'>
-        {startDateFormatted}
+      <span key='size' className='text-sm text-muted-foreground'>
+        {initiativeSizeUtils.getLabel(init.size as InitiativeSize)}
       </span>
-    ) : null,
-    targetDateFormatted ? (
-      <span key='target-date' className='text-sm text-muted-foreground'>
-        {targetDateFormatted}
-      </span>
-    ) : null,
-    init.team && (
-      <div key='team' className='flex items-center gap-2'>
-        <TeamAvatar name={init.team.name} avatar={init.team.avatar} size='xs' />
-        <Link
-          href={`/teams/${init.team.id}`}
-          className='text-sm text-muted-foreground hover:text-foreground transition-colors'
-        >
-          {init.team.name}
-        </Link>
-      </div>
     ),
   ].filter(Boolean)
 
