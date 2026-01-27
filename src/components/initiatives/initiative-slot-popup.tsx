@@ -24,6 +24,7 @@ import {
   ArrowRight,
   ChevronRight,
   Pencil,
+  Eye,
 } from 'lucide-react'
 import { Link } from '@/components/ui/link'
 
@@ -108,7 +109,7 @@ export function InitiativeSlotPopup({
   }, [isOpen, initiativeId, dataInitiativeId, loading])
 
   return (
-    <div className='flex shrink-0 items-center gap-1'>
+    <div className='flex shrink-0 items-center gap-1' data-slot-card-actions>
       <Tooltip>
         <TooltipTrigger asChild>
           <Link
@@ -121,22 +122,30 @@ export function InitiativeSlotPopup({
         </TooltipTrigger>
         <TooltipContent side='top'>Edit initiative</TooltipContent>
       </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Link
+            href={`/initiatives/${initiativeId}`}
+            className='inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50'
+            onClick={e => e.stopPropagation()}
+          >
+            <Eye className='h-4 w-4' />
+          </Link>
+        </TooltipTrigger>
+        <TooltipContent side='top'>View initiative</TooltipContent>
+      </Tooltip>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <PopoverTrigger asChild>
-              <Button
-                variant='ghost'
-                size='sm'
-                className='h-7 w-7 p-0 text-muted-foreground hover:text-foreground'
-                onClick={e => e.stopPropagation()}
-              >
-                <ChevronRight className='h-4 w-4' />
-              </Button>
-            </PopoverTrigger>
-          </TooltipTrigger>
-          <TooltipContent side='top'>View Details</TooltipContent>
-        </Tooltip>
+        <PopoverTrigger asChild>
+          <Button
+            variant='ghost'
+            size='sm'
+            className='h-7 w-7 p-0 text-muted-foreground hover:text-foreground'
+            onClick={e => e.stopPropagation()}
+            title='View Details'
+          >
+            <ChevronRight className='h-4 w-4' />
+          </Button>
+        </PopoverTrigger>
         <PopoverContent
           side='top'
           align='end'
