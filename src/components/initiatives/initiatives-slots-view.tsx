@@ -8,7 +8,6 @@ import {
   type DragMode,
 } from './slot-card'
 import { SlotInitiativeSelectorModal } from './slot-initiative-selector-modal'
-import { InitiativeDetailModal } from './initiative-detail-modal'
 import {
   swapInitiativeSlots,
   insertInitiativeAtSlot,
@@ -42,10 +41,6 @@ export function InitiativesSlotsView({
   const [insertPosition, setInsertPosition] = useState<InsertPosition | null>(
     null
   )
-  const [detailModalOpen, setDetailModalOpen] = useState(false)
-  const [selectedInitiativeId, setSelectedInitiativeId] = useState<
-    string | null
-  >(null)
 
   // Check if any filters are active
   const hasActiveFilters =
@@ -80,11 +75,6 @@ export function InitiativesSlotsView({
   const handleAssignClick = (slotNumber: number) => {
     setSelectedSlotNumber(slotNumber)
     setSelectorModalOpen(true)
-  }
-
-  const handleInitiativeClick = (initiative: SlotInitiative) => {
-    setSelectedInitiativeId(initiative.id)
-    setDetailModalOpen(true)
   }
 
   const handleDragStart = (initiative: SlotInitiative) => {
@@ -263,7 +253,6 @@ export function InitiativesSlotsView({
               slotNumber={slotNumber}
               initiative={initiative}
               onAssignClick={handleAssignClick}
-              onInitiativeClick={handleInitiativeClick}
               isDragging={draggedInitiative?.slot === slotNumber}
               isSwapTarget={swapTargetSlot === slotNumber}
               insertMarkerDirection={getInsertMarkerDirection(slotNumber)}
@@ -280,17 +269,6 @@ export function InitiativesSlotsView({
         slotNumber={selectedSlotNumber}
         unslottedInitiatives={unslottedInitiatives}
       />
-
-      {selectedInitiativeId && (
-        <InitiativeDetailModal
-          initiativeId={selectedInitiativeId}
-          isOpen={detailModalOpen}
-          onClose={() => {
-            setDetailModalOpen(false)
-            setSelectedInitiativeId(null)
-          }}
-        />
-      )}
     </>
   )
 }

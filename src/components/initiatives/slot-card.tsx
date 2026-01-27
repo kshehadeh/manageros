@@ -1,7 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { Link } from '@/components/ui/link'
+import { useState, useRef } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { RagCircle } from '@/components/rag'
@@ -52,7 +51,6 @@ interface SlotCardProps {
   slotNumber: number
   initiative?: SlotInitiative
   onAssignClick: (slotNumber: number) => void
-  onInitiativeClick?: (initiative: SlotInitiative) => void
   isDragging?: boolean
   isSwapTarget?: boolean
   insertMarkerDirection?: InsertMarkerDirection
@@ -72,7 +70,6 @@ export function SlotCard({
   slotNumber,
   initiative,
   onAssignClick,
-  onInitiativeClick,
   isDragging = false,
   isSwapTarget = false,
   insertMarkerDirection = null,
@@ -84,6 +81,7 @@ export function SlotCard({
   onDrop,
 }: SlotCardProps) {
   const [isRemoving, setIsRemoving] = useState(false)
+  const pointerDownTargetRef = useRef<EventTarget | null>(null)
 
   const handleRemove = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -108,6 +106,15 @@ export function SlotCard({
 
   const handleDragStart = (e: React.DragEvent) => {
     if (!initiative || isFilteredOut) return
+    // Don't start drag when the user clicked in the footer (Edit/View/Popup buttons)
+    const target = pointerDownTargetRef.current
+    if (
+      target instanceof HTMLElement &&
+      target.closest('[data-slot-card-actions]')
+    ) {
+      e.preventDefault()
+      return
+    }
     e.dataTransfer.effectAllowed = 'move'
     e.dataTransfer.setData('text/plain', initiative.id)
     onDragStart?.(initiative)
@@ -273,6 +280,9 @@ export function SlotCard({
         isFilteredOut && 'opacity-60'
       )}
       draggable={!isFilteredOut}
+      onPointerDown={e => {
+        pointerDownTargetRef.current = e.target
+      }}
       onDragStart={isFilteredOut ? undefined : handleDragStart}
       onDragEnd={isFilteredOut ? undefined : onDragEnd}
       onDragOver={isFilteredOut ? undefined : handleDragOver}
@@ -314,46 +324,14 @@ export function SlotCard({
               <RagCircle rag={initiative.rag} size='small' />
             </div>
 
-            {onInitiativeClick ? (
-              <button
-                type='button'
-                className='flex-1 text-left'
-                onClick={e => {
-                  e.stopPropagation()
-                  onInitiativeClick(initiative)
-                }}
-                draggable={false}
-              >
-                <h3
-                  className={cn(
-                    'font-medium text-sm line-clamp-2 mb-2 transition-colors',
-                    isFilteredOut
-                      ? 'text-muted-foreground'
-                      : 'hover:text-primary'
-                  )}
-                >
-                  {initiative.title}
-                </h3>
-              </button>
-            ) : (
-              <Link
-                href={`/initiatives/${initiative.id}`}
-                className='flex-1'
-                onClick={e => e.stopPropagation()}
-                draggable={false}
-              >
-                <h3
-                  className={cn(
-                    'font-medium text-sm line-clamp-2 mb-2 transition-colors',
-                    isFilteredOut
-                      ? 'text-muted-foreground'
-                      : 'hover:text-primary'
-                  )}
-                >
-                  {initiative.title}
-                </h3>
-              </Link>
-            )}
+            <h3
+              className={cn(
+                'font-medium text-sm line-clamp-2 mb-2 flex-1',
+                isFilteredOut ? 'text-muted-foreground' : 'text-foreground'
+              )}
+            >
+              {initiative.title}
+            </h3>
 
             <div className='flex items-center gap-2 flex-wrap'>
               <Badge
