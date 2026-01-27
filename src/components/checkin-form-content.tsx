@@ -36,9 +36,21 @@ export function CheckInFormContent({
     return isNaN(date.getTime()) ? '' : date.toISOString()
   }
 
+  // Default "week of" to the nearest Monday on or before today when adding a new check-in (if Monday, use today)
+  const getDefaultWeekOf = (): string => {
+    if (checkIn?.weekOf) return getWeekOfISO(checkIn.weekOf)
+    const now = new Date()
+    const day = now.getDay() // 0=Sun, 1=Mon, ..., 6=Sat
+    const daysSinceMonday = day === 0 ? 6 : day - 1
+    const nearestMonday = new Date(now)
+    nearestMonday.setDate(now.getDate() - daysSinceMonday)
+    nearestMonday.setHours(0, 0, 0, 0)
+    return nearestMonday.toISOString()
+  }
+
   // Form state to preserve values on error
   const [formData, setFormData] = useState({
-    weekOf: getWeekOfISO(checkIn?.weekOf),
+    weekOf: getDefaultWeekOf(),
     rag: checkIn?.rag ?? 'green',
     confidence: checkIn?.confidence ?? 80,
     summary: checkIn?.summary ?? '',
@@ -49,7 +61,7 @@ export function CheckInFormContent({
   // Reset form when checkIn changes
   useEffect(() => {
     setFormData({
-      weekOf: getWeekOfISO(checkIn?.weekOf),
+      weekOf: getDefaultWeekOf(),
       rag: checkIn?.rag ?? 'green',
       confidence: checkIn?.confidence ?? 80,
       summary: checkIn?.summary ?? '',
