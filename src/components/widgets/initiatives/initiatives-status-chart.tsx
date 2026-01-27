@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
   Tooltip,
   Cell,
-  type TooltipProps,
+  type TooltipContentProps,
 } from 'recharts'
 
 interface InitiativesStatusChartProps {
@@ -18,13 +18,16 @@ interface InitiativesStatusChartProps {
 }
 
 // Custom tooltip for bar chart
-const BarChartTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+const BarChartTooltip = ({
+  active,
+  payload,
+}: TooltipContentProps<number, string>) => {
   if (active && payload && payload.length && payload[0]) {
     const data = payload[0]
     const originalData =
       (data.payload as { name?: string; value?: number }) || {}
     const statusName = originalData.name || 'Unknown'
-    const count = originalData.value || data.value || 0
+    const count = originalData.value ?? data.value ?? 0
     return (
       <div className='rounded-md border border-border bg-card text-card-foreground p-2 shadow-md'>
         <p className='text-xs font-medium font-mono'>{statusName}</p>

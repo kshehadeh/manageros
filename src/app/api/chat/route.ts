@@ -32,10 +32,10 @@ export async function POST(req: Request) {
 
     const { messages } = await req.json()
 
-    const convertedMessages = convertToModelMessages(messages)
+    const convertedMessages = await convertToModelMessages(messages)
 
     const result = streamText({
-      model: openai('gpt-4o'),
+      model: openai('gpt-5.1'),
       messages: convertedMessages,
 
       tools: {

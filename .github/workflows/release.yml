@@ -1,67 +1,67 @@
 name: Release
 
 on:
-    workflow_dispatch:
-    push:
-        branches: [main]
+  workflow_dispatch:
+  push:
+    branches: [main]
 
 jobs:
-    release:
-        runs-on: ubuntu-latest
-        environment: Production
-        permissions:
-            contents: write
-            issues: write
-            pull-requests: write
+  release:
+    runs-on: ubuntu-latest
+    environment: Production
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
 
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-                  ref: main
-                  token: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Setup Bun
-              uses: oven-sh/setup-bun@v2
-              with:
-                  bun-version: latest
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
-            - name: Install dependencies
-              run: bun install
-              env:
-                  DIRECT_URL: ${{ vars.DIRECT_URL }}
-                  DATABASE_URL: ${{ vars.DATABASE_URL }}
+      - name: Install dependencies
+        run: bun install
+        env:
+          DIRECT_URL: ${{ vars.DIRECT_URL }}
+          DATABASE_URL: ${{ vars.DATABASE_URL }}
 
-            - name: Import GPG key
-              uses: crazy-max/ghaction-import-gpg@v6
-              with:
-                  gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-                  passphrase: ${{ secrets.GPG_PASSPHRASE }}
-                  git_user_signingkey: true
-                  git_commit_gpgsign: true
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
 
-            - name: Configure Git
-              run: |
-                  git config --global user.name "ManagerOS Release Bot"
-                  git config --global user.email "github-actions@users.noreply.github.com"
-                  git config --global commit.gpgsign true
-                  git config --global gpg.program gpg
+      - name: Configure Git
+        run: |
+          git config --global user.name "ManagerOS Release Bot"
+          git config --global user.email "github-actions@users.noreply.github.com"
+          git config --global commit.gpgsign true
+          git config --global gpg.program gpg
 
-            - name: Run release-it
-              run: bun run release
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run release-it
+        run: bun run release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Update staging branch with new version
-              run: |
-                  # Fetch latest changes including the release commit that was just pushed
-                  git fetch origin main staging
-                  # Checkout staging branch
-                  git checkout staging
-                  # Merge the updated main (with new version) into staging
-                  git merge origin/main --no-edit -m "chore: sync staging with main after release"
-                  # Push the updated staging branch
-                  git push origin staging
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update staging branch with new version
+        run: |
+          # Fetch latest changes including the release commit that was just pushed
+          git fetch origin main staging
+          # Checkout staging branch
+          git checkout staging
+          # Merge the updated main (with new version) into staging
+          git merge origin/main --no-edit -m "chore: sync staging with main after release"
+          # Push the updated staging branch
+          git push origin staging
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

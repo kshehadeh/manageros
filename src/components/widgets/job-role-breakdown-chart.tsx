@@ -6,7 +6,7 @@ import {
   Cell,
   ResponsiveContainer,
   Tooltip,
-  type TooltipProps,
+  type TooltipContentProps,
 } from 'recharts'
 
 interface JobRoleBreakdownChartProps {
@@ -15,7 +15,10 @@ interface JobRoleBreakdownChartProps {
 }
 
 // Custom tooltip for pie charts
-const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+const CustomTooltip = ({
+  active,
+  payload,
+}: TooltipContentProps<number, string>) => {
   if (active && payload && payload.length && payload[0]) {
     const data = payload[0]
     return (
@@ -54,8 +57,8 @@ export function JobRoleBreakdownChart({
               }) => {
                 const RADIAN = Math.PI / 180
                 const radius = innerRadius + (outerRadius - innerRadius) * 0.5
-                const x = cx + radius * Math.cos(-midAngle * RADIAN)
-                const y = cy + radius * Math.sin(-midAngle * RADIAN)
+                const x = cx + radius * Math.cos((midAngle ?? 0) * RADIAN)
+                const y = cy + radius * Math.sin((midAngle ?? 0) * RADIAN)
 
                 return (
                   <text
@@ -70,7 +73,7 @@ export function JobRoleBreakdownChart({
                     }}
                     className='text-xs font-mono'
                   >
-                    {`${(percent * 100).toFixed(0)}%`}
+                    {`${((percent ?? 0) * 100).toFixed(0)}%`}
                   </text>
                 )
               }}

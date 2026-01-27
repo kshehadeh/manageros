@@ -391,9 +391,8 @@ export async function updatePerson(id: string, formData: PersonFormData) {
   // Compare against updatedPerson.managerId (normalized database value) instead of validatedData.managerId
   // to avoid issues with undefined vs null comparison
   if (oldManagerId !== updatedPerson.managerId) {
-    const { resolveManagerSpanExceptions } = await import(
-      '@/lib/tolerance-rules/resolve-exceptions'
-    )
+    const { resolveManagerSpanExceptions } =
+      await import('@/lib/tolerance-rules/resolve-exceptions')
     // Check old manager (if they had too many reports, they might now be below threshold)
     if (oldManagerId) {
       await resolveManagerSpanExceptions(
@@ -410,9 +409,8 @@ export async function updatePerson(id: string, formData: PersonFormData) {
   // If person's status changed from inactive to active, their manager's active report count increased
   // We only need to check if status changed and person has a manager
   if (oldStatus !== updatedPerson.status && updatedPerson.managerId) {
-    const { resolveManagerSpanExceptions } = await import(
-      '@/lib/tolerance-rules/resolve-exceptions'
-    )
+    const { resolveManagerSpanExceptions } =
+      await import('@/lib/tolerance-rules/resolve-exceptions')
     // If person became inactive, manager's active report count decreased (might be within threshold now)
     // If person became active, manager's active report count increased (evaluation job will create exceptions if needed)
     // We only resolve if person became inactive (report count decreased)
@@ -567,9 +565,8 @@ export async function updatePersonPartial(
     validatedData.managerId !== undefined &&
     oldManagerId !== updatedPerson.managerId
   ) {
-    const { resolveManagerSpanExceptions } = await import(
-      '@/lib/tolerance-rules/resolve-exceptions'
-    )
+    const { resolveManagerSpanExceptions } =
+      await import('@/lib/tolerance-rules/resolve-exceptions')
     // Check old manager (if they had too many reports, they might now be below threshold)
     if (oldManagerId) {
       await resolveManagerSpanExceptions(
@@ -589,9 +586,8 @@ export async function updatePersonPartial(
     oldStatus !== updatedPerson.status &&
     updatedPerson.managerId
   ) {
-    const { resolveManagerSpanExceptions } = await import(
-      '@/lib/tolerance-rules/resolve-exceptions'
-    )
+    const { resolveManagerSpanExceptions } =
+      await import('@/lib/tolerance-rules/resolve-exceptions')
     // If person became inactive, manager's active report count decreased (might be within threshold now)
     // If person became active, manager's active report count increased (evaluation job will create exceptions if needed)
     // We only resolve if person became inactive (report count decreased)

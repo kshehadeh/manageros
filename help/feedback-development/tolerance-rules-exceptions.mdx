@@ -5,7 +5,9 @@ category: Feedback & Development
 ---
 
 <Info>
-  Tolerance rules help you **monitor organizational health** by automatically tracking key metrics and alerting you when thresholds are exceeded. Think of them as automated health checks for your team.
+  Tolerance rules help you **monitor organizational health** by automatically
+  tracking key metrics and alerting you when thresholds are exceeded. Think of
+  them as automated health checks for your team.
 </Info>
 
 Tolerance rules monitor important organizational practices like one-on-one frequency, initiative check-ins, feedback cycles, and management span. When a threshold is exceeded, the system creates an **exception** and sends a **notification** to alert you.
@@ -19,12 +21,14 @@ Tolerance rules are configurable monitors that track specific organizational met
   Rules evaluate daily without any manual work. Set them up once and they'll keep monitoring your organization.
 </Card>
 
-<Card title="Actionable Alerts" icon="bell">
-  When thresholds are exceeded, you get notifications with clear information about what needs attention.
+<Card title='Actionable Alerts' icon='bell'>
+  When thresholds are exceeded, you get notifications with clear information
+  about what needs attention.
 </Card>
 
-<Card title="Flexible Configuration" icon="settings">
-  Each rule type has configurable thresholds that you can adjust to match your organization's needs.
+<Card title='Flexible Configuration' icon='settings'>
+  Each rule type has configurable thresholds that you can adjust to match your
+  organization's needs.
 </Card>
 
 <Card title="Status Tracking" icon="check-circle">
@@ -39,21 +43,25 @@ Tolerance rules are configurable monitors that track specific organizational met
 Monitors whether managers are having regular one-on-one meetings with their direct reports.
 
 **What it checks:**
+
 - Finds the most recent one-on-one meeting between each manager and their direct reports
 - Calculates how many days have passed since the last meeting
 - Creates exceptions if too much time has passed
 
 **Configuration:**
+
 - **Warning Threshold**: Days before creating a warning exception
 - **Urgent Threshold**: Days before creating an urgent exception
 
 **Example:**
 If you set warning at 14 days and urgent at 21 days:
+
 - A manager who hasn't met with a report in 15 days gets a **warning** exception
 - A manager who hasn't met with a report in 22 days gets an **urgent** exception
 
 <Tip>
-  **Best Practice**: Set warning threshold to your target 1:1 frequency (e.g., weekly = 7 days), and urgent to 2x that (e.g., 14 days).
+  **Best Practice**: Set warning threshold to your target 1:1 frequency (e.g.,
+  weekly = 7 days), and urgent to 2x that (e.g., 14 days).
 </Tip>
 
 ### Initiative Check-In
@@ -61,15 +69,18 @@ If you set warning at 14 days and urgent at 21 days:
 Monitors whether active initiatives have had recent check-ins.
 
 **What it checks:**
+
 - Finds all active initiatives (planned or in progress)
 - Looks for the most recent check-in date
 - Creates exceptions if too much time has passed since the last check-in
 
 **Configuration:**
+
 - **Warning Threshold**: Days since last check-in before creating a warning
 
 **Example:**
 If you set warning at 7 days:
+
 - An initiative that hasn't had a check-in in 8 days gets a **warning** exception
 - If an initiative has never had a check-in, it immediately exceeds the threshold
 
@@ -78,15 +89,18 @@ If you set warning at 7 days:
 Monitors whether people have received 360 feedback within a specified time period.
 
 **What it checks:**
+
 - Finds all active people in your organization
 - Looks for the most recent feedback campaign where they were the target
 - Creates exceptions if too much time has passed since last feedback
 
 **Configuration:**
+
 - **Warning Threshold**: Months since last feedback before creating a warning
 
 **Example:**
 If you set warning at 6 months:
+
 - A person who hasn't received feedback in 7 months gets a **warning** exception
 - If someone has never received feedback, it immediately exceeds the threshold
 
@@ -95,14 +109,17 @@ If you set warning at 6 months:
 Monitors whether managers have too many direct reports.
 
 **What it checks:**
+
 - Counts active direct reports for each manager
 - Creates exceptions if a manager exceeds the maximum
 
 **Configuration:**
+
 - **Max Direct Reports**: Maximum number of direct reports allowed
 
 **Example:**
 If you set max at 8:
+
 - A manager with 9 direct reports gets an **urgent** exception
 - This helps identify when managers might be overloaded
 
@@ -133,7 +150,9 @@ When you receive a notification about an exception:
 3. **Update status** - Acknowledge, ignore, or resolve the exception
 
 <Tip>
-  **Resolve exceptions when fixed**: When you've addressed the underlying issue (e.g., had the 1:1, did the check-in), mark the exception as resolved. This helps track that issues are being addressed.
+  **Resolve exceptions when fixed**: When you've addressed the underlying issue
+  (e.g., had the 1:1, did the check-in), mark the exception as resolved. This
+  helps track that issues are being addressed.
 </Tip>
 
 ## Notifications
@@ -145,6 +164,7 @@ When an exception is created, you automatically receive a **notification**:
 - **Link**: Direct link to view the exception details
 
 Notifications appear in:
+
 - Your notification bell icon
 - The notifications page
 - Exception-specific views
@@ -172,7 +192,8 @@ Each rule type has specific configuration options:
 - **Manager Span**: Maximum direct reports
 
 <Warning>
-  **Start conservative**: Begin with longer thresholds and adjust based on your actual patterns. You can always make them stricter later.
+  **Start conservative**: Begin with longer thresholds and adjust based on your
+  actual patterns. You can always make them stricter later.
 </Warning>
 
 ### Enabling and Disabling
@@ -183,6 +204,7 @@ You can enable or disable rules without deleting them:
 - **Disabled**: Rule is not evaluated (existing exceptions remain)
 
 This is useful for:
+
 - Temporarily pausing a rule
 - Testing different threshold values
 - Seasonal adjustments
@@ -197,6 +219,7 @@ You can manually trigger a tolerance check at any time:
 4. You'll see a summary of exceptions created
 
 This is useful for:
+
 - Testing new rules
 - Checking status after making changes
 - Immediate evaluation without waiting for the daily run
@@ -230,6 +253,7 @@ This is useful for:
 **Goal**: Ensure managers have weekly 1:1s with their direct reports
 
 **Configuration:**
+
 - Warning threshold: 7 days
 - Urgent threshold: 14 days
 
@@ -240,6 +264,7 @@ This is useful for:
 **Goal**: Ensure active initiatives have regular check-ins
 
 **Configuration:**
+
 - Warning threshold: 7 days
 
 **Result**: Initiatives without check-ins for a week get warnings.
@@ -249,6 +274,7 @@ This is useful for:
 **Goal**: Ensure everyone receives 360 feedback at least every 6 months
 
 **Configuration:**
+
 - Warning threshold: 6 months
 
 **Result**: People who haven't received feedback in 6+ months get warnings.
@@ -258,6 +284,7 @@ This is useful for:
 **Goal**: Ensure no manager has more than 8 direct reports
 
 **Configuration:**
+
 - Max direct reports: 8
 
 **Result**: Managers with 9+ direct reports get urgent exceptions.
@@ -288,4 +315,3 @@ This is useful for:
 - **Settings**: Configure tolerance rules in Settings → Tolerance Rules
 - **Exceptions**: View and manage exceptions in the Exceptions page
 - **Notifications**: Manage notifications in the Notifications page
-

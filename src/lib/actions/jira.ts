@@ -164,9 +164,8 @@ export async function linkPersonToJiraAccount(
   }
 
   // Get integration instance
-  const { getIntegration } = await import(
-    '@/lib/integrations/integration-factory'
-  )
+  const { getIntegration } =
+    await import('@/lib/integrations/integration-factory')
   const integrationInstance = await getIntegration(orgIntegration.id)
 
   if (!integrationInstance) {
@@ -373,9 +372,8 @@ export async function fetchJiraAssignedTickets(
     }
 
     // Get integration instance
-    const { getIntegration } = await import(
-      '@/lib/integrations/integration-factory'
-    )
+    const { getIntegration } =
+      await import('@/lib/integrations/integration-factory')
     const integrationInstance = await getIntegration(orgIntegration.id)
 
     if (!integrationInstance || integrationInstance.getType() !== 'jira') {
@@ -507,9 +505,8 @@ export async function fetchJiraMetrics(
     }
 
     // Get integration instance
-    const { getIntegration } = await import(
-      '@/lib/integrations/integration-factory'
-    )
+    const { getIntegration } =
+      await import('@/lib/integrations/integration-factory')
     const integrationInstance = await getIntegration(orgIntegration.id)
 
     if (!integrationInstance || integrationInstance.getType() !== 'jira') {

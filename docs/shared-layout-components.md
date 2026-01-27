@@ -23,7 +23,6 @@ The top-level wrapper for all pages. Provides consistent spacing between major s
 
 ```tsx
 import { PageContainer } from '@/components/ui/page-container'
-
 ;<PageContainer>{/* Page content */}</PageContainer>
 ```
 
@@ -47,7 +46,6 @@ Handles page headers with title, subtitle, icon, and actions. Supports both simp
 ```tsx
 import { PageHeader } from '@/components/ui/page-header'
 import { Rocket } from 'lucide-react'
-
 ;<PageHeader
   title='Initiatives'
   titleIcon={Rocket}
@@ -93,7 +91,6 @@ Wraps the main content area and handles two-column layout structure (main conten
 import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
 import { PageSidebar } from '@/components/ui/page-sidebar'
-
 ;<PageContent>
   <PageMain>{/* Main content */}</PageMain>
   <PageSidebar>{/* Sidebar content */}</PageSidebar>
@@ -115,7 +112,6 @@ Wraps the main content column. Applies `flex-1 min-w-0` for proper flex behavior
 
 ```tsx
 import { PageMain } from '@/components/ui/page-main'
-
 ;<PageMain>
   <div className='space-y-6'>
     <PageSection>{/* Content sections */}</PageSection>
@@ -138,7 +134,6 @@ Wraps the sidebar column. Applies responsive width (`w-full lg:w-80 lg:shrink-0`
 
 ```tsx
 import { PageSidebar } from '@/components/ui/page-sidebar'
-
 ;<PageSidebar>
   <PageSection header={<SectionHeader icon={Users} title='Participants' />}>
     {/* Sidebar content */}
@@ -161,7 +156,6 @@ Optional wrapper for section content areas. Provides consistent spacing within s
 
 ```tsx
 import { SectionContent } from '@/components/ui/section-content'
-
 ;<PageSection>
   <SectionContent>{/* Section content */}</SectionContent>
 </PageSection>

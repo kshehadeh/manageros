@@ -7,7 +7,7 @@ import {
   YAxis,
   ResponsiveContainer,
   Tooltip,
-  type TooltipProps,
+  type TooltipContentProps,
 } from 'recharts'
 
 interface TeamBreakdownChartProps {
@@ -17,13 +17,16 @@ interface TeamBreakdownChartProps {
 const CHART_COLORS = ['#3b82f6'] // blue
 
 // Custom tooltip for bar chart
-const BarChartTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+const BarChartTooltip = ({
+  active,
+  payload,
+}: TooltipContentProps<number, string>) => {
   if (active && payload && payload.length && payload[0]) {
     const data = payload[0]
     const originalData =
       (data.payload as { name?: string; value?: number }) || {}
     const teamName = originalData.name || 'Unknown'
-    const peopleCount = originalData.value || data.value || 0
+    const peopleCount = originalData.value ?? data.value ?? 0
     return (
       <div className='rounded-md border border-border bg-card text-card-foreground p-2 shadow-md'>
         <p className='text-xs font-medium font-mono'>{teamName}</p>

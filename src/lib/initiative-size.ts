@@ -169,4 +169,3 @@ export const initiativeSizeUtils = {
     ...INITIATIVE_SIZE_DEFAULT_DESCRIPTIONS,
   }),
 }
-
