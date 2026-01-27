@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.64.0](https://github.com/kshehadeh/manageros/compare/v1.63.2...v1.64.0) (2026-01-27)
+
+### Features
+
+- **checkin-form:** set default week of to nearest Monday for new check-ins ([45e1dbe](https://github.com/kshehadeh/manageros/commit/45e1dbecaf65ae5cfe1b951d336a84c199aefe99))
+
 ## [1.63.2](https://github.com/kshehadeh/manageros/compare/v1.63.1...v1.63.2) (2026-01-27)
 
 ## [1.63.1](https://github.com/kshehadeh/manageros/compare/v1.63.0...v1.63.1) (2026-01-27)
