@@ -1,5 +1,7 @@
 # Changelog
 
+## [1.63.1](https://github.com/kshehadeh/manageros/compare/v1.63.0...v1.63.1) (2026-01-27)
+
 # [1.63.0](https://github.com/kshehadeh/manageros/compare/v1.62.0...v1.63.0) (2026-01-22)
 
 ### Bug Fixes
