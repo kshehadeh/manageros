@@ -134,6 +134,7 @@ if (organization) {
    - **Impact**: Low (rare scenario)
 
 3. **Resync needed** (line 336):
+
    ```typescript
    if (resync) {
      await syncUserDataToClerk(syncObject) // ⚠️ Clerk API write

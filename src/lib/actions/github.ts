@@ -118,9 +118,8 @@ export async function linkPersonToGithubAccount(
   }
 
   // Get integration instance
-  const { getIntegration } = await import(
-    '@/lib/integrations/integration-factory'
-  )
+  const { getIntegration } =
+    await import('@/lib/integrations/integration-factory')
   const integrationInstance = await getIntegration(orgIntegration.id)
 
   if (!integrationInstance) {
@@ -387,9 +386,8 @@ export async function fetchGithubPullRequests(
 
   try {
     // Get integration instance
-    const { getIntegration } = await import(
-      '@/lib/integrations/integration-factory'
-    )
+    const { getIntegration } =
+      await import('@/lib/integrations/integration-factory')
     const integrationInstance = await getIntegration(orgIntegration.id)
 
     if (!integrationInstance || integrationInstance.getType() !== 'github') {
@@ -511,9 +509,8 @@ export async function fetchGithubMetrics(
         : undefined
 
     // Get integration instance
-    const { getIntegration } = await import(
-      '@/lib/integrations/integration-factory'
-    )
+    const { getIntegration } =
+      await import('@/lib/integrations/integration-factory')
     const integrationInstance = await getIntegration(orgIntegration.id)
 
     if (!integrationInstance || integrationInstance.getType() !== 'github') {

@@ -53,6 +53,7 @@ GET {CLERK_FRONTEND_API_URL}/oauth/authorize?
 ```
 
 **Parameters:**
+
 - `client_id`: Your OAuth application's Client ID
 - `response_type`: Always `code` for authorization code flow
 - `redirect_uri`: Must match one of your registered redirect URIs
@@ -74,6 +75,7 @@ redirect_uri=YOUR_REDIRECT_URI
 ```
 
 **Response:**
+
 ```json
 {
   "access_token": "eyJhbGc...",
@@ -100,17 +102,17 @@ const response = await fetch('https://your-mpath-instance.com/api/tasks', {
 
 Scopes define what permissions your application has. Request only the scopes you need:
 
-| Scope               | Description                          |
-| ------------------- | ------------------------------------ |
-| `read:people`       | Read people and team information     |
-| `write:people`      | Create, update, and delete people   |
-| `read:tasks`        | Read tasks                           |
-| `write:tasks`       | Create, update, and delete tasks    |
-| `read:initiatives`  | Read initiatives and objectives      |
+| Scope               | Description                            |
+| ------------------- | -------------------------------------- |
+| `read:people`       | Read people and team information       |
+| `write:people`      | Create, update, and delete people      |
+| `read:tasks`        | Read tasks                             |
+| `write:tasks`       | Create, update, and delete tasks       |
+| `read:initiatives`  | Read initiatives and objectives        |
 | `write:initiatives` | Create, update, and delete initiatives |
-| `read:meetings`     | Read meetings                        |
-| `write:meetings`    | Create, update, and delete meetings  |
-| `admin`             | Full admin access (admins only)     |
+| `read:meetings`     | Read meetings                          |
+| `write:meetings`    | Create, update, and delete meetings    |
+| `admin`             | Full admin access (admins only)        |
 
 **Note**: The `admin` scope is only available to organization administrators.
 
@@ -157,7 +159,7 @@ async function handleCallback(code: string) {
     }),
   })
   const { access_token, refresh_token } = await response.json()
-  
+
   // Store tokens securely (never in localStorage for production)
   // Then use access_token for API calls
 }
@@ -219,7 +221,7 @@ tasks = api_response.json()
 ## Security Best Practices
 
 <Warning>
-Never expose your Client Secret in client-side code or public repositories.
+  Never expose your Client Secret in client-side code or public repositories.
 </Warning>
 
 1. **Store Secrets Securely**: Keep your Client Secret on the server side only
@@ -233,11 +235,11 @@ Never expose your Client Secret in client-side code or public repositories.
 
 ### Common Errors
 
-| Error Code | Description                    | Solution                                    |
-| ---------- | ------------------------------ | ------------------------------------------- |
-| 401        | Invalid or expired token       | Refresh the token or re-authenticate        |
-| 403        | Insufficient permissions       | Request the required scopes                 |
-| 400        | Invalid request                | Check your request parameters               |
+| Error Code | Description              | Solution                             |
+| ---------- | ------------------------ | ------------------------------------ |
+| 401        | Invalid or expired token | Refresh the token or re-authenticate |
+| 403        | Insufficient permissions | Request the required scopes          |
+| 400        | Invalid request          | Check your request parameters        |
 
 ### Handling Expired Tokens
 
@@ -246,7 +248,7 @@ async function makeApiCall(accessToken: string) {
   let response = await fetch('/api/tasks', {
     headers: { Authorization: `Bearer ${accessToken}` },
   })
-  
+
   if (response.status === 401) {
     // Token expired, refresh it
     const newToken = await refreshAccessToken(refreshToken)
@@ -255,7 +257,7 @@ async function makeApiCall(accessToken: string) {
       headers: { Authorization: `Bearer ${newToken}` },
     })
   }
-  
+
   return response.json()
 }
 ```
@@ -296,5 +298,6 @@ For help with OAuth integration:
 ---
 
 **Related Guides:**
+
 - [API Overview](/api)
 - [Integrations Overview](/integrations/integrations)

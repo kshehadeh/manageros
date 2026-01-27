@@ -115,7 +115,6 @@ The application now includes standardized page layout classes to ensure consiste
 // Standard page structure
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
-
 ;<div className='page-container'>
   <div className='page-header'>
     <h1 className='page-title'>Page Title</h1>

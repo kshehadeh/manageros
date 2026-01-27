@@ -130,4 +130,3 @@ const footer = {
   margin: '32px 0 0',
   padding: '0 40px',
 }
-

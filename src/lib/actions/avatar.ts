@@ -156,9 +156,8 @@ export async function getLinkedAccountAvatars(personId: string) {
 
       if (jiraAccountId) {
         // Get integration instance
-        const { getIntegration } = await import(
-          '@/lib/integrations/integration-factory'
-        )
+        const { getIntegration } =
+          await import('@/lib/integrations/integration-factory')
         const integrationInstance = await getIntegration(jiraIntegration.id)
 
         if (integrationInstance && integrationInstance.getType() === 'jira') {

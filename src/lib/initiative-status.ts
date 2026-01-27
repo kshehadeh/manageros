@@ -37,10 +37,7 @@ const INITIATIVE_STATUS_LABELS: Record<InitiativeStatus, string> = {
 }
 
 // Badge variants for each status
-const INITIATIVE_STATUS_VARIANTS: Record<
-  InitiativeStatus,
-  BadgeVariant
-> = {
+const INITIATIVE_STATUS_VARIANTS: Record<InitiativeStatus, BadgeVariant> = {
   [INITIATIVE_STATUS.PLANNED]: 'secondary',
   [INITIATIVE_STATUS.IN_PROGRESS]: 'default',
   [INITIATIVE_STATUS.PAUSED]: 'secondary',
@@ -61,9 +58,7 @@ const INITIATIVE_STATUS_UI_VARIANTS: Record<
 }
 
 // Status groups for filtering and organization
-const IN_PROGRESS_STATUSES: InitiativeStatus[] = [
-  INITIATIVE_STATUS.IN_PROGRESS,
-]
+const IN_PROGRESS_STATUSES: InitiativeStatus[] = [INITIATIVE_STATUS.IN_PROGRESS]
 
 export const COMPLETED_STATUSES: InitiativeStatus[] = [
   INITIATIVE_STATUS.DONE,
@@ -131,4 +126,3 @@ export const initiativeStatusUtils = {
   isValid: (status: string): status is InitiativeStatus =>
     ALL_INITIATIVE_STATUSES.includes(status as InitiativeStatus),
 }
-

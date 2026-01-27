@@ -16,7 +16,6 @@ All entity detail pages should use the shared layout components instead of CSS c
 
 ```tsx
 import { PageContainer } from '@/components/ui/page-container'
-
 ;<PageContainer>
   {/* Header */}
   {/* Main Content */}
@@ -36,7 +35,6 @@ import { PageContainer } from '@/components/ui/page-container'
 ```tsx
 import { PageHeader } from '@/components/ui/page-header'
 import { Rocket } from 'lucide-react'
-
 ;<PageHeader
   title={entity.name}
   titleIcon={Rocket}
@@ -117,7 +115,6 @@ import { Rocket } from 'lucide-react'
 import { PageContent } from '@/components/ui/page-content'
 import { PageMain } from '@/components/ui/page-main'
 import { PageSidebar } from '@/components/ui/page-sidebar'
-
 ;<PageContent>
   <PageMain>{/* Main content sections */}</PageMain>
 
@@ -189,7 +186,6 @@ import { SectionHeader } from '@/components/ui/section-header'
 import { PageSidebar } from '@/components/ui/page-sidebar'
 import { PageSection } from '@/components/ui/page-section'
 import { SectionHeader } from '@/components/ui/section-header'
-
 ;<PageSidebar>
   <PageSection header={<SectionHeader icon={Users} title='Related Items' />}>
     {/* Sidebar content */}

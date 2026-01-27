@@ -30,11 +30,11 @@ const sizeClasses = {
 /**
  * PersonAvatar component displays a person's avatar with initials fallback
  */
-export function PersonAvatar({ 
-  name, 
-  avatar, 
-  size = 'md', 
-  className 
+export function PersonAvatar({
+  name,
+  avatar,
+  size = 'md',
+  className,
 }: PersonAvatarProps) {
   return (
     <Avatar className={cn(sizeClasses[size], className)}>

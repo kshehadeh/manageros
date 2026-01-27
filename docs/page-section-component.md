@@ -37,7 +37,6 @@ Use `SectionHeaderAction` component for links that navigate to other pages:
 ```tsx
 import { SectionHeaderAction } from '@/components/ui/section-header-action'
 import { Eye } from 'lucide-react'
-
 ;<PageSection
   header={
     <SectionHeader
@@ -63,7 +62,6 @@ For actions that open modals, dialogs, or perform onClick actions, use a plain `
 ```tsx
 import { cn } from '@/lib/utils'
 import { Plus } from 'lucide-react'
-
 ;<PageSection
   header={
     <SectionHeader
