@@ -166,22 +166,6 @@ export const oneOnOneTableUrlConfig: TableUrlConfig = {
 }
 
 /**
- * Notes table URL configuration
- */
-export const notesTableUrlConfig: TableUrlConfig = {
-  filterParamMap: {
-    search: 'search',
-  },
-  defaultValues: {
-    search: '',
-    sort: { field: '', direction: 'asc' },
-    grouping: 'none',
-  },
-  sortParamName: DEFAULT_SORT_PARAM,
-  groupingParamName: DEFAULT_GROUPING_PARAM,
-}
-
-/**
  * Notifications table URL configuration
  */
 export const notificationsTableUrlConfig: TableUrlConfig = {

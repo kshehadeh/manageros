@@ -7,7 +7,6 @@ import {
   Edit,
   Trash2,
   Plus,
-  FileText,
   Link as LinkIcon,
   CheckCircle,
   Target,
@@ -21,8 +20,6 @@ import {
   TaskQuickEditDialog,
   type TaskQuickEditDialogRef,
 } from '@/components/tasks/task-quick-edit-dialog'
-import { NoteEditorModal } from '@/components/notes/note-editor-modal'
-import { createNote } from '@/lib/actions/notes'
 import { CheckInModal } from '@/components/checkin-modal'
 import {
   Dialog,
@@ -59,12 +56,10 @@ export function InitiativeActionsDropdown({
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [showTaskDialog, setShowTaskDialog] = useState(false)
-  const [showNoteModal, setShowNoteModal] = useState(false)
   const [showLinkModal, setShowLinkModal] = useState(false)
   const [showCheckInModal, setShowCheckInModal] = useState(false)
   const [showObjectiveModal, setShowObjectiveModal] = useState(false)
   const [showManagePeopleModal, setShowManagePeopleModal] = useState(false)
-  const [isSubmittingNote, setIsSubmittingNote] = useState(false)
   const [isSubmittingObjective, setIsSubmittingObjective] = useState(false)
   const [objectiveFormData, setObjectiveFormData] = useState({
     title: '',
@@ -100,28 +95,6 @@ export function InitiativeActionsDropdown({
     setTimeout(() => {
       taskDialogRef.current?.focus()
     }, 100)
-  }
-
-  const handleNoteSave = async (data: { title: string; content: string }) => {
-    setIsSubmittingNote(true)
-    try {
-      await createNote({
-        entityType: 'Initiative',
-        entityId: initiativeId,
-        content: data.content,
-        title: data.title || undefined,
-      })
-      toast.success('Note created successfully')
-      setShowNoteModal(false)
-      router.refresh()
-    } catch (error) {
-      console.error('Error creating note:', error)
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to create note'
-      )
-    } finally {
-      setIsSubmittingNote(false)
-    }
   }
 
   const handleLinkSuccess = () => {
@@ -214,17 +187,6 @@ export function InitiativeActionsDropdown({
                       onClick={event => {
                         event.stopPropagation()
                         close()
-                        setShowNoteModal(true)
-                      }}
-                    >
-                      <FileText className='w-4 h-4' />
-                      Add Note
-                    </button>
-                    <button
-                      className='flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left'
-                      onClick={event => {
-                        event.stopPropagation()
-                        close()
                         setShowLinkModal(true)
                       }}
                     >
@@ -298,15 +260,6 @@ export function InitiativeActionsDropdown({
           setShowTaskDialog(false)
           router.refresh()
         }}
-      />
-
-      {/* Add Note Modal */}
-      <NoteEditorModal
-        open={showNoteModal}
-        onOpenChange={setShowNoteModal}
-        onSave={handleNoteSave}
-        isLoading={isSubmittingNote}
-        mode='create'
       />
 
       {/* Add Link Modal */}

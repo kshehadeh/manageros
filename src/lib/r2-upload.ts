@@ -149,38 +149,6 @@ export async function uploadFileToR2(
   }
 }
 
-/**
- * Upload multiple files to Cloudflare R2
- */
-export async function uploadFilesToR2(
-  files: File[],
-  options: FileUploadOptions
-): Promise<FileUploadResult[]> {
-  const results: FileUploadResult[] = []
-  const errors: string[] = []
-
-  for (const file of files) {
-    try {
-      const result = await uploadFileToR2(file, options)
-      results.push(result)
-    } catch (error) {
-      errors.push(
-        `${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
-    }
-  }
-
-  if (errors.length > 0 && results.length === 0) {
-    throw new Error(`All uploads failed:\n${errors.join('\n')}`)
-  }
-
-  if (errors.length > 0) {
-    console.warn('Some uploads failed:', errors)
-  }
-
-  return results
-}
-
 export interface FileDownloadResult {
   body: ReadableStream<Uint8Array>
   contentType: string

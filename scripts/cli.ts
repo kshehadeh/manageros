@@ -856,7 +856,6 @@ async function getOrganizationStats(organizationId: string) {
     notificationCount,
     reportInstanceCount,
     cronJobCount,
-    noteCount,
     fileAttachmentCount,
     githubOrgCount,
   ] = await Promise.all([
@@ -871,7 +870,6 @@ async function getOrganizationStats(organizationId: string) {
     prisma.notification.count({ where: { organizationId } }),
     prisma.reportInstance.count({ where: { organizationId } }),
     prisma.cronJobExecution.count({ where: { organizationId } }),
-    prisma.note.count({ where: { organizationId } }),
     prisma.fileAttachment.count({ where: { organizationId } }),
     prisma.organizationGithubOrg.count({ where: { organizationId } }),
   ])
@@ -888,7 +886,6 @@ async function getOrganizationStats(organizationId: string) {
     notificationCount,
     reportInstanceCount,
     cronJobCount,
-    noteCount,
     fileAttachmentCount,
     githubOrgCount,
   }
@@ -982,7 +979,6 @@ async function deleteOrganization(slug?: string) {
     console.log(`  Notifications: ${stats.notificationCount}`)
     console.log(`  Report Instances: ${stats.reportInstanceCount}`)
     console.log(`  Cron Job Executions: ${stats.cronJobCount}`)
-    console.log(`  Notes: ${stats.noteCount}`)
     console.log(`  File Attachments: ${stats.fileAttachmentCount}`)
     console.log(`  GitHub Orgs: ${stats.githubOrgCount}`)
 
@@ -1183,14 +1179,6 @@ async function deleteOrganization(slug?: string) {
     })
     if (cronJobCount.count > 0) {
       console.log(`  ✓ Deleted ${cronJobCount.count} cron job execution(s)`)
-    }
-
-    // Notes
-    const noteCount = await prisma.note.deleteMany({
-      where: { organizationId: organization.id },
-    })
-    if (noteCount.count > 0) {
-      console.log(`  ✓ Deleted ${noteCount.count} note(s)`)
     }
 
     // File attachments

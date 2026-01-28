@@ -2,6 +2,13 @@ import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+  // Redirect old notes routes to dashboard (notes feature removed)
+  async redirects() {
+    return [
+      { source: '/notes', destination: '/dashboard', permanent: true },
+      { source: '/notes/:path*', destination: '/dashboard', permanent: true },
+    ]
+  },
   images: {
     remotePatterns: [
       { hostname: 'pub-56cc58f3bbba47f99bfd16db7875a540.r2.dev' },

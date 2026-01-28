@@ -83,7 +83,6 @@ if (!user.managerOSOrganizationId) {
 | meeting-instance.ts  | ✅         | ✅         | ✅                            | PASS   |
 | team.ts              | ✅         | ✅         | ✅                            | PASS   |
 | checkin.ts           | ✅         | ✅         | ✅                            | PASS   |
-| notes.ts             | ✅         | ✅         | ✅                            | PASS   |
 | entity-links.ts      | ✅         | ✅         | ✅                            | PASS   |
 | organization.ts      | ✅         | ✅         | ✅ (isAdminOrOwner)           | PASS   |
 | notification.ts      | ✅         | ✅         | ✅                            | PASS   |

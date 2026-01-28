@@ -225,22 +225,6 @@ export interface UserSettings {
     }
   >
 
-  // Per-view notes table settings
-  notesTableSettings: Record<
-    string,
-    {
-      sorting: Array<{ id: string; desc: boolean }>
-      grouping: string
-      sort: {
-        field: string
-        direction: 'asc' | 'desc'
-      }
-      filters: {
-        search: string
-      }
-    }
-  >
-
   // Per-view feedback campaigns table settings
   feedbackCampaignsTableSettings: Record<
     string,
@@ -309,7 +293,6 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   jobRolesTableSettings: {},
   organizationMembersTableSettings: {},
   toleranceRulesTableSettings: {},
-  notesTableSettings: {},
   feedbackCampaignsTableSettings: {},
   // When adding new settings, add their defaults here:
   // sidebarCollapsed: false
@@ -1055,68 +1038,6 @@ export function updateToleranceRulesTableSettings(
     ...currentSettings,
     toleranceRulesTableSettings: {
       ...currentSettings.toleranceRulesTableSettings,
-      [settingsId]: updatedTableSettings,
-    },
-  }
-
-  saveUserSettings(userId, updatedSettings)
-}
-
-/**
- * Get notes table settings for a specific view
- */
-export function getNotesTableSettings(
-  userId: string,
-  settingsId: string
-): UserSettings['notesTableSettings'][string] {
-  const settings = loadUserSettings(userId)
-  return (
-    settings.notesTableSettings[settingsId] || {
-      sorting: [],
-      grouping: 'none',
-      sort: {
-        field: '',
-        direction: 'asc',
-      },
-      filters: {
-        search: '',
-      },
-    }
-  )
-}
-
-/**
- * Update notes table settings for a specific view
- */
-export function updateNotesTableSettings(
-  userId: string,
-  settingsId: string,
-  tableSettings: Partial<UserSettings['notesTableSettings'][string]>
-): void {
-  const currentSettings = loadUserSettings(userId)
-  const currentTableSettings = currentSettings.notesTableSettings[
-    settingsId
-  ] || {
-    sorting: [],
-    grouping: 'none',
-    sort: {
-      field: '',
-      direction: 'asc' as const,
-    },
-    filters: {
-      search: '',
-    },
-  }
-
-  const updatedTableSettings = {
-    ...currentTableSettings,
-    ...tableSettings,
-  }
-
-  const updatedSettings: UserSettings = {
-    ...currentSettings,
-    notesTableSettings: {
-      ...currentSettings.notesTableSettings,
       [settingsId]: updatedTableSettings,
     },
   }

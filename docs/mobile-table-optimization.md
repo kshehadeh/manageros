@@ -174,7 +174,6 @@ All section headers using the `SectionHeader` component automatically benefit:
 - Active Tasks Section
 - Owned Initiatives Section
 - One-on-One Meetings Section
-- Notes Section
 - Jira Activity Section
 - GitHub PR Activity Section
 - Meeting Participants Section

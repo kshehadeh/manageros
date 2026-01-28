@@ -805,13 +805,6 @@ export async function getFilteredNavigation(user: UserBrief | null) {
       section: 'Planning',
     },
     {
-      name: 'Notes',
-      href: '/notes',
-      icon: 'FileText',
-      adminOnly: false,
-      section: 'Planning',
-    },
-    {
       name: 'People',
       href: '/people',
       icon: 'User',
@@ -968,10 +961,6 @@ const _PERMISSION_KEYS = [
   'job-role.delete',
   'job-role.view',
   'organization.invitation.view',
-  'note.create',
-  'note.edit',
-  'note.delete',
-  'note.view',
 ] as const
 
 /**
@@ -1514,70 +1503,6 @@ const PermissionMap: Record<PermissionType, PermissionCheck> = {
   // Organization invitation permissions
   'organization.invitation.view': user => {
     return isAdminOrOwner(user) && !!user.managerOSOrganizationId
-  },
-  // Note permissions
-  'note.create': user => {
-    return !!user.managerOSOrganizationId
-  },
-  'note.edit': async (user, id) => {
-    if (!user.managerOSOrganizationId || !id) return false
-    if (isAdminOrOwner(user)) return true
-
-    // Check if user created the note
-    const note = await prisma.note.findFirst({
-      where: {
-        id,
-        organizationId: user.managerOSOrganizationId,
-        createdById: user.managerOSUserId || '',
-      },
-    })
-
-    return !!note
-  },
-  'note.delete': async (user, id) => {
-    if (!user.managerOSOrganizationId || !id) return false
-    if (isAdminOrOwner(user)) return true
-
-    // Check if user created the note
-    const note = await prisma.note.findFirst({
-      where: {
-        id,
-        organizationId: user.managerOSOrganizationId,
-        createdById: user.managerOSUserId || '',
-      },
-    })
-
-    return !!note
-  },
-  'note.view': async (user, id) => {
-    if (!user.managerOSOrganizationId) {
-      return false
-    }
-
-    if (!id) {
-      return !!user.managerOSOrganizationId
-    }
-
-    // Check if user can view the note (creator, shared with everyone, or shared with user)
-    const note = await prisma.note.findFirst({
-      where: {
-        id,
-        organizationId: user.managerOSOrganizationId,
-        OR: [
-          { createdById: user.managerOSUserId || '' },
-          { sharedWithEveryone: true },
-          {
-            sharedWith: {
-              some: {
-                userId: user.managerOSUserId || '',
-              },
-            },
-          },
-        ],
-      },
-    })
-
-    return !!note
   },
 }
 
