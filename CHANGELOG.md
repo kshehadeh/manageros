@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.66.0](https://github.com/kshehadeh/manageros/compare/v1.64.0...v1.66.0) (2026-01-28)
+
+### Features
+
+- **notes:** remove notes feature and redirect to dashboard ([4a4d5ae](https://github.com/kshehadeh/manageros/commit/4a4d5ae37aac9f5e11983c4b1b01d51b69a1e475))
+
 # [1.64.0](https://github.com/kshehadeh/manageros/compare/v1.63.2...v1.64.0) (2026-01-27)
 
 ### Features
