@@ -1435,11 +1435,6 @@ export async function deleteOrganization() {
     where: { organizationId },
   })
 
-  // Notes
-  await prisma.note.deleteMany({
-    where: { organizationId },
-  })
-
   // File attachments
   await prisma.fileAttachment.deleteMany({
     where: { organizationId },

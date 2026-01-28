@@ -1,5 +1,9 @@
 # ManagerOS Roadmap
 
+## Removed Features
+
+- **Notes feature** (January 28, 2026) - Standalone and entity-attached notes (Note/NoteShare models, /notes routes, Notes section on initiatives) were removed. Rich text editing (NotionEditor) and inline image upload (NoteImage, /api/notes/upload-image, /api/notes/images) remain in use for initiatives, tasks, feedback, one-on-ones, and job roles.
+
 ## Implemented Features ✅
 
 ### Core Infrastructure
@@ -35,7 +39,6 @@
 - **Check-ins** - Weekly progress updates with RAG status and blockers tracking
 - **Initiative Owners** - Multiple ownership roles (owner, sponsor, collaborator)
 - **Metrics Tracking** - Quantitative measurement capabilities
-- **Notes and File Attachments** - Rich text notes with file attachments, Cloudflare R2 storage, organization-scoped access control (October 3, 2025)
 
 ### Task Management
 

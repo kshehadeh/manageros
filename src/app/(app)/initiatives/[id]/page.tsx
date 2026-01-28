@@ -5,7 +5,6 @@ import { InitiativeObjectivesServer } from '@/components/initiatives/initiative-
 import { InitiativeTasks } from '@/components/initiatives/initiative-tasks-server'
 import { InitiativeCheckInsServer } from '@/components/initiatives/initiative-checkins-server'
 import { InitiativeSidebar } from '@/components/initiatives/initiative-sidebar'
-import { NotesSectionServer } from '@/components/notes/notes-section-server'
 import { SectionHeader } from '@/components/ui/section-header'
 import { PageSection } from '@/components/ui/page-section'
 import { PageContainer } from '@/components/ui/page-container'
@@ -22,7 +21,6 @@ import { prisma } from '@/lib/db'
 import {
   InitiativeTasksSkeleton,
   InitiativeObjectivesSkeleton,
-  InitiativeNotesSkeleton,
   InitiativeCheckInsSkeleton,
   InitiativeSidebarSkeleton,
   InitiativePropertiesSidebarSkeleton,
@@ -173,13 +171,6 @@ export default async function InitiativeDetail({
 
               <Suspense fallback={<InitiativeObjectivesSkeleton />}>
                 <InitiativeObjectivesServer initiativeId={init.id} />
-              </Suspense>
-
-              <Suspense fallback={<InitiativeNotesSkeleton />}>
-                <NotesSectionServer
-                  entityType='Initiative'
-                  entityId={init.id}
-                />
               </Suspense>
 
               <Suspense fallback={<InitiativeCheckInsSkeleton />}>
