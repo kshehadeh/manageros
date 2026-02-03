@@ -630,6 +630,19 @@ export async function getSlottedInitiatives() {
   // Get task counts for all initiatives to calculate progress
   const initiativeIds = activeInitiatives.map(i => i.id)
 
+  // Get latest check-in per initiative (for slot card footer)
+  const checkIns = await prisma.checkIn.findMany({
+    where: { initiativeId: { in: initiativeIds } },
+    orderBy: { createdAt: 'desc' },
+    select: { initiativeId: true, weekOf: true },
+  })
+  const latestCheckInByInitiative = new Map<string, Date>()
+  for (const c of checkIns) {
+    if (!latestCheckInByInitiative.has(c.initiativeId)) {
+      latestCheckInByInitiative.set(c.initiativeId, c.weekOf)
+    }
+  }
+
   const taskCounts = await prisma.task.groupBy({
     by: ['initiativeId'],
     where: {
@@ -661,12 +674,13 @@ export async function getSlottedInitiatives() {
     completedTaskCounts.map(t => [t.initiativeId, t._count.id])
   )
 
-  // Add progress to each initiative
+  // Add progress and latest check-in date to each initiative
   const initiativesWithProgress = activeInitiatives.map(initiative => {
     const total = totalCountMap.get(initiative.id) || 0
     const completed = completedCountMap.get(initiative.id) || 0
     const progress = total === 0 ? 0 : Math.round((completed / total) * 100)
-    return { ...initiative, progress }
+    const latestCheckIn = latestCheckInByInitiative.get(initiative.id) ?? null
+    return { ...initiative, progress, latestCheckIn }
   })
 
   const slottedInitiatives = initiativesWithProgress.filter(

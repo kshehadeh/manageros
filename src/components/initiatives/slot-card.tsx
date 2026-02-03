@@ -9,7 +9,7 @@ import {
   type InitiativeStatus,
 } from '@/lib/initiative-status'
 import { initiativeSizeUtils, type InitiativeSize } from '@/lib/initiative-size'
-import { GripVertical, Plus, X, Calendar } from 'lucide-react'
+import { GripVertical, Plus, X, Calendar, CheckCircle2 } from 'lucide-react'
 import { formatShortDate } from '@/lib/utils/date-utils'
 import { cn } from '@/lib/utils'
 import { removeInitiativeFromSlot } from '@/lib/actions/initiative'
@@ -25,6 +25,7 @@ export interface SlotInitiative {
   size?: string | null
   targetDate?: Date | null
   progress?: number
+  latestCheckIn?: Date | null
   team?: {
     id: string
     name: string
@@ -369,28 +370,42 @@ export function SlotCard({
                 )}
             </div>
 
-            {/* Footer: date and buttons */}
+            {/* Footer: target date, last check-in, and buttons */}
             <div
               className={cn(
                 'flex min-h-[2.25rem] items-center justify-between gap-2 mt-2 pt-2 border-t',
                 isFilteredOut ? 'border-border/30' : 'border-border/50'
               )}
             >
-              {initiative.targetDate ? (
-                <div
-                  className={cn(
-                    'flex items-center gap-1 text-xs',
-                    isFilteredOut
-                      ? 'text-muted-foreground'
-                      : 'text-muted-foreground'
-                  )}
-                >
-                  <Calendar className='h-3 w-3' />
-                  <span>{formatShortDate(initiative.targetDate)}</span>
-                </div>
-              ) : (
-                <div />
-              )}
+              <div className='flex flex-wrap items-center gap-x-3 gap-y-1'>
+                {initiative.targetDate ? (
+                  <div
+                    className={cn(
+                      'flex items-center gap-1 text-xs',
+                      isFilteredOut
+                        ? 'text-muted-foreground'
+                        : 'text-muted-foreground'
+                    )}
+                  >
+                    <Calendar className='h-3 w-3 shrink-0' />
+                    <span>{formatShortDate(initiative.targetDate)}</span>
+                  </div>
+                ) : null}
+                {initiative.latestCheckIn ? (
+                  <div
+                    className={cn(
+                      'flex items-center gap-1 text-xs',
+                      isFilteredOut
+                        ? 'text-muted-foreground'
+                        : 'text-muted-foreground'
+                    )}
+                    title='Last check-in'
+                  >
+                    <CheckCircle2 className='h-3 w-3 shrink-0' />
+                    <span>{formatShortDate(initiative.latestCheckIn)}</span>
+                  </div>
+                ) : null}
+              </div>
               <InitiativeSlotPopup initiativeId={initiative.id} />
             </div>
           </div>
