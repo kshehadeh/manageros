@@ -630,10 +630,11 @@ export async function getSlottedInitiatives() {
   // Get task counts for all initiatives to calculate progress
   const initiativeIds = activeInitiatives.map(i => i.id)
 
-  // Get latest check-in per initiative (for slot card footer)
+  // Get latest check-in per initiative by week (for slot card footer).
+  // Order by weekOf so backfilled or edited older weeks don't override a newer week.
   const checkIns = await prisma.checkIn.findMany({
     where: { initiativeId: { in: initiativeIds } },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { weekOf: 'desc' },
     select: { initiativeId: true, weekOf: true },
   })
   const latestCheckInByInitiative = new Map<string, Date>()
