@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.67.0](https://github.com/kshehadeh/manageros/compare/v1.66.0...v1.67.0) (2026-02-03)
+
+### Features
+
+- **slot-card:** add latest check-in date to slot card footer ([580ec34](https://github.com/kshehadeh/manageros/commit/580ec340ae28df616fa5e39572213b09616bcf29))
+
 # [1.66.0](https://github.com/kshehadeh/manageros/compare/v1.64.0...v1.66.0) (2026-01-28)
 
 ### Features
