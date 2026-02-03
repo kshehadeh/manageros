@@ -379,26 +379,14 @@ export function SlotCard({
             >
               <div className='flex flex-wrap items-center gap-x-3 gap-y-1'>
                 {initiative.targetDate ? (
-                  <div
-                    className={cn(
-                      'flex items-center gap-1 text-xs',
-                      isFilteredOut
-                        ? 'text-muted-foreground'
-                        : 'text-muted-foreground'
-                    )}
-                  >
+                  <div className='flex items-center gap-1 text-xs text-muted-foreground'>
                     <Calendar className='h-3 w-3 shrink-0' />
                     <span>{formatShortDate(initiative.targetDate)}</span>
                   </div>
                 ) : null}
                 {initiative.latestCheckIn ? (
                   <div
-                    className={cn(
-                      'flex items-center gap-1 text-xs',
-                      isFilteredOut
-                        ? 'text-muted-foreground'
-                        : 'text-muted-foreground'
-                    )}
+                    className='flex items-center gap-1 text-xs text-muted-foreground'
                     title='Last check-in'
                   >
                     <CheckCircle2 className='h-3 w-3 shrink-0' />
