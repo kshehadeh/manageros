@@ -341,6 +341,119 @@ removeInitiativeOwner(
 - `Error: "User must belong to an organization to manage initiative owners"`
 - `Error: "Initiative not found or access denied"`
 
+## Slot Management
+
+Slots provide a way to prioritize active initiatives. Each slot number represents relative priority (slot 1 = highest priority).
+
+### getSlottedInitiatives
+
+Retrieves all active initiatives for the slots view, with automatic slot normalization.
+
+**Function Signature:**
+
+```typescript
+getSlottedInitiatives(): Promise<{
+  slottedInitiatives: SlotInitiative[]
+  unslottedInitiatives: SlotInitiative[]
+  totalSlots: number
+}>
+```
+
+**Returns:**
+
+- `slottedInitiatives` - Active initiatives with slot assignments
+- `unslottedInitiatives` - Active initiatives without slot assignments
+- `totalSlots` - Total count of active initiatives
+
+**Note:** This function automatically normalizes slots on each call:
+
+1. Clears slots from non-active initiatives (done/canceled)
+2. Renumbers slots to be contiguous (1, 2, 3, ...)
+
+---
+
+### assignInitiativeToSlot
+
+Assigns an active initiative to a specific slot.
+
+**Function Signature:**
+
+```typescript
+assignInitiativeToSlot(initiativeId: string, slotNumber: number): Promise<Initiative>
+```
+
+**Parameters:**
+
+- `initiativeId`: Initiative ID to assign
+- `slotNumber`: Slot number to assign to
+
+**Throws:**
+
+- `Error: "User must belong to an organization to manage initiative slots"`
+- `Error: "Initiative not found or is not active"`
+- `Error: "This slot is already assigned to another initiative"`
+
+---
+
+### removeInitiativeFromSlot
+
+Removes an initiative from its slot and compacts remaining slots.
+
+**Function Signature:**
+
+```typescript
+removeInitiativeFromSlot(initiativeId: string): Promise<Initiative>
+```
+
+**Parameters:**
+
+- `initiativeId`: Initiative ID to remove from slot
+
+**Note:** After removal, all initiatives with higher slot numbers are shifted down by 1 to fill the gap.
+
+---
+
+### swapInitiativeSlots
+
+Swaps slots between two initiatives, or moves an initiative to an empty slot.
+
+**Function Signature:**
+
+```typescript
+swapInitiativeSlots(
+  sourceInitiativeId: string,
+  targetSlotNumber: number,
+  targetInitiativeId?: string
+): Promise<{ success: boolean }>
+```
+
+---
+
+### insertInitiativeAtSlot
+
+Inserts an initiative at a specific slot position, shifting subsequent initiatives.
+
+**Function Signature:**
+
+```typescript
+insertInitiativeAtSlot(
+  sourceInitiativeId: string,
+  targetSlotNumber: number
+): Promise<{ success: boolean }>
+```
+
+**Note:** All initiatives at or after the target slot are shifted up by 1.
+
+---
+
+### Automatic Slot Clearing
+
+When an initiative's status is changed to `done` or `canceled`:
+
+1. The initiative's slot is automatically cleared
+2. All initiatives with higher slot numbers are shifted down by 1
+3. This keeps slots contiguous without manual intervention
+
 ## Initiative Status Values
 
 - `planning` - Initiative is in planning phase

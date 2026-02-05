@@ -10,6 +10,93 @@ import {
 } from '@/lib/subscription-utils'
 import { getTaskAccessWhereClause } from '@/lib/task-access-utils'
 
+/**
+ * Shift all initiative slots down by 1 for slots greater than the removed slot.
+ * This compacts the slot numbers to fill gaps when an initiative is removed from a slot.
+ */
+async function compactSlotsAfterRemoval(
+  organizationId: string,
+  removedSlotNumber: number
+) {
+  // Find all active initiatives with slot numbers greater than the removed slot
+  const initiativesToShift = await prisma.initiative.findMany({
+    where: {
+      organizationId,
+      status: { in: ['planned', 'in_progress', 'paused'] },
+      slot: { gt: removedSlotNumber },
+    },
+    orderBy: { slot: 'asc' },
+    select: { id: true, slot: true },
+  })
+
+  // Shift each down by 1 (process in ascending order to avoid conflicts)
+  for (const initiative of initiativesToShift) {
+    if (initiative.slot !== null) {
+      await prisma.initiative.update({
+        where: { id: initiative.id },
+        data: { slot: initiative.slot - 1 },
+      })
+    }
+  }
+}
+
+/**
+ * Normalize initiative slots for an organization:
+ * 1. Clear slots from any non-active initiatives (done/canceled)
+ * 2. Re-number active slotted initiatives to be contiguous (1, 2, 3, ...)
+ * This ensures slots are always in a valid state.
+ */
+async function normalizeInitiativeSlots(organizationId: string) {
+  // Step 1: Clear slots from non-active initiatives
+  await prisma.initiative.updateMany({
+    where: {
+      organizationId,
+      status: { notIn: ['planned', 'in_progress', 'paused'] },
+      slot: { not: null },
+    },
+    data: { slot: null },
+  })
+
+  // Step 2: Get all active initiatives with slots, ordered by slot number
+  const slottedInitiatives = await prisma.initiative.findMany({
+    where: {
+      organizationId,
+      status: { in: ['planned', 'in_progress', 'paused'] },
+      slot: { not: null },
+    },
+    orderBy: { slot: 'asc' },
+    select: { id: true, slot: true },
+  })
+
+  // Step 3: Check if slots need renumbering (gaps or not starting at 1)
+  let needsRenumbering = false
+  for (let i = 0; i < slottedInitiatives.length; i++) {
+    if (slottedInitiatives[i].slot !== i + 1) {
+      needsRenumbering = true
+      break
+    }
+  }
+
+  // Step 4: Renumber if needed
+  if (needsRenumbering && slottedInitiatives.length > 0) {
+    // First, set all slots to null to avoid unique constraint conflicts
+    await prisma.initiative.updateMany({
+      where: {
+        id: { in: slottedInitiatives.map(i => i.id) },
+      },
+      data: { slot: null },
+    })
+
+    // Then reassign contiguous slot numbers
+    for (let i = 0; i < slottedInitiatives.length; i++) {
+      await prisma.initiative.update({
+        where: { id: slottedInitiatives[i].id },
+        data: { slot: i + 1 },
+      })
+    }
+  }
+}
+
 export async function createInitiative(formData: InitiativeFormData) {
   const user = await getCurrentUser()
 
@@ -202,6 +289,7 @@ export async function updateInitiative(
   // Clear slot if status is being set to done or canceled
   const shouldClearSlot =
     validatedData.status === 'done' || validatedData.status === 'canceled'
+  const previousSlot = existingInitiative.slot
 
   // Update the initiative with objectives and owners
   const initiative = await prisma.initiative.update({
@@ -250,6 +338,11 @@ export async function updateInitiative(
       team: true,
     },
   })
+
+  // Compact slots if we cleared a slot
+  if (shouldClearSlot && previousSlot !== null) {
+    await compactSlotsAfterRemoval(user.managerOSOrganizationId, previousSlot)
+  }
 
   // Revalidate the initiatives page
   revalidatePath('/initiatives')
@@ -590,6 +683,9 @@ export async function getSlottedInitiatives() {
 
   const organizationId = user.managerOSOrganizationId
 
+  // Normalize slots to ensure they are contiguous and only on active initiatives
+  await normalizeInitiativeSlots(organizationId)
+
   // Get all active initiatives (not done or canceled)
   const activeInitiatives = await prisma.initiative.findMany({
     where: {
@@ -790,11 +886,18 @@ export async function removeInitiativeFromSlot(initiativeId: string) {
     throw new Error('Initiative not found or access denied')
   }
 
+  const previousSlot = initiative.slot
+
   // Remove from slot
   const updated = await prisma.initiative.update({
     where: { id: initiativeId },
     data: { slot: null },
   })
+
+  // Compact slots if the initiative had a slot
+  if (previousSlot !== null) {
+    await compactSlotsAfterRemoval(user.managerOSOrganizationId, previousSlot)
+  }
 
   revalidatePath('/initiatives')
   revalidatePath('/initiatives/slots')
@@ -1031,6 +1134,7 @@ export async function updateInitiativeStatus(
 
   // Clear slot if status is being set to done or canceled
   const shouldClearSlot = status === 'done' || status === 'canceled'
+  const previousSlot = existingInitiative.slot
 
   const updated = await prisma.initiative.update({
     where: { id: initiativeId },
@@ -1039,6 +1143,11 @@ export async function updateInitiativeStatus(
       ...(shouldClearSlot && { slot: null }),
     },
   })
+
+  // Compact slots if we cleared a slot
+  if (shouldClearSlot && previousSlot !== null) {
+    await compactSlotsAfterRemoval(user.managerOSOrganizationId, previousSlot)
+  }
 
   revalidatePath('/initiatives')
   revalidatePath('/initiatives/slots')

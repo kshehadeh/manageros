@@ -39,6 +39,8 @@
 - **Check-ins** - Weekly progress updates with RAG status and blockers tracking
 - **Initiative Owners** - Multiple ownership roles (owner, sponsor, collaborator)
 - **Metrics Tracking** - Quantitative measurement capabilities
+- **Slots View** - Visual prioritization of active initiatives with drag-and-drop reordering
+- **Automatic Slot Management** (February 2026) - Slots automatically compact when initiatives are completed/canceled, keeping slot numbers contiguous
 
 ### Task Management
 
@@ -251,8 +253,8 @@
 
 ---
 
-_Last Updated: December 2025_
-_Next Review: January 2026_
+_Last Updated: February 2026_
+_Next Review: March 2026_
 
 ### Updates on 2025-12-19
 
@@ -410,3 +412,17 @@ _Next Review: January 2026_
   - Added debug component `CacheTestComponent` for testing and monitoring cache behavior
   - System provides instant data display with background refresh, eliminates redundant API calls, and improves overall performance
   - Extensible architecture ready for adding teams, initiatives, and other entity caching
+
+### Updates on 2026-02-05
+
+- **Initiative Slot Management Enhancements** (Completed):
+  - Fixed slot view showing incorrect number of slots after initiative status changes
+  - Added automatic slot compaction: when an initiative is completed/canceled, higher-numbered slots shift down to fill the gap
+  - Implemented slot normalization on page load to clean up any inconsistent data
+  - Added `compactSlotsAfterRemoval()` helper function for slot shifting
+  - Added `normalizeInitiativeSlots()` function to ensure slots are contiguous and only on active initiatives
+  - Updated `updateInitiativeStatus`, `updateInitiative`, and `removeInitiativeFromSlot` to trigger slot compaction
+  - Added `router.refresh()` to `InitiativePropertiesSidebar` after status changes for immediate UI updates
+  - Added back-forward cache refresh handling to slots page client component
+  - Updated help documentation with new "Slots View" section explaining slot behavior
+  - Updated API documentation with slot management server actions
