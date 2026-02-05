@@ -1,5 +1,11 @@
 # Changelog
 
+# [1.68.0](https://github.com/kshehadeh/manageros/compare/v1.67.0...v1.68.0) (2026-02-05)
+
+### Features
+
+- **slots:** enhance initiative slot management and documentation ([24aabc0](https://github.com/kshehadeh/manageros/commit/24aabc02a6849b1e43c40febaa4333fe9859ac7b))
+
 # [1.67.0](https://github.com/kshehadeh/manageros/compare/v1.66.0...v1.67.0) (2026-02-03)
 
 ### Features
