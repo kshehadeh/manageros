@@ -307,6 +307,92 @@ The initiative actions dropdown (available on initiative detail pages) provides 
   Don't let old initiatives clutter your view.
 </Warning>
 
+## Slots View
+
+The **Slots View** provides a visual way to prioritize and manage your active initiatives. Each slot represents one active initiative, ordered by importance.
+
+### How Slots Work
+
+<AccordionGroup>
+<Accordion title="Slot assignment">
+
+- **Active initiatives** (Planned, In Progress, or Paused) can be assigned to slots
+- Each slot has a number (1, 2, 3, etc.) representing relative priority
+- Slot 1 is typically your highest-priority initiative
+- You can drag and drop initiatives to reorder them
+- Click an empty slot to assign an unslotted initiative
+
+</Accordion>
+
+<Accordion title="Automatic slot management">
+
+When an initiative's status changes to **Done** or **Canceled**:
+
+1. The initiative is automatically removed from its slot
+2. All higher-numbered slots shift down to fill the gap
+3. The total slot count adjusts to match the number of active initiatives
+
+This keeps your slots tidy without manual cleanup.
+
+<Info>
+  For example, if you have initiatives in slots 1, 2, and 3, and you mark the
+  one in slot 2 as Done, the initiative in slot 3 automatically moves to slot 2.
+</Info>
+
+</Accordion>
+
+<Accordion title="Slot normalization">
+
+When you open the Slots View, the system automatically:
+
+- Clears slots from any non-active initiatives (Done/Canceled)
+- Renumbers slots to be contiguous (no gaps)
+
+This ensures your slots are always in a valid, clean state.
+
+</Accordion>
+</AccordionGroup>
+
+### Using the Slots View
+
+<Steps>
+<Step title="Navigate to Slots View">
+
+Go to **Initiatives** and select the **Slots** view from the view dropdown.
+
+</Step>
+
+<Step title="Assign initiatives to slots">
+
+- Click an empty slot card to open the initiative selector
+- Choose from your unslotted active initiatives
+- The initiative will be assigned to that slot number
+
+</Step>
+
+<Step title="Reorder by dragging">
+
+- Drag a slot card to a new position
+- Other slots shift automatically to accommodate
+- Use this to reprioritize as circumstances change
+
+</Step>
+
+<Step title="Remove from slots">
+
+- Hover over a slot card and click the X button
+- Or simply mark the initiative as Done or Canceled
+- The slot will be freed up automatically
+
+</Step>
+</Steps>
+
+<Tip>
+  Use the Slots View in weekly planning sessions to ensure your team is focused
+  on the right priorities. The visual layout makes it easy to discuss what
+  should move up or down.
+</Tip>
+
 ## Related Topics
 
 <CardGroup cols={2}>
