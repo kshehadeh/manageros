@@ -36,7 +36,7 @@ export class ToleranceRulesEvaluationJob extends CronJob {
 
       return {
         success: result.errors.length === 0,
-        notificationsCreated: exceptionsCreated, // Exceptions create notifications
+        notificationsCreated: 0,
         metadata,
         error:
           result.errors.length > 0
@@ -46,7 +46,7 @@ export class ToleranceRulesEvaluationJob extends CronJob {
     } catch (error) {
       return {
         success: false,
-        notificationsCreated: exceptionsCreated,
+        notificationsCreated: 0,
         error: error instanceof Error ? error.message : 'Unknown error',
         metadata,
       }

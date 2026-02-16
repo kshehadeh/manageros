@@ -164,23 +164,3 @@ export const oneOnOneTableUrlConfig: TableUrlConfig = {
   sortParamName: DEFAULT_SORT_PARAM,
   groupingParamName: DEFAULT_GROUPING_PARAM,
 }
-
-/**
- * Notifications table URL configuration
- */
-export const notificationsTableUrlConfig: TableUrlConfig = {
-  filterParamMap: {
-    search: 'search',
-    type: 'type',
-    status: 'status',
-  },
-  defaultValues: {
-    search: '',
-    type: '',
-    status: '',
-    sort: { field: '', direction: 'asc' },
-    grouping: 'none',
-  },
-  sortParamName: DEFAULT_SORT_PARAM,
-  groupingParamName: DEFAULT_GROUPING_PARAM,
-}

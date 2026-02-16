@@ -25,13 +25,7 @@ export async function resolveOneOnOneExceptions(
       entityId: { in: [entityId1, entityId2] },
       status: 'active',
     },
-    include: {
-      notification: {
-        include: {
-          responses: true,
-        },
-      },
-    },
+    select: { id: true },
   })
 
   if (exceptions.length === 0) {
@@ -40,7 +34,6 @@ export async function resolveOneOnOneExceptions(
 
   const now = new Date()
 
-  // Resolve all exceptions
   await prisma.exception.updateMany({
     where: {
       id: { in: exceptions.map(e => e.id) },
@@ -50,40 +43,6 @@ export async function resolveOneOnOneExceptions(
       resolvedAt: now,
     },
   })
-
-  // Update linked notification responses
-  const notificationIds = exceptions
-    .map(e => e.notificationId)
-    .filter((id): id is string => id !== null)
-
-  if (notificationIds.length > 0) {
-    // Get all users who have responses for these notifications
-    const notificationResponses = await prisma.notificationResponse.findMany({
-      where: {
-        notificationId: { in: notificationIds },
-      },
-      select: {
-        notificationId: true,
-        userId: true,
-      },
-    })
-
-    // Update each notification response
-    await Promise.all(
-      notificationResponses.map(response =>
-        prisma.notificationResponse.updateMany({
-          where: {
-            notificationId: response.notificationId,
-            userId: response.userId,
-          },
-          data: {
-            status: 'resolved',
-            resolvedAt: now,
-          },
-        })
-      )
-    )
-  }
 }
 
 /**
@@ -102,13 +61,7 @@ export async function resolveInitiativeExceptions(
       entityId: initiativeId,
       status: 'active',
     },
-    include: {
-      notification: {
-        include: {
-          responses: true,
-        },
-      },
-    },
+    select: { id: true },
   })
 
   if (exceptions.length === 0) {
@@ -117,7 +70,6 @@ export async function resolveInitiativeExceptions(
 
   const now = new Date()
 
-  // Resolve all exceptions
   await prisma.exception.updateMany({
     where: {
       id: { in: exceptions.map(e => e.id) },
@@ -127,40 +79,6 @@ export async function resolveInitiativeExceptions(
       resolvedAt: now,
     },
   })
-
-  // Update linked notification responses
-  const notificationIds = exceptions
-    .map(e => e.notificationId)
-    .filter((id): id is string => id !== null)
-
-  if (notificationIds.length > 0) {
-    // Get all users who have responses for these notifications
-    const notificationResponses = await prisma.notificationResponse.findMany({
-      where: {
-        notificationId: { in: notificationIds },
-      },
-      select: {
-        notificationId: true,
-        userId: true,
-      },
-    })
-
-    // Update each notification response
-    await Promise.all(
-      notificationResponses.map(response =>
-        prisma.notificationResponse.updateMany({
-          where: {
-            notificationId: response.notificationId,
-            userId: response.userId,
-          },
-          data: {
-            status: 'resolved',
-            resolvedAt: now,
-          },
-        })
-      )
-    )
-  }
 }
 
 /**
@@ -183,13 +101,7 @@ export async function resolveFeedback360Exceptions(
         ruleType: 'feedback_360',
       },
     },
-    include: {
-      notification: {
-        include: {
-          responses: true,
-        },
-      },
-    },
+    select: { id: true },
   })
 
   if (exceptions.length === 0) {
@@ -198,7 +110,6 @@ export async function resolveFeedback360Exceptions(
 
   const now = new Date()
 
-  // Resolve all exceptions
   await prisma.exception.updateMany({
     where: {
       id: { in: exceptions.map(e => e.id) },
@@ -208,40 +119,6 @@ export async function resolveFeedback360Exceptions(
       resolvedAt: now,
     },
   })
-
-  // Update linked notification responses
-  const notificationIds = exceptions
-    .map(e => e.notificationId)
-    .filter((id): id is string => id !== null)
-
-  if (notificationIds.length > 0) {
-    // Get all users who have responses for these notifications
-    const notificationResponses = await prisma.notificationResponse.findMany({
-      where: {
-        notificationId: { in: notificationIds },
-      },
-      select: {
-        notificationId: true,
-        userId: true,
-      },
-    })
-
-    // Update each notification response
-    await Promise.all(
-      notificationResponses.map(response =>
-        prisma.notificationResponse.updateMany({
-          where: {
-            notificationId: response.notificationId,
-            userId: response.userId,
-          },
-          data: {
-            status: 'resolved',
-            resolvedAt: now,
-          },
-        })
-      )
-    )
-  }
 }
 
 /**
@@ -317,18 +194,6 @@ export async function resolveManagerSpanExceptions(
 
   const now = new Date()
 
-  // Get exceptions with notifications for updating notification responses
-  const exceptions = await prisma.exception.findMany({
-    where: {
-      id: { in: exceptionsToResolve },
-    },
-    select: {
-      id: true,
-      notificationId: true,
-    },
-  })
-
-  // Resolve all exceptions
   await prisma.exception.updateMany({
     where: {
       id: { in: exceptionsToResolve },
@@ -338,38 +203,4 @@ export async function resolveManagerSpanExceptions(
       resolvedAt: now,
     },
   })
-
-  // Update linked notification responses
-  const notificationIds = exceptions
-    .map(e => e.notificationId)
-    .filter((id): id is string => id !== null)
-
-  if (notificationIds.length > 0) {
-    // Get all users who have responses for these notifications
-    const notificationResponses = await prisma.notificationResponse.findMany({
-      where: {
-        notificationId: { in: notificationIds },
-      },
-      select: {
-        notificationId: true,
-        userId: true,
-      },
-    })
-
-    // Update each notification response
-    await Promise.all(
-      notificationResponses.map(response =>
-        prisma.notificationResponse.updateMany({
-          where: {
-            notificationId: response.notificationId,
-            userId: response.userId,
-          },
-          data: {
-            status: 'resolved',
-            resolvedAt: now,
-          },
-        })
-      )
-    )
-  }
 }

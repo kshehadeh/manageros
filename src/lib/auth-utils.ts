@@ -839,13 +839,6 @@ export async function getFilteredNavigation(user: UserBrief | null) {
       adminOnly: true,
       section: 'Organization',
     },
-    {
-      name: 'Notifications',
-      href: '/notifications',
-      icon: 'Bell',
-      adminOnly: false,
-      section: 'Organization',
-    },
   ]
 
   // Filter navigation based on organization membership and admin role

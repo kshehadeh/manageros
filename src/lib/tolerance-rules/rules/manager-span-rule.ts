@@ -5,11 +5,7 @@
 
 import { z } from 'zod'
 import { prisma } from '@/lib/db'
-import {
-  createException,
-  linkExceptionToNotification,
-} from '@/lib/actions/exceptions'
-import { createSystemNotification } from '@/lib/actions/notification'
+import { createException } from '@/lib/actions/exceptions'
 import { getExistingExceptions } from '../base-rule'
 import type { ToleranceRule } from '@/types/tolerance-rule'
 import type { CreateExceptionInput } from '@/types/exception'
@@ -62,31 +58,7 @@ async function createExceptionForManagerSpan(
     },
   }
 
-  const exception = await createException(exceptionInput)
-
-  // Create notification for the manager
-  const managerWithUser = await prisma.person.findUnique({
-    where: { id: managerId },
-    include: { user: true },
-  })
-
-  if (managerWithUser?.user?.id) {
-    const notification = await createSystemNotification({
-      title: 'Warning: Manager Span of Control',
-      message,
-      type: 'warning',
-      organizationId: rule.organizationId,
-      userId: managerWithUser.user.id,
-      metadata: {
-        exceptionId: exception.id,
-        entityType: 'Person',
-        entityId: managerId,
-        navigationPath: `/people/${managerId}`,
-      },
-    })
-
-    await linkExceptionToNotification(exception.id, notification.id)
-  }
+  await createException(exceptionInput)
 }
 
 /**

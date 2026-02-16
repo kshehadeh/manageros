@@ -70,33 +70,33 @@ if (!user.managerOSOrganizationId) {
 
 ### Server Actions (All 26 files)
 
-| File                 | Auth Check | Org Filter | Entity Access                 | Status |
-| -------------------- | ---------- | ---------- | ----------------------------- | ------ |
-| task.ts              | ✅         | ✅         | ✅ (getTaskAccessWhereClause) | PASS   |
-| person.ts            | ✅         | ✅         | ✅                            | PASS   |
-| oneonone.ts          | ✅         | ✅         | ✅ (participant check)        | PASS   |
-| feedback.ts          | ✅         | ✅         | ✅ (FIXED)                    | PASS   |
-| feedback-campaign.ts | ✅         | ✅         | ✅ (manager check)            | PASS   |
-| synopsis.ts          | ✅         | ✅         | ✅ (isOwnPerson/isOrgAdmin)   | PASS   |
-| initiative.ts        | ✅         | ✅         | ✅ (permission check)         | PASS   |
-| meeting.ts           | ✅         | ✅         | ✅ (privacy + participant)    | PASS   |
-| meeting-instance.ts  | ✅         | ✅         | ✅                            | PASS   |
-| team.ts              | ✅         | ✅         | ✅                            | PASS   |
-| checkin.ts           | ✅         | ✅         | ✅                            | PASS   |
-| entity-links.ts      | ✅         | ✅         | ✅                            | PASS   |
-| organization.ts      | ✅         | ✅         | ✅ (isAdminOrOwner)           | PASS   |
-| notification.ts      | ✅         | ✅         | ✅                            | PASS   |
-| csv-import.ts        | ✅         | ✅         | ✅ (admin only)               | PASS   |
-| report.ts            | ✅         | ✅         | ✅                            | PASS   |
-| github.ts            | ✅         | ✅         | ✅                            | PASS   |
-| avatar.ts            | ✅         | ✅         | ✅                            | PASS   |
-| job-roles.ts         | ✅         | ✅         | ✅                            | PASS   |
-| jira.ts              | ✅         | ✅         | ✅                            | PASS   |
-| permissions.ts       | ✅         | ✅         | ✅                            | PASS   |
-| person-overview.ts   | ✅         | ✅         | ✅                            | PASS   |
-| password-reset.ts    | ✅         | N/A        | N/A                           | PASS   |
-| subscription.ts      | ✅         | ✅         | ✅                            | PASS   |
-| feedback-template.ts | ✅         | ✅         | ✅                            | PASS   |
+| File                               | Auth Check | Org Filter | Entity Access                 | Status |
+| ---------------------------------- | ---------- | ---------- | ----------------------------- | ------ |
+| task.ts                            | ✅         | ✅         | ✅ (getTaskAccessWhereClause) | PASS   |
+| person.ts                          | ✅         | ✅         | ✅                            | PASS   |
+| oneonone.ts                        | ✅         | ✅         | ✅ (participant check)        | PASS   |
+| feedback.ts                        | ✅         | ✅         | ✅ (FIXED)                    | PASS   |
+| feedback-campaign.ts               | ✅         | ✅         | ✅ (manager check)            | PASS   |
+| synopsis.ts                        | ✅         | ✅         | ✅ (isOwnPerson/isOrgAdmin)   | PASS   |
+| initiative.ts                      | ✅         | ✅         | ✅ (permission check)         | PASS   |
+| meeting.ts                         | ✅         | ✅         | ✅ (privacy + participant)    | PASS   |
+| meeting-instance.ts                | ✅         | ✅         | ✅                            | PASS   |
+| team.ts                            | ✅         | ✅         | ✅                            | PASS   |
+| checkin.ts                         | ✅         | ✅         | ✅                            | PASS   |
+| entity-links.ts                    | ✅         | ✅         | ✅                            | PASS   |
+| organization.ts                    | ✅         | ✅         | ✅ (isAdminOrOwner)           | PASS   |
+| (notification.ts removed Feb 2026) | -          | -          | -                             | N/A    |
+| csv-import.ts                      | ✅         | ✅         | ✅ (admin only)               | PASS   |
+| report.ts                          | ✅         | ✅         | ✅                            | PASS   |
+| github.ts                          | ✅         | ✅         | ✅                            | PASS   |
+| avatar.ts                          | ✅         | ✅         | ✅                            | PASS   |
+| job-roles.ts                       | ✅         | ✅         | ✅                            | PASS   |
+| jira.ts                            | ✅         | ✅         | ✅                            | PASS   |
+| permissions.ts                     | ✅         | ✅         | ✅                            | PASS   |
+| person-overview.ts                 | ✅         | ✅         | ✅                            | PASS   |
+| password-reset.ts                  | ✅         | N/A        | N/A                           | PASS   |
+| subscription.ts                    | ✅         | ✅         | ✅                            | PASS   |
+| feedback-template.ts               | ✅         | ✅         | ✅                            | PASS   |
 
 ### Page Endpoints (All checked)
 
@@ -109,23 +109,23 @@ All page.tsx files properly implement:
 
 ### API Endpoints (All checked)
 
-| Endpoint              | Auth       | Org Filter | Special Rules            | Status |
-| --------------------- | ---------- | ---------- | ------------------------ | ------ |
-| /api/tasks            | ✅         | ✅         | getTaskAccessWhereClause | PASS   |
-| /api/people           | ✅         | ✅         | -                        | PASS   |
-| /api/initiatives      | ✅         | ✅         | -                        | PASS   |
-| /api/oneonones        | ✅         | ✅         | participant filter       | PASS   |
-| /api/feedback         | ✅         | ✅         | privacy filter           | PASS   |
-| /api/meetings         | ✅         | ✅         | privacy + participant    | PASS   |
-| /api/teams            | ✅         | ✅         | -                        | PASS   |
-| /api/search           | ✅         | ✅         | entity-specific rules    | PASS   |
-| /api/notifications/\* | ✅         | ✅         | user-specific            | PASS   |
-| /api/organization/\*  | ✅         | ✅         | isAdminOrOwner           | PASS   |
-| /api/reports/\*       | ✅         | ✅         | report.authorize()       | PASS   |
-| /api/chat             | ✅ (FIXED) | ✅         | tool-level auth          | PASS   |
-| /api/cron/\*          | ✅         | ✅         | CRON_SECRET              | PASS   |
-| /api/webhooks/\*      | ✅         | N/A        | signature verify         | PASS   |
-| /api/billing/\*       | ✅         | ✅         | -                        | PASS   |
+| Endpoint                                 | Auth       | Org Filter | Special Rules            | Status |
+| ---------------------------------------- | ---------- | ---------- | ------------------------ | ------ |
+| /api/tasks                               | ✅         | ✅         | getTaskAccessWhereClause | PASS   |
+| /api/people                              | ✅         | ✅         | -                        | PASS   |
+| /api/initiatives                         | ✅         | ✅         | -                        | PASS   |
+| /api/oneonones                           | ✅         | ✅         | participant filter       | PASS   |
+| /api/feedback                            | ✅         | ✅         | privacy filter           | PASS   |
+| /api/meetings                            | ✅         | ✅         | privacy + participant    | PASS   |
+| /api/teams                               | ✅         | ✅         | -                        | PASS   |
+| /api/search                              | ✅         | ✅         | entity-specific rules    | PASS   |
+| /api/notifications/\* (removed Feb 2026) | -          | -          | -                        | N/A    |
+| /api/organization/\*                     | ✅         | ✅         | isAdminOrOwner           | PASS   |
+| /api/reports/\*                          | ✅         | ✅         | report.authorize()       | PASS   |
+| /api/chat                                | ✅ (FIXED) | ✅         | tool-level auth          | PASS   |
+| /api/cron/\*                             | ✅         | ✅         | CRON_SECRET              | PASS   |
+| /api/webhooks/\*                         | ✅         | N/A        | signature verify         | PASS   |
+| /api/billing/\*                          | ✅         | ✅         | -                        | PASS   |
 
 ## Security Test Scenarios
 
@@ -191,12 +191,6 @@ describe('Admin-only functions', () => {
     // Login as regular user
     // Attempt to view/modify org members
     // Expect: 403 Forbidden
-  })
-
-  it('should prevent non-admins from deleting notifications', async () => {
-    // Login as regular user
-    // Attempt to delete org notification
-    // Expect: Permission denied
   })
 })
 ```

@@ -80,7 +80,7 @@
 - **Sidebar Navigation** - Persistent navigation with role-based access
 - **Direct Reports View** - Dedicated manager view of team members
 - **Command Palette** (September 25, 2025) - Global Cmd/Ctrl+K palette with quick actions and search across tasks, initiatives, and people. Extensible sources for commands and server-backed results. Includes Create Task modal trigger.
-- **Notification System** (October 1, 2025) - Real-time notifications with bell icon, notification responses (read/dismissed), and full notification management page
+- **Notification System** - Removed (February 2026). In-app notification bell and notifications page were removed; tolerance rules still create exceptions viewable on the Exceptions page.
 
 ### Data Management
 
@@ -90,7 +90,7 @@
 - **Data Validation** - Zod schema validation throughout
 - **Report System** - Extensible reporting framework with markdown output (January 2025)
 - **AI Synopsis Report** - AI-generated work summaries combining tasks, initiatives, GitHub, Jira, and feedback data (January 2025)
-- **Cron Job System** (October 1, 2025) - Extensible automated task system with job registry, execution tracking, and two initial jobs: birthday notifications and activity monitoring
+- **Cron Job System** (October 1, 2025) - Extensible automated task system with job registry, execution tracking, and tolerance rules evaluation job
 - **Client-Side Caching System** (January 2025) - Zustand-based cache with stale-while-revalidate pattern, network awareness, and navigation-based cache invalidation for optimized data fetching
 
 ### Security & Access Control
@@ -120,7 +120,7 @@
 
 #### 2. Enhanced Communication
 
-- ~~**Notification System** - Real-time notifications for assignments, due dates, check-ins~~ ✅ (October 1, 2025)
+- ~~**Notification System** - Real-time notifications for assignments, due dates, check-ins~~ ✅ (October 2025) — Removed (February 2026)
 - **Email Integration** - Automated email reminders and updates
 - **Comment System** - Threaded discussions on initiatives, tasks, and feedback
 - **Mention System** - @mention functionality for team collaboration
@@ -202,8 +202,7 @@
 ### Immediate (Next 2-4 weeks)
 
 1. **Enhanced Dashboard** - Better metrics and visualizations
-2. **Notification System** - Email and in-app notifications
-3. **Mobile Optimization** - Responsive design improvements
+2. **Mobile Optimization** - Responsive design improvements
 
 ### Short-term (1-3 months)
 
@@ -329,12 +328,9 @@ _Next Review: March 2026_
   - Implemented `CronJobRegistry` for job management and execution
   - Added `CronJobExecutionService` for tracking job runs with status, timing, and results
   - Created database model `CronJobExecution` for execution history
-  - Implemented two initial jobs:
-    - **Birthday Notification Job**: Notifies managers about upcoming birthdays (7 days ahead) of direct/indirect reports
-    - **Activity Monitoring Job**: Notifies managers about team members with no activity in last 14 days (tasks, one-on-ones, feedback)
+  - Implemented job registry with tolerance rules evaluation job (birthday and activity notification jobs were removed in February 2026 along with the in-app notification system)
   - Created command-line runner script with support for specific jobs, organizations, and verbose output
-  - Added package.json scripts: `cron:run`, `cron:birthdays`, `cron:activity`
-  - Created system-level `createSystemNotification` function for cron jobs (bypasses authentication)
+  - Added package.json script: `cron:run`, `cron:tolerance-rules`
   - Comprehensive documentation in `docs/cron-job-system.md` with setup, usage, and extension guide
 
 - **Job Role Management Page** (Completed):
