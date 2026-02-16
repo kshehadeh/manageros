@@ -1,5 +1,7 @@
 # Changelog
 
+## [1.69.1](https://github.com/kshehadeh/manageros/compare/v1.68.0...v1.69.1) (2026-02-16)
+
 # [1.68.0](https://github.com/kshehadeh/manageros/compare/v1.67.0...v1.68.0) (2026-02-05)
 
 ### Features
