@@ -1420,11 +1420,6 @@ export async function deleteOrganization() {
     where: { organizationId },
   })
 
-  // Notifications
-  await prisma.notification.deleteMany({
-    where: { organizationId },
-  })
-
   // Report instances
   await prisma.reportInstance.deleteMany({
     where: { organizationId },

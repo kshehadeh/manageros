@@ -57,7 +57,6 @@ export async function createException(
     entityId: exception.entityId,
     message: exception.message,
     metadata: exception.metadata as Record<string, unknown> | null,
-    notificationId: exception.notificationId,
     status: exception.status as ExceptionStatus,
     acknowledgedAt: exception.acknowledgedAt,
     ignoredAt: exception.ignoredAt,
@@ -132,14 +131,6 @@ export async function getExceptions(
             ruleType: true,
           },
         },
-        notification: {
-          select: {
-            id: true,
-            title: true,
-            message: true,
-            type: true,
-          },
-        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -154,14 +145,6 @@ export async function getExceptions(
             id: true,
             name: true,
             ruleType: true,
-          },
-        },
-        notification: {
-          select: {
-            id: true,
-            title: true,
-            message: true,
-            type: true,
           },
         },
       },
@@ -180,7 +163,6 @@ export async function getExceptions(
     entityId: ex.entityId,
     message: ex.message,
     metadata: ex.metadata as Record<string, unknown> | null,
-    notificationId: ex.notificationId,
     status: ex.status as ExceptionStatus,
     acknowledgedAt: ex.acknowledgedAt,
     ignoredAt: ex.ignoredAt,
@@ -195,14 +177,6 @@ export async function getExceptions(
           id: ex.rule.id,
           name: ex.rule.name,
           ruleType: ex.rule.ruleType,
-        }
-      : undefined,
-    notification: ex.notification
-      ? {
-          id: ex.notification.id,
-          title: ex.notification.title,
-          message: ex.notification.message,
-          type: ex.notification.type,
         }
       : undefined,
   }))
@@ -245,29 +219,6 @@ export async function acknowledgeException(id: string): Promise<Exception> {
     },
   })
 
-  // Update linked notification response if exists
-  if (existingException.notificationId && user.managerOSUserId) {
-    await prisma.notificationResponse.upsert({
-      where: {
-        // eslint-disable-next-line camelcase
-        notificationId_userId: {
-          notificationId: existingException.notificationId,
-          userId: user.managerOSUserId,
-        },
-      },
-      update: {
-        status: 'acknowledged',
-        acknowledgedAt: new Date(),
-      },
-      create: {
-        notificationId: existingException.notificationId,
-        userId: user.managerOSUserId,
-        status: 'acknowledged',
-        acknowledgedAt: new Date(),
-      },
-    })
-  }
-
   revalidatePath('/exceptions')
   return exception as Exception
 }
@@ -306,29 +257,6 @@ export async function ignoreException(id: string): Promise<Exception> {
       ignoredBy: user.managerOSUserId,
     },
   })
-
-  // Update linked notification response if exists
-  if (existingException.notificationId && user.managerOSUserId) {
-    await prisma.notificationResponse.upsert({
-      where: {
-        // eslint-disable-next-line camelcase
-        notificationId_userId: {
-          notificationId: existingException.notificationId,
-          userId: user.managerOSUserId,
-        },
-      },
-      update: {
-        status: 'ignored',
-        ignoredAt: new Date(),
-      },
-      create: {
-        notificationId: existingException.notificationId,
-        userId: user.managerOSUserId,
-        status: 'ignored',
-        ignoredAt: new Date(),
-      },
-    })
-  }
 
   revalidatePath('/exceptions')
   return exception as Exception
@@ -369,45 +297,6 @@ export async function resolveException(id: string): Promise<Exception> {
     },
   })
 
-  // Update linked notification response if exists
-  if (existingException.notificationId && user.managerOSUserId) {
-    await prisma.notificationResponse.upsert({
-      where: {
-        // eslint-disable-next-line camelcase
-        notificationId_userId: {
-          notificationId: existingException.notificationId,
-          userId: user.managerOSUserId,
-        },
-      },
-      update: {
-        status: 'resolved',
-        resolvedAt: new Date(),
-      },
-      create: {
-        notificationId: existingException.notificationId,
-        userId: user.managerOSUserId,
-        status: 'resolved',
-        resolvedAt: new Date(),
-      },
-    })
-  }
-
   revalidatePath('/exceptions')
-  return exception as Exception
-}
-
-/**
- * Link an exception to a notification
- * This is typically called when creating a notification for an exception
- */
-export async function linkExceptionToNotification(
-  exceptionId: string,
-  notificationId: string
-): Promise<Exception> {
-  const exception = await prisma.exception.update({
-    where: { id: exceptionId },
-    data: { notificationId },
-  })
-
   return exception as Exception
 }

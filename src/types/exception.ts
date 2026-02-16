@@ -21,7 +21,6 @@ export interface Exception {
   entityId: string
   message: string
   metadata: Record<string, unknown> | null
-  notificationId: string | null
   status: ExceptionStatus
   acknowledgedAt: Date | null
   ignoredAt: Date | null
@@ -35,12 +34,6 @@ export interface Exception {
     id: string
     name: string
     ruleType: string
-  }
-  notification?: {
-    id: string
-    title: string
-    message: string
-    type: string
   }
 }
 

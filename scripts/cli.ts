@@ -616,18 +616,6 @@ async function deleteUserByIdentifier(identifier: string) {
       console.log(`  ✓ Deleted ${invitationCount} invitation(s)`)
     }
 
-    // Delete notifications for the user
-    const notificationCount = await prisma.notification.count({
-      where: { userId: user.id },
-    })
-    if (notificationCount > 0) {
-      console.log(`  Deleting ${notificationCount} notification(s) for user...`)
-      await prisma.notification.deleteMany({
-        where: { userId: user.id },
-      })
-      console.log(`  ✓ Deleted ${notificationCount} notification(s)`)
-    }
-
     console.log(`\nDeleting database user: ${user.id}`)
     await prisma.user.delete({
       where: { id: user.id },
@@ -853,7 +841,6 @@ async function getOrganizationStats(organizationId: string) {
     jobRoleCount,
     jobLevelCount,
     jobDomainCount,
-    notificationCount,
     reportInstanceCount,
     cronJobCount,
     fileAttachmentCount,
@@ -867,7 +854,6 @@ async function getOrganizationStats(organizationId: string) {
     prisma.jobRole.count({ where: { organizationId } }),
     prisma.jobLevel.count({ where: { organizationId } }),
     prisma.jobDomain.count({ where: { organizationId } }),
-    prisma.notification.count({ where: { organizationId } }),
     prisma.reportInstance.count({ where: { organizationId } }),
     prisma.cronJobExecution.count({ where: { organizationId } }),
     prisma.fileAttachment.count({ where: { organizationId } }),
@@ -883,7 +869,6 @@ async function getOrganizationStats(organizationId: string) {
     jobRoleCount,
     jobLevelCount,
     jobDomainCount,
-    notificationCount,
     reportInstanceCount,
     cronJobCount,
     fileAttachmentCount,
@@ -976,7 +961,6 @@ async function deleteOrganization(slug?: string) {
     console.log(`  Job Roles: ${stats.jobRoleCount}`)
     console.log(`  Job Levels: ${stats.jobLevelCount}`)
     console.log(`  Job Domains: ${stats.jobDomainCount}`)
-    console.log(`  Notifications: ${stats.notificationCount}`)
     console.log(`  Report Instances: ${stats.reportInstanceCount}`)
     console.log(`  Cron Job Executions: ${stats.cronJobCount}`)
     console.log(`  File Attachments: ${stats.fileAttachmentCount}`)
@@ -1155,14 +1139,6 @@ async function deleteOrganization(slug?: string) {
     })
     if (entityLinkCount.count > 0) {
       console.log(`  ✓ Deleted ${entityLinkCount.count} entity link(s)`)
-    }
-
-    // Notifications
-    const notificationCount = await prisma.notification.deleteMany({
-      where: { organizationId: organization.id },
-    })
-    if (notificationCount.count > 0) {
-      console.log(`  ✓ Deleted ${notificationCount.count} notification(s)`)
     }
 
     // Report instances

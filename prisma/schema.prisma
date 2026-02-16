@@ -50,7 +50,6 @@ model Organization {
   jobRoles               JobRole[]
   levels                 JobLevel[]
   domains                JobDomain[]
-  notifications          Notification[]
   reportInstances        ReportInstance[]
   cronJobExecutions      CronJobExecution[]
   fileAttachments        FileAttachment[]
@@ -86,8 +85,6 @@ model User {
   feedbackCampaigns       FeedbackCampaign[]
   createdTasks            Task[]
   createdEntityLinks      EntityLink[]
-  notifications           Notification[]
-  notificationResponses   NotificationResponse[]
   ownedReports            Report[]                 @relation("ReportOwner")
   reportRuns              ReportInstance[]
   fileAttachments         FileAttachment[]
@@ -603,49 +600,6 @@ model PasswordResetToken {
   @@index([token])
 }
 
-model Notification {
-  id             String        @id @default(cuid())
-  title          String
-  message        String
-  type           String        @default("info") // info|warning|success|error
-  organizationId String?
-  organization   Organization? @relation(fields: [organizationId], references: [id])
-  userId         String? // If null, it's an organization-wide notification
-  user           User?         @relation(fields: [userId], references: [id])
-  metadata       Json? // Additional data for deduplication and job tracking
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-
-  // Relationships
-  responses NotificationResponse[]
-  exception Exception?
-
-  @@index([organizationId])
-  @@index([userId])
-  @@index([createdAt])
-}
-
-model NotificationResponse {
-  id             String       @id @default(cuid())
-  notificationId String
-  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
-  userId         String
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status         String       @default("unread") // unread|read|dismissed|acknowledged|ignored|resolved
-  readAt         DateTime?
-  dismissedAt    DateTime?
-  acknowledgedAt DateTime?
-  ignoredAt      DateTime?
-  resolvedAt     DateTime?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-
-  @@unique([notificationId, userId])
-  @@index([notificationId])
-  @@index([userId])
-  @@index([status])
-}
-
 model CronJobExecution {
   id                   String        @id @default(cuid())
   jobId                String
@@ -837,8 +791,6 @@ model Exception {
   entityId       String                  // ID of the entity that triggered the exception
   message        String                  // Human-readable message
   metadata       Json?                   // Additional context data
-  notificationId String?                 @unique
-  notification   Notification?           @relation(fields: [notificationId], references: [id], onDelete: SetNull)
   status         String                  @default("active") // active|acknowledged|ignored|resolved
   acknowledgedAt DateTime?
   ignoredAt      DateTime?
@@ -854,7 +806,6 @@ model Exception {
   @@index([entityType, entityId])
   @@index([status])
   @@index([severity])
-  @@index([notificationId])
 }
 
 // Optional: OAuth Client Metadata

@@ -5,8 +5,6 @@
 
 import { z } from 'zod'
 import { prisma } from '@/lib/db'
-import { linkExceptionToNotification } from '@/lib/actions/exceptions'
-import { createSystemNotification } from '@/lib/actions/notification'
 import { getExistingExceptions } from '../base-rule'
 import type { ToleranceRule } from '@/types/tolerance-rule'
 import type { ToleranceRuleModule } from '../base-rule'
@@ -108,17 +106,6 @@ async function createExceptionForOneOnOneSafely(
       }
     )
 
-    // If exception was created, create notification outside transaction
-    if (result) {
-      await createNotificationForOneOnOneException(
-        rule,
-        managerId,
-        reportId,
-        severity,
-        entityId
-      )
-    }
-
     return result
   } catch (error) {
     // Handle unique constraint violations (P2002 is Prisma's unique constraint error code)
@@ -134,59 +121,6 @@ async function createExceptionForOneOnOneSafely(
     }
     // Re-throw other errors
     throw error
-  }
-}
-
-/**
- * Create notification for one-on-one exception (extracted for reuse)
- */
-async function createNotificationForOneOnOneException(
-  rule: ToleranceRule,
-  managerId: string,
-  reportId: string,
-  severity: 'warning' | 'urgent',
-  entityId: string
-): Promise<void> {
-  // Get the exception that was just created
-  const exception = await prisma.exception.findFirst({
-    where: {
-      ruleId: rule.id,
-      organizationId: rule.organizationId,
-      entityType: 'OneOnOne',
-      entityId,
-      status: 'active',
-    },
-  })
-
-  if (!exception) {
-    return
-  }
-
-  // Create notification for the manager
-  const managerWithUser = await prisma.person.findUnique({
-    where: { id: managerId },
-    include: { user: true },
-  })
-
-  if (managerWithUser?.user?.id) {
-    const notification = await createSystemNotification({
-      title:
-        severity === 'urgent'
-          ? 'Urgent: Missing 1:1 Meeting'
-          : 'Warning: Missing 1:1 Meeting',
-      message: exception.message,
-      type: severity === 'urgent' ? 'error' : 'warning',
-      organizationId: rule.organizationId,
-      userId: managerWithUser.user.id,
-      metadata: {
-        exceptionId: exception.id,
-        entityType: 'OneOnOne',
-        entityId,
-        navigationPath: `/people/${managerId}`,
-      },
-    })
-
-    await linkExceptionToNotification(exception.id, notification.id)
   }
 }
 

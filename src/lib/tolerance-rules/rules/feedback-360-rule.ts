@@ -5,11 +5,7 @@
 
 import { z } from 'zod'
 import { prisma } from '@/lib/db'
-import {
-  createException,
-  linkExceptionToNotification,
-} from '@/lib/actions/exceptions'
-import { createSystemNotification } from '@/lib/actions/notification'
+import { createException } from '@/lib/actions/exceptions'
 import { getExistingExceptions } from '../base-rule'
 import type { ToleranceRule } from '@/types/tolerance-rule'
 import type { CreateExceptionInput } from '@/types/exception'
@@ -68,35 +64,7 @@ async function createExceptionForFeedback360(
     },
   }
 
-  const exception = await createException(exceptionInput)
-
-  // Create notification for the person's manager
-  const personWithManager = await prisma.person.findUnique({
-    where: { id: personId },
-    include: {
-      manager: {
-        include: { user: true },
-      },
-    },
-  })
-
-  if (personWithManager?.manager?.user?.id) {
-    const notification = await createSystemNotification({
-      title: 'Warning: Missing 360 Feedback',
-      message,
-      type: 'warning',
-      organizationId: rule.organizationId,
-      userId: personWithManager.manager.user.id,
-      metadata: {
-        exceptionId: exception.id,
-        entityType: 'Person',
-        entityId: personId,
-        navigationPath: `/people/${personId}`,
-      },
-    })
-
-    await linkExceptionToNotification(exception.id, notification.id)
-  }
+  await createException(exceptionInput)
 }
 
 /**

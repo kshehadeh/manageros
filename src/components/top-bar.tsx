@@ -6,7 +6,6 @@ import { ModeToggle } from '@/components/mode-toggle'
 import { Menu, X, Search } from 'lucide-react'
 import { useMobileMenu } from '@/components/mobile-menu-provider'
 import { useCommandPalette } from '@/components/command-palette/provider'
-import { NotificationBell } from '@/components/notifications/notification-bell'
 import {
   Tooltip,
   TooltipContent,
@@ -79,16 +78,8 @@ export default function TopBar() {
 
           {/* Desktop right-side actions */}
           <div className='hidden md:flex items-center gap-md'>
-            {hasOrganization && <NotificationBell />}
             <ModeToggle />
           </div>
-
-          {/* Mobile notification button */}
-          {hasOrganization && (
-            <div className='md:hidden'>
-              <NotificationBell />
-            </div>
-          )}
         </div>
       </div>
     </header>

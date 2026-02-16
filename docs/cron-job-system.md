@@ -1,6 +1,6 @@
 # Cron Job System
 
-The ManagerOS cron job system provides an extensible framework for running scheduled tasks that generate notifications and perform automated actions. The system is designed to be easily extensible with new job types.
+The ManagerOS cron job system provides an extensible framework for running scheduled tasks. The system is designed to be easily extensible with new job types.
 
 ## Architecture
 
@@ -9,77 +9,27 @@ The ManagerOS cron job system provides an extensible framework for running sched
 - **CronJob**: Abstract base class for all cron jobs
 - **CronJobRegistry**: Manages job registration and execution
 - **CronJobExecutionService**: Tracks job execution history and statistics
-- **Job Types**: Specific implementations for different notification scenarios
+- **Job Types**: Specific implementations (e.g., tolerance rules evaluation)
 
 ### Database Models
 
 - **CronJobExecution**: Tracks individual job runs with status, timing, and results
-- **Notification**: Stores generated notifications
-- **NotificationResponse**: Tracks user interactions with notifications
 
 ## Available Jobs
 
-### 1. Birthday Notifications (`birthday-notification`)
+### Tolerance Rules Evaluation (`tolerance-rules-evaluation`)
 
-**Schedule**: Daily at 9 AM (`0 9 * * *`)
+**Schedule**: Daily at 8 AM (`0 8 * * *`)
 
-**Purpose**: Notifies managers about upcoming birthdays of their direct and indirect reports.
-
-**Features**:
-
-- Finds birthdays in the next 7 days
-- Handles both direct and indirect reports
-- Creates different notification messages for today, tomorrow, or future birthdays
-- Groups multiple birthdays in a single notification when appropriate
-
-**Configuration**:
-
-```json
-{
-  "daysAhead": 7
-}
-```
-
-### 2. Activity Monitoring (`activity-monitoring`)
-
-**Schedule**: Weekly on Monday at 10 AM (`0 10 * * 1`)
-
-**Purpose**: Identifies team members with no recent activity and notifies their managers.
+**Purpose**: Evaluates all enabled tolerance rules for the organization and creates exceptions when thresholds are exceeded.
 
 **Features**:
 
-- Checks for recent tasks, Jira tickets, one-on-ones, and feedback
-- Configurable lookback period (default: 14 days)
-- Only notifies about reports who have been inactive
-- Provides context about the last activity type and date
+- Runs all enabled rules (one-on-one frequency, initiative check-in, 360 feedback, manager span)
+- Creates exceptions that appear on the Exceptions page
+- Configurable per-rule thresholds in organization settings
 
-**Configuration**:
-
-```json
-{
-  "daysBack": 14
-}
-```
-
-### 3. Overdue Tasks Notification (`overdue-tasks-notification`)
-
-**Schedule**: Daily at 9 AM (`0 9 * * *`)
-
-**Purpose**: Identifies tasks with past due dates and notifies the assigned users.
-
-**Features**:
-
-- Finds tasks with due dates that have passed
-- Only includes incomplete tasks (excludes 'done' and 'dropped' status)
-- Groups multiple overdue tasks per user into a single notification
-- Uses deduplication to prevent duplicate notifications within 24 hours
-- Respects organization boundaries and task access control
-
-**Configuration**:
-
-```json
-{}
-```
+**Configuration**: Per-rule configuration is managed in Settings → Tolerance Rules.
 
 ## Usage
 
@@ -91,10 +41,8 @@ The ManagerOS cron job system provides an extensible framework for running sched
 # Run all jobs for all organizations
 bun run cron:run
 
-# Run specific job for all organizations
-bun run cron:birthdays
-bun run cron:activity
-bun run cron:overdue-tasks
+# Run tolerance rules evaluation for all organizations
+bun run cron:tolerance-rules
 
 # Run with verbose output
 bun scripts/run-cron-jobs.ts --verbose
@@ -103,15 +51,13 @@ bun scripts/run-cron-jobs.ts --verbose
 bun scripts/run-cron-jobs.ts --org org123
 
 # Run specific job for specific organization
-bun scripts/run-cron-jobs.ts --job birthday-notification --org org123
+bun scripts/run-cron-jobs.ts --job tolerance-rules-evaluation --org org123
 ```
 
 #### Package.json Scripts
 
 - `cron:run` - Run all cron jobs
-- `cron:birthdays` - Run birthday notification job
-- `cron:activity` - Run activity monitoring job
-- `cron:overdue-tasks` - Run overdue tasks notification job
+- `cron:tolerance-rules` - Run tolerance rules evaluation job
 
 ### Setting Up Automated Execution
 
@@ -121,15 +67,8 @@ bun scripts/run-cron-jobs.ts --job birthday-notification --org org123
 # Edit crontab
 crontab -e
 
-# Add entries for automated execution
-# Daily birthday notifications at 9 AM
-0 9 * * * cd /path/to/manageros && bun run cron:birthdays
-
-# Daily overdue tasks notifications at 9 AM
-0 9 * * * cd /path/to/manageros && bun run cron:overdue-tasks
-
-# Weekly activity monitoring on Monday at 10 AM
-0 10 * * 1 cd /path/to/manageros && bun run cron:activity
+# Daily tolerance rules evaluation at 8 AM
+0 8 * * * cd /path/to/manageros && bun run cron:tolerance-rules
 ```
 
 #### Using GitHub Actions
@@ -225,7 +164,7 @@ All job executions are tracked in the `CronJobExecution` table with:
 - Organization processed
 - Start and completion times
 - Success/failure status
-- Number of notifications created
+- Result metadata (e.g. exceptions created)
 - Error messages (if any)
 - Execution metadata
 
@@ -278,14 +217,14 @@ const deletedCount = await CronJobExecutionService.cleanupOldExecutions(90)
 - Use `--verbose` flag for detailed output
 - Check execution history in the database
 - Review error messages in failed executions
-- Monitor notification creation counts
+- Monitor result metadata in execution records
 
 ### Testing
 
 ```bash
 # Test specific job with verbose output
-bun scripts/run-cron-jobs.ts --job birthday-notification --verbose
+bun scripts/run-cron-jobs.ts --job tolerance-rules-evaluation --verbose
 
 # Test for specific organization
-bun scripts/run-cron-jobs.ts --job activity-monitoring --org test-org --verbose
+bun scripts/run-cron-jobs.ts --job tolerance-rules-evaluation --org test-org --verbose
 ```

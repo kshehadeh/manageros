@@ -8,9 +8,6 @@ import {
   CronJobResult,
   CronJobExecutionContext,
 } from './types'
-import { BirthdayNotificationJob } from './jobs/birthday-notification-job'
-import { ActivityMonitoringJob } from './jobs/activity-monitoring-job'
-import { OverdueTasksNotificationJob } from './jobs/overdue-tasks-notification-job'
 import { ToleranceRulesEvaluationJob } from './jobs/tolerance-rules-evaluation-job'
 
 class CronJobRegistry {
@@ -116,9 +113,6 @@ class CronJobRegistry {
    * Register default jobs
    */
   private registerDefaultJobs(): void {
-    this.register(new BirthdayNotificationJob())
-    this.register(new ActivityMonitoringJob())
-    this.register(new OverdueTasksNotificationJob())
     this.register(new ToleranceRulesEvaluationJob())
   }
 }

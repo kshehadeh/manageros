@@ -5,11 +5,7 @@
 
 import { z } from 'zod'
 import { prisma } from '@/lib/db'
-import {
-  createException,
-  linkExceptionToNotification,
-} from '@/lib/actions/exceptions'
-import { createSystemNotification } from '@/lib/actions/notification'
+import { createException } from '@/lib/actions/exceptions'
 import { getExistingExceptions } from '../base-rule'
 import type { ToleranceRule } from '@/types/tolerance-rule'
 import type { CreateExceptionInput } from '@/types/exception'
@@ -65,39 +61,7 @@ async function createExceptionForInitiative(
     },
   }
 
-  const exception = await createException(exceptionInput)
-
-  // Create notifications for initiative owners
-  const owners = await prisma.initiativeOwner.findMany({
-    where: { initiativeId },
-    include: {
-      person: {
-        include: {
-          user: true,
-        },
-      },
-    },
-  })
-
-  for (const owner of owners) {
-    if (owner.person.user?.id) {
-      const notification = await createSystemNotification({
-        title: 'Warning: Missing Initiative Check-In',
-        message,
-        type: 'warning',
-        organizationId: rule.organizationId,
-        userId: owner.person.user.id,
-        metadata: {
-          exceptionId: exception.id,
-          entityType: 'Initiative',
-          entityId: initiativeId,
-          navigationPath: `/initiatives/${initiativeId}`,
-        },
-      })
-
-      await linkExceptionToNotification(exception.id, notification.id)
-    }
-  }
+  await createException(exceptionInput)
 }
 
 /**

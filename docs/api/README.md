@@ -10,7 +10,7 @@ ManagerOS uses a hybrid API architecture:
 
 1. **REST Endpoints** (`/api/*`) - For client-side data fetching with query parameters and filters
 2. **Server Actions** (`'use server'`) - For mutations and server-side operations from Server Components
-3. **Real-time** - Server-Sent Events for live notifications
+3. **Real-time** - Server-Sent Events for live updates where applicable
 
 ## Authentication
 
@@ -200,7 +200,6 @@ See [Security Requirements](../../.cursor/rules/security-requirements.mdc) for d
 | API               | Description                                            | Documentation                   |
 | ----------------- | ------------------------------------------------------ | ------------------------------- |
 | **Organizations** | Organization setup, invitations, and member management | [View Docs](./organizations.md) |
-| **Notifications** | Create and manage notifications                        | [View Docs](./notifications.md) |
 
 ## Quick Start
 

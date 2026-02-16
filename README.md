@@ -124,7 +124,6 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - **Feedback System**: Multi-directional feedback with privacy controls and feedback campaigns
 - **Reporting**: Extensible reporting framework with AI-powered synopsis generation
 - **Integrations**: Jira and GitHub integration for work activity tracking
-- **Notifications**: Real-time notification system with bell icon and management page
 - **Command Palette**: Global Cmd/Ctrl+K palette for quick actions and search
 - **Help System**: Contextual help with markdown-rendered modals
 
@@ -133,7 +132,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - **Client-Side Caching**: Zustand-based cache with stale-while-revalidate pattern
 - **Notes & Attachments**: Rich text notes with file attachments stored in Cloudflare R2
 - **Avatar Management**: Person and team avatars with upload, Jira/GitHub integration, and initials fallback
-- **Cron Jobs**: Extensible automated task system (birthday notifications, activity monitoring)
+- **Cron Jobs**: Extensible automated task system (tolerance rules evaluation)
 - **Security**: Organization-level isolation and entity-specific access control
 - **Theming**: Token-based theming with light/dark mode support
 
@@ -161,7 +160,6 @@ The application uses a comprehensive Prisma schema with PostgreSQL. Key models i
 - **FeedbackCampaign**: External stakeholder feedback collection
 - **Meeting**: Recurring meetings with instances
 - **Note**: Rich text notes with file attachments
-- **Notification**: Real-time notification system
 - **Report**: Extensible reporting framework
 - **JobRole/JobLevel/JobDomain**: Structured job role management
 
@@ -198,7 +196,7 @@ bun run help:validate    # Validate help content
 
 # Cron Jobs
 bun run cron:run         # Run all cron jobs
-bun run cron:birthdays   # Run birthday notification job
+bun run cron:tolerance-rules   # Run tolerance rules evaluation job
 bun run cron:activity    # Run activity monitoring job
 
 # Version Management
@@ -326,7 +324,6 @@ For the complete roadmap with implemented features and future plans, see [roadma
 - ✅ Feedback system with campaigns
 - ✅ Reporting framework with AI synopsis
 - ✅ Jira and GitHub integrations
-- ✅ Notification system
 - ✅ Command palette
 - ✅ Help system
 - ✅ Client-side caching
