@@ -1,5 +1,15 @@
 # Changelog
 
+# [1.71.0](https://github.com/kshehadeh/manageros/compare/v1.69.1...v1.71.0) (2026-02-24)
+
+### Bug Fixes
+
+- **task-reminders:** fix issues identified during code review. ([f5607dd](https://github.com/kshehadeh/manageros/commit/f5607ddd1aea02376b6587f9134b1728dcca2214))
+
+### Features
+
+- **task-reminders:** add task due reminders with web push and cron ([47b8432](https://github.com/kshehadeh/manageros/commit/47b84321fd47018d7bbba97facb53001223266e4))
+
 ## [1.69.1](https://github.com/kshehadeh/manageros/compare/v1.68.0...v1.69.1) (2026-02-16)
 
 # [1.68.0](https://github.com/kshehadeh/manageros/compare/v1.67.0...v1.68.0) (2026-02-05)
