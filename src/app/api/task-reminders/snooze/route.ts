@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth-utils'
-import { snoozeDelivery } from '@/lib/data/task-reminders'
+import {
+  snoozeDelivery,
+  TaskReminderValidationError,
+} from '@/lib/data/task-reminders'
 
 /**
  * POST /api/task-reminders/snooze
@@ -47,6 +50,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
+    if (error instanceof TaskReminderValidationError) {
+      return NextResponse.json({ error: error.message }, { status: 400 })
+    }
     console.error('POST /api/task-reminders/snooze:', error)
     return NextResponse.json(
       {

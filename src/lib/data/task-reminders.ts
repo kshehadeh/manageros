@@ -10,6 +10,13 @@ export interface TaskReminderUserContext {
   personId?: string
 }
 
+export class TaskReminderValidationError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'TaskReminderValidationError'
+  }
+}
+
 /**
  * Upsert the current user's reminder preference for a task.
  * Use null for reminderMinutesBeforeDue to clear the reminder.
@@ -84,8 +91,8 @@ export async function ensureDeliveryRecordsForUpcoming(
 
   const tasks = await prisma.task.findMany({
     where: {
-      dueDate: { not: null },
-      status: { not: 'done' },
+      dueDate: { not: null, lte: windowEnd },
+      status: { notIn: ['done', 'dropped'] },
       completedAt: null,
       ...getTaskAccessWhereClause(
         context.organizationId,
@@ -161,7 +168,7 @@ export async function getDueNowDeliveries(context: TaskReminderUserContext) {
       remindAt: { lte: now },
       pushSentAt: null,
       task: {
-        status: { not: 'done' },
+        status: { notIn: ['done', 'dropped'] },
         completedAt: null,
       },
     },
@@ -183,10 +190,11 @@ export async function ensureDeliveryRecordsForOrganization(
   windowMs: number = 24 * 60 * 60 * 1000
 ) {
   const now = new Date()
+  const windowEnd = new Date(now.getTime() + windowMs)
   const tasks = await prisma.task.findMany({
     where: {
-      dueDate: { not: null },
-      status: { not: 'done' },
+      dueDate: { not: null, lte: windowEnd },
+      status: { notIn: ['done', 'dropped'] },
       completedAt: null,
       OR: [
         { initiative: { organizationId } },
@@ -255,7 +263,7 @@ export async function getDueNowDeliveriesForOrganization(
       remindAt: { lte: now },
       pushSentAt: null,
       task: {
-        status: { not: 'done' },
+        status: { notIn: ['done', 'dropped'] },
         completedAt: null,
       },
       user: {
@@ -293,7 +301,7 @@ export async function getUpcomingDeliveries(
       status: TaskReminderDeliveryStatus.PENDING,
       remindAt: { lte: windowEnd },
       task: {
-        status: { not: 'done' },
+        status: { notIn: ['done', 'dropped'] },
         completedAt: null,
       },
     },
@@ -345,7 +353,7 @@ export async function snoozeDelivery(
   snoozeMinutes: number
 ) {
   if (snoozeMinutes <= 0) {
-    throw new Error('Snooze minutes must be positive')
+    throw new TaskReminderValidationError('Snooze minutes must be positive')
   }
 
   const delivery = await prisma.taskReminderDelivery.findFirst({
@@ -371,8 +379,15 @@ export async function snoozeDelivery(
   const minutesUntilDue = Math.floor(
     (delivery.taskDueDate.getTime() - now.getTime()) / (60 * 1000)
   )
+  if (minutesUntilDue <= 0) {
+    throw new TaskReminderValidationError(
+      'Task is already overdue and cannot be snoozed'
+    )
+  }
   if (snoozeMinutes > minutesUntilDue) {
-    throw new Error('Snooze time cannot be later than the task due date')
+    throw new TaskReminderValidationError(
+      'Snooze time cannot be later than the task due date'
+    )
   }
 
   const newRemindAt = new Date(now.getTime() + snoozeMinutes * 60 * 1000)
@@ -395,19 +410,33 @@ export async function snoozeDelivery(
 }
 
 /**
- * When a task's due date is updated, invalidate PENDING deliveries for the old due date
- * so that ensureDeliveryRecordsForUpcoming will create a new one for the new due date.
+ * When a task's due date is updated, invalidate PENDING deliveries for all users
+ * on that task so stale records are not sent with the old schedule.
  */
 export async function invalidateDeliveriesForTaskDueDateChange(
   taskId: string,
   context: TaskReminderUserContext,
   newDueDate: Date | null
 ) {
+  const task = await prisma.task.findFirst({
+    where: {
+      id: taskId,
+      ...getTaskAccessWhereClause(
+        context.organizationId,
+        context.userId,
+        context.personId
+      ),
+    },
+    select: { id: true },
+  })
+  if (!task) {
+    throw new Error('Task not found or access denied')
+  }
+
   if (newDueDate === null) {
     await prisma.taskReminderDelivery.deleteMany({
       where: {
         taskId,
-        userId: context.userId,
         status: TaskReminderDeliveryStatus.PENDING,
       },
     })
@@ -417,7 +446,6 @@ export async function invalidateDeliveriesForTaskDueDateChange(
   await prisma.taskReminderDelivery.deleteMany({
     where: {
       taskId,
-      userId: context.userId,
       taskDueDate: { not: newDueDate },
       status: TaskReminderDeliveryStatus.PENDING,
     },
