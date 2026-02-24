@@ -12,6 +12,7 @@ import { CreateTaskModal } from '@/components/command-palette/create-task-modal'
 import { PersonSelectorModal } from '@/components/command-palette/person-selector-modal'
 import { EditFormNavigator } from '@/components/edit-form-navigator'
 import { OfflineAwareLayout } from '@/components/offline-aware-layout'
+import { TaskReminderProvider } from '@/components/task-reminders/task-reminder-provider'
 import { AIChatSidebarWrapper } from '@/components/ai-chat-sidebar-wrapper'
 import { CacheProvider } from '@/components/cache-provider'
 import SidebarClient from '@/components/sidebar-client'
@@ -125,6 +126,7 @@ export default async function AppLayout({ children }: AppLayoutProps) {
                     <CreateTaskModal />
                     <PersonSelectorModal />
                     <EditFormNavigator />
+                    <TaskReminderProvider />
                   </CacheProvider>
                 </MobileMenuProvider>
               </BreadcrumbProvider>

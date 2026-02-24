@@ -181,6 +181,12 @@ export const taskSchema = z.object({
     })
     .default(DEFAULT_TASK_PRIORITY),
   dueDate: z.string().optional(),
+  reminderMinutesBeforeDue: z.coerce
+    .number()
+    .int()
+    .positive()
+    .nullable()
+    .optional(),
   initiativeId: z.string().optional(),
   objectiveId: z.string().optional(),
 })

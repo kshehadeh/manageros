@@ -49,6 +49,7 @@
 - **Assignment & Estimation** - Person assignment with time estimates
 - **Due Dates** - Deadline tracking and management
 - **Initiative Integration** - Tasks linked to initiatives and objectives
+- **Task Due Desktop Notifications** (February 2026) - Desktop reminders when a task is due. Configurable reminder timing (no reminder, 5 min, 1 hour, 1 day, or custom minutes before due). Per-user reminder preference per task. **Web Push** support: reminders can be sent when the tab is in the background or closed (service worker, VAPID, cron job `task-reminder-push`). In-app poll still runs for non-push or fallback. Acknowledge dismisses the reminder; Snooze lets the user pick a new reminder time (options limited by time left until due). See docs/task-reminders.md.
 
 ### One-on-One Management
 

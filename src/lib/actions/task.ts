@@ -7,6 +7,10 @@ import { getCurrentUser, getActionPermission } from '@/lib/auth-utils'
 import { type TaskStatus } from '@/lib/task-status'
 import { taskPriorityUtils, DEFAULT_TASK_PRIORITY } from '@/lib/task-priority'
 import { getTaskAccessWhereClause } from '@/lib/task-access-utils'
+import {
+  upsertTaskReminderPreference,
+  invalidateDeliveriesForTaskDueDateChange,
+} from '@/lib/data/task-reminders'
 
 export async function createTask(formData: TaskFormData) {
   const user = await getCurrentUser()
@@ -84,6 +88,24 @@ export async function createTask(formData: TaskFormData) {
       createdBy: true,
     },
   })
+
+  // Set reminder preference for the current user if due date and reminder are provided
+  const reminderMinutes =
+    validatedData.reminderMinutesBeforeDue !== undefined
+      ? validatedData.reminderMinutesBeforeDue
+      : null
+  if (user.managerOSUserId && user.managerOSOrganizationId) {
+    const context = {
+      userId: user.managerOSUserId,
+      organizationId: user.managerOSOrganizationId,
+      personId: user.managerOSPersonId ?? undefined,
+    }
+    if (dueDate && reminderMinutes !== null) {
+      await upsertTaskReminderPreference(task.id, context, reminderMinutes)
+    } else if (reminderMinutes === null) {
+      await upsertTaskReminderPreference(task.id, context, null)
+    }
+  }
 
   // Revalidate the tasks page
   revalidatePath('/tasks')
@@ -166,6 +188,20 @@ export async function updateTask(taskId: string, formData: TaskFormData) {
     }
   }
 
+  // Invalidate reminder deliveries if due date changed
+  if (
+    user.managerOSUserId &&
+    user.managerOSOrganizationId &&
+    existingTask.dueDate?.getTime() !== dueDate?.getTime()
+  ) {
+    const context = {
+      userId: user.managerOSUserId,
+      organizationId: user.managerOSOrganizationId,
+      personId: user.managerOSPersonId ?? undefined,
+    }
+    await invalidateDeliveriesForTaskDueDateChange(taskId, context, dueDate)
+  }
+
   // Update the task
   const task = await prisma.task.update({
     where: { id: taskId },
@@ -188,6 +224,24 @@ export async function updateTask(taskId: string, formData: TaskFormData) {
       createdBy: true,
     },
   })
+
+  // Update reminder preference for the current user
+  const reminderMinutes =
+    validatedData.reminderMinutesBeforeDue !== undefined
+      ? validatedData.reminderMinutesBeforeDue
+      : null
+  if (user.managerOSUserId && user.managerOSOrganizationId) {
+    const context = {
+      userId: user.managerOSUserId,
+      organizationId: user.managerOSOrganizationId,
+      personId: user.managerOSPersonId ?? undefined,
+    }
+    if (dueDate && reminderMinutes !== null) {
+      await upsertTaskReminderPreference(taskId, context, reminderMinutes)
+    } else {
+      await upsertTaskReminderPreference(taskId, context, reminderMinutes)
+    }
+  }
 
   // Revalidate the tasks page and task detail page
   revalidatePath('/tasks')
@@ -344,6 +398,10 @@ export async function getTask(taskId: string) {
       initiative: true,
       objective: true,
       createdBy: true,
+      reminderPreferences: {
+        where: { userId: user.managerOSUserId || '' },
+        take: 1,
+      },
     },
   })
 
@@ -719,6 +777,7 @@ export async function updateTaskQuickEdit(
     dueDate?: string | null
     priority?: number
     status?: string
+    reminderMinutesBeforeDue?: number | null
   }
 ) {
   const user = await getCurrentUser()
@@ -760,6 +819,21 @@ export async function updateTaskQuickEdit(
   // Parse due date if provided
   const dueDate = updates.dueDate ? new Date(updates.dueDate) : undefined
 
+  // Invalidate reminder deliveries if due date changed
+  if (
+    user.managerOSUserId &&
+    user.managerOSOrganizationId &&
+    dueDate !== undefined &&
+    existingTask.dueDate?.getTime() !== dueDate.getTime()
+  ) {
+    const context = {
+      userId: user.managerOSUserId,
+      organizationId: user.managerOSOrganizationId,
+      personId: user.managerOSPersonId ?? undefined,
+    }
+    await invalidateDeliveriesForTaskDueDateChange(taskId, context, dueDate)
+  }
+
   // Prepare update data
   const updateData: {
     title?: string
@@ -789,6 +863,24 @@ export async function updateTaskQuickEdit(
       createdBy: true,
     },
   })
+
+  // Update reminder preference when provided
+  if (
+    updates.reminderMinutesBeforeDue !== undefined &&
+    user.managerOSUserId &&
+    user.managerOSOrganizationId
+  ) {
+    const context = {
+      userId: user.managerOSUserId,
+      organizationId: user.managerOSOrganizationId,
+      personId: user.managerOSPersonId ?? undefined,
+    }
+    await upsertTaskReminderPreference(
+      taskId,
+      context,
+      updates.reminderMinutesBeforeDue ?? null
+    )
+  }
 
   // Revalidate the tasks page and task detail page
   revalidatePath('/tasks')

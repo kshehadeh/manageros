@@ -28,11 +28,17 @@ import {
   Calendar,
   Target,
   Crosshair,
+  Bell,
 } from 'lucide-react'
 import { HelpIcon } from '@/components/help-icon'
 import { InitiativeSelect } from '@/components/ui/initiative-select'
 import { PersonSelect } from '@/components/ui/person-select'
 import { FormTemplate, type FormSection } from '@/components/ui/form-template'
+import {
+  getReminderOptions,
+  getReminderLabel,
+  REMINDER_MINUTES,
+} from '@/lib/task-reminders'
 
 interface TaskFormProps {
   people: Person[]
@@ -85,6 +91,8 @@ function TaskFormContent({
     status: initialData?.status || DEFAULT_TASK_STATUS,
     priority: originalPriority,
     dueDate: originalDueDate,
+    reminderMinutesBeforeDue:
+      initialData?.reminderMinutesBeforeDue ?? undefined,
     initiativeId:
       preselectedInitiativeId || initialData?.initiativeId || undefined,
     objectiveId:
@@ -345,7 +353,11 @@ function TaskFormContent({
               <Calendar className='h-4 w-4 text-muted-foreground shrink-0' />
               <DateTimePickerWithNaturalInput
                 value={formData.dueDate}
-                onChange={value => handleInputChange('dueDate', value)}
+                onChange={value => {
+                  handleInputChange('dueDate', value)
+                  if (!value)
+                    handleInputChange('reminderMinutesBeforeDue', undefined)
+                }}
                 placeholder="e.g., 'tomorrow', 'next Monday', 'Jan 15'"
                 disabled={isSubmitting}
                 error={!!errors.dueDate}
@@ -357,6 +369,94 @@ function TaskFormContent({
               <p className='text-sm text-red-500 mt-1'>{errors.dueDate}</p>
             )}
           </div>
+
+          {formData.dueDate && (
+            <div>
+              <div className='flex items-center gap-2'>
+                <Bell className='h-4 w-4 text-muted-foreground shrink-0' />
+                <select
+                  id='reminderMinutesBeforeDue'
+                  name='reminderMinutesBeforeDue'
+                  value={
+                    formData.reminderMinutesBeforeDue == null
+                      ? ''
+                      : (
+                            [
+                              REMINDER_MINUTES.FIVE_MIN,
+                              REMINDER_MINUTES.ONE_HOUR,
+                              REMINDER_MINUTES.ONE_DAY,
+                            ] as number[]
+                          ).includes(
+                            formData.reminderMinutesBeforeDue as number
+                          )
+                        ? formData.reminderMinutesBeforeDue
+                        : 'custom'
+                  }
+                  onChange={e => {
+                    const v = e.target.value
+                    if (v === '') {
+                      handleInputChange('reminderMinutesBeforeDue', undefined)
+                    } else if (v === 'custom') {
+                      handleInputChange('reminderMinutesBeforeDue', 30)
+                    } else {
+                      handleInputChange(
+                        'reminderMinutesBeforeDue',
+                        parseInt(v, 10)
+                      )
+                    }
+                  }}
+                  disabled={isSubmitting}
+                  className={`input flex-1 ${errors.reminderMinutesBeforeDue ? 'border-red-500' : ''}`}
+                >
+                  {getReminderOptions().map(opt => (
+                    <option key={opt.value ?? 'none'} value={opt.value ?? ''}>
+                      {opt.label}
+                    </option>
+                  ))}
+                  <option value='custom'>Custom</option>
+                </select>
+              </div>
+              {(
+                [
+                  REMINDER_MINUTES.FIVE_MIN,
+                  REMINDER_MINUTES.ONE_HOUR,
+                  REMINDER_MINUTES.ONE_DAY,
+                ] as number[]
+              ).includes(
+                formData.reminderMinutesBeforeDue as number
+              ) ? null : formData.reminderMinutesBeforeDue != null &&
+                formData.reminderMinutesBeforeDue > 0 ? (
+                <div className='mt-2 flex items-center gap-2'>
+                  <label
+                    htmlFor='customReminderMinutes'
+                    className='text-sm text-muted-foreground'
+                  >
+                    Minutes before due:
+                  </label>
+                  <input
+                    id='customReminderMinutes'
+                    type='number'
+                    min={1}
+                    value={formData.reminderMinutesBeforeDue ?? ''}
+                    onChange={e => {
+                      const n = parseInt(e.target.value, 10)
+                      handleInputChange(
+                        'reminderMinutesBeforeDue',
+                        Number.isNaN(n) ? undefined : n
+                      )
+                    }}
+                    disabled={isSubmitting}
+                    className='input w-24'
+                  />
+                </div>
+              ) : null}
+              {errors.reminderMinutesBeforeDue && (
+                <p className='text-sm text-red-500 mt-1'>
+                  {errors.reminderMinutesBeforeDue}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       ),
     },

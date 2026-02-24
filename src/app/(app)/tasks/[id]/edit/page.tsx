@@ -45,7 +45,8 @@ export default async function EditTaskPage({
     }),
   ])
 
-  // Prepare initial data for the form
+  // Prepare initial data for the form (reminder from current user's preference)
+  const reminderPref = task.reminderPreferences?.[0]
   const initialData = {
     title: task.title,
     description: task.description || '',
@@ -55,6 +56,8 @@ export default async function EditTaskPage({
     dueDate: task.dueDate
       ? new Date(task.dueDate).toISOString().split('T')[0]
       : '',
+    reminderMinutesBeforeDue:
+      reminderPref?.reminderMinutesBeforeDue ?? undefined,
     initiativeId: task.initiativeId || '',
     objectiveId: task.objectiveId || '',
   }
