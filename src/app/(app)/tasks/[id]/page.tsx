@@ -22,11 +22,14 @@ import { type TaskStatus } from '@/lib/task-status'
 import { type TaskPriority } from '@/lib/task-priority'
 import { updateTaskTitle, updateTaskDescription } from '@/lib/actions/task'
 import { getCurrentUser } from '@/lib/auth-utils'
+import { TaskReminderBanner } from '@/components/task-reminders/task-reminder-banner'
 
 export default async function TaskDetailPage({
   params,
+  searchParams: searchParamsPromise,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ reminder?: string }>
 }) {
   const user = await getCurrentUser()
 
@@ -35,6 +38,8 @@ export default async function TaskDetailPage({
   }
 
   const { id } = await params
+  const searchParams = await searchParamsPromise
+  const reminderDeliveryId = searchParams?.reminder ?? null
   const task = await getTask(id)
 
   if (!task) {
@@ -127,6 +132,14 @@ export default async function TaskDetailPage({
         <PageContent>
           <PageMain>
             <div className='space-y-6'>
+              {reminderDeliveryId && (
+                <TaskReminderBanner
+                  deliveryId={reminderDeliveryId}
+                  taskId={task.id}
+                  taskDueDate={task.dueDate}
+                  onDismiss={() => {}}
+                />
+              )}
               {/* Task Description */}
               <PageSection
                 header={<SectionHeader icon={FileText} title='Description' />}
@@ -158,6 +171,10 @@ export default async function TaskDetailPage({
                   objective={task.objective}
                   estimate={task.estimate}
                   dueDate={task.dueDate}
+                  reminderMinutesBeforeDue={
+                    task.reminderPreferences?.[0]?.reminderMinutesBeforeDue ??
+                    undefined
+                  }
                   createdBy={task.createdBy}
                   updatedAt={task.updatedAt}
                 />
@@ -190,6 +207,9 @@ export default async function TaskDetailPage({
           objective={task.objective}
           estimate={task.estimate}
           dueDate={task.dueDate}
+          reminderMinutesBeforeDue={
+            task.reminderPreferences?.[0]?.reminderMinutesBeforeDue ?? undefined
+          }
           createdBy={task.createdBy}
           updatedAt={task.updatedAt}
           showHeader={false}

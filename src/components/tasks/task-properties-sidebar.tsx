@@ -9,6 +9,7 @@ import {
   Rocket,
   Target,
   Info,
+  Bell,
 } from 'lucide-react'
 import {
   PropertiesSidebar,
@@ -22,6 +23,8 @@ import {
   updateTaskPriority,
   updateTaskDueDate,
 } from '@/lib/actions/task'
+import { updateTaskReminderPreference } from '@/lib/actions/task-reminders'
+import { getReminderOptions, getReminderLabel } from '@/lib/task-reminders'
 import { taskStatusUtils, type TaskStatus } from '@/lib/task-status'
 import { taskPriorityUtils, type TaskPriority } from '@/lib/task-priority'
 import { Link } from '@/components/ui/link'
@@ -44,6 +47,7 @@ interface TaskPropertiesSidebarProps {
   } | null
   estimate?: number | null
   dueDate?: Date | null
+  reminderMinutesBeforeDue?: number | null
   createdBy?: {
     id: string
     name: string
@@ -62,6 +66,7 @@ export function TaskPropertiesSidebar({
   objective,
   estimate,
   dueDate,
+  reminderMinutesBeforeDue,
   createdBy,
   updatedAt,
   canEdit = true,
@@ -146,6 +151,45 @@ export function TaskPropertiesSidebar({
       ),
     },
   ]
+
+  if (dueDate != null && canEdit) {
+    const reminderOptions = getReminderOptions().map(opt => ({
+      value: (opt.value ?? 'none') as string | number,
+      label: opt.label,
+      variant: undefined,
+    }))
+    properties.push({
+      key: 'reminder',
+      label: 'Reminder',
+      icon: Bell,
+      value: (
+        <InlineEditableDropdown
+          value={(reminderMinutesBeforeDue ?? 'none') as string | number}
+          options={reminderOptions}
+          onValueChange={async (val: string | number) => {
+            const v = val === 'none' || val === '' ? null : (val as number)
+            await updateTaskReminderPreference(taskId, v)
+          }}
+          getLabel={value =>
+            value === 'none' || value === '' || value == null
+              ? 'No reminder'
+              : getReminderLabel(value as number)
+          }
+        />
+      ),
+    })
+  } else if (dueDate != null && reminderMinutesBeforeDue != null) {
+    properties.push({
+      key: 'reminder',
+      label: 'Reminder',
+      icon: Bell,
+      value: (
+        <span className='text-sm'>
+          {getReminderLabel(reminderMinutesBeforeDue)}
+        </span>
+      ),
+    })
+  }
 
   if (assignee) {
     properties.push({

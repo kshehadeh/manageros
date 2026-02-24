@@ -9,6 +9,7 @@ import {
   CronJobExecutionContext,
 } from './types'
 import { ToleranceRulesEvaluationJob } from './jobs/tolerance-rules-evaluation-job'
+import { TaskReminderPushJob } from './jobs/task-reminder-push-job'
 
 class CronJobRegistry {
   private jobs: Map<string, CronJob> = new Map()
@@ -114,6 +115,7 @@ class CronJobRegistry {
    */
   private registerDefaultJobs(): void {
     this.register(new ToleranceRulesEvaluationJob())
+    this.register(new TaskReminderPushJob())
   }
 }
 

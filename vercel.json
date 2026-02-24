@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/notifications?job=tolerance-rules-evaluation",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/notifications?job=task-reminder-push",
+      "schedule": "*/5 * * * *"
     }
   ],
   "buildCommand": "bun run build",

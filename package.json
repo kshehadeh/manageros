@@ -1,7 +1,7 @@
 {
   "name": "manageros-starter",
+  "version": "1.70.0",
   "private": true,
-  "version": "1.69.1",
   "type": "module",
   "scripts": {
     "dev": "bun --bun next dev --turbo",
@@ -42,18 +42,6 @@
     "release:minor": "release-it minor --ci",
     "release:major": "release-it major --ci",
     "knip": "knip"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "prettier --write",
-      "oxlint --fix"
-    ],
-    "*.{json,md,css,scss}": [
-      "prettier --write"
-    ]
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.19",
@@ -132,6 +120,7 @@
     "tailwindcss-animate": "^1.0.7",
     "tiptap-markdown": "^0.9.0",
     "use-stick-to-bottom": "^1.1.2",
+    "web-push": "^3.6.7",
     "zod": "^4.3.6",
     "zustand": "^5.0.10"
   },
@@ -144,12 +133,13 @@
     "@types/node": "^25.0.10",
     "@types/react": "19.2.9",
     "@types/react-dom": "19.2.3",
+    "@types/web-push": "^3.6.4",
     "autoprefixer": "^10.4.22",
     "canvas": "^3.2.1",
-    "oxlint": "^1.42.0",
     "husky": "^9.1.7",
     "knip": "^5.82.1",
     "lint-staged": "^16.2.7",
+    "oxlint": "^1.42.0",
     "pg": "^8.17.2",
     "playwright": "^1.58.0",
     "postcss": "^8.5.6",
@@ -164,5 +154,17 @@
   "overrides": {
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "oxlint --fix"
+    ],
+    "*.{json,md,css,scss}": [
+      "prettier --write"
+    ]
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }

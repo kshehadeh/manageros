@@ -22,17 +22,17 @@ CRON_SECRET=your-random-secret-string-here
 
 The following cron jobs are configured in `vercel.json`:
 
-#### Birthday Notifications
+#### Tolerance Rules Evaluation
 
-- **Schedule**: `0 9 * * *` (Daily at 9:00 AM UTC)
-- **Job ID**: `birthday-notification`
-- **Purpose**: Notifies managers about upcoming birthdays of their direct and indirect reports
+- **Schedule**: `0 8 * * *` (Daily at 8:00 AM UTC)
+- **Job ID**: `tolerance-rules-evaluation`
+- **Purpose**: Evaluates enabled tolerance rules and creates exceptions when thresholds are exceeded
 
-#### Activity Monitoring
+#### Task Reminder Push (Web Push)
 
-- **Schedule**: `0 10 * * 1` (Weekly on Monday at 10:00 AM UTC)
-- **Job ID**: `activity-monitoring`
-- **Purpose**: Identifies team members with no recent activity and notifies their managers
+- **Schedule**: `*/5 * * * *` (Every 5 minutes)
+- **Job ID**: `task-reminder-push`
+- **Purpose**: Sends Web Push notifications for task reminders that are due. Requires VAPID keys and runs per organization. See [Task reminders](task-reminders.md).
 
 ## API Endpoint
 
@@ -49,13 +49,14 @@ The cron jobs trigger the `/api/cron/notifications` endpoint, which supports the
 GET /api/cron/notifications
 
 # Run specific job for all organizations
-GET /api/cron/notifications?job=birthday-notification
+GET /api/cron/notifications?job=tolerance-rules-evaluation
+GET /api/cron/notifications?job=task-reminder-push
 
 # Run all jobs for specific organization
 GET /api/cron/notifications?org=org123
 
 # Run specific job for specific organization with verbose logging
-GET /api/cron/notifications?job=activity-monitoring&org=org123&verbose=true
+GET /api/cron/notifications?job=task-reminder-push&org=org123&verbose=true
 ```
 
 ## Security
@@ -160,8 +161,14 @@ To add a new cron job:
 - **Cold Starts**: First execution after inactivity may be slower
 - **Rate Limits**: Be mindful of database and external API rate limits
 
+## Cron vs Vercel Workflows
+
+**Vercel Cron** (used here) is the right fit for periodic scheduled tasks: time-based HTTP triggers (e.g. “every minute” or “daily at 8 AM”) that run a single endpoint. No state or durability is required.
+
+**Vercel Workflows** are for durable, multi-step processes that need to pause and resume, maintain state, or run over long timeframes. Use Workflows when you need retries, human-in-the-loop steps, or complex orchestration—not for simple “run this job every N minutes” scheduling.
+
 ## Related Documentation
 
 - [Cron Job System](./cron-job-system.md) - Detailed system architecture
-- [Notification System](./notification-system.md) - How notifications work
+- [Task reminders](task-reminders.md) - Web Push and reminder setup
 - [Database Backup](./database-backup.md) - Backup procedures

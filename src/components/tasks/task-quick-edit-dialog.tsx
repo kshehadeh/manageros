@@ -38,6 +38,8 @@ import {
   createQuickTask,
   createQuickTaskForInitiative,
 } from '@/lib/actions/task'
+import { updateTaskReminderPreference } from '@/lib/actions/task-reminders'
+import { getReminderOptions, REMINDER_MINUTES } from '@/lib/task-reminders'
 import {
   type TaskStatus,
   taskStatusUtils,
@@ -52,6 +54,7 @@ import {
   Flag,
   CheckCircle,
   Plus,
+  Bell,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { usePeopleForSelect } from '@/hooks/use-organization-cache'
@@ -141,6 +144,7 @@ const TaskQuickEditDialogContent = forwardRef<
       dueDate: originalDueDate,
       priority: originalPriority,
       status: task?.status || TASK_STATUS.TODO,
+      reminderMinutesBeforeDue: undefined as number | null | undefined,
     })
 
     // Reset textarea and form state when dialog opens in create mode
@@ -153,6 +157,7 @@ const TaskQuickEditDialogContent = forwardRef<
           dueDate: '',
           priority: 3,
           status: TASK_STATUS.TODO,
+          reminderMinutesBeforeDue: undefined,
         })
         setErrors({})
       }
@@ -198,7 +203,7 @@ const TaskQuickEditDialogContent = forwardRef<
 
     const handleInputChange = (
       field: keyof typeof formData,
-      value: string | number
+      value: string | number | undefined
     ) => {
       setFormData(prev => ({ ...prev, [field]: value }))
       // Clear field error when user starts typing
@@ -208,7 +213,11 @@ const TaskQuickEditDialogContent = forwardRef<
     }
 
     const handleDateChange = (value: string) => {
-      setFormData(prev => ({ ...prev, dueDate: value }))
+      setFormData(prev => ({
+        ...prev,
+        dueDate: value,
+        ...(value ? {} : { reminderMinutesBeforeDue: undefined }),
+      }))
       // Clear field error when user changes date
       if (errors.dueDate) {
         setErrors(prev => ({ ...prev, dueDate: '' }))
@@ -246,6 +255,17 @@ const TaskQuickEditDialogContent = forwardRef<
               taskPriority
             )
           }
+          if (
+            createdTask?.id &&
+            formData.reminderMinutesBeforeDue != null &&
+            formData.reminderMinutesBeforeDue > 0 &&
+            taskDueDate
+          ) {
+            await updateTaskReminderPreference(
+              createdTask.id,
+              formData.reminderMinutesBeforeDue
+            )
+          }
 
           toast.success('Task created successfully!', {
             description: `"${taskTitle}" has been added to your tasks.`,
@@ -281,6 +301,7 @@ const TaskQuickEditDialogContent = forwardRef<
             dueDate: formData.dueDate || null,
             priority: formData.priority,
             status: formData.status,
+            reminderMinutesBeforeDue: formData.reminderMinutesBeforeDue,
           }
 
           await updateTaskQuickEdit(task.id, updateData)
@@ -521,6 +542,92 @@ const TaskQuickEditDialogContent = forwardRef<
                       <p className='text-sm text-red-500'>{errors.dueDate}</p>
                     )}
                   </div>
+
+                  {/* Reminder - only when due date is set */}
+                  {formData.dueDate && (
+                    <div className='space-y-2'>
+                      <div className='flex items-center gap-2'>
+                        <Bell className='h-4 w-4 text-muted-foreground' />
+                        <select
+                          value={
+                            formData.reminderMinutesBeforeDue == null ||
+                            formData.reminderMinutesBeforeDue === undefined
+                              ? ''
+                              : (
+                                    [
+                                      REMINDER_MINUTES.FIVE_MIN,
+                                      REMINDER_MINUTES.ONE_HOUR,
+                                      REMINDER_MINUTES.ONE_DAY,
+                                    ] as number[]
+                                  ).includes(
+                                    formData.reminderMinutesBeforeDue as number
+                                  )
+                                ? formData.reminderMinutesBeforeDue
+                                : 'custom'
+                          }
+                          onChange={e => {
+                            const v = e.target.value
+                            if (v === '') {
+                              handleInputChange(
+                                'reminderMinutesBeforeDue',
+                                undefined
+                              )
+                            } else if (v === 'custom') {
+                              handleInputChange('reminderMinutesBeforeDue', 30)
+                            } else {
+                              handleInputChange(
+                                'reminderMinutesBeforeDue',
+                                parseInt(v, 10)
+                              )
+                            }
+                          }}
+                          disabled={isSubmitting}
+                          className='input flex-1'
+                        >
+                          {getReminderOptions().map(opt => (
+                            <option
+                              key={opt.value ?? 'none'}
+                              value={opt.value ?? ''}
+                            >
+                              {opt.label}
+                            </option>
+                          ))}
+                          <option value='custom'>Custom</option>
+                        </select>
+                      </div>
+                      {formData.reminderMinutesBeforeDue != null &&
+                        formData.reminderMinutesBeforeDue > 0 &&
+                        !(
+                          [
+                            REMINDER_MINUTES.FIVE_MIN,
+                            REMINDER_MINUTES.ONE_HOUR,
+                            REMINDER_MINUTES.ONE_DAY,
+                          ] as number[]
+                        ).includes(
+                          formData.reminderMinutesBeforeDue as number
+                        ) && (
+                          <div className='flex items-center gap-2'>
+                            <label className='text-sm text-muted-foreground'>
+                              Minutes before due:
+                            </label>
+                            <input
+                              type='number'
+                              min={1}
+                              value={formData.reminderMinutesBeforeDue ?? ''}
+                              onChange={e => {
+                                const n = parseInt(e.target.value, 10)
+                                handleInputChange(
+                                  'reminderMinutesBeforeDue',
+                                  Number.isNaN(n) ? undefined : n
+                                )
+                              }}
+                              disabled={isSubmitting}
+                              className='input w-24'
+                            />
+                          </div>
+                        )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
