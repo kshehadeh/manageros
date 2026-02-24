@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "commit-work": {
+      "source": "softaworks/agent-toolkit",
+      "sourceType": "github",
+      "computedHash": "88cec816d028de357ae7ede3ace36a2bc235a225e3e7d2bb18cdb5190ab6c482"
+    }
+  }
+}
