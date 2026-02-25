@@ -1,5 +1,16 @@
 # Changelog
 
+# [1.72.0](https://github.com/kshehadeh/manageros/compare/v1.71.0...v1.72.0) (2026-02-25)
+
+### Bug Fixes
+
+- **action-dropdown, data-table-context-menu:** improve menu positioning logic ([d93bf6e](https://github.com/kshehadeh/manageros/commit/d93bf6e79e69aa04088c348037ea617ea7bcc012))
+- **task-reminders:** update reminder handling to use null instead of undefined ([fd34b4e](https://github.com/kshehadeh/manageros/commit/fd34b4e3aebd1146472bd1ff66c7075469caa799))
+
+### Features
+
+- **task-reminders:** set default reminder for new tasks with due dates ([b36564f](https://github.com/kshehadeh/manageros/commit/b36564fcba48fe40926f5d948368bbd4492977f4))
+
 # [1.71.0](https://github.com/kshehadeh/manageros/compare/v1.69.1...v1.71.0) (2026-02-24)
 
 ### Bug Fixes
