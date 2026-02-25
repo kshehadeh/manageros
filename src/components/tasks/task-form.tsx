@@ -206,9 +206,9 @@ function TaskFormContent({
 
   function handleInputChange(
     field: keyof TaskFormData,
-    value: string | number | undefined
+    value: string | number | undefined | null
   ) {
-    // Convert empty strings to undefined for optional fields (except title which is required)
+    // Convert empty strings to undefined for optional fields (except title which is required); preserve null for explicit "No reminder"
     const processedValue = value === '' && field !== 'title' ? undefined : value
     setFormData(prev => ({ ...prev, [field]: processedValue }))
     // Clear field error when user starts typing
@@ -395,7 +395,7 @@ function TaskFormContent({
                   onChange={e => {
                     const v = e.target.value
                     if (v === '') {
-                      handleInputChange('reminderMinutesBeforeDue', undefined)
+                      handleInputChange('reminderMinutesBeforeDue', null)
                     } else if (v === 'custom') {
                       handleInputChange('reminderMinutesBeforeDue', 30)
                     } else {
