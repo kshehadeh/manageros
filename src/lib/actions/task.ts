@@ -11,6 +11,7 @@ import {
   upsertTaskReminderPreference,
   invalidateDeliveriesForTaskDueDateChange,
 } from '@/lib/data/task-reminders'
+import { REMINDER_MINUTES } from '@/lib/task-reminders'
 
 export async function createTask(formData: TaskFormData) {
   const user = await getCurrentUser()
@@ -89,19 +90,20 @@ export async function createTask(formData: TaskFormData) {
     },
   })
 
-  // Set reminder preference for the current user if due date and reminder are provided
-  const reminderMinutes =
-    validatedData.reminderMinutesBeforeDue !== undefined
-      ? validatedData.reminderMinutesBeforeDue
-      : null
+  // Set reminder preference: default to 5 minutes before due when a due date is set and no reminder was chosen
+  const reminderMinutes = validatedData.reminderMinutesBeforeDue
+  const effectiveReminder =
+    dueDate && reminderMinutes === undefined
+      ? REMINDER_MINUTES.FIVE_MIN
+      : (reminderMinutes ?? null)
   if (user.managerOSUserId && user.managerOSOrganizationId) {
     const context = {
       userId: user.managerOSUserId,
       organizationId: user.managerOSOrganizationId,
       personId: user.managerOSPersonId ?? undefined,
     }
-    if (dueDate && reminderMinutes !== null) {
-      await upsertTaskReminderPreference(task.id, context, reminderMinutes)
+    if (dueDate && effectiveReminder !== null) {
+      await upsertTaskReminderPreference(task.id, context, effectiveReminder)
     } else if (reminderMinutes === null) {
       await upsertTaskReminderPreference(task.id, context, null)
     }
@@ -484,6 +486,20 @@ export async function createQuickTask(
     },
   })
 
+  // Automatically add a reminder 5 minutes before due when task has a due date
+  if (task.dueDate && user.managerOSUserId && user.managerOSOrganizationId) {
+    const context = {
+      userId: user.managerOSUserId,
+      organizationId: user.managerOSOrganizationId,
+      personId: user.managerOSPersonId ?? undefined,
+    }
+    await upsertTaskReminderPreference(
+      task.id,
+      context,
+      REMINDER_MINUTES.FIVE_MIN
+    )
+  }
+
   // Revalidate the tasks page
   revalidatePath('/tasks')
   revalidatePath('/my-tasks')
@@ -598,6 +614,20 @@ export async function createQuickTaskForInitiative(
       createdBy: true,
     },
   })
+
+  // Automatically add a reminder 5 minutes before due when task has a due date
+  if (task.dueDate && user.managerOSUserId && user.managerOSOrganizationId) {
+    const context = {
+      userId: user.managerOSUserId,
+      organizationId: user.managerOSOrganizationId,
+      personId: user.managerOSPersonId ?? undefined,
+    }
+    await upsertTaskReminderPreference(
+      task.id,
+      context,
+      REMINDER_MINUTES.FIVE_MIN
+    )
+  }
 
   // Revalidate the tasks page and initiative page
   revalidatePath('/tasks')

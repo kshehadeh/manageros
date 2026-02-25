@@ -2,10 +2,16 @@
 
 import { useEffect, useState, useCallback, ReactNode } from 'react'
 
+const MENU_MIN_WIDTH = 160
+/** Min space we want below the trigger before flipping menu above */
+const MIN_SPACE_BELOW = 200
+
 interface ContextMenuState {
   visible: boolean
   x: number
   y: number
+  /** When true, menu is positioned above the trigger (use bottom for positioning) */
+  openAbove: boolean
   entityId: string
   triggerType: 'button' | 'rightClick'
 }
@@ -31,6 +37,7 @@ export function useDataTableContextMenu(): UseDataTableContextMenuReturn {
     visible: false,
     x: 0,
     y: 0,
+    openAbove: false,
     entityId: '',
     triggerType: 'rightClick',
   })
@@ -39,10 +46,28 @@ export function useDataTableContextMenu(): UseDataTableContextMenuReturn {
     (e: React.MouseEvent, entityId: string) => {
       e.stopPropagation()
       const rect = e.currentTarget.getBoundingClientRect()
+      const spaceBelow =
+        typeof window !== 'undefined'
+          ? window.innerHeight - rect.bottom - 4
+          : Infinity
+      const openAbove =
+        spaceBelow < MIN_SPACE_BELOW && rect.top > MIN_SPACE_BELOW
+      const x = Math.max(
+        0,
+        Math.min(
+          rect.right - MENU_MIN_WIDTH,
+          typeof window !== 'undefined'
+            ? window.innerWidth - MENU_MIN_WIDTH
+            : rect.right - MENU_MIN_WIDTH
+        )
+      )
+      // When openAbove, y is the menu's bottom edge (viewport top coords) so we can compute CSS bottom
+      const y = openAbove ? rect.top - 4 : rect.bottom + 4
       setContextMenu({
         visible: true,
-        x: rect.right - 160,
-        y: rect.bottom + 4,
+        x,
+        y,
+        openAbove,
         entityId,
         triggerType: 'button',
       })
@@ -77,10 +102,18 @@ export function useDataTableContextMenu(): UseDataTableContextMenuReturn {
       return (
         <div
           className={`fixed bg-popover border border-border rounded-md shadow-md py-1 z-50 min-w-[160px] ${className}`}
-          style={{
-            left: `${contextMenu.x}px`,
-            top: `${contextMenu.y}px`,
-          }}
+          style={
+            contextMenu.openAbove
+              ? {
+                  left: `${contextMenu.x}px`,
+                  bottom: `${typeof window !== 'undefined' ? window.innerHeight - contextMenu.y : 0}px`,
+                  top: 'auto',
+                }
+              : {
+                  left: `${contextMenu.x}px`,
+                  top: `${contextMenu.y}px`,
+                }
+          }
           onClick={e => e.stopPropagation()}
         >
           {children({

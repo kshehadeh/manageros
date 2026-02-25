@@ -8,6 +8,8 @@ Task due reminders show a desktop notification when a task’s due time is withi
 2. Choose **Reminder**: No reminder, 5 minutes before, 1 hour before, 1 day before, or **Custom** (enter minutes before due).
 3. Save the task.
 
+When you create a new task with a due date and do not choose a reminder, a **5 minutes before** reminder is set automatically. You can change or remove it in the task form, quick edit, or task detail sidebar.
+
 You can set or change the reminder in:
 
 - **Task form** (create/edit) – reminder field appears when a due date is set.

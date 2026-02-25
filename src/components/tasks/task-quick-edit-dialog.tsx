@@ -203,7 +203,7 @@ const TaskQuickEditDialogContent = forwardRef<
 
     const handleInputChange = (
       field: keyof typeof formData,
-      value: string | number | undefined
+      value: string | number | undefined | null
     ) => {
       setFormData(prev => ({ ...prev, [field]: value }))
       // Clear field error when user starts typing
@@ -255,16 +255,18 @@ const TaskQuickEditDialogContent = forwardRef<
               taskPriority
             )
           }
-          if (
-            createdTask?.id &&
-            formData.reminderMinutesBeforeDue != null &&
-            formData.reminderMinutesBeforeDue > 0 &&
-            taskDueDate
-          ) {
-            await updateTaskReminderPreference(
-              createdTask.id,
-              formData.reminderMinutesBeforeDue
-            )
+          if (createdTask?.id && taskDueDate) {
+            if (formData.reminderMinutesBeforeDue === null) {
+              await updateTaskReminderPreference(createdTask.id, null)
+            } else if (
+              formData.reminderMinutesBeforeDue != null &&
+              formData.reminderMinutesBeforeDue > 0
+            ) {
+              await updateTaskReminderPreference(
+                createdTask.id,
+                formData.reminderMinutesBeforeDue
+              )
+            }
           }
 
           toast.success('Task created successfully!', {
@@ -570,7 +572,7 @@ const TaskQuickEditDialogContent = forwardRef<
                             if (v === '') {
                               handleInputChange(
                                 'reminderMinutesBeforeDue',
-                                undefined
+                                null
                               )
                             } else if (v === 'custom') {
                               handleInputChange('reminderMinutesBeforeDue', 30)

@@ -44,13 +44,20 @@ export function ActionDropdown({
   menuClassName,
   triggerClassName,
   trigger,
-  usePortal = false,
+  usePortal = true,
   onOpenChange,
 }: ActionDropdownProps) {
+  const MENU_WIDTH = 192 // min-w-48
+  const MIN_SPACE_BELOW = 200
+
   const [open, setOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
-  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 })
+  const [menuPosition, setMenuPosition] = useState({
+    top: 0,
+    left: 0,
+    openAbove: false,
+  })
 
   const setOpenState = useCallback(
     (value: boolean) => {
@@ -62,15 +69,26 @@ export function ActionDropdown({
 
   const toggle = (event: ReactMouseEvent) => {
     event.stopPropagation()
-    if (!open && usePortal && dropdownRef.current) {
-      // Calculate position for fixed positioning
+    if (
+      !open &&
+      usePortal &&
+      dropdownRef.current &&
+      typeof window !== 'undefined'
+    ) {
       const rect = dropdownRef.current.getBoundingClientRect()
-      const menuWidth = 192 // w-48 = 192px
+      const spaceBelow = window.innerHeight - rect.bottom - 4
+      const openAbove =
+        spaceBelow < MIN_SPACE_BELOW && rect.top > MIN_SPACE_BELOW
+      const leftUnclamped =
+        align === 'right' ? rect.right - MENU_WIDTH : rect.left
+      const left = Math.max(
+        0,
+        Math.min(leftUnclamped, window.innerWidth - MENU_WIDTH)
+      )
+      // When openAbove, top stores the menu's bottom edge (viewport coords) for CSS bottom
+      const top = openAbove ? rect.top - 4 : rect.bottom + 4
 
-      setMenuPosition({
-        top: rect.bottom + 4,
-        left: align === 'right' ? rect.right - menuWidth : rect.left,
-      })
+      setMenuPosition({ top, left, openAbove })
     }
     setOpenState(!open)
   }
@@ -131,10 +149,16 @@ export function ActionDropdown({
               )}
               style={
                 usePortal
-                  ? {
-                      top: `${menuPosition.top}px`,
-                      left: `${menuPosition.left}px`,
-                    }
+                  ? menuPosition.openAbove
+                    ? {
+                        left: `${menuPosition.left}px`,
+                        bottom: `${typeof window !== 'undefined' ? window.innerHeight - menuPosition.top : 0}px`,
+                        top: 'auto',
+                      }
+                    : {
+                        top: `${menuPosition.top}px`,
+                        left: `${menuPosition.left}px`,
+                      }
                   : undefined
               }
               onClick={event => event.stopPropagation()}
