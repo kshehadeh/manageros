@@ -16,7 +16,8 @@ interface TaskReminderBannerProps {
   deliveryId: string
   taskId: string
   taskDueDate: Date | null
-  onDismiss: () => void
+  /** Optional: called when banner is dismissed. Omit when rendering from a Server Component (functions cannot be passed). */
+  onDismiss?: () => void
 }
 
 export function TaskReminderBanner({
@@ -43,7 +44,7 @@ export function TaskReminderBanner({
         const err = await res.json().catch(() => ({}))
         throw new Error(err?.error ?? 'Failed to acknowledge')
       }
-      onDismiss()
+      onDismiss?.()
       router.replace(`/tasks/${taskId}`)
       toast.success('Reminder acknowledged')
     } catch (e) {
@@ -71,7 +72,7 @@ export function TaskReminderBanner({
           const err = await res.json().catch(() => ({}))
           throw new Error(err?.error ?? 'Failed to snooze')
         }
-        onDismiss()
+        onDismiss?.()
         router.replace(`/tasks/${taskId}`)
         const at = new Date(Date.now() + snoozeMinutes * 60 * 1000)
         toast.success(
