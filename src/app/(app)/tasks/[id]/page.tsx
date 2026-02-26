@@ -137,7 +137,6 @@ export default async function TaskDetailPage({
                   deliveryId={reminderDeliveryId}
                   taskId={task.id}
                   taskDueDate={task.dueDate}
-                  onDismiss={() => {}}
                 />
               )}
               {/* Task Description */}
