@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.72.1](https://github.com/kshehadeh/manageros/compare/v1.72.0...v1.72.1) (2026-02-26)
+
+### Bug Fixes
+
+- **task-reminders:** make onDismiss optional in TaskReminderBanner component ([f4d7829](https://github.com/kshehadeh/manageros/commit/f4d7829624c2dbb39e4b769551a702d9c209c6c6))
+
 # [1.72.0](https://github.com/kshehadeh/manageros/compare/v1.71.0...v1.72.0) (2026-02-25)
 
 ### Bug Fixes
